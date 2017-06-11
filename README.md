@@ -1,4 +1,6 @@
-RealUI [![Build Status](https://travis-ci.org/RealUI/RealUI.svg?branch=master)](https://travis-ci.org/RealUI/RealUI)
+RealUI
+[![Build Status](https://travis-ci.org/RealUI/RealUI.svg?branch=master)](https://travis-ci.org/RealUI/RealUI)
+[![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)](https://discord.gg/0fn0FPyQGIXpuoKO)
 ======
 
 RealUI is a minimalistic UI designed to be functional, yet also efficient and elegant.
@@ -11,7 +13,6 @@ The following addons have been modified to suit RealUI and should not be updated
   - cargBags_Nivaya
   - EasyMail
   - FreebTip
-  - SharedMedia + SharedMedia_MyMedia
 
 
 

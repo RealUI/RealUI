@@ -232,6 +232,7 @@ cargBags:RegisterPlugin("BagBar", function(self, bags)
     end
 
     local bar = _G.CreateFrame("Frame",  nil, self)
+    bar:SetScript("OnShow", updater)
     bar.container = self
 
     bar.layouts = cargBags.classes.Container.layouts
@@ -249,6 +250,7 @@ cargBags:RegisterPlugin("BagBar", function(self, bags)
     end
 
     self.implementation:RegisterEvent("BAG_UPDATE", bar, updater)
+    self.implementation:RegisterEvent("PLAYER_MONEY", bar, updater)
     self.implementation:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED", bar, updater)
     self.implementation:RegisterEvent("ITEM_LOCK_CHANGED", bar, onLock)
 

@@ -62,7 +62,7 @@ local GetItemLevelBonusFromRelic do
         end
 
         cache[itemLink] = iLvl
-        return iLvl
+        return iLvl or 0
     end
 end
 
@@ -167,11 +167,7 @@ local function ItemButton_Update(self, item)
         end
 
         if _G.IsArtifactRelicItem(item.link) then
-            local iLvlBonus = _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(item.link)
-            if not iLvlBonus then
-                iLvlBonus = GetItemLevelBonusFromRelic(item.link)
-            end
-            self.BottomString:SetFormattedText("+%d", iLvlBonus)
+            self.BottomString:SetFormattedText("+%d", GetItemLevelBonusFromRelic(item.link))
         elseif (item.equipLoc ~= "") and (item.level and item.level > 0) then
             self.BottomString:SetText(item.level)
         else

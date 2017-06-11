@@ -29,8 +29,8 @@ EasyMail.AddrWidth = 0;
 -- Clear list dialog
 StaticPopupDialogs["EASYMAIL_CLEARLIST"] = {
     text = EASYMAIL_CLEARQUESTION,
-    button1 = TEXT(YES),
-    button2 = TEXT(NO),
+    button1 = _G.YES,
+    button2 = _G.NO,
     OnAccept = function()
         EasyMail.ClearList();
     end,
@@ -42,8 +42,8 @@ StaticPopupDialogs["EASYMAIL_CLEARLIST"] = {
 
 StaticPopupDialogs["EASYMAIL_DELETENAME"] = {
     text = "temp",
-    button1 = TEXT(YES),
-    button2 = TEXT(NO),
+    button1 = _G.YES,
+    button2 = _G.NO,
     OnAccept = function()
         EasyMail.DeleteName();
     end,
@@ -55,8 +55,8 @@ StaticPopupDialogs["EASYMAIL_DELETENAME"] = {
 
 StaticPopupDialogs["EASYMAIL_DELETEMAIL"] = {
     text = EASYMAIL_DELETEQUESTION,
-    button1 = TEXT(YES),
-    button2 = TEXT(NO),
+    button1 = _G.YES,
+    button2 = _G.NO,
     OnAccept = function()
         EasyMail.ClickDelete();
     end,

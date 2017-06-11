@@ -1,6 +1,10 @@
 How to contribute to RealUI
 ---------------------------
 
+## Localization ##
+
+If you know a language other than English, this is the easiest way to contribute. There is a [localization project](https://wow.curseforge.com/projects/realui-localization/localization) on Curse where you can easily see what phrases need translation or review.
+
 ## Bug Reports ##
 
 Before you report a bug, [follow these steps](http://www.wowinterface.com/forums/showthread.php?t=500891) first. In addition to checking the forums, also check the [issue tracker](https://github.com/RealUI/RealUI/issues) here on GitHub, to ensure that there isn't an existing issue reported.
@@ -26,7 +30,7 @@ Provide more context by answering these questions:
 
 ## Pull Requests ##
 
-If you would like to contribute code, a [pull request](https://help.github.com/articles/about-pull-requests/) is the best way to do so. When submitting a pull request, please adhere to the following guildlines.
+If you would like to contribute code, a [pull request](https://help.github.com/articles/about-pull-requests/) is the best way to do so. When submitting a pull request, please adhere to the following guidelines.
 
   * Make a short but descriptive name.
   * Have a detailed description of what your PR provides and/or what it's trying to solve.
@@ -53,6 +57,19 @@ Most of the libraries used are not included in the repo since they will get brou
   * [LibStrataFix](https://mods.curse.com/addons/wow/libstratafix)
   * [LibWindow-1.1](https://mods.curse.com/addons/wow/libwindow-1-1)
   * [UTF8](https://mods.curse.com/addons/wow/utf8)
+
+
+## Packaging ##
+
+RealUI uses a [customized fork of the BigWigsMods packager.](https://github.com/RealUI/packager/tree/RealUI_edits) This is a shell script that can be run on Windows 10 if [WSL is installed](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), in addition to Linux or Mac. In order for this script to run properly you must have the following commands available:
+
+  * [git](http://packages.ubuntu.com/xenial/git) and [svn](http://packages.ubuntu.com/xenial/subversion) - to retrieve externals
+  * [pandoc](http://packages.ubuntu.com/xenial/pandoc) - to create a bbcode changelog for WoWI
+  * [zip and unzip](http://packages.ubuntu.com/xenial/zip) - to unpack externals and create final package
+  * [jq](http://packages.ubuntu.com/xenial/jq) - to upload the package to WoWI and create a GitHub release
+
+**Note:** While this script *can* be run locally, it's not necessary to do so as the script will be run as part of the Travis CI build. That said, a `package.bat` file is available for testing purposes.
+
 
 ## Styleguides ##
 

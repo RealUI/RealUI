@@ -5,7 +5,6 @@ local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
-local round = RealUI.Round
 local db, ndb
 
 local MODNAME = "CastBars"
@@ -13,56 +12,83 @@ local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local layoutSize
 
-local MaxTicks = 10
 local ChannelingTicks = {}
 do
-    local function RegisterSpellName(spellID, numticks)
+    local function RegisterSpellName(spellID, numticks, isInstant)
         local name = _G.GetSpellInfo(spellID)
         if name then
-            ChannelingTicks[name] = numticks
+            ChannelingTicks[name] = {
+                id = spellID,
+                ticks = numticks,
+                isInstant = isInstant
+            }
         else
             _G.print("The spell for ID", spellID, "no longer exists.")
         end
     end
 
+    -- RegisterSpellName(spellID, (duration / interval), isInstant)
+
+    -- Death Knight
+    RegisterSpellName(206931, 3 / 1, true) -- Blooddrinker
+
+    -- Demon Hunter
+    RegisterSpellName(198013, 2 / 2, true)    -- Eye Beam
+    RegisterSpellName(211053, 2 / 0.25, true) -- Fel Barrage
+    RegisterSpellName(212084, 2 / 0.2, true)  -- Fel Devastation
+
     -- Druid
-    RegisterSpellName(740, 4) -- Tranquility
+    RegisterSpellName(740, 8 / 2, true) -- Tranquility
+
+    -- Hunter
+    RegisterSpellName(120360, 3 / 0.2, true) -- Barrage
+    RegisterSpellName(212640, 6 / 1, false)  -- Mending Bandage
 
     -- Mage
-    RegisterSpellName(5143, 5)  -- Arcane Missiles
-    RegisterSpellName(12051, 3) -- Evocation
+    RegisterSpellName(5143, 2 / 0.4, false)  -- Arcane Missiles
+    RegisterSpellName(12051, 6 / 2, true)    -- Evocation
+    RegisterSpellName(205021, 10 / 1, false) -- Ray of Frost
 
     -- Monk
-    RegisterSpellName(117952, 4) -- Crackling Jade Lightning
-    RegisterSpellName(191837, 2)  -- Essence Font
-    RegisterSpellName(113656, 4) -- Fists of Fury
+    RegisterSpellName(117952, 4 / 1, false)     -- Crackling Jade Lightning
+    RegisterSpellName(191837, 3 / 1.002, false) -- Essence Font
+    RegisterSpellName(113656, 4 / 1, true)      -- Fists of Fury
+    RegisterSpellName(115175, 20 / 0.5, false)  -- Soothing Mist
+    RegisterSpellName(101546, 1.5 / 0.5, true)  -- Spinning Crane Kick
 
     -- Priest
-    RegisterSpellName(64843, 4) -- Divine Hymn
-    RegisterSpellName(15407, 3) -- Mind Flay
-    RegisterSpellName(48045, 5) -- Mind Sear
-    RegisterSpellName(47540, 2) -- Penance
+    RegisterSpellName(64843, 4 / 2, true)     -- Divine Hymn
+    RegisterSpellName(15407, 3 / 0.75, false) -- Mind Flay
+    RegisterSpellName(47540, 2 / 1, true)     -- Penance
+
+    -- Shaman
+    RegisterSpellName(204437, 6 / 1, false) -- Lightning Lasso
 
     -- Warlock
-    RegisterSpellName(689, 6)  -- Drain Life
-    RegisterSpellName(755, 6)  -- Health Funnel
-    RegisterSpellName(4629, 6) -- Rain of Fire
+    RegisterSpellName(193440, 3 / 0.2, false) -- Demonfire
+    RegisterSpellName(193440, 3 / 1, false)   -- Demonwrath
+    RegisterSpellName(234153, 6 / 1, false)   -- Drain Life
+    RegisterSpellName(198590, 6 / 1, false)   -- Drain Soul
+    RegisterSpellName(755, 6 / 1, false)      -- Health Funnel
 end
 
--- Chanelling Ticks
-function CastBars:ClearTicks()
-    CastBars:debug("ClearTicks")
-    for i = 1, MaxTicks do
-        self.tick[i]:Hide()
-    end
-end
+function CastBars:SetBarTicks(tickInfo)
+    CastBars:debug("SetBarTicks", tickInfo)
+    if not tickInfo then return end
 
-function CastBars:SetBarTicks(numTicks)
-    CastBars:debug("SetBarTicks", numTicks)
-    if not numTicks then return end
+    local numTicks = tickInfo.ticks
+    local haste = _G.UnitSpellHaste("player") / 100 + 1
+    numTicks = _G.floor(numTicks * haste + 0.5)
     for i = 1, numTicks do
-        self.tick[i]:SetPoint("TOPRIGHT", -(_G.floor(db.size[layoutSize].width * ((i - 1) / numTicks))), 0)
-        self.tick[i]:Show()
+        local xOfs
+        if i == 1 and tickInfo.isInstant then
+            xOfs = 0
+        else
+            xOfs = _G.floor(db.size[layoutSize].width * ((i - 1) / numTicks))
+        end
+        local tick = self.tickPool:Acquire()
+        tick:SetPoint("TOPRIGHT", -xOfs, 0)
+        tick:Show()
     end
 end
 
@@ -121,78 +147,31 @@ function CastBars:UpdateAnchors()
     end
 end
 
-local frameInfo = {
-    player = {
-        leftAngle = [[\]],
-        rightAngle = [[\]],
-        smooth = false,
-    },
-    target = {
-        leftAngle = [[/]],
-        rightAngle = [[/]],
-        smooth = false,
-    },
-    focus = {
-        leftAngle = [[\]],
-        rightAngle = [[/]],
-        smooth = false,
-    },
-}
-
--- From oUF castbar
-local updateSafeZone = function(self)
-    local sz = self.safeZone
-    local width = self:GetWidth()
-    local _, _, _, ms = _G.GetNetStats()
-
-    -- Guard against GetNetStats returning latencies of 0.
-    if (ms ~= 0) then
-        -- MADNESS!
-        local safeZonePercent = (width / self.max) * (ms / 1e5)
-        CastBars:debug("updateSafeZone", safeZonePercent, ms)
-        if (safeZonePercent > 1) then safeZonePercent = 1 end
-        sz:SetWidth(width * safeZonePercent)
-        sz:Show()
-    else
-        sz:Hide()
-    end
-end
-
-local function PostCastStart(self, unit, ...)
-    CastBars:debug("PostCastStart", unit, ...)
+local function PostCastStart(self, unit, name, castID, spellID)
+    CastBars:debug("PostCastStart", unit, name, castID, spellID)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
-    self:SetValue(0, true)
 
     if self.interrupt then
         local color = db.colors.uninterruptible
         self:SetStatusBarColor(color[1], color[2], color[3], color[4])
     else
-        local color = db.colors[unit]
+        local color = db.colors[unit] or db.colors.player -- unit could be a vehicle
         self:SetStatusBarColor(color[1], color[2], color[3], color[4])
     end
 
-    local sz = self.safeZone
-    sz:ClearAllPoints()
-    if self:GetReverseFill() then
-        sz:SetPoint("TOPLEFT", self, 2, 0)
-    else
-        sz:SetPoint("TOPRIGHT", self, -2, 0)
-    end
-    updateSafeZone(self)
-
-    if self.ClearTicks then
-        self:ClearTicks()
+    if self.tickPool then
+        self.tickPool:ReleaseAll()
     end
 end
 --[==[
-local function PostCastFailed(self, unit, ...)
-    CastBars:debug("PostCastFailed", unit, ...)
+local function PostCastFailed(self, unit, castID, spellID)
+    CastBars:debug("PostCastFailed", unit, castID, spellID)
 end
 ]==]
-local function PostCastInterrupted(self, unit, ...)
-    CastBars:debug("PostCastInterrupted", unit, ...)
+local function PostCastInterrupted(self, unit, castID, spellID)
+    CastBars:debug("PostCastInterrupted", unit, castID, spellID)
     self.castid = nil
     if not self.flashAnim:IsPlaying() then
         CastBars:debug("PlayFlash")
@@ -206,57 +185,47 @@ local function PostCastInterrupted(self, unit, ...)
         self.flashAnim:Play()
     end
 end
-local function PostCastInterruptible(self, unit, ...)
-    CastBars:debug("PostCastInterruptible", unit, ...)
+local function PostCastInterruptible(self, unit)
+    CastBars:debug("PostCastInterruptible", unit)
     local color = db.colors[unit]
     self:SetStatusBarColor(color[1], color[2], color[3], color[4])
 end
-local function PostCastNotInterruptible(self, unit, ...)
-    CastBars:debug("PostCastNotInterruptible", unit, ...)
+local function PostCastNotInterruptible(self, unit)
+    CastBars:debug("PostCastNotInterruptible", unit)
     local color = db.colors.uninterruptible
     self:SetStatusBarColor(color[1], color[2], color[3], color[4])
 end
 --[==[
-local function PostCastDelayed(self, unit, ...)
-    CastBars:debug("PostCastDelayed", unit, ...)
+local function PostCastDelayed(self, unit, name, castID, spellID)
+    CastBars:debug("PostCastDelayed", unit, name, castID, spellID)
 end
-local function PostCastStop(self, unit, ...)
-    CastBars:debug("PostCastStop", unit, ...)
+local function PostCastStop(self, unit, name, castID, spellID)
+    CastBars:debug("PostCastStop", unit, name, castID, spellID)
 end
 ]==]
 
-local function PostChannelStart(self, unit, spellName)
-    CastBars:debug("PostChannelStart", unit, spellName)
-    self:SetValue(self.duration, true)
-
-    local sz = self.safeZone
-    sz:ClearAllPoints()
-    if self:GetReverseFill() then
-        sz:SetPoint("TOPRIGHT", self, -1, 0)
-    else
-        sz:SetPoint("TOPLEFT", self, 1, 0)
-    end
-    updateSafeZone(self)
-
+local function PostChannelStart(self, unit, name, spellID)
+    CastBars:debug("PostChannelStart", unit, name, spellID)
     if self.SetBarTicks then
-        self:SetBarTicks(ChannelingTicks[spellName])
+        self.tickPool:ReleaseAll()
+        self:SetBarTicks(ChannelingTicks[name])
     end
 end
 --[==[
-local function PostChannelUpdate(self, unit, ...)
-    CastBars:debug("PostChannelUpdate", unit, ...)
+local function PostChannelUpdate(self, unit, name, spellID)
+    CastBars:debug("PostChannelUpdate", unit, name, spellID)
 end
-local function PostChannelStop(self, unit, ...)
-    CastBars:debug("PostChannelStop", unit, ...)
+local function PostChannelStop(self, unit, name, spellID)
+    CastBars:debug("PostChannelStop", unit, name, spellID)
 end
 ]==]
 
-local function CustomDelayText(self, duration, ...)
-    CastBars:debug("CustomDelayText", duration, ...)
+local function CustomDelayText(self, duration)
+    CastBars:debug("CustomDelayText", duration)
     self.Time:SetFormattedText("%.1f", duration)
 end
-local function CustomTimeText(self, duration, ...)
-    CastBars:debug("CustomTimeText", duration, ...)
+local function CustomTimeText(self, duration)
+    CastBars:debug("CustomTimeText", duration)
     self.Time:SetFormattedText("%.1f", duration)
 end
 
@@ -345,14 +314,15 @@ local function OnUpdate(self, elapsed)
     end
 end
 
-function CastBars:CreateCastBars(unitFrame, unit)
+function CastBars:CreateCastBars(unitFrame, unit, unitData)
     CastBars:debug("CreateCastBars", unit)
-    local info, unitDB = frameInfo[unit], db[unit]
-    local size, color = db.size[layoutSize], db.colors[unit]
-    local width, height = size[unit] and size[unit].width or size.width, size[unit] and size[unit].height or size.height
-    if not unitDB.debug then info.debug = nil end
-    local Castbar = unitFrame:CreateAngleFrame("Status", width, height, unitFrame, info)
+    local info, unitDB = unitData.power or unitData.health, db[unit]
+    local size, color = unitDB.size, db.colors[unit]
+    local Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
+    Castbar:SetSize(size.x, size.y)
+    Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
     Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    Castbar:SetSmooth(false)
     if db.reverse[unit] then
         Castbar:SetReverseFill(true)
     end
@@ -371,24 +341,22 @@ function CastBars:CreateCastBars(unitFrame, unit)
     Time:SetFontObject(_G.RealUIFont_PixelNumbers)
 
     color = db.colors.latency
-    local safeZone = unitFrame:CreateAngleFrame("Bar", width, height, Castbar, info)
-    Castbar.safeZone = safeZone
-    safeZone:SetValue(1, true)
-    safeZone:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)
+    SafeZone:SetColorTexture(color[1], color[2], color[3], color[4])
+    SafeZone:SetSize(10, 10)
+    Castbar.SafeZone = SafeZone
 
     if unit == "player" then
-        CastBars:debug("Set positions", unit)
         Castbar:SetPoint("TOPRIGHT", _G.RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
-
-        Castbar.tick = {}
-        for i = 1, MaxTicks do
-            local tick = unitFrame:CreateAngleFrame("Bar", width, height, Castbar, info)
-            tick:SetStatusBarColor(0, 0, 0, 0.5)
-            tick:SetWidth(round(width * 0.08))
+        Castbar.tickPool = _G.CreateObjectPool(function(pool)
+            local tick = unitFrame:CreateAngle("Texture", nil, Castbar)
+            tick:SetColorTexture(1, 1, 1, 0.5)
+            tick:SetSize(2, size.y)
+            return tick
+        end, function(pool, tick)
             tick:ClearAllPoints()
-            Castbar.tick[i] = tick
-        end
-        Castbar.ClearTicks = CastBars.ClearTicks
+            tick:Hide()
+        end)
         Castbar.SetBarTicks = CastBars.SetBarTicks
     elseif unit == "target" then
         CastBars:debug("Set positions", unit)
@@ -453,7 +421,7 @@ function CastBars:ToggleConfigMode(isConfigMode)
             castbar:SetMinMaxValues(castbar.duration, castbar.max)
             castbar.Text:SetText(_G.SPELL_CASTING)
             castbar.Icon:SetTexture([[Interface\Icons\INV_Misc_Dice_02]])
-            castbar.safeZone:Hide()
+            castbar.SafeZone:Hide()
 
             -- We need to wait a bit for the game to register that we have a target and focus
             _G.C_Timer.After(0.2, function()
@@ -473,19 +441,19 @@ function CastBars:OnInitialize()
                 target = false,
             },
             player = {
-                size = {x = 230, y = 28},
+                size = {x = 230, y = 8},
                 position = {x = 0, y = 0},
                 icon = 28,
                 debug = false
             },
             target = {
-                size = {x = 230, y = 28},
+                size = {x = 230, y = 8},
                 position = {x = 0, y = 0},
                 icon = 28,
                 debug = false
             },
             focus = {
-                size = {x = 146, y = 28},
+                size = {x = 146, y = 5},
                 position = {x = 0, y = 0},
                 icon = 16,
                 debug = false

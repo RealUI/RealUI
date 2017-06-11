@@ -18,7 +18,7 @@ CooldownCount.Timer = Timer
 
 ----------
 --sexy constants!
-local ICON_SIZE = 36 --the normal size for an icon (don't change this)
+local CD_FONT
 local DAY, HOUR, MINUTE = 86400, 3600, 60 --used for formatting text
 local DAYISH, HOURISH, MINUTEISH = 3600 * 23.5, 60 * 59.5, 59.5 --used for formatting text at transition points
 local HALFDAYISH, HALFHOURISH, HALFMINUTEISH = DAY/2 + 0.5, HOUR/2 + 0.5, MINUTE/2 + 0.5 --used for calculating next update times
@@ -58,56 +58,6 @@ local function setTimeFormats()
     DAYS_FORMAT = "|cff"..ColorTableToStr(db.colors.days).."%dh|r"
 end
 
----------------------------
----- 4.3 Compatibility ----
----------------------------
---[[local active = {}
-
-local function cooldown_OnShow(self)
-    active[self] = true
-end
-
-local function cooldown_OnHide(self)
-    active[self] = nil
-end
-
---returns true if the cooldown timer should be updated and false otherwise
-local function cooldown_ShouldUpdateTimer(self, start, duration, charges, maxCharges)
-    local timer = self.timer
-    if not timer then
-        return true
-    end
-    return not(timer.start == start or timer.charges == charges or timer.maxCharges == maxCharges)
-end
-
-local function cooldown_Update(self)
-    local button = self:GetParent()
-    local action = button.action
-
-    local start, duration = _G.GetActionCooldown(action)
-    local charges, maxCharges = _G.GetActionCharges(action)
-
-    if cooldown_ShouldUpdateTimer(self, start, duration, charges, maxCharges) then
-        Timer.Start(self, start, duration, charges, maxCharges)
-    end
-end
-
-function CooldownCount:ACTIONBAR_UPDATE_COOLDOWN()
-    for cooldown in next, active do
-        cooldown_Update(cooldown)
-    end
-end
-
-local hooked = {}
-local function actionButton_Register(frame)
-    local cooldown = frame.cooldown
-    if not hooked[cooldown] then
-        cooldown:HookScript('OnShow', cooldown_OnShow)
-        cooldown:HookScript('OnHide', cooldown_OnHide)
-        hooked[cooldown] = true
-    end
-end]]
-
 ---------------
 ---- Timer ----
 ---------------
@@ -132,91 +82,63 @@ end
 function Timer:UpdateText()
     local remain = self.enabled and (self.duration - (_G.GetTime() - self.start)) or 0
     if round(remain) > 0 then
-        if (self.fontScale * self:GetEffectiveScale() / _G.UIParent:GetScale()) < db.minScale then
-            self.text:SetText("")
-            return self:SetNextUpdate(1)
-        else
-            local formatStr, time, nextUpdate = getTimeText(remain)
-            if (remain >= MINUTEISH * 10) and (ndb.media.font.pixel.cooldown[2] >= 16) then
-                local font, size, outline = _G.RealUIFont_PixelCooldown:GetFont()
-                self.text:SetFont(font, size / 2, outline)
-            else
-                self.text:SetFontObject(_G.RealUIFont_PixelCooldown)
+        local text = self.text
+        local formatStr, time, nextUpdate = getTimeText(remain)
+        text:SetFormattedText(formatStr, time)
+        text:Show()
+        --print("----- Update -----", time)
+
+        local maxX, maxY = self:GetSize()
+        for fontSize = CD_FONT.maxSize, CD_FONT.minSize, -1 do
+            text:SetFont(CD_FONT.font, fontSize, CD_FONT.flags)
+            if text:GetStringWidth() < maxX and text:GetStringHeight() < maxY then
+                --print("not Truncated", fontSize)
+                break
             end
-            self.text:SetFormattedText(formatStr, time)
-            return self:SetNextUpdate(nextUpdate)
         end
+        return self:SetNextUpdate(nextUpdate)
     else
         return self:Stop()
     end
 end
 
---forces the given timer to update on the next frame
-function Timer:ForceUpdate()
-    self:UpdateText()
-    self:Show()
-end
-
---adjust font size whenever the timer's parent size changes
---hide if it gets too tiny
-function Timer:OnSizeChanged(width, height)
-    local fontScale = round(width) / ICON_SIZE
-    if fontScale == self.fontScale then
-        return
-    end
-
-    self.fontScale = fontScale
-    if fontScale < db.minScale then
-        self:Hide()
-    else
-        self.text:SetFontObject(_G.RealUIFont_PixelCooldown)
-        if self.enabled then
-            self:ForceUpdate()
-        end
-    end
-end
-
 function Timer:Start(start, duration, modRate)
-
-    --start timer
     if start > 0 and duration > db.minDuration then
         self.start = start
         self.duration = duration
         self.enabled = true
+        self.text:SetFont(CD_FONT.font, CD_FONT.maxSize, CD_FONT.flags)
         self:UpdateText()
-        if self.fontScale >= db.minScale then self:Show() end
-    --stop timer
+        self:Show()
     else
         self:Stop()
     end
 end
 
+local otherAnchor = {
+    TOPLEFT = {point = "BOTTOMRIGHT", x = 0.7, y = -0.7},
+    BOTTOMLEFT = {point = "TOPRIGHT", x = 0.7, y = 0.7},
+    TOPRIGHT = {point = "BOTTOMLEFT", x = -0.7, y = -0.7},
+    BOTTOMRIGHT = {point = "TOPLEFT", x = -0.7, y = 0.7}
+}
 --returns a new timer object
 local function CreateTimer(cd)
-    --a frame to watch for OnSizeChanged events
-    --needed since OnSizeChanged has funny triggering if the frame with the handler is not shown
-    local scaler = _G.CreateFrame('Frame', nil, cd)
-    scaler:SetAllPoints(cd)
-
-    local timer = _G.CreateFrame('Frame', nil, scaler); timer:Hide()
-    timer:SetAllPoints(scaler)
+    local xOffset, yOffset = cd:GetSize()
+    local other = otherAnchor[db.point]
+    local timer = _G.CreateFrame('Frame', nil, cd)
+    timer:SetPoint(db.point)
+    timer:SetPoint(other.point, cd, db.point, xOffset * other.x, yOffset * other.y)
+    timer:Hide()
 
     local text = timer:CreateFontString(nil, 'OVERLAY')
-    text:SetPoint(db.position.point, db.position.x, db.position.y)
-    text:SetJustifyH(db.position.justify)
-    text:SetFontObject(_G.RealUIFont_PixelCooldown)
+    text:SetFont(CD_FONT.font, CD_FONT.maxSize, CD_FONT.flags)
+    text:SetAllPoints(timer)
+    text:Hide()
     timer.text = text
 
     for key, func in next, Timer do
         timer[key] = func
     end
-
-    timer:OnSizeChanged(scaler:GetSize())
-    scaler:SetScript("OnSizeChanged", function(self, ...)
-        timer:OnSizeChanged(...)
-    end)
-
-    cd.timer = timer
     return timer
 end
 
@@ -225,9 +147,9 @@ function CooldownCount:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
-            minScale = 0.5,
             minDuration = 2,
             expiringDuration = 5,
+            point = "BOTTOMLEFT",
             colors = {
                 expiring =  {1,     0,      0},
                 seconds =   {1,     1,      0},
@@ -235,17 +157,21 @@ function CooldownCount:OnInitialize()
                 hours =     {0.25,  1,      1},
                 days =      {0.25,  0.25,   1},
             },
-            position = {
-                point = "BOTTOMLEFT",
-                x = 1.5,
-                y = 0.5,
-                justify = "LEFT"
-            },
         },
     })
     db = self.db.profile
     ndb = RealUI.db.profile
 
+    if db.position then
+        db.position = nil
+    end
+
+    CD_FONT = {
+        font = ndb.media.font.standard[4],
+        minSize = 6,
+        maxSize = 20,
+        flags = "OUTLINE"
+    }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 

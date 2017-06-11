@@ -80,14 +80,26 @@ end)
 mods["Blizzard_AuctionUI"] = function(F, C)
     mods.debug("Blizzard_AuctionUI", F, C)
 
-   _G.WowTokenGameTimeTutorial.Tutorial:SetDrawLayer("BACKGROUND", 7)
     F.ReskinAtlas(_G.WowTokenGameTimeTutorial.Tutorial, "token-info-background")
 
     for _, side in next, {"LeftDisplay", "RightDisplay"} do
         _G.WowTokenGameTimeTutorial[side].Label:SetTextColor(1, 1, 1)
         _G.WowTokenGameTimeTutorial[side].Tutorial1:SetTextColor(.5, .5, .5)
     end
+end
 
-    _G.StoreButton:SetSize(149, 26)
-    _G.StoreButton:SetPoint("TOPLEFT", _G.WowTokenGameTimeTutorial.RightDisplay.Tutorial2, "BOTTOMLEFT", 56, -12)
+mods["RealUI_Bugs"] = function(F, C)
+    mods.debug("RealUI_Bugs", F, C)
+
+    local RealUI_ErrorFrame = _G.RealUI_ErrorFrame
+    for i = 1, 10 do
+        -- Remove borders and backgrounds
+        _G.select(i, RealUI_ErrorFrame:GetRegions()):Hide()
+    end
+    F.CreateBD(RealUI_ErrorFrame)
+    F.ReskinClose(RealUI_ErrorFrame.Close)
+    F.Reskin(RealUI_ErrorFrame.Reload)
+    F.ReskinArrow(RealUI_ErrorFrame.PreviousError, "Left")
+    F.ReskinArrow(RealUI_ErrorFrame.NextError, "Right")
+    F.ReskinScroll(RealUI_ErrorFrame.ScrollFrame.ScrollBar)
 end

@@ -6,5 +6,5 @@ local L = RealUI.L
 
 if RealUI.locale == "koKR" then
 
-L["Version"] = "번역"
+--@localization(locale="koKR", format="lua_additive_table", handle-unlocalized="comment")@
 end

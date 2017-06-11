@@ -1,8 +1,11 @@
-:: Run luacheck and increment version
-powershell ".\utils\update.ps1"
+:: Run luacheck
+call luacheck Interface || pause && EXIT
+
+:: Increment version
+powershell .\utils\update.ps1
 
 :: Run packager
-:: Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-g version] [-p slug] [-w wowi-id]
+:: Usage: release.sh [-acdelosuz] [-t topdir] [-r releasedir] [-p slug] [-w wowi-id] [-g game-version]
 ::   -a               Skip third party addons.
 ::   -c               Skip copying files into the package directory.
 ::   -d               Skip uploading.
@@ -16,5 +19,5 @@ powershell ".\utils\update.ps1"
 ::   -r releasedir    Set directory containing the package directory. Defaults to $topdir/.release.
 ::   -p curse-id      Set the project id used on CurseForge for localization and uploading.
 ::   -w wowi-id       Set the addon id used on WoWInterface for uploading.
-utils\release.sh -adelz
-bash -c "./utils/release.sh -clo -w 16068"
+::   -g game-version  Set the game version to use for CurseForge and WoWInterface uploading."
+bash -c "./utils/release.sh -p 88269 -w 16068"

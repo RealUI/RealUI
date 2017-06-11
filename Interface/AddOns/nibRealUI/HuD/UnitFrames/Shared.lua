@@ -8,210 +8,10 @@ local RealUI = private.RealUI
 local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
-local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 local CombatFader = RealUI:GetModule("CombatFader")
-
-
 local round = RealUI.Round
-UnitFrames.textures = {
-    [1] = {
-        F1 = { -- Player / Target Frames
-            health = {
-                width = 222,
-                height = 13,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Health_Warning]=],
-            },
-            power = {
-                width = 197,
-                height = 8,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Power_Warning]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_EndBox_Surround]=],
-            },
-            tanking = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Tanking_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Tanking_Surround]=],
-            },
-            range = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Range_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F1_Range_Surround]=],
-            },
-        },
-        F2 = { -- Focus / Target Target
-            health = {
-                width = 116,
-                height = 9,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F2_EndBox_Surround]=],
-            },
-        },
-        F3 = { -- Focus Target / Pet
-            health = {
-                width = 105,
-                height = 9,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_HealthBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\1\F3_EndBox_Surround]=],
-            },
-        },
-    },
-    [2] = {
-        F1 = { -- Player / Target Frames
-            health = {
-                width = 259,
-                height = 15,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Health_Warning]=],
-            },
-            power = {
-                width = 230,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Step]=],
-                warn = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Power_Warning]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_EndBox_Surround]=],
-            },
-            tanking = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Tanking_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Tanking_Surround]=],
-            },
-            range = {
-                width = 32,
-                height = 32,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Range_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F1_Range_Surround]=],
-            },
-        },
-        F2 = { -- Focus / Target Target
-            health = {
-                width = 138,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_HealthBox_Surround]=],
-            },
-            statusBox = { -- Combat, Resting, Leader, AFK
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_StatusBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F2_EndBox_Surround]=],
-            },
-        },
-        F3 = { -- Focus Target / Pet
-            health = {
-                width = 126,
-                height = 10,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Surround]=],
-                step = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_Health_Step]=],
-            },
-            healthBox = { -- PvP Status / Classification
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_HealthBox_Surround]=],
-            },
-            endBox = { -- Tapped, Hostile, Friendly
-                width = 16,
-                height = 16,
-                bar = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Bar]=],
-                border = [=[Interface\AddOns\nibRealUI\HuD\UnitFrames\Media\2\F3_EndBox_Surround]=],
-            },
-        },
-    },
-}
 
+-- Power types where the default state is empty
 RealUI.ReversePowers = {
     ["RAGE"] = true,
     ["RUNIC_POWER"] = true,
@@ -222,30 +22,63 @@ RealUI.ReversePowers = {
     ["FURY"] = true,
     ["PAIN"] = true,
 }
+local function GetVertices(info, useOther)
+    local side = info.point
+    if useOther then
+        side = side == "RIGHT" and "LEFT" or "RIGHT"
+    end
 
-function UnitFrames:PositionSteps(vert)
-    UnitFrames:debug("PositionSteps")
+    if side == "RIGHT" then
+        return (info.rightVertex % 2) + 1, info.rightVertex
+    else
+        return info.leftVertex, (info.leftVertex % 2) + 3
+    end
+end
+
+local function CreateSteps(parent, height, info)
+    local stepHeight = round(height / 2)
+    local step, warn = {}, {}
+
+    for i = 1, 2 do
+        local leftVertex, rightVertex = GetVertices(info)
+        local s = parent:CreateAngle("Frame", nil, parent.overlay)
+        s:SetSize(2, stepHeight)
+        s:SetAngleVertex(leftVertex, rightVertex)
+        s:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+        step[i] = s
+
+        local w = parent:CreateAngle("Frame", nil, parent.overlay)
+        w:SetSize(2, height)
+        w:SetAngleVertex(leftVertex, rightVertex)
+        w:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+        warn[i] = w
+    end
+    return step, warn
+end
+local function PositionSteps(self, vert)
     local width, height = self:GetSize()
-    local point, relPoint = vert.."RIGHT", vert.."LEFT"
-    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
+    local isRight = self:GetReverseFill()
+    local point, relPoint = vert..(isRight and "RIGHT" or "LEFT"), vert..(isRight and "LEFT" or "RIGHT")
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
-            xOfs = xOfs + height
+            xOfs = (xOfs + height) * (isRight and 1 or -1)
             self.step[i]:SetPoint(point, self, relPoint, xOfs, 0)
             self.warn[i]:SetPoint(point, self, relPoint, xOfs, 0)
         else
-            self.step[i]:SetPoint(point, self, -xOfs, 0)
-            self.warn[i]:SetPoint(point, self, -xOfs, 0)
+            xOfs = xOfs * (isRight and -1 or 1)
+            self.step[i]:SetPoint(point, self, xOfs, 0)
+            self.warn[i]:SetPoint(point, self, xOfs, 0)
         end
     end
 end
-function UnitFrames:UpdateSteps(unit, cur, max)
+local function UpdateSteps(self, unit, cur, max)
     UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)
     local percent = RealUI:GetSafeVals(cur, max)
-    local stepPoints = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"]
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
     for i = 1, 2 do
         --print(percent, unit, cur, max, self.colorClass)
         if self:GetReversePercent() then
@@ -270,262 +103,246 @@ function UnitFrames:UpdateSteps(unit, cur, max)
     end
 end
 
-local function updateSteps(unit, type, percent, frame)
-    local stepPoints, texture = db.misc.steppoints[RealUI.class] or db.misc.steppoints["default"], nil
-    local isLargeFrame = false
-    if _G.UnitInVehicle("player") then
-        if unit == "player" and type == "power" then
-            return
-        end
-        if unit == "vehicle" or unit == "target" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
-            isLargeFrame = true
-        elseif unit == "focus" or unit == "targettarget" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
-        elseif unit == "focustarget" or unit == "pet" or unit == "player" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
-        end
-    else
-        if unit == "player" or unit == "target" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F1[type]
-            isLargeFrame = true
-        elseif unit == "focus" or unit == "targettarget" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F2[type]
-        elseif unit == "focustarget" or unit == "pet" then
-            texture = UnitFrames.textures[UnitFrames.layoutSize].F3[type]
-        end
+local function CreateHealthBar(parent, info)
+    local width, height = parent:GetWidth(), parent:GetHeight()
+    if db.units[parent.unit].healthHeight then
+        height = round((height - 3) * db.units[parent.unit].healthHeight)
     end
-    for i = 1, 2 do
-        if frame.step then
-            --print(percent, unit, type, frame:GetParent().unit)
-            if frame.bar.reverse then
-                --print("step reverse")
-                if percent > stepPoints[i] and isLargeFrame then
-                    frame.step[i]:SetAlpha(type == "power" and 0 or 1)
-                    frame.warn[i]:SetAlpha(type == "power" and 1 or 0)
-                else
-                    frame.step[i]:SetAlpha(type == "power" and 1 or 0)
-                    frame.warn[i]:SetAlpha(type == "power" and 0 or 1)
-                end
-            else
-                --print("step normal")
-                if percent < stepPoints[i] and isLargeFrame then
-                    frame.step[i]:SetAlpha(0)
-                    frame.warn[i]:SetAlpha(1)
-                else
-                    frame.step[i]:SetAlpha(1)
-                    frame.warn[i]:SetAlpha(0)
-                end
-            end
-        else
-            --print(percent, unit, type, frame:GetParent().unit)
-            if frame.bar.reverse then
-                --print("step reverse")
-                if percent > stepPoints[i] and isLargeFrame then
-                    frame.steps[i]:SetTexture(type == "power" and texture.warn or texture.step)
-                else
-                    frame.steps[i]:SetTexture(type == "power" and texture.step or texture.warn)
-                end
-            else
-                --print("step normal")
-                if percent < stepPoints[i] and isLargeFrame then
-                    frame.steps[i]:SetTexture(texture.warn)
-                else
-                    frame.steps[i]:SetTexture(texture.step)
-                end
-            end
-        end
+    local Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
+    Health:SetSize(width, height)
+    Health:SetPoint("TOP"..info.point, parent)
+    Health:SetReverseFill(info.point == "RIGHT")
+    Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+    Health:SetAngleVertex(info.leftVertex, info.rightVertex)
+
+    if info.text then
+        Health.text = Health:CreateFontString(nil, "OVERLAY")
+        Health.text:SetPoint("BOTTOM"..info.point, Health, "TOP"..info.point, 2, 2)
+        Health.text:SetFontObject(_G.RealUIFont_Pixel)
+        parent:Tag(Health.text, "[realui:health]")
     end
+
+    Health.step, Health.warn = CreateSteps(parent, height, info)
+    Health.barType = "health"
+    Health.colorClass = db.overlay.classColor
+    Health.colorHealth = true
+    Health.frequentUpdates = true
+
+    Health.PositionSteps = PositionSteps
+    Health.PostUpdate = UpdateSteps
+    parent.Health = Health
 end
-
-function UnitFrames:HealthOverride(event, unit)
-    UnitFrames:debug("Health Override", self, event, unit)
-    local health = self.Health
-    if event == "ClassColorBars" then
-        UnitFrames:SetHealthColor(self)
-    elseif event == "ReverseBars" then
-        AngleStatusBar:SetReverseFill(health.bar, ndb.settings.reverseUnitFrameBars)
-    end
-    local healthPer, healthCurr, healthMax = RealUI:GetSafeVals(_G.UnitHealth(unit), _G.UnitHealthMax(unit))
-    updateSteps(unit, "health", healthPer, health)
-    if health.SetValue then
-        health:SetMinMaxValues(0, healthMax)
-        health:SetValue(healthCurr)
-    else
-        AngleStatusBar:SetValue(health.bar, healthPer)
-    end
-end
-
-function UnitFrames:PredictOverride(event, unit)
-    if(self.unit ~= unit) then return end
-    UnitFrames:debug("PredictOverride", self, event, unit)
-
-    local reverseUnitFrameBars = ndb.settings.reverseUnitFrameBars
-    local hp = self.HealPrediction
-    local healthBar = self.Health
-
-    local myIncomingHeal = _G.UnitGetIncomingHeals(unit, 'player') or 0
-    local allIncomingHeal = _G.UnitGetIncomingHeals(unit) or 0
-    local totalAbsorb = _G.UnitGetTotalAbsorbs(unit) or 0
-    local myCurrentHealAbsorb = _G.UnitGetTotalHealAbsorbs(unit) or 0
-    local health, maxHealth = _G.UnitHealth(unit), _G.UnitHealthMax(unit)
-
-    --local overHealAbsorb = false
-    if (health < myCurrentHealAbsorb) then
-        --overHealAbsorb = true
-        myCurrentHealAbsorb = health
-    end
-
-    if (health - myCurrentHealAbsorb + allIncomingHeal > maxHealth * hp.maxOverflow) then
-        allIncomingHeal = maxHealth * hp.maxOverflow - health + myCurrentHealAbsorb
-    end
-
-    local otherIncomingHeal = 0
-    if (allIncomingHeal < myIncomingHeal) then
-        myIncomingHeal = allIncomingHeal
-    else
-        otherIncomingHeal = allIncomingHeal - myIncomingHeal
-    end
-
-    local overAbsorb, atMax = false
-    if reverseUnitFrameBars then
-        UnitFrames:debug("reverseUnitFrameBars")
-        if (health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth) then
-            UnitFrames:debug("Check over absorb", totalAbsorb)
-            if (totalAbsorb > 0) then
-                overAbsorb = true
-            end
-
-            if (allIncomingHeal > myCurrentHealAbsorb) then
-                totalAbsorb = _G.max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
-            else
-                totalAbsorb = _G.max(0, maxHealth - health)
-            end
-        end
-    else
-        UnitFrames:debug("not reverseUnitFrameBars")
-        if (totalAbsorb >= health) then
-            UnitFrames:debug("Check over absorb", totalAbsorb)
-            overAbsorb = true
-
-            if (allIncomingHeal > myCurrentHealAbsorb) then
-                totalAbsorb = _G.max(0, health - myCurrentHealAbsorb + allIncomingHeal)
-            else
-                totalAbsorb = _G.max(0, health)
-            end
-        end
-        atMax = health == maxHealth
-    end
-
-    if (myCurrentHealAbsorb > allIncomingHeal) then
-        myCurrentHealAbsorb = myCurrentHealAbsorb - allIncomingHeal
-    else
-        myCurrentHealAbsorb = 0
-    end
-
-    if (hp.myBar) then
-        hp.myBar:SetMinMaxValues(0, maxHealth)
-        hp.myBar:SetValue(myIncomingHeal)
-    end
-
-    if (hp.otherBar) then
-        hp.otherBar:SetMinMaxValues(0, maxHealth)
-        hp.otherBar:SetValue(otherIncomingHeal)
-    end
-
-    if (hp.absorbBar) then
-        UnitFrames:debug("Update absorbBar", maxHealth, totalAbsorb, overAbsorb, atMax)
-        if hp.absorbBar.SetValue then
-            hp.absorbBar:SetMinMaxValues(0, maxHealth)
-            hp.absorbBar:SetValue(totalAbsorb)
-        else
-            AngleStatusBar:SetValue(hp.absorbBar, 1 - (_G.min(totalAbsorb, health) / maxHealth), true)
-        end
-        hp.absorbBar:ClearAllPoints()
-        if unit == "player" then
-            if atMax then
-                hp.absorbBar:SetPoint("TOPRIGHT", healthBar, -2, 0)
-            else
-                hp.absorbBar:SetPoint("TOPRIGHT", healthBar.bar, "TOPLEFT", healthBar.bar:GetHeight() - 2, 0)
-            end
-            if overAbsorb then
-                hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, 0)
-            end
-        else
-            if atMax then
-                hp.absorbBar:SetPoint("TOPLEFT", healthBar, 2, -1)
-            else
-                hp.absorbBar:SetPoint("TOPLEFT", healthBar.bar, "TOPRIGHT", 0, 0)
-            end
-            if overAbsorb then
-                hp.absorbBar:SetPoint("TOPRIGHT", healthBar, 2, -1)
-            end
-        end
-    end
-
-    if (hp.healAbsorbBar) then
-        hp.healAbsorbBar:SetMinMaxValues(0, maxHealth)
-        hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
-    end
-end
-
-
-function UnitFrames:PowerOverride(event, unit)
-    UnitFrames:debug("Power Override", self, event, unit)
-    --if not self.Power.enabled then return end
-
-    local powerType, powerToken = _G.UnitPowerType(self.unit)
-    UnitFrames:debug("Target powerType", powerType, powerToken)
-    AngleStatusBar:SetBarColor(self.Power.bar, self.colors.power[powerToken] or self.colors.power[powerType])
-
-    if ndb.settings.reverseUnitFrameBars then
-        AngleStatusBar:SetReverseFill(self.Power.bar, not RealUI.ReversePowers[powerToken])
-    else
-        AngleStatusBar:SetReverseFill(self.Power.bar, RealUI.ReversePowers[powerToken])
-    end
-
-    local powerPer, powerCurr, powerMax = RealUI:GetSafeVals(_G.UnitPower(unit), _G.UnitPowerMax(unit))
-    updateSteps(unit, "power", powerPer, self.Power)
-    if self.Power.SetValue then
-        self.Power:SetMinMaxValues(0, powerMax)
-        self.Power:SetValue(powerCurr)
-    else
-        AngleStatusBar:SetValue(self.Power.bar, powerPer)
-    end
-end
-
-function UnitFrames:PvPOverride(event, unit)
-    UnitFrames:debug("PvP Override", self, event, unit, _G.IsPVPTimerRunning())
-    local pvp, color = self.PvP
-    local setColor = pvp.lines and pvp.SetBackgroundColor or pvp.SetVertexColor
-    if _G.UnitIsPVP(unit) then
-        local reaction = _G.UnitReaction(unit, "player")
-        if not reaction then
-            -- Can be nil if the target is out of range
-            reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
-        end
-        color = self.colors.reaction[reaction]
-        setColor(pvp, color[1], color[2], color[3], color[4])
-    else
-        color = RealUI.media.background
-        setColor(pvp, color[1], color[2], color[3], color[4])
-    end
-end
-
-do
+local CreateHealthStatus do
     local classification = {
         rareelite = {1, 0.5, 0},
         elite = {1, 1, 0},
         rare = {0.75, 0.75, 0.75},
     }
-    function UnitFrames:UpdateClassification(event)
-        UnitFrames:debug("Classification", self.unit, event, _G.UnitClassification(self.unit))
+
+    local function UpdatePvP(self, event, unit)
+        local PvPIndicator, color = self.PvPIndicator
+        if _G.UnitIsPVP(unit) then
+            local reaction = _G.UnitReaction(unit, "player")
+            if not reaction then
+                -- Can be nil if the target is out of range
+                reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
+            end
+            color = self.colors.reaction[reaction]
+            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+        else
+            color = RealUI.media.background
+            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+        end
+    end
+    local function UpdateClassification(self, event)
         local color = classification[_G.UnitClassification(self.unit)] or RealUI.media.background
-        self.Class:SetVertexColor(color[1], color[2], color[3], color[4])
+        self.Classification:SetBackgroundColor(color[1], color[2], color[3], color[4])
+    end
+
+    function CreateHealthStatus(parent, info)
+        local leftVertex, rightVertex = GetVertices(info)
+        local width, height = 4, _G.ceil(parent.Health:GetHeight() * 0.65)
+        local PvPIndicator = parent:CreateAngle("Frame", nil, parent.Health)
+        PvPIndicator:SetSize(width, height)
+        PvPIndicator:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -8 or 8, 0)
+        PvPIndicator:SetAngleVertex(leftVertex, rightVertex)
+
+        PvPIndicator.Override = UpdatePvP
+        parent.PvP = PvPIndicator
+
+        if not (parent.unit == "player" or parent.unit == "pet") then
+            local class = parent:CreateAngle("Frame", nil, parent.Health)
+            class:SetSize(width, height)
+            class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
+            class:SetAngleVertex(leftVertex, rightVertex)
+
+            class.Update = UpdateClassification
+            parent.Classification = class
+            parent:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", UpdateClassification)
+        end
     end
 end
 
-do
+local CreateHealthPredictBar do
+    local function PredictOverride(self, event, unit)
+        if(self.unit ~= unit) then return end
+
+        local hp = self.HealthPrediction
+        local healthBar = self.Health
+
+        local myIncomingHeal = _G.UnitGetIncomingHeals(unit, 'player') or 0
+        local allIncomingHeal = _G.UnitGetIncomingHeals(unit) or 0
+        local totalAbsorb = _G.UnitGetTotalAbsorbs(unit) or 0
+        local myCurrentHealAbsorb = _G.UnitGetTotalHealAbsorbs(unit) or 0
+        local health, maxHealth = _G.UnitHealth(unit), _G.UnitHealthMax(unit)
+
+        --local overHealAbsorb = false
+        if (health < myCurrentHealAbsorb) then
+            --overHealAbsorb = true
+            myCurrentHealAbsorb = health
+        end
+
+        if (health - myCurrentHealAbsorb + allIncomingHeal > maxHealth * hp.maxOverflow) then
+            allIncomingHeal = maxHealth * hp.maxOverflow - health + myCurrentHealAbsorb
+        end
+
+        local otherIncomingHeal = 0
+        if (allIncomingHeal < myIncomingHeal) then
+            myIncomingHeal = allIncomingHeal
+        else
+            otherIncomingHeal = allIncomingHeal - myIncomingHeal
+        end
+
+        local overAbsorb, atMax
+        if healthBar:GetReversePercent() then
+            if (totalAbsorb >= health) then
+                overAbsorb = true
+
+                if (allIncomingHeal > myCurrentHealAbsorb) then
+                    totalAbsorb = _G.max(0, health - myCurrentHealAbsorb + allIncomingHeal)
+                else
+                    totalAbsorb = _G.max(0, health)
+                end
+            end
+            atMax = health == maxHealth
+        else
+            if (health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth) then
+                if (totalAbsorb > 0) then
+                    overAbsorb = true
+                end
+
+                if (allIncomingHeal > myCurrentHealAbsorb) then
+                    totalAbsorb = _G.max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
+                else
+                    totalAbsorb = _G.max(0, maxHealth - health)
+                end
+            end
+        end
+
+        if (myCurrentHealAbsorb > allIncomingHeal) then
+            myCurrentHealAbsorb = myCurrentHealAbsorb - allIncomingHeal
+        else
+            myCurrentHealAbsorb = 0
+        end
+
+        if (hp.myBar) then
+            hp.myBar:SetMinMaxValues(0, maxHealth)
+            hp.myBar:SetValue(myIncomingHeal)
+        end
+
+        if (hp.otherBar) then
+            hp.otherBar:SetMinMaxValues(0, maxHealth)
+            hp.otherBar:SetValue(otherIncomingHeal)
+        end
+
+        if (hp.absorbBar) then
+            hp.absorbBar:SetMinMaxValues(0, maxHealth)
+            hp.absorbBar:SetValue(totalAbsorb)
+            hp.absorbBar:ClearAllPoints()
+            local fill = healthBar:GetStatusBarTexture()
+            if healthBar:GetReverseFill() then
+                if atMax then
+                    hp.absorbBar:SetPoint("TOPRIGHT", healthBar)
+                else
+                    hp.absorbBar:SetPoint("TOPRIGHT", fill, "TOPLEFT", fill:GetHeight(), 0)
+                end
+                if overAbsorb then
+                    hp.absorbBar:SetPoint("TOPLEFT", healthBar)
+                end
+            else
+                if atMax then
+                    hp.absorbBar:SetPoint("TOPLEFT", healthBar)
+                else
+                    hp.absorbBar:SetPoint("TOPLEFT", fill, "TOPRIGHT", -fill:GetHeight(), 0)
+                end
+                if overAbsorb then
+                    hp.absorbBar:SetPoint("TOPRIGHT", healthBar)
+                end
+            end
+        end
+
+        if (hp.healAbsorbBar) then
+            hp.healAbsorbBar:SetMinMaxValues(0, maxHealth)
+            hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
+        end
+    end
+    function CreateHealthPredictBar(parent, info)
+        local width, height = parent.Health:GetSize()
+        local absorbBar = parent:CreateAngle("StatusBar", nil, parent.Health)
+        absorbBar:SetSize(width, height)
+        absorbBar:SetBackgroundColor(0, 0, 0, 0)
+        absorbBar:SetBackgroundBorderColor(0, 0, 0, 0)
+        absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
+        absorbBar:SetAngleVertex(info.leftVertex, info.rightVertex)
+        absorbBar:SetReverseFill(parent.Health:GetReverseFill())
+        absorbBar:SetFrameLevel(parent.Health:GetFrameLevel())
+
+        parent.HealthPrediction = {
+            absorbBar = absorbBar,
+            frequentUpdates = true,
+            Override = PredictOverride,
+        }
+    end
+end
+
+local function CreatePowerBar(parent, info)
+    local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
+    local Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
+    Power:SetSize(width, height)
+    Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -5 or 5, 0)
+    Power:SetAngleVertex(info.leftVertex, info.rightVertex)
+    Power:SetReverseFill(info.point == "RIGHT")
+
+    Power.text = Power:CreateFontString(nil, "OVERLAY")
+    Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
+    Power.text:SetFontObject(_G.RealUIFont_Pixel)
+    parent:Tag(Power.text, "[realui:power]")
+
+    Power.step, Power.warn = CreateSteps(parent, height, info)
+    Power.barType = "power"
+    Power.colorPower = true
+    Power.frequentUpdates = true
+
+    local powerType
+    function Power:UpdateReverse()
+        if ndb.settings.reverseUnitFrameBars then
+            Power:SetReversePercent(RealUI.ReversePowers[powerType])
+        else
+            Power:SetReversePercent(not RealUI.ReversePowers[powerType])
+        end
+    end
+    Power.PositionSteps = PositionSteps
+    function Power:PostUpdate(unit, cur, min, max)
+        UpdateSteps(self, unit, cur, max)
+        local _, pType = _G.UnitPowerType(parent.unit)
+        if pType ~= powerType then
+            powerType = pType
+            Power:UpdateReverse()
+        end
+    end
+    parent.Power = Power
+end
+local CreatePowerStatus do
     local status = {
         afk = {1, 1, 0},
         offline = oUF.colors.disconnected,
@@ -533,85 +350,139 @@ do
         combat = {1, 0, 0},
         resting = {0, 1, 0},
     }
-    function UnitFrames:UpdateStatus(event, ...)
-        UnitFrames:debug("UpdateStatus", self.unit, event, ...)
+    local function UpdateStatus(self, event)
         local unit, color = self.unit
 
         if _G.UnitIsAFK(unit) then
-            self.Leader.status = "afk"
+            self.LeaderIndicator.status = "afk"
         elseif not(_G.UnitIsConnected(unit)) then
-            self.Leader.status = "offline"
+            self.LeaderIndicator.status = "offline"
         elseif _G.UnitIsGroupLeader(unit) then
-            self.Leader.status = "leader"
+            self.LeaderIndicator.status = "leader"
         else
-            self.Leader.status = false
+            self.LeaderIndicator.status = false
         end
-        UnitFrames:debug("Status2:", self.Leader.status)
 
-        if self.Leader.status then
-            color = status[self.Leader.status]
-            self.Leader:SetVertexColor(color[1], color[2], color[3], color[4])
-            self.Leader:Show()
-            self.AFK:Show()
+        if self.LeaderIndicator.status then
+            color = status[self.LeaderIndicator.status]
+            self.LeaderIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.LeaderIndicator:Show()
         else
-            self.Leader:Hide()
-            self.AFK:Hide()
+            self.LeaderIndicator:Hide()
         end
 
         if _G.UnitAffectingCombat(unit) then
-            self.Combat.status = "combat"
+            self.CombatIndicator.status = "combat"
         elseif _G.IsResting(unit) then
-            self.Combat.status = "resting"
+            self.CombatIndicator.status = "resting"
         else
-            self.Combat.status = false
+            self.CombatIndicator.status = false
         end
-        UnitFrames:debug("Status1:", self.Combat.status)
 
-        if self.Leader.status and not self.Combat.status then
+        if self.LeaderIndicator.status and not self.CombatIndicator.status then
             color = RealUI.media.background
-            self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
-            self.Combat:Show()
-            self.Resting:Show()
-        elseif self.Combat.status then
-            color = status[self.Combat.status]
-            self.Combat:SetVertexColor(color[1], color[2], color[3], color[4])
-            self.Combat:Show()
-            self.Resting:Show()
+            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:Show()
+        elseif self.CombatIndicator.status then
+            color = status[self.CombatIndicator.status]
+            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:Show()
         else
-            self.Combat:Hide()
-            self.Resting:Hide()
+            self.CombatIndicator:Hide()
         end
+    end
+
+    function CreatePowerStatus(parent, data)
+        local point, anchor, relPoint, x, info
+        if data.power then
+            info, anchor = data.power, parent.Power
+        else
+            info, anchor = data.health, parent.Health
+        end
+        if info.point == "LEFT" then
+            point, relPoint, x = "TOPLEFT", "TOPRIGHT", -8
+        else
+            point, relPoint, x = "TOPRIGHT", "TOPLEFT", 8
+        end
+        local leftVertex, rightVertex = GetVertices(info, not data.isBig)
+        local width, height = 4, anchor:GetHeight()
+
+
+        local CombatRest = parent:CreateAngle("Frame", nil, anchor)
+        CombatRest:SetSize(width, height)
+        CombatRest:SetPoint(point, anchor, relPoint, x, 0)
+        CombatRest:SetAngleVertex(leftVertex, rightVertex)
+        CombatRest.Override = UpdateStatus
+        parent.CombatIndicator = CombatRest
+        parent.RestingIndicator = CombatRest
+
+        local LeaderAFK = parent:CreateAngle("Frame", nil, anchor)
+        LeaderAFK:SetSize(width, height)
+        LeaderAFK:SetPoint(point, CombatRest, relPoint, x, 0)
+        LeaderAFK:SetAngleVertex(leftVertex, rightVertex)
+        LeaderAFK.Override = UpdateStatus
+        parent.LeaderIndicator = LeaderAFK
+        parent.AwayIndicator = LeaderAFK
     end
 end
 
-function UnitFrames:UpdateEndBox(...)
-    UnitFrames:debug("UpdateEndBox", self and self.unit, ...)
-    local unit, color = self.unit
-    local _, class = _G.UnitClass(unit)
-    if _G.UnitIsPlayer(unit) then
-        color = RealUI:GetClassColor(class)
-    else
-        if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
-            color = self.colors.tapped
+local CreateEndBox do
+    local function UpdateEndBox(self, ...)
+        local unit, color = self.unit
+        local _, class = _G.UnitClass(unit)
+        if _G.UnitIsPlayer(unit) then
+            color = self.colors.class[class] --RealUI:GetClassColor(class)
         else
-            color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+            if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
+                color = self.colors.tapped
+            else
+                color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+            end
+        end
+        for i = 1, #self.EndBox do
+            self.EndBox[i]:SetBackgroundColor(color[1], color[2], color[3], 1)
         end
     end
-    self.endBox:Show()
-    self.endBox:SetVertexColor(color[1], color[2], color[3], 1)
-end
+    function CreateEndBox(parent, data)
+        local height = parent.Health:GetHeight()
+        local boxHeight = height + (data.isBig and 2 or 0)
+        local boxWidth = data.isBig and 6 or 4
+        local point, relPoint, x
+        if data.health.point == "RIGHT" then
+            point, relPoint, x = "TOPLEFT", "TOPRIGHT", -(height - 2)
+        else
+            point, relPoint, x = "TOPRIGHT", "TOPLEFT", (height - 2)
+        end
+        parent.EndBox = {
+            Update = UpdateEndBox
+        }
 
-function UnitFrames:SetHealthColor(unitFrame)
-    local healthColor
-    if db.overlay.classColor and (unitFrame.unit ~= "player") and _G.UnitIsPlayer(unitFrame.unit) then
-        local _, class = _G.UnitClass(unitFrame.unit)
-        healthColor = RealUI:GetClassColor(class)
-        healthColor = RealUI:ColorDarken(0.15, healthColor)
-        healthColor = RealUI:ColorDesaturate(0.2, healthColor)
-    else
-        healthColor = unitFrame.colors.health
+        local healthBox = parent:CreateAngle("Frame", nil, parent.Health)
+        healthBox:SetSize(boxWidth, boxHeight)
+        healthBox:SetPoint(point, parent.Health, relPoint, x, 0)
+        healthBox:SetAngleVertex(GetVertices(data.health))
+        parent.EndBox[1] = healthBox
+
+        if data.isBig then
+            height = parent.Power:GetHeight()
+            boxHeight = height + 2
+            boxWidth = data.isBig and 6 or 4
+            if data.power.point == "RIGHT" then
+                point, relPoint, x = "BOTTOMLEFT", "BOTTOMRIGHT", -(height - 2)
+            else
+                point, relPoint, x = "BOTTOMRIGHT", "BOTTOMLEFT", (height - 2)
+            end
+            local powerBox = parent:CreateAngle("Frame", nil, parent.Power)
+            powerBox:SetSize(boxWidth, boxHeight)
+            powerBox:SetPoint(point, parent.Power, relPoint, x, 0)
+            powerBox:SetAngleVertex(GetVertices(data.power))
+            parent.EndBox[2] = powerBox
+
+            -- hide the line between the two boxes
+            healthBox.bottom:Hide()
+            powerBox.top:Hide()
+        end
     end
-    AngleStatusBar:SetBarColor(unitFrame.Health.bar, healthColor)
 end
 
 -- Init
@@ -639,31 +510,48 @@ local function Shared(self, unit)
     self.overlay:SetFrameStrata("BACKGROUND")
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
-    -- TODO: combine duplicate frame creation. eg healthbar, endbox, etc.
-    --[[ Idea:
-        local info = info[unit]
-        CreateHealthBar(self, info.health)
-        CreatePvPStatus(self, info.health)
-        if info.predict then
-            CreatePredictBar(self, info.health)
-        end
-        if info.power then
-            CreatePowerBar(self, info.power)
-        end
-        CreatePowerStatus(self, info.power or info.health)
-        CreateEndBox(self, info.health)
-    ]]
-
-    -- This would be all unit specific stuff, eg. Totems, stats, threat
-    UnitFrames[unit](self)
-
-    if RealUI:GetModuleEnabled("CastBars") and (unit == "player" or unit == "target" or unit == "focus") then
-        RealUI:GetModule("CastBars"):CreateCastBars(self, unit)
+    local unitData = UnitFrames[unit]
+    local unitDB = db.units[unit]
+    self:SetSize(unitDB.size.x, unitDB.size.y)
+    CreateHealthBar(self, unitData.health)
+    CreateHealthStatus(self, unitData.health)
+    if unitData.isBig then
+        CreateHealthPredictBar(self, unitData.health)
+        CreatePowerBar(self, unitData.power)
     end
-    if unit == "player" then
-        local ClassResource = RealUI:GetModule("ClassResource")
-        if ClassResource:IsEnabled() then
-            ClassResource:Setup(self, unit)
+    CreatePowerStatus(self, unitData)
+    CreateEndBox(self, unitData)
+
+    unitData.create(self)
+
+    if unitData.hasCastBars and RealUI:GetModuleEnabled("CastBars") then
+        RealUI:GetModule("CastBars"):CreateCastBars(self, unit, unitData)
+    end
+
+
+    function self.PreUpdate(frame, event)
+        frame.Health:SetSmooth(false)
+        if frame.Power then
+            frame.Power:SetSmooth(false)
+        end
+        if unitData.PreUpdate then
+            unitData.PreUpdate(frame, event)
+        end
+    end
+
+    function self.PostUpdate(frame, event)
+        frame.Health:SetSmooth(true)
+        frame.Health:PositionSteps(unitData.issmall and "BOTTOM" or "TOP")
+        if frame.Power then
+            frame.Power:SetSmooth(true)
+            frame.Power:PositionSteps("BOTTOM")
+        end
+        if frame.Classification then
+            frame.Classification.Update(frame, event)
+        end
+        frame.EndBox.Update(frame, event)
+        if unitData.PostUpdate then
+            unitData.PostUpdate(frame, event)
         end
     end
 end

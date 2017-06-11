@@ -330,48 +330,27 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
             if not widget.skinned then
                 local frame = widget.frame
 
-                frame.DLeft:SetAlpha(0)
-                frame.DMiddle:SetAlpha(0)
-                frame.DRight:SetAlpha(0)
+                F.ReskinArrow(frame.dropButton, "Down")
+                frame.dropButton:ClearAllPoints()
+                frame.dropButton:SetPoint("TOPRIGHT", frame.DRight, -19, -21)
 
                 local bg = _G.CreateFrame("Frame", nil, frame)
+                bg:SetPoint("BOTTOMRIGHT", frame.dropButton, "BOTTOMLEFT", 1, 0)
                 F.CreateBD(bg, 0)
-                if frame.displayButton then
-                    bg:SetPoint("TOPRIGHT", -4, -24)
-                    bg:SetPoint("BOTTOMLEFT", frame.displayButton, "BOTTOMRIGHT", 2, 0)
-                else
-                    bg:SetPoint("TOPLEFT", 5, -18)
-                    bg:SetPoint("BOTTOMRIGHT", -1, 6)
-                end
 
                 local gradient = F.CreateGradient(frame)
                 gradient:SetPoint("TOPLEFT", bg, 1, -1)
                 gradient:SetPoint("BOTTOMRIGHT", bg, -1, 1)
 
-                frame.text:ClearAllPoints()
-                frame.text:SetPoint("LEFT", bg, 0, 0)
-                frame.text:SetPoint("RIGHT", bg, -25, 0)
+                if frame.displayButton then
+                    bg:SetPoint("TOPLEFT", frame.displayButton, "TOPRIGHT", 3, -19)
+                else
+                    bg:SetPoint("TOPLEFT", 5, -22)
+                end
 
-                frame.dropButton:SetSize(20, 20)
-                frame.dropButton:ClearAllPoints()
-                frame.dropButton:SetPoint("TOPRIGHT", bg)
-                F.Reskin(frame.dropButton, true)
-
-                frame.dropButton:SetDisabledTexture(C.media.backdrop)
-                local dis = frame.dropButton:GetDisabledTexture()
-                dis:SetVertexColor(0, 0, 0, .4)
-                dis:SetDrawLayer("OVERLAY")
-                dis:SetAllPoints()
-
-                local tex = frame.dropButton:CreateTexture(nil, "ARTWORK")
-                tex:SetTexture(C.media.arrowDown)
-                tex:SetSize(8, 8)
-                tex:SetPoint("CENTER")
-                tex:SetVertexColor(1, 1, 1)
-                frame.dropButton.tex = tex
-
-                frame.dropButton:HookScript("OnEnter", F.colourArrow)
-                frame.dropButton:HookScript("OnLeave", F.clearArrow)
+                frame.DLeft:SetAlpha(0)
+                frame.DMiddle:SetAlpha(0)
+                frame.DRight:SetAlpha(0)
 
                 if MODULETYPE == "Statusbar" then
                     widget.alignoffset = 26

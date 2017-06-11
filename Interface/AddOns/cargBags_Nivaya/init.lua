@@ -23,3 +23,5 @@ ns.options = {
         },
     },
 }
+
+_G.RealUI.hasCargBags = true

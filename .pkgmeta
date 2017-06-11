@@ -71,18 +71,19 @@ externals:
         url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
         tag: latest
 
-    Interface/AddOns/nibRealUI_Init/Libs/CallbackHandler-1.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/CallbackHandler-1.0
-        tag: latest
     Interface/AddOns/nibRealUI_Init/Libs/LibItemUpgradeInfo-1.0:
         url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
         tag: latest
     Interface/AddOns/nibRealUI_Init/Libs/LibSharedMedia-3.0:
         url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
         tag: latest
-    Interface/AddOns/nibRealUI_Init/Libs/LibStub:
-        url: https://repos.wowace.com/wow/ace3/trunk/LibStub
-        tag: latest
     Interface/AddOns/nibRealUI_Init/Libs/UTF8:
         url: https://repos.wowace.com/wow/utf8/trunk
+        tag: latest
+
+    Interface/AddOns/RealUI_Bugs/Libs/CallbackHandler-1.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/CallbackHandler-1.0
+        tag: latest
+    Interface/AddOns/RealUI_Bugs/Libs/LibStub:
+        url: https://repos.wowace.com/wow/ace3/trunk/LibStub
         tag: latest

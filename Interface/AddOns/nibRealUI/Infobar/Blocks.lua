@@ -70,6 +70,7 @@ local function SetupTextTable()
 
     local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
+    local TABLE_WIDTH = RealUI.ModValue(320)
     local numTables = 0
     local extData = {}
 
@@ -335,7 +336,7 @@ local function SetupTextTable()
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         Infobar:debug("CellProto:SetupCell")
         local textTable = self.textTable
-        local width = data.width or 500
+        local width = data.width or TABLE_WIDTH
         extData[data] = extData[data] or {}
         textTable.data = data
 
@@ -424,7 +425,7 @@ local function SetupTextTable()
         local cellHeight = UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
-        return width, cellHeight + 11
+        return width, cellHeight + (MAX_ROWS + 1)
     end
 
     function TextTableCellPrototype:ReleaseCell()
@@ -632,11 +633,45 @@ function Infobar:CreateBlocks()
             },
         }
 
+        local errors
+        function startMenu:BugGrabber_BugGrabbed(callback, errorObject)
+            --[[errorObject = {
+                message = sanitizedMessage,
+                stack = table.concat(tmp, "\n"),
+                locals = inCombat and "" or debuglocals(3),
+                session = addon:GetSessionId(),
+                time = date("%Y/%m/%d %H:%M:%S"),
+                counter = 1,
+            }]]
+
+            if not self.dataObj.value then
+                _G.tinsert(menuList, 3, {
+                    text = _G.SHOW_LUA_ERRORS,
+                    func = function() _G.RealUI_ErrorFrame:ShowError() end,
+                    notCheckable = true,
+                })
+                self.dataObj.icon = fa["bug"]
+                self.dataObj.iconR, self.dataObj.iconG, self.dataObj.iconB = 0.75, 0.15, 0.15
+            end
+
+            self.dataObj.value = #errors
+        end
+        _G.BugGrabber.RegisterCallback(startMenu, "BugGrabber_BugGrabbed")
+
         LDB:NewDataObject("start", {
             name = L["Start"],
             type = "RealUI",
             icon = fa["bars"],
             iconFont = iconFont,
+            OnEnable = function(block)
+                startMenu.block = block
+                startMenu.dataObj = block.dataObj
+
+                errors = _G.BugGrabber:GetDB()
+                if #errors > 0 then
+                    startMenu:BugGrabber_BugGrabbed("OnEnable", errors[#errors])
+                end
+            end,
             OnEnter = function(block, ...)
                 Infobar:debug("Start: OnEnter", block.side, ...)
                 _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
@@ -870,7 +905,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local time, tableWidth = _G.GetTime(), 500
+        local time, tableWidth = _G.GetTime(), RealUI.ModValue(320)
         local guildData = {}
         local headerData = {
             sort = {
@@ -899,7 +934,7 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Guild: OnEnable", block.side, ...)
                 if not _G.IsInGuild() then
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:RemoveBlock(block.name, block.dataObj, info)
+                    Infobar:HideBlock(block.name, block.dataObj, info)
                 end
             end,
             OnClick = function(block, ...)
@@ -981,10 +1016,10 @@ function Infobar:CreateBlocks()
                 local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
                 if isVisible and not isInGuild then
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:RemoveBlock(block.name, block.dataObj, info)
+                    Infobar:HideBlock(block.name, block.dataObj, info)
                 elseif not isVisible and isInGuild then
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:AddBlock(block.name, block.dataObj, info)
+                    Infobar:ShowBlock(block.name, block.dataObj, info)
                 end
 
                 local now = _G.GetTime()
@@ -1071,7 +1106,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local ClassLookup, tableWidth = {}, 450
+        local ClassLookup, tableWidth = {}, RealUI.ModValue(300)
         local friendsData = {}
         local headerData = {
             sort = {
@@ -1423,8 +1458,26 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Rep)
-                local name, _, minRep, maxRep, curRep = _G.GetWatchedFactionInfo()
-                return curRep - minRep, maxRep - minRep, name
+                local name, reaction, minRep, maxRep, curRep, factionID = _G.GetWatchedFactionInfo()
+                if _G.C_Reputation.IsFactionParagon(factionID) then
+                    local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
+                    maxRep = threshold
+                    curRep = currentValue % threshold
+                    if hasRewardPending then
+                        curRep = curRep + threshold
+                    end
+                    return curRep, maxRep, name, hasRewardPending
+                else
+                    if reaction == _G.MAX_REPUTATION_REACTION then
+                        -- We're exalted
+                        minRep = 0
+                    end
+                end
+
+                -- Normalize values
+                maxRep = maxRep - minRep
+                curRep = curRep - minRep
+                return curRep, maxRep, name
             end,
             GetColor = function(Rep)
                 local _, reaction = _G.GetWatchedFactionInfo()
@@ -1435,17 +1488,22 @@ function Infobar:CreateBlocks()
                 return not not _G.GetWatchedFactionInfo()
             end,
             SetTooltip = function(Rep, tooltip)
-                local minRep, maxRep, name = Rep:GetStats()
+                local curRep, maxRep, name, hasRewardPending = Rep:GetStats()
                 local r, g, b, reaction = Rep:GetColor()
 
                 local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
-                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minRep), RealUI:ReadableNumber(maxRep), (minRep/maxRep)*100)
+                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(_G["FACTION_STANDING_LABEL"..reaction], repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
                 tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+
+                if hasRewardPending then
+                    lineNum = tooltip:AddLine(_G.BOUNTY_TUTORIAL_BOUNTY_FINISHED)
+                    tooltip:SetLineTextColor(lineNum, 0.7, 0.7, 0.7)
+                end
 
                 tooltip:AddLine(" ")
             end,
@@ -1638,7 +1696,7 @@ function Infobar:CreateBlocks()
                 Infobar.frame.watch.main.rested:Hide()
                 UpdateProgress(block)
             else
-                Infobar:RemoveBlock(block.name, block.dataObj, block)
+                Infobar:HideBlock(block.name, block.dataObj, block)
             end
         end
 
@@ -1727,6 +1785,10 @@ function Infobar:CreateBlocks()
                         UpdateState(block)
                     end
                     block:UnregisterEvent(event)
+                elseif event == "UPDATE_FACTION" then
+                    if not watchStates[dbc.progressState]:IsValid() then
+                        UpdateState(block)
+                    end
                 end
 
                 UpdateProgress(block)
@@ -1778,13 +1840,12 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("Mail1: OnEvent", event, ...)
+                local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                 local isVisible, hasNewMail = block:IsVisible(), _G.HasNewMail()
                 if not isVisible and hasNewMail then
-                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:AddBlock(block.name, block.dataObj, info)
+                    Infobar:ShowBlock(block.name, block.dataObj, info)
                 elseif isVisible and not hasNewMail then
-                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:RemoveBlock(block.name, block.dataObj, info)
+                    Infobar:HideBlock(block.name, block.dataObj, info)
                 end
             end,
             events = {
@@ -2176,7 +2237,7 @@ function Infobar:CreateBlocks()
             -- if there are no connected realms, the return is just an empty table.
             connectedRealms[1] = RealUI.realmNormalized
         end
-        local tokens, tableWidth = {}, 400
+        local tokens, tableWidth = {}, RealUI.ModValue(250)
         local currencyData = {}
         local headerData = {
             info = {
@@ -2261,12 +2322,12 @@ function Infobar:CreateBlocks()
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
-                local realmMoneyTotal, faction = 0, RealUI.faction
+                local realmMoneyTotal = 0
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local realm_faction = realm.."-"..faction
-                        local factionDB = currencyDB[realm][faction]
+                        local realm_faction = realm.."-"..RealUI.faction
+                        local factionDB = currencyDB[realm][RealUI.faction]
                         for name, data in next, factionDB do
                             local classColor = RealUI:GetClassColor(data.class, "hex")
                             name = charName:format(classColor, name)

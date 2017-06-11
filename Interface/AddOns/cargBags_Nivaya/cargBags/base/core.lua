@@ -162,7 +162,9 @@ end)
 local handlerFuncs = _G.setmetatable({}, {
     __index = function(self, handler)
         self[handler] = function(this, ...)
-            return this[handler] and this[handler](this, ...)
+            if this[handler] then
+                return this[handler](this, ...)
+            end
         end
         return self[handler]
     end

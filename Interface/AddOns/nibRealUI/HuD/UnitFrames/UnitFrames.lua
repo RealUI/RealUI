@@ -51,9 +51,33 @@ local units = {
 function UnitFrames:RefreshUnits(event)
     for i = 1, #units do
         local unit = _G["RealUI" .. units[i] .. "Frame"]
+        if event == "ClassColorBars" then
+            unit.Health.colorClass = db.overlay.classColor
+        elseif event == "ReverseBars" then
+            unit.Health:SetReversePercent(not unit.Health:GetReversePercent())
+            if unit.Power then
+                unit.Power:UpdateReverse()
+            end
+            if unit.DruidMana then
+                unit.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+            end
+        end
         unit:UpdateAllElements(event)
     end
 end
+
+UnitFrames.steppoints = {
+    default = {0.35, 0.25},
+    health = {
+        HUNTER  = {0.8, 0.2},
+        PALADIN = {0.4, 0.2},
+        WARRIOR = {0.35, 0.2},
+    },
+    power = {
+        MAGE    = {0.7, 0.25},
+        WARLOCK = {0.6, 0.4},
+    },
+}
 
 ----------------------------
 ------ Initialization ------
@@ -68,14 +92,6 @@ function UnitFrames:OnInitialize()
                 focuskey = "shift",
                 statusText = "smart",
                 alwaysDisplayFullHealth = true,
-                steppoints = {
-                    ["default"] = {0.35, 0.25},
-                    ["MAGE"]    = {0.9, 0.5},
-                    ["HUNTER"]  = {0.8, 0.2},
-                    ["PALADIN"] = {0.35, 0.2},
-                    ["WARLOCK"] = {0.35, 0.2},
-                    ["WARRIOR"] = {0.35, 0.2},
-                },
                 combatfade = {
                     enabled = true,
                     opacity = {
@@ -98,6 +114,22 @@ function UnitFrames:OnInitialize()
                     size = {x = 259, y = 28},
                     position = {x = 0, y = 0},
                     healthHeight = 0.6, --percentage of the unit height used by the healthbar
+                },
+                targettarget = {
+                    size = {x = 138, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                focus = {
+                    size = {x = 138, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                focustarget = {
+                    size = {x = 126, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                pet = {
+                    size = {x = 126, y = 10},
+                    position = {x = 0, y = 0},
                 },
             },
             arena = {

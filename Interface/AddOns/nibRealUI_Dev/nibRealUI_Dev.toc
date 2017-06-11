@@ -1,7 +1,7 @@
 ## Interface: 70200
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Dev
 ## Notes: Development assistant for RealUI
-## LoadWith: Blizzard_CompactRaidFrames
+## LoadWith: RealUI_Bugs
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0, LibTextDump-1.0, UTF8
 
 ..\nibRealUI_Init\libs\LibStub\LibStub.lua
@@ -9,3 +9,5 @@
 ..\nibRealUI_Init\Init.lua
 
 nibRealUI_Dev.lua
+
+alert.lua

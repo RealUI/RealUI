@@ -13,8 +13,6 @@ local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
-local prepFrames = {}
-
 --[[ Utils ]]--
 local function TimeFormat(t)
     local h, m, hplus, mplus, s, f
@@ -37,59 +35,22 @@ local function TimeFormat(t)
     return f
 end
 
-local function UnitCastUpdate(self, event, unitID, spell, rank, lineID, spellID)
-    --print(self.unit, event, unitID, spell, rank, lineID, spellID)
-    if spellID == 59752 or spellID == 42292 then
-        local startTime, duration = _G.GetSpellCooldown(spellID)
-        self.Trinket.startTime = startTime
-        self.Trinket.endTime = startTime + duration
-        if db.arena.announceUse then
-            local chat = db.arena.announceChat
-            if chat == "GROUP" then
-                chat = "INSTANCE_CHAT"
-            end
-            _G.SendChatMessage("Trinket used by: ".._G.GetUnitName(unitID, true), chat)
-        end
-    end
-end
-
-local function UpdatePrep(self, event, unit, status)
-    UnitFrames:debug("Arena:----- UpdatePrep -----")
-    local notVisible = _G.UnitAffectingCombat("player") and "SetAlpha" or "Hide"
-    if not unit then
-        UnitFrames:debug(event)
-        local numOpps = _G.GetNumArenaOpponentSpecs()
-        for i = 1, 5 do
-            local opp = prepFrames[i]
-            if (i <= numOpps) then
-                local specID, gender = _G.GetArenaOpponentSpec(i)
-                --print("Opponent", i, "specID:", specID, "gender:", gender)
-                if (specID > 0) then
-                    local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID, gender)
-                    opp.icon:SetTexture(specIcon)
-                    opp:Show()
-                else
-                    opp:Hide()
+local function UpdateCC(self, event, unit)
+    local spellID, startTime, duration = _G.C_PvP.GetArenaCrowdControlInfo(unit)
+    if spellID then
+        if startTime ~= 0 and duration ~= 0 then
+            self.Trinket:SetCooldown(startTime / 1000.0, duration / 1000.0)
+            if db.arena.announceUse then
+                local chat = db.arena.announceChat
+                if chat == "GROUP" then
+                    chat = "INSTANCE_CHAT"
                 end
-            else
-                opp[notVisible](opp, 0)
+                _G.SendChatMessage("Trinket used by: ".._G.GetUnitName(unit, true), chat)
+            elseif RealUI.isDev then
+                _G.print("Trinket used by: ".._G.GetUnitName(unit, true))
             end
-        end
-    else
-        UnitFrames:debug(event, unit, status)
-        unit = _G.tonumber(unit:match("arena(%d+)")) -- filter arenapet*
-        local opp = prepFrames[unit or 0]
-        if opp then
-            if status == "seen" then
-                UnitFrames:debug("Arena Opp Seen", unit, opp)
-                opp:SetAlpha(1)
-            elseif status == "destroyed" then
-                UnitFrames:debug("Arena Opp Destroyed", unit, opp)
-                opp:SetAlpha(0)
-            elseif status == "cleared" then
-                UnitFrames:debug("Arena Opp Cleared", unit, opp)
-                opp[notVisible](opp, 0)
-            end
+        else
+            self.Trinket:Clear();
         end
     end
 end
@@ -105,7 +66,7 @@ local function CreateHealthBar(parent)
     parent.Health.frequentUpdates = true
     if not(ndb.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
-        parent.Health.PostUpdate = function(self, unit, min, max)
+        parent.Health.PostUpdate = function(self, unit, cur, max)
             self:SetValue(max - self:GetValue())
         end
     end
@@ -115,13 +76,13 @@ end
 
 local function CreateTags(parent)
     parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.HealthValue:SetPoint("TOPLEFT", parent.Health, "TOPLEFT", 2.5, -6.5)
+    parent.HealthValue:SetPoint("TOPLEFT", 2.5, -6.5)
     parent.HealthValue:SetFontObject(_G.RealUIFont_Pixel)
     parent.HealthValue:SetJustifyH("LEFT")
     parent:Tag(parent.HealthValue, "[realui:healthPercent]")
 
     parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.Name:SetPoint("TOPRIGHT", parent.Health, "TOPRIGHT", -0.5, -6.5)
+    parent.Name:SetPoint("TOPRIGHT", -0.5, -6.5)
     parent.Name:SetFontObject(_G.RealUIFont_Pixel)
     parent.Name:SetJustifyH("RIGHT")
     parent:Tag(parent.Name, "[realui:name]")
@@ -137,7 +98,7 @@ local function CreatePowerBar(parent)
     local color = parent.colors.power["MANA"]
     parent.Power:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Power.colorPower = true
-    parent.Power.PostUpdate = function(bar, unit, min, max)
+    parent.Power.PostUpdate = function(bar, unit, cur, min, max)
         bar:SetShown(max > 0)
     end
 
@@ -153,12 +114,6 @@ local function CreateTrinket(parent)
         if self.elapsed >= self.interval then
             self.elapsed = 0
             if self.startTime and self.endTime then
-                --print("UpdateIcon", self.startTime, self.endTime)
-                if self.needsUpdate then
-                    self.timer:Show()
-                    self.timer:SetMinMaxValues(0, self.endTime - self.startTime)
-                end
-
                 local now = _G.GetTime()
                 self.timer:SetValue(self.endTime - now)
                 self.text:SetText(TimeFormat(_G.ceil(self.endTime - now)))
@@ -170,7 +125,6 @@ local function CreateTrinket(parent)
                     self.timer:SetStatusBarColor(1, (per*2), 0)
                 end
             else
-                --print("HideIcon", self.startTime, self.endTime)
                 self.timer:Hide()
                 self.text:SetText()
             end
@@ -182,7 +136,6 @@ local function CreateTrinket(parent)
     trinket.icon = trinket:CreateTexture(nil, "BACKGROUND")
     trinket.icon:SetAllPoints()
     trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-Horde]])
-    trinket.icon:SetTexCoord(.08, .92, .08, .92)
     F.ReskinIcon(trinket.icon)
 
     trinket.timer = _G.CreateFrame("StatusBar", nil, trinket)
@@ -199,6 +152,18 @@ local function CreateTrinket(parent)
     trinket.text:SetFontObject(_G.RealUIFont_PixelSmall)
     trinket.text:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1.5, 4)
     trinket.text:SetJustifyH("LEFT")
+
+    function trinket:SetCooldown(startTime, duration)
+        self.startTime = startTime
+        self.endTime = startTime + duration
+
+        self.timer:Show()
+        self.timer:SetMinMaxValues(0, self.endTime - self.startTime)
+    end
+    function trinket:Clear()
+        self.startTime = nil
+        self.endTime = nil
+    end
     parent.Trinket = trinket
 end
 
@@ -218,24 +183,14 @@ local function CreateArena(self)
 
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
-    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", UnitCastUpdate)
-end
+    self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
 
-local function SetupPrepFrames(index)
-    UnitFrames:debug("SetupPrepFrames")
-    local prep = _G.CreateFrame("Frame", nil, _G.UIParent)
-    if (index == 1) then
-        prep:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
-    else
-        prep:SetPoint("TOP", prepFrames[index - 1], "BOTTOM", 0, -db.boss.gap)
+    function self.PostUpdate(this, event)
+        if event == "ArenaPreparation" then
+            local _, _, _, specIcon = _G.GetSpecializationInfoByID(_G.GetArenaOpponentSpec(self.id))
+            this.Trinket.icon:SetTexture(specIcon)
+        end
     end
-    prep:SetSize(22, 22)
-    prep:Hide()
-    prep.icon = prep:CreateTexture(nil, 'OVERLAY')
-    prep.icon:SetAllPoints()
-    prep.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    F.ReskinIcon(prep.icon)
-    prepFrames[index] = prep
 end
 
 -- Init
@@ -248,12 +203,11 @@ _G.tinsert(UnitFrames.units, function(...)
     oUF:SetActiveStyle("RealUI:arena")
     -- Bosses and arenas are mutually excusive, so we'll just use some boss stuff for both for now.
     for i = 1, _G.MAX_BOSS_FRAMES do
-        SetupPrepFrames(i)
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
-        arena:SetPoint("RIGHT", prepFrames[i], "LEFT", -3, 0)
+        if i == 1 then
+            arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
+        else
+            arena:SetPoint("TOP", "RealUIArenaFrame"..(i-1), "BOTTOM", 0, -db.boss.gap)
+        end
     end
-    prepFrames[1]:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
-    prepFrames[1]:RegisterEvent("ARENA_OPPONENT_UPDATE")
-    prepFrames[1]:RegisterEvent("PLAYER_ENTERING_WORLD")
-    prepFrames[1]:SetScript("OnEvent", UpdatePrep)
 end)

@@ -57,20 +57,11 @@ mods["PLAYER_LOGIN"]["EasyMail"] = function(self, F, C)
 
 
     -- Send
-    F.Reskin(_G.EasyMail_MailButton, true)
+    F.ReskinArrow(_G.EasyMail_MailButton, "Down")
     _G.EasyMail_MailButton:SetSize(20, 20)
     _G.EasyMail_MailButton:ClearAllPoints()
     _G.EasyMail_MailButton:SetPoint("TOPLEFT", _G.SendMailNameEditBox, "TOPRIGHT", -1, 0)
 
-    local tex = _G.EasyMail_MailButton:CreateTexture(nil, "ARTWORK")
-    tex:SetTexture(C.media.arrowDown)
-    tex:SetSize(8, 8)
-    tex:SetPoint("CENTER")
-    tex:SetVertexColor(1, 1, 1)
-    _G.EasyMail_MailButton.tex = tex
-
-    _G.EasyMail_MailButton:HookScript("OnEnter", F.colourArrow)
-    _G.EasyMail_MailButton:HookScript("OnLeave", F.clearArrow)
 
     -- Dropdown pullout
     F.CreateBD(_G.EasyMail_MailDropdownBackdrop)

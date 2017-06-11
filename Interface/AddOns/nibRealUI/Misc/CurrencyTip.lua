@@ -10,7 +10,6 @@ local DB, realmDB, charDB
 local MODNAME = "CurrencyTip"
 local CurrencyTip = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-local THIRTY_DAYS = 60 * 60 * 24 * 30
 local playerList = {}
 local nameToID = {} -- maps localized currency names to IDs
 
@@ -135,46 +134,6 @@ function CurrencyTip:SetUpHooks()
     end)
 end
 
-function CurrencyTip:SetUpChar()
-    self:debug("SetUpChar GetNormalizedRealmName", _G.GetNormalizedRealmName())
-    local realm   = RealUI.realmNormalized
-    local faction = RealUI.faction
-    local player  = RealUI.charName
-
-    self:debug("Check faction")
-    for k,v in next, DB[realm] do
-        if k ~= "Alliance" and k ~= "Horde" then
-            DB[realm][k] = nil
-        end
-    end
-
-    realmDB = DB[realm][faction]
-    if not realmDB then return end -- probably low level Pandaren
-    self:debug("SetUpChar")
-
-    charDB = realmDB[player]
-
-    local now = _G.time()
-    charDB.class = RealUI.class
-    charDB.lastSeen = now
-
-    local cutoff = now - THIRTY_DAYS
-    for name, data in next, realmDB do
-        if data.lastSeen and data.lastSeen < cutoff then
-            realmDB[name] = nil
-        elseif name ~= player then
-            _G.tinsert(playerList, name)
-        end
-    end
-    _G.sort(playerList)
-    _G.tinsert(playerList, 1, player)
-
-    self:SetUpHooks()
-
-    UpdateCurrency()
-    UpdateMoney()
-end
-
 function CurrencyTip:CURRENCY_DISPLAY_UPDATE(...)
     self:debug("CURRENCY_DISPLAY_UPDATE", ...)
     UpdateCurrency()
@@ -188,34 +147,29 @@ end
 -- Initialization --
 --------------------
 function CurrencyTip:OnInitialize()
-    DB = RealUI.db.global.currency
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI.faction ~= "Neutral")
 end
 
 function CurrencyTip:OnEnable()
     self:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
     self:RegisterEvent("PLAYER_MONEY")
+    RealUI:InitCurrencyDB()
 
-    if not RealUI.realmNormalized then
-        -- On first login GetNormalizedRealmName() returns nil until now
-        RealUI.realmNormalized = _G.GetNormalizedRealmName()
-    end
+    DB = RealUI.db.global.currency
+    realmDB = DB[RealUI.realmNormalized][RealUI.faction]
+    charDB = realmDB[RealUI.charName]
 
-    -- transfer info from realm to normalized realm
-    if RealUI.realmNormalized ~= RealUI.realm and DB[RealUI.realm] then
-        DB[RealUI.realmNormalized] = RealUI:DeepCopy(DB[RealUI.realm])
-        RealUI.db.global.currency[RealUI.realm] = nil
-    end
-
-    if not DB[RealUI.realmNormalized] then
-        DB[RealUI.realmNormalized] = {}
-    end
-    if not DB[RealUI.realmNormalized][RealUI.faction] then
-        DB[RealUI.realmNormalized][RealUI.faction] = {}
-    end
-    if not DB[RealUI.realmNormalized][RealUI.faction][RealUI.charName] then
-        DB[RealUI.realmNormalized][RealUI.faction][RealUI.charName] = {}
+    local player  = RealUI.charName
+    for name, data in next, realmDB do
+        if name ~= player then
+            _G.tinsert(playerList, name)
+        end
     end
 
-    self:SetUpChar()
+    _G.sort(playerList)
+    _G.tinsert(playerList, 1, player)
+    self:SetUpHooks()
+
+    UpdateCurrency()
+    UpdateMoney()
 end

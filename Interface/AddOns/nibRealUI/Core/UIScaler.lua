@@ -11,8 +11,12 @@ function RealUI:PrintScreenSize()
     _G.print(("The current screen resolution is %dx%d"):format(RealUI:GetResolutionVals(true)))
     _G.print(("The current screen size is %dx%d"):format(_G.floor(_G.GetScreenWidth()+0.5), _G.floor(_G.GetScreenHeight()+0.5)))
 end
-function RealUI:GetUIScale()
-    return db.customScale
+function RealUI:GetUIScale(getRaw)
+    if ndbg.tags.retinaDisplay.set and not getRaw then
+        return db.customScale * 2
+    else
+        return db.customScale
+    end
 end
 
 -- UI Scaler

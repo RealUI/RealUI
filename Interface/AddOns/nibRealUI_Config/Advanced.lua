@@ -323,186 +323,6 @@ local core do
             allIcons = nil
         end
     end
-    local playerShields do
-        local MODNAME = "PlayerShields"
-        local PlayerShields = RealUI:GetModule(MODNAME)
-        local db = PlayerShields.db.profile
-        playerShields = {
-            name = "Player Shields",
-            desc = "Tracks absorbs/shields on the player.",
-            type = "group",
-            childGroups = "tab",
-            args = {
-                header = {
-                    name = "Player Shields",
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = "Tracks absorbs/shields on the player.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Player Shields module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    end,
-                    order = 30,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-                show = {
-                    name = "Show",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 40,
-                    args = {
-                        solo = {
-                            name = "While Solo",
-                            type = "toggle",
-                            get = function(info) return db.show.solo end,
-                            set = function(info, value)
-                                db.show.solo = value
-                                PlayerShields:UpdateVisibility()
-                            end,
-                            order = 10,
-                        },
-                        pve = {
-                            name = "In PvE",
-                            type = "toggle",
-                            get = function(info) return db.show.pve end,
-                            set = function(info, value)
-                                db.show.pve = value
-                                PlayerShields:UpdateVisibility()
-                            end,
-                            order = 20,
-                        },
-                        pvp = {
-                            name = "In PvP",
-                            type = "toggle",
-                            get = function(info) return db.show.pvp end,
-                            set = function(info, value)
-                                db.show.pvp = value
-                                PlayerShields:UpdateVisibility()
-                            end,
-                            order = 30,
-                        },
-                        onlyTank = {
-                            name = "Only Role = Tank",
-                            type = "toggle",
-                            get = function(info) return db.show.onlyTank end,
-                            set = function(info, value)
-                                db.show.onlyTank = value
-                                PlayerShields:UpdateVisibility()
-                            end,
-                            order = 40,
-                        },
-                        onlySpec = {
-                            name = "Only Spec = Tank",
-                            type = "toggle",
-                            get = function(info) return db.show.onlySpec end,
-                            set = function(info, value)
-                                db.show.onlySpec = value
-                                PlayerShields:UpdateVisibility()
-                            end,
-                            order = 50,
-                        },
-                    },
-                },
-                gap2 = {
-                    name = " ",
-                    type = "description",
-                    order = 41,
-                },
-                sizeposition = {
-                    name = "Size/Position",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 50,
-                    args = {
-                        parent = {
-                            name = "Parent",
-                            desc = L["General_NoteParent"],
-                            type = "input",
-                            width = "double",
-                            get = function(info) return _G.tostring(db.position.parent) end,
-                            set = function(info, value)
-                                db.position.parent = value
-                            end,
-                            order = 10,
-                        },
-                        gap1 = {
-                            name = " ",
-                            type = "description",
-                            order = 11,
-                        },
-                        rPoint = {
-                            name = "Anchor To",
-                            type = "select",
-                            style = "dropdown",
-                            values = RealUI.globals.anchorPoints,
-                            get = function(info)
-                                for k,v in next, RealUI.globals.anchorPoints do
-                                    if v == db.position.rPoint then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                db.position.rPoint = RealUI.globals.anchorPoints[value]
-                            end,
-                            order = 20,
-                        },
-                        point = {
-                            name = "Anchor From",
-                            type = "select",
-                            style = "dropdown",
-                            values = RealUI.globals.anchorPoints,
-                            get = function(info)
-                                for k,v in next, RealUI.globals.anchorPoints do
-                                    if v == db.position.point then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                db.position.point = RealUI.globals.anchorPoints[value]
-                            end,
-                            order = 30,
-                        },
-                        x = {
-                            name = "X",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return _G.tostring(db.position.x) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                db.position.x = value
-                            end,
-                            order = 40,
-                        },
-                        y = {
-                            name = "Y",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return _G.tostring(db.position.y) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                db.position.y = value
-                            end,
-                            order = 50,
-                        },
-                    },
-                },
-            },
-        }
-    end
     local screenSaver do
         local MODNAME = "ScreenSaver"
         local ScreenSaver = RealUI:GetModule(MODNAME)
@@ -703,7 +523,6 @@ local core do
         order = 0,
         args = {
             infobar = infobar,
-            playerShields = playerShields,
             screenSaver = screenSaver,
             worldMarker = worldMarker,
         },
@@ -1360,7 +1179,12 @@ local uiTweaks do
         local MODNAME = "CooldownCount"
         local CooldownCount = RealUI:GetModule(MODNAME)
         local db = CooldownCount.db.profile
-        local table_Justify = {"LEFT", "CENTER", "RIGHT"}
+        local anchors = {
+            "TOPLEFT",
+            "TOPRIGHT",
+            "BOTTOMLEFT",
+            "BOTTOMRIGHT",
+        }
         cooldown = {
             name = L["Tweaks_CooldownCount"],
             desc = L["Tweaks_CooldownCountDesc"],
@@ -1392,19 +1216,6 @@ local uiTweaks do
                     type = "description",
                     order = 41,
                 },
-                minScale = {
-                    name = "Min Scale",
-                    desc = "The minimum scale we want to show cooldown counts at, anything below this will be hidden.",
-                    type = "range",
-                    isPercent = true,
-                    min = 0, max = 1, step = 0.05,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
-                    get = function(info) return db.minScale end,
-                    set = function(info, value)
-                        db.minScale = value
-                    end,
-                    order = 60,
-                },
                 minDuration = {
                     name = "Min Duration",
                     desc = "The minimum number of seconds a cooldown's duration must be to display text.",
@@ -1429,17 +1240,31 @@ local uiTweaks do
                     end,
                     order = 80,
                 },
+                point = {
+                    name = "Anchor",
+                    type = "select",
+                    values = anchors,
+                    get = function(info)
+                        for k,v in next, anchors do
+                            if v == db.point then return k end
+                        end
+                    end,
+                    set = function(info, value)
+                        db.point = anchors[value]
+                    end,
+                    order = 90,
+                },
                 gap2 = {
                     name = " ",
                     type = "description",
-                    order = 81,
+                    order = 91,
                 },
                 colors = {
                     name = "Colors",
                     type = "group",
                     inline = true,
                     disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 90,
+                    order = 100,
                     args = {
                         expiring = {
                             name = "Expiring",
@@ -1505,70 +1330,6 @@ local uiTweaks do
                                 db.colors.days[3] = b
                             end,
                             order = 50,
-                        },
-                    },
-                },
-                gap3 = {
-                    name = " ",
-                    type = "description",
-                    order = 91,
-                },
-                position = {
-                    name = "Position",
-                    type = "group",
-                    inline = true,
-                    disabled = function(info) if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 100,
-                    args = {
-                        point = {
-                            name = "Anchor",
-                            type = "select",
-                            values = RealUI.globals.anchorPoints,
-                            get = function(info)
-                                for k,v in next, RealUI.globals.anchorPoints do
-                                    if v == db.position.point then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                db.position.point = RealUI.globals.anchorPoints[value]
-                            end,
-                            order = 10,
-                        },
-                        x = {
-                            name = "X",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return tostring(db.position.x) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                db.position.x = value
-                            end,
-                            order = 20,
-                        },
-                        y = {
-                            name = "Y",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return tostring(db.position.y) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                db.position.y = value
-                            end,
-                            order = 30,
-                        },
-                        justify = {
-                            name = "Text Justification",
-                            type = "select",
-                            values = table_Justify,
-                            get = function(info)
-                                for k,v in next, table_Justify do
-                                    if v == db.position.justify then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                db.position.justify = table_Justify[value]
-                            end,
-                            order = 40,
                         },
                     },
                 },
@@ -3380,144 +3141,146 @@ local uiTweaks do
     end
     local speechBubbles do
         local MODNAME = "SpeechBubbles"
-        local SpeechBubbles = RealUI:GetModule(MODNAME)
-        local db = SpeechBubbles.db.profile
-        speechBubbles = {
-            name = "Speech Bubbles",
-            desc = "Skins the speech bubbles.",
-            type = "group",
-            args = {
-                header = {
-                    name = "Speech Bubbles",
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = "Skins the speech bubbles.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Speech Bubbles module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                        RealUI:ReloadUIDialog()
-                    end,
-                    order = 30,
-                },
-                desc2 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-                desc3 = {
-                    name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
-                    type = "description",
-                    order = 32,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 33,
-                },
-                general = {
-                    name = "General",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 40,
-                    args = {
-                        sendersize = {
-                            name = "Sender Name Size",
-                            type = "range",
-                            min = 6, max = 32, step = 1,
-                            get = function(info) return db.sendersize end,
-                            set = function(info, value)
-                                db.sendersize = value
-                            end,
-                            order = 10,
+        local SpeechBubbles = RealUI:GetModule(MODNAME, true)
+        if SpeechBubbles then
+            local db = SpeechBubbles.db.profile
+            speechBubbles = {
+                name = "Speech Bubbles",
+                desc = "Skins the speech bubbles.",
+                type = "group",
+                args = {
+                    header = {
+                        name = "Speech Bubbles",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Skins the speech bubbles.",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Speech Bubbles module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value)
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                            RealUI:ReloadUIDialog()
+                        end,
+                        order = 30,
+                    },
+                    desc2 = {
+                        name = " ",
+                        type = "description",
+                        order = 31,
+                    },
+                    desc3 = {
+                        name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
+                        type = "description",
+                        order = 32,
+                    },
+                    gap1 = {
+                        name = " ",
+                        type = "description",
+                        order = 33,
+                    },
+                    general = {
+                        name = "General",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                        order = 40,
+                        args = {
+                            sendersize = {
+                                name = "Sender Name Size",
+                                type = "range",
+                                min = 6, max = 32, step = 1,
+                                get = function(info) return db.sendersize end,
+                                set = function(info, value)
+                                    db.sendersize = value
+                                end,
+                                order = 10,
+                            },
+                            hideSender = {
+                                name = "Hide Sender Name",
+                                type = "toggle",
+                                get = function() return db.hideSender end,
+                                set = function(info, value)
+                                    db.hideSender = value
+                                end,
+                                order = 11,
+                            },
+                            messagesize = {
+                                name = "Message Size",
+                                type = "range",
+                                min = 6, max = 32, step = 1,
+                                get = function(info) return db.messagesize end,
+                                set = function(info, value)
+                                    db.messagesize = value
+                                end,
+                                order = 20,
+                            },
+                            edgesize = {
+                                name = "Edge Size",
+                                type = "range",
+                                min = 0, max = 20, step = 1,
+                                get = function(info) return db.edgesize end,
+                                set = function(info, value)
+                                    db.edgesize = value
+                                end,
+                                order = 30,
+                            },
                         },
-                        hideSender = {
-                            name = "Hide Sender Name",
-                            type = "toggle",
-                            get = function() return db.hideSender end,
-                            set = function(info, value)
-                                db.hideSender = value
-                            end,
-                            order = 11,
-                        },
-                        messagesize = {
-                            name = "Message Size",
-                            type = "range",
-                            min = 6, max = 32, step = 1,
-                            get = function(info) return db.messagesize end,
-                            set = function(info, value)
-                                db.messagesize = value
-                            end,
-                            order = 20,
-                        },
-                        edgesize = {
-                            name = "Edge Size",
-                            type = "range",
-                            min = 0, max = 20, step = 1,
-                            get = function(info) return db.edgesize end,
-                            set = function(info, value)
-                                db.edgesize = value
-                            end,
-                            order = 30,
+                    },
+                    gap2 = {
+                        name = " ",
+                        type = "description",
+                        order = 41,
+                    },
+                    colors = {
+                        name = "Colors",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                        order = 50,
+                        args = {
+                            background = {
+                                name = "Background",
+                                type = "color",
+                                hasAlpha = true,
+                                get = function(info,r,g,b,a)
+                                    return db.colors.bg[1], db.colors.bg[2], db.colors.bg[3], db.colors.bg[4]
+                                end,
+                                set = function(info,r,g,b,a)
+                                    db.colors.bg[1] = r
+                                    db.colors.bg[2] = g
+                                    db.colors.bg[3] = b
+                                    db.colors.bg[4] = a
+                                end,
+                                order = 10,
+                            },
+                            border = {
+                                name = "Border",
+                                type = "color",
+                                hasAlpha = true,
+                                get = function(info,r,g,b,a)
+                                    return db.colors.border[1], db.colors.border[2], db.colors.border[3], db.colors.border[4]
+                                end,
+                                set = function(info,r,g,b,a)
+                                    db.colors.border[1] = r
+                                    db.colors.border[2] = g
+                                    db.colors.border[3] = b
+                                    db.colors.border[4] = a
+                                end,
+                                order = 10,
+                            },
                         },
                     },
                 },
-                gap2 = {
-                    name = " ",
-                    type = "description",
-                    order = 41,
-                },
-                colors = {
-                    name = "Colors",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 50,
-                    args = {
-                        background = {
-                            name = "Background",
-                            type = "color",
-                            hasAlpha = true,
-                            get = function(info,r,g,b,a)
-                                return db.colors.bg[1], db.colors.bg[2], db.colors.bg[3], db.colors.bg[4]
-                            end,
-                            set = function(info,r,g,b,a)
-                                db.colors.bg[1] = r
-                                db.colors.bg[2] = g
-                                db.colors.bg[3] = b
-                                db.colors.bg[4] = a
-                            end,
-                            order = 10,
-                        },
-                        border = {
-                            name = "Border",
-                            type = "color",
-                            hasAlpha = true,
-                            get = function(info,r,g,b,a)
-                                return db.colors.border[1], db.colors.border[2], db.colors.border[3], db.colors.border[4]
-                            end,
-                            set = function(info,r,g,b,a)
-                                db.colors.border[1] = r
-                                db.colors.border[2] = g
-                                db.colors.border[3] = b
-                                db.colors.border[4] = a
-                            end,
-                            order = 10,
-                        },
-                    },
-                },
-            },
-        }
+            }
+        end
     end
 
     uiTweaks = {

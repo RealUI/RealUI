@@ -144,3 +144,50 @@ tags.Methods["realui:power"] = function(unit)
     end
 end
 tags.Events["realui:power"] = tags.Events["realui:powerValue"]
+
+
+-- Colored Threat Percent
+tags.Methods["realui:threat"] = function(unit)
+    local color = tags.Methods['threatcolor'](unit)
+    local isTanking, _, rawPercentage = _G.UnitDetailedThreatSituation("player", "target")
+
+    if rawPercentage and not _G.UnitIsDeadOrGhost(unit) and _G.IsInGroup() then
+        local tankLead
+        if isTanking then
+            tankLead = _G.UnitThreatPercentageOfLead("player", "target")
+        end
+        return ("%s%d%%|r"):format(color, tankLead or rawPercentage)
+    end
+end
+tags.Events["realui:threat"] = "UNIT_THREAT_SITUATION_UPDATE UNIT_THREAT_LIST_UPDATE"
+
+-- Range
+local rangeColors = {
+    [5] = RealUI.media.colors.green,
+    [30] = RealUI.media.colors.yellow,
+    [35] = RealUI.media.colors.amber,
+    [40] = RealUI.media.colors.orange,
+    [50] = RealUI.media.colors.red,
+    [100] = RealUI.media.colors.red,
+}
+local rangeCheck = _G.LibStub("LibRangeCheck-2.0")
+tags.Methods["realui:range"] = function(unit)
+    local _, maxRange = rangeCheck:GetRange("target")
+    if maxRange and not _G.UnitIsUnit("target", "player") then
+        local section
+        if maxRange <= 5 then
+            section = 5
+        elseif maxRange <= 30 then
+            section = 30
+        elseif maxRange <= 35 then
+            section = 35
+        elseif maxRange <= 40 then
+            section = 40
+        elseif maxRange <= 50 then
+            section = 50
+        else
+            section = 100
+        end
+        return ("|cff%s%d|r"):format(RealUI:ColorTableToStr(rangeColors[section]), maxRange)
+    end
+end

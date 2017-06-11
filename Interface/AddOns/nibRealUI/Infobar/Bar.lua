@@ -402,6 +402,47 @@ function Infobar:RemoveBlock(name, dataObj, blockInfo)
     end
 end
 
+function Infobar:ShowBlock(name, dataObj, blockInfo)
+    self:debug("Infobar:HideBlock", name, blockInfo.side, blockInfo.index)
+    local block, dock = blocksByData[dataObj], Infobar.frame[blockInfo.side]
+    for i = 1, #dock.ADJUSTED_BLOCKS do
+        if block == dock.ADJUSTED_BLOCKS[i].block then
+            dock.ADJUSTED_BLOCKS[i].isHidden = false
+            break
+        end
+    end
+
+    self:AddBlock(name, dataObj, blockInfo)
+end
+function Infobar:HideBlock(name, dataObj, blockInfo)
+    local block, position = blocksByData[dataObj], blockInfo.index
+    local dock, found = Infobar.frame[blockInfo.side]
+    for i = 1, #dock.ADJUSTED_BLOCKS do
+        if block == dock.ADJUSTED_BLOCKS[i].block then
+            dock.ADJUSTED_BLOCKS[i].isHidden = true
+            found = true
+            break
+        end
+    end
+
+    if not found then
+        local i = 1
+        while i <= #dock.ADJUSTED_BLOCKS do
+            if position < dock.ADJUSTED_BLOCKS[i].position then
+                break
+            end
+            i = i + 1
+        end
+        _G.tinsert(dock.ADJUSTED_BLOCKS, i, {
+            position = position, -- where the block should be
+            index = #dock.DOCKED_BLOCKS, -- where the block is
+            isHidden = true,
+            block = block
+        })
+    end
+    self:RemoveBlock(name, dataObj, blockInfo)
+end
+
 function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
     if dataObj.type == "data source" or dataObj.type == "RealUI" then
         local blockInfo = self:GetBlockInfo(name, dataObj)
@@ -478,7 +519,7 @@ function DockMixin:OnLoad()
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
     self.DOCKED_BLOCKS = {};
-    self.UNORDERED_BLOCKS = {}
+    self.ADJUSTED_BLOCKS = {} -- blocks that are not in thier saved position
     self.isDirty = true;    --You dirty, dirty frame
 end
 
@@ -499,32 +540,33 @@ function DockMixin:AddBlock(block, position)
     self.isDirty = true;
     block.isDocked = true;
 
-    local insertIndex = position
-    for i = 1, #self.UNORDERED_BLOCKS do
-        if insertIndex < self.UNORDERED_BLOCKS[i].index then
-            insertIndex = self.UNORDERED_BLOCKS[i].position
+    local adjustedPosition = position
+    for i = 1, #self.ADJUSTED_BLOCKS do
+        if adjustedPosition < self.ADJUSTED_BLOCKS[i].position then
+            adjustedPosition = self.ADJUSTED_BLOCKS[i].index
             break
         end
     end
 
-    if ( insertIndex and insertIndex <= #self.DOCKED_BLOCKS + 1 ) then
-        _G.assert(insertIndex ~= 1 or block == self.primary, insertIndex);
-        _G.tinsert(self.DOCKED_BLOCKS, insertIndex, block);
+    if ( adjustedPosition and adjustedPosition <= #self.DOCKED_BLOCKS + 1 ) then
+        _G.assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition);
+        _G.tinsert(self.DOCKED_BLOCKS, adjustedPosition, block);
     else
         _G.tinsert(self.DOCKED_BLOCKS, block);
     end
 
-    if position > #self.DOCKED_BLOCKS or insertIndex ~= position then
-        local index = 1
-        while index <= #self.UNORDERED_BLOCKS do
-            if position < self.UNORDERED_BLOCKS[index].index then
+    if position > #self.DOCKED_BLOCKS or adjustedPosition ~= position then
+        -- the block is not where is should be, save both for future reference
+        local i = 1
+        while i <= #self.ADJUSTED_BLOCKS do
+            if position < self.ADJUSTED_BLOCKS[i].position then
                 break
             end
-            index = index + 1
+            i = i + 1
         end
-        _G.tinsert(self.UNORDERED_BLOCKS, index, {
-            position = #self.DOCKED_BLOCKS,
-            index = position,
+        _G.tinsert(self.ADJUSTED_BLOCKS, i, {
+            position = position, -- where the block should be
+            index = #self.DOCKED_BLOCKS, -- where the block is
             block = block
         })
     end
@@ -562,27 +604,33 @@ function DockMixin:UpdateBlocks(forceUpdate)
         return;
     end
 
-    local lastBlock = nil;
-
+    local lastBlock
     for index, block in ipairs(self.DOCKED_BLOCKS) do
         if forceUpdate then
             block:AdjustElements(Infobar:GetBlockInfo(block.name, block.dataObj))
         end
 
         _G.wipe(toBeRemoved)
-        for i = 1, #self.UNORDERED_BLOCKS do
-            if block == self.UNORDERED_BLOCKS[i].block then
-                if index == self.UNORDERED_BLOCKS[i].index then
+        local indexAdjust = 0
+        for i = 1, #self.ADJUSTED_BLOCKS do
+            if self.ADJUSTED_BLOCKS[i].isHidden and index >= self.ADJUSTED_BLOCKS[i].position then
+                indexAdjust = indexAdjust + 1
+            end
+
+            if block == self.ADJUSTED_BLOCKS[i].block then
+                if index == self.ADJUSTED_BLOCKS[i].position then
+                    -- the block is now where is should be, remove it
                     _G.tinsert(toBeRemoved, i)
                 else
-                    self.UNORDERED_BLOCKS[i].position = index
+                    -- the block is *still* not where is should be, update it's index
+                    self.ADJUSTED_BLOCKS[i].index = index
                 end
             end
         end
         for i = 1, #toBeRemoved do
-            _G.tremove(self.UNORDERED_BLOCKS, toBeRemoved[i])
+            _G.tremove(self.ADJUSTED_BLOCKS, toBeRemoved[i])
         end
-        block.index = index
+        block.index = index + indexAdjust
         block:SavePosition()
         block:Show();
 

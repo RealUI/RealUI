@@ -8,6 +8,9 @@ local next = _G.next
 local RealUI = private.RealUI
 local db
 
+if _G.AuroraConfig and _G.AuroraConfig.chatBubbles then
+    return
+end
 local MODNAME = "SpeechBubbles"
 local SpeechBubbles = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
