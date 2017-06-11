@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20] - 2017-06-08 ##
 ### Removed AddOns ###
 
   * !BugGrabber
@@ -205,6 +206,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20]: https://github.com/RealUI/RealUI/compare/8.1_r19g...8.1_r20
 [8.1 r19g]: https://github.com/RealUI/RealUI/compare/8.1_r19f...8.1_r19g
 [8.1 r19f]: https://github.com/RealUI/RealUI/compare/8.1_r19e...8.1_r19f
 [8.1 r19e]: https://github.com/RealUI/RealUI/compare/8.1_r19d...8.1_r19e
