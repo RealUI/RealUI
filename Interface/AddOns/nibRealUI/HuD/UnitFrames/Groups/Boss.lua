@@ -72,7 +72,7 @@ local function CreateHealthBar(parent)
     parent.Health.frequentUpdates = true
     if not(ndb.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
-        parent.Health.PostUpdate = function(self, unit, min, max)
+        parent.Health.PostUpdate = function(self, unit, cur, max)
             self:SetValue(max - self:GetValue())
         end
     end
@@ -101,7 +101,7 @@ local function CreatePowerBar(parent)
     power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 3)
     power:SetStatusBarTexture(RealUI.media.textures.plain)
     power.colorPower = true
-    power.PostUpdate = function(bar, unit, min, max)
+    power.PostUpdate = function(bar, unit, cur, min, max)
         bar:SetShown(max > 0)
     end
 
@@ -116,7 +116,7 @@ local function CreateAltPowerBar(parent)
     altPowerBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 6)
     altPowerBar:SetStatusBarTexture(RealUI.media.textures.plain)
     altPowerBar.colorPower = true
-    -- altPowerBar.PostUpdate = function(bar, unit, min, max)
+    -- altPowerBar.PostUpdate = function(bar, unit, cur, min, max)
     -- 	bar:SetShown(max > 0)
     -- end
 
