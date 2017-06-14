@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
     - luarocks
+    - pandoc
 
 before_install: luarocks install --local luacheck
 
