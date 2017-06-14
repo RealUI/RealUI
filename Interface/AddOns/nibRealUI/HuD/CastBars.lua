@@ -153,7 +153,7 @@ local function PostCastStart(self, unit, name, castID, spellID)
         self.flashAnim:Stop()
     end
 
-    if self.interrupt then
+    if self.notInterruptible then
         local color = db.colors.uninterruptible
         self:SetStatusBarColor(color[1], color[2], color[3], color[4])
     else
