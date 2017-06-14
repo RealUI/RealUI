@@ -21,3 +21,5 @@ powershell .\utils\update.ps1
 ::   -w wowi-id       Set the addon id used on WoWInterface for uploading.
 ::   -g game-version  Set the game version to use for CurseForge and WoWInterface uploading."
 bash -c "./utils/release.sh -p 88269 -w 16068"
+
+pause

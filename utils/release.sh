@@ -55,8 +55,6 @@ fi
 exit_code=0
 exit_prompt() {
 	echo "$1"
-	echo "Hit return to continue"
-	read dummy_variable
 	exit $exit_code
 }
 
