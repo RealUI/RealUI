@@ -5,6 +5,7 @@
 ## Version: 8.1 r20
 ## LoadWith: Blizzard_CompactRaidFrames
 ## OptionalDeps: Ace3
+## SavedVariables: RealUI_Storage
 
 Init.lua
 

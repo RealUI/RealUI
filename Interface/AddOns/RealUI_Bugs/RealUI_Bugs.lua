@@ -249,11 +249,22 @@ end
 function errorFrame:BugGrabber_CapturePaused()
     --print("Too many errors")
 end
+function errorFrame:ADDON_LOADED(addon)
+    if not _G.RealUI_Storage then
+        _G.RealUI_Storage = {}
+    end
+
+    -- Store saved variables for future transition to a new addon
+    if addon == "nibRealUI_Init" then
+        _G.RealUI_Storage.nibRealUI_Init = {}
+        _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB = _G.RealUI_InitDB
+    end
+end
 
 _G.BugGrabber.setupCallbacks()
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_BugGrabbed")
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_CapturePaused")
-errorFrame:RegisterEvent("LUA_WARNING")
+errorFrame:RegisterEvent("ADDON_LOADED")
 errorFrame:SetScript("OnEvent", function(self, event, ...)
     if self[event] then
         self[event](...)
