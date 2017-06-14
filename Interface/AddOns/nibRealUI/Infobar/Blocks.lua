@@ -26,7 +26,7 @@ testCell:Hide()
 local qTipAquire = qTip.Acquire
 function qTip:Acquire(...)
     local tooltip = qTipAquire(self, ...)
-    RealUI.ResetScale(tooltip)
+    RealUI.RegisterModdedFrame(tooltip)
     if _G.Aurora and not tooltip._skinned then
         _G.Aurora[1].CreateBD(tooltip)
         tooltip._skinned = true
@@ -56,10 +56,8 @@ local function SetupFonts()
         object = text
     }
 
-    size = RealUI.ModValue(9)
     iconFont = {
         font = fa.path,
-        size = size,
         outline = Infobar:GetFontOutline()
     }
 end
