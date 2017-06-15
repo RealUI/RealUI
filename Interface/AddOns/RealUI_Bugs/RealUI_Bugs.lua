@@ -2,11 +2,6 @@
 --local next = _G.next
 
 local errorFrame do
-    local function ScrollingEdit_OnLoad(self)
-        self.cursorOffset = 0
-        self.cursorHeight = 0
-    end
-
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
     errorFrame:SetClampedToScreen(true)
     errorFrame:SetMovable(true)
@@ -16,30 +11,11 @@ local errorFrame do
     errorFrame:Hide()
 
     errorFrame.Close = _G.RealUI_ErrorFrameClose
+    errorFrame.Title:SetText(_G.LUA_ERROR)
 
-    -- errorFrame.Title:SetText(_G.LUA_ERROR) -- is725
-    errorFrame.title = errorFrame.title or errorFrame.Title
-    errorFrame.title:SetText(_G.LUA_ERROR)
-
-    --[[ -- is725
     local dragArea = _G.CreateFrame("Frame", nil, errorFrame, "TitleDragAreaTemplate")
     dragArea:SetPoint("TOPLEFT")
     dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", -26, -26)
-    errorFrame.DragArea = dragArea
-    ]]
-    local dragArea = _G.CreateFrame("Frame", nil, errorFrame)
-    dragArea:SetPoint("TOPLEFT")
-    dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", 0, -26)
-    dragArea:EnableMouse(true)
-    dragArea:RegisterForDrag("LeftButton")
-    dragArea:SetScript("OnDragStart", function(self)
-        self:GetParent().moving = true
-        self:GetParent():StartMoving()
-    end)
-    dragArea:SetScript("OnDragStop", function(self)
-        self:GetParent().moving = false
-        self:GetParent():StopMovingOrSizing()
-    end)
     errorFrame.DragArea = dragArea
 
     local index = errorFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalCenter")
