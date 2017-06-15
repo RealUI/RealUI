@@ -24,13 +24,10 @@ style.apiVersion = "7.0"
 
 style.defaults = {
     acknowledgedSplashScreen = true,
-    bags = false,
     buttonSolidColour = {.1, .1, .1, 1},
     useButtonGradientColour = false,
     chatBubbles = true,
-    chatBubbleNames = true,
     enableFont = false,
-    loot = false,
     useCustomColour = false,
     tooltips = false,
 }
