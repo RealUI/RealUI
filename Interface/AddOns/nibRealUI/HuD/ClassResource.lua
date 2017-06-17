@@ -4,14 +4,12 @@ local _, private = ...
 local next = _G.next
 --local tinsert = _G.table.insert
 
--- Libs --
-local LibWin = _G.LibStub("LibWindow-1.1")
-
 -- RealUI --
 local RealUI = private.RealUI
 local db, pointDB, barDB
 
 local CombatFader = RealUI:GetModule("CombatFader")
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local MODNAME = "ClassResource"
 local ClassResource = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -37,41 +35,10 @@ function ClassResource:GetResources()
     return self.points, self.bar
 end
 
-local dragBG
-local function GetFrame(kind)
-    return kind == "points" and (ClassResource.Runes or ClassResource.ClassPower) or ClassResource.resource
-end
-
 function ClassResource:ForceUpdate()
     (ClassResource.Runes or ClassResource.ClassPower):ForceUpdate()
     if ClassResource.resource then
         ClassResource.resource:ForceUpdate()
-    end
-end
-
-function ClassResource:Lock(kind)
-    if not db[kind].locked then
-        db[kind].locked = true
-        local frame = GetFrame(kind)
-        frame:EnableMouse(false)
-        dragBG:ClearAllPoints()
-        dragBG:Hide()
-    end
-    if not RealUI.isInTestMode then
-        self:ToggleConfigMode(false)
-    end
-end
-function ClassResource:Unlock(kind)
-    if not RealUI.isInTestMode then
-        self:ToggleConfigMode(true)
-    end
-    if db[kind].locked then
-        db[kind].locked = false
-        local frame = GetFrame(kind)
-        frame:EnableMouse(true)
-        dragBG:SetPoint("TOPLEFT", frame, -2, 2)
-        dragBG:SetPoint("BOTTOMRIGHT", frame, 2, -2)
-        dragBG:Show()
     end
 end
 
@@ -126,15 +93,10 @@ function ClassResource:SettingsUpdate(kind, event)
                     end
                 end
             end
-        elseif event == "position" then
-            local frame = self.Runes or self.ClassPower
-            frame:RestorePosition()
         end
     elseif kind == "bar" then
         if event == "size" then
             self.resource:SetSize(settings.size.width, db.size.height)
-        elseif event == "position" then
-            self.resource:RestorePosition()
         end
     end
 end
@@ -143,23 +105,8 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     self:debug("CreateClassPower", unit)
     local ClassPower = _G.CreateFrame("Frame", nil, _G.UIParent)
     CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
+    self:PositionFrame(ClassPower, pointDB.position)
     ClassPower:SetSize(16, 16)
-
-    LibWin:Embed(ClassPower)
-    ClassPower:RegisterConfig(pointDB.position)
-    ClassPower:RestorePosition()
-    ClassPower:SetMovable(true)
-    ClassPower:RegisterForDrag("LeftButton")
-    ClassPower:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    ClassPower:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-    end)
-
-    dragBG = ClassPower:CreateTexture()
-    dragBG:SetColorTexture(1, 1, 1, 0.5)
-    dragBG:Hide()
 
     function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType)
         self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
@@ -215,19 +162,8 @@ function ClassResource:CreateRunes(unitFrame, unit)
     self:debug("CreateRunes", unit)
     local Runes = _G.CreateFrame("Frame", nil, _G.UIParent)
     CombatFader:RegisterFrameForFade(MODNAME, Runes)
+    self:PositionFrame(Runes, pointDB.position)
     Runes:SetSize(16, 16)
-
-    LibWin:Embed(Runes)
-    Runes:RegisterConfig(pointDB.position)
-    Runes:RestorePosition()
-    Runes:SetMovable(true)
-    Runes:RegisterForDrag("LeftButton")
-    Runes:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    Runes:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-    end)
 
     local size = pointDB.size
     for index = 1, MAX_RUNES do
@@ -264,20 +200,9 @@ function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
     local size = barDB.size
     local Stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
+    self:PositionFrame(Stagger, barDB.position)
     Stagger:SetSize(size.width, size.height)
     Stagger:SetAngleVertex(1, 3)
-
-    LibWin:Embed(Stagger)
-    Stagger:RegisterConfig(barDB.position)
-    Stagger:RestorePosition()
-    Stagger:SetMovable(true)
-    Stagger:RegisterForDrag("LeftButton")
-    Stagger:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    Stagger:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-    end)
 
     function Stagger.PostUpdate(element, cur, max)
         local r, g, b = element:GetStatusBarColor()
@@ -322,7 +247,10 @@ function ClassResource:ToggleConfigMode(val)
     if self.configMode == val then return end
     self.configMode = val
 
-    self.ClassPower:PostUpdate(3, 6, 1, false, powerToken, "ForceUpdate")
+    for i = 1, 6 do
+        self.ClassPower[i]:SetShown(val)
+    end
+    self.ClassPower:PostUpdate(val and 3 or 0, val and 6 or 0, true, powerToken)
     if self.resource then
         self.resource:ForceUpdate()
     end
@@ -334,7 +262,6 @@ function ClassResource:OnInitialize()
         points = {
             hideempty = true, -- Only show used icons
             reverse = false, -- Points start on the right
-            locked = true,
             size = {
                 width = 13,
                 height = 13,
@@ -370,8 +297,8 @@ function ClassResource:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         class = {
+            locked = true,
             bar = {
-                locked = true,
                 size = {
                     width = 200,
                     height = 8,
@@ -414,5 +341,10 @@ function ClassResource:OnEnable()
     self:debug("OnEnable")
 
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
+    FramePoint:RegisterMod(self, function(this, isLocked)
+        if not RealUI.isInTestMode then
+            self:ToggleConfigMode(not isLocked)
+        end
+    end)
     RealUI:RegisterConfigModeModule(self)
 end

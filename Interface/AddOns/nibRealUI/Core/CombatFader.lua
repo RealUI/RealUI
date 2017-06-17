@@ -136,7 +136,7 @@ function CombatFader:RegisterFrameForFade(mod, frame)
 end
 
 function CombatFader:AddFadeConfig(mod, configDB, startOrder)
-    if not modules[mod] then return end
+    _G.assert(modules[mod], mod.." has not yet been registered.")
     local modDB = modules[mod].options
     configDB.args.fadeHeader = {
         name = L["CombatFade"],

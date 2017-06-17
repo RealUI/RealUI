@@ -5,7 +5,7 @@ local debug = private.debug
 
 -- Lua Globals --
 local next = _G.next
-local tostring, tonumber = _G.tostring, _G.tonumber
+local tostring = _G.tostring
 
 -- Libs --
 local ACD = _G.LibStub("AceConfigDialog-3.0")
@@ -18,6 +18,7 @@ local ndbc = RealUI.db.char
 local hudSize = ndb.settings.hudSize
 local round = RealUI.Round
 
+local CombatFader = RealUI:GetModule("CombatFader")
 local uiWidth, uiHeight = _G.UIParent:GetSize()
 
 local other do
@@ -320,7 +321,6 @@ local other do
 end
 local unitframes do
     debug("HuD UnitFrames")
-    local CombatFader = RealUI:GetModule("CombatFader")
     local UnitFrames = RealUI:GetModule("UnitFrames")
     local db = UnitFrames.db.profile
     unitframes = {
@@ -1223,115 +1223,46 @@ local castbars do
 end
 local classresource do
     debug("HuD ClassResource")
-    local CombatFader = RealUI:GetModule("CombatFader")
     local ClassResource = RealUI:GetModule("ClassResource")
     local db = ClassResource.db.class
     local pointDB, barDB = db.points, db.bar
     local power, bars = ClassResource:GetResources()
     debug("power and bars", power, bars)
     if power or bars then
-        classresource = {
-            name = L["Resource"],
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
+        local barOptions = {
+            name = bars or "",
             type = "group",
-            childGroups = "tab",
-            order = 4,
+            hidden = bars == nil,
+            disabled = function()
+                return not RealUI:GetModuleEnabled("ClassResource")
+            end,
+            order = 20,
             args = {
-                enable = {
-                    name = L["General_Enabled"],
-                    desc = L["General_EnabledDesc"]:format(L["Resource"]),
-                    type = "toggle",
-                    get = function(info)
-                        return RealUI:GetModuleEnabled("ClassResource")
-                    end,
+                width = {
+                    name = L["HuD_Width"],
+                    type = "input",
+                    get = function(info) return tostring(barDB.size.width) end,
                     set = function(info, value)
-                        RealUI:SetModuleEnabled("ClassResource", value)
-                        CloseHuDWindow()
-                        RealUI:ReloadUIDialog()
+                        barDB.size.width = value
+                        ClassResource:SettingsUpdate("bar", "size")
                     end,
                     order = 10,
                 },
-                bars = {
-                    name = bars or "",
-                    type = "group",
-                    hidden = bars == nil,
-                    disabled = function()
-                        return not RealUI:GetModuleEnabled("ClassResource")
+                height = {
+                    name = L["HuD_Height"],
+                    type = "input",
+                    get = function(info) return tostring(barDB.size.height) end,
+                    set = function(info, value)
+                        barDB.size.height = value
+                        ClassResource:SettingsUpdate("bar", "size")
                     end,
                     order = 20,
-                    args = {
-                        width = {
-                            name = L["HuD_Width"],
-                            type = "input",
-                            get = function(info) return tostring(barDB.size.width) end,
-                            set = function(info, value)
-                                barDB.size.width = value
-                                ClassResource:SettingsUpdate("bar", "size")
-                            end,
-                            order = 10,
-                        },
-                        height = {
-                            name = L["HuD_Height"],
-                            type = "input",
-                            get = function(info) return tostring(barDB.size.height) end,
-                            set = function(info, value)
-                                barDB.size.height = value
-                                ClassResource:SettingsUpdate("bar", "size")
-                            end,
-                            order = 20,
-                        },
-                        headerPos = {
-                            name = L["General_Position"],
-                            type = "header",
-                            order = 25,
-                        },
-                        position = {
-                            name = "",
-                            type = "group",
-                            inline = true,
-                            order = 30,
-                            args = {
-                                lock = {
-                                    name = L["General_Lock"],
-                                    desc = L["General_LockDesc"],
-                                    type = "toggle",
-                                    get = function(info) return barDB.locked end,
-                                    set = function(info, value)
-                                        ClassResource[value and "Lock" or "Unlock"](ClassResource, "bar")
-                                    end,
-                                    order = 0,
-                                },
-                                x = {
-                                    name = L["General_XOffset"],
-                                    desc = L["General_XOffsetDesc"],
-                                    type = "input",
-                                    dialogControl = "NumberEditBox",
-                                    get = function(info) return tostring(barDB.position.x) end,
-                                    set = function(info, value)
-                                        barDB.position.x = round(tonumber(value))
-                                        ClassResource:SettingsUpdate("bar", "position")
-                                    end,
-                                    order = 10,
-                                },
-                                y = {
-                                    name = L["General_YOffset"],
-                                    desc = L["General_YOffsetDesc"],
-                                    type = "input",
-                                    dialogControl = "NumberEditBox",
-                                    get = function(info) return tostring(barDB.position.y) end,
-                                    set = function(info, value)
-                                        barDB.position.y = round(tonumber(value))
-                                        ClassResource:SettingsUpdate("bar", "position")
-                                    end,
-                                    order = 20,
-                                },
-                            },
-                        },
-                    },
                 },
-            }
+            },
         }
-        local points = {
+        ClassResource:AddPositionConfig(barOptions, barDB.position, 50)
+
+        local pointOptions = {
             name = power.name,
             type = "group",
             disabled = function() return not RealUI:GetModuleEnabled("ClassResource") end,
@@ -1396,57 +1327,36 @@ local classresource do
                     end,
                     order = 25,
                 },
-                headerPos = {
-                    name = L["General_Position"],
-                    type = "header",
-                    order = 75,
-                },
-                position = {
-                    name = "",
-                    type = "group",
-                    inline = true,
-                    order = 80,
-                    args = {
-                        lock = {
-                            name = L["General_Lock"],
-                            desc = L["General_LockDesc"],
-                            type = "toggle",
-                            get = function(info) return pointDB.locked end,
-                            set = function(info, value)
-                                ClassResource[value and "Lock" or "Unlock"](ClassResource, "points")
-                            end,
-                            order = 0,
-                        },
-                        x = {
-                            name = L["General_XOffset"],
-                            desc = L["General_XOffsetDesc"],
-                            type = "input",
-                            dialogControl = "NumberEditBox",
-                            get = function(info) return tostring(pointDB.position.x) end,
-                            set = function(info, value)
-                                pointDB.position.x = round(tonumber(value))
-                                ClassResource:SettingsUpdate("points", "position")
-                            end,
-                            order = 10,
-                        },
-                        y = {
-                            name = L["General_YOffset"],
-                            desc = L["General_YOffsetDesc"],
-                            type = "input",
-                            dialogControl = "NumberEditBox",
-                            get = function(info) return tostring(pointDB.position.y) end,
-                            set = function(info, value)
-                                pointDB.position.y = round(tonumber(value))
-                                ClassResource:SettingsUpdate("points", "position")
-                            end,
-                            order = 20,
-                        },
-                    },
-                },
             },
         }
-        CombatFader:AddFadeConfig("ClassResource", points, 55)
-        classresource.args.points = points
+        CombatFader:AddFadeConfig("ClassResource", pointOptions, 50)
+        ClassResource:AddPositionConfig(pointOptions, pointDB.position, 75)
+
+        classresource = {
+            name = L["Resource"],
+            icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
+            type = "group",
+            childGroups = "tab",
+            order = 4,
+            args = {
+                enable = {
+                    name = L["General_Enabled"],
+                    desc = L["General_EnabledDesc"]:format(L["Resource"]),
+                    type = "toggle",
+                    get = function(info)
+                        return RealUI:GetModuleEnabled("ClassResource")
+                    end,
+                    set = function(info, value)
+                        RealUI:SetModuleEnabled("ClassResource", value)
+                        CloseHuDWindow()
+                        RealUI:ReloadUIDialog()
+                    end,
+                    order = 10,
+                },
+                bars = barOptions,
+                points = pointOptions,
+            }
+        }
     end
 end
 
