@@ -192,8 +192,10 @@ frame:SetScript("OnEvent", function(self, event, addon)
             }
 
             for preload in next, addons do
-                mods.debug(preload, F, C)
-                mods[preload](F, C)
+                if _G.IsAddOnLoaded(preload) then
+                    mods.debug(preload, F, C)
+                    mods[preload](F, C)
+                end
             end
         elseif addon == "nibRealUI" then
             for _, moduleFunc in next, addonModule do
