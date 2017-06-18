@@ -307,9 +307,11 @@ end
 
 local function CreatePowerBar(parent, info)
     local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
+    local xOffset = parent.Health:GetHeight() - height
+
     local Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
     Power:SetSize(width, height)
-    Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -5 or 5, 0)
+    Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
     Power:SetAngleVertex(info.leftVertex, info.rightVertex)
     Power:SetReverseFill(info.point == "RIGHT")
 
@@ -512,7 +514,10 @@ local function Shared(self, unit)
 
     local unitData = UnitFrames[unit]
     local unitDB = db.units[unit]
-    self:SetSize(unitDB.size.x, unitDB.size.y)
+    local sizeMod = UnitFrames.layoutSize == 1 and 0.85 or 1
+
+    local width, height = round(unitDB.size.x * sizeMod), round(unitDB.size.y * sizeMod)
+    self:SetSize(width, height)
     CreateHealthBar(self, unitData.health)
     CreateHealthStatus(self, unitData.health)
     if unitData.isBig then
