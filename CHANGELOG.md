@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+  * RealUI_Bugs
+
+### Changed ###
+
+  * Added a new option to affect the size of the Infobar.
+  * The text of an error will now be highlighted when clicked.
+  * Certain Aurora options are no longer enforced.
+
+### Fixed ###
+
+  * Inturruptable spells would not display in the proper color.
+  * The cooldown text will now have a more consistent size.
+  * Fixed a bug that could taint the World Map.
+  * Progress Watch should no longer switch to Honor for no reason.
+
+
+
+
 ## [8.1 r20] - 2017-06-08 ##
 ### Removed AddOns ###
 

@@ -117,7 +117,7 @@ _G.C_Timer.NewTicker(1, function()
             local isSecure, taint = _G.issecurevariable(varName)
             if not isSecure then
                 _G.print(varName, "is tainted by", taint, lastEvent)
-                debug(varName, "is tainted", lastEvent)
+                debug(varName, "is tainted by", taint, lastEvent)
                 debug(_G.debugstack())
                 taintCheck[varName] = true
             end
