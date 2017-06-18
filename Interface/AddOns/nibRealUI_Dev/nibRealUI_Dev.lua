@@ -105,19 +105,22 @@ end
 local seenEvent, lastEvent = {}
 local taintCheck = {
     WorldMap_UpdateQuestBonusObjectives = false,
+    NUM_WORLDMAP_DEBUG_ZONEMAP = false,
     WorldMapFrame = false,
 }
 local eventWhitelist = {
     ARENA_PREP_OPPONENT_SPECIALIZATIONS = true
 }
-local frame = _G.CreateFrame("Frame")
-frame:SetScript("OnUpdate", function(self, elapsed)
+_G.C_Timer.NewTicker(1, function()
     for varName, isTainted in next, taintCheck do
-        if not isTainted and not _G.issecurevariable(varName) then
-            _G.print(varName, "is tainted", lastEvent)
-            debug(varName, "is tainted", lastEvent)
-            debug(_G.debugstack())
-            taintCheck[varName] = true
+        if not isTainted then
+            local isSecure, taint = _G.issecurevariable(varName)
+            if not isSecure then
+                _G.print(varName, "is tainted by", taint, lastEvent)
+                debug(varName, "is tainted", lastEvent)
+                debug(_G.debugstack())
+                taintCheck[varName] = true
+            end
         end
     end
 end)
@@ -125,6 +128,7 @@ end)
 local autorunScripts = {
     alert = false
 }
+local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
     lastEvent = event

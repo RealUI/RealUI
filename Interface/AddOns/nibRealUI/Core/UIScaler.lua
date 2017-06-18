@@ -37,15 +37,27 @@ function UIScaler:UpdateUIScale()
     if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
     -- Set Scale (WoW CVar can't go below .64)
-    UIScaler:debug("UpdateUIScale", scale, _G.GetCVar("uiScale"), ndbg.tags.retinaDisplay.set)
+    local cvarScale, parentScale = _G.GetCVar("uiScale"), _G.UIParent:GetScale()
+    UIScaler:debug("Current scale", cvarScale, parentScale, _G.UIParent:GetEffectiveScale())
     if scale < .64 then
-        _G.SetCVar("uiScale", 1)
-        _G.UIParent:SetScale(scale)
+        UIScaler:debug("UIParent", scale)
+        if not cvarScale == 1 then
+            --[[ SetCVar will taint the ObjectiveTracker, and by extention the WorldMap and
+                map action button. As such, we only use that if we absolutly have to.]]
+            _G.SetCVar("uiScale", 1)
+        end
+        if not parentScale == scale then
+            _G.UIParent:SetScale(scale)
+        end
     else
         UIScaler:debug("SetCVar", scale)
-        _G.UIParent:SetScale(1)
-        _G.SetCVar("useUiScale", 1)
-        _G.SetCVar("uiScale", scale)
+        if not cvarScale == scale then
+            _G.SetCVar("useUiScale", 1)
+            _G.SetCVar("uiScale", scale)
+        end
+        if not parentScale == 1 then
+            _G.UIParent:SetScale(1)
+        end
     end
     self.uiScaleChanging = false
 end
