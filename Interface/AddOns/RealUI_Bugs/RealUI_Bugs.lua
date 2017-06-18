@@ -72,15 +72,15 @@ end
 
 
 local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Herror:%s|h[%s: %s]|h|r]=]
-local REALUI_ERROR_FORMAT = [[|cFFFFD200Message:|r|cFFFFFFFF %s|r
+local REALUI_ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
-|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Count:|r|cFFFFFFFF %s|r
+|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
 |cFFFFD200Version:|r %s
 |cFFFFD200Locals:|r
 |cFFFFFFFF%s|r]]
-local ERROR_FORMAT = [[|cFFFFD200Message:|r|cFFFFFFFF %s|r
+local ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
-|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Count:|r|cFFFFFFFF %s|r
+|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
 |cFFFFD200Locals:|r
 |cFFFFFFFF%s|r]]
 
@@ -192,9 +192,9 @@ function errorFrame:Update()
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
         if err.message:find("RealUI") or (err.message:find("Nivaya") and _G.RealUI.hasCargBags) then
-            editbox:SetText(REALUI_ERROR_FORMAT:format(msg, stack, err.time, err.counter, _G.RealUI:GetVerString(true), locals))
+            editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, _G.RealUI:GetVerString(true), locals))
         else
-            editbox:SetText(ERROR_FORMAT:format(msg, stack, err.time, err.counter, locals))
+            editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
         end
         editbox:HighlightText(0, 0)
         editbox:SetCursorPosition(0)
