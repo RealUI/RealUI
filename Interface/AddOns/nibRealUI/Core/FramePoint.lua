@@ -89,11 +89,9 @@ local function AddPositionConfig(mod, configDB, position, startOrder)
                 type = "input",
                 dialogControl = "NumberEditBox",
                 get = function(info)
-                    print("get", position.x)
                     return _G.tostring(position.x)
                 end,
                 set = function(info, value)
-                    print("set", value)
                     position.x = round(_G.tonumber(value))
                     Restore(mod)
                 end,

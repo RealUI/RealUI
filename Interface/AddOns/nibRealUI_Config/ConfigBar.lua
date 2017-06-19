@@ -1226,9 +1226,9 @@ local classresource do
     local ClassResource = RealUI:GetModule("ClassResource")
     local db = ClassResource.db.class
     local pointDB, barDB = db.points, db.bar
-    local power, bars = ClassResource:GetResources()
-    debug("power and bars", power, bars)
-    if power or bars then
+    local points, bars = ClassResource:GetResources()
+    debug("points and bars", points, bars)
+    if points or bars then
         local barOptions = {
             name = bars or "",
             type = "group",
@@ -1263,14 +1263,14 @@ local classresource do
         ClassResource:AddPositionConfig(barOptions, barDB.position, 50)
 
         local pointOptions = {
-            name = power.name,
+            name = points.name,
             type = "group",
             disabled = function() return not RealUI:GetModuleEnabled("ClassResource") end,
             order = 20,
             args = {
                 hideempty = {
-                    name = L["Resource_HideUnused"]:format(power.name),
-                    desc = L["Resource_HideUnusedDesc"]:format(power.name),
+                    name = L["Resource_HideUnused"]:format(points.name),
+                    desc = L["Resource_HideUnusedDesc"]:format(points.name),
                     type = "toggle",
                     hidden = RealUI.class == "DEATHKNIGHT",
                     get = function(info) return pointDB.hideempty end,
@@ -1282,9 +1282,9 @@ local classresource do
                 },
                 reverse = {
                     name = L["Resource_Reverse"],
-                    desc = L["Resource_ReverseDesc"]:format(power.name),
+                    desc = L["Resource_ReverseDesc"]:format(points.name),
                     type = "toggle",
-                    hidden = power.token ~= "COMBO_POINTS",
+                    hidden = points.token ~= "COMBO_POINTS",
                     get = function(info) return pointDB.reverse end,
                     set = function(info, value)
                         pointDB.reverse = value
@@ -1316,7 +1316,7 @@ local classresource do
                 },
                 gap = {
                     name = L["Resource_Gap"],
-                    desc = L["Resource_GapDesc"]:format(power.name),
+                    desc = L["Resource_GapDesc"]:format(points.name),
                     type = "input",
                     hidden = RealUI.class == "PALADIN",
                     get = function(info) return tostring(pointDB.size.gap) end,
