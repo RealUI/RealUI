@@ -117,18 +117,14 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, Fu, Co)
             _G.DBM_GUI_OptionsFrameBossMods:HookScript("OnShow", styleDBM)
         end)
 
-        _G.hooksecurefunc(_G.DBM_GUI_OptionsFrame, "DisplayButton", function(button, element)
-            -- bit of a hack, can't get the API to work
-            local pushed = element.toggle:GetPushedTexture():GetTexture()
-
-            if not element.styled then
-                F.ReskinExpandOrCollapse(element.toggle)
-                element.toggle:GetPushedTexture():SetAlpha(0)
-
-                element.styled = true
+        _G.hooksecurefunc(_G.DBM_GUI_OptionsFrame, "CreateButtons", function(this, frame)
+            for i = 1, #frame.buttons do
+                local button = frame.buttons[i]
+                if not button.styled then
+                    F.ReskinExpandOrCollapse(button.toggle)
+                    button.styled = true
+                end
             end
-
-            element.toggle.plus:SetShown(pushed and pushed:find("Plus"))
         end)
 
         local MAX_BUTTONS = 10

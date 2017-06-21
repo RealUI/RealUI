@@ -290,7 +290,7 @@ _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
                     btn:SetText("")
                     btn:SetSize(17, 17)
                 end
-                widget.minus.plus:Hide()
+                widget.minus._auroraBG.plus:Hide()
 
                 widget.skinned = true
             end
