@@ -26,7 +26,7 @@ testCell:Hide()
 local qTipAquire = qTip.Acquire
 function qTip:Acquire(...)
     local tooltip = qTipAquire(self, ...)
-    RealUI.ResetScale(tooltip)
+    RealUI.RegisterModdedFrame(tooltip)
     if _G.Aurora and not tooltip._skinned then
         _G.Aurora[1].CreateBD(tooltip)
         tooltip._skinned = true
@@ -56,10 +56,8 @@ local function SetupFonts()
         object = text
     }
 
-    size = RealUI.ModValue(9)
     iconFont = {
         font = fa.path,
-        size = size,
         outline = Infobar:GetFontOutline()
     }
 end
@@ -1531,7 +1529,7 @@ function Infobar:CreateBlocks()
             GetColor = function(Art)
                 return .901, .8, .601
             end,
-            IsValid = function(Rep)
+            IsValid = function(Art)
                 local activeArtifact = _G.C_ArtifactUI.GetEquippedArtifactInfo()
                 Infobar:debug("artifact:IsValid", activeArtifact, artifactInit)
                 if activeArtifact or artifactInit then
@@ -1539,6 +1537,7 @@ function Infobar:CreateBlocks()
                     if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
                         -- async timer to prevent stack overflow
                         _G.C_Timer.After(2, artData.ForceUpdate)
+                        return true
                     end
                     return not not activeArtifact
                 else
@@ -1601,7 +1600,7 @@ function Infobar:CreateBlocks()
                     return 1.0, 0.24, 0
                 end
             end,
-            IsValid = function(Rep)
+            IsValid = function(Honor)
                 return _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT]
             end,
             SetTooltip = function(Honor, tooltip)

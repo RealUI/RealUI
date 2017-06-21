@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20a] - 2017-06-21 ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+  * RealUI_Bugs
+
+### Added ###
+
+  * There is a new option to change the UI Mod Scale. This will affect the size of a few select frames, like the Infobar.
+
+### Changed ###
+
+  * The text of an error will now be highlighted when clicked.
+  * Certain Aurora options are no longer enforced.
+
+### Fixed ###
+
+  * Inturruptable spells would not display in the proper color.
+  * The cooldown text will now have a more consistent size.
+  * Fixed a few bugs that could taint the World Map.
+  * Progress Watch should no longer switch to Honor for no reason.
+  * Castbars in the healer layout will no longer overlap the action bars.
+  * Healers should now be assigned to the Healer layout by default.
+
+
+
+
 ## [8.1 r20] - 2017-06-08 ##
 ### Removed AddOns ###
 
@@ -206,6 +236,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20a]: https://github.com/RealUI/RealUI/compare/8.1_r20...8.1_r20a
 [8.1 r20]: https://github.com/RealUI/RealUI/compare/8.1_r19g...8.1_r20
 [8.1 r19g]: https://github.com/RealUI/RealUI/compare/8.1_r19f...8.1_r19g
 [8.1 r19f]: https://github.com/RealUI/RealUI/compare/8.1_r19e...8.1_r19f
@@ -215,4 +246,3 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 [8.1 r19b]: https://github.com/RealUI/RealUI/compare/8.1_r19a...8.1_r19b
 [8.1 r19a]: https://github.com/RealUI/RealUI/compare/8.1_r19...8.1_r19a
 [8.1 r19]: https://github.com/RealUI/RealUI/compare/8.1_r18l...8.1_r19
-

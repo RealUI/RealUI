@@ -1,17 +1,11 @@
 local _, private = ...
 
--- Lua Globals --
-local next = _G.next
---local tinsert = _G.table.insert
-
--- Libs --
-local LibWin = _G.LibStub("LibWindow-1.1")
-
 -- RealUI --
 local RealUI = private.RealUI
 local db, pointDB, barDB
 
 local CombatFader = RealUI:GetModule("CombatFader")
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local MODNAME = "ClassResource"
 local ClassResource = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -32,47 +26,20 @@ local powerTextures = {
 
 local MAX_RUNES = 6
 local MAX_POINTS = 10
+local hasPoints = false
 
 function ClassResource:GetResources()
-    return self.points, self.bar
-end
-
-local dragBG
-local function GetFrame(kind)
-    return kind == "points" and (ClassResource.Runes or ClassResource.ClassPower) or ClassResource.resource
+    return self.points and self.points.info, self.bar and self.bar.info
 end
 
 function ClassResource:ForceUpdate()
-    (ClassResource.Runes or ClassResource.ClassPower):ForceUpdate()
-    if ClassResource.resource then
-        ClassResource.resource:ForceUpdate()
+    if ClassResource.points then
+        ClassResource.points:ForceUpdate()
     end
-end
-
-function ClassResource:Lock(kind)
-    if not db[kind].locked then
-        db[kind].locked = true
-        local frame = GetFrame(kind)
-        frame:EnableMouse(false)
-        dragBG:ClearAllPoints()
-        dragBG:Hide()
+    if ClassResource.bar then
+        ClassResource.bar:ForceUpdate()
     end
-    if not RealUI.isInTestMode then
-        self:ToggleConfigMode(false)
-    end
-end
-function ClassResource:Unlock(kind)
-    if not RealUI.isInTestMode then
-        self:ToggleConfigMode(true)
-    end
-    if db[kind].locked then
-        db[kind].locked = false
-        local frame = GetFrame(kind)
-        frame:EnableMouse(true)
-        dragBG:SetPoint("TOPLEFT", frame, -2, 2)
-        dragBG:SetPoint("BOTTOMRIGHT", frame, 2, -2)
-        dragBG:Show()
-    end
+    CombatFader:RefreshMod()
 end
 
 local function PositionRune(rune, index)
@@ -102,39 +69,29 @@ function ClassResource:SettingsUpdate(kind, event)
     local settings = db[kind]
     if kind == "points" then
         if event == "gap" then
-            for _, element in next, {"Runes", "ClassPower"} do
-                local frame = self[element]
-                self:debug("element", element, #frame)
-                for i = 1, #frame do
-                    local icon = frame[i]
-                    if element == "Runes" then
-                        PositionRune(frame[i], i)
-                    elseif element == "ClassPower" then
-                        icon:ClearAllPoints()
-                        PositionIcon(icon, i, frame[i-1])
-                    end
+            local frame = self.points
+            for i = 1, #frame do
+                local icon = frame[i]
+                if hasPoints then
+                    icon:ClearAllPoints()
+                    PositionIcon(icon, i, frame[i-1])
+                else
+                    PositionRune(frame[i], i)
                 end
             end
         elseif event == "size" then
-            for _, element in next, {"Runes", "ClassPower"} do
-                local frame = self[element]
-                for i = 1, #frame do
-                    local icon = frame[i]
-                    icon:SetSize(settings.size.width, settings.size.height)
-                    if element == "Runes" then
-                        PositionRune(frame[i], i)
-                    end
+            local frame = self.points
+            for i = 1, #frame do
+                local icon = frame[i]
+                icon:SetSize(settings.size.width, settings.size.height)
+                if not hasPoints then
+                    PositionRune(frame[i], i)
                 end
             end
-        elseif event == "position" then
-            local frame = self.Runes or self.ClassPower
-            frame:RestorePosition()
         end
     elseif kind == "bar" then
         if event == "size" then
-            self.resource:SetSize(settings.size.width, db.size.height)
-        elseif event == "position" then
-            self.resource:RestorePosition()
+            self.bar:SetSize(settings.size.width, db.size.height)
         end
     end
 end
@@ -144,22 +101,11 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     local ClassPower = _G.CreateFrame("Frame", nil, _G.UIParent)
     CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
     ClassPower:SetSize(16, 16)
-
-    LibWin:Embed(ClassPower)
-    ClassPower:RegisterConfig(pointDB.position)
-    ClassPower:RestorePosition()
-    ClassPower:SetMovable(true)
-    ClassPower:RegisterForDrag("LeftButton")
-    ClassPower:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    ClassPower:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-    end)
-
-    dragBG = ClassPower:CreateTexture()
-    dragBG:SetColorTexture(1, 1, 1, 0.5)
-    dragBG:Hide()
+    if hasPoints then
+        self:PositionFrame(ClassPower, pointDB.position)
+    else
+        ClassPower:SetPoint("CENTER", -160, -40.5)
+    end
 
     function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType)
         self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
@@ -208,26 +154,16 @@ function ClassResource:CreateClassPower(unitFrame, unit)
 
         ClassPower[index] = icon
     end
+
     unitFrame.ClassPower = ClassPower
-    ClassResource.ClassPower = ClassPower
+    return ClassPower
 end
 function ClassResource:CreateRunes(unitFrame, unit)
     self:debug("CreateRunes", unit)
     local Runes = _G.CreateFrame("Frame", nil, _G.UIParent)
     CombatFader:RegisterFrameForFade(MODNAME, Runes)
+    self:PositionFrame(Runes, pointDB.position)
     Runes:SetSize(16, 16)
-
-    LibWin:Embed(Runes)
-    Runes:RegisterConfig(pointDB.position)
-    Runes:RestorePosition()
-    Runes:SetMovable(true)
-    Runes:RegisterForDrag("LeftButton")
-    Runes:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    Runes:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-    end)
 
     local size = pointDB.size
     for index = 1, MAX_RUNES do
@@ -257,27 +193,17 @@ function ClassResource:CreateRunes(unitFrame, unit)
             rune.tex:SetColorTexture(color[1], color[2], color[3], 0.4)
         end
     end
+
     unitFrame.Runes = Runes
-    self.Runes = Runes
+    return Runes
 end
 function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
     local size = barDB.size
     local Stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
+    self:PositionFrame(Stagger, barDB.position)
     Stagger:SetSize(size.width, size.height)
     Stagger:SetAngleVertex(1, 3)
-
-    LibWin:Embed(Stagger)
-    Stagger:RegisterConfig(barDB.position)
-    Stagger:RestorePosition()
-    Stagger:SetMovable(true)
-    Stagger:RegisterForDrag("LeftButton")
-    Stagger:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    Stagger:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-    end)
 
     function Stagger.PostUpdate(element, cur, max)
         local r, g, b = element:GetStatusBarColor()
@@ -293,7 +219,7 @@ function ClassResource:CreateStagger(unitFrame, unit)
     end
 
     unitFrame.Stagger = Stagger
-    self.resource = Stagger
+    return Stagger
 end
 
 local classPowers = {
@@ -307,14 +233,19 @@ local classPowers = {
 }
 function ClassResource:Setup(unitFrame, unit)
     -- Points
-    self:CreateClassPower(unitFrame, unit)
+    local points = self:CreateClassPower(unitFrame, unit)
     if playerClass == "DEATHKNIGHT" then
-        self:CreateRunes(unitFrame, unit)
+        points = self:CreateRunes(unitFrame, unit)
+    end
+    if hasPoints then
+        self.points = points
+        self.points.info = {token = powerToken, name = _G[powerToken]}
     end
 
     -- Bars
     if playerClass == "MONK" then
-        self:CreateStagger(unitFrame, unit)
+        self.bar = self:CreateStagger(unitFrame, unit)
+        self.bar.info = _G.GetSpellInfo(124255)
     end
 end
 
@@ -322,9 +253,28 @@ function ClassResource:ToggleConfigMode(val)
     if self.configMode == val then return end
     self.configMode = val
 
-    self.ClassPower:PostUpdate(3, 6, 1, false, powerToken, "ForceUpdate")
-    if self.resource then
-        self.resource:ForceUpdate()
+    if val then
+        if self.points then
+            self.points:SetAlpha(1)
+            if hasPoints then
+                for i = 1, 5 do
+                    self.points[i]:SetShown(val)
+                end
+                self.points:PostUpdate(val and 3 or 0, val and 5 or 0, true, powerToken)
+            else
+                for i = 1, MAX_RUNES do
+                    self.points[i]:SetValue(i / MAX_RUNES)
+                    self.points:PostUpdate(self.points[i], i, 0, MAX_RUNES, i == MAX_RUNES)
+                end
+            end
+        end
+        if self.bar then
+            local maxHealth = _G.UnitHealthMax("player")
+            self.bar:SetMinMaxValues(0, maxHealth)
+            self.bar:PostUpdate(maxHealth * 0.4, maxHealth)
+        end
+    else
+        ClassResource:ForceUpdate()
     end
 end
 
@@ -334,7 +284,6 @@ function ClassResource:OnInitialize()
         points = {
             hideempty = true, -- Only show used icons
             reverse = false, -- Points start on the right
-            locked = true,
             size = {
                 width = 13,
                 height = 13,
@@ -370,8 +319,8 @@ function ClassResource:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         class = {
+            locked = true,
             bar = {
-                locked = true,
                 size = {
                     width = 200,
                     height = 8,
@@ -400,13 +349,7 @@ function ClassResource:OnInitialize()
 
     -- Setup resources
     powerToken = classPowers[playerClass]
-    if powerToken then
-        self.points = {token = powerToken, name = _G[powerToken]}
-    end
-    if playerClass == "MONK" then
-        self.bar = _G.GetSpellInfo(124255) -- Stagger
-    end
-
+    hasPoints = powerToken and powerToken ~= "RUNES"
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
@@ -414,5 +357,10 @@ function ClassResource:OnEnable()
     self:debug("OnEnable")
 
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
+    FramePoint:RegisterMod(self, function(this, isLocked)
+        if not RealUI.isInTestMode then
+            self:ToggleConfigMode(not isLocked)
+        end
+    end)
     RealUI:RegisterConfigModeModule(self)
 end

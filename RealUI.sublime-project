@@ -41,5 +41,8 @@
 			"name": "Docs",
 			"path": "."
 		}
-	]
+	],
+    "syntax_override": {
+        "\\.lua$": ["WoWDevelopment", "WoW Lua"]
+    }
 }

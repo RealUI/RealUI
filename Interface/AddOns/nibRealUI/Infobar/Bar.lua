@@ -32,7 +32,7 @@ end
 local function PrepareTooltip(tooltip, block)
     Infobar:debug("PrepareTooltip", tooltip, block and block.name)
     if tooltip and block then
-        RealUI.ResetScale(tooltip)
+        RealUI.RegisterModdedFrame(tooltip)
         tooltip:ClearAllPoints()
         if tooltip.SetOwner then
             tooltip:SetOwner(block, ("ANCHOR_NONE"))
@@ -232,7 +232,7 @@ function BlockMixin:AdjustElements(blockInfo)
             local iconWidth
             if self.icon.isFont then
                 local iconFont = self.dataObj.iconFont
-                self.icon:SetFont(iconFont.font, iconFont.size, outline)
+                self.icon:SetFont(iconFont.font, size, outline)
                 if outline == "OUTLINE" then
                     -- Outlined font icons are too wide for their visual
                     iconWidth = self.icon:GetStringWidth() - space
@@ -240,7 +240,8 @@ function BlockMixin:AdjustElements(blockInfo)
                     iconWidth = self.icon:GetStringWidth()
                 end
             else
-                iconWidth = self.icon:GetWidth()
+                self.icon:SetSize(size, size)
+                iconWidth = size
             end
 
             self.checkWidth = iconWidth < 1
@@ -267,6 +268,7 @@ function BlockMixin:AdjustElements(blockInfo)
     end
 
     self:SetWidth(width)
+    self:SetHeight(BAR_HEIGHT)
 end
 
 local function SortBlocks(block1, block2)
@@ -305,7 +307,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
         local icon
         if dataObj.iconFont then
             icon = block:CreateFontString(nil, "ARTWORK")
-            icon:SetFont(dataObj.iconFont.font, dataObj.iconFont.size, dataObj.iconFont.outline)
+            icon:SetFont(dataObj.iconFont.font, size, dataObj.iconFont.outline)
             icon:SetText(dataObj.icon)
             if dataObj.iconR then
                 icon:SetTextColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
@@ -349,9 +351,6 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     block:SetScript("OnDragStart", block.OnDragStart)
 
     block:SetScript("OnUpdate", block.OnUpdate)
-
-    Infobar:debug("SetHeight", BAR_HEIGHT)
-    block:SetHeight(BAR_HEIGHT)
     block:AdjustElements(blockInfo)
     block:SetClampedToScreen(true)
     return block
@@ -698,7 +697,16 @@ function Infobar:CreateBar()
     frame:SetHeight(BAR_HEIGHT)
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)
-    RealUI.ResetScale(frame)
+    RealUI.RegisterModdedFrame(frame, function(this)
+        BAR_HEIGHT = RealUI.ModValue(16)
+        this:SetHeight(BAR_HEIGHT)
+
+        blockFont.size = RealUI.ModValue(9)
+        for index, block in Infobar:IterateBlocks() do
+            local blockInfo = Infobar:GetBlockInfo(block.name)
+            if block.AdjustElements then block:AdjustElements(blockInfo) end
+        end
+    end)
 
     -- Background
     frame:SetBackdrop({
@@ -829,13 +837,20 @@ function Infobar:SettingsUpdate(setting, block)
     end
 end
 
-function Infobar:GetBlockInfo(name, dataObj)
-    if not name and dataObj then
+function Infobar:GetBlockInfo(dataobjectname)
+    local objType = _G.type(dataobjectname)
+    _G.assert(objType == "string" or objType == "table", "\"dataobjectname\" must be a string or a table, got "..objType)
+
+    local name, dataObj
+    if objType == "table" then
+        dataObj = dataobjectname
         name = LDB:GetNameByDataObject(dataObj)
-    elseif name and not dataObj then
+        _G.assert(dataObj.type and name, "table must be an LDB data object.")
+    elseif objType == "string" then
+        name = dataobjectname
         dataObj = LDB:GetDataObjectByName(name)
+        _G.assert(dataObj and dataObj.type, "string must be the name of an LDB data object.")
     end
-    _G.assert(_G.type(name) == "string" and _G.type(dataObj) == "table", "Usage: Infobar:GetBlockInfo(\"dataobjectname\")")
 
     if dataObj.type == "RealUI" then
         self:debug("RealUI object")

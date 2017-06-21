@@ -52,6 +52,7 @@ RealUI.media = {
 
 local defaults = {
     stripeOpacity = 0.5,
+    uiModScale = 1,
 }
 
 local debugger = {}
@@ -99,20 +100,38 @@ local function debug(...)
     return Debug("Init", ...)
 end
 
-local _, uiHieght = _G.GetPhysicalScreenSize()
-local pixelScale = 768 / uiHieght
-local uiMod = uiHieght / 768
+local uiMod, pixelScale
+local function UpdateUIScale()
+    local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
+    debug("physical size", pysWidth, pysHeight)
+
+    pixelScale = 768 / pysHeight
+    uiMod = (pysHeight / 768) * _G.RealUI_InitDB.uiModScale
+    debug("uiMod", uiMod)
+end
+
 function RealUI.ModValue(value, getFloat)
     return RealUI.Round(value * uiMod, getFloat and 2 or 0)
 end
 
-function RealUI.ResetScale(frame)
+local previewFrames = {}
+function RealUI.RegisterModdedFrame(frame, updateFunc)
     -- Frames that are sized via ModValue become HUGE with retina scale.
     local customScale = RealUI:GetUIScale(true)
     if RealUI.db.global.tags.retinaDisplay.set then
         return frame:SetScale(customScale)
     elseif customScale > pixelScale then
         return frame:SetScale(pixelScale)
+    end
+
+    if updateFunc then
+        previewFrames[frame] = updateFunc
+    end
+end
+function RealUI.PreviewModScale()
+    UpdateUIScale()
+    for frame, func in next, previewFrames do
+        func(frame)
     end
 end
 
@@ -156,21 +175,27 @@ f:SetScript("OnEvent", function(self, event, addon)
         -- Do stuff at login
         f:UnregisterEvent("PLAYER_LOGIN")
         --f:UnregisterEvent("ADDON_LOADED")
-    elseif event == "UI_SCALE_CHANGED" then
-        local scrHeight = _G.GetScreenHeight()
-        scrHeight = floor(scrHeight + 0.5)
-        debug("scrHeight", scrHeight)
-
-        local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
-        debug("physical size", pysWidth, pysHeight)
-
-        uiMod = pysHeight / 768
-        debug("uiMod", uiMod)
     elseif event == "ADDON_LOADED" then
         if addon == "nibRealUI_Init" then
             debug("nibRealUI_Init: loaded", uiMod)
-            _G.RealUI_InitDB = _G.RealUI_InitDB or defaults
+            _G.RealUI_InitDB = _G.RealUI_InitDB or {}
             _G.RealUI_Debug = {}
+
+            -- load or init variables
+            for key, value in next, defaults do
+                if _G.RealUI_InitDB[key] == nil then
+                    if _G.type(value) == "table" then
+                        _G.RealUI_InitDB[key] = {}
+                        for k, v in next, value do
+                            _G.RealUI_InitDB[key][k] = value[k]
+                        end
+                    else
+                        _G.RealUI_InitDB[key] = value
+                    end
+                end
+            end
+
+            UpdateUIScale()
         elseif addon == "!Aurora_RealUI" then
             -- Create Aurora namespace incase Aurora is disabled
             local Aurora = {{},{}}

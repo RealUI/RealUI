@@ -2,11 +2,6 @@
 --local next = _G.next
 
 local errorFrame do
-    local function ScrollingEdit_OnLoad(self)
-        self.cursorOffset = 0
-        self.cursorHeight = 0
-    end
-
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
     errorFrame:SetClampedToScreen(true)
     errorFrame:SetMovable(true)
@@ -16,30 +11,11 @@ local errorFrame do
     errorFrame:Hide()
 
     errorFrame.Close = _G.RealUI_ErrorFrameClose
+    errorFrame.Title:SetText(_G.LUA_ERROR)
 
-    -- errorFrame.Title:SetText(_G.LUA_ERROR) -- is725
-    errorFrame.title = errorFrame.title or errorFrame.Title
-    errorFrame.title:SetText(_G.LUA_ERROR)
-
-    --[[ -- is725
     local dragArea = _G.CreateFrame("Frame", nil, errorFrame, "TitleDragAreaTemplate")
     dragArea:SetPoint("TOPLEFT")
     dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", -26, -26)
-    errorFrame.DragArea = dragArea
-    ]]
-    local dragArea = _G.CreateFrame("Frame", nil, errorFrame)
-    dragArea:SetPoint("TOPLEFT")
-    dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", 0, -26)
-    dragArea:EnableMouse(true)
-    dragArea:RegisterForDrag("LeftButton")
-    dragArea:SetScript("OnDragStart", function(self)
-        self:GetParent().moving = true
-        self:GetParent():StartMoving()
-    end)
-    dragArea:SetScript("OnDragStop", function(self)
-        self:GetParent().moving = false
-        self:GetParent():StopMovingOrSizing()
-    end)
     errorFrame.DragArea = dragArea
 
     local index = errorFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalCenter")
@@ -57,18 +33,13 @@ local errorFrame do
     text:SetSize(scrollFrame:GetSize())
     text:SetAutoFocus(false)
     text:SetMultiLine(true)
-    text:SetMaxLetters(4000)
+    text:SetMaxLetters(0)
     text:SetFontObject("GameFontHighlightSmall")
-    text:SetScript("OnCursorChanged", _G.ScrollingEdit_OnCursorChanged)
-    text:SetScript("OnUpdate", function(self, elapsed)
-        _G.ScrollingEdit_OnUpdate(self, elapsed, self:GetParent())
-    end)
-    text:SetScript("OnEditFocusGained", function(self)
-        self:HighlightText(0)
-    end)
     text:SetScript("OnEscapePressed", _G.EditBox_ClearFocus)
+    text:SetScript("OnEditFocusGained", function(self)
+        self:HighlightText()
+    end)
     scrollFrame:SetScrollChild(text)
-    ScrollingEdit_OnLoad(text)
     scrollFrame.Text = text
 
     local reload = _G.CreateFrame("Button", nil, errorFrame, "UIPanelButtonTemplate")
@@ -101,15 +72,15 @@ end
 
 
 local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Herror:%s|h[%s: %s]|h|r]=]
-local REALUI_ERROR_FORMAT = [[|cFFFFD200Message:|r|cFFFFFFFF %s|r
+local REALUI_ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
-|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Count:|r|cFFFFFFFF %s|r
+|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
 |cFFFFD200Version:|r %s
 |cFFFFD200Locals:|r
 |cFFFFFFFF%s|r]]
-local ERROR_FORMAT = [[|cFFFFD200Message:|r|cFFFFFFFF %s|r
+local ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
-|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Count:|r|cFFFFFFFF %s|r
+|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
 |cFFFFD200Locals:|r
 |cFFFFFFFF%s|r]]
 
@@ -221,9 +192,9 @@ function errorFrame:Update()
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
         if err.message:find("RealUI") or (err.message:find("Nivaya") and _G.RealUI.hasCargBags) then
-            editbox:SetText(REALUI_ERROR_FORMAT:format(msg, stack, err.time, err.counter, _G.RealUI:GetVerString(true), locals))
+            editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, _G.RealUI:GetVerString(true), locals))
         else
-            editbox:SetText(ERROR_FORMAT:format(msg, stack, err.time, err.counter, locals))
+            editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
         end
         editbox:HighlightText(0, 0)
         editbox:SetCursorPosition(0)
@@ -249,11 +220,22 @@ end
 function errorFrame:BugGrabber_CapturePaused()
     --print("Too many errors")
 end
+function errorFrame:ADDON_LOADED(addon)
+    if not _G.RealUI_Storage then
+        _G.RealUI_Storage = {}
+    end
+
+    -- Store saved variables for future transition to a new addon
+    if addon == "nibRealUI_Init" then
+        _G.RealUI_Storage.nibRealUI_Init = {}
+        _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB = _G.RealUI_InitDB
+    end
+end
 
 _G.BugGrabber.setupCallbacks()
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_BugGrabbed")
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_CapturePaused")
-errorFrame:RegisterEvent("LUA_WARNING")
+errorFrame:RegisterEvent("ADDON_LOADED")
 errorFrame:SetScript("OnEvent", function(self, event, ...)
     if self[event] then
         self[event](...)

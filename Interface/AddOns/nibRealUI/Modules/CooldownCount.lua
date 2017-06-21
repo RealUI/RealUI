@@ -55,7 +55,7 @@ local function setTimeFormats()
     SECONDS_FORMAT = "|cff"..ColorTableToStr(db.colors.seconds).."%d|r"
     MINUTES_FORMAT = "|cff"..ColorTableToStr(db.colors.minutes).."%dm|r"
     HOURS_FORMAT = "|cff"..ColorTableToStr(db.colors.hours).."%dh|r"
-    DAYS_FORMAT = "|cff"..ColorTableToStr(db.colors.days).."%dh|r"
+    DAYS_FORMAT = "|cff"..ColorTableToStr(db.colors.days).."%dd|r"
 end
 
 ---------------
@@ -79,6 +79,11 @@ function Timer:Stop()
     return self:Hide()
 end
 
+
+local sizeAdjust = {
+    {time = 10, adj = 4},
+    {time = MINUTE, adj = 2},
+}
 function Timer:UpdateText()
     local remain = self.enabled and (self.duration - (_G.GetTime() - self.start)) or 0
     if round(remain) > 0 then
@@ -86,16 +91,16 @@ function Timer:UpdateText()
         local formatStr, time, nextUpdate = getTimeText(remain)
         text:SetFormattedText(formatStr, time)
         text:Show()
-        --print("----- Update -----", time)
 
-        local maxX, maxY = self:GetSize()
-        for fontSize = CD_FONT.maxSize, CD_FONT.minSize, -1 do
-            text:SetFont(CD_FONT.font, fontSize, CD_FONT.flags)
-            if text:GetStringWidth() < maxX and text:GetStringHeight() < maxY then
-                --print("not Truncated", fontSize)
+        local size = CD_FONT.size
+        for i = 1, #sizeAdjust do
+            local info = sizeAdjust[i]
+            if remain < info.time then
+                size = size + info.adj
                 break
             end
         end
+        text:SetFont(CD_FONT.font, size, CD_FONT.flags)
         return self:SetNextUpdate(nextUpdate)
     else
         return self:Stop()
@@ -107,7 +112,7 @@ function Timer:Start(start, duration, modRate)
         self.start = start
         self.duration = duration
         self.enabled = true
-        self.text:SetFont(CD_FONT.font, CD_FONT.maxSize, CD_FONT.flags)
+        self.text:SetFont(CD_FONT.font, CD_FONT.size, CD_FONT.flags)
         self:UpdateText()
         self:Show()
     else
@@ -115,24 +120,22 @@ function Timer:Start(start, duration, modRate)
     end
 end
 
-local otherAnchor = {
-    TOPLEFT = {point = "BOTTOMRIGHT", x = 0.7, y = -0.7},
-    BOTTOMLEFT = {point = "TOPRIGHT", x = 0.7, y = 0.7},
-    TOPRIGHT = {point = "BOTTOMLEFT", x = -0.7, y = -0.7},
-    BOTTOMRIGHT = {point = "TOPLEFT", x = -0.7, y = 0.7}
+local anchor = {
+    TOPLEFT = {x = 1, y = -1},
+    BOTTOMLEFT = {x = 1, y = 1},
+    TOPRIGHT = {x = -1, y = -1},
+    BOTTOMRIGHT = {x = -1, y = 1}
 }
 --returns a new timer object
 local function CreateTimer(cd)
-    local xOffset, yOffset = cd:GetSize()
-    local other = otherAnchor[db.point]
     local timer = _G.CreateFrame('Frame', nil, cd)
-    timer:SetPoint(db.point)
-    timer:SetPoint(other.point, cd, db.point, xOffset * other.x, yOffset * other.y)
+    timer:SetAllPoints()
     timer:Hide()
 
+    local point = anchor[db.point]
     local text = timer:CreateFontString(nil, 'OVERLAY')
-    text:SetFont(CD_FONT.font, CD_FONT.maxSize, CD_FONT.flags)
-    text:SetAllPoints(timer)
+    text:SetFont(CD_FONT.font, CD_FONT.size, CD_FONT.flags)
+    text:SetPoint(db.point, point.x, point.y)
     text:Hide()
     timer.text = text
 
@@ -168,8 +171,7 @@ function CooldownCount:OnInitialize()
 
     CD_FONT = {
         font = ndb.media.font.standard[4],
-        minSize = 6,
-        maxSize = 20,
+        size = 10,
         flags = "OUTLINE"
     }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))

@@ -915,8 +915,8 @@ local skins do
             order = 40,
         }
         skins.args.customScale = {
-            name = "Custom ".._G.UI_SCALE,
-            desc = ("Set a custom UI scale (%.2f to %.2f). Note: UI elements may lose their sharp appearance."):format(minScale, maxScale),
+            name = L.Appearance_UIScale,
+            desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
             type = "input",
             disabled = function() return db.pixelPerfect end,
             validate = function(info, value)
@@ -937,6 +937,19 @@ local skins do
                 UIScaler:UpdateUIScale()
             end,
             order = 50,
+        }
+        skins.args.uiModScale = {
+            name = L.Appearance_ModScale,
+            desc = L.Appearance_ModScaleDesc:format(L.Infobar.."\nHUD Config"),
+            type = "range",
+            isPercent = true,
+            min = 0.5, max = 2, step = 0.05,
+            get = function(info) return _G.RealUI_InitDB.uiModScale end,
+            set = function(info, value)
+                _G.RealUI_InitDB.uiModScale = value
+                RealUI.PreviewModScale()
+            end,
+            order = 60,
         }
     end
     local addonSkins = RealUI:GetAddOnSkins()

@@ -24,13 +24,10 @@ style.apiVersion = "7.0"
 
 style.defaults = {
     acknowledgedSplashScreen = true,
-    bags = false,
     buttonSolidColour = {.1, .1, .1, 1},
     useButtonGradientColour = false,
     chatBubbles = true,
-    chatBubbleNames = true,
     enableFont = false,
-    loot = false,
     useCustomColour = false,
     tooltips = false,
 }
@@ -53,18 +50,8 @@ style.classcolors = {
 local skinnedAtlas = {
     ["token-info-background"] = [[Interface\AddOns\!Aurora_RealUI\Media\AuctionFrame\Token]],
     ["splash-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash]],
-    ["splash-703-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash703]],
-    ["splash-703-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash703]],
-    ["splash-703-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash703]],
-    ["splash-704-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash704]],
-    ["splash-704-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash704]],
-    ["splash-704-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash704]],
-    ["splash-705-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash705]],
     ["splash-705-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash705]],
     ["splash-705-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash705]],
-    ["splash-boost-topleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\SplashBoost]],
-    ["splash-boost-right"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\SplashBoost]],
-    ["splash-boost-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\SplashBoost]],
 }
 
 -- Save these functions so we dont have to duplicate just to place a border around an icon.
@@ -205,8 +192,10 @@ frame:SetScript("OnEvent", function(self, event, addon)
             }
 
             for preload in next, addons do
-                mods.debug(preload, F, C)
-                mods[preload](F, C)
+                if _G.IsAddOnLoaded(preload) then
+                    mods.debug(preload, F, C)
+                    mods[preload](F, C)
+                end
             end
         elseif addon == "nibRealUI" then
             for _, moduleFunc in next, addonModule do
