@@ -922,7 +922,7 @@ local skins do
             validate = function(info, value)
                 value = _G.tonumber(value)
                 if value then
-                    if value > minScale and value < maxScale then
+                    if value >= minScale and value <= maxScale then
                         return true
                     else
                         return ("Value must be between %.2f and %.2f"):format(minScale, maxScale)
@@ -931,10 +931,9 @@ local skins do
                     return "Value must be a number"
                 end
             end,
-            get = function() return tostring(db.customScale) end,
+            get = function() return db.customScale end,
             set = function(info, value)
-                db.customScale = _G.tonumber(value)
-                UIScaler:UpdateUIScale()
+                UIScaler:UpdateUIScale(_G.tonumber(value))
             end,
             order = 50,
         }
