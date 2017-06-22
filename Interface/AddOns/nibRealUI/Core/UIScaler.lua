@@ -11,12 +11,8 @@ function RealUI:PrintScreenSize()
     _G.print(("The current screen resolution is %dx%d"):format(RealUI:GetResolutionVals(true)))
     _G.print(("The current screen size is %dx%d"):format(_G.floor(_G.GetScreenWidth()+0.5), _G.floor(_G.GetScreenHeight()+0.5)))
 end
-function RealUI:GetUIScale(getRaw)
-    if ndbg.tags.retinaDisplay.set and not getRaw then
-        return db.customScale * 2
-    else
-        return db.customScale
-    end
+function RealUI:GetUIScale()
+    return db.customScale, ndbg.tags.retinaDisplay.set
 end
 
 -- UI Scaler
@@ -41,21 +37,21 @@ function UIScaler:UpdateUIScale()
     UIScaler:debug("Current scale", cvarScale, parentScale, _G.UIParent:GetEffectiveScale())
     if scale < .64 then
         UIScaler:debug("UIParent", scale)
-        if not cvarScale == 1 then
+        if cvarScale ~= 1 then
             --[[ SetCVar will taint the ObjectiveTracker, and by extention the WorldMap and
                 map action button. As such, we only use that if we absolutly have to.]]
             _G.SetCVar("uiScale", 1)
         end
-        if not parentScale == scale then
+        if parentScale ~= scale then
             _G.UIParent:SetScale(scale)
         end
     else
         UIScaler:debug("SetCVar", scale)
-        if not cvarScale == scale then
+        if cvarScale ~= scale then
             _G.SetCVar("useUiScale", 1)
             _G.SetCVar("uiScale", scale)
         end
-        if not parentScale == 1 then
+        if parentScale ~= 1 then
             _G.UIParent:SetScale(1)
         end
     end
