@@ -217,10 +217,10 @@ function errorFrame:BugGrabber_BugGrabbed(callback, errorObject)
     if not lastSeen[errorID] or (now - lastSeen[errorID]) > threshold then
         lastSeen[errorID] = now
         _G.print(CHAT_ERROR_FORMAT:format(errorID, _G.LUA_ERROR, errorID))
-    end
 
-    if self:IsShown() then
-        self:Update()
+        if self:IsShown() then
+            self:Update()
+        end
     end
 end
 function errorFrame:BugGrabber_CapturePaused()
