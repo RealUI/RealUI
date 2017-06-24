@@ -11,6 +11,21 @@ local LoggedIn = false
 local APBFrames = {}
 local UpdateInterval = 0
 
+--[[ Testing spots:
+    ALT_POWER_TYPE_HORIZONTAL:
+        Draenor, SMV: Akeeta's Hovel > Pillars of Fate -- click portal
+        EK, Hillsbrad: Quest > Peacebloom vs. Scourge -- uses vehicle
+        ToT, Lei Shen: Uses the bar on boss units
+
+    ALT_POWER_TYPE_CIRCULAR:
+        BWD, Atramedes:
+
+    ALT_POWER_TYPE_COUNTER:
+        Darkmoon Fair: Tonk Commander -- Uses vehicle with both HORIZONTAL and COUNTER
+            see also: https://github.com/oUF-wow/oUF/issues/293
+
+
+]]
 -- Events
 function AltPowerBar:PowerUpdate()
     if _G.UnitAlternatePowerInfo("player") then
