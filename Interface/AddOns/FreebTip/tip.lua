@@ -524,7 +524,7 @@ local style do
     end
 
     function style(frame)
-        if(not frame) then return end
+        if not frame or frame:IsForbidden() then return end
         local frameName = frame:GetName()
 
         if(not frame._bg) then
@@ -658,6 +658,7 @@ end)
 
 local timer = 0.1
 local function GT_OnUpdate(self, elapsed)
+    if self:IsForbidden() then return end
     self:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
 
     self.freebtipUpdate = (self.freebtipUpdate or timer) - elapsed
