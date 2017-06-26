@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed ###
 
-  * Chat output for errors has been throttled.
+  * Chat output and text updates for errors has been throttled.
 
 ### Fixed ###
 
@@ -259,6 +259,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20b]: https://github.com/RealUI/RealUI/compare/8.1_r20a...8.1_r20b
 [8.1 r20a]: https://github.com/RealUI/RealUI/compare/8.1_r20...8.1_r20a
 [8.1 r20]: https://github.com/RealUI/RealUI/compare/8.1_r19g...8.1_r20
 [8.1 r19g]: https://github.com/RealUI/RealUI/compare/8.1_r19f...8.1_r19g
