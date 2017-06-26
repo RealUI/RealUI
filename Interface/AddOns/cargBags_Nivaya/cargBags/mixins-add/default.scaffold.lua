@@ -139,15 +139,16 @@ local function ItemButton_Update(self, item)
     end
 
     -- Count
-    local _, itemCount = _G.GetContainerItemInfo(item.bagID, item.slotID)
-    if itemCount and itemCount > 1 then
+    local texture, itemCount = _G.GetContainerItemInfo(item.bagID, item.slotID)
+    itemCount = itemCount or (texture and 1 or 0)
+    if itemCount > 1 then
         self.Count:SetText(itemCount >= 1e3 and "*" or itemCount)
         self.Count:Show()
     else
         self.Count:Hide()
     end
     item.count = itemCount
-    self.count = itemCount -- Thank you Blizz for not using local variables >.> (BankFrame.lua @ 234 )
+    self.count = itemCount
 
     -- Durability
     local dCur, dMax = _G.GetContainerItemDurability(item.bagID, item.slotID)

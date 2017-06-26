@@ -1,7 +1,11 @@
 local _, private = ...
 
+-- Lua Globals --
+local tonumber, tostring = _G.tonumber, _G.tostring
+
 -- RealUI --
 local RealUI = private.RealUI
+local round = RealUI.Round
 local db, ndbg
 
 local MODNAME = "UIScaler"
@@ -11,55 +15,45 @@ function RealUI:PrintScreenSize()
     _G.print(("The current screen resolution is %dx%d"):format(RealUI:GetResolutionVals(true)))
     _G.print(("The current screen size is %dx%d"):format(_G.floor(_G.GetScreenWidth()+0.5), _G.floor(_G.GetScreenHeight()+0.5)))
 end
-function RealUI:GetUIScale(getRaw)
-    if ndbg.tags.retinaDisplay.set and not getRaw then
-        return db.customScale * 2
-    else
-        return db.customScale
-    end
+function RealUI:GetUIScale()
+    return tonumber(db.customScale), ndbg.tags.retinaDisplay.set
 end
 
 -- UI Scaler
-function UIScaler:UpdateUIScale()
+function UIScaler:UpdateUIScale(newScale)
     if self.uiScaleChanging then return end
-    self.uiScaleChanging = true
 
     -- Get Scale
-    local scale
+    local oldScale = tonumber(db.customScale)
     if db.pixelPerfect then
         local _, height = RealUI:GetResolutionVals(true)
         UIScaler:debug("raw size", _, height)
-        scale = 768 / height
-        db.customScale = scale
-    else
-        scale = db.customScale
+        newScale = 768 / height
     end
-    if ndbg.tags.retinaDisplay.set then scale = scale * 2 end
 
-    -- Set Scale (WoW CVar can't go below .64)
-    local cvarScale, parentScale = _G.GetCVar("uiScale"), _G.UIParent:GetScale()
-    UIScaler:debug("Current scale", cvarScale, parentScale, _G.UIParent:GetEffectiveScale())
-    if scale < .64 then
-        UIScaler:debug("UIParent", scale)
-        if not cvarScale == 1 then
-            --[[ SetCVar will taint the ObjectiveTracker, and by extention the WorldMap and
-                map action button. As such, we only use that if we absolutly have to.]]
-            _G.SetCVar("uiScale", 1)
-        end
-        if not parentScale == scale then
-            _G.UIParent:SetScale(scale)
-        end
-    else
-        UIScaler:debug("SetCVar", scale)
-        if not cvarScale == scale then
-            _G.SetCVar("useUiScale", 1)
-            _G.SetCVar("uiScale", scale)
-        end
-        if not parentScale == 1 then
-            _G.UIParent:SetScale(1)
-        end
+    local cvarScale, parentScale = tonumber(_G.GetCVar("uiscale")), round(_G.UIParent:GetScale(), 2)
+    UIScaler:debug("Current scale", oldScale, cvarScale, parentScale)
+
+    if not newScale then
+        newScale = _G.min(cvarScale, parentScale)
     end
-    self.uiScaleChanging = false
+    UIScaler:debug("newScale", newScale)
+
+    if oldScale ~= newScale then
+        self.uiScaleChanging = true
+        -- Set Scale (WoW CVar can't go below .64)
+        local uiScale = newScale * (ndbg.tags.retinaDisplay.set and 2 or 1)
+        if cvarScale ~= uiScale then
+            --[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
+                WorldMap and map action button. As such, we only use that if we absolutly have to.]]
+            _G.SetCVar("uiScale", _G.max(uiScale, 0.64))
+        end
+        if parentScale ~= uiScale then
+            _G.UIParent:SetScale(uiScale)
+        end
+        db.customScale = tostring(newScale)
+        self.uiScaleChanging = false
+    end
 end
 
 function UIScaler:PLAYER_ENTERING_WORLD()
@@ -76,11 +70,15 @@ function UIScaler:OnInitialize()
     self.db:RegisterDefaults({
         profile = {
             pixelPerfect = true,
-            customScale = 1,
+            customScale = "1",
         }
     })
     db = self.db.profile
     ndbg = RealUI.db.global
+
+    if _G.type(db.customScale) ~= "string" then
+        db.customScale = tostring(round(db.customScale), 2)
+    end
 
     -- Keep WoW UI Scale slider hidden and replace with RealUI button
     _G["Advanced_UseUIScale"]:Hide()

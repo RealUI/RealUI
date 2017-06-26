@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20b] - 2017-06-26 ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya
+  * FreebTip
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+
+### Changed ###
+
+  * Chat output for errors has been throttled.
+
+### Fixed ###
+
+  * UI scale will now behave properly when set to below .64.
+  * An error may occur when sorting bags.
+  * Added additional checks for forbidden frames.
+  * Ensure minimap coordinates are not updating in an instance.
+
+
+
+
 ## [8.1 r20a] - 2017-06-21 ##
 ### Modified AddOns ###
 

@@ -62,34 +62,6 @@ local function ZoomMinimapOut()
     _G.MinimapZoomOut:Disable()
 end
 
--- Timer
-local RefreshMap, RefreshZoom
-local RefreshTimer = _G.CreateFrame("FRAME")
-RefreshTimer.elapsed = 5
-RefreshTimer:Hide()
-RefreshTimer:SetScript("OnUpdate", function(s, e)
-    RefreshTimer.elapsed = RefreshTimer.elapsed - e
-    if (RefreshTimer.elapsed <= 0) then
-        -- Map
-        if RefreshMap then
-            local x, y = _G.GetPlayerMapPosition("Player")
-
-            -- If Coords are at 0,0 then it's possible that they are stuck
-            if x == 0 and y == 0 and not _G.WorldMapFrame:IsVisible() then
-                _G.SetMapToCurrentZone()
-            end
-            RefreshMap = false
-        end
-
-        -- Zoom
-        if RefreshZoom then
-            ZoomMinimapOut()
-            RefreshZoom = false
-        end
-        RefreshTimer.elapsed = 1
-    end
-end)
-
 local function fadeIn(frame)
     --print("fadeIn")
     if _G.InCombatLockdown() then return end
@@ -1015,52 +987,11 @@ function MinimapAdv:LootSpecUpdate()
 end
 
 
----- Coordinates ----
-local coords_int = 0.5
-function MinimapAdv:CoordsUpdate()
-    self:debug("CoordsUpdate")
-    if (_G.IsInInstance() or not(_G.Minimap:IsVisible()) or self.StationaryTime >= 10) then   -- Hide Coords
-        MMFrames.info.Coords:SetScript("OnUpdate", nil)
-        infoTexts.Coords.shown = false
-    else    -- Show Coords
-        MMFrames.info.Coords:SetScript("OnUpdate", function(coordsFrame, elapsed)
-            coords_int = coords_int - elapsed
-            if (coords_int <= 0) then
-                local X, Y = _G.GetPlayerMapPosition("player")
-                coordsFrame.text:SetText(("%.1f  %.1f"):format(X*100, Y*100))
-                coordsFrame:SetHeight(coordsFrame.text:GetStringHeight())
-                coords_int = 0.5
-            end
-        end)
-        infoTexts.Coords.shown = true
-    end
-    if not UpdateProcessing then self:UpdateInfoPosition() end
-end
-
 ---------------------
 -- MINIMAP UPDATES --
 ---------------------
-function MinimapAdv:MovementUpdate()
-    self:debug("MovementUpdate")
-    if not(db.information.coordDelayHide) or _G.IsInInstance() or not(_G.Minimap:IsVisible()) then return end
-
-    local X, Y = _G.GetPlayerMapPosition("player")
-    if X == self.LastX and Y == self.LastY then
-        self.StationaryTime = self.StationaryTime + 0.5
-    else
-        self.StationaryTime = 0
-    end
-    self.LastX = X
-    self.LastY = Y
-
-    if ((self.StationaryTime >= 10) and (infoTexts.Coords.shown)) or ((self.StationaryTime < 10) and not(infoTexts.Coords.shown)) then
-        self:CoordsUpdate()
-    end
-end
-
 function MinimapAdv:Update()
     UpdateProcessing = true     -- Stops individual update functions from calling UpdateInfoPosition
-    self:CoordsUpdate()
     self:DungeonDifficultyUpdate()
     self:UpdateButtonsPosition()
     UpdateProcessing = false
@@ -1101,6 +1032,9 @@ function MinimapAdv:UpdateShownState()
             self:ToggleGatherer()
             self:UpdateMinimapPosition()
         end
+        infoTexts.Coords.shown = false
+    else
+        infoTexts.Coords.shown = true
     end
     self:Toggle(MinimapShown)
 end
@@ -1470,8 +1404,6 @@ function MinimapAdv:ZoneChange(event, ...)
     Location.text:SetTextColor(r, g, b)
     Location:SetHeight(Location.text:GetStringHeight())
     infoTexts.Location.shown = db.information.location
-
-    RefreshMap = true
 end
 
 function MinimapAdv:ZONE_CHANGED_NEW_AREA(event, ...)
@@ -1501,11 +1433,6 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
 
     -- Update POIs
     self:UpdatePOIEnabled()
-
-    -- Timer
-    RefreshMap = true
-    RefreshZoom = true
-    RefreshTimer:Show()
 end
 
 -- Hide default Clock Button
@@ -1577,20 +1504,6 @@ function MinimapAdv:RegEvents()
     local UpdatePOICall = function() self:POIUpdate() end
     _G.hooksecurefunc("AddQuestWatch", UpdatePOICall)
     _G.hooksecurefunc("RemoveQuestWatch", UpdatePOICall)
-
-    -- Player Coords
-    self.LastX = 0
-    self.LastY = 0
-    self.StationaryTime = 0
-    local function MovementTimerUpdate()
-        MinimapAdv:MovementUpdate()
-    end
-    self:RegisterEvent("PLAYER_STARTED_MOVING", function(...)
-        self.CoordsTicker = _G.C_Timer.NewTicker(0.5, MovementTimerUpdate)
-    end)
-    self:RegisterEvent("PLAYER_STOPPED_MOVING", function(...)
-        self.CoordsTicker:Cancel()
-    end)
 end
 
 --------------------------
@@ -1805,8 +1718,6 @@ local function CreateFrames()
     MMFrames.farm:SetScript("OnMouseDown", Farm_OnMouseDown)
 
     -- Info
-    MMFrames.info.Coords = NewInfoFrame("Coords", _G.Minimap)
-    MMFrames.info.Coords:SetAlpha(0.75)
     MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap, true)
     MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap, true)
     MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap, true)
@@ -1814,6 +1725,20 @@ local function CreateFrames()
     MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s", true)
     MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s", true)
     MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s", true)
+
+    -- Coordinates
+    local lastUpdate, threshold = 0, 0.5
+    MMFrames.info.Coords = NewInfoFrame("Coords", _G.Minimap)
+    MMFrames.info.Coords:SetAlpha(0.75)
+    MMFrames.info.Coords:SetScript("OnUpdate", function(coordsFrame, elapsed)
+        lastUpdate = lastUpdate + elapsed
+        if not _G.IsInInstance() and lastUpdate > threshold then
+            local x, y = _G.GetPlayerMapPosition("player")
+            coordsFrame.text:SetText(("%.1f  %.1f"):format(x * 100, y * 100))
+            coordsFrame:SetHeight(coordsFrame.text:GetStringHeight())
+            lastUpdate = 0
+        end
+    end)
 
     -- Zone Indicator
     MMFrames.info.zoneIndicator = _G.CreateFrame("Frame", "MinimapAdv_Zone", _G.Minimap)

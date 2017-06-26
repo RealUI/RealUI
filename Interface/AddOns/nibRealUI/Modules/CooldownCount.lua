@@ -181,7 +181,7 @@ function CooldownCount:OnEnable()
     setTimeFormats()
 
     _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
-        if not cd.noCooldownCount then
+        if not cd:IsForbidden() and not cd.noCooldownCount then
             if start > 0 then
                 CooldownCount:debug("CDF_Set", cd:GetDebugName(), start, duration, modRate)
             end

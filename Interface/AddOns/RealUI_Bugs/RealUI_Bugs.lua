@@ -201,6 +201,7 @@ function errorFrame:Update()
     end
 end
 
+local lastSeen, threshold = {}, 2
 function errorFrame:BugGrabber_BugGrabbed(callback, errorObject)
     --[[errorObject = {
         message = sanitizedMessage,
@@ -211,10 +212,15 @@ function errorFrame:BugGrabber_BugGrabbed(callback, errorObject)
         counter = 1,
     }]]
     --print(errorObject.message)
-    local errorID = _G.BugGrabber:GetErrorID(errorObject)
-    _G.print(CHAT_ERROR_FORMAT:format(errorID, _G.LUA_ERROR, errorID))
-    if self:IsShown() then
-        self:Update()
+    local errorID, now = _G.BugGrabber:GetErrorID(errorObject), _G.time()
+
+    if not lastSeen[errorID] or (now - lastSeen[errorID]) > threshold then
+        lastSeen[errorID] = now
+        _G.print(CHAT_ERROR_FORMAT:format(errorID, _G.LUA_ERROR, errorID))
+
+        if self:IsShown() then
+            self:Update()
+        end
     end
 end
 function errorFrame:BugGrabber_CapturePaused()
