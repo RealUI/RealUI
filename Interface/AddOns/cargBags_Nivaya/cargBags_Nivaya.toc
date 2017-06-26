@@ -1,7 +1,7 @@
 ## Interface: 70200
 ## Title: cargBags_Nivaya: |cffffffffReal|r|cffbf3030UI|r
 ## Author: Luzzifus (Modified by Nibelheim and Gethe)
-## Version: 8.1 r20a
+## Version: 8.1 r20b
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: ItemRack, Outfitter
 ## SavedVariables: cB_CustomBags, cBniv_CatInfo, cBnivCfg
