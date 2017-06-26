@@ -857,10 +857,12 @@ function Infobar:CreateBlocks()
                 end
             end
         end
-        local RankSort do
+        local RankSort, UpdateRanks do
             local rankTable = {}
-            for i = 1, _G.GuildControlGetNumRanks() do
-                rankTable[_G.GuildControlGetRankName(i)] = i
+            function UpdateRanks()
+                for i = 1, _G.GuildControlGetNumRanks() do
+                    rankTable[_G.GuildControlGetRankName(i)] = i
+                end
             end
 
             function RankSort(val1, val2)
@@ -1011,33 +1013,38 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("Guild: OnEvent", event, ...)
-                local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
-                if isVisible and not isInGuild then
-                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:HideBlock(block.name, block.dataObj, info)
-                elseif not isVisible and isInGuild then
-                    local info = Infobar:GetBlockInfo(block.name, block.dataObj)
-                    Infobar:ShowBlock(block.name, block.dataObj, info)
-                end
-
-                local now = _G.GetTime()
-                Infobar:debug("Guild: time", now - time)
-                if now - time > 10 then
-                    _G.GuildRoster()
-                    time = now
+                if event == "GUILD_RANKS_UPDATE" then
+                    UpdateRanks()
                 else
-                    local _, online, onlineAndMobile = _G.GetNumGuildMembers()
-                    block.dataObj.value = online
-                    if online == onlineAndMobile then
-                        block.dataObj.suffix = ""
+                    local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
+                    if isVisible and not isInGuild then
+                        local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                        Infobar:HideBlock(block.name, block.dataObj, info)
+                    elseif not isVisible and isInGuild then
+                        local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                        Infobar:ShowBlock(block.name, block.dataObj, info)
+                    end
+
+                    local now = _G.GetTime()
+                    Infobar:debug("Guild: time", now - time)
+                    if now - time > 10 then
+                        _G.GuildRoster()
+                        time = now
                     else
-                        block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
+                        local _, online, onlineAndMobile = _G.GetNumGuildMembers()
+                        block.dataObj.value = online
+                        if online == onlineAndMobile then
+                            block.dataObj.suffix = ""
+                        else
+                            block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
+                        end
                     end
                 end
             end,
             events = {
                 "PLAYER_GUILD_UPDATE",
                 "GUILD_ROSTER_UPDATE",
+                "GUILD_RANKS_UPDATE",
                 "GUILD_MOTD",
             },
         })
