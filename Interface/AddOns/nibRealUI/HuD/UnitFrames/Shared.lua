@@ -432,10 +432,10 @@ local CreateEndBox do
     local function UpdateEndBox(self, ...)
         local unit, color = self.unit
         local _, class = _G.UnitClass(unit)
-        if _G.UnitIsPlayer(unit) then
-            color = self.colors.class[class] --RealUI:GetClassColor(class)
+        if class and _G.UnitIsPlayer(unit) then
+            color = self.colors.class[class]
         else
-            if ( not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) ) then
+            if not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) then
                 color = self.colors.tapped
             else
                 color = self.colors.reaction[_G.UnitReaction(unit, "player")]
