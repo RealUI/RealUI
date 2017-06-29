@@ -117,8 +117,8 @@ end
 local previewFrames = {}
 function RealUI.RegisterModdedFrame(frame, updateFunc)
     -- Frames that are sized via ModValue become HUGE with retina scale.
-    local customScale = RealUI:GetUIScale(true)
-    if RealUI.db.global.tags.retinaDisplay.set then
+    local customScale, isRetina = RealUI:GetUIScale()
+    if isRetina then
         return frame:SetScale(customScale)
     elseif customScale > pixelScale then
         return frame:SetScale(pixelScale)
