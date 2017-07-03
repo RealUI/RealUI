@@ -149,7 +149,7 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
     local color = tags.Methods['threatcolor'](unit)
-    local isTanking, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
+    local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
     if percentage and not _G.UnitIsDeadOrGhost(unit) then
         if isTanking then
@@ -157,7 +157,8 @@ tags.Methods["realui:threat"] = function(unit)
         end
 
         if percentage and percentage ~= 0 then
-            return ("%s%d%%|r"):format(color, percentage)
+            UnitFrames:debug("threat", color, isTanking, percentage)
+            return ("%s%1.0f%%|r"):format(color, percentage)
         end
     end
 end
