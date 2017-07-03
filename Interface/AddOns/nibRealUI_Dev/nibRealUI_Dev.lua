@@ -24,6 +24,7 @@ local BlizzAddons = {
     "Blizzard_NamePlates",
     "Blizzard_SecureTransferUI",
     "Blizzard_Deprecated",
+    "Blizzard_Console",
 
     -- LoD
     "Blizzard_AchievementUI",
@@ -44,6 +45,7 @@ local BlizzAddons = {
     "Blizzard_Collections",
     "Blizzard_CombatLog",
     "Blizzard_CombatText",
+    "Blizzard_Commentator",
     "Blizzard_Contribution",
     "Blizzard_DeathRecap",
     "Blizzard_DebugTools",
@@ -109,7 +111,8 @@ local taintCheck = {
     WorldMapFrame = false,
 }
 local eventWhitelist = {
-    ARENA_PREP_OPPONENT_SPECIALIZATIONS = true
+    ADDONS_UNLOADING = true,
+    ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 _G.C_Timer.NewTicker(1, function()
     for varName, isTainted in next, taintCheck do
@@ -155,8 +158,6 @@ frame:SetScript("OnEvent", function(self, event, ...)
             debug("", ...)
         end
 
-        debug("GetNormalizedRealmName", _G.GetNormalizedRealmName())
-        --debug("UIParent:GetSize", _G.UIParent:GetSize())
         if eventWhitelist[event] then
             _G.print("Dev", event, ...)
         else
