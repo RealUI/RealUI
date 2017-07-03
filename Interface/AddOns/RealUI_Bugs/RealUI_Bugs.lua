@@ -226,7 +226,7 @@ end
 function errorFrame:BugGrabber_CapturePaused()
     --print("Too many errors")
 end
-function errorFrame:ADDON_LOADED(addon)
+function errorFrame.ADDON_LOADED(addon)
     if not _G.RealUI_Storage then
         _G.RealUI_Storage = {}
     end
