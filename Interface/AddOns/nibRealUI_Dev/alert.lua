@@ -1,15 +1,5 @@
 local _, ns = ...
 
-local ID = {
-    spec = 268, -- Brewmaster
-    item = 30234, -- Nordrassil Wrath-Kilt
-    rollType = _G.LOOT_ROLL_TYPE_NEED,
-    currency = 823, -- Apexis Crystals
-    recipe = 42141,
-    quest = 42114,
-    archRace = 1, -- Dwarf
-}
-
 local achievementAlerts do
     local guild, toon = 4989, 6348
     local achievementID, isGuild, isEarned = toon, false, false
@@ -99,70 +89,186 @@ local lootAlerts do
     -- _G.LootAlertSystem:AddAlert(itemLink, quantity, rollType, roll, specID, isCurrency, showFactionBG, lootSource, lessAwesome, isUpgraded)
     -- _G.LootUpgradeAlertSystem:AddAlert(itemLink, quantity, specID, baseQuality)
     -- _G.MoneyWonAlertSystem:AddAlert(amount)
+
+    local itemID, apItemID = 30234 --[[ Nordrassil Wrath-Kilt ]], 147406 --[[ Greater Pathfinder's Symbol ]]
+    local _, itemLink = _G.GetItemInfo(itemID)
+    _G.GetItemInfo(apItemID)
+    local rollType, lootSpec = _G.LOOT_ROLL_TYPE_NEED, 268 --[[ Brewmaster ]]
+    local currencyID = 823 -- Apexis Crystals
+    local bonusPrompt, bonusDuration = 244782, 10
+    local rewardType, rewardQuantity = "item", 1
+    local bonusResults = {
+        "item",
+        "currency",
+        "money",
+        "artifact_power",
+    }
     lootAlerts = {
         name = "Loot Alerts",
         type = "group",
         args = {
+            header1 = {
+                name = "Items",
+                type = "header",
+                order = 0,
+            },
             lootWon = {
                 name = "Loot Roll Won",
                 desc = "LootAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.GetItemInfo(ID.item)
-                    _G.LootAlertSystem:AddAlert(ID.item, 1, ID.rollType, 98, ID.spec)
+                    _G.GetItemInfo(itemID)
+                    _G.LootAlertSystem:AddAlert(itemID, 1, rollType, 98, lootSpec)
                 end,
+                order = 1,
             },
             lootWonUpgrade = {
                 name = "Loot Roll Won (Upgrade)",
                 desc = "LootAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.GetItemInfo(ID.item)
-                    _G.LootAlertSystem:AddAlert(ID.item, 1, ID.rollType, 98, ID.spec, nil, nil, nil, nil, true)
+                    _G.GetItemInfo(itemID)
+                    _G.LootAlertSystem:AddAlert(itemID, 1, rollType, 98, lootSpec, nil, nil, nil, nil, true)
                 end,
+                order = 1,
             },
             lootGiven = {
                 name = "Loot Given",
                 desc = "LootAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.GetItemInfo(ID.item)
-                    _G.LootAlertSystem:AddAlert(ID.item, 1, nil, nil, ID.spec, nil, nil, nil, true)
+                    _G.GetItemInfo(itemID)
+                    _G.LootAlertSystem:AddAlert(itemID, 1, nil, nil, lootSpec, nil, nil, nil, true)
                 end,
-            },
-            lootMoney = {
-                name = "Loot Money",
-                desc = "MoneyWonAlertSystem",
-                type = "execute",
-                func = function()
-                    _G.GetItemInfo(ID.item)
-                    _G.MoneyWonAlertSystem:AddAlert(123456)
-                end,
-            },
-            lootCurrency = {
-                name = "Loot Currency",
-                desc = "LootAlertSystem",
-                type = "execute",
-                func = function()
-                    _G.LootAlertSystem:AddAlert(ID.currency, 100, nil, nil, ID.spec, true)
-                end,
-            },
-            lootGarrisonCache = {
-                name = "Loot Garrison Cache",
-                desc = "LootAlertSystem",
-                type = "execute",
-                func = function()
-                    _G.LootAlertSystem:AddAlert(824, 100, nil, nil, ID.spec, true, nil, 10)
-                end,
+                order = 1,
             },
             lootUpgrade = {
                 name = "Loot Upgrade",
                 desc = "LootUpgradeAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.GetItemInfo(ID.item)
-                    _G.LootUpgradeAlertSystem:AddAlert(ID.item, 1, ID.spec, 3)
+                    _G.GetItemInfo(itemID)
+                    _G.LootUpgradeAlertSystem:AddAlert(itemID, 1, lootSpec, 3)
                 end,
+                order = 1,
+            },
+            header2 = {
+                name = "Bonus Roll",
+                type = "header",
+                order = 2,
+            },
+            bonusResultType = {
+                name = "Result Type",
+                type = "select",
+                values = bonusResults,
+                get = function()
+                    for i, resultType in _G.ipairs(bonusResults) do
+                        if resultType == rewardType then
+                            return i
+                        end
+                    end
+                end,
+                set = function(info, value)
+                    rewardType = bonusResults[value]
+                    if rewardType == "item" then
+                        local _, link = _G.GetItemInfo(itemID)
+                        itemLink = link
+                        rewardQuantity = 1
+                    elseif rewardType == "money" then
+                        rewardQuantity = 123456
+                    elseif rewardType == "artifact_power" then
+                        local _, link = _G.GetItemInfo(147406)
+                        itemLink = link
+                        rewardQuantity = 123456
+                    end
+                end,
+                order = 3,
+            },
+            bonusPrompt = {
+                name = "Bonus Roll Prompt",
+                desc = "LootAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.GetItemInfo(itemID)
+                    _G.BonusRollFrame_StartBonusRoll(bonusPrompt, "Woah! A bonus roll!", bonusDuration, currencyID, 2)
+                    _G.C_Timer.After(bonusDuration, _G.BonusRollFrame_CloseBonusRoll)
+                end,
+                order = 3,
+            },
+            bonusStart = {
+                name = "Bonus Roll Start",
+                desc = "LootAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.BonusRollFrame_OnEvent(_G.BonusRollFrame, "BONUS_ROLL_STARTED")
+                end,
+                order = 3,
+            },
+            bonusResult = {
+                name = "Bonus Roll Result",
+                desc = "LootAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.BonusRollFrame_OnEvent(_G.BonusRollFrame, "BONUS_ROLL_RESULT", rewardType, itemLink, rewardQuantity, lootSpec)
+                end,
+                order = 3,
+            },
+            header3 = {
+                name = "Currency",
+                type = "header",
+                order = 4,
+            },
+            lootMoney = {
+                name = "Loot Money",
+                desc = "MoneyWonAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.GetItemInfo(itemID)
+                    _G.MoneyWonAlertSystem:AddAlert(123456)
+                end,
+                order = 5,
+            },
+            lootCurrency = {
+                name = "Loot Currency",
+                desc = "LootAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.LootAlertSystem:AddAlert(currencyID, 100, nil, nil, lootSpec, true)
+                end,
+                order = 5,
+            },
+            lootGarrisonCache = {
+                name = "Loot Garrison Cache",
+                desc = "LootAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.LootAlertSystem:AddAlert(824, 100, nil, nil, lootSpec, true, nil, 10)
+                end,
+                order = 5,
+            },
+            header4 = {
+                name = "Misc",
+                type = "header",
+                order = 6,
+            },
+            store = {
+                name = "Store Purchase",
+                desc = "StorePurchaseAlertSystem",
+                type = "execute",
+                func = function()
+                    local name, _, _, _, _, _, _, _, _, icon = _G.GetItemInfo(itemID)
+                    _G.StorePurchaseAlertSystem:AddAlert(icon, name, itemID)
+                end,
+                order = 7,
+            },
+            legendary = {
+                name = "Legion Legendary",
+                desc = "LegendaryItemAlertSystem",
+                type = "execute",
+                func = function()
+                    _G.LegendaryItemAlertSystem:AddAlert(itemID)
+                end,
+                order = 7,
             },
         },
     }
@@ -243,25 +349,17 @@ local garrisonAlerts do
     }
 end
 local miscAlerts do
+    local recipeID, questID, archRace = 42141 --[[]], 42114 --[[]], 1 --[[ Dwarf ]]
     miscAlerts = {
         name = "Misc Alerts",
         type = "group",
         args = {
-            store = {
-                name = "Store Purchase",
-                desc = "StorePurchaseAlertSystem",
-                type = "execute",
-                func = function()
-                    local name, _, _, _, _, _, _, _, _, icon = _G.GetItemInfo(ID.item)
-                    _G.StorePurchaseAlertSystem:AddAlert(icon, name, ID.item)
-                end,
-            },
             digsite = {
                 name = "Digsite Complete",
                 desc = "DigsiteCompleteAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.DigsiteCompleteAlertSystem:AddAlert(ID.archRace)
+                    _G.DigsiteCompleteAlertSystem:AddAlert(archRace)
                 end,
             },
             newRecipe = {
@@ -269,7 +367,7 @@ local miscAlerts do
                 desc = "NewRecipeLearnedAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.NewRecipeLearnedAlertSystem:AddAlert(ID.recipe)
+                    _G.NewRecipeLearnedAlertSystem:AddAlert(recipeID)
                 end,
             },
             worldQuest = {
@@ -277,15 +375,7 @@ local miscAlerts do
                 desc = "WorldQuestCompleteAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.WorldQuestCompleteAlertSystem:AddAlert(ID.quest)
-                end,
-            },
-            legendary = {
-                name = "Legion Legendary",
-                desc = "LegendaryItemAlertSystem",
-                type = "execute",
-                func = function()
-                    _G.LegendaryItemAlertSystem:AddAlert(ID.item)
+                    _G.WorldQuestCompleteAlertSystem:AddAlert(questID)
                 end,
             },
         },
