@@ -274,30 +274,31 @@ local lootAlerts do
     }
 end
 local garrisonAlerts do
+    local isUpgraded, talentID = false, 370 --[[ Hunter: Long Range ]]
+    local function hasGarrison()
+        return _G.C_Garrison.GetLandingPageGarrisonType() > 0
+    end
     local function isDraenorGarrison()
         return _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_6_0
     end
     garrisonAlerts = {
         name = "Garrison Alerts",
-        disabled = _G.C_Garrison.GetLandingPageGarrisonType() == 0,
+        disabled = not hasGarrison(),
         type = "group",
         args = {
-            building = {
-                name = "Garrison Building",
-                desc = "GarrisonBuildingAlertSystem",
-                type = "execute",
-                func = function()
-                    _G.GarrisonBuildingAlertSystem:AddAlert("Barn")
-                end,
+            header1 = {
+                name = "Followers",
+                type = "header",
+                order = 0,
             },
-            mission = {
-                name = "Garrison Mission",
-                desc = "GarrisonMissionAlertSystem",
-                type = "execute",
-                func = function()
-                    local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
-                    _G.GarrisonMissionAlertSystem:AddAlert(mission.missionID)
+            isUpgraded = {
+                name = "Follower is upgraded",
+                type = "toggle",
+                get = function() return isUpgraded end,
+                set = function(info, value)
+                    isUpgraded = value
                 end,
+                order = 1,
             },
             follower = {
                 name = "Garrison Follower",
@@ -305,8 +306,45 @@ local garrisonAlerts do
                 type = "execute",
                 func = function()
                     local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
-                    _G.GarrisonFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.level, follower.quality)
+                    _G.GarrisonFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.level, follower.quality, isUpgraded, follower)
                 end,
+                order = 1,
+            },
+            followerShip = {
+                name = "Garrison Ship Follower",
+                desc = "GarrisonShipFollowerAlertSystem",
+                disabled = not isDraenorGarrison(),
+                type = "execute",
+                func = function()
+                    local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
+                    _G.GarrisonShipFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.className, follower.texPrefix, follower.level, follower.quality, isUpgraded, follower)
+                end,
+                order = 1,
+            },
+            header2 = {
+                name = "Missions",
+                type = "header",
+                order = 2,
+            },
+            mission = {
+                name = "Garrison Mission",
+                desc = "GarrisonMissionAlertSystem",
+                type = "execute",
+                func = function()
+                    local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
+                    _G.GarrisonMissionAlertSystem:AddAlert(mission)
+                end,
+                order = 3,
+            },
+            missionRandom = {
+                name = "Garrison Random Mission",
+                desc = "GarrisonRandomMissionAlertSystem",
+                type = "execute",
+                func = function()
+                    local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
+                    _G.GarrisonRandomMissionAlertSystem:AddAlert(mission)
+                end,
+                order = 3,
             },
             missionShip = {
                 name = "Garrison Ship Mission",
@@ -317,33 +355,30 @@ local garrisonAlerts do
                     local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
                     _G.GarrisonShipMissionAlertSystem:AddAlert(mission.missionID)
                 end,
+                order = 3,
             },
-            followerShip = {
-                name = "Garrison Ship Follower",
-                desc = "GarrisonShipFollowerAlertSystem",
-                disabled = not isDraenorGarrison(),
+            header3 = {
+                name = "Misc",
+                type = "header",
+                order = 4,
+            },
+            building = {
+                name = "Garrison Building",
+                desc = "GarrisonBuildingAlertSystem",
                 type = "execute",
                 func = function()
-                    local follower = _G.C_Garrison.GetFollowers(_G.LE_FOLLOWER_TYPE_SHIPYARD_6_2)[1]
-                    _G.GarrisonShipFollowerAlertSystem:AddAlert(follower.followerID, follower.name, follower.className, follower.texPrefix, follower.level, follower.quality)
+                    _G.GarrisonBuildingAlertSystem:AddAlert("Barn")
                 end,
-            },
-            missionRandom = {
-                name = "Garrison Random Mission",
-                desc = "GarrisonRandomMissionAlertSystem",
-                type = "execute",
-                func = function()
-                    local mission = _G.C_Garrison.GetAvailableMissions(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)[1]
-                    _G.GarrisonRandomMissionAlertSystem:AddAlert(mission.missionID)
-                end,
+                order = 5,
             },
             talent = {
                 name = "Garrison Talent",
                 desc = "GarrisonTalentAlertSystem",
                 type = "execute",
                 func = function()
-                    _G.GarrisonTalentAlertSystem:AddAlert(_G.LE_GARRISON_TYPE_7_0)
+                    _G.GarrisonTalentAlertSystem:AddAlert(_G.LE_GARRISON_TYPE_7_0, _G.C_Garrison.GetTalent(talentID))
                 end,
+                order = 5,
             },
         },
     }
