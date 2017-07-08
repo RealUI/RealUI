@@ -135,8 +135,13 @@ local UpdateAngle do
         end
 
         if meta.hasBG then
-            local customScale, isRetina = RealUI:GetUIScale()
-            local offset = minWidth * customScale * (isRetina and 2 or 1) -- Line offsets are placed without respect for UI Scale
+            local offset
+            if RealUI.is730 then
+                offset = minWidth
+            else
+                local customScale, isRetina = RealUI:GetUIScale()
+                offset = minWidth * customScale * (isRetina and 2 or 1) -- Line offsets are placed without respect for UI Scale
+            end
             if meta.leftVertex == 1 then
                 self.top:SetPoint("TOPLEFT", minWidth, 0)
                 self.bottom:SetPoint("BOTTOMLEFT", 0, 0)
