@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * FreebTip
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+  * RealUI_Bugs
+
+### Fixed ###
+
+  * RealUI_Bugs would itself throw an error if RealUI didn't load properly.
+  * The guild list should no longer error after guild ranks are changed.
+  * Fix a unit frames bug when using vehicles.
+
+
+
+
 ## [8.1 r20b] - 2017-06-26 ##
 ### Modified AddOns ###
 
