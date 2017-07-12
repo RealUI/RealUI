@@ -24,6 +24,7 @@ local BlizzAddons = {
     "Blizzard_NamePlates",
     "Blizzard_SecureTransferUI",
     "Blizzard_Deprecated",
+    "Blizzard_Console",
 
     -- LoD
     "Blizzard_AchievementUI",
@@ -44,6 +45,7 @@ local BlizzAddons = {
     "Blizzard_Collections",
     "Blizzard_CombatLog",
     "Blizzard_CombatText",
+    "Blizzard_Commentator",
     "Blizzard_Contribution",
     "Blizzard_DeathRecap",
     "Blizzard_DebugTools",
@@ -109,7 +111,8 @@ local taintCheck = {
     WorldMapFrame = false,
 }
 local eventWhitelist = {
-    ARENA_PREP_OPPONENT_SPECIALIZATIONS = true
+    ADDONS_UNLOADING = true,
+    ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 _G.C_Timer.NewTicker(1, function()
     for varName, isTainted in next, taintCheck do
@@ -125,8 +128,44 @@ _G.C_Timer.NewTicker(1, function()
     end
 end)
 
+function ns.commands:testFrame()
+    local testFrame1 = _G.CreateFrame("Frame", "RealUI_TestFrame1", _G.UIParent, "ButtonFrameTemplate")
+    testFrame1:SetPoint("TOPLEFT", 550, -400)
+
+    local testFrame2 = _G.CreateFrame("Frame", "RealUI_TestFrame2", _G.UIParent, "ButtonFrameTemplate")
+    testFrame2:SetPoint("TOPRIGHT", -550, -400)
+    _G.Aurora.Skin.ButtonFrameTemplate(testFrame2)
+end
+function ns.commands:bug()
+    local button = _G.PetStableFrame.CloseButton
+    button:SetNormalTexture("")
+    button:SetHighlightTexture("")
+    button:SetPushedTexture("")
+
+    button:SetSize(17, 17)
+
+    local tex = button:CreateTexture("ARTWORK")
+    tex:SetAllPoints()
+    tex:SetColorTexture(.2, .2, .2, 1)
+
+    button:SetPoint("TOPRIGHT", -4, -3)
+
+    for i = 1, 2 do
+        local line = button:CreateLine()
+        line:SetColorTexture(1, 1, 1)
+        line:SetThickness(0.5)
+        if i == 1 then
+            line:SetStartPoint("TOPLEFT", 2, -2)
+            line:SetEndPoint("BOTTOMRIGHT", -2, 2)
+        else
+            line:SetStartPoint("TOPRIGHT", -2, -2)
+            line:SetEndPoint("BOTTOMLEFT", 2, 2)
+        end
+    end
+end
 local autorunScripts = {
-    alert = false
+    alert = false,
+    testFrame = false,
 }
 local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
@@ -155,8 +194,6 @@ frame:SetScript("OnEvent", function(self, event, ...)
             debug("", ...)
         end
 
-        debug("GetNormalizedRealmName", _G.GetNormalizedRealmName())
-        --debug("UIParent:GetSize", _G.UIParent:GetSize())
         if eventWhitelist[event] then
             _G.print("Dev", event, ...)
         else

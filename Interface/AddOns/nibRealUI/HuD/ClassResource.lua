@@ -237,7 +237,8 @@ function ClassResource:Setup(unitFrame, unit)
     if playerClass == "DEATHKNIGHT" then
         points = self:CreateRunes(unitFrame, unit)
     end
-    if hasPoints then
+
+    if powerToken and points then
         self.points = points
         self.points.info = {token = powerToken, name = _G[powerToken]}
     end
@@ -347,10 +348,24 @@ function ClassResource:OnInitialize()
     db = self.db.class
     pointDB, barDB = db.points, db.bar
 
+    local isEnabled = RealUI:GetModuleEnabled(MODNAME)
+
     -- Setup resources
     powerToken = classPowers[playerClass]
     hasPoints = powerToken and powerToken ~= "RUNES"
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+
+    if not isEnabled then
+        if powerToken then
+            self.points = {}
+            self.points.info = {token = powerToken, name = _G[powerToken]}
+        end
+        if playerClass == "MONK" then
+            self.bar = {}
+            self.bar.info = _G.GetSpellInfo(124255)
+        end
+    end
+
+    self:SetEnabledState(isEnabled)
 end
 
 function ClassResource:OnEnable()

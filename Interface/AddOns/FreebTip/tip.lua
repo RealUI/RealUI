@@ -629,9 +629,6 @@ local tooltips = {
     "ItemRefShoppingTooltip3",
     "FloatingBattlePetTooltip",
     "BattlePetTooltip",
-    "DropDownList1MenuBackdrop",
-    "DropDownList2MenuBackdrop",
-    "DropDownList3MenuBackdrop",
 }
 
 local frameload = CreateFrame("Frame")

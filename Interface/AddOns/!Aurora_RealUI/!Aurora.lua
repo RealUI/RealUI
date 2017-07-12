@@ -32,21 +32,6 @@ style.defaults = {
     tooltips = false,
 }
 
-style.classcolors = {
-    ["DEATHKNIGHT"] = { r = 0.77, g = 0.12, b = 0.23 },
-    ["DEMONHUNTER"] = { r = 0.64, g = 0.19, b = 0.79 },
-    ["DRUID"]       = { r = 1.00, g = 0.49, b = 0.04 },
-    ["HUNTER"]      = { r = 0.67, g = 0.83, b = 0.45 },
-    ["MAGE"]        = { r = 0.41, g = 0.80, b = 0.94 },
-    ["MONK"]        = { r = 0.00, g = 1.00, b = 0.59 },
-    ["PALADIN"]     = { r = 0.96, g = 0.55, b = 0.73 },
-    ["PRIEST"]      = { r = 0.80, g = 0.80, b = 0.80 },
-    ["ROGUE"]       = { r = 1.00, g = 0.96, b = 0.41 },
-    ["SHAMAN"]      = { r = 0.00, g = 0.44, b = 0.87 },
-    ["WARLOCK"]     = { r = 0.58, g = 0.51, b = 0.79 },
-    ["WARRIOR"]     = { r = 0.78, g = 0.61, b = 0.43 },
-}
-
 local skinnedAtlas = {
     ["token-info-background"] = [[Interface\AddOns\!Aurora_RealUI\Media\AuctionFrame\Token]],
     ["splash-botleft"] = [[Interface\AddOns\!Aurora_RealUI\Media\Splash\Splash]],
@@ -63,32 +48,52 @@ style.copy = {
     ReskinIcon = true,
 }
 
+local Base
+
 -- Reskin* functions (Icon excepted) should never be saved, and only used within !Aurora.
 -- This is to ensure a consistent look if the user disables Aurora.
 local functions = {}
-functions.CreateBD = function(f, a)
+functions.CreateBD = function(f, alpha)
     --print("Override CreateBD", f:GetName(), a)
-    f:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        edgeSize = 1,
-    })
-    f:SetBackdropBorderColor(0, 0, 0)
-    if not a then
-        --print("CreateSD")
-        f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
-        f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
-        f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-        f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
-        f.tex:SetAllPoints()
-        f.tex:SetHorizTile(true)
-        f.tex:SetVertTile(true)
-        f.tex:SetBlendMode("ADD")
-        tinsert(_G.REALUI_WINDOW_FRAMES, f)
-        tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
+    if Base then
+        local red, green, blue, a = RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4]
+        if alpha then
+            a = alpha
+        else
+            f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
+            f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+            f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+            f.tex:SetAllPoints()
+            f.tex:SetHorizTile(true)
+            f.tex:SetVertTile(true)
+            f.tex:SetBlendMode("ADD")
+            tinsert(_G.REALUI_WINDOW_FRAMES, f)
+            tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
+        end
+        Base.SetBackdrop(f, red, green, blue, a)
     else
-        --print("CreateBD: alpha", a)
-        f:SetBackdropColor(0, 0, 0, a)
+        f:SetBackdrop({
+            bgFile = RealUI.media.textures.plain,
+            edgeFile = RealUI.media.textures.plain,
+            edgeSize = 1,
+        })
+        f:SetBackdropBorderColor(0, 0, 0)
+        if not alpha then
+            --print("CreateSD")
+            f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+            f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
+            f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+            f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+            f.tex:SetAllPoints()
+            f.tex:SetHorizTile(true)
+            f.tex:SetVertTile(true)
+            f.tex:SetBlendMode("ADD")
+            tinsert(_G.REALUI_WINDOW_FRAMES, f)
+            tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
+        else
+            --print("CreateBD: alpha", alpha)
+            f:SetBackdropColor(0, 0, 0, alpha)
+        end
     end
 end
 
@@ -149,6 +154,9 @@ frame:SetScript("OnEvent", function(self, event, addon)
         debug("Load Addon", addon, addonModule)
         if addon == "Aurora" then
             F, C = _G.Aurora[1], _G.Aurora[2]
+            if _G.Aurora.Base then
+                Base = _G.Aurora.Base
+            end
 
             F.colorTex = function(f)
                 if f:IsEnabled() then

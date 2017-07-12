@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20c] - 2017-07-11 ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * FreebTip
+  * nibRealUI
+  * nibRealUI_Config
+  * nibRealUI_Init
+  * RealUI_Bugs
+
+### Fixed ###
+
+  * RealUI_Bugs would itself throw an error if RealUI didn't load properly.
+  * The guild list should no longer error after guild ranks are changed.
+  * Fix a unit frames bug when using vehicles.
+  * Class Resource could not be re-enabled if it had beed disabled.
+
+
+
+
 ## [8.1 r20b] - 2017-06-26 ##
 ### Modified AddOns ###
 
@@ -15,7 +35,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed ###
 
-  * Chat output for errors has been throttled.
+  * Chat output and text updates for errors has been throttled.
 
 ### Fixed ###
 
@@ -259,6 +279,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20c]: https://github.com/RealUI/RealUI/compare/8.1_r20b...8.1_r20c
+[8.1 r20b]: https://github.com/RealUI/RealUI/compare/8.1_r20a...8.1_r20b
 [8.1 r20a]: https://github.com/RealUI/RealUI/compare/8.1_r20...8.1_r20a
 [8.1 r20]: https://github.com/RealUI/RealUI/compare/8.1_r19g...8.1_r20
 [8.1 r19g]: https://github.com/RealUI/RealUI/compare/8.1_r19f...8.1_r19g

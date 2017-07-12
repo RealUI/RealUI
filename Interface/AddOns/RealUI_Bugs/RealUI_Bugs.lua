@@ -174,6 +174,7 @@ local function GetNavigationButtonEnabledStates(count, index)
     return false, false;
 end
 
+local RealUI_Version
 function errorFrame:Update()
     local errors = _G.BugGrabber:GetDB()
     local numErrors = #errors
@@ -192,7 +193,7 @@ function errorFrame:Update()
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
         if err.message:find("RealUI") or (err.message:find("Nivaya") and _G.RealUI.hasCargBags) then
-            editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, _G.RealUI:GetVerString(true), locals))
+            editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, RealUI_Version, locals))
         else
             editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
         end
@@ -226,13 +227,15 @@ end
 function errorFrame:BugGrabber_CapturePaused()
     --print("Too many errors")
 end
-function errorFrame:ADDON_LOADED(addon)
+function errorFrame.ADDON_LOADED(addon)
     if not _G.RealUI_Storage then
         _G.RealUI_Storage = {}
     end
 
-    -- Store saved variables for future transition to a new addon
-    if addon == "nibRealUI_Init" then
+    if addon == "nibRealUI" then
+        RealUI_Version = _G.GetAddOnMetadata("nibRealUI", "Version")
+    elseif addon == "nibRealUI_Init" then
+        -- Store saved variables for future transition to a new addon
         _G.RealUI_Storage.nibRealUI_Init = {}
         _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB = _G.RealUI_InitDB
     end
