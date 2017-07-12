@@ -1229,108 +1229,107 @@ local classresource do
     local points, bars = ClassResource:GetResources()
     debug("points and bars", points, bars)
     if points or bars then
-        local barOptions = {
-            name = bars or "",
-            type = "group",
-            hidden = bars == nil,
-            disabled = function()
-                return not RealUI:GetModuleEnabled("ClassResource")
-            end,
-            order = 20,
-            args = {
-                width = {
-                    name = L["HuD_Width"],
-                    type = "input",
-                    get = function(info) return tostring(barDB.size.width) end,
-                    set = function(info, value)
-                        barDB.size.width = value
-                        ClassResource:SettingsUpdate("bar", "size")
-                    end,
-                    order = 10,
+        local barOptions, pointOptions
+        if RealUI:GetModuleEnabled("ClassResource") then
+            barOptions = {
+                name = bars or "",
+                type = "group",
+                hidden = bars == nil,
+                order = 20,
+                args = {
+                    width = {
+                        name = L["HuD_Width"],
+                        type = "input",
+                        get = function(info) return tostring(barDB.size.width) end,
+                        set = function(info, value)
+                            barDB.size.width = value
+                            ClassResource:SettingsUpdate("bar", "size")
+                        end,
+                        order = 10,
+                    },
+                    height = {
+                        name = L["HuD_Height"],
+                        type = "input",
+                        get = function(info) return tostring(barDB.size.height) end,
+                        set = function(info, value)
+                            barDB.size.height = value
+                            ClassResource:SettingsUpdate("bar", "size")
+                        end,
+                        order = 20,
+                    },
                 },
-                height = {
-                    name = L["HuD_Height"],
-                    type = "input",
-                    get = function(info) return tostring(barDB.size.height) end,
-                    set = function(info, value)
-                        barDB.size.height = value
-                        ClassResource:SettingsUpdate("bar", "size")
-                    end,
-                    order = 20,
-                },
-            },
-        }
-        ClassResource:AddPositionConfig(barOptions, barDB.position, 50)
+            }
+            ClassResource:AddPositionConfig(barOptions, barDB.position, 50)
 
-        local pointOptions = {
-            name = points.name,
-            type = "group",
-            disabled = function() return not RealUI:GetModuleEnabled("ClassResource") end,
-            order = 20,
-            args = {
-                hideempty = {
-                    name = L["Resource_HideUnused"]:format(points.name),
-                    desc = L["Resource_HideUnusedDesc"]:format(points.name),
-                    type = "toggle",
-                    hidden = RealUI.class == "DEATHKNIGHT",
-                    get = function(info) return pointDB.hideempty end,
-                    set = function(info, value)
-                        pointDB.hideempty = value
-                        ClassResource:ForceUpdate()
-                    end,
-                    order = 5,
+            pointOptions = {
+                name = points.name,
+                type = "group",
+                order = 20,
+                args = {
+                    hideempty = {
+                        name = L["Resource_HideUnused"]:format(points.name),
+                        desc = L["Resource_HideUnusedDesc"]:format(points.name),
+                        type = "toggle",
+                        hidden = RealUI.class == "DEATHKNIGHT",
+                        get = function(info) return pointDB.hideempty end,
+                        set = function(info, value)
+                            pointDB.hideempty = value
+                            ClassResource:ForceUpdate()
+                        end,
+                        order = 5,
+                    },
+                    reverse = {
+                        name = L["Resource_Reverse"],
+                        desc = L["Resource_ReverseDesc"]:format(points.name),
+                        type = "toggle",
+                        hidden = points.token ~= "COMBO_POINTS",
+                        get = function(info) return pointDB.reverse end,
+                        set = function(info, value)
+                            pointDB.reverse = value
+                            ClassResource:SettingsUpdate("points", "gap")
+                        end,
+                        order = 10,
+                    },
+                    width = {
+                        name = L["HuD_Width"],
+                        type = "input",
+                        hidden = RealUI.class ~= "DEATHKNIGHT",
+                        get = function(info) return tostring(pointDB.size.width) end,
+                        set = function(info, value)
+                            pointDB.size.width = value
+                            ClassResource:SettingsUpdate("points", "size")
+                        end,
+                        order = 15,
+                    },
+                    height = {
+                        name = L["HuD_Height"],
+                        type = "input",
+                        hidden = RealUI.class ~= "DEATHKNIGHT",
+                        get = function(info) return tostring(pointDB.size.height) end,
+                        set = function(info, value)
+                            pointDB.size.height = value
+                            ClassResource:SettingsUpdate("points", "size")
+                        end,
+                        order = 20,
+                    },
+                    gap = {
+                        name = L["Resource_Gap"],
+                        desc = L["Resource_GapDesc"]:format(points.name),
+                        type = "input",
+                        hidden = RealUI.class == "PALADIN",
+                        get = function(info) return tostring(pointDB.size.gap) end,
+                        set = function(info, value)
+                            value = RealUI:ValidateOffset(value)
+                            pointDB.size.gap = value
+                            ClassResource:SettingsUpdate("points", "gap")
+                        end,
+                        order = 25,
+                    },
                 },
-                reverse = {
-                    name = L["Resource_Reverse"],
-                    desc = L["Resource_ReverseDesc"]:format(points.name),
-                    type = "toggle",
-                    hidden = points.token ~= "COMBO_POINTS",
-                    get = function(info) return pointDB.reverse end,
-                    set = function(info, value)
-                        pointDB.reverse = value
-                        ClassResource:SettingsUpdate("points", "gap")
-                    end,
-                    order = 10,
-                },
-                width = {
-                    name = L["HuD_Width"],
-                    type = "input",
-                    hidden = RealUI.class ~= "DEATHKNIGHT",
-                    get = function(info) return tostring(pointDB.size.width) end,
-                    set = function(info, value)
-                        pointDB.size.width = value
-                        ClassResource:SettingsUpdate("points", "size")
-                    end,
-                    order = 15,
-                },
-                height = {
-                    name = L["HuD_Height"],
-                    type = "input",
-                    hidden = RealUI.class ~= "DEATHKNIGHT",
-                    get = function(info) return tostring(pointDB.size.height) end,
-                    set = function(info, value)
-                        pointDB.size.height = value
-                        ClassResource:SettingsUpdate("points", "size")
-                    end,
-                    order = 20,
-                },
-                gap = {
-                    name = L["Resource_Gap"],
-                    desc = L["Resource_GapDesc"]:format(points.name),
-                    type = "input",
-                    hidden = RealUI.class == "PALADIN",
-                    get = function(info) return tostring(pointDB.size.gap) end,
-                    set = function(info, value)
-                        value = RealUI:ValidateOffset(value)
-                        pointDB.size.gap = value
-                        ClassResource:SettingsUpdate("points", "gap")
-                    end,
-                    order = 25,
-                },
-            },
-        }
-        CombatFader:AddFadeConfig("ClassResource", pointOptions, 50)
-        ClassResource:AddPositionConfig(pointOptions, pointDB.position, 75)
+            }
+            CombatFader:AddFadeConfig("ClassResource", pointOptions, 50)
+            ClassResource:AddPositionConfig(pointOptions, pointDB.position, 75)
+        end
 
         classresource = {
             name = L["Resource"],
