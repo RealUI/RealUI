@@ -154,8 +154,8 @@ frame:SetScript("OnEvent", function(self, event, addon)
         debug("Load Addon", addon, addonModule)
         if addon == "Aurora" then
             F, C = _G.Aurora[1], _G.Aurora[2]
-            if Aurora.Base then
-                Base, Hook, Skin = _G.Aurora.Base, _G.Aurora.Hook, _G.Aurora.Skin
+            if _G.Aurora.Base then
+                Base = _G.Aurora.Base
             end
 
             F.colorTex = function(f)
