@@ -129,39 +129,31 @@ _G.C_Timer.NewTicker(1, function()
 end)
 
 function ns.commands:testFrame()
-    local testFrame1 = _G.CreateFrame("Frame", "RealUI_TestFrame1", _G.UIParent, "ButtonFrameTemplate")
-    testFrame1:SetPoint("TOPLEFT", 550, -400)
-
-    local testFrame2 = _G.CreateFrame("Frame", "RealUI_TestFrame2", _G.UIParent, "ButtonFrameTemplate")
-    testFrame2:SetPoint("TOPRIGHT", -550, -400)
-    _G.Aurora.Skin.ButtonFrameTemplate(testFrame2)
-end
-function ns.commands:bug()
-    local button = _G.PetStableFrame.CloseButton
-    button:SetNormalTexture("")
-    button:SetHighlightTexture("")
-    button:SetPushedTexture("")
-
-    button:SetSize(17, 17)
-
-    local tex = button:CreateTexture("ARTWORK")
-    tex:SetAllPoints()
-    tex:SetColorTexture(.2, .2, .2, 1)
-
-    button:SetPoint("TOPRIGHT", -4, -3)
+    local template = "UIPanelScrollFrameTemplate"
+    local parentFrame = _G.CreateFrame("Frame", "RealUI_TestFrameParent", _G.UIParent)
+    parentFrame:SetPoint("TOPLEFT", 300, -300)
+    parentFrame:SetPoint("BOTTOMRIGHT", -300, 300)
 
     for i = 1, 2 do
-        local line = button:CreateLine()
-        line:SetColorTexture(1, 1, 1)
-        line:SetThickness(0.5)
+        local testFrame = _G.CreateFrame("ScrollFrame", "RealUI_TestFrame"..i, parentFrame, template)
+        local texture = testFrame:CreateTexture(nil, "BACKGROUND")
+        texture:SetColorTexture(0, 0, 0, 0.2)
+        texture:SetAllPoints()
+
         if i == 1 then
-            line:SetStartPoint("TOPLEFT", 2, -2)
-            line:SetEndPoint("BOTTOMRIGHT", -2, 2)
+            testFrame:SetPoint("TOPLEFT")
+            testFrame:SetPoint("BOTTOMRIGHT", -700, 0)
         else
-            line:SetStartPoint("TOPRIGHT", -2, -2)
-            line:SetEndPoint("BOTTOMLEFT", 2, 2)
+            testFrame:SetPoint("TOPLEFT", 700, 0)
+            testFrame:SetPoint("BOTTOMRIGHT")
+            _G.Aurora.Skin[template](testFrame)
         end
     end
+end
+function ns.commands:test()
+    _G.ResetTutorials()
+    _G.TutorialFrame_NewTutorial(17) --TUTORIAL_REPUTATION
+    _G.TutorialFrame_NewTutorial(18) --TUTORIAL_GROUPING
 end
 local autorunScripts = {
     alert = false,
