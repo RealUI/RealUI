@@ -383,6 +383,52 @@ local garrisonAlerts do
         },
     }
 end
+local bnetAlerts do
+    local toastType, toastInfo = 1, _G.BNGetFriendInfo(1)
+    local toastTypes = {
+        "online",
+        "offline",
+        "broadcast",
+        "pending",
+        "new",
+    }
+    bnetAlerts = {
+        name = "Battle.net Alerts",
+        type = "group",
+        args = {
+            toastType = {
+                name = "Result Type",
+                type = "select",
+                values = toastTypes,
+                get = function() return toastType end,
+                set = function(info, value)
+                    toastType = value
+                    local _, online = _G.BNGetNumFriends()
+                    if toastTypes[toastType] == "online" then
+                        toastInfo = _G.BNGetFriendInfo(online + 1)
+                    elseif toastTypes[toastType] == "offline" then
+                        toastInfo = _G.BNGetFriendInfo(online + 1)
+                    elseif toastTypes[toastType] == "broadcast" then
+                        toastInfo = _G.BNGetFriendInfo(online + 1)
+                    elseif toastTypes[toastType] == "pending" then
+                        toastInfo = 4
+                    elseif toastTypes[toastType] == "new" then
+                        toastInfo = nil
+                    end
+                end,
+                order = 3,
+            },
+            toast = {
+                name = "Battle.net Toast",
+                desc = "BNToastFrame_Show",
+                type = "execute",
+                func = function()
+                    _G.BNToastFrame_AddToast(toastType, toastInfo)
+                end,
+            },
+        },
+    }
+end
 local miscAlerts do
     local recipeID, questID, archRace = 42141 --[[]], 42114 --[[]], 1 --[[ Dwarf ]]
     miscAlerts = {
@@ -425,6 +471,7 @@ local alert = {
         lfgAlerts = lfgAlerts,
         lootAlerts = lootAlerts,
         garrisonAlerts = garrisonAlerts,
+        bnetAlerts = bnetAlerts,
         miscAlerts = miscAlerts,
     }
 }
