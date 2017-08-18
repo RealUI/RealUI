@@ -19,11 +19,11 @@ tags.Methods["realui:name"] = function(unit)
         isDead = true
     end
 
-    local unitTag = unit:match("(boss)%d?$") or unit
-                            -- enUS,    zhTW,   zhCN,   ruRU, koKR
-    --local test1, test2, test3, test4, test5 = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
-    --local test = test3
-    local name = UnitFrames:AbrvName(_G.UnitName(unit)--[[test]], unitTag) --
+    local unitTag = unit:match("(boss)%d?$") or unit:match("(arena)%d?$") or unit
+
+    --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
+    local name = _G.UnitName(unit) or ""
+    name = RealUI:AbbreviateName(name, UnitFrames[unitTag].nameLength)
 
     local nameColor = "ffffff"
     if isDead then

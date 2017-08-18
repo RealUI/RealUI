@@ -193,6 +193,10 @@ local function CreateArena(self)
     end
 end
 
+UnitFrames.arena = {
+    nameLength = 135 / 10
+}
+
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile

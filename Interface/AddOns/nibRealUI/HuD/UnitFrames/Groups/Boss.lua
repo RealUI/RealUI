@@ -230,6 +230,10 @@ local function CreateBoss(self)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
 end
 
+UnitFrames.boss = {
+    nameLength = 135 / 10
+}
+
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
