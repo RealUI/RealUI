@@ -425,15 +425,26 @@ function RealUI:CreateFS(parent, justify, size)
 end
 
 -- Formatting
+local utf8len, utf8sub = _G.string.utf8len, _G.string.utf8sub
 function RealUI:AbbreviateName(name, maxLength)
     if not name then return "" end
-
     local maxNameLength = maxLength or 12
-    local newName = (name:utf8len() > maxNameLength) and name:gsub("%s?(..[\128-\191]*)%S+%s", "%1. ") or name
 
-    if (newName:utf8len() > maxNameLength) then
-        newName = newName:utf8sub(1, maxNameLength)
-        newName = newName..".."
+    local words, newName = {_G.strsplit(" ", name)}
+    if #words > 2 and utf8len(name) > maxNameLength then
+        local i = 1
+        repeat
+            words[i] = utf8sub(words[i], 1, 1) .. "."
+            i = i + 1
+        until i == #words
+
+        newName = _G.strjoin(" ", _G.unpack(words))
+    else
+        newName = name
+    end
+
+    if utf8len(newName) > maxNameLength then
+        newName = utf8sub(newName, 1, maxNameLength)..".."
     end
     return newName
 end
