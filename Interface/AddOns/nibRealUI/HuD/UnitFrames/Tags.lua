@@ -19,7 +19,7 @@ tags.Methods["realui:name"] = function(unit)
         isDead = true
     end
 
-    local unitTag = unit:match("(boss)%d?$") or unit:match("(arena)%d?$") or unit
+    local unitTag = unit:match("^(%w-)%d") or unit
 
     --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
     local name = _G.UnitName(unit) or ""
