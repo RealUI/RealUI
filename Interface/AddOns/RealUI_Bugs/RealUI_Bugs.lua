@@ -1,3 +1,4 @@
+local ADDON_NAME = ...
 -- Lua Globals --
 --local next = _G.next
 
@@ -232,8 +233,8 @@ function errorFrame.ADDON_LOADED(addon)
         _G.RealUI_Storage = {}
     end
 
-    if addon == "nibRealUI" then
-        RealUI_Version = _G.GetAddOnMetadata("nibRealUI", "Version")
+    if addon == ADDON_NAME then
+        RealUI_Version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
     elseif addon == "nibRealUI_Init" then
         -- Store saved variables for future transition to a new addon
         _G.RealUI_Storage.nibRealUI_Init = {}
