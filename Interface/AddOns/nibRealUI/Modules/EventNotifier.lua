@@ -31,8 +31,8 @@ local function GetGuildInvites()
         local numDayEvents = _G.CalendarGetNumDayEvents(monthOffset, day)
 
         for i = 1, numDayEvents do
-            local _, _, _, _, _, _, _, _, inviteStatus = _G.CalendarGetDayEvent(monthOffset, day, i)
-            if inviteStatus == 8 then
+            local event = _G.C_Calendar.GetDayEvent(monthOffset, day, i)
+            if event.inviteStatus == _G.CALENDAR_INVITESTATUS_NOT_SIGNEDUP then
                 numGuildInvites = numGuildInvites + 1
             end
         end

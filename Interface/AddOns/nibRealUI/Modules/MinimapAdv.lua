@@ -1085,14 +1085,14 @@ local function Toggle_OnMouseDown()
         if RealUI.is730 then
             _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
         else
-        _G.PlaySound("igMiniMapClose")
+            _G.PlaySound("igMiniMapClose")
         end
         MinimapAdv:Toggle(false)
     else
         if RealUI.is730 then
             _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
         else
-        _G.PlaySound("igMiniMapOpen")
+            _G.PlaySound("igMiniMapOpen")
         end
         MinimapAdv:Toggle(true)
     end
@@ -1215,7 +1215,7 @@ local function Farm_OnMouseDown()
         if RealUI.is730 then
             _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
         else
-        _G.PlaySound("igMiniMapOpen")
+            _G.PlaySound("igMiniMapOpen")
         end
         button:Hide()
     else
@@ -1224,7 +1224,7 @@ local function Farm_OnMouseDown()
         if RealUI.is730 then
             _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
         else
-        _G.PlaySound("igMiniMapClose")
+            _G.PlaySound("igMiniMapClose")
         end
         button:Show()
     end
@@ -1469,7 +1469,7 @@ end
 
 function MinimapAdv:PLAYER_LOGIN(event, ...)
     self:debug(event, ...)
-    MMFrames.buttonframe.edge:SetTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.buttonframe.edge:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
 end
 
 -- Register events
