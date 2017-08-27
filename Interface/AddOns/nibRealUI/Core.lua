@@ -259,13 +259,13 @@ end
 
 ---- Style Updates ----
 function RealUI:StyleSetWindowOpacity()
-    local color = RealUI.media.window
-    for k, frame in next, _G.REALUI_WINDOW_FRAMES do
-        if frame.SetBackdropColor then
-            frame:SetBackdropColor(color[1], color[2], color[3], color[4])
+        local color = RealUI.media.window
+        for k, frame in next, _G.REALUI_WINDOW_FRAMES do
+            if frame.SetBackdropColor then
+                frame:SetBackdropColor(color[1], color[2], color[3], color[4])
+            end
         end
     end
-end
 
 function RealUI:StyleSetStripeOpacity()
     for k, tex in next, _G.REALUI_STRIPE_TEXTURES do
@@ -456,52 +456,30 @@ end
 function RealUI:PLAYER_ENTERING_WORLD()
     self:LockdownUpdates()
 
-    -- Modify Main Menu
-    for i = 1, _G.GameMenuFrame:GetNumRegions() do
-        local region =  _G.select(i, _G.GameMenuFrame:GetRegions())
-        if region:GetObjectType() == "FontString" then
-            if region:GetText() == _G.MAINMENU_BUTTON then
-                region:SetFontObject(_G.RealUIFont_PixelSmall)
-                region:SetTextColor(C.r, C.g, C.b)
-                region:SetShadowColor(0, 0, 0, 0)
-                region:SetPoint("TOP", _G.GameMenuFrame, "TOP", 0, -10.5)
-            end
-        end
-    end
-
+    -- Hide store button
     _G.GameMenuButtonStore:SetScale(0.00001)
     _G.GameMenuButtonStore:SetAlpha(0)
 
-    -- RealUI Control
-    local ConfigStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
-    _G.GameMenuFrame.realuiControl = RealUI:CreateTextButton(ConfigStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
-    _G.GameMenuFrame.realuiControl:SetPoint("TOP", _G.GameMenuButtonContinue, "BOTTOM", 0, -16)
-    _G.GameMenuFrame.realuiControl:SetScript("OnMouseUp", function()
+    -- RealUI Config
+    local configStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
+    local configBtn = RealUI:CreateTextButton(configStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
+    configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
+    configBtn:SetScript("OnMouseUp", function()
         RealUI.Debug("Config", "GameMenuFrame")
         RealUI:LoadConfig("HuD")
         _G.HideUIPanel(_G.GameMenuFrame)
     end)
 
-    -- Button Backgrounds
-    local helpNewBG = RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonHelp, _G.GameMenuButtonWhatsNew)
-    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonOptions, _G.GameMenuButtonAddons)
-
-    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonLogout, _G.GameMenuButtonQuit)
-    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuButtonContinue, _G.GameMenuButtonContinue)
-    RealUI:CreateBGSection(_G.GameMenuFrame, _G.GameMenuFrame.realuiControl, _G.GameMenuFrame.realuiControl)
+    _G.GameMenuButtonKeybindings:SetPoint("TOP", configBtn, "BOTTOM", 0, -1)
 
     _G.hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function(menuFrame)
         debug("GameMenuFrame_UpdateVisibleButtons")
-        local height = 359
+        local height = 332
 
-        if _G.SplashFrameCanBeShown() then
-            helpNewBG:SetPoint("BOTTOMRIGHT", _G.GameMenuButtonWhatsNew, "BOTTOMRIGHT", 2, -2)
-        else
+        if not _G.SplashFrameCanBeShown() then
             height = height - 20
-            helpNewBG:SetPoint("BOTTOMRIGHT", _G.GameMenuButtonHelp, "BOTTOMRIGHT", 2, -2)
         end
 
-        debug("menuFrame:SetHeight", height)
         menuFrame:SetHeight(height)
     end)
 
