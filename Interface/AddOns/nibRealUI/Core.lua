@@ -259,6 +259,12 @@ end
 
 ---- Style Updates ----
 function RealUI:StyleSetWindowOpacity()
+    if RealUI.isAuroraUpdated then
+        local r, g, b = _G.Aurora.frameColor:GetRGB()
+        for i = 1, #C.frames do
+            C.frames[i]:SetBackdropColor(r, g, b, _G.AuroraConfig.alpha)
+        end
+    else
         local color = RealUI.media.window
         for k, frame in next, _G.REALUI_WINDOW_FRAMES do
             if frame.SetBackdropColor then
@@ -266,6 +272,7 @@ function RealUI:StyleSetWindowOpacity()
             end
         end
     end
+end
 
 function RealUI:StyleSetStripeOpacity()
     for k, tex in next, _G.REALUI_STRIPE_TEXTURES do
@@ -461,8 +468,15 @@ function RealUI:PLAYER_ENTERING_WORLD()
     _G.GameMenuButtonStore:SetAlpha(0)
 
     -- RealUI Config
-    local configStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
-    local configBtn = RealUI:CreateTextButton(configStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
+    local configBtn
+    if RealUI.isAuroraUpdated then
+        configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
+        configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.highlightColor.colorStr))
+        _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
+    else
+        local configStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
+        configBtn = RealUI:CreateTextButton(configStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
+    end
     configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
     configBtn:SetScript("OnMouseUp", function()
         RealUI.Debug("Config", "GameMenuFrame")

@@ -324,23 +324,31 @@ function RealUI:AddButtonHighlight(button)
 end
 
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)
-    local bdColor
-    frame:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        edgeSize = 1,
-    })
-    if windowColor then
-        bdColor = RealUI.media.window
-        tinsert(_G.REALUI_WINDOW_FRAMES, frame)
+    if RealUI.isAuroraUpdated then
+        if stripes then
+            _G.Aurora.Base.SetBackdrop(frame)
+        else
+            _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.frameColor:GetRGBA())
+        end
     else
-        bdColor = RealUI.media.background
-    end
-    frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
-    frame:SetBackdropBorderColor(0, 0, 0)
+        local bdColor
+        frame:SetBackdrop({
+            bgFile = RealUI.media.textures.plain,
+            edgeFile = RealUI.media.textures.plain,
+            edgeSize = 1,
+        })
+        if windowColor then
+            bdColor = RealUI.media.window
+            tinsert(_G.REALUI_WINDOW_FRAMES, frame)
+        else
+            bdColor = RealUI.media.background
+        end
+        frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
+        frame:SetBackdropBorderColor(0, 0, 0)
 
-    if stripes then
-        self:AddStripeTex(frame)
+        if stripes then
+            self:AddStripeTex(frame)
+        end
     end
 end
 

@@ -161,6 +161,21 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 end
             end
 
+            if _G.Aurora.Base then
+                RealUI.isAuroraUpdated = true
+                function _G.Aurora.Base.Pre.SetBackdrop(f, BGr, BGg, BGb, a)
+                    if not a then
+                        local stripes = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+                        stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+                        stripes:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+                        stripes:SetAllPoints()
+                        stripes:SetHorizTile(true)
+                        stripes:SetVertTile(true)
+                        stripes:SetBlendMode("ADD")
+                        tinsert(_G.REALUI_STRIPE_TEXTURES, stripes)
+                    end
+                end
+            end
             F.AddPlugin(function()
                 mods["RealUI_Bugs"](F, C)
             end)
@@ -183,6 +198,11 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 end
             end
         elseif addon == "nibRealUI" then
+            if RealUI.isAuroraUpdated then
+                _G.AuroraConfig.alpha = RealUI.media.window[4]
+                RealUI:StyleSetWindowOpacity()
+            end
+
             for _, moduleFunc in next, addonModule do
                 moduleFunc(F, C)
             end
