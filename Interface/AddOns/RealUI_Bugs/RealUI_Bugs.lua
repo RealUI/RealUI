@@ -239,6 +239,10 @@ function errorFrame.ADDON_LOADED(addon)
         -- Store saved variables for future transition to a new addon
         _G.RealUI_Storage.nibRealUI_Init = {}
         _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB = _G.RealUI_InitDB
+    elseif addon == "Aurora" then
+        -- Store saved variables for future transition to a new addon
+        _G.RealUI_Storage.Aurora = {}
+        _G.RealUI_Storage.Aurora.AuroraConfig = _G.AuroraConfig
     end
 end
 
