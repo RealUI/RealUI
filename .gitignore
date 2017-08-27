@@ -1,6 +1,8 @@
 .release
 auth.*
 
+**/test.lua
+
 ## IntelliJ ##
 *.iws
 *.ipr

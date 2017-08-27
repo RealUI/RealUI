@@ -128,76 +128,9 @@ _G.C_Timer.NewTicker(1, function()
     end
 end)
 
-function ns.commands:testFrame()
-    local template = ""
-    local parentFrame = _G.CreateFrame("Frame", "RealUI_TestFrameParent", _G.UIParent)
-    parentFrame:SetPoint("TOPLEFT", 300, -300)
-    parentFrame:SetPoint("BOTTOMRIGHT", -300, 300)
-
-    for i = 1, 2 do
-        local testFrame = _G.CreateFrame("Frame", "RealUI_TestFrame"..i, parentFrame, template)
-        testFrame:SetParent(parentFrame)
-        testFrame:Show()
-        local texture = testFrame:CreateTexture(nil, "BACKGROUND")
-        _G.Aurora.Base.SetTexture(texture, "roleDAMAGER", true)
-        --texture:SetColorTexture(0, 0, 0, 0.2)
-        texture:SetPoint("TOPLEFT")
-        --texture:SetPoint("BOTTOMRIGHT")
-
-        if i == 1 then
-            testFrame:SetPoint("TOPLEFT")
-            testFrame:SetPoint("BOTTOMRIGHT", -700, 0)
-        else
-            testFrame:SetPoint("TOPLEFT", 700, 0)
-            testFrame:SetPoint("BOTTOMRIGHT")
-            --_G.Aurora.Skin[template](testFrame)
-        end
-    end
-end
-
-local tempColor = {}
-local function GetColorTexture(string)
-    _G.wipe(tempColor)
-    string = string:gsub("Color%-", "")
-
-    local prevChar, val
-    string:gsub("(%x)", function(char)
-        if prevChar then
-            val = _G.tonumber(prevChar..char, 16) / 255 -- convert hex to perc decimal
-            _G.tinsert(tempColor, val - (val % 0.01)) -- round val to two decimal places
-            prevChar = nil
-        elseif char == "0" then
-            _G.tinsert(tempColor, 0)
-        else
-            prevChar = char
-        end
-    end)
-
-    return tempColor[1], tempColor[2], tempColor[3], tempColor[4]
-end
-local colors = {
-    {0, 0, 0, 1},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0.5},
-    {0.2, 0.2, 0.2, 0.5},
-    {1, 0, 0, 1},
-    {0.67, 0.83, 0.45, 1},
-}
-function ns.commands:test()
-    local frame = _G.CreateFrame("Frame")
-
-    local texture = frame:CreateTexture()
-    local color, colorStr
-    for i = 1, #colors do
-        color = colors[i]
-        texture:SetColorTexture(color[1], color[2], color[3], color[4])
-        colorStr = texture:GetTexture()
-        _G.print(color[1]..", "..color[2]..", "..color[3]..", "..color[4], colorStr)
-        _G.print(GetColorTexture(colorStr))
-    end
-end
 local autorunScripts = {
     alert = false,
+    test = false,
     testFrame = false,
 }
 local frame = _G.CreateFrame("Frame")
