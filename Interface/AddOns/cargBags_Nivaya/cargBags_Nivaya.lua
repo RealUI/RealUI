@@ -344,7 +344,7 @@ function cbNivaya:CreateAnchors()
         for _, bag in ipairs(_G.cB_CustomBags) do
             if bag.active then
                 local c = bag.col
-                if ref[c] == 0 then ref[c] = (c == 0) and bags.bankQuest or bags.bankTrade end
+                if ref[c] == 0 then ref[c] = (c == 0) and bags.bankBattlePet or bags.bankTrade end
                 CreateAnchorInfo(ref[c], bags["Bank" .. bag.name], "Bottom")
                 ref[c] = bags["Bank" .. bag.name]
             end

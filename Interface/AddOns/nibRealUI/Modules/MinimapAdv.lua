@@ -1082,10 +1082,18 @@ end
 local function Toggle_OnMouseDown()
     local MinimapShown = _G.Minimap:IsVisible()
     if MinimapShown then
-        _G.PlaySound("igMiniMapClose")
+        if RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
+        else
+            _G.PlaySound("igMiniMapClose")
+        end
         MinimapAdv:Toggle(false)
     else
-        _G.PlaySound("igMiniMapOpen")
+        if RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
+        else
+            _G.PlaySound("igMiniMapOpen")
+        end
         MinimapAdv:Toggle(true)
     end
     _G.Lib_CloseDropDownMenus()
@@ -1204,12 +1212,20 @@ local function Farm_OnMouseDown()
     if ExpandedState == 0 then
         ExpandedState = 1
         MMFrames.farm.icon:SetTexture(Textures.Collapse)
-        _G.PlaySound("igMiniMapOpen")
+        if RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
+        else
+            _G.PlaySound("igMiniMapOpen")
+        end
         button:Hide()
     else
         ExpandedState = 0
         MMFrames.farm.icon:SetTexture(Textures.Expand)
-        _G.PlaySound("igMiniMapClose")
+        if RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
+        else
+            _G.PlaySound("igMiniMapClose")
+        end
         button:Show()
     end
     _G.Lib_CloseDropDownMenus()
@@ -1453,7 +1469,7 @@ end
 
 function MinimapAdv:PLAYER_LOGIN(event, ...)
     self:debug(event, ...)
-    MMFrames.buttonframe.edge:SetTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.buttonframe.edge:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
 end
 
 -- Register events

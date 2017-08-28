@@ -14,31 +14,6 @@ local UnitFrames = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 UnitFrames.units = {}
 
--- Abbreviated Name
-local NameLengths = {
-    [1] = {
-        ["target"] = 25,
-        ["pet"] = 14,
-    },
-    [2] = {
-        ["target"] = 22,
-        ["pet"] = 14,
-    },
-}
-function UnitFrames:AbrvName(name, unit)
-    --print("AbrvName", name, string.match(name, "%w+"), unit)
-    if not name then return "" end
-    --if not string.match(name, "%w+") then
-    --    return name
-    --end
-
-    if (unit == "target") and (db.misc.alwaysDisplayFullHealth) then
-        return RealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] - 7)
-    else
-        return RealUI:AbbreviateName(name, NameLengths[self.layoutSize][unit] or 12)
-    end
-end
-
 local units = {
     "Player",
     "Target",

@@ -84,7 +84,7 @@ function UIScaler:OnInitialize()
     _G["Advanced_UseUIScale"]:Hide()
     _G["Advanced_UIScaleSlider"]:Hide()
 
-    local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate") --RealUI:CreateTextButton("RealUI UI Scaler", _G["Advanced_UIScaleSlider"]:GetParent(), 200, 24)
+    local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
     scaleBtn:SetSize(200, 24)
     scaleBtn:SetText("RealUI UI Scaler")
     scaleBtn:SetPoint("TOPLEFT", _G.Advanced_UIScaleSlider, 20, 0)

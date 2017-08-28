@@ -3,7 +3,11 @@
 ----------------------------------------------------------------------------------------
 local ShowReadyCheckHook = function(self, initiator)
     if initiator ~= "player" then
-        _G.PlaySound("ReadyCheck", "Master")
+        if _G.RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.READY_CHECK, "Master")
+        else
+            _G.PlaySound("ReadyCheck", "Master")
+        end
     end
 end
 _G.hooksecurefunc("ShowReadyCheck", ShowReadyCheckHook)
@@ -21,14 +25,26 @@ ForceWarning:SetScript("OnEvent", function(self, event)
         for i = 1, _G.GetMaxBattlefieldID() do
             local status = _G.GetBattlefieldStatus(i)
             if status == "confirm" then
-                _G.PlaySound("PVPTHROUGHQUEUE", "Master")
+                if _G.RealUI.is730 then
+                    _G.PlaySound(_G.SOUNDKIT.PVP_THROUGH_QUEUE, "Master")
+                else
+                    _G.PlaySound("PVPTHROUGHQUEUE", "Master")
+                end
                 break
             end
         end
     elseif event == "PET_BATTLE_QUEUE_PROPOSE_MATCH" then
-        _G.PlaySound("PVPTHROUGHQUEUE", "Master")
+        if _G.RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.PVP_THROUGH_QUEUE, "Master")
+        else
+            _G.PlaySound("PVPTHROUGHQUEUE", "Master")
+        end
     elseif event == "LFG_PROPOSAL_SHOW" then
-        _G.PlaySound("ReadyCheck", "Master")
+        if _G.RealUI.is730 then
+            _G.PlaySound(_G.SOUNDKIT.READY_CHECK, "Master")
+        else
+            _G.PlaySound("ReadyCheck", "Master")
+        end
     elseif event == "RESURRECT_REQUEST" then
         _G.PlaySoundFile([[Sound\Spells\Resurrection.wav]], "Master")
     end

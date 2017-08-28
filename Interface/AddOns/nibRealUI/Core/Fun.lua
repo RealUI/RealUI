@@ -3,7 +3,7 @@ local _, private = ...
 -- Lua Globals --
 local min, max, floor = _G.math.min, _G.math.max, _G.math.floor
 local tinsert, tsort = _G.table.insert, _G.table.sort
-local next, type, select = _G.next, _G.type, _G.select
+local next, type = _G.next, _G.type
 local print, tonumber = _G.print, _G.tonumber
 local Clamp = _G.Clamp
 
@@ -216,70 +216,6 @@ function RealUI:MakeFrameDraggable(frame)
 end
 
 -- Frames
-local function ReskinSlider(f)
-    f:SetBackdrop(nil)
-    local bd = _G.CreateFrame("Frame", nil, f)
-    bd:SetPoint("TOPLEFT", -23, 0)
-    bd:SetPoint("BOTTOMRIGHT", 23, 0)
-    bd:SetFrameStrata("BACKGROUND")
-    bd:SetFrameLevel(f:GetFrameLevel()-1)
-
-    RealUI:CreateBD(bd, 0)
-    f.bg = RealUI:CreateInnerBG(bd)
-    f.bg:SetVertexColor(1, 1, 1, 0.6)
-
-    local slider = select(4, f:GetRegions())
-    slider:SetTexture([[Interface\AddOns\nibRealUI\Media\HuDConfig\SliderPos]])
-    slider:SetSize(16, 16)
-    slider:SetBlendMode("ADD")
-
-    for i = 1, f:GetNumRegions() do
-        local region = select(i, f:GetRegions())
-        if region:GetObjectType() == "FontString" then
-            region:SetFontObject(_G.RealUIFont_PixelSmall)
-            if region:GetText() == _G.LOW then
-                region:ClearAllPoints()
-                region:SetPoint("BOTTOMLEFT", bd, "BOTTOMLEFT", 3.5, 4.5)
-                region:SetTextColor(0.75, 0.75, 0.75)
-                region:SetShadowColor(0, 0, 0, 0)
-            elseif region:GetText() == _G.HIGH then
-                region:ClearAllPoints()
-                region:SetPoint("BOTTOMRIGHT", bd, "BOTTOMRIGHT", 1.5, 4.5)
-                region:SetTextColor(0.75, 0.75, 0.75)
-                region:SetShadowColor(0, 0, 0, 0)
-            else
-                region:SetTextColor(0.9, 0.9, 0.9)
-            end
-        end
-    end
-end
-
-function RealUI:CreateSlider(name, parent, minVal, maxVal, title, step)
-    local f = _G.CreateFrame("Slider", name, parent, "OptionsSliderTemplate")
-    f:SetFrameLevel(parent:GetFrameLevel() + 2)
-    f:SetSize(180, 17)
-    f:SetMinMaxValues(minVal, maxVal)
-    f:SetValue(0)
-    f:SetValueStep(step)
-    f.header = RealUI:CreateFS(f, "CENTER", "small")
-    f.header:SetPoint("BOTTOM", f, "TOP", 0, 4)
-    f.header:SetText(title)
-    f.value = RealUI:CreateFS(f, "CENTER", "small")
-    f.value:SetPoint("TOP", f, "BOTTOM", 1, -4)
-    f.value:SetText(f:GetValue())
-
-    local sbg = _G.CreateFrame("Frame", nil, f)
-    sbg:SetPoint("TOPLEFT", f, "TOPLEFT", 2, 0)
-    sbg:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 0)
-    RealUI:CreateBD(sbg)
-    sbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
-    sbg:SetFrameLevel(f:GetFrameLevel() - 1)
-
-    ReskinSlider(f)
-
-    return f
-end
-
 function RealUI:CreateCheckbox(name, parent, label, side, size)
     local f = _G.CreateFrame("CheckButton", name, parent, "ChatConfigCheckButtonTemplate")
     f:SetSize(size, size)
@@ -387,44 +323,32 @@ function RealUI:AddButtonHighlight(button)
     highlight:SetBackdropBorderColor(self.classColor[1], self.classColor[2], self.classColor[3], self.classColor[4])
 end
 
-function RealUI:SkinButton(button, icon, border)
-    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    icon:SetPoint("TOPLEFT", 3, -3)
-    icon:SetPoint("BOTTOMRIGHT", -3, 3)
-
-    border:SetTexture(nil)
-
-    local bd1 = _G.CreateFrame("Frame", nil, button)
-    bd1:SetPoint("TOPLEFT", button, 2, -2)
-    bd1:SetPoint("BOTTOMRIGHT", button, -2, 2)
-    bd1:SetFrameLevel(1)
-    RealUI:CreateBD(bd1, 0)
-
-    local bd2 = _G.CreateFrame("Frame", nil, button)
-    bd2:SetPoint("TOPLEFT", button, 0, 0)
-    bd2:SetPoint("BOTTOMRIGHT", button, 0, 0)
-    bd2:SetFrameLevel(1)
-    RealUI:CreateBD(bd2)
-end
-
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)
-    local bdColor
-    frame:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        edgeSize = 1,
-    })
-    if windowColor then
-        bdColor = RealUI.media.window
-        tinsert(_G.REALUI_WINDOW_FRAMES, frame)
+    if RealUI.isAuroraUpdated then
+        if stripes then
+            _G.Aurora.Base.SetBackdrop(frame)
+        else
+            _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.frameColor:GetRGBA())
+        end
     else
-        bdColor = RealUI.media.background
-    end
-    frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
-    frame:SetBackdropBorderColor(0, 0, 0)
+        local bdColor
+        frame:SetBackdrop({
+            bgFile = RealUI.media.textures.plain,
+            edgeFile = RealUI.media.textures.plain,
+            edgeSize = 1,
+        })
+        if windowColor then
+            bdColor = RealUI.media.window
+            tinsert(_G.REALUI_WINDOW_FRAMES, frame)
+        else
+            bdColor = RealUI.media.background
+        end
+        frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
+        frame:SetBackdropBorderColor(0, 0, 0)
 
-    if stripes then
-        self:AddStripeTex(frame)
+        if stripes then
+            self:AddStripeTex(frame)
+        end
     end
 end
 
@@ -478,19 +402,6 @@ function RealUI:CreateBGSection(parent, f1, f2, ...)
     return Sect1
 end
 
-function RealUI:CreateInnerBG(frame)
-    local f = frame
-    if frame:GetObjectType() == "Texture" then f = frame:GetParent() end
-
-    local bg = f:CreateTexture(nil, "BACKGROUND")
-    bg:SetPoint("TOPLEFT", frame, 1, -1)
-    bg:SetPoint("BOTTOMRIGHT", frame, -1, 1)
-    bg:SetTexture(RealUI.media.textures.plain)
-    bg:SetVertexColor(0, 0, 0, 0)
-
-    return bg
-end
-
 function RealUI:AddStripeTex(parent)
     local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
         stripeTex:SetAllPoints()
@@ -522,15 +433,26 @@ function RealUI:CreateFS(parent, justify, size)
 end
 
 -- Formatting
+local utf8len, utf8sub = _G.string.utf8len, _G.string.utf8sub
 function RealUI:AbbreviateName(name, maxLength)
     if not name then return "" end
-
     local maxNameLength = maxLength or 12
-    local newName = (name:utf8len() > maxNameLength) and name:gsub("%s?(..[\128-\191]*)%S+%s", "%1. ") or name
 
-    if (newName:utf8len() > maxNameLength) then
-        newName = newName:utf8sub(1, maxNameLength)
-        newName = newName..".."
+    local words, newName = {_G.strsplit(" ", name)}
+    if #words > 2 and utf8len(name) > maxNameLength then
+        local i = 1
+        repeat
+            words[i] = utf8sub(words[i], 1, 1) .. "."
+            i = i + 1
+        until i == #words
+
+        newName = _G.strjoin(" ", _G.unpack(words))
+    else
+        newName = name
+    end
+
+    if utf8len(newName) > maxNameLength then
+        newName = utf8sub(newName, 1, maxNameLength)..".."
     end
     return newName
 end

@@ -128,43 +128,9 @@ _G.C_Timer.NewTicker(1, function()
     end
 end)
 
-function ns.commands:testFrame()
-    local testFrame1 = _G.CreateFrame("Frame", "RealUI_TestFrame1", _G.UIParent, "ButtonFrameTemplate")
-    testFrame1:SetPoint("TOPLEFT", 550, -400)
-
-    local testFrame2 = _G.CreateFrame("Frame", "RealUI_TestFrame2", _G.UIParent, "ButtonFrameTemplate")
-    testFrame2:SetPoint("TOPRIGHT", -550, -400)
-    _G.Aurora.Skin.ButtonFrameTemplate(testFrame2)
-end
-function ns.commands:bug()
-    local button = _G.PetStableFrame.CloseButton
-    button:SetNormalTexture("")
-    button:SetHighlightTexture("")
-    button:SetPushedTexture("")
-
-    button:SetSize(17, 17)
-
-    local tex = button:CreateTexture("ARTWORK")
-    tex:SetAllPoints()
-    tex:SetColorTexture(.2, .2, .2, 1)
-
-    button:SetPoint("TOPRIGHT", -4, -3)
-
-    for i = 1, 2 do
-        local line = button:CreateLine()
-        line:SetColorTexture(1, 1, 1)
-        line:SetThickness(0.5)
-        if i == 1 then
-            line:SetStartPoint("TOPLEFT", 2, -2)
-            line:SetEndPoint("BOTTOMRIGHT", -2, 2)
-        else
-            line:SetStartPoint("TOPRIGHT", -2, -2)
-            line:SetEndPoint("BOTTOMLEFT", 2, 2)
-        end
-    end
-end
 local autorunScripts = {
     alert = false,
+    test = false,
     testFrame = false,
 }
 local frame = _G.CreateFrame("Frame")

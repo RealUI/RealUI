@@ -48,52 +48,32 @@ style.copy = {
     ReskinIcon = true,
 }
 
-local Base
-
 -- Reskin* functions (Icon excepted) should never be saved, and only used within !Aurora.
 -- This is to ensure a consistent look if the user disables Aurora.
 local functions = {}
-functions.CreateBD = function(f, alpha)
+functions.CreateBD = function(f, a)
     --print("Override CreateBD", f:GetName(), a)
-    if Base then
-        local red, green, blue, a = RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4]
-        if alpha then
-            a = alpha
-        else
-            f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
-            f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-            f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
-            f.tex:SetAllPoints()
-            f.tex:SetHorizTile(true)
-            f.tex:SetVertTile(true)
-            f.tex:SetBlendMode("ADD")
-            tinsert(_G.REALUI_WINDOW_FRAMES, f)
-            tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
-        end
-        Base.SetBackdrop(f, red, green, blue, a)
+    f:SetBackdrop({
+        bgFile = RealUI.media.textures.plain,
+        edgeFile = RealUI.media.textures.plain,
+        edgeSize = 1,
+    })
+    f:SetBackdropBorderColor(0, 0, 0)
+    if not a then
+        --print("CreateSD")
+        f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+        f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
+        f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+        f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+        f.tex:SetAllPoints()
+        f.tex:SetHorizTile(true)
+        f.tex:SetVertTile(true)
+        f.tex:SetBlendMode("ADD")
+        tinsert(_G.REALUI_WINDOW_FRAMES, f)
+        tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
     else
-        f:SetBackdrop({
-            bgFile = RealUI.media.textures.plain,
-            edgeFile = RealUI.media.textures.plain,
-            edgeSize = 1,
-        })
-        f:SetBackdropBorderColor(0, 0, 0)
-        if not alpha then
-            --print("CreateSD")
-            f:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
-            f.tex = f.tex or f:CreateTexture(nil, "BACKGROUND", nil, 1)
-            f.tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-            f.tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
-            f.tex:SetAllPoints()
-            f.tex:SetHorizTile(true)
-            f.tex:SetVertTile(true)
-            f.tex:SetBlendMode("ADD")
-            tinsert(_G.REALUI_WINDOW_FRAMES, f)
-            tinsert(_G.REALUI_STRIPE_TEXTURES, f.tex)
-        else
-            --print("CreateBD: alpha", alpha)
-            f:SetBackdropColor(0, 0, 0, alpha)
-        end
+        --print("CreateBD: alpha", a)
+        f:SetBackdropColor(0, 0, 0, a)
     end
 end
 
@@ -154,9 +134,6 @@ frame:SetScript("OnEvent", function(self, event, addon)
         debug("Load Addon", addon, addonModule)
         if addon == "Aurora" then
             F, C = _G.Aurora[1], _G.Aurora[2]
-            if _G.Aurora.Base then
-                Base = _G.Aurora.Base
-            end
 
             F.colorTex = function(f)
                 if f:IsEnabled() then
@@ -184,6 +161,21 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 end
             end
 
+            if _G.Aurora.Base then
+                RealUI.isAuroraUpdated = true
+                function _G.Aurora.Base.Pre.SetBackdrop(f, BGr, BGg, BGb, a)
+                    if not a then
+                        local stripes = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+                        stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+                        stripes:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+                        stripes:SetAllPoints()
+                        stripes:SetHorizTile(true)
+                        stripes:SetVertTile(true)
+                        stripes:SetBlendMode("ADD")
+                        tinsert(_G.REALUI_STRIPE_TEXTURES, stripes)
+                    end
+                end
+            end
             F.AddPlugin(function()
                 mods["RealUI_Bugs"](F, C)
             end)
@@ -206,6 +198,11 @@ frame:SetScript("OnEvent", function(self, event, addon)
                 end
             end
         elseif addon == "nibRealUI" then
+            if RealUI.isAuroraUpdated then
+                _G.AuroraConfig.alpha = RealUI.media.window[4]
+                RealUI:StyleSetWindowOpacity()
+            end
+
             for _, moduleFunc in next, addonModule do
                 moduleFunc(F, C)
             end

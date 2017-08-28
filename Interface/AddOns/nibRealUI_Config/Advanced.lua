@@ -857,6 +857,9 @@ local skins do
                 min = 0, max = 1, step = 0.05,
                 get = function(info) return RealUI.media.window[4] end,
                 set = function(info, value)
+                    if RealUI.isAuroraUpdated then
+                        _G.AuroraConfig.alpha = value
+                    end
                     RealUI.media.window[4] = value
                     RealUI:StyleSetWindowOpacity()
                 end,

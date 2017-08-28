@@ -17,6 +17,7 @@ L.bagCaptions = {
     ["cBniv_BankSets"]      = _G.LOOT_JOURNAL_ITEM_SETS,
     ["cBniv_BankArmor"]     = _G.BAG_FILTER_EQUIPMENT,
     ["cBniv_BankQuest"]     = _G.AUCTION_CATEGORY_QUEST_ITEMS,
+    ["cBniv_BankPet"]       = _G.AUCTION_CATEGORY_BATTLE_PETS,
     ["cBniv_BankTrade"]     = _G.BAG_FILTER_TRADE_GOODS,
     ["cBniv_BankCons"]      = _G.BAG_FILTER_CONSUMABLES,
     ["cBniv_Junk"]          = _G.BAG_FILTER_JUNK,
