@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20d] - 2017-07-11 ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * cargBags_Nivaya
+  * EasyMail
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+
+### Changed ###
+
+  * Improve name abbreviation.
+  * The main menu RealUI Config button has been moved.
+
+### Fixed ###
+
+  * The Battle Pet bank bag would overlap others.
+  * Misc bugs for patch 7.3.0
+
+
+
+
 ## [8.1 r20c] - 2017-07-11 ##
 ### Modified AddOns ###
 
@@ -279,6 +302,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20d]: https://github.com/RealUI/RealUI/compare/8.1_r20c...8.1_r20d
 [8.1 r20c]: https://github.com/RealUI/RealUI/compare/8.1_r20b...8.1_r20c
 [8.1 r20b]: https://github.com/RealUI/RealUI/compare/8.1_r20a...8.1_r20b
 [8.1 r20a]: https://github.com/RealUI/RealUI/compare/8.1_r20...8.1_r20a
