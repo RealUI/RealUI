@@ -27,10 +27,6 @@ local qTipAquire = qTip.Acquire
 function qTip:Acquire(...)
     local tooltip = qTipAquire(self, ...)
     RealUI.RegisterModdedFrame(tooltip)
-    if _G.Aurora and not tooltip._skinned then
-        _G.Aurora[1].CreateBD(tooltip)
-        tooltip._skinned = true
-    end
     return tooltip
 end
 
