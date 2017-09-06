@@ -29,6 +29,9 @@
 			"path": "Interface\\AddOns\\RealUI_Bugs"
 		},
 		{
+			"path": "Interface\\AddOns\\RealUI_Skins"
+		},
+		{
 			"file_exclude_patterns":
 			[
 				"*.sublime*",

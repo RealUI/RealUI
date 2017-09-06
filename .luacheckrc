@@ -6,6 +6,7 @@ include_files = {
     "Interface/AddOns/nibRealUI_Dev",
     "Interface/AddOns/nibRealUI_Init",
     "Interface/AddOns/RealUI_Bugs",
+    "Interface/AddOns/RealUI_Skins",
 }
 
 exclude_files = {

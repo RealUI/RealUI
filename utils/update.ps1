@@ -10,6 +10,7 @@ $addons = @(
     "./Interface/AddOns/nibRealUI_Config/nibRealUI_Config.toc",
     "./Interface/AddOns/nibRealUI_Init/nibRealUI_Init.toc"
     "./Interface/AddOns/RealUI_Bugs/RealUI_Bugs.toc"
+    "./Interface/AddOns/RealUI_Skins/RealUI_Skins.toc"
 )
 
 # replace version strings
