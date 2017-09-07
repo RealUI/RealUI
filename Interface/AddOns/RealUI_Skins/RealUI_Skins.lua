@@ -185,10 +185,8 @@ function private.OnLoad()
 end
 
 if not private.Aurora then
-    print("Aurora not embedded")
     local OnLoad = private.OnLoad
     function _G.Aurora_OnLoad(privateDev)
-        print("Aurora_OnLoad")
         private = privateDev
         Aurora = private.Aurora
         OnLoad()
