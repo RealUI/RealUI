@@ -1,6 +1,50 @@
 local ADDON_NAME = ...
+
 -- Lua Globals --
---local next = _G.next
+-- luacheck: globals select tostring next
+
+local LTD, debugger = _G.LibStub("LibTextDump-1.0"), {}
+local function CreateDebugFrame(mod)
+    if debugger[mod] then
+        return
+    end
+    local function save(buffer)
+        _G.RealUI_Debug[mod] = buffer
+    end
+    debugger[mod] = LTD:New(("%s Debug Output"):format(mod), 640, 473, save)
+    debugger[mod].numDuped = 0
+    debugger[mod].prevLine = ""
+    return debugger[mod]
+end
+
+local RealUI = {}
+function RealUI.Debug(mod, ...)
+    local modDebug = debugger[mod]
+    if not modDebug then
+        modDebug = CreateDebugFrame(mod)
+    end
+    local text = ""
+    for i = 1, select("#", ...) do
+        local arg = select(i, ...)
+        text = text .. tostring(arg) .. "     "
+    end
+    if modDebug.prevLine == text then
+        modDebug.numDuped = modDebug.numDuped + 1
+    else
+        if modDebug.numDuped > 0 then
+            modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
+            modDebug.numDuped = 0
+        end
+        modDebug:AddLine(text, "%H:%M:%S")
+        modDebug.prevLine = text
+    end
+end
+function RealUI.GetDebug(mod)
+    return function (...)
+        return RealUI.Debug(mod, ...)
+    end
+end
+_G.RealUI = RealUI
 
 local errorFrame do
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
@@ -270,6 +314,36 @@ function _G.ChatFrame_OnHyperlinkShow(frame, link, ...)
 end
 
 _G.SLASH_ERROR1 = '/error'
-_G.SlashCmdList.ERROR = function(str)
+function _G.SlashCmdList.ERROR(str)
     errorFrame:ShowError()
+end
+
+_G.SLASH_DEBUG1 = "/debug"
+function _G.SlashCmdList.DEBUG(mod, editBox)
+    _G.print("/debug", mod, editBox)
+    if mod == "" then
+        -- TODO: Make this show a frame w/ buttons to specific debugs
+        for k, v in next, debugger do
+            _G.print(k, debugger[k]:Lines())
+        end
+    else
+        local modDebug = debugger[mod]
+        if not modDebug then
+            modDebug = CreateDebugFrame(mod)
+        end
+        if mod == "test" then
+            _G.print("Generating test...")
+            for i = 1, 100 do
+                modDebug:AddLine("Test line "..i.." WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+                --modDebug:AddLine("Test line "..i)
+            end
+        end
+        if modDebug:Lines() == 0 then
+            modDebug:AddLine("Nothing to report.")
+            modDebug:Display()
+            modDebug:Clear()
+            return
+        end
+        modDebug:Display()
+    end
 end

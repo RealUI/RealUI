@@ -855,25 +855,22 @@ local skins do
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return RealUI.media.window[4] end,
+                get = function(info) return _G.RealUI_SkinsDB.frameAlpha end,
                 set = function(info, value)
-                    if RealUI.isAuroraUpdated then
-                        _G.AuroraConfig.alpha = value
-                    end
-                    RealUI.media.window[4] = value
-                    RealUI:StyleSetWindowOpacity()
+                    _G.RealUI_SkinsDB.frameAlpha = value
+                    RealUI:UpdateFrameStyle()
                 end,
                 order = 10,
             },
-            stripeOpacity = {
+            stripeAlpha = {
                 name = L["Appearance_StripeOpacity"],
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return _G.RealUI_InitDB.stripeOpacity end,
+                get = function(info) return _G.RealUI_SkinsDB.stripeAlpha end,
                 set = function(info, value)
-                    _G.RealUI_InitDB.stripeOpacity = value
-                    RealUI:StyleSetStripeOpacity()
+                    _G.RealUI_SkinsDB.stripeAlpha = value
+                    RealUI:UpdateFrameStyle()
                 end,
                 order = 20,
             },
@@ -946,9 +943,9 @@ local skins do
             type = "range",
             isPercent = true,
             min = 0.5, max = 2, step = 0.05,
-            get = function(info) return _G.RealUI_InitDB.uiModScale end,
+            get = function(info) return _G.RealUI_SkinsDB.uiModScale end,
             set = function(info, value)
-                _G.RealUI_InitDB.uiModScale = value
+                _G.RealUI_SkinsDB.uiModScale = value
                 RealUI.PreviewModScale()
             end,
             order = 60,

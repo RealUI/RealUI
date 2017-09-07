@@ -42,6 +42,7 @@ externals:
         tag: latest
     Interface/AddOns/nibRealUI/Libs/LibArtifactData-1.0:
         url: https://github.com/Rainrider/LibArtifactData-1.0.git
+        tag: latest
     Interface/AddOns/nibRealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
@@ -57,6 +58,9 @@ externals:
     Interface/AddOns/nibRealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
+    Interface/AddOns/nibRealUI/Libs/UTF8:
+        url: https://repos.wowace.com/wow/utf8/trunk
+        tag: latest
 
     Interface/AddOns/nibRealUI_Config/Libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
@@ -71,16 +75,6 @@ externals:
         url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
         tag: latest
 
-    Interface/AddOns/nibRealUI_Init/Libs/LibItemUpgradeInfo-1.0:
-        url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
-        tag: latest
-    Interface/AddOns/nibRealUI_Init/Libs/LibSharedMedia-3.0:
-        url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
-        tag: latest
-    Interface/AddOns/nibRealUI_Init/Libs/UTF8:
-        url: https://repos.wowace.com/wow/utf8/trunk
-        tag: latest
-
     Interface/AddOns/RealUI_Bugs/Libs/CallbackHandler-1.0:
         url: https://repos.wowace.com/wow/ace3/trunk/CallbackHandler-1.0
         tag: latest
@@ -90,4 +84,10 @@ externals:
 
     Interface/AddOns/RealUI_Skins/Aurora:
         url: https://github.com/Haleth/Aurora.git
+        tag: latest
+    Interface/AddOns/RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
+        url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
+        tag: latest
+    Interface/AddOns/RealUI_Skins/Libs/LibSharedMedia-3.0:
+        url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
         tag: latest

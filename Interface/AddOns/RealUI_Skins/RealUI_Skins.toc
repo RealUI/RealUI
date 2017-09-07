@@ -4,10 +4,12 @@
 ## Author: Gethe
 ## Version: 8.1 r20d
 ## LoadWith: RealUI_Bugs
-## OptionalDeps: Ace3
+## OptionalDeps: nibRealUI_Dev, Aurora, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0
 ## SavedVariables: RealUI_SkinsDB
 ## X-Aurora-Host: Aurora_OnLoad
 
 Aurora\Skin\skin.xml
+Libs\Libs.xml
+Fonts.xml
 
 RealUI_Skins.lua

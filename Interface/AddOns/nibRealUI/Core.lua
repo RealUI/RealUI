@@ -3,9 +3,6 @@ local ADDON_NAME, private = ...
 -- Lua Globals --
 local next, type = _G.next, _G.type
 
--- Libs --
-local C = _G.Aurora[2]
-
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
@@ -22,9 +19,6 @@ for word, letter in _G.GetAddOnMetadata(ADDON_NAME, "Version"):gmatch("(%d+)(%a*
         _G.tinsert(RealUI.verinfo, letter)
     end
 end
-
-if not _G.REALUI_STRIPE_TEXTURES then _G.REALUI_STRIPE_TEXTURES = {} end
-if not _G.REALUI_WINDOW_FRAMES then _G.REALUI_WINDOW_FRAMES = {} end
 
 RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
@@ -186,7 +180,6 @@ local defaults, charInit do
             settings = {
                 powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
                 fontStyle = 2,
-                stripeOpacity = 0.5,
                 hudSize = 1,
                 reverseUnitFrameBars = false,
             },
@@ -253,31 +246,6 @@ function RealUI:SetPowerMode(val)
     for k, mod in self:IterateModules() do
         if self:GetModuleEnabled(k) and mod.SetUpdateSpeed and type(mod.SetUpdateSpeed) == "function" then
             mod:SetUpdateSpeed()
-        end
-    end
-end
-
----- Style Updates ----
-function RealUI:StyleSetWindowOpacity()
-    if RealUI.isAuroraUpdated then
-        local r, g, b = _G.Aurora.frameColor:GetRGB()
-        for i = 1, #C.frames do
-            C.frames[i]:SetBackdropColor(r, g, b, _G.AuroraConfig.alpha)
-        end
-    else
-        local color = RealUI.media.window
-        for k, frame in next, _G.REALUI_WINDOW_FRAMES do
-            if frame.SetBackdropColor then
-                frame:SetBackdropColor(color[1], color[2], color[3], color[4])
-            end
-        end
-    end
-end
-
-function RealUI:StyleSetStripeOpacity()
-    for k, tex in next, _G.REALUI_STRIPE_TEXTURES do
-        if tex.SetAlpha then
-            tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         end
     end
 end
@@ -468,15 +436,9 @@ function RealUI:PLAYER_ENTERING_WORLD()
     _G.GameMenuButtonStore:SetAlpha(0)
 
     -- RealUI Config
-    local configBtn
-    if RealUI.isAuroraUpdated then
-        configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
-        configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.highlightColor.colorStr))
-        _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
-    else
-        local configStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
-        configBtn = RealUI:CreateTextButton(configStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
-    end
+    local configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
+    configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.highlightColor.colorStr))
+    _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
     configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
     configBtn:SetScript("OnMouseUp", function()
         RealUI.Debug("Config", "GameMenuFrame")
@@ -569,8 +531,7 @@ function RealUI:PLAYER_LOGIN()
     end
 
     -- Update styling
-    self:StyleSetStripeOpacity()
-    self:StyleSetWindowOpacity()
+    self:UpdateFrameStyle()
 end
 
 -- To help position UI elements
@@ -692,11 +653,6 @@ function RealUI:OnInitialize()
         _G.SetCVar("synchronizeConfig", 1)
         _G.SetCVar("synchronizeBindings", 1)
         _G.SetCVar("synchronizeMacros", 1)
-    end
-
-    if db.settings.stripeOpacity then
-        _G.RealUI_InitDB.stripeOpacity = db.settings.stripeOpacity
-        db.settings.stripeOpacity = nil
     end
 
     _G.SetCVar("useCompactPartyFrames", 1)

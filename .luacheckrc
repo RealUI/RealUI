@@ -1,10 +1,8 @@
 include_files = {
-    "Interface/AddOns/!Aurora_RealUI",
     "Interface/AddOns/cargBags_Nivaya",
     "Interface/AddOns/nibRealUI",
     "Interface/AddOns/nibRealUI_Config",
     "Interface/AddOns/nibRealUI_Dev",
-    "Interface/AddOns/nibRealUI_Init",
     "Interface/AddOns/RealUI_Bugs",
     "Interface/AddOns/RealUI_Skins",
 }
@@ -22,8 +20,8 @@ exclude_files = {
 }
 
 max_line_length = false
-self = false
 unused_args = false
+self = false
 std = "none"
 globals = {
     "_G"

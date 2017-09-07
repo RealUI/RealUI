@@ -324,31 +324,10 @@ function RealUI:AddButtonHighlight(button)
 end
 
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)
-    if RealUI.isAuroraUpdated then
-        if stripes then
-            _G.Aurora.Base.SetBackdrop(frame)
-        else
-            _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.frameColor:GetRGBA())
-        end
+    if stripes then
+        _G.Aurora.Base.SetBackdrop(frame)
     else
-        local bdColor
-        frame:SetBackdrop({
-            bgFile = RealUI.media.textures.plain,
-            edgeFile = RealUI.media.textures.plain,
-            edgeSize = 1,
-        })
-        if windowColor then
-            bdColor = RealUI.media.window
-            tinsert(_G.REALUI_WINDOW_FRAMES, frame)
-        else
-            bdColor = RealUI.media.background
-        end
-        frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
-        frame:SetBackdropBorderColor(0, 0, 0)
-
-        if stripes then
-            self:AddStripeTex(frame)
-        end
+        _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.frameColor:GetRGBA())
     end
 end
 
@@ -406,13 +385,10 @@ function RealUI:AddStripeTex(parent)
     local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
         stripeTex:SetAllPoints()
         stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-        stripeTex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+        stripeTex:SetAlpha(_G.RealUI_SkinsDB.stripeAlpha)
         stripeTex:SetHorizTile(true)
         stripeTex:SetVertTile(true)
         stripeTex:SetBlendMode("ADD")
-
-    tinsert(_G.REALUI_STRIPE_TEXTURES, stripeTex)
-
     return stripeTex
 end
 
