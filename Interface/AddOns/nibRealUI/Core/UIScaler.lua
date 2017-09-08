@@ -90,7 +90,7 @@ function UIScaler:OnInitialize()
     scaleBtn:SetPoint("TOPLEFT", _G.Advanced_UIScaleSlider, 20, 0)
     scaleBtn:SetScript("OnClick", function()
         RealUI.Debug("Config", "UI Scale")
-        RealUI:LoadConfig("RealUI", "skins")
+        RealUI.LoadConfig("RealUI", "skins")
     end)
 
     -- CVar "uiScale" doesn't exist until late in the loading process

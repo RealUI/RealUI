@@ -37,7 +37,7 @@ local other do
                 type = "execute",
                 func = function(info, ...)
                     RealUI.Debug("Config", "Config Bar")
-                    RealUI:LoadConfig("RealUI")
+                    RealUI.LoadConfig("RealUI")
                 end,
                 order = 0,
             },

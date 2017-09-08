@@ -352,7 +352,7 @@ function RealUI:HideTutorial()
     _G.UIFrameFadeOut(_G.RealUITutorialBG, 0.3, 0.5, 0)
     _G.RealUITutorialLogo:Hide()
     RealUI.Debug("Config", "HideTutorial")
-    RealUI:LoadConfig("HuD")
+    RealUI.LoadConfig("HuD")
     RealUI.db.global.tutorial.stage = -1
 end
 
@@ -432,7 +432,7 @@ function RealUI:InitTutorial()
         btnSkip:Hide()
         tBG:Hide()
         RealUI.Debug("Config", "SkipTutorial")
-        RealUI:LoadConfig("HuD")
+        RealUI.LoadConfig("HuD")
         RealUI.db.global.tutorial.stage = -1
     end)
     RealUI:AddButtonHighlight(btnSkip)

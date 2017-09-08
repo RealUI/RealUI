@@ -442,7 +442,7 @@ function RealUI:PLAYER_ENTERING_WORLD()
     configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
     configBtn:SetScript("OnMouseUp", function()
         RealUI.Debug("Config", "GameMenuFrame")
-        RealUI:LoadConfig("HuD")
+        RealUI.LoadConfig("HuD")
         _G.HideUIPanel(_G.GameMenuFrame)
     end)
 
@@ -563,11 +563,11 @@ end
 function RealUI:ChatCommand_Config()
     RealUI.Debug("Config", "/real")
     dbg.tags.slashRealUITyped = true
-    RealUI:LoadConfig("HuD")
+    RealUI.LoadConfig("HuD")
 end
 
 local configLoaded = false
-function RealUI:LoadConfig(app, section, ...)
+function RealUI.LoadConfig(app, section, ...)
     if _G.InCombatLockdown() then
         return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
     end
@@ -578,7 +578,7 @@ function RealUI:LoadConfig(app, section, ...)
             _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
         end
     end
-    self:ToggleConfig(app, section, ...)
+    RealUI.ToggleConfig(app, section, ...)
 end
 
 function RealUI:OnInitialize()
@@ -629,7 +629,7 @@ function RealUI:OnInitialize()
     self:RegisterChatCommand("realui", "ChatCommand_Config")
     self:RegisterChatCommand("realadv", function()
         RealUI.Debug("Config", "/realadv")
-        RealUI:LoadConfig("RealUI")
+        RealUI.LoadConfig("RealUI")
     end)
     self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", _G.ReloadUI)

@@ -1130,7 +1130,7 @@ end
 ---- Config Button ----
 local function Config_OnMouseDown()
     RealUI.Debug("Config", "Minimap")
-    RealUI:LoadConfig("RealUI", "uiTweaks", "minimap")
+    RealUI.LoadConfig("RealUI", "uiTweaks", "minimap")
     _G.Lib_CloseDropDownMenus()
 end
 

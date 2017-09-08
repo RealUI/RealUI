@@ -345,7 +345,7 @@ local function InitializeOptions()
     hudConfig:SetSize(#hudConfig * width, height)
 end
 
-function RealUI:ToggleConfig(app, section, ...)
+function RealUI.ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
     if not initialized then InitializeOptions() end
     if app == "HuD" then

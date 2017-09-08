@@ -539,7 +539,7 @@ function Infobar:CreateBlocks()
         local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
         local menuList = {
             {text = L["Start_Config"],
-                func = function() RealUI:LoadConfig("HuD") end,
+                func = function() RealUI.LoadConfig("HuD") end,
                 notCheckable = true,
             },
             {text = L["General_Lock"],
