@@ -174,7 +174,7 @@ function private.OnLoad()
 
             local stripes = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-            stripes:SetAlpha(_G.RealUI_SkinsDB.stripeOpacity)
+            stripes:SetAlpha(_G.RealUI_SkinsDB.stripeAlpha)
             stripes:SetAllPoints()
             stripes:SetHorizTile(true)
             stripes:SetVertTile(true)
