@@ -6,7 +6,6 @@ local RealUI = private.RealUI
 
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
 RealUI.is730 = _G.tonumber(xpac) == 7 and (_G.tonumber(major) >= 3 and _G.tonumber(minor) >= 0)
-RealUI.isDev = _G.IsAddOnLoaded("nibRealUI_Dev")
 
 RealUI.charName = _G.UnitName("player")
 RealUI.realm = _G.GetRealmName()

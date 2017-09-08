@@ -5,6 +5,7 @@ local next = _G.next
 
 -- RealUI --
 local debug = _G.RealUI.GetDebug("Dev")
+_G.RealUI.isDev = true
 
 ns.debug = debug
 ns.commands = {}
