@@ -568,16 +568,20 @@ end
 
 local configLoaded = false
 function RealUI.LoadConfig(app, section, ...)
+    debug("RealUI.LoadConfig", app, section, ...)
     if _G.InCombatLockdown() then
         return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
     end
+    debug("is loaded", configLoaded)
     if not configLoaded then
         local reason
         configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
+        debug("LoadAddOn", configLoaded, reason)
         if not configLoaded then
             _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
         end
     end
+    debug("ToggleConfig", RealUI.ToggleConfig)
     RealUI.ToggleConfig(app, section, ...)
 end
 
