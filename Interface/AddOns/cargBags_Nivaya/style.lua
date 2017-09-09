@@ -128,7 +128,9 @@ do
         end
 
         -- sort larger stacks first
-        return item1.count > item2.count
+        if item1.count and item2.count then
+            return item1.count > item2.count
+        end
     end;
     QuickSort = function(tbl) _G.table.sort(tbl, func) end
 end
