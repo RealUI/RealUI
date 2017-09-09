@@ -130,14 +130,6 @@ function MirrorBar:MIRROR_TIMER_START(event, timer, value, maxValue, scale, paus
     self:UpdateShown()
 end
 
--- Colors
-function MirrorBar:UpdateColors()
-    -- BG + Border
-    local color = RealUI.media.background
-    MBFrames.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
-    MBFrames.bg:SetBackdropBorderColor(0, 0, 0, 1)
-end
-
 -- Position
 function MirrorBar:UpdatePosition()
     -- BG + Border
@@ -157,7 +149,6 @@ function MirrorBar:RefreshMod()
     db = self.db.profile
 
     MirrorBar:UpdatePosition()
-    MirrorBar:UpdateColors()
 end
 
 function MirrorBar:PLAYER_LOGIN()

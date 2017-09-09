@@ -214,7 +214,7 @@ end
 
 local function CreateBoss(self)
     self:SetSize(135, 24)
-    F.CreateBD(self, RealUI.media.background[4])
+    F.CreateBD(self, 0.7)
 
     CreateHealthBar(self)
     CreateTags(self)

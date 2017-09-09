@@ -259,14 +259,14 @@ local function LootOnEnter(self)
         _G.GameTooltip:SetLootItem(slot)
         _G.CursorUpdate(self)
     end
-    self.bg:SetBackdropColor(0.15, 0.15, 0.15, RealUI.media.background[4])
+    self.bg:SetBackdropColor(0.15, 0.15, 0.15, _G.RealUI_SkinsDB.frameAlpha)
 end
 
 local LootOnLeave = function(self)
     --print("LootOnLeave: ")
     _G.GameTooltip:Hide()
     _G.ResetCursor()
-    self.bg:SetBackdropColor(0, 0, 0, RealUI.media.background[4])
+    self.bg:SetBackdropColor(_G.Aurora.frameColor.r, _G.Aurora.frameColor.g, _G.Aurora.frameColor.b, _G.RealUI_SkinsDB.frameAlpha)
 end
 
 local LootOnClick = function(self)
@@ -310,9 +310,11 @@ local createSlot = function(id)
     bg:SetPoint("TOPLEFT", frame, -1, 1)
     bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
     bg:SetFrameLevel(frame:GetFrameLevel()-1)
-    RealUI:CreateBD(bg)
-
     frame.bg = bg
+
+    _G.Aurora.Base.SetBackdrop(bg)
+    bg:SetBackdropColor(_G.Aurora.frameColor.r, _G.Aurora.frameColor.g, _G.Aurora.frameColor.b, _G.RealUI_SkinsDB.frameAlpha)
+
 
     frame:SetScript("OnClick", LootOnClick)
     frame:SetScript("OnEnter", LootOnEnter)

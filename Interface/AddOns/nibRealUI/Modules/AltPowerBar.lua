@@ -39,13 +39,8 @@ end
 
 -- Colors
 function AltPowerBar:UpdateColors()
-    -- BG + Border
-    local color = RealUI.media.background
-    APBFrames.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
-    APBFrames.bg:SetBackdropBorderColor(0, 0, 0, 1)
-
     -- Bar
-    color = RealUI.media.colors.green
+    local color = RealUI.media.colors.green
     APBFrames.bar:SetStatusBarColor(color[1], color[2], color[3], 0.85)
 end
 

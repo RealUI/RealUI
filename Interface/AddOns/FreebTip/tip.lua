@@ -1,5 +1,8 @@
 local ADDON_NAME, ns = ...
 
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+
 local mediapath = "Interface\\AddOns\\FreebTip\\media\\"
 local cfg = {
     -- xRUI
@@ -30,8 +33,8 @@ local cfg = {
     },
 
     -- Background / Border / Guild - (Colors)
-    bgcolor = { r=RealUI.media.window[1], g=RealUI.media.window[2], b=RealUI.media.window[3], t=RealUI.media.window[4] }, -- background
-    bdrcolor = { r=0, g=0, b=0 }, -- border
+    bgcolor = Aurora.frameColor, -- background
+    bdrcolor = Aurora.frameColor, -- border
     gcolor = { r=1.00, g=1.00, b=0.70}, -- guild
 
     you = "<You>",

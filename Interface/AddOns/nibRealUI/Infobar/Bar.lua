@@ -6,6 +6,8 @@ local next, ipairs = _G.next, _G.ipairs
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
+local Aurora = _G.Aurora
+local Base = Aurora.Base
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -708,16 +710,8 @@ function Infobar:CreateBar()
         end
     end)
 
-    -- Background
-    frame:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        edgeSize = 1,
-    })
-    frame:SetBackdropBorderColor(0, 0, 0, db.bgAlpha)
-    frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], db.bgAlpha)
-
     -- Stripes
+    Base.SetBackdrop(frame, Aurora.frameColor.r, Aurora.frameColor.g, Aurora.frameColor.b, db.bgAlpha)
     local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
     tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
     tex:SetAlpha(db.bgAlpha * 0.6)
@@ -819,10 +813,8 @@ function Infobar:SettingsUpdate(setting, block)
         end
         block:OnEvent("SettingsUpdate")
     elseif setting == "bgAlpha" then
-        self.frame:SetBackdropBorderColor(0, 0, 0, db.bgAlpha)
-        self.frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], db.bgAlpha)
-        self.frame.tex:SetAlpha(db.bgAlpha * 0.55)
-
+        Base.SetBackdropColor(self.frame, Aurora.frameColor.r, Aurora.frameColor.g, Aurora.frameColor.b, db.bgAlpha)
+        self.frame.tex:SetAlpha(db.bgAlpha * 0.6)
         self.frame.watch:UpdateColors()
 
         local outline = self:GetFontOutline()

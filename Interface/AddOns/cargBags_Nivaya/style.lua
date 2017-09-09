@@ -484,13 +484,6 @@ function MyContainer:OnCreate(name, settings)
     self:SetWidth((itemSlotSize + 2) * self.Columns + 2)
 
     -- The frame background
-    local tBankCustom = (tBankBags and not _G.cBnivCfg.BankBlack)
-    local color_rb = _G.RealUI.media.window[1]
-    local color_gb = tBankCustom and .2 or _G.RealUI.media.window[2]
-    local color_bb = tBankCustom and .3 or _G.RealUI.media.window[3]
-    local alpha_fb = _G.RealUI.media.window[4]
-
-    -- The frame background
     local background = _G.CreateFrame("Frame", nil, self)
     background:SetBackdrop{
         bgFile = _G.RealUI.media.textures.plain,

@@ -4,6 +4,9 @@ local _, private = ...
 local RealUI = private.RealUI
 local db, ndb, ndbc
 
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+
 local MODNAME = "ScreenSaver"
 local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
@@ -253,9 +256,7 @@ function ScreenSaver:CreateFrames()
         self.panel:SetFrameStrata("MEDIUM")
         self.panel:SetFrameLevel("1")
         self.panel:SetSize(_G.UIParent:GetWidth(), 21)
-        -- self.panel:SetBackdropColor(0.075, 0.075, 0.075, db.panel.opacity)
-        RealUI:CreateBD(self.panel, nil, true)
-        self.panel:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+        Base.SetBackdrop(self.panel)
         self.panel:SetAlpha(0)
         self.panel:Hide()
         self:RepositionPanel()

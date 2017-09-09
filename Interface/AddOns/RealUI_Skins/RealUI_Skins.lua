@@ -15,8 +15,6 @@ local defaults = {
 }
 
 RealUI.media = {
-    window =        {0.03, 0.03, 0.03, 0.9},
-    background =    {0.085, 0.085, 0.085, 0.9},
     colors = {
         red =       {0.85, 0.14, 0.14, 1},
         orange =    {1.00, 0.38, 0.08, 1},

@@ -44,13 +44,13 @@ local function CreateSteps(parent, height, info)
         local s = parent:CreateAngle("Frame", nil, parent.overlay)
         s:SetSize(2, stepHeight)
         s:SetAngleVertex(leftVertex, rightVertex)
-        s:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+        s:SetBackgroundColor(.5, .5, .5)
         step[i] = s
 
         local w = parent:CreateAngle("Frame", nil, parent.overlay)
         w:SetSize(2, height)
         w:SetAngleVertex(leftVertex, rightVertex)
-        w:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+        w:SetBackgroundColor(.5, .5, .5)
         warn[i] = w
     end
     return step, warn
@@ -134,9 +134,9 @@ local function CreateHealthBar(parent, info)
 end
 local CreateHealthStatus do
     local classification = {
-        rareelite = {1, 0.5, 0},
-        elite = {1, 1, 0},
-        rare = {0.75, 0.75, 0.75},
+        rareelite = {r=1, g=0.5, b=0},
+        elite = {r=1, g=1, b=0},
+        rare = {r=0.75, g=0.75, b=0.75},
     }
 
     local function UpdatePvP(self, event, unit)
@@ -150,13 +150,12 @@ local CreateHealthStatus do
             color = self.colors.reaction[reaction]
             PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         else
-            color = RealUI.media.background
-            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            PvPIndicator:SetBackgroundColor(_G.Aurora.frameColor:GetRGBA())
         end
     end
     local function UpdateClassification(self, event)
-        local color = classification[_G.UnitClassification(self.unit)] or RealUI.media.background
-        self.Classification:SetBackgroundColor(color[1], color[2], color[3], color[4])
+        local color = classification[_G.UnitClassification(self.unit)] or _G.Aurora.frameColor
+        self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
     function CreateHealthStatus(parent, info)
@@ -382,8 +381,7 @@ local CreatePowerStatus do
         end
 
         if self.LeaderIndicator.status and not self.CombatIndicator.status then
-            color = RealUI.media.background
-            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:SetBackgroundColor(_G.Aurora.frameColor:GetRGBA())
             self.CombatIndicator:Show()
         elseif self.CombatIndicator.status then
             color = status[self.CombatIndicator.status]
