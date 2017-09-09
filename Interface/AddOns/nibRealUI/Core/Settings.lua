@@ -177,25 +177,18 @@ end
 
 local function CreateInstallWindow()
     debug("CreateInstallWindow")
-    -- To help with debugging
-    local bdAlpha, ibSizeOffs = 0.9, 0
-    if RealUI.isDev then
-        bdAlpha = 0.5
-        ibSizeOffs = 300
-    end
+
+    local pointOfs = RealUI.isDev and 50 or 0
+    IWF = _G.CreateFrame("Frame", nil, _G.UIParent)
+    IWF:SetPoint("TOPLEFT", pointOfs, -pointOfs)
+    IWF:SetPoint("BOTTOMRIGHT", -pointOfs, pointOfs)
+    IWF:SetFrameStrata("DIALOG")
+    IWF:Hide()
 
     -- Background
-    IWF = _G.CreateFrame("Frame", nil, _G.UIParent)
-    IWF:Hide()
-        IWF:SetParent(_G.UIParent)
-        IWF:SetAllPoints(_G.UIParent)
-        IWF:SetFrameStrata("DIALOG")
-        IWF:SetFrameLevel(0)
-    IWF:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-    })
-    IWF:SetBackdropColor(0, 0, 0, bdAlpha)
-    RealUI:AddStripeTex(IWF)
+    local bg = IWF:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(0, 0, 0, 1)
+    bg:SetAllPoints()
 
     -- Logo
     IWF.logo = CreateIWTextureFrame(Textures.Logo, 256, 256, {"BOTTOM", IWF, "CENTER", 0, 0}, {1, 1, 1, 1})
@@ -245,8 +238,7 @@ local function CreateInstallWindow()
 
     -- Button
     IWF.install = _G.CreateFrame("Button", "RealUI_Install", IWF, "SecureActionButtonTemplate")
-        IWF.install:SetPoint("CENTER")
-        IWF.install:SetSize(_G.UIParent:GetWidth() - ibSizeOffs, _G.UIParent:GetHeight() - ibSizeOffs)
+    IWF.install:SetAllPoints()
     IWF.install:RegisterForClicks("LeftButtonUp")
     IWF.install:SetScript("OnClick", function()
         RunStage1()

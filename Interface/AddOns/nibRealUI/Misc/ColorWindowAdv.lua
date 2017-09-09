@@ -26,6 +26,7 @@ CPF.swatchBG:SetSize(48, 48)
 CPF.swatchBG:SetPoint("TOPLEFT", _G.ColorPickerWheel, "TOPRIGHT", 87, 0)
 CPF.swatchBG:SetHorizTile(true)
 CPF.swatchBG:SetVertTile(true)
+CPF.swatchBG:SetDesaturated(true)
 
 CPF.prevSwatch = CPF:CreateTexture(nil, "ARTWORK", nil, -3)
 CPF.prevSwatch:SetSize(32, 32)
@@ -130,14 +131,9 @@ end
 
 for type, offsetFactor in next, CPFEditBoxes do
     local editbox = _G.CreateFrame("EditBox", nil, CPF)
-    editbox:SetHeight(15)
-    editbox:SetWidth(50)
+    editbox:SetSize(50, 15)
     editbox:SetPoint("BOTTOMLEFT", (70 * offsetFactor) + 13, 34)
-
-    editbox:SetBackdrop({
-        bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-    })
-    editbox:SetBackdropColor(0, 0, 0, .5)
+    _G.Aurora.Base.SetBackdrop(editbox, _G.Aurora.frameColor:GetRGBA())
 
     editbox:SetFontObject(_G.ChatFontNormal)
     editbox:SetAutoFocus(false)

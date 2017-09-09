@@ -239,18 +239,6 @@ end
 
 -- Frame Creation
 function ScreenSaver:CreateFrames()
-    -- Dark Background
-    self.bg = _G.CreateFrame("Frame", nil, _G.UIParent)
-        self.bg:SetAllPoints(_G.UIParent)
-        self.bg:SetFrameStrata("BACKGROUND")
-        self.bg:SetFrameLevel(0)
-        self.bg:SetBackdrop({
-            bgFile = RealUI.media.textures.plain,
-        })
-        self.bg:SetBackdropColor(0, 0, 0, 1)
-        self.bg:SetAlpha(0)
-        self.bg:Hide()
-
     -- Panel
     self.panel = _G.CreateFrame("Frame", "RealUIScreenSaver", _G.UIParent)
         self.panel:SetFrameStrata("MEDIUM")
@@ -261,14 +249,21 @@ function ScreenSaver:CreateFrames()
         self.panel:Hide()
         self:RepositionPanel()
 
+    -- Dark Background
+    self.bg = self.panel:CreateTexture(nil, "BACKGROUND")
+        self.bg:SetColorTexture(0, 0, 0, 1)
+        self.bg:SetAllPoints(_G.UIParent)
+        self.bg:SetAlpha(0)
+        self.bg:Hide()
+
     self.panel.left = self.panel:CreateTexture(nil, "ARTWORK")
-        self.panel.left:SetTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+        self.panel.left:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
         self.panel.left:SetPoint("LEFT", self.panel, "LEFT", 0, 0)
         self.panel.left:SetHeight(19)
         self.panel.left:SetWidth(4)
 
     self.panel.right = self.panel:CreateTexture(nil, "ARTWORK")
-        self.panel.right:SetTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+        self.panel.right:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
         self.panel.right:SetPoint("RIGHT", self.panel, "RIGHT", 0, 0)
         self.panel.right:SetHeight(19)
         self.panel.right:SetWidth(4)

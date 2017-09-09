@@ -313,14 +313,7 @@ function RealUI:AddButtonHighlight(button)
     highlight:SetPoint("CENTER", button, "CENTER", 0, 0)
     highlight:SetWidth(button:GetWidth() - 2)
     highlight:SetHeight(button:GetHeight() - 2)
-    highlight:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-    })
-    highlight:SetBackdropColor(0,0,0,0)
-    highlight:SetBackdropBorderColor(self.classColor[1], self.classColor[2], self.classColor[3], self.classColor[4])
+    _G.AuroraBase.SetBackdrop(highlight, _G.Aurora.highlightColor:GetRGBA())
 end
 
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)
@@ -363,33 +356,6 @@ function RealUI:CreateBG(frame, alpha)
     bg:SetVertexColor(0, 0, 0, alpha)
 
     return bg
-end
-
-function RealUI:CreateBGSection(parent, f1, f2, ...)
-    -- Button Backgrounds
-    local x1, y1, x2, y2 = -2, 2, 2, -2
-    if ... then
-        x1, y1, x2, y2 = ...
-    end
-    local Sect1 = _G.CreateFrame("Frame", nil, parent)
-    Sect1:SetPoint("TOPLEFT", f1, "TOPLEFT", x1, y1)
-    Sect1:SetPoint("BOTTOMRIGHT", f2, "BOTTOMRIGHT", x2, y2)
-    RealUI:CreateBD(Sect1)
-    Sect1:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
-    Sect1:SetFrameLevel(parent:GetFrameLevel() + 1)
-
-    return Sect1
-end
-
-function RealUI:AddStripeTex(parent)
-    local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
-        stripeTex:SetAllPoints()
-        stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-        stripeTex:SetAlpha(_G.RealUI_SkinsDB.stripeAlpha)
-        stripeTex:SetHorizTile(true)
-        stripeTex:SetVertTile(true)
-        stripeTex:SetBlendMode("ADD")
-    return stripeTex
 end
 
 function RealUI:CreateFS(parent, justify, size)

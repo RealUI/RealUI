@@ -161,13 +161,7 @@ function MirrorBar:CreateFrames()
     -- BG + Border
     MBFrames.bg = _G.CreateFrame("Frame", "RealUI_MirrorBar", _G.UIParent)
     MBFrames.bg:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
-
-    MBFrames.bg:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0}
-    })
+    _G.Aurora.Base.SetBackdrop(MBFrames.bg)
 
     -- Bar + Text
     MBFrames.bar = _G.CreateFrame("StatusBar", nil, MBFrames.bg)

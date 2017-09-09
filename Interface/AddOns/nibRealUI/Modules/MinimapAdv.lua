@@ -456,13 +456,7 @@ local OddList = {
 
 local buttons = {}
 local button = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
-button:SetBackdrop({
-    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    edgeSize = 1,
-})
-button:SetBackdropBorderColor(0, 0, 0)
-button:SetBackdropColor(0, 0, 0, .5)
+_G.Auora.Base.SetBackdrop(button, _G.Aurora.frameColor:GetRGBA())
 button:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
 button:SetSize(136, 32)
 button:SetFrameStrata("LOW")

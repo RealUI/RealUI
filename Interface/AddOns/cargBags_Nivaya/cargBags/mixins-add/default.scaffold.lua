@@ -101,8 +101,6 @@ end
 
 local function ItemButton_Scaffold(self)
     self:SetSize(37, 37)
-    local _, height = _G.RealUI:GetResolutionVals(true)
-    local bordersize = 768 / height / (_G.GetCVar("uiScale") * _G.cBnivCfg.scale)
     local name = self:GetName()
     self.Icon = _G[name.."IconTexture"]
     self.Count = _G[name.."Count"]
@@ -111,10 +109,7 @@ local function ItemButton_Scaffold(self)
     self.Border = _G.CreateFrame("Frame", nil, self)
     self.Border:SetPoint("TOPLEFT", self.Icon, 0, 0)
     self.Border:SetPoint("BOTTOMRIGHT", self.Icon, 0, 0)
-    self.Border:SetBackdrop({
-        edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = bordersize,
-    })
-    self.Border:SetBackdropBorderColor(0, 0, 0, 0)
+    _G.Aurora.Base.SetBackdrop(self.Border, _G.Aurora.frameColor:GetRGBA())
 
     self.TopString = CreateInfoString(self, "TOP")
     self.BottomString = CreateInfoString(self, "BOTTOM")

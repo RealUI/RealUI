@@ -54,13 +54,11 @@ do
         frame:SetHeight(15)
         frame:SetWidth(80)
         frame:SetFrameStrata"TOOLTIP"
-        frame:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background";})
         frame:EnableMouse(true)
         frame:SetMovable(true)
         frame:SetClampedToScreen(true)
-        frame:RegisterForDrag"LeftButton"
-        frame:SetBackdropBorderColor(0, .9, 0)
-        frame:SetBackdropColor(0, .9, 0)
+        frame:RegisterForDrag("LeftButton")
+        Aurora.Base.SetBackdrop(frame, Aurora.frameColor:GetRGBA())
         frame:Hide()
 
         frame:SetScript("OnDragStart", OnDragStart)

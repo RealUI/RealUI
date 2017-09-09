@@ -113,8 +113,6 @@ function AddonControl:CreateOptionsFrame()
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
         acO.reloadui:SetScript("OnClick", _G.ReloadUI)
 
-    RealUI:CreateBGSection(acO, acO.okay, acO.reloadui)
-
     -- Header
     local header = RealUI:CreateFS(acO, "CENTER", "small")
         header:SetText(L["Control_AddonControl"])
@@ -148,11 +146,10 @@ function AddonControl:CreateOptionsFrame()
         lPosition:SetWidth(40)
         lPosition:SetTextColor(C.r, C.g, C.b)
 
-    local acAddonSect = RealUI:CreateBDFrame(acO)
-    local bgColor = RealUI.media.background
-    acAddonSect:SetBackdropColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+    local acAddonSect = _G.CreateFrame("Frame", nil, acO)
     acAddonSect:SetPoint("TOPLEFT", acO, "TOPLEFT", 6, -42)
     acAddonSect:SetPoint("BOTTOMRIGHT", acO, "BOTTOMRIGHT", -6, 36)
+    _G.Aurora.Base.SetBackdrop(acAddonSect)
 
     local LayoutAddOns = {
         ["Bartender4"] = true,
@@ -176,7 +173,7 @@ function AddonControl:CreateOptionsFrame()
             cnt = cnt + 1
 
             -- AddOn name
-            local fs = acO:CreateFontString(nil, "OVERLAY")
+            local fs = acAddonSect:CreateFontString(nil, "OVERLAY")
             fs:SetFontObject(_G.RealUIFont_Normal)
             fs:SetText(addon)
             if not prevLabel then
@@ -265,8 +262,6 @@ function AddonControl:CreateOptionsFrame()
         end
     end
     acO:SetHeight(84 + (cnt * 19.25))
-    RealUI:CreateBGSection(acAddonSect, acAddonSect.firstReset, acAddonSect.lastReset)
-
     acO:Show()
 end
 

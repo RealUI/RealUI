@@ -4,6 +4,9 @@ local cargBags = ns.cargBags
 -- Lua Globals --
 local next, ipairs = _G.next, _G.ipairs
 
+local Aurora = _G.Aurora
+local Base, Skin = Aurora.Base, Aurora.Skin
+
 local L = ns.L
 local bags = ns.bags
 local bagsHidden = ns.bagsHidden
@@ -485,22 +488,11 @@ function MyContainer:OnCreate(name, settings)
 
     -- The frame background
     local background = _G.CreateFrame("Frame", nil, self)
-    background:SetBackdrop{
-        bgFile = _G.RealUI.media.textures.plain,
-        edgeFile = _G.RealUI.media.textures.plain,
-        tile = true, tileSize = 16, edgeSize = 1,
-        insets = {left = 1, right = 1, top = 1, bottom = 1},
-    }
     background:SetFrameStrata("HIGH")
     background:SetFrameLevel(1)
-    background:SetBackdropColor(color_rb,color_gb,color_bb,alpha_fb)
-    background:SetBackdropBorderColor(0, 0, 0, 1)
-
     background:SetPoint("TOPLEFT", -4, 4)
     background:SetPoint("BOTTOMRIGHT", 4, -4)
-
-    -- Stripes
-    background.tex = _G.RealUI:AddStripeTex(background)
+    Base.SetBackdrop(background)
 
     -- Caption, close button
     local caption = background:CreateFontString(background, "OVERLAY", nil)
@@ -514,10 +506,8 @@ function MyContainer:OnCreate(name, settings)
 
         if tBag or tBank then
             local close = _G.CreateFrame("Button", nil, self, "UIPanelCloseButton")
-            close:SetPoint("TOPRIGHT", 8, 8)
-            if _G.Aurora and _G.Aurora[1].ReskinClose then
-                _G.Aurora[1].ReskinClose(close, "TOPRIGHT", self, "TOPRIGHT", 1, 1)
-            end
+            Skin.UIPanelCloseButton(close)
+            close:SetPoint("TOPRIGHT", 1, 1)
             close:SetScript("OnClick", function(container)
                 if cbNivaya:AtBank() then
                     _G.CloseBankFrame()
@@ -713,17 +703,6 @@ function MyContainer:OnCreate(name, settings)
         local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
         if dtNT then dtNT:SetTexture(nil) end
 
-        self.DropTarget.bg = _G.CreateFrame("Frame", nil, self.DropTarget)
-        self.DropTarget.bg:SetAllPoints()
-        self.DropTarget.bg:SetBackdrop({
-            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-            edgeFile = "Interface\\Buttons\\WHITE8x8",
-            tile = false, tileSize = 16, edgeSize = 1,
-        })
-        self.DropTarget.bg:SetBackdropColor(1, 1, 1, 0.1)
-        self.DropTarget.bg:SetBackdropBorderColor(0, 0, 0, 1)
-        self.DropTarget:SetWidth(itemSlotSize - 1)
-        self.DropTarget:SetHeight(itemSlotSize - 1)
 
         local DropTargetProcessItem = function()
             -- if CursorHasItem() then  -- Commented out to fix Guild Bank -> Bags item dragging
@@ -733,6 +712,11 @@ function MyContainer:OnCreate(name, settings)
         end
         self.DropTarget:SetScript("OnMouseUp", DropTargetProcessItem)
         self.DropTarget:SetScript("OnReceiveDrag", DropTargetProcessItem)
+        self.DropTarget:SetSize(itemSlotSize - 1, itemSlotSize - 1)
+
+        self.DropTarget.bg = _G.CreateFrame("Frame", nil, self.DropTarget)
+        self.DropTarget.bg:SetAllPoints()
+        Base.SetBackdrop(self.DropTarget.bg, Aurora.frameColor:GetRGBA())
 
         local fs = self:CreateFontString(nil, "OVERLAY")
         fs:SetFontObject(_G.RealUIFont_PixelSmall)

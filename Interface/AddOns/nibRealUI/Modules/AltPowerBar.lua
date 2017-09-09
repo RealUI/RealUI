@@ -83,13 +83,7 @@ function AltPowerBar:CreateFrames()
     -- BG + Border
     APBFrames.bg = _G.CreateFrame("Frame", "RealUI_AltPowerBarBG", _G.UIParent)
     APBFrames.bg:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
-
-    APBFrames.bg:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0}
-    })
+    _G.Aurora.Base.SetBackdrop(APBFrames.bg)
 
     -- Bar + Text
     APBFrames.bar = _G.CreateFrame("StatusBar", "RealUI_AltPowerBar", APBFrames.bg)

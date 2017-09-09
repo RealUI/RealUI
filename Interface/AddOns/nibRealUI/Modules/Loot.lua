@@ -330,12 +330,10 @@ local createSlot = function(id)
     iconFrame:SetPoint("RIGHT", frame, "LEFT", -2, 0)
 
     local icon = iconFrame:CreateTexture(nil, "ARTWORK")
-    icon:SetTexCoord(.08, .92, .08, .92)
     icon:SetPoint("TOPLEFT", 1, -1)
     icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    _G.Aurora.Base.CropIcon(icon, iconFrame)
     frame.icon = icon
-
-    RealUI:CreateBG(icon)
 
     local count = RealUI:CreateFS(iconFrame, "CENTER")
     count:SetPoint("TOP", iconFrame, 1, -2)

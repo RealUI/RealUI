@@ -402,10 +402,7 @@ function RealUI:InitTutorial()
     tBG:SetFrameLevel(0)
     tBG:SetWidth(_G.UIParent:GetWidth() + 2000)
     tBG:SetHeight(_G.UIParent:GetHeight() + 2000)
-    tBG:SetBackdrop({
-        bgFile = [[Interface\AddOns\nibRealUI\Media\Plain]],
-    })
-    tBG:SetBackdropColor(0, 0, 0, 0.4)
+    _G.Aurora.Base.SetBackdrop(tBG, _G.Aurora.frameColor:GetRGBA())
 
     -- Logo
     local rLogo = _G.UIParent:CreateTexture("RealUITutorialLogo", "ARTWORK")
