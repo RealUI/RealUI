@@ -1,5 +1,6 @@
 include_files = {
     "Interface/AddOns/cargBags_Nivaya",
+    "Interface/AddOns/FreebTip",
     "Interface/AddOns/nibRealUI",
     "Interface/AddOns/nibRealUI_Config",
     "Interface/AddOns/nibRealUI_Dev",
