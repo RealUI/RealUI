@@ -13,3 +13,4 @@ Libs\Libs.xml
 Fonts.xml
 
 RealUI_Skins.lua
+AddOns\Masque.lua

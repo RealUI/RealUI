@@ -184,9 +184,17 @@ end
 
 if not private.Aurora then
     local OnLoad = private.OnLoad
+    local AddOns = {}
+    private.AddOns = AddOns
     function _G.Aurora_OnLoad(privateDev)
         private = privateDev
         Aurora = private.Aurora
+
+        for addon, func in next, AddOns do
+            print("add", addon)
+            private.AddOns[addon] = func
+        end
+
         OnLoad()
     end
 end
