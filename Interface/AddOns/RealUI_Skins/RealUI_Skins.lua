@@ -191,7 +191,6 @@ if not private.Aurora then
         Aurora = private.Aurora
 
         for addon, func in next, AddOns do
-            print("add", addon)
             private.AddOns[addon] = func
         end
 

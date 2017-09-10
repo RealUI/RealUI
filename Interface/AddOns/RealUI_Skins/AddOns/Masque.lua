@@ -1,7 +1,6 @@
 local _, private = ...
 
 function private.AddOns.Masque()
-    print("Masque loaded")
     local EAB = _G.ExtraActionButton1
     EAB:SetNormalTexture("")
 
