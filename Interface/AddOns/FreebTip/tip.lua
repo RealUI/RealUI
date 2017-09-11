@@ -332,8 +332,9 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
         end
         _G.GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
 
-        local level
+        local level, IsBattlePet
         if _G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit) then
+            IsBattlePet = true
             level = _G.UnitBattlePetLevel(unit)
         else
             level = _G.UnitLevel(unit)
@@ -344,6 +345,8 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             local unitType
             if isPlayer then
                 unitType = ("%s %s%s"):format(_G.UnitRace(unit), color, _G.UnitClass(unit))
+            elseif IsBattlePet then
+                unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
             else
                 unitType = _G.UnitCreatureType(unit)
             end
@@ -352,9 +355,24 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             if level == -1 then
                 level = "??"
                 diff = qqColor
+            elseif IsBattlePet then
+                local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
+                if teamLevel then -- from WorldMapFrame.lua: 2522
+                    if teamLevel < level then
+                        --add 2 to the min level because it's really hard to fight higher level pets
+                        diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2);
+                    elseif teamLevel > level then
+                        diff = _G.GetRelativeDifficultyColor(teamLevel, level);
+                    else
+                        --if your team is in the level range, no need to call the function, just make it yellow
+                        diff = _G.QuestDifficultyColors["difficult"];
+                    end
+                else
+                    --If you unlocked pet battles but have no team, level ranges are meaningless so make them grey
+                    diff = _G.QuestDifficultyColors["header"];
+                end
             else
-                level = ("%d"):format(level)
-                diff = _G.GetQuestDifficultyColor(level)
+                diff = _G.GetCreatureDifficultyColor(level)
             end
 
             local classify = _G.UnitClassification(unit) or ""
