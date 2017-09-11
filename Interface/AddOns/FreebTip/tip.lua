@@ -333,7 +333,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
         _G.GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
 
         local level, IsBattlePet
-        if _G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit) then
+        if _G.UnitIsBattlePet(unit) then
             IsBattlePet = true
             level = _G.UnitBattlePetLevel(unit)
         else
