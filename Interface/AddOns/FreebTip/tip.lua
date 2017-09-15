@@ -200,10 +200,9 @@ end
 
 local function PlayerName(self, unit)
     local unitName, server = _G.UnitName(unit)
-    print(unitName, server)
     if not cfg.hideTitles then
+        -- if the unit is out of range, this will be nil
         unitName = _G.UnitPVPName(unit) or unitName
-        print("title", unitName, server)
     end
 
     if server and server ~= "" then
