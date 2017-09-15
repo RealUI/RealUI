@@ -200,8 +200,10 @@ end
 
 local function PlayerName(self, unit)
     local unitName, server = _G.UnitName(unit)
+    print(unitName, server)
     if not cfg.hideTitles then
-        unitName = _G.UnitPVPName(unit)
+        unitName = _G.UnitPVPName(unit) or unitName
+        print("title", unitName, server)
     end
 
     if server and server ~= "" then
@@ -332,9 +334,9 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
         end
         _G.GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
 
-        local level, IsBattlePet
-        if _G.UnitIsBattlePet(unit) then
-            IsBattlePet = true
+        local level
+        local IsBattlePet = _G.UnitIsBattlePet(unit)
+        if IsBattlePet then
             level = _G.UnitBattlePetLevel(unit)
         else
             level = _G.UnitLevel(unit)
