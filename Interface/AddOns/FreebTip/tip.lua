@@ -21,7 +21,7 @@ local cfg = {
     colorborderItem = true,
 
     combathide = false,     -- world objects
-    combathideALL = false,  -- everything
+    combathideALL = true,  -- everything
 
 
     -- additions
@@ -384,7 +384,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
                 local linetext = tiptext:GetText()
 
                 if linetext and linetext:find(_G.LEVEL) then
-                    tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType, (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
+                    tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType or "unitType", (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
                     break
                 end
             end

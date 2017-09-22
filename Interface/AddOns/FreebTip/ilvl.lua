@@ -90,7 +90,6 @@ local function GetItemLevel(guid, data, age)
     if not artifactcolor then artifactcolor =_G.ITEM_QUALITY_COLORS[_G.LE_ITEM_QUALITY_ARTIFACT].hex end
     if ((not guid) or (data and type(data.items) ~= "table")) then return end
 
-
     local totalILvl = 0
     local hasTwoHander, isDualWield
     local artifactILvl, mainArtifact, offArtifact
@@ -102,6 +101,7 @@ local function GetItemLevel(guid, data, age)
             if link then
                 local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
                 if rarity and subTypeID then
+                    --ilvl = _G.GetDetailedItemLevelInfo(link)
                     if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
                         ilvl = ItemUpgradeInfo:GetUpgradedItemLevel(link)
                     end
@@ -211,6 +211,10 @@ end)
 _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
     local unit = ns.GetUnit()
     self.freebtipiLvlSet = false
+    --[[
+    LibInspect:RequestData("items", unit)
+    iLvlUpdate:Show()
+    ]]
     if _G.UnitIsUnit(unit, "player") then
         local _, avgItemLevelEquipped = _G.GetAverageItemLevel()
         ShowiLvl(avgItemLevelEquipped)

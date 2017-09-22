@@ -161,6 +161,7 @@ function private.OnLoad()
     end
 
     UpdateUIScale()
+    --private.disabled.tooltips = true
 
     local Base, Hook = Aurora.Base, Aurora.Hook
     function Hook.GameTooltip_OnHide(gametooltip)
