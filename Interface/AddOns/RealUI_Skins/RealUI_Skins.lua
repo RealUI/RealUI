@@ -5,8 +5,10 @@ local _, private = ...
 
 local Aurora = private.Aurora
 local RealUI = _G.RealUI
-local debug = RealUI.GetDebug("Skins")
 local RealUI_SkinsDB
+
+local debug = RealUI.GetDebug("Skins")
+private.debug = debug
 
 local defaults = {
     stripeAlpha = 0.5,
@@ -125,6 +127,7 @@ function RealUI:UpdateFrameStyle()
 end
 
 function private.OnLoad()
+    --print("OnLoad Aurora", Aurora, private.Aurora)
     _G.RealUI_SkinsDB = _G.RealUI_SkinsDB or {}
     RealUI_SkinsDB = _G.RealUI_SkinsDB
 
@@ -180,19 +183,32 @@ function private.OnLoad()
             skinnedFrames[frame] = stripes
         end
     end
+
+    function private.AddOns.nibRealUI()
+        if not _G.IsAddOnLoaded("Ace3") then
+            private.AddOns.Ace3()
+        end
+    end
 end
 
 if not private.Aurora then
-    local OnLoad = private.OnLoad
+    private.Aurora = _G.Aurora
+
     local AddOns = {}
     private.AddOns = AddOns
+
+    local OnLoad = private.OnLoad
     function _G.Aurora_OnLoad(privateDev)
-        private = privateDev
         Aurora = private.Aurora
+        --print("Aurora_OnLoad Aurora", Aurora, private.Aurora)
+
+        privateDev.debug = private.debug
 
         for addon, func in next, AddOns do
-            private.AddOns[addon] = func
+            privateDev.AddOns[addon] = func
         end
+
+        private = privateDev
 
         OnLoad()
     end
