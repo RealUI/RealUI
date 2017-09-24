@@ -472,7 +472,7 @@ local core do
                     order = 40,
                     args = {
                         arena = {
-                            name = "Arenas",
+                            name = _G.ARENA_BATTLES,
                             type = "toggle",
                             get = function(info) return db.visibility.arena end,
                             set = function(info, value)
@@ -482,7 +482,7 @@ local core do
                             order = 10,
                         },
                         pvp = {
-                            name = "Battlegrounds",
+                            name = _G.BATTLEGROUNDS,
                             type = "toggle",
                             get = function(info) return db.visibility.pvp end,
                             set = function(info, value)
@@ -492,7 +492,7 @@ local core do
                             order = 20,
                         },
                         party = {
-                            name = "5 Man Dungeons",
+                            name = _G.DUNGEONS,
                             type = "toggle",
                             get = function(info) return db.visibility.party end,
                             set = function(info, value)
@@ -502,7 +502,7 @@ local core do
                             order = 30,
                         },
                         raid = {
-                            name = "Raid Dungeons",
+                            name = _G.RAIDS,
                             type = "toggle",
                             get = function(info) return db.visibility.raid end,
                             set = function(info, value)
@@ -3009,7 +3009,7 @@ local uiTweaks do
                             order = 30,
                             args = {
                                 arena = {
-                                    name = "Arenas",
+                                    name = _G.ARENA_BATTLES,
                                     type = "toggle",
                                     get = function(info) return db.hidden.collapse.arena end,
                                     set = function(info, value)
@@ -3019,7 +3019,7 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 pvp = {
-                                    name = "Battlegrounds",
+                                    name = _G.BATTLEGROUNDS,
                                     type = "toggle",
                                     get = function(info) return db.hidden.collapse.pvp end,
                                     set = function(info, value)
@@ -3029,7 +3029,7 @@ local uiTweaks do
                                     order = 20,
                                 },
                                 party = {
-                                    name = "5 Man Dungeons",
+                                    name = _G.DUNGEONS,
                                     type = "toggle",
                                     get = function(info) return db.hidden.collapse.party end,
                                     set = function(info, value)
@@ -3038,15 +3038,25 @@ local uiTweaks do
                                     end,
                                     order = 30,
                                 },
+                                scenario = {
+                                    name = _G.SCENARIOS,
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.collapse.party end,
+                                    set = function(info, value)
+                                        db.hidden.collapse.party = value
+                                        ObjectivesAdv:UpdateCollapseState()
+                                    end,
+                                    order = 40,
+                                },
                                 raid = {
-                                    name = "Raid Dungeons",
+                                    name = _G.RAIDS,
                                     type = "toggle",
                                     get = function(info) return db.hidden.collapse.raid end,
                                     set = function(info, value)
                                         db.hidden.collapse.raid = value
                                         ObjectivesAdv:UpdateCollapseState()
                                     end,
-                                    order = 40,
+                                    order = 50,
                                 },
                             },
                         },
@@ -3063,7 +3073,7 @@ local uiTweaks do
                             order = 40,
                             args = {
                                 arena = {
-                                    name = "Arenas",
+                                    name = _G.ARENA_BATTLES,
                                     type = "toggle",
                                     get = function(info) return db.hidden.hide.arena end,
                                     set = function(info, value)
@@ -3073,7 +3083,7 @@ local uiTweaks do
                                     order = 10,
                                 },
                                 pvp = {
-                                    name = "Battlegrounds",
+                                    name = _G.BATTLEGROUNDS,
                                     type = "toggle",
                                     get = function(info) return db.hidden.hide.pvp end,
                                     set = function(info, value)
@@ -3083,7 +3093,7 @@ local uiTweaks do
                                     order = 20,
                                 },
                                 party = {
-                                    name = "5 Man Dungeons",
+                                    name = _G.DUNGEONS,
                                     type = "toggle",
                                     get = function(info) return db.hidden.hide.party end,
                                     set = function(info, value)
@@ -3092,15 +3102,25 @@ local uiTweaks do
                                     end,
                                     order = 30,
                                 },
+                                scenario = {
+                                    name = _G.SCENARIOS,
+                                    type = "toggle",
+                                    get = function(info) return db.hidden.hide.party end,
+                                    set = function(info, value)
+                                        db.hidden.hide.party = value
+                                        ObjectivesAdv:UpdateHideState()
+                                    end,
+                                    order = 40,
+                                },
                                 raid = {
-                                    name = "Raid Dungeons",
+                                    name = _G.RAIDS,
                                     type = "toggle",
                                     get = function(info) return db.hidden.hide.raid end,
                                     set = function(info, value)
                                         db.hidden.hide.raid = value
                                         ObjectivesAdv:UpdateHideState()
                                     end,
-                                    order = 40,
+                                    order = 50,
                                 },
                             },
                         },
