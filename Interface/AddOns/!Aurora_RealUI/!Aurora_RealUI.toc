@@ -1,8 +1,8 @@
-## Interface: 70200
+## Interface: 70300
 ## Title: !Aurora |cffffffffReal|r|cffbf3333UI|r
 ## Notes: A custom Aurora skin for RealUI
 ## Author: Gethe
-## Version: 8.1 r20d
+## Version: 8.1 r20e
 ## RequiredDeps: RealUI_Bugs, nibRealUI_Init
 ## OptionalDeps: !BugGrabber, Masque
 

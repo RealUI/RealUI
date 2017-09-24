@@ -605,7 +605,7 @@ function RealUI:ChatCommand_Config()
     RealUI:LoadConfig("HuD")
 end
 
-local configLoaded, configFailed = false, false
+local configLoaded = false
 function RealUI:LoadConfig(app, section, ...)
     if _G.InCombatLockdown() then
         return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
@@ -614,11 +614,10 @@ function RealUI:LoadConfig(app, section, ...)
         local reason
         configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
         if not configLoaded then
-            _G.print("Failed to load nibRealUI_Config:", reason)
-            configFailed = true
+            _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
         end
     end
-    if not configFailed then return self:ToggleConfig(app, section, ...) end
+    self:ToggleConfig(app, section, ...)
 end
 
 function RealUI:OnInitialize()

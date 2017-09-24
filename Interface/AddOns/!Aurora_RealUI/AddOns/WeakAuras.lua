@@ -101,7 +101,7 @@ mods["PLAYER_LOGIN"]["WeakAuras"] = function(self, Fu, Co)
             -- Minimize button
             children[5]:Hide()
             local minimize = children[5]:GetChildren()
-            F.ReskinArrow(minimize, "up")
+            F.ReskinArrow(minimize, "Up")
             minimize:SetParent(frame)
             minimize:SetSize(17, 17)
             minimize:ClearAllPoints()

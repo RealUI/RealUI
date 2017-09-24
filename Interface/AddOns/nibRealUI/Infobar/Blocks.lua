@@ -27,10 +27,6 @@ local qTipAquire = qTip.Acquire
 function qTip:Acquire(...)
     local tooltip = qTipAquire(self, ...)
     RealUI.RegisterModdedFrame(tooltip)
-    if _G.Aurora and not tooltip._skinned then
-        _G.Aurora[1].CreateBD(tooltip)
-        tooltip._skinned = true
-    end
     return tooltip
 end
 
@@ -537,6 +533,10 @@ function Infobar:CreateBlocks()
         SetupFonts()
         SetupTextTable()
     end
+
+    -- TODO: when Blizz fixes the issues with textures not showing, use these.
+    --local leftClick = CreateTextureMarkup([[Interface\TutorialFrame\UI-TUTORIAL-FRAME]], 512, 512, 14, 16, 0.0019531, 0.1484375, 0.4257813, 0.6210938)
+    --local rightClick = CreateTextureMarkup([[Interface\TutorialFrame\UI-TUTORIAL-FRAME]], 512, 512, 14, 16, 0.0019531, 0.1484375, 0.6269531, 0.8222656)
 
     --[[ Static Blocks ]]--
     do  -- Start
@@ -1909,8 +1909,9 @@ function Infobar:CreateBlocks()
     do -- Specialization
         local specInfo, currentSpecIndex = {}
         for specIndex = 1, RealUI.numSpecs do
-            local _, name, _, icon = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+            local id, name, _, icon = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
             specInfo[specIndex] = {
+                id = id,
                 name = name,
                 icon = icon,
             }
@@ -1933,21 +1934,25 @@ function Infobar:CreateBlocks()
 
         local equipmentNeedsUpdate = false
         local function Line_OnMouseUp(line, specIndex, button)
+            local tooltip = line:GetParent():GetParent():GetParent()
             if button == "LeftButton" then
-                if not _G.InCombatLockdown() then
-                    if specIndex == currentSpecIndex then
-                        if dbc.specgear[specIndex] >= 0 then
-                            EquipmentManager_EquipSet(dbc.specgear[specIndex])
-                        end
-                    else
-                        _G.SetSpecialization(specIndex)
-                        if dbc.specgear[specIndex] >= 0 then
-                            equipmentNeedsUpdate = dbc.specgear[specIndex]
+                if _G.IsAltKeyDown() then
+                    _G.SetLootSpecialization(specInfo[specIndex].id)
+                else
+                    if not _G.InCombatLockdown() then
+                        if specIndex == currentSpecIndex then
+                            if dbc.specgear[specIndex] >= 0 then
+                                EquipmentManager_EquipSet(dbc.specgear[specIndex])
+                            end
+                        else
+                            _G.SetSpecialization(specIndex)
+                            if dbc.specgear[specIndex] >= 0 then
+                                equipmentNeedsUpdate = dbc.specgear[specIndex]
+                            end
                         end
                     end
                 end
             elseif button == "RightButton" then
-                local tooltip = line:GetParent():GetParent():GetParent()
                 if _G.IsAltKeyDown() then
                     dbc.specgear[specIndex] = -1
                     tooltip:SetCell(specInfo[specIndex].line, 2, "---")
@@ -1992,6 +1997,16 @@ function Infobar:CreateBlocks()
             block.dataObj.text = specInfo[currentSpecIndex].name
         end
 
+        local lootSpec, hintLine
+        local function Spec_TooltipOnUpdate(tooltip)
+            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, 3)
+            if tooltip:IsMouseOver() then
+                tooltip:SetCell(hintLine, 1, L["Spec_ChangeSpec"], nil, 3)
+            else
+                tooltip:SetCell(hintLine, 1, L["Spec_Open"], nil, 3)
+            end
+        end
+
         LDB:NewDataObject("spec", {
             name = _G.SPECIALIZATION,
             type = "RealUI",
@@ -2009,6 +2024,7 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "LEFT", "LEFT")
                 SetupTooltip(tooltip, block)
+                tooltip:SetScript("OnUpdate", Spec_TooltipOnUpdate)
                 local lineNum, colNum
 
                 lineNum, colNum = tooltip:AddHeader()
@@ -2024,14 +2040,16 @@ function Infobar:CreateBlocks()
                 end
 
                 tooltip:AddLine(" ")
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, 3)
-
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Spec_ChangeSpec"], nil, 3)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                lootSpec = tooltip:AddLine()
+                hintLine = tooltip:AddLine()
+                tooltip:SetCell(hintLine, 1, L["Spec_Open"], nil, 3)
+                tooltip:SetCellTextColor(hintLine, 1, 0, 1, 0)
 
                 tooltip:Show()
+            end,
+            OnClick = function(block, ...)
+                Infobar:debug("spec: OnClick", block.side, ...)
+                _G.ToggleTalentFrame(_G.TalentMicroButton.suggestedTab)
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("spec: OnEvent", block.side, event, ...)
