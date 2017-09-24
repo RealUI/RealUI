@@ -13,7 +13,7 @@ manual-changelog:
 
 externals:
     Interface/AddOns/FreebTip/LibInspect:
-        url: https://repos.wowace.com/wow/libinspect/trunk
+        url: https://github.com/scotepi/wow-libinspect.git
         tag: latest
 
     Interface/AddOns/nibRealUI/Libs/AceAddon-3.0:
