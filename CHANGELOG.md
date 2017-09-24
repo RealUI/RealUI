@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20e] - 2017-09-24 ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * nibRealUI
+  * nibRealUI_Config
+
+### Changed ###
+
+  * The loot spec can now be changed from the Infobar spec block.
+  * The Objectives tracker is now shown by default when in a scenario.
+
+### Fixed ###
+
+  * An error would occur when the WeakAuras skin was enabled.
+
+
+
+
 ## [8.1 r20d] - 2017-07-11 ##
 ### Modified AddOns ###
 
@@ -302,6 +321,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20e]: https://github.com/RealUI/RealUI/compare/8.1_r20d...8.1_r20e
 [8.1 r20d]: https://github.com/RealUI/RealUI/compare/8.1_r20c...8.1_r20d
 [8.1 r20c]: https://github.com/RealUI/RealUI/compare/8.1_r20b...8.1_r20c
 [8.1 r20b]: https://github.com/RealUI/RealUI/compare/8.1_r20a...8.1_r20b

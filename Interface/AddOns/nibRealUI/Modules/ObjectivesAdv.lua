@@ -20,15 +20,7 @@ function ObjectivesAdv:UpdateHideState()
     local _, instanceType = _G.GetInstanceInfo()
 
     if db.hidden.enabled and (instanceType ~= "none") and RealUI:GetModuleEnabled(MODNAME) then
-        if (instanceType == "pvp" and db.hidden.hide.pvp) then          -- Battlegrounds
-            Hide = true
-        elseif (instanceType == "arena" and db.hidden.hide.arena) then  -- Arena
-            Hide = true
-        elseif (((instanceType == "party") or (instanceType == "scenario")) and db.hidden.hide.party) then  -- 5 Man Dungeons
-            Hide = true
-        elseif (instanceType == "raid" and db.hidden.hide.raid) then    -- Raid Dungeons
-            Hide = true
-        end
+        Hide = db.hidden.hide[instanceType]
     end
     if Hide then
         self.hidden = true
@@ -144,12 +136,14 @@ function ObjectivesAdv:OnInitialize()
                 collapse = {
                     pvp = true,
                     arena = false,
+                    scenario = false,
                     party = true,
                     raid = false,
                 },
                 hide = {
                     pvp = false,
                     arena = true,
+                    scenario = false,
                     party = false,
                     raid = true,
                 },
