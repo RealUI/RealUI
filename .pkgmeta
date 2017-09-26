@@ -81,6 +81,9 @@ externals:
     Interface/AddOns/RealUI_Bugs/Libs/LibStub:
         url: https://repos.wowace.com/wow/ace3/trunk/LibStub
         tag: latest
+    Interface/AddOns/RealUI_Bugs/Libs/LibTextDump-1.0:
+        url: https://repos.wowace.com/wow/libtextdump-1-0
+        tag: latest
 
     Interface/AddOns/RealUI_Skins/Aurora:
         url: https://github.com/Haleth/Aurora.git
