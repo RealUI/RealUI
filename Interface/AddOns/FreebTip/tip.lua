@@ -20,8 +20,8 @@ local cfg = {
     colorborderClass = true,
     colorborderItem = true,
 
-    combathide = false,     -- world objects
-    combathideALL = true,  -- everything
+    combathide = true,     -- world objects
+    combathideALL = false,  -- everything
 
 
     -- additions
