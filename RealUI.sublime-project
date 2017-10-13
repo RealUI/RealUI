@@ -33,6 +33,7 @@
 			"folder_exclude_patterns":
 			[
 				".idea",
+				".release",
 				"Interface",
 			],
 			"name": "Docs",
