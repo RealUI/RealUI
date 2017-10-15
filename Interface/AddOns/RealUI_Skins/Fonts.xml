@@ -5,9 +5,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
         local LSM = _G.LibStub("LibSharedMedia-3.0")
 
         --[[ Backgrounds ]]--
-        LSM:Register("background", "Plain", [[Interface\AddOns\nibRealUI\Media\Plain]])
-        LSM:Register("background", "Plain80", [[Interface\AddOns\nibRealUI\Media\Plain80]])
-        LSM:Register("background", "Plain90", [[Interface\AddOns\nibRealUI\Media\Plain90]])
+        LSM:Register("background", "Plain", [[Interface\Buttons\WHITE8x8]])
 
         --[[ Fonts ]]--
         local LOCALE_MASK = LSM.LOCALE_BIT_koKR + LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_zhCN + LSM.LOCALE_BIT_zhTW + LSM.LOCALE_BIT_western
@@ -47,10 +45,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
         LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf]], LSM.LOCALE_BIT_koKR)
 
         --[[ Statusbars ]]--
-        LSM:Register("statusbar", "Plain", [[Interface\AddOns\nibRealUI\Media\Plain]])
-        LSM:Register("statusbar", "Plain80", [[Interface\AddOns\nibRealUI\Media\Plain80]])
-        LSM:Register("statusbar", "Plain90", [[Interface\AddOns\nibRealUI\Media\Plain90]])
-        LSM:Register("statusbar", "Plain_Dark", [[Interface\AddOns\nibRealUI\Media\Plain80]])
+        LSM:Register("statusbar", "Plain", [[Interface\Buttons\WHITE8x8]])
     </Script>
 
     <FontFamily  name="RealUIFont_Normal" virtual="true">

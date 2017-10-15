@@ -28,21 +28,7 @@ RealUI.media = {
         purple =    {0.70, 0.28, 1.00, 1},
     },
     textures = {
-        plain =     [[Interface\AddOns\nibRealUI\Media\Plain.tga]],
-        plain80 =   [[Interface\AddOns\nibRealUI\Media\Plain80.tga]],
-        plain90 =   [[Interface\AddOns\nibRealUI\Media\Plain90.tga]],
-        border =    [[Interface\AddOns\nibRealUI\Media\Plain.tga]],
-    },
-    icons = {
-        DoubleArrow =   [[Interface\AddOns\nibRealUI\Media\Icons\DoubleArrow]],
-        DoubleArrow2 =  [[Interface\AddOns\nibRealUI\Media\Icons\DoubleArrow2]],
-        Lightning =     [[Interface\AddOns\nibRealUI\Media\Icons\Lightning]],
-        Cross =         [[Interface\AddOns\nibRealUI\Media\Icons\Cross]],
-        Flame =         [[Interface\AddOns\nibRealUI\Media\Icons\Flame]],
-        Heart =         [[Interface\AddOns\nibRealUI\Media\Icons\Heart]],
-        PersonPlus =    [[Interface\AddOns\nibRealUI\Media\Icons\PersonPlus]],
-        Shield =        [[Interface\AddOns\nibRealUI\Media\Icons\Shield]],
-        Sword =         [[Interface\AddOns\nibRealUI\Media\Icons\Sword]],
+        plain = [[Interface\Buttons\WHITE8x8]],
     },
 }
 

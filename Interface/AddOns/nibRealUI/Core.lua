@@ -570,7 +570,7 @@ local configLoaded = false
 function RealUI.LoadConfig(app, section, ...)
     debug("RealUI.LoadConfig", app, section, ...)
     if _G.InCombatLockdown() then
-        return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
+        return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Notification_Alert]])
     end
     debug("is loaded", configLoaded)
     if not configLoaded then
