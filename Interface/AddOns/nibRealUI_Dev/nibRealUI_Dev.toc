@@ -1,6 +1,7 @@
 ## Interface: 70300
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Dev
 ## Notes: Development assistant for RealUI
+## RequiredDeps: RealUI_Bugs
 ## LoadWith: RealUI_Bugs
 
 nibRealUI_Dev.lua
