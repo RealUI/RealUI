@@ -31,9 +31,9 @@ tags.Methods["realui:name"] = function(unit)
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
-        nameColor = RealUI:ColorTableToStr(RealUI:GetClassColor(class))
+        nameColor = _G.CUSTOM_CLASS_COLORS[class].colorStr
     end
-    return ("|cff%s%s|r"):format(nameColor, name)
+    return ("|c%s%s|r"):format(nameColor, name)
 end
 tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 

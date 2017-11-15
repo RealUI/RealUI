@@ -35,11 +35,6 @@ local itemSlotSize = ns.options.itemSlotSize
 local cbNivaya = cargBags:GetImplementation("Nivaya")
 local MyContainer = cbNivaya:GetContainerClass()
 
-local function GetClassColor(class)
-    local classColors = _G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class] or _G.RAID_CLASS_COLORS[class]
-    return {classColors.r, classColors.g, classColors.b}
-end
-
 local GetNumFreeSlots = function(bagType)
     local free, max = 0, 0
     if bagType == "bag" then
@@ -317,14 +312,9 @@ local function SetFrameMovable(f, v)
     end
 end
 
-local classColor
 local function IconButton_OnEnter(self)
     self.mouseover = true
-
-    if not classColor then
-        classColor = GetClassColor(_G.select(2, _G.UnitClass("player")))
-    end
-    self.icon:SetVertexColor(classColor[1], classColor[2], classColor[3])
+    self.icon:SetVertexColor(_G.RealUI.charInfo.class.color:GetRGB())
 
     if self.tooltip then
         self.tooltip:Show()

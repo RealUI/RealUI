@@ -313,7 +313,7 @@ local function SetupTextTable()
                 end)
 
                 local highlight = row:CreateTexture(nil, "BACKGROUND")
-                local r, g, b = _G.unpack(RealUI.classColor)
+                local r, g, b = RealUI.charInfo.class.color:GetRGB()
                 highlight:SetColorTexture(r, g, b, 0.25)
                 highlight:SetAllPoints()
                 highlight:Hide()
@@ -355,7 +355,7 @@ local function SetupTextTable()
                 header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
-                local hR, hG, hB = _G.unpack(RealUI.classColor)
+                local hR, hG, hB = RealUI.charInfo.class.color:GetRGB()
                 local highlight = header:CreateTexture(nil, "ARTWORK")
                 highlight:SetColorTexture(hR, hG, hB)
                 highlight:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
@@ -977,8 +977,7 @@ function Infobar:CreateBlocks()
                         local name = _G.Ambiguate(fullName, "guild")
 
                         -- Class color names
-                        local color = RealUI:GetClassColor(class, "hex")
-                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
+                        name = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[class].colorStr, name)
 
                         -- Tags
                         if isMobile then
@@ -989,8 +988,7 @@ function Infobar:CreateBlocks()
                         end
 
                         -- Difficulty color levels
-                        color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl))
-                        lvl = ("%s%d|r"):format(color, lvl)
+                        lvl = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
 
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
@@ -1186,7 +1184,7 @@ function Infobar:CreateBlocks()
 
                         if characterName then
                             if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
-                                name = nameFormat:format(bnetFriendColor, name, RealUI:GetClassColor(ClassLookup[class], "hex"), characterName)
+                                name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
                                     name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
@@ -1241,7 +1239,7 @@ function Infobar:CreateBlocks()
                     local name, level, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
                     if isOnline then
                         -- Class color names
-                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(RealUI:GetClassColor(ClassLookup[class], "hex"), name)
+                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, name)
 
                         if status == _G.CHAT_FLAG_AFK then
                             cName = PlayerStatus[1] .. cName
@@ -1907,15 +1905,7 @@ function Infobar:CreateBlocks()
     end
 
     do -- Specialization
-        local specInfo, currentSpecIndex = {}
-        for specIndex = 1, RealUI.numSpecs do
-            local id, name, _, icon = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
-            specInfo[specIndex] = {
-                id = id,
-                name = name,
-                icon = icon,
-            }
-        end
+        local specInfo, specLines = RealUI.charInfo.specs, {}
         local equipSetsByIndex, equipSetsByID = {}, {}
         local layout = {
             L["Layout_DPSTank"],
@@ -1940,7 +1930,7 @@ function Infobar:CreateBlocks()
                     _G.SetLootSpecialization(specInfo[specIndex].id)
                 else
                     if not _G.InCombatLockdown() then
-                        if specIndex == currentSpecIndex then
+                        if specIndex == specInfo.current.index then
                             if dbc.specgear[specIndex] >= 0 then
                                 EquipmentManager_EquipSet(dbc.specgear[specIndex])
                             end
@@ -1955,7 +1945,7 @@ function Infobar:CreateBlocks()
             elseif button == "RightButton" then
                 if _G.IsAltKeyDown() then
                     dbc.specgear[specIndex] = -1
-                    tooltip:SetCell(specInfo[specIndex].line, 2, "---")
+                    tooltip:SetCell(specLines[specIndex], 2, "---")
                 else
                     local numEquipSets = _G.GetNumEquipmentSets()
                     if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then
@@ -1968,7 +1958,7 @@ function Infobar:CreateBlocks()
                             end
                         end
                     end
-                    tooltip:SetCell(specInfo[specIndex].line, 2, equipSetsByID[dbc.specgear[specIndex]].name)
+                    tooltip:SetCell(specLines[specIndex], 2, equipSetsByID[dbc.specgear[specIndex]].name)
                 end
             end
         end
@@ -1992,9 +1982,8 @@ function Infobar:CreateBlocks()
             end
         end
         local function UpdateBlock(block)
-            currentSpecIndex = _G.GetSpecialization()
-            block.dataObj.icon = specInfo[currentSpecIndex].icon
-            block.dataObj.text = specInfo[currentSpecIndex].name
+            block.dataObj.icon = specInfo[specInfo.current.index].icon
+            block.dataObj.text = specInfo[specInfo.current.index].name
         end
 
         local lootSpec, hintLine
@@ -2029,12 +2018,12 @@ function Infobar:CreateBlocks()
 
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
-                for specIndex = 1, RealUI.numSpecs do
+                for specIndex = 1, #RealUI.charInfo.specs do
                     local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]]
                     lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
-                    specInfo[specIndex].line = lineNum
-                    if specIndex == currentSpecIndex then
+                    specLines[specIndex] = lineNum
+                    if specIndex == specInfo.current.index then
                         tooltip:SetLineTextColor(lineNum, _G.unpack(RealUI.media.colors.orange))
                     end
                 end
@@ -2055,10 +2044,10 @@ function Infobar:CreateBlocks()
                 Infobar:debug("spec: OnEvent", block.side, event, ...)
                 if event == "EQUIPMENT_SETS_CHANGED" then
                     UpdateGearSets()
-                elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
+                elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
                     UpdateBlock(block)
-                    if ndbc.layout.spec[currentSpecIndex] ~= ndbc.layout.current then
-                        ndbc.layout.current = ndbc.layout.spec[currentSpecIndex]
+                    if ndbc.layout.spec[specInfo.current.index] ~= ndbc.layout.current then
+                        ndbc.layout.current = ndbc.layout.spec[specInfo.current.index]
                         RealUI:UpdateLayout()
                     end
 
@@ -2069,7 +2058,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             events = {
-                "ACTIVE_TALENT_GROUP_CHANGED",
+                "PLAYER_SPECIALIZATION_CHANGED",
                 "EQUIPMENT_SETS_CHANGED",
                 "EQUIPMENT_SWAP_FINISHED",
                 "PLAYER_EQUIPMENT_CHANGED",
@@ -2288,7 +2277,7 @@ function Infobar:CreateBlocks()
             OnEnable = function(block)
                 Infobar:debug("currency: OnEnable", block.side)
                 currencyDB = RealUI.db.global.currency
-                charDB = currencyDB[RealUI.realmNormalized][RealUI.faction][RealUI.charName]
+                charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
                 if not currencyStates[dbc.currencyState] then
                     dbc.currencyState = "money"
                 end
@@ -2354,11 +2343,10 @@ function Infobar:CreateBlocks()
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local realm_faction = realm.."-"..RealUI.faction
-                        local factionDB = currencyDB[realm][RealUI.faction]
+                        local realm_faction = realm.."-"..RealUI.charInfo.faction
+                        local factionDB = currencyDB[realm][RealUI.charInfo.faction]
                         for name, data in next, factionDB do
-                            local classColor = RealUI:GetClassColor(data.class, "hex")
-                            name = charName:format(classColor, name)
+                            name = charName:format(_G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
                             local money = GetMoneyString(data.money, true)
                             realmMoneyTotal = realmMoneyTotal + data.money
 

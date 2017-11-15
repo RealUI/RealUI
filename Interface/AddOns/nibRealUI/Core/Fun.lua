@@ -465,19 +465,6 @@ function RealUI:GetILVLColor(lvl, ilvl)
     end
 end
 
-local default = {r = 1, g = 1, b = 1, colorStr = "ffffffff"}
-function RealUI:GetClassColor(class, kind)
-    local classColors = (_G.CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS)[class] or default
-    if kind == "key" then
-        return classColors
-    elseif kind == "hex" then
-        return classColors.colorStr
-    else
-        return {classColors.r, classColors.g, classColors.b}
-    end
-end
-
-
 --[[
 All color functions assume arguments are within the range 0.0 - 1.0
 

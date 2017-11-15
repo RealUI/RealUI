@@ -335,9 +335,8 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     label:SetText(dataObj.label or dataObj.name)
     block.label = label
 
-    local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
     local highlight = block:CreateTexture(nil, "ARTWORK")
-    highlight:SetColorTexture(r, g, b)
+    highlight:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
     highlight:SetHeight(1)
     highlight:SetPoint("BOTTOMLEFT")
     highlight:SetPoint("BOTTOMRIGHT")
@@ -860,7 +859,7 @@ end
 --------------------
 function Infobar:OnInitialize()
     local specgear = {}
-    for specIndex = 1, RealUI.numSpecs do
+    for specIndex = 1, #RealUI.charInfo.specs do
         specgear[specIndex] = -1
     end
     self.db = RealUI.db:RegisterNamespace(MODNAME)

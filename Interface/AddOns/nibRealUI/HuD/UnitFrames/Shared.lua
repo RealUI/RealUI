@@ -59,7 +59,7 @@ local function PositionSteps(self, vert)
     local width, height = self:GetSize()
     local isRight = self:GetReverseFill()
     local point, relPoint = vert..(isRight and "RIGHT" or "LEFT"), vert..(isRight and "LEFT" or "RIGHT")
-    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
@@ -78,7 +78,7 @@ local function UpdateSteps(self, unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)
     local percent = RealUI:GetSafeVals(cur, max)
-    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
     for i = 1, 2 do
         --print(percent, unit, cur, max, self.colorClass)
         if self:GetReversePercent() then

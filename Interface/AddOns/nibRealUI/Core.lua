@@ -130,8 +130,8 @@ local defaults, charInit do
         needchatmoved = true,
     }
     local spec = {}
-    for specIndex = 1, RealUI.numSpecs do
-        local _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+    for specIndex = 1, #RealUI.charInfo.specs do
+        local _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.charInfo.class.id, specIndex)
         debug("Spec info", specIndex, role)
         spec[specIndex] = role == "HEALER" and 2 or 1
     end
@@ -350,10 +350,12 @@ function RealUI:InitCurrencyDB()
     if not RealUI.realmNormalized then
         local DB = RealUI.db.global.currency
 
-        RealUI.realmNormalized = _G.GetNormalizedRealmName()
-        local realm   = RealUI.realmNormalized
-        local faction = RealUI.faction
-        local player  = RealUI.charName
+        local charInfo = RealUI.charInfo
+        charInfo.realmNormalized = _G.GetNormalizedRealmName()
+
+        local realm   = charInfo.realmNormalized
+        local faction = charInfo.faction
+        local player  = charInfo.name
 
         if not DB[realm] then
             DB[realm] = {}
@@ -383,13 +385,22 @@ function RealUI:InitCurrencyDB()
             end
 
             local charDB = realmDB[player]
-            charDB.class = RealUI.class
+            charDB.class = charInfo.class.token
             charDB.lastSeen = now
         else
             DB[realm][faction] = nil
         end
     end
 end
+
+local function UpdateSpec()
+    local old = RealUI.charInfo.specs.current.index
+    local new = _G.GetSpecialization()
+    if old ~= new then
+        RealUI.charInfo.specs.current = RealUI.charInfo.specs[new]
+    end
+end
+
 
 -- Version info retrieval
 function RealUI:GetVerString(returnLong)
@@ -458,8 +469,7 @@ function RealUI:OnInitialize()
     self.media = db.media
 
     -- Vars
-    self.classColor = RealUI:GetClassColor(self.class)
-    self.key = ("%s - %s"):format(self.charName, self.realm)
+    self.key = ("%s - %s"):format(self.charInfo.name, self.charInfo.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 
@@ -488,6 +498,7 @@ function RealUI:OnInitialize()
     end)
 
     -- Register events
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
     self:RegisterEvent("PLAYER_ENTERING_WORLD", "LockdownUpdates")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
 
@@ -627,6 +638,8 @@ function RealUI:OnEnable()
     if _G.GetCVar("taintLog") ~= "0" then
          _G.print(L["Slash_Taint"]:format(red, blue))
     end
+
+    UpdateSpec()
 
     -- Update styling
     self:UpdateFrameStyle()

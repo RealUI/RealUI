@@ -29,13 +29,12 @@ local function UpdateTabStyle(self, style)
     end
 
     -- Color
-    local color
-    if ((style == "highlight") and db.colors.classcolorhighlight) or style == "selected" then
-        color = RealUI.classColor
+    if style == "highlight" or style == "selected" then
+        text:SetTextColor(RealUI.charInfo.class.color:GetRGB())
     else
-        color = db.colors[style]
+        local color = db.colors[style]
+        text:SetTextColor(color[1], color[2], color[3], color[4])
     end
-    text:SetTextColor(color[1], color[2], color[3], color[4])
 end
 
 -- Chat Tab mouse-events

@@ -1100,7 +1100,7 @@ end
 local function Toggle_OnEnter()
     MMFrames.toggle.mouseover = true
 
-    MMFrames.toggle.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.toggle.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.toggle:SetFrameLevel(6)
 
     MMFrames.buttonframe.tooltip:Hide()
@@ -1131,7 +1131,7 @@ end
 local function Config_OnEnter()
     MMFrames.config.mouseover = true
 
-    MMFrames.config.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.config.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.config:SetFrameLevel(6)
 
     if ExpandedState == 0 then
@@ -1165,7 +1165,7 @@ end
 local function Tracking_OnEnter()
     MMFrames.tracking.mouseover = true
 
-    MMFrames.tracking.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.tracking.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.tracking:SetFrameLevel(6)
 
     if ExpandedState == 0 then
@@ -1237,7 +1237,7 @@ end
 local function Farm_OnEnter()
     MMFrames.farm.mouseover = true
 
-    MMFrames.farm.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.farm.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.farm:SetFrameLevel(6)
 
     if ExpandedState == 0 then
@@ -1463,7 +1463,7 @@ end
 
 function MinimapAdv:PLAYER_LOGIN(event, ...)
     self:debug(event, ...)
-    MMFrames.buttonframe.edge:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.buttonframe.edge:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
 end
 
 -- Register events
@@ -1620,7 +1620,7 @@ local function CreateFrames()
     MMFrames.buttonframe.tooltipIcon:SetWidth(16)
     MMFrames.buttonframe.tooltipIcon:SetHeight(16)
     MMFrames.buttonframe.tooltipIcon:SetTexture(Textures.TooltipIcon)
-    MMFrames.buttonframe.tooltipIcon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.buttonframe.tooltipIcon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.buttonframe.tooltipIcon:Hide()
 
     -- Toggle Button
@@ -1646,7 +1646,7 @@ local function CreateFrames()
         local name, texture, category, nested, numTracking;
         local count = _G.GetNumTrackingTypes();
         local info;
-        local _, class = _G.UnitClass("player");
+        local class = RealUI.charInfo.class.token
 
         if (level == 1) then
             info = _G.Lib_UIDropDownMenu_CreateInfo();

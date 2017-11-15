@@ -7,11 +7,37 @@ local RealUI = private.RealUI
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
 RealUI.is730 = _G.tonumber(xpac) == 7 and (_G.tonumber(major) >= 3 and _G.tonumber(minor) >= 0)
 
-RealUI.charName = _G.UnitName("player")
-RealUI.realm = _G.GetRealmName()
-RealUI.faction = _G.UnitFactionGroup("player")
-RealUI.classLocale, RealUI.class, RealUI.classID = _G.UnitClass("player")
-RealUI.numSpecs = _G.GetNumSpecializationsForClassID(RealUI.classID)
+local classLocale, classToken, classID = _G.UnitClass("player")
+RealUI.charInfo = {
+    name = _G.UnitName("player"),
+    realm = _G.GetRealmName(),
+    faction = _G.UnitFactionGroup("player"),
+    class = {
+        locale = classLocale,
+        token = classToken,
+        id = classID,
+        color = _G.CUSTOM_CLASS_COLORS[classToken] or _G.CUSTOM_CLASS_COLORS.PRIEST
+    },
+    specs = {
+        current = {}
+    }
+}
+
+for specIndex = 1, _G.GetNumSpecializationsForClassID(classID) do
+    local id, name, _, iconID, role, isRecommended = _G.GetSpecializationInfoForClassID(classID, specIndex)
+    RealUI.charInfo.specs[specIndex] = {
+        index = specIndex,
+        id = id,
+        name = name,
+        icon = iconID,
+        role = role,
+        isRecommended = isRecommended,
+    }
+
+    if isRecommended then
+        RealUI.charInfo.specs.current = RealUI.charInfo.specs[specIndex]
+    end
+end
 
 RealUI.globals = {
     anchorPoints = {

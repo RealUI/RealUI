@@ -32,7 +32,7 @@ function Chat:OnInitialize()
                 opacity = {},
                 strings = {},
                 history = {
-                    [RealUI.realm] = {history = {}},
+                    [RealUI.charInfo.realm] = {history = {}},
                 },
             },
         },

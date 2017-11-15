@@ -12,6 +12,7 @@ local MODNAME = "AddonListAdv"
 local AddonListAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
+local classInfo
 
 local function OnSaveAs(self)
     local popup;
@@ -79,9 +80,9 @@ local function GetSet(name)
     --print("GetSet", name)
     if name == "RealUI" then
         return RealUISet
-    elseif name == RealUI.classLocale then
+    elseif name == classInfo.locale then
         if not dbk[1] then
-            dbk[1] = {["name"] = RealUI.classLocale}
+            dbk[1] = {["name"] = classInfo.locale}
         end
         return dbk[1]
     else
@@ -249,8 +250,8 @@ function AddonListAdv.SetDropDown_Populate(menu, level)
             count = 0
         end
 
-        info.text = ("%s (%d)"):format(RealUI.classLocale, count)
-        info.value = RealUI.classLocale
+        info.text = ("%s (%d)"):format(classInfo.locale, count)
+        info.value = classInfo.locale
         _G.Lib_UIDropDownMenu_AddButton(info)
 
         for i = 1, #dbg do
@@ -327,7 +328,7 @@ function AddonListAdv.SetDropDown_Populate(menu, level)
         info.func = function() self:UnloadSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
         _G.Lib_UIDropDownMenu_AddButton(info, level)
 
-        if _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= RealUI.classLocale then
+        if _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= classInfo.locale then
             info.text = "Delete"
             info.func = function() self:DeleteSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
             _G.Lib_UIDropDownMenu_AddButton(info, level)
@@ -378,6 +379,8 @@ function AddonListAdv:OnInitialize()
         dbg[1] = nil
     end
 
+    classInfo = RealUI.charInfo.class
+
     if RealUI.isDev then
         local function AddOptDeps(optDeps)
             for i = 1, #optDeps do
@@ -398,7 +401,7 @@ end
 
 function AddonListAdv:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    _G.UIDropDownMenu_SetSelectedValue(_G.AddonCharacterDropDown, RealUI.charName)
+    _G.UIDropDownMenu_SetSelectedValue(_G.AddonCharacterDropDown, RealUI.charInfo.name)
 
     if LoggedIn then self:RefreshMod() end
 end
