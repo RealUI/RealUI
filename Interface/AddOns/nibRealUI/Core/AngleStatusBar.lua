@@ -5,7 +5,7 @@ local abs = _G.math.abs
 local tinsert, next, type = _G.table.insert, _G.next, _G.type
 
 -- Libs --
-local oUF = _G.oUFembed
+local oUF = private.oUF
 
 -- RealUI --
 local RealUI = private.RealUI

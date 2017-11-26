@@ -11,6 +11,9 @@ manual-changelog:
     filename: CHANGELOG.md
     markup-type: markdown
 
+tools-used:
+    - ouf
+
 externals:
     Interface/AddOns/FreebTip/LibInspect:
         url: https://github.com/scotepi/wow-libinspect.git
