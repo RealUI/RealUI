@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+
+### Fixed ###
+
+  * Switching equip sets would brake if a set was deleted.
+  * Libraries for Config would not load.
+  * Improper format codes for Chinese localization.
+  * The SpellBook would be tainted if it was opened via the Infobar start menu.
+
+
+
+
 ## [8.1 r20e] - 2017-09-24 ##
 ### Modified AddOns ###
 
