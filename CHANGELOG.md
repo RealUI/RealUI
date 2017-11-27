@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20f] - 2017-11-27 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -336,6 +337,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20f]: https://github.com/RealUI/RealUI/compare/8.1_r20e...8.1_r20f
 [8.1 r20e]: https://github.com/RealUI/RealUI/compare/8.1_r20d...8.1_r20e
 [8.1 r20d]: https://github.com/RealUI/RealUI/compare/8.1_r20c...8.1_r20d
 [8.1 r20c]: https://github.com/RealUI/RealUI/compare/8.1_r20b...8.1_r20c
