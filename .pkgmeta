@@ -11,6 +11,9 @@ manual-changelog:
     filename: CHANGELOG.md
     markup-type: markdown
 
+tools-used:
+    - ouf
+
 externals:
     Interface/AddOns/FreebTip/LibInspect:
         url: https://github.com/scotepi/wow-libinspect.git
@@ -83,7 +86,6 @@ externals:
         tag: latest
     Interface/AddOns/RealUI_Bugs/Libs/LibTextDump-1.0:
         url: https://repos.wowace.com/wow/libtextdump-1-0
-        tag: latest
 
     Interface/AddOns/RealUI_Skins/Aurora:
         url: https://github.com/Haleth/Aurora.git

@@ -4,7 +4,7 @@ local _, private = ...
 local floor = _G.math.floor
 
 -- Libs --
-local oUF = _G.oUFembed
+local oUF = private.oUF
 local F = _G.Aurora[1]
 
 -- RealUI --
