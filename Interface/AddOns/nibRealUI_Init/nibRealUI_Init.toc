@@ -2,7 +2,7 @@
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Init
 ## Notes: Primary initialization for RealUI
 ## Author: Gethe
-## Version: 8.1 r20e
+## Version: 8.1 r20f
 ## RequiredDeps: RealUI_Bugs
 ## OptionalDeps: nibRealUI_Dev, Ace3, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0, LibTextDump-1.0, UTF8
 ## SavedVariables: RealUI_InitDB
