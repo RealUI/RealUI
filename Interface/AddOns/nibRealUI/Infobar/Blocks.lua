@@ -565,7 +565,10 @@ function Infobar:CreateBlocks()
                 notCheckable = true,
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
-                func = function() _G.ToggleSpellBook(_G.BOOKTYPE_SPELL) end,
+                func = function()
+                    -- ToggleSpellBook causes taint
+                    _G.ToggleFrame(_G.SpellBookFrame)
+                end,
                 notCheckable = true,
             },
             {text = _G.TALENTS_BUTTON,
@@ -1947,7 +1950,7 @@ function Infobar:CreateBlocks()
                         else
                             _G.SetSpecialization(specIndex)
                             if dbc.specgear[specIndex] >= 0 then
-                                equipmentNeedsUpdate = dbc.specgear[specIndex]
+                                    equipmentNeedsUpdate = dbc.specgear[specIndex]
                             end
                         end
                     end
@@ -1988,6 +1991,12 @@ function Infobar:CreateBlocks()
                         name = equipName,
                         index = index
                     }
+                end
+            end
+
+            for specIndex = 1, RealUI.numSpecs do
+                if not equipSetsByID[dbc.specgear[specIndex]] then
+                    dbc.specgear[specIndex] = -1
                 end
             end
         end

@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Libs --
-local oUF = _G.oUFembed
+local oUF = private.oUF
 
 -- RealUI --
 local RealUI = private.RealUI

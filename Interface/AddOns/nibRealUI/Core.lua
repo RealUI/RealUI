@@ -592,13 +592,6 @@ function RealUI:Taint_Logging_Toggle()
     _G.ReloadUI()
 end
 
-function RealUI:ADDON_LOADED(event, addon)
-    if addon ~= ADDON_NAME then return end
-
-    -- Open before login to stop taint
-    _G.ToggleFrame(_G.SpellBookFrame)
-end
-
 function RealUI:ChatCommand_Config()
     RealUI.Debug("Config", "/real")
     dbg.tags.slashRealUITyped = true
@@ -656,7 +649,6 @@ function RealUI:OnInitialize()
     end)
 
     -- Register events
-    self:RegisterEvent("ADDON_LOADED")
     self:RegisterEvent("PLAYER_LOGIN")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
