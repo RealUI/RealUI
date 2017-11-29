@@ -1984,7 +1984,7 @@ function Infobar:CreateBlocks()
                 end
             end
 
-            for specIndex = 1, RealUI.numSpecs do
+            for specIndex = 1, #specInfo do
                 if not equipSetsByID[dbc.specgear[specIndex]] then
                     dbc.specgear[specIndex] = -1
                 end
