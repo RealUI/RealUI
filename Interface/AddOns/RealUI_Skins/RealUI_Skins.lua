@@ -67,7 +67,7 @@ function RealUI.GetDurabilityColor(a, b)
 end
 
 local uiMod, pixelScale
-local function UpdateUIScale()
+function private.UpdateUIScale()
     local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
     debug("physical size", pysWidth, pysHeight)
 
@@ -95,7 +95,7 @@ function RealUI.RegisterModdedFrame(frame, updateFunc)
     end
 end
 function RealUI.PreviewModScale()
-    UpdateUIScale()
+    private.UpdateUIScale()
     for frame, func in next, previewFrames do
         func(frame)
     end
@@ -146,10 +146,8 @@ function private.OnLoad()
         end
     end
 
-    UpdateUIScale()
-    --private.disabled.tooltips = true
-
     local Base, Hook = Aurora.Base, Aurora.Hook
+    Aurora.Scale.Value = RealUI.ModValue
     function Hook.GameTooltip_OnHide(gametooltip)
         local color = Aurora.frameColor
         Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, _G.RealUI_SkinsDB.frameAlpha)
@@ -175,28 +173,5 @@ function private.OnLoad()
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end
-    end
-end
-
-if not private.Aurora then
-    private.Aurora = _G.Aurora
-
-    local AddOns = {}
-    private.AddOns = AddOns
-
-    local OnLoad = private.OnLoad
-    function _G.Aurora_OnLoad(privateDev)
-        Aurora = private.Aurora
-        --print("Aurora_OnLoad Aurora", Aurora, private.Aurora)
-
-        privateDev.debug = private.debug
-
-        for addon, func in next, AddOns do
-            privateDev.AddOns[addon] = func
-        end
-
-        private = privateDev
-
-        OnLoad()
     end
 end
