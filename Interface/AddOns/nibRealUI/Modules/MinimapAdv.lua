@@ -1347,7 +1347,7 @@ local function Garrison_OnEnter(self)
         _G.GameTooltip:AddLine(" ")
 
         local currency, amount = _G.GetCurrencyInfo(currencyId)
-        _G.GameTooltip:AddDoubleLine(currency, _G.BreakUpLargeNumbers(amount), 1, 1, 1, 1, 1, 1)
+        _G.GameTooltip:AddDoubleLine(currency, RealUI:ReadableNumber(amount), 1, 1, 1, 1, 1, 1)
 
         if #categoryInfo > 0 then
             _G.GameTooltip:AddLine(" ")
