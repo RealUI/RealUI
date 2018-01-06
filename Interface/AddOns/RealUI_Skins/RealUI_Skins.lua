@@ -67,12 +67,13 @@ function RealUI.GetDurabilityColor(a, b)
 end
 
 local uiMod, pixelScale
-function private.UpdateUIScale()
+local function UpdateUIScale()
     local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
-    debug("physical size", pysWidth, pysHeight)
 
     pixelScale = 768 / pysHeight
     uiMod = (pysHeight / 768) * _G.RealUI_SkinsDB.uiModScale
+
+    debug("physical size", pysWidth, pysHeight)
     debug("uiMod", uiMod)
 end
 
@@ -145,6 +146,8 @@ function private.OnLoad()
             end
         end
     end
+
+    private.UpdateUIScale = UpdateUIScale
 
     local Base, Hook = Aurora.Base, Aurora.Hook
     Aurora.Scale.Value = RealUI.ModValue
