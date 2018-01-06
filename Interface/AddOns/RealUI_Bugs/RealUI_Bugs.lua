@@ -219,6 +219,14 @@ local function GetNavigationButtonEnabledStates(count, index)
     return false, false;
 end
 
+local function IsErrorFromRealUI(err)
+    if err.message:find("RealUI") or err.stack:find("RealUI") then
+        return true
+    elseif (err.message:find("Nivaya") or err.stack:find("Nivaya")) and _G.RealUI.hasCargBags then
+        return true
+    end
+end
+
 local RealUI_Version
 function errorFrame:Update()
     local errors = _G.BugGrabber:GetDB()
@@ -233,11 +241,13 @@ function errorFrame:Update()
 
     self.IndexLabel:SetText(("%d / %d"):format(self.index, numErrors))
 
+
     if numErrors > 0 then
         local err = errors[self.index]
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
-        if err.message:find("RealUI") or (err.message:find("Nivaya") and _G.RealUI.hasCargBags) then
+
+        if IsErrorFromRealUI(err) then
             editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, RealUI_Version, locals))
         else
             editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
