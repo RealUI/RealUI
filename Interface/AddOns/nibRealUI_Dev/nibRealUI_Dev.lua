@@ -139,7 +139,7 @@ local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
     lastEvent = event
-    if event == "PLAYER_ENTERING_WORLD" then
+    if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do
             if run then
                 ns.commands[command](ns.commands)
