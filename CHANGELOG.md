@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * nibRealUI
+  * nibRealUI_Init
+  * FreebTip
+  * RealUI_Bugs
+
+### Changed ###
+
+  * Improved the display of large numbers in various places.
+
+### Fixed ###
+
+  * Progress Watch might break when using Artifact Power on a fresh 110.
+
+
+
+
 ## [8.1 r20f] - 2017-11-27 ##
 ### Modified AddOns ###
 
