@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next max
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -1571,7 +1571,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
                     tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
 
-                    local minAP, maxAP = artifact.power, artifact.maxPower
+                    local minAP, maxAP = artifact.power, max(artifact.power, artifact.maxPower)
                     local artStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minAP), RealUI:ReadableNumber(maxAP), (minAP/maxAP)*100)
                     lineNum = tooltip:AddLine(RealUI:ReadableNumber(artifact.unspentPower), artStatus)
                     tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
