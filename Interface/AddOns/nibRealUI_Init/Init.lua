@@ -197,23 +197,26 @@ f:SetScript("OnEvent", function(self, event, addon)
 
             UpdateUIScale()
         elseif addon == "!Aurora_RealUI" then
-            -- Create Aurora namespace incase Aurora is disabled
-            local Aurora = {{},{}}
-            _G.Aurora = Aurora
-            local F = Aurora[1] -- F, functions
-            local C = Aurora[2] -- C, constants/config
+            local F, C = _G.Aurora[1], _G.Aurora[2]
+            if not (F and C) then
+                -- Create Aurora namespace since Aurora is disabled
+                local Aurora = {{},{}}
+                _G.Aurora = Aurora
+                F = Aurora[1] -- F, functions
+                C = Aurora[2] -- C, constants/config
 
-            -- Setup __index to catch other addons using functions if Aurora is disabled.
-            -- This way I don't have to add the entire API.
-            _G.setmetatable(F, {__index = function(table, key)
-                debug("Aurora: __index", key, table)
-                if not _G.rawget(table, key) then
-                    table[key] = function(...)
-                        debug("Aurora: function:", key, "args:", ...)
+                -- Setup __index to catch other addons using functions if Aurora is disabled.
+                -- This way I don't have to add the entire API.
+                _G.setmetatable(F, {__index = function(table, key)
+                    debug("Aurora: __index", key, table)
+                    if not _G.rawget(table, key) then
+                        table[key] = function(...)
+                            debug("Aurora: function:", key, "args:", ...)
+                        end
+                        return table[key]
                     end
-                    return table[key]
-                end
-            end})
+                end})
+            end
 
             F.dummy = function() end
 

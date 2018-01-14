@@ -690,19 +690,6 @@ local function GT_OnUpdate(self, elapsed)
 end
 GameTooltip:HookScript("OnUpdate", GT_OnUpdate)
 
--- Because if you're not hacking, you're doing it wrong
-local function OverrideGetBackdropColor()
-    return cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t
-end
-GameTooltip.GetBackdropColor = OverrideGetBackdropColor
-GameTooltip:SetBackdropColor(OverrideGetBackdropColor)
-
-local function OverrideGetBackdropBorderColor()
-    return cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b
-end
-GameTooltip.GetBackdropBorderColor = OverrideGetBackdropBorderColor
-GameTooltip:SetBackdropBorderColor(OverrideGetBackdropBorderColor)
-
 GameTooltipHeaderText:SetFont(cfg.font, cfg.fontsize+2, cfg.outline)
 GameTooltipText:SetFont(cfg.font, cfg.fontsize, cfg.outline)
 GameTooltipTextSmall:SetFont(cfg.font, cfg.fontsize-2, cfg.outline)

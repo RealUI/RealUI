@@ -6,6 +6,8 @@ local _, mods = ...
 local next = _G.next
 
 _G.tinsert(mods["PLAYER_LOGIN"], function(F, C)
+    if _G.RealUI.isAuroraUpdated then return end
+
     mods.debug("Blizzard_PetBattleUI", F, C)
     local RealUI = _G.RealUI
     local r, g, b = C.r, C.g, C.b
