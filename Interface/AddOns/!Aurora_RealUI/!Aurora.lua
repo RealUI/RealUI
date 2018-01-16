@@ -107,12 +107,75 @@ end
 
 _G.AURORA_CUSTOM_STYLE = style
 
+local hasRun = false
+local function LoadAurora(addonModule)
+    if hasRun then return end
+    debug("LoadAurora")
+    F, C = _G.Aurora[1], _G.Aurora[2]
+
+    F.colorTex = function(f)
+        if f:IsEnabled() then
+            for _, tex in next, f.tex do
+                tex:SetVertexColor(r, g, b)
+            end
+        end
+    end
+
+    F.clearTex = function(f)
+        for _, tex in next, f.tex do
+            tex:SetVertexColor(1, 1, 1)
+        end
+    end
+
+    F.ReskinAtlas = function(f, atlas, is8Point)
+        debug("ReskinAtlas", atlas, is8Point)
+        local _, _, _, left, right, top, bottom = _G.GetAtlasInfo(atlas)
+        -- file is an ID instead of a path now
+        f:SetTexture(skinnedAtlas[atlas])
+        if is8Point then
+            return left, right, top, bottom
+        else
+            f:SetTexCoord(left, right, top, bottom)
+        end
+    end
+
+    if _G.Aurora.Base then
+        debug("isUpdated")
+        RealUI.isAuroraUpdated = true
+
+        _G.AuroraConfig.mainmenubar = false
+        _G.AuroraConfig.enableFont = false
+        _G.AuroraConfig.tooltips = false
+        function _G.Aurora.Base.Pre.SetBackdrop(f, BGr, BGg, BGb, a)
+            if not a then
+                local stripes = f:CreateTexture(nil, "BACKGROUND", nil, 1)
+                stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+                stripes:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
+                stripes:SetAllPoints()
+                stripes:SetHorizTile(true)
+                stripes:SetVertTile(true)
+                stripes:SetBlendMode("ADD")
+                tinsert(_G.REALUI_STRIPE_TEXTURES, stripes)
+            end
+        end
+    end
+    F.AddPlugin(function()
+        mods["RealUI_Bugs"](F, C)
+    end)
+    for _, moduleFunc in next, addonModule do
+        F.AddPlugin(function()
+            moduleFunc(F, C)
+        end)
+    end
+    hasRun = true
+end
+
 local frame = _G.CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self, event, addon)
     if event == "PLAYER_LOGIN" and _G.IsAddOnLoaded("Aurora") then
-        F, C = _G.Aurora[1], _G.Aurora[2]
+        LoadAurora(mods["Aurora"])
         -- some skins need to be deferred till after all other addons.
         for addonName, func in next, mods[event] do
             if _G.type(addonName) == "string" then
@@ -133,58 +196,11 @@ frame:SetScript("OnEvent", function(self, event, addon)
         local addonModule = mods[addon]
         debug("Load Addon", addon, addonModule)
         if addon == "Aurora" then
-            F, C = _G.Aurora[1], _G.Aurora[2]
-
-            F.colorTex = function(f)
-                if f:IsEnabled() then
-                    for _, tex in next, f.tex do
-                        tex:SetVertexColor(r, g, b)
-                    end
-                end
-            end
-
-            F.clearTex = function(f)
-                for _, tex in next, f.tex do
-                    tex:SetVertexColor(1, 1, 1)
-                end
-            end
-
-            F.ReskinAtlas = function(f, atlas, is8Point)
-                debug("ReskinAtlas", atlas, is8Point)
-                local _, _, _, left, right, top, bottom = _G.GetAtlasInfo(atlas)
-                -- file is an ID instead of a path now
-                f:SetTexture(skinnedAtlas[atlas])
-                if is8Point then
-                    return left, right, top, bottom
-                else
-                    f:SetTexCoord(left, right, top, bottom)
-                end
-            end
-
-            if _G.Aurora.Base then
-                RealUI.isAuroraUpdated = true
-                function _G.Aurora.Base.Pre.SetBackdrop(f, BGr, BGg, BGb, a)
-                    if not a then
-                        local stripes = f:CreateTexture(nil, "BACKGROUND", nil, 1)
-                        stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-                        stripes:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
-                        stripes:SetAllPoints()
-                        stripes:SetHorizTile(true)
-                        stripes:SetVertTile(true)
-                        stripes:SetBlendMode("ADD")
-                        tinsert(_G.REALUI_STRIPE_TEXTURES, stripes)
-                    end
-                end
-            end
-            F.AddPlugin(function()
-                mods["RealUI_Bugs"](F, C)
-            end)
-            for _, moduleFunc in next, addonModule do
-                F.AddPlugin(function()
-                    moduleFunc(F, C)
-                end)
-            end
+            LoadAurora(addonModule)
         elseif addon == ADDON_NAME then
+            if _G.IsAddOnLoaded("Aurora") then
+                LoadAurora(mods["Aurora"])
+            end
             -- These addons are loaded before !Aurora_RealUI.
             local addons = {
                 Blizzard_CompactRaidFrames = true,

@@ -62,19 +62,21 @@ _G.tinsert(mods["Aurora"], function(F, C)
         flash:SetVertexColor(r, g, b, .8)
     end
 
-    -- World State Frame
-    F.Reskin(_G.WorldStateScoreFrameQueueButton)
-    for i = 1, _G.MAX_WORLDSTATE_SCORE_BUTTONS do
-        local scoreBtn = _G["WorldStateScoreButton" .. i]
-        scoreBtn.factionLeft:SetTexture(C.media.backdrop)
-        scoreBtn.factionLeft:SetBlendMode("ADD")
-        scoreBtn.factionRight:SetTexture(C.media.backdrop)
-        scoreBtn.factionRight:SetBlendMode("ADD")
+    if not _G.RealUI.isAuroraUpdated then
+        -- World State Frame
+        F.Reskin(_G.WorldStateScoreFrameQueueButton)
+        for i = 1, _G.MAX_WORLDSTATE_SCORE_BUTTONS do
+            local scoreBtn = _G["WorldStateScoreButton" .. i]
+            scoreBtn.factionLeft:SetTexture(C.media.backdrop)
+            scoreBtn.factionLeft:SetBlendMode("ADD")
+            scoreBtn.factionRight:SetTexture(C.media.backdrop)
+            scoreBtn.factionRight:SetBlendMode("ADD")
+        end
+        _G.WorldStateScoreWinnerFrameLeft:SetTexture(C.media.backdrop)
+        _G.WorldStateScoreWinnerFrameLeft:SetBlendMode("ADD")
+        _G.WorldStateScoreWinnerFrameRight:SetTexture(C.media.backdrop)
+        _G.WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
     end
-    _G.WorldStateScoreWinnerFrameLeft:SetTexture(C.media.backdrop)
-    _G.WorldStateScoreWinnerFrameLeft:SetBlendMode("ADD")
-    _G.WorldStateScoreWinnerFrameRight:SetTexture(C.media.backdrop)
-    _G.WorldStateScoreWinnerFrameRight:SetBlendMode("ADD")
 end)
 
 mods["Blizzard_AuctionUI"] = function(F, C)
@@ -92,14 +94,29 @@ mods["RealUI_Bugs"] = function(F, C)
     mods.debug("RealUI_Bugs", F, C)
 
     local RealUI_ErrorFrame = _G.RealUI_ErrorFrame
-    for i = 1, 10 do
-        -- Remove borders and backgrounds
-        _G.select(i, RealUI_ErrorFrame:GetRegions()):Hide()
+    if _G.RealUI.isAuroraUpdated then
+        local Skin = _G.Aurora.Skin
+        Skin.UIPanelDialogTemplate(RealUI_ErrorFrame)
+        Skin.UIPanelScrollFrameTemplate(RealUI_ErrorFrame.ScrollFrame)
+        Skin.UIPanelButtonTemplate(RealUI_ErrorFrame.Reload)
+
+        for i, delta in _G.next, {"Previous", "Next"} do
+            if i == 1 then
+                Skin.NavButtonPrevious(RealUI_ErrorFrame[delta.."Error"])
+            else
+                Skin.NavButtonNext(RealUI_ErrorFrame[delta.."Error"])
+            end
+        end
+    else
+        for i = 1, 10 do
+            -- Remove borders and backgrounds
+            _G.select(i, RealUI_ErrorFrame:GetRegions()):Hide()
+        end
+        F.CreateBD(RealUI_ErrorFrame)
+        F.ReskinClose(RealUI_ErrorFrame.Close)
+        F.Reskin(RealUI_ErrorFrame.Reload)
+        F.ReskinArrow(RealUI_ErrorFrame.PreviousError, "Left")
+        F.ReskinArrow(RealUI_ErrorFrame.NextError, "Right")
+        F.ReskinScroll(RealUI_ErrorFrame.ScrollFrame.ScrollBar)
     end
-    F.CreateBD(RealUI_ErrorFrame)
-    F.ReskinClose(RealUI_ErrorFrame.Close)
-    F.Reskin(RealUI_ErrorFrame.Reload)
-    F.ReskinArrow(RealUI_ErrorFrame.PreviousError, "Left")
-    F.ReskinArrow(RealUI_ErrorFrame.NextError, "Right")
-    F.ReskinScroll(RealUI_ErrorFrame.ScrollFrame.ScrollBar)
 end

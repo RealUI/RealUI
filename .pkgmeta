@@ -82,7 +82,6 @@ externals:
         tag: latest
     Interface/AddOns/nibRealUI_Init/Libs/LibTextDump-1.0: 
         url: https://repos.wowace.com/wow/libtextdump-1-0
-        tag: latest 
     Interface/AddOns/nibRealUI_Init/Libs/UTF8:
         url: https://repos.wowace.com/wow/utf8/trunk
         tag: latest

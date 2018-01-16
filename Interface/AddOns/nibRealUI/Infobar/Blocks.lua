@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next max
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -1571,9 +1571,9 @@ function Infobar:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
                     tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
 
-                    local minAP, maxAP = artifact.power, artifact.maxPower
-                    local artStatus = ("%s/%s (%d%%)"):format(_G.FormatLargeNumber(minAP), _G.FormatLargeNumber(maxAP), (minAP/maxAP)*100)
-                    lineNum = tooltip:AddLine(_G.FormatLargeNumber(artifact.unspentPower), artStatus)
+                    local minAP, maxAP = artifact.power, max(artifact.power, artifact.maxPower)
+                    local artStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minAP), RealUI:ReadableNumber(maxAP), (minAP/maxAP)*100)
+                    lineNum = tooltip:AddLine(RealUI:ReadableNumber(artifact.unspentPower), artStatus)
                     tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
 
                     if artifact.numRanksPurchasable > 0 then
@@ -2113,7 +2113,7 @@ function Infobar:CreateBlocks()
             local goldString, silverString, copperString
             local gold, silver, copper = SplitMoney(money)
 
-            goldString = GOLD_AMOUNT_STRING:format(_G.FormatLargeNumber(gold), _G.GOLD_AMOUNT_SYMBOL)
+            goldString = GOLD_AMOUNT_STRING:format(RealUI:ReadableNumber(gold), _G.GOLD_AMOUNT_SYMBOL)
             silverString = SILVER_AMOUNT_STRING:format(silver, _G.SILVER_AMOUNT_SYMBOL)
             copperString = COPPER_AMOUNT_STRING:format(copper, _G.COPPER_AMOUNT_SYMBOL)
 

@@ -457,30 +457,17 @@ function RealUI:AbbreviateName(name, maxLength)
     return newName
 end
 
-local function FormatToDecimalPlaces(num, places)
-    local placeValue = ("%%.%df"):format(places)
-    return placeValue:format(num)
-end
-function RealUI:ReadableNumber(num, places)
-    local ret
-    if not num then
-        return 0
-    elseif num >= 100000000 then
-        ret = FormatToDecimalPlaces(num / 1000000, places or 0) .. "m" -- hundred million
-    elseif num >= 10000000 then
-        ret = FormatToDecimalPlaces(num / 1000000, places or 1) .. "m" -- ten million
-    elseif num >= 1000000 then
-        ret = FormatToDecimalPlaces(num / 1000000, places or 2) .. "m" -- million
-    elseif num >= 100000 then
-        ret = FormatToDecimalPlaces(num / 1000, places or 0) .. "k" -- hundred thousand
-    elseif num >= 10000 then
-        ret = FormatToDecimalPlaces(num / 1000, places or 1) .. "k" -- ten thousand
-    elseif num >= 1000 then
-        ret = FormatToDecimalPlaces(num / 1000, places or 2) .. "k" -- thousand
-    else
-        ret = FormatToDecimalPlaces(num, places or 0) -- hundreds
-    end
-    return ret
+function RealUI:ReadableNumber(value)
+    local retString = _G.tostring(value)
+	local strLen = retString:len()
+	if strLen > 8 then
+		retString = _G.BreakUpLargeNumbers(retString:sub(1, -7)).._G.SECOND_NUMBER_CAP;
+	elseif strLen > 5 then
+		retString = retString:sub(1, -4).._G.FIRST_NUMBER_CAP;
+	elseif strLen > 3 then
+		retString = _G.BreakUpLargeNumbers(value);
+	end
+	return retString;
 end
 
 -- Opposite Faction

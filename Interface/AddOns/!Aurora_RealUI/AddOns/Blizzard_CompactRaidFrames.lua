@@ -1,6 +1,8 @@
 local _, mods = ...
 
 mods["Blizzard_CompactRaidFrames"] = function(F, C)
+    if _G.RealUI.isAuroraUpdated then return end
+
     local CompactRaidFrameManager = _G.CompactRaidFrameManager
     CompactRaidFrameManager:DisableDrawLayer("ARTWORK")
     F.CreateBD(CompactRaidFrameManager)
