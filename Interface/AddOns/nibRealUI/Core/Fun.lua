@@ -403,13 +403,17 @@ function RealUI:ReadableNumber(value)
     local retString = _G.tostring(value)
 	local strLen = retString:len()
 	if strLen > 8 then
-		retString = _G.BreakUpLargeNumbers(retString:sub(1, -7)).._G.SECOND_NUMBER_CAP;
-	elseif strLen > 5 then
-		retString = retString:sub(1, -4).._G.FIRST_NUMBER_CAP;
+        retString = _G.BreakUpLargeNumbers(retString:sub(1, -7)).._G.SECOND_NUMBER_CAP
+    elseif strLen > 6 then
+		retString = ("%.2f"):format(value / 1000000).._G.SECOND_NUMBER_CAP
+    elseif strLen > 5 then
+        retString = retString:sub(1, -4).._G.FIRST_NUMBER_CAP
+	elseif strLen > 4 then
+		retString = ("%.1f"):format(value / 1000).._G.FIRST_NUMBER_CAP
 	elseif strLen > 3 then
-		retString = _G.BreakUpLargeNumbers(value);
+		retString = _G.BreakUpLargeNumbers(value)
 	end
-	return retString;
+	return retString
 end
 
 -- Opposite Faction
