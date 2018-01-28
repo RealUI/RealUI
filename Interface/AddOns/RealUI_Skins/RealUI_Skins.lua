@@ -156,7 +156,7 @@ function private.OnLoad()
         Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, _G.RealUI_SkinsDB.frameAlpha)
     end
 
-    function Base.Post.SetBackdrop(frame, r, g, b, a)
+    function Base.Post.SetBackdrop(ret, frame, r, g, b, a)
         if not a then
             local color = Aurora.frameColor
             frame:SetBackdropColor(color.r, color.g, color.b, _G.RealUI_SkinsDB.frameAlpha)
