@@ -531,6 +531,8 @@ end
 local skins do
     debug("Adv Skins")
     order = order + 1
+
+    local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins")
     local fonts do
         local LSM = _G.LibStub("LibSharedMedia-3.0")
         local Fonts = RealUI:GetModule("Fonts")
@@ -855,9 +857,9 @@ local skins do
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return _G.RealUI_SkinsDB.frameAlpha end,
+                get = function(info) return SkinsDB.frameAlpha end,
                 set = function(info, value)
-                    _G.RealUI_SkinsDB.frameAlpha = value
+                    SkinsDB.frameAlpha = value
                     RealUI:UpdateFrameStyle()
                 end,
                 order = 10,
@@ -867,9 +869,9 @@ local skins do
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return _G.RealUI_SkinsDB.stripeAlpha end,
+                get = function(info) return SkinsDB.stripeAlpha end,
                 set = function(info, value)
-                    _G.RealUI_SkinsDB.stripeAlpha = value
+                    SkinsDB.stripeAlpha = value
                     RealUI:UpdateFrameStyle()
                 end,
                 order = 20,
@@ -943,9 +945,9 @@ local skins do
             type = "range",
             isPercent = true,
             min = 0.5, max = 2, step = 0.05,
-            get = function(info) return _G.RealUI_SkinsDB.uiModScale end,
+            get = function(info) return SkinsDB.uiModScale end,
             set = function(info, value)
-                _G.RealUI_SkinsDB.uiModScale = value
+                SkinsDB.uiModScale = value
                 RealUI.PreviewModScale()
             end,
             order = 60,

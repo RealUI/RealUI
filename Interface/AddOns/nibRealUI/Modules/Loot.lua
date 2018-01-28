@@ -259,14 +259,12 @@ local function LootOnEnter(self)
         _G.GameTooltip:SetLootItem(slot)
         _G.CursorUpdate(self)
     end
-    self.bg:SetBackdropColor(0.15, 0.15, 0.15, _G.RealUI_SkinsDB.frameAlpha)
 end
 
 local LootOnLeave = function(self)
     --print("LootOnLeave: ")
     _G.GameTooltip:Hide()
     _G.ResetCursor()
-    self.bg:SetBackdropColor(_G.Aurora.frameColor.r, _G.Aurora.frameColor.g, _G.Aurora.frameColor.b, _G.RealUI_SkinsDB.frameAlpha)
 end
 
 local LootOnClick = function(self)
@@ -306,20 +304,13 @@ local createSlot = function(id)
     frame:SetID(id)
     RealUILootFrame.slots[id] = frame
 
-    local bg = _G.CreateFrame("Frame", nil, frame)
-    bg:SetPoint("TOPLEFT", frame, -1, 1)
-    bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
-    bg:SetFrameLevel(frame:GetFrameLevel()-1)
-    frame.bg = bg
-
-    _G.Aurora.Base.SetBackdrop(bg)
-    bg:SetBackdropColor(_G.Aurora.frameColor.r, _G.Aurora.frameColor.g, _G.Aurora.frameColor.b, _G.RealUI_SkinsDB.frameAlpha)
-
-
     frame:SetScript("OnClick", LootOnClick)
     frame:SetScript("OnEnter", LootOnEnter)
     frame:SetScript("OnLeave", LootOnLeave)
     frame:SetScript("OnUpdate", LootOnUpdate)
+
+    _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.buttonColor:GetRGBA())
+    _G.Aurora.Base.SetHighlight(frame, "backdrop")
 
     local iconFrame = _G.CreateFrame("Frame", nil, frame)
     iconFrame:SetHeight(LootIconSize)

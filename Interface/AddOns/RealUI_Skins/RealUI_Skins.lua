@@ -1,19 +1,20 @@
-local _, private = ...
+local ADDON_NAME, private = ...
 
 -- Lua Globals --
 -- luacheck: globals floor next type
 
 local Aurora = private.Aurora
 local RealUI = _G.RealUI
-local RealUI_SkinsDB
 
 local debug = RealUI.GetDebug("Skins")
 private.debug = debug
 
 local defaults = {
-    stripeAlpha = 0.5,
-    frameAlpha = 0.7,
-    uiModScale = 1,
+    profile = {
+        stripeAlpha = 0.5,
+        frameAlpha = 0.7,
+        uiModScale = 1,
+    }
 }
 
 RealUI.media = {
@@ -32,46 +33,12 @@ RealUI.media = {
     },
 }
 
-function RealUI.Round(value, places)
-    local mult = 10 ^ (places or 0)
-    return floor(value * mult + 0.5) / mult
-end
-function RealUI:GetSafeVals(min, max)
-    if max == 0 then
-        return 0
-    else
-        return min / max
-    end
-end
-
-
-function RealUI:ColorTableToStr(vals)
-    return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
-end
-function RealUI.GetDurabilityColor(a, b)
-    if a and b then
-        debug("RGBColorGradient", a, b)
-        return _G.oUFembed.RGBColorGradient(a, b, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
-    else
-        debug("GetDurabilityColor", a)
-        if a < 0 then
-            return 1, 0, 0
-        elseif a <= 0.5 then
-            return 1, a * 2, 0
-        elseif a >= 1 then
-            return 0, 1, 0
-        else
-            return 2 - a * 2, 1, 0
-        end
-    end
-end
-
 local uiMod, pixelScale
 local function UpdateUIScale()
     local pysWidth, pysHeight = _G.GetPhysicalScreenSize()
 
     pixelScale = 768 / pysHeight
-    uiMod = (pysHeight / 768) * _G.RealUI_SkinsDB.uiModScale
+    uiMod = (pysHeight / 768) * private.skinsDB.uiModScale
 
     debug("physical size", pysWidth, pysHeight)
     debug("uiMod", uiMod)
@@ -107,44 +74,32 @@ function RealUI:UpdateFrameStyle()
     local color = Aurora.frameColor
     for frame, stripes in next, skinnedFrames do
         if stripes.SetAlpha then
-            frame:SetBackdropColor(color.r, color.g, color.b, _G.RealUI_SkinsDB.frameAlpha)
-            stripes:SetAlpha(RealUI_SkinsDB.stripeAlpha)
+            frame:SetBackdropColor(color.r, color.g, color.b, private.skinsDB.frameAlpha)
+            stripes:SetAlpha(private.skinsDB.stripeAlpha)
         end
     end
 end
 
 function private.OnLoad()
     --print("OnLoad Aurora", Aurora, private.Aurora)
-    _G.RealUI_SkinsDB = _G.RealUI_SkinsDB or {}
-    RealUI_SkinsDB = _G.RealUI_SkinsDB
+    local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
+    private.skinsDB = skinsDB.profile
 
+    -- Transfer settings
     if _G.RealUI_Storage.nibRealUI_Init then
         local RealUI_InitDB = _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB
-        RealUI_SkinsDB.stripeAlpha = RealUI_InitDB.stripeOpacity
-        RealUI_SkinsDB.uiModScale = RealUI_InitDB.uiModScale
+        private.skinsDB.stripeAlpha = RealUI_InitDB.stripeOpacity
+        private.skinsDB.uiModScale = RealUI_InitDB.uiModScale
         _G.RealUI_Storage.nibRealUI_Init = nil
     end
 
     if _G.RealUI_Storage.Aurora then
         local AuroraConfig = _G.RealUI_Storage.Aurora.AuroraConfig
-        RealUI_SkinsDB.frameAlpha = AuroraConfig.alpha
+        private.skinsDB.frameAlpha = AuroraConfig.alpha
         if type(AuroraConfig.customClassColors) == "table" then
-            RealUI_SkinsDB.customClassColors = AuroraConfig.customClassColors
+            private.skinsDB.customClassColors = AuroraConfig.customClassColors
         end
         _G.RealUI_Storage.Aurora = nil
-    end
-
-    for key, value in next, defaults do
-        if RealUI_SkinsDB[key] == nil then
-            if _G.type(value) == "table" then
-                RealUI_SkinsDB[key] = {}
-                for k, v in next, value do
-                    RealUI_SkinsDB[key][k] = value[k]
-                end
-            else
-                RealUI_SkinsDB[key] = value
-            end
-        end
     end
 
     private.UpdateUIScale = UpdateUIScale
@@ -153,17 +108,17 @@ function private.OnLoad()
     Aurora.Scale.Value = RealUI.ModValue
     function Hook.GameTooltip_OnHide(gametooltip)
         local color = Aurora.frameColor
-        Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, _G.RealUI_SkinsDB.frameAlpha)
+        Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, private.skinsDB.frameAlpha)
     end
 
     function Base.Post.SetBackdrop(ret, frame, r, g, b, a)
         if not a then
             local color = Aurora.frameColor
-            frame:SetBackdropColor(color.r, color.g, color.b, _G.RealUI_SkinsDB.frameAlpha)
+            frame:SetBackdropColor(color.r, color.g, color.b, private.skinsDB.frameAlpha)
 
             local stripes = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-            stripes:SetAlpha(_G.RealUI_SkinsDB.stripeAlpha)
+            stripes:SetAlpha(private.skinsDB.stripeAlpha)
             stripes:SetAllPoints()
             stripes:SetHorizTile(true)
             stripes:SetVertTile(true)
@@ -173,8 +128,44 @@ function private.OnLoad()
     end
 
     function private.AddOns.nibRealUI()
+        RealUI:RegisterAddOnDB(ADDON_NAME, private.skinsDB)
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end
     end
 end
+
+
+--[[ Util functions ]]--
+function RealUI.Round(value, places)
+    local mult = 10 ^ (places or 0)
+    return floor(value * mult + 0.5) / mult
+end
+function RealUI:GetSafeVals(min, max)
+    if max == 0 then
+        return 0
+    else
+        return min / max
+    end
+end
+function RealUI:ColorTableToStr(vals)
+    return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
+end
+function RealUI.GetDurabilityColor(a, b)
+    if a and b then
+        debug("RGBColorGradient", a, b)
+        return _G.oUFembed.RGBColorGradient(a, b, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
+    else
+        debug("GetDurabilityColor", a)
+        if a < 0 then
+            return 1, 0, 0
+        elseif a <= 0.5 then
+            return 1, a * 2, 0
+        elseif a >= 1 then
+            return 0, 1, 0
+        else
+            return 2 - a * 2, 1, 0
+        end
+    end
+end
+
