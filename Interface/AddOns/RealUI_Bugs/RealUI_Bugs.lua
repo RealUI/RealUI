@@ -289,6 +289,9 @@ function errorFrame.ADDON_LOADED(addon)
 
     if addon == ADDON_NAME then
         RealUI_Version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
+    elseif addon == "nibRealUI" then
+        _G.RealUI_Storage.nibRealUI = {}
+        _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
     elseif addon == "nibRealUI_Init" then
         -- Store saved variables for future transition to a new addon
         _G.RealUI_Storage.nibRealUI_Init = {}

@@ -33,21 +33,20 @@ end
 local headerFont, textFont, iconFont
 local function SetupFonts()
     local size = RealUI.ModValue(10)
-    local font = RealUI.db.profile.media.font.standard
+    local fonts = RealUI:GetAddOnDB("RealUI_Skins").fonts
     local header = _G.CreateFont("RealUI_TooltipHeader")
-    header:SetFont(font[4], size)
+    header:SetFont(fonts.normal, size)
     headerFont = {
-        font = font[4],
+        font = fonts.normal,
         size = size,
         object = header
     }
 
     size = RealUI.ModValue(9)
-    font = RealUI.db.profile.media.font.chat
     local text = _G.CreateFont("RealUI_TooltipText")
-    text:SetFont(font[4], size)
+    text:SetFont(fonts.chat, size)
     textFont = {
-        font = font[4],
+        font = fonts.chat,
         size = size,
         object = text
     }
@@ -1569,7 +1568,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
                     tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
 
-                    local minAP, maxAP = artifact.power, max(artifact.power, artifact.maxPower)
+                    local minAP, maxAP = artifact.power, _G.max(artifact.power, artifact.maxPower)
                     local artStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minAP), RealUI:ReadableNumber(maxAP), (minAP/maxAP)*100)
                     lineNum = tooltip:AddLine(RealUI:ReadableNumber(artifact.unspentPower), artStatus)
                     tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)

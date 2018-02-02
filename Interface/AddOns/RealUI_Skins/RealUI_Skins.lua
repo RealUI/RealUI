@@ -14,6 +14,12 @@ local defaults = {
         stripeAlpha = 0.5,
         frameAlpha = 0.7,
         uiModScale = 1,
+        fonts = {
+            normal = [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf]],
+            chat = [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf]],
+            crit = [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf]],
+            header = [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf]],
+        }
     }
 }
 
@@ -102,10 +108,34 @@ function private.OnLoad()
         _G.RealUI_Storage.Aurora = nil
     end
 
+    if _G.RealUI_Storage.nibRealUI then
+        local profile = _G.RealUI_Storage.nibRealUI.nibRealUIDB.profiles.RealUI
+        if profile and profile.media.font then
+            local font = profile.media.font
+            if font.standard then
+                private.skinsDB.fonts.normal = font.standard[4]
+            end
+            if font.chat then
+                private.skinsDB.fonts.chat = font.chat[4]
+            end
+            if font.crit then
+                private.skinsDB.fonts.crit = font.crit[4]
+            end
+            if font.header then
+                private.skinsDB.fonts.header = font.header[4]
+            end
+            profile.media.font = nil
+        end
+    else
+        _G.ReloadUI()
+    end
+
     private.UpdateUIScale = UpdateUIScale
+    for fontType, fontPath in next, private.skinsDB.fonts do
+        private.font[fontType] = fontPath
+    end
 
     local Base, Hook = Aurora.Base, Aurora.Hook
-    Aurora.Scale.Value = RealUI.ModValue
     function Hook.GameTooltip_OnHide(gametooltip)
         local color = Aurora.frameColor
         Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, private.skinsDB.frameAlpha)
@@ -129,6 +159,12 @@ function private.OnLoad()
 
     function private.AddOns.nibRealUI()
         RealUI:RegisterAddOnDB(ADDON_NAME, private.skinsDB)
+        if _G.nibRealUIDB.profiles.RealUI then
+            local font = _G.nibRealUIDB.profiles.RealUI.media.font
+            if font.standard then
+                font.standard = nil
+            end
+        end
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end
