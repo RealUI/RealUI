@@ -533,9 +533,31 @@ local skins do
     order = order + 1
 
     local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins")
+    local function appGet(info)
+        return SkinsDB[info[#info]]
+    end
+    local function appSet(info, value)
+        SkinsDB[info[#info]] = value
+        RealUI:UpdateFrameStyle()
+    end
+
+    local LSM = _G.LibStub("LibSharedMedia-3.0")
+    local function fontGet(info)
+        for name, path in next, _G.AceGUIWidgetLSMlists.font do
+            if path == SkinsDB.fonts[info[#info]] then
+                return name
+            end
+        end
+    end
+    local function fontSet(info, value)
+        SkinsDB.fonts[info[#info]] = LSM:Fetch("font", value)
+    end
+
+    local UIScaler = RealUI:GetModule("UIScaler")
+    local db = UIScaler.db.profile
+    local minScale, maxScale = 0.48, 1
     local fonts do
         -- _G.LibStub("LibSharedMedia-3.0"):List("font")
-        local LSM = _G.LibStub("LibSharedMedia-3.0")
         local font = ndb.media.font
         local outlines = {
             "NONE",
@@ -543,52 +565,12 @@ local skins do
             "THICKOUTLINE",
             "OUTLINE, MONOCHROME",
         }
-        local function fontGet(info)
-            for name, path in next, _G.AceGUIWidgetLSMlists.font do
-                if path == SkinsDB.fonts[info[#info]] then
-                    return name
-                end
-            end
-        end
-        local function fontSet(info, value)
-            SkinsDB.fonts[info[#info]] = LSM:Fetch("font", value)
-        end
         fonts = {
             name = L["Fonts"],
             type = "group",
             childGroups = "select",
             order = 40,
             args = {
-                normal = {
-                    name = L["Fonts_Normal"],
-                    desc = L["Fonts_NormalDesc"],
-                    type = "select",
-                    dialogControl = "LSM30_Font",
-                    values = _G.AceGUIWidgetLSMlists.font,
-                    get = fontGet,
-                    set = fontSet,
-                    order = 10,
-                },
-                chat = {
-                    name = L["Fonts_Chat"],
-                    desc = L["Fonts_ChatDesc"],
-                    type = "select",
-                    dialogControl = "LSM30_Font",
-                    values = _G.AceGUIWidgetLSMlists.font,
-                    get = fontGet,
-                    set = fontSet,
-                    order = 20,
-                },
-                header = {
-                    name = L["Fonts_Header"],
-                    desc = L["Fonts_HeaderDesc"],
-                    type = "select",
-                    dialogControl = "LSM30_Font",
-                    values = _G.AceGUIWidgetLSMlists.font,
-                    get = fontGet,
-                    set = fontSet,
-                    order = 30,
-                },
                 small = {
                     name = L["Fonts_PixelSmall"],
                     type = "group",
@@ -778,34 +760,126 @@ local skins do
         type = "group",
         order = order,
         args = {
-            header = {
-                name = "Skins",
+            headerAppear = {
+                name = _G.APPEARANCE_LABEL,
                 type = "header",
                 order = 0,
             },
-            windowOpacity = {
-                name = L["Appearance_WinOpacity"],
+            frameAlpha = {
+                name = L.Appearance_WinOpacity,
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return SkinsDB.frameAlpha end,
-                set = function(info, value)
-                    SkinsDB.frameAlpha = value
-                    RealUI:UpdateFrameStyle()
-                end,
-                order = 10,
+                get = appGet,
+                set = appSet,
+                order = 1,
             },
             stripeAlpha = {
-                name = L["Appearance_StripeOpacity"],
+                name = L.Appearance_StripeOpacity,
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return SkinsDB.stripeAlpha end,
-                set = function(info, value)
-                    SkinsDB.stripeAlpha = value
-                    RealUI:UpdateFrameStyle()
-                end,
+                get = appGet,
+                set = appSet,
+                order = 2,
+            },
+            headerFonts = {
+                name = L.Fonts,
+                type = "header",
+                order = 10,
+            },
+            normal = {
+                name = L.Fonts_Normal,
+                desc = L.Fonts_NormalDesc,
+                type = "select",
+                dialogControl = "LSM30_Font",
+                values = _G.AceGUIWidgetLSMlists.font,
+                get = fontGet,
+                set = fontSet,
+                order = 11,
+            },
+            chat = {
+                name = L.Fonts_Chat,
+                desc = L.Fonts_ChatDesc,
+                type = "select",
+                dialogControl = "LSM30_Font",
+                values = _G.AceGUIWidgetLSMlists.font,
+                get = fontGet,
+                set = fontSet,
+                order = 12,
+            },
+            header = {
+                name = L.Fonts_Header,
+                desc = L.Fonts_HeaderDesc,
+                type = "select",
+                dialogControl = "LSM30_Font",
+                values = _G.AceGUIWidgetLSMlists.font,
+                get = fontGet,
+                set = fontSet,
+                order = 13,
+            },
+            headerScale = {
+                name = _G.UI_SCALE,
+                type = "header",
                 order = 20,
+            },
+            highRes = {
+                name = L.Scale_HighRes,
+                desc = L.Scale_HighResDesc,
+                type = "toggle",
+                get = function() return ndbg.tags.retinaDisplay.set end,
+                set = function(info, value)
+                    ndbg.tags.retinaDisplay.set = value
+                    RealUI:ReloadUIDialog()
+                end,
+                order = 21,
+            },
+            pixelPerfect = {
+                name = L.Scale_Pixel,
+                desc = L.Scale_PixelDesc,
+                type = "toggle",
+                get = function() return db.pixelPerfect end,
+                set = function(info, value)
+                    db.pixelPerfect = value
+                    UIScaler:UpdateUIScale()
+                end,
+                order = 22,
+            },
+            customScale = {
+                name = L.Appearance_UIScale,
+                desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
+                type = "input",
+                disabled = function() return db.pixelPerfect end,
+                validate = function(info, value)
+                    value = _G.tonumber(value)
+                    if value then
+                        if value >= minScale and value <= maxScale then
+                            return true
+                        else
+                            return ("Value must be between %.2f and %.2f"):format(minScale, maxScale)
+                        end
+                    else
+                        return "Value must be a number"
+                    end
+                end,
+                get = function() return db.customScale end,
+                set = function(info, value)
+                    UIScaler:UpdateUIScale(_G.tonumber(value))
+                end,
+                order = 23,
+            },
+            uiModScale = {
+                name = L.Appearance_ModScale,
+                desc = L.Appearance_ModScaleDesc:format(L.Infobar.."\nHUD Config"),
+                type = "range",
+                isPercent = true,
+                min = 0.5, max = 2, step = 0.05,
+                get = function(info) return SkinsDB.uiModScale end,
+                set = function(info, value)
+                    SkinsDB.uiModScale = value
+                    RealUI.PreviewModScale()
+                end,
+                order = 24,
             },
             fonts = fonts,
             addons = {
@@ -816,74 +890,7 @@ local skins do
             }
         }
     }
-    do --[[ UI Scale ]]--
-        local UIScaler = RealUI:GetModule("UIScaler")
-        local db = UIScaler.db.profile
-        local minScale, maxScale = 0.48, 1
-        skins.args.uiScale = {
-            name = _G.UI_SCALE,
-            type = "header",
-            order = 29,
-        }
-        skins.args.retinaDisplay = {
-            name = "Retina Display",
-            desc = "Warning: Only activate if on a really high-resolution display (such as a Retina display).\n\nDouble UI scaling so that UI elements are easier to see.",
-            type = "toggle",
-            get = function() return ndbg.tags.retinaDisplay.set end,
-            set = function(info, value)
-                ndbg.tags.retinaDisplay.set = value
-                RealUI:ReloadUIDialog()
-            end,
-            order = 30,
-        }
-        skins.args.pixelPerfect = {
-            name = "Pixel Perfect",
-            desc = "Recommended: Automatically sets the scale of the UI so that UI elements appear pixel-perfect.",
-            type = "toggle",
-            get = function() return db.pixelPerfect end,
-            set = function(info, value)
-                db.pixelPerfect = value
-                UIScaler:UpdateUIScale()
-            end,
-            order = 40,
-        }
-        skins.args.customScale = {
-            name = L.Appearance_UIScale,
-            desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
-            type = "input",
-            disabled = function() return db.pixelPerfect end,
-            validate = function(info, value)
-                value = _G.tonumber(value)
-                if value then
-                    if value >= minScale and value <= maxScale then
-                        return true
-                    else
-                        return ("Value must be between %.2f and %.2f"):format(minScale, maxScale)
-                    end
-                else
-                    return "Value must be a number"
-                end
-            end,
-            get = function() return db.customScale end,
-            set = function(info, value)
-                UIScaler:UpdateUIScale(_G.tonumber(value))
-            end,
-            order = 50,
-        }
-        skins.args.uiModScale = {
-            name = L.Appearance_ModScale,
-            desc = L.Appearance_ModScaleDesc:format(L.Infobar.."\nHUD Config"),
-            type = "range",
-            isPercent = true,
-            min = 0.5, max = 2, step = 0.05,
-            get = function(info) return SkinsDB.uiModScale end,
-            set = function(info, value)
-                SkinsDB.uiModScale = value
-                RealUI.PreviewModScale()
-            end,
-            order = 60,
-        }
-    end
+
     local addonSkins = RealUI:GetAddOnSkins()
     for i = 1, #addonSkins do
         local name = addonSkins[i]

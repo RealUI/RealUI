@@ -130,6 +130,9 @@ function private.OnLoad()
         _G.ReloadUI()
     end
 
+    private.disabled.bags = true
+    private.disabled.mainmenubar = true
+
     private.UpdateUIScale = UpdateUIScale
     for fontType, fontPath in next, private.skinsDB.fonts do
         private.font[fontType] = fontPath
