@@ -25,9 +25,9 @@ tags.Methods["realui:name"] = function(unit)
     local name = _G.UnitName(unit) or ""
     name = RealUI:AbbreviateName(name, UnitFrames[unitTag].nameLength)
 
-    local nameColor = "ffffff"
+    local nameColor = "ffffffff"
     if isDead then
-        nameColor = "3f3f3f"
+        nameColor = "ff3f3f3f"
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
