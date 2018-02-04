@@ -19,6 +19,9 @@ local defaults = {
             chat = [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf]],
             crit = [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf]],
             header = [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf]],
+        },
+        addons = {
+            ["**"] = true
         }
     }
 }
@@ -160,12 +163,18 @@ function private.OnLoad()
         end
     end
 
+    for name, enabled in next, private.skinsDB do
+        if name ~= "nibRealUI" and not enabled then
+            private.AddOns[name] = private.nop
+        end
+    end
+
     function private.AddOns.nibRealUI()
         RealUI:RegisterAddOnDB(ADDON_NAME, private.skinsDB)
         if _G.nibRealUIDB.profiles.RealUI then
-            local font = _G.nibRealUIDB.profiles.RealUI.media.font
-            if font.standard then
-                font.standard = nil
+            local profile = _G.nibRealUIDB.profiles.RealUI
+            if profile.media.font then
+                profile.media.font = nil
             end
         end
         if not _G.IsAddOnLoaded("Ace3") then

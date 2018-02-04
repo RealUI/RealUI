@@ -754,9 +754,32 @@ local skins do
             }
         }
     end
+    local addons do
+        local addonSkins = _G.Aurora.Base.GetSkinList()
+        addons = {
+            name = _G.ADDONS,
+            type = "group",
+            hidden = #addonSkins == 0,
+            args = {
+            }
+        }
+
+        for i = 1, #addonSkins do
+            local name = addonSkins[i]
+            if name ~= "nibRealUI" then
+                addons.args[name] = {
+                    name = name,
+                    type = "toggle",
+                    get = function() return SkinsDB.addons[name] end,
+                    set = function(info, value)
+                        SkinsDB.addons[name] = value
+                    end,
+                }
+            end
+        end
+    end
     skins = {
-        name = "Skins",
-        desc = "Toggle skinning of UI frames.",
+        name = L.Appearance_Skins,
         type = "group",
         order = order,
         args = {
@@ -824,8 +847,8 @@ local skins do
                 order = 20,
             },
             highRes = {
-                name = L.Scale_HighRes,
-                desc = L.Scale_HighResDesc,
+                name = L.Appearance_HighRes,
+                desc = L.Appearance_HighResDesc,
                 type = "toggle",
                 get = function() return ndbg.tags.retinaDisplay.set end,
                 set = function(info, value)
@@ -835,8 +858,8 @@ local skins do
                 order = 21,
             },
             pixelPerfect = {
-                name = L.Scale_Pixel,
-                desc = L.Scale_PixelDesc,
+                name = L.Appearance_Pixel,
+                desc = L.Appearance_PixelDesc,
                 type = "toggle",
                 get = function() return db.pixelPerfect end,
                 set = function(info, value)
@@ -882,28 +905,9 @@ local skins do
                 order = 24,
             },
             fonts = fonts,
-            addons = {
-                name = _G.ADDONS,
-                type = "group",
-                args = {
-                }
-            }
+            addons = addons
         }
     }
-
-    local addonSkins = RealUI:GetAddOnSkins()
-    for i = 1, #addonSkins do
-        local name = addonSkins[i]
-        skins.args.addons.args[name] = {
-            name = name,
-            type = "toggle",
-            get = function() return RealUI:GetModuleEnabled(name) end,
-            set = function(info, value)
-                RealUI:SetModuleEnabled(name, value)
-                RealUI:ReloadUIDialog()
-            end,
-        }
-    end
 end
 local uiTweaks do
     debug("Adv UITweaks")

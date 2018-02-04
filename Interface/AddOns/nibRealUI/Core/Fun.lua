@@ -19,13 +19,11 @@ local debug = RealUI.GetDebug("Fun")
 -- Misc Functions
 private.addonDB = {}
 function RealUI:RegisterAddOnDB(addon, db)
-    print("Register", addon, db)
     if not private.addonDB[addon] then
         private.addonDB[addon] = db
     end
 end
 function RealUI:GetAddOnDB(addon)
-    print("Register", addon, private.addonDB[addon])
     return private.addonDB[addon]
 end
 
