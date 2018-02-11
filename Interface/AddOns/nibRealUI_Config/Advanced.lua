@@ -13,7 +13,6 @@ local RealUI = _G.RealUI
 local L = RealUI.L
 local ndb = RealUI.db.profile
 --local ndbc = RealUI.db.char
-local ndbg = RealUI.db.global
 
 local order = 0
 
@@ -553,8 +552,6 @@ local skins do
         SkinsDB.fonts[info[#info]] = LSM:Fetch("font", value)
     end
 
-    local UIScaler = RealUI:GetModule("UIScaler")
-    local db = UIScaler.db.profile
     local minScale, maxScale = 0.48, 1
     local fonts do
         -- _G.LibStub("LibSharedMedia-3.0"):List("font")
@@ -846,33 +843,33 @@ local skins do
                 type = "header",
                 order = 20,
             },
-            highRes = {
+            isHighRes = {
                 name = L.Appearance_HighRes,
                 desc = L.Appearance_HighResDesc,
                 type = "toggle",
-                get = function() return ndbg.tags.retinaDisplay.set end,
+                get = function() return SkinsDB.isHighRes end,
                 set = function(info, value)
-                    ndbg.tags.retinaDisplay.set = value
-                    RealUI:ReloadUIDialog()
+                    SkinsDB.isHighRes = value
+                    RealUI.UpdateUIScale()
                 end,
                 order = 21,
             },
-            pixelPerfect = {
+            isPixelScale = {
                 name = L.Appearance_Pixel,
                 desc = L.Appearance_PixelDesc,
                 type = "toggle",
-                get = function() return db.pixelPerfect end,
+                get = function() return SkinsDB.isPixelScale end,
                 set = function(info, value)
-                    db.pixelPerfect = value
-                    UIScaler:UpdateUIScale()
+                    SkinsDB.isPixelScale = value
+                    RealUI.UpdateUIScale()
                 end,
-                order = 22,
+                order = 22
             },
             customScale = {
                 name = L.Appearance_UIScale,
                 desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
                 type = "input",
-                disabled = function() return db.pixelPerfect end,
+                disabled = function() return SkinsDB.isPixelScale end,
                 validate = function(info, value)
                     value = _G.tonumber(value)
                     if value then
@@ -885,9 +882,9 @@ local skins do
                         return "Value must be a number"
                     end
                 end,
-                get = function() return db.customScale end,
+                get = function() return _G.tostring(SkinsDB.customScale) end,
                 set = function(info, value)
-                    UIScaler:UpdateUIScale(_G.tonumber(value))
+                    RealUI.UpdateUIScale(_G.tonumber(value))
                 end,
                 order = 23,
             },

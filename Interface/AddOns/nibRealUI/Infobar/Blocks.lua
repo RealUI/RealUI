@@ -13,14 +13,15 @@ fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf
 
 -- RealUI --
 local RealUI = private.RealUI
+local Scale = RealUI.Scale
 local round = RealUI.Round
 local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
 local testCell = _G.UIParent:CreateFontString()
-testCell:SetPoint("CENTER")
-testCell:SetSize(500, 20)
+Scale.Point(testCell, "CENTER")
+Scale.Size(testCell, 500, 20)
 testCell:Hide()
 
 local qTipAquire = qTip.Acquire
@@ -32,7 +33,7 @@ end
 
 local headerFont, textFont, iconFont
 local function SetupFonts()
-    local size = RealUI.ModValue(10)
+    local size = Scale.Value(10)
     local fonts = RealUI:GetAddOnDB("RealUI_Skins").fonts
     local header = _G.CreateFont("RealUI_TooltipHeader")
     header:SetFont(fonts.normal, size)
@@ -42,7 +43,7 @@ local function SetupFonts()
         object = header
     }
 
-    size = RealUI.ModValue(9)
+    size = Scale.Value(9)
     local text = _G.CreateFont("RealUI_TooltipText")
     text:SetFont(fonts.chat, size)
     textFont = {
@@ -63,7 +64,7 @@ local function SetupTextTable()
 
     local MAX_ROWS = 15
     local ROW_HEIGHT = textFont.size
-    local TABLE_WIDTH = RealUI.ModValue(320)
+    local TABLE_WIDTH = 320
     local numTables = 0
     local extData = {}
 
@@ -105,10 +106,10 @@ local function SetupTextTable()
                     if not cell then
                         cell = _G.CreateFrame("Button", "$parentCell"..col, row)
                         cell:SetID(col)
-                        cell:SetPoint("TOP")
-                        cell:SetPoint("BOTTOM")
-                        cell:SetPoint("LEFT", header[col])
-                        cell:SetPoint("RIGHT", header[col])
+                        Scale.Point(cell, "TOP")
+                        Scale.Point(cell, "BOTTOM")
+                        Scale.Point(cell, "LEFT", header[col])
+                        Scale.Point(cell, "RIGHT", header[col])
                         cell.row = row
                         row[col] = cell
 
@@ -265,8 +266,8 @@ local function SetupTextTable()
         if not self.textTable then
             numTables = numTables + 1
             local textTable = _G.CreateFrame("Frame", "IL_TextTable"..numTables, self)
-            textTable:SetPoint("TOPLEFT")
-            textTable:SetPoint("BOTTOMRIGHT")
+            Scale.Point(textTable, "TOPLEFT")
+            Scale.Point(textTable, "BOTTOMRIGHT")
             textTable:EnableMouse(true)
 
             --[[ Test BG
@@ -275,19 +276,19 @@ local function SetupTextTable()
             test:SetAllPoints(textTable)]]
 
             textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable) -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
-            textTable.header:SetPoint("TOPLEFT")
-            textTable.header:SetPoint("RIGHT")
+            Scale.Point(textTable.header, "TOPLEFT")
+            Scale.Point(textTable.header, "RIGHT")
             textTable.header:SetHeight(ROW_HEIGHT)
 
             local line = textTable:CreateTexture(nil, "BACKGROUND")
             line:SetColorTexture(1, 1, 1)
-            line:SetPoint("TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
-            line:SetPoint("RIGHT")
+            Scale.Point(line, "TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
+            Scale.Point(line, "RIGHT")
             line:SetHeight(1)
 
             textTable.scrollArea = _G.CreateFrame("ScrollFrame", "$parentScroll", textTable, "FauxScrollFrameTemplate")
-            textTable.scrollArea:SetPoint("TOPLEFT", line, 0, -5)
-            textTable.scrollArea:SetPoint("BOTTOMRIGHT")
+            Scale.Point(textTable.scrollArea, "TOPLEFT", line, 0, -5)
+            Scale.Point(textTable.scrollArea, "BOTTOMRIGHT")
             textTable.scrollArea:SetScript("OnVerticalScroll", function(scroll, offset)
                 _G.FauxScrollFrame_OnVerticalScroll(scroll, offset, ROW_HEIGHT, UpdateScroll)
             end)
@@ -298,11 +299,11 @@ local function SetupTextTable()
             for index = 1, MAX_ROWS do
                 local row = _G.CreateFrame("Button", "$parentRow"..index, textTable)
                 if index == 1 then -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
-                    row:SetPoint("TOPLEFT", prev)
+                    Scale.Point(row, "TOPLEFT", prev)
                 else
-                    row:SetPoint("TOPLEFT", prev, "BOTTOMLEFT")
+                    Scale.Point(row, "TOPLEFT", prev, "BOTTOMLEFT")
                 end
-                row:SetPoint("RIGHT")
+                Scale.Point(row, "RIGHT")
                 row:SetHeight(ROW_HEIGHT)
                 row:SetScript("OnEnter", function(r)
                     r.highlight:Show()
@@ -329,7 +330,7 @@ local function SetupTextTable()
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         Infobar:debug("CellProto:SetupCell")
         local textTable = self.textTable
-        local width = data.width or TABLE_WIDTH
+        local width = Scale.Value(data.width or TABLE_WIDTH)
         extData[data] = extData[data] or {}
         textTable.data = data
 
@@ -341,12 +342,12 @@ local function SetupTextTable()
             if not header then
                 header = _G.CreateFrame("Button", nil, headerRow)
                 header:SetID(col)
-                header:SetPoint("TOP", 0, -4)
-                header:SetPoint("BOTTOM")
+                Scale.Point(header, "TOP", 0, -4)
+                Scale.Point(header, "BOTTOM")
                 if col == 1 then
-                    header:SetPoint("LEFT")
+                    Scale.Point(header, "LEFT")
                 else
-                    header:SetPoint("LEFT", headerRow[col-1], "RIGHT", 2, 0)
+                    Scale.Point(header, "LEFT", headerRow[col-1], "RIGHT", 2, 0)
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
@@ -357,8 +358,8 @@ local function SetupTextTable()
                 local hR, hG, hB = RealUI.charInfo.class.color:GetRGB()
                 local highlight = header:CreateTexture(nil, "ARTWORK")
                 highlight:SetColorTexture(hR, hG, hB)
-                highlight:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
-                highlight:SetPoint("RIGHT")
+                Scale.Point(highlight, "TOPLEFT", header, "BOTTOMLEFT", 0, -5)
+                Scale.Point(highlight, "RIGHT")
                 highlight:SetHeight(3)
                 header:SetHighlightTexture(highlight)
                 header.hl = highlight
@@ -671,6 +672,8 @@ function Infobar:CreateBlocks()
                 startMenu.block = block
                 startMenu.dataObj = block.dataObj
 
+                _G.Aurora.Skin.UIDropDownMenuTemplate(startMenu)
+
                 errors = _G.BugGrabber:GetDB()
                 if #errors > 0 then
                     startMenu:BugGrabber_BugGrabbed("OnEnable", errors[#errors])
@@ -728,15 +731,16 @@ function Infobar:CreateBlocks()
                 setTimeOptions(block)
 
                 local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                alert:SetSize(177, alert.Text:GetHeight() + 42)
-                alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
-                alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
+                Scale.Point(alert, "BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
+                Scale.Point(alert.Arrow, "TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
                 alert.CloseButton:SetScript("OnClick", function(btn)
                     alert:Hide()
                     alert.isHidden = true
                 end)
                 alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                alert.Text:SetWidth(145)
+                Scale.Width(alert.Text, 145)
+
+                Scale.Size(alert, 177, alert.Text:GetStringHeight() + 42)
                 block.alert = alert
 
                 Infobar:ScheduleRepeatingTimer(function()
@@ -911,7 +915,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local time, tableWidth = _G.GetTime(), RealUI.ModValue(320)
+        local time, tableWidth = _G.GetTime(), 320
         local guildData = {}
         local headerData = {
             sort = {
@@ -1115,7 +1119,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local ClassLookup, tableWidth = {}, RealUI.ModValue(300)
+        local ClassLookup, tableWidth = {}, 300
         local friendsData = {}
         local headerData = {
             sort = {
@@ -1377,15 +1381,15 @@ function Infobar:CreateBlocks()
                 end
                 local alert = block.alert
                 if lowDur < 0.1 and not alert.isHidden then
-                    alert:SetSize(177, alert.Text:GetHeight() + 42)
-                    alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
-                    alert:SetPoint("BOTTOM", block, "TOP", 30, 18)
+                    Scale.Size(alert, 177, alert.Text:GetHeight() + 42)
+                    Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", -30, 4)
+                    Scale.Point(alert, "BOTTOM", block, "TOP", 30, 18)
                     alert.CloseButton:SetScript("OnClick", function(btn)
                         alert:Hide()
                         alert.isHidden = true
                     end)
                     alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
-                    alert.Text:SetWidth(145)
+                    Scale.Width(alert.Text, 145)
                     alert:Show()
                     alert.isHidden = false
                 else
@@ -1674,7 +1678,7 @@ function Infobar:CreateBlocks()
 
                 if _G.type(otherValue) == "number" then
                     local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                    main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
+                    Scale.Point(main.rested, "BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
                 end
 
@@ -2262,7 +2266,7 @@ function Infobar:CreateBlocks()
             -- if there are no connected realms, the return is just an empty table.
             connectedRealms[1] = RealUI.realmNormalized
         end
-        local tokens, tableWidth = {}, RealUI.ModValue(250)
+        local tokens, tableWidth = {}, 250
         local currencyData = {}
         local headerData = {
             info = {
