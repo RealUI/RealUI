@@ -1521,7 +1521,7 @@ end
 --------------------------
 
 -- Frame Template
-local function NewInfoFrame(name, parent, format, size2)
+local function NewInfoFrame(name, parent, format)
     local NewFrame = _G.CreateFrame("Frame", "MinimapAdv_"..name, parent)
     NewFrame:SetSize(_G.Minimap:GetWidth(), 12)
     NewFrame:SetFrameStrata("LOW")
@@ -1530,11 +1530,7 @@ local function NewInfoFrame(name, parent, format, size2)
     local text = NewFrame:CreateFontString(nil, "ARTWORK")
     text:SetNonSpaceWrap(true)
     text:SetAllPoints()
-    if size2 then
-        text:SetFontObject("RealUIFont_Pixel")
-    else
-        text:SetFontObject("RealUIFont_PixelSmall")
-    end
+    text:SetFontObject("SystemFont_Shadow_Med1_Outline")
     NewFrame.text = text
 
     if format then
@@ -1611,7 +1607,7 @@ local function CreateFrames()
 
     MMFrames.buttonframe.tooltip = MMFrames.buttonframe:CreateFontString()
     MMFrames.buttonframe.tooltip:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", 78.5, 4.5)
-    MMFrames.buttonframe.tooltip:SetFontObject("RealUIFont_PixelSmall")
+    MMFrames.buttonframe.tooltip:SetFontObject("SystemFont_Shadow_Med1")
     MMFrames.buttonframe.tooltip:SetTextColor(0.8, 0.8, 0.8)
     MMFrames.buttonframe.tooltip:Hide()
 
@@ -1728,13 +1724,13 @@ local function CreateFrames()
     MMFrames.farm:SetScript("OnMouseDown", Farm_OnMouseDown)
 
     -- Info
-    MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap, true)
-    MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap, true)
-    MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap, true)
-    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap, nil, true)
-    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s", true)
-    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s", true)
-    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s", true)
+    MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap)
+    MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap)
+    MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap)
+    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap)
+    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s")
+    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s")
+    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s")
 
     -- Coordinates
     local lastUpdate, threshold = 0, 0.5

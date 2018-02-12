@@ -93,8 +93,8 @@ function AltPowerBar:CreateFrames()
     APBFrames.bar:SetPoint("BOTTOMRIGHT", APBFrames.bg, "BOTTOMRIGHT", -1, 1)
 
     APBFrames.text = APBFrames.bar:CreateFontString(nil, "OVERLAY")
-    APBFrames.text:SetPoint("CENTER", APBFrames.bar, "CENTER", 1.5, -0.5)
-    APBFrames.text:SetFontObject(_G.RealUIFont_Pixel)
+    APBFrames.text:SetPoint("CENTER", APBFrames.bar)
+    APBFrames.text:SetFontObject("SystemFont_Shadow_Med1")
     APBFrames.text:SetTextColor(1, 1, 1, 1)
 
     -- Update Power

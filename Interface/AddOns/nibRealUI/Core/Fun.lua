@@ -371,13 +371,12 @@ end
 function RealUI:CreateFS(parent, justify, size)
     local f = parent:CreateFontString(nil, "OVERLAY")
 
-    if size == "small" then
-        f:SetFontObject(_G.RealUIFont_PixelSmall)
-    elseif size == "large" then
-        f:SetFontObject(_G.RealUIFont_PixelLarge)
+    if size == "large" then
+        f:SetFontObject("Fancy16Font")
     else
-        f:SetFontObject(_G.RealUIFont_Pixel)
+        f:SetFontObject("SystemFont_Shadow_Med1")
     end
+
     f:SetShadowColor(0, 0, 0, 0)
     if justify then f:SetJustifyH(justify) end
 

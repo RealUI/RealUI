@@ -94,7 +94,7 @@ local function CreateInfoString(button, position)
         str:SetJustifyH("RIGHT")
         str:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5)
     end
-    str:SetFontObject(_G.RealUIFont_PixelSmall)
+    str:SetFontObject("NumberFont_Outline_Med")
 
     return str
 end

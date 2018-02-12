@@ -114,7 +114,7 @@ function AddonControl:CreateOptionsFrame()
         acO.reloadui:SetScript("OnClick", _G.ReloadUI)
 
     -- Header
-    local header = RealUI:CreateFS(acO, "CENTER", "small")
+    local header = RealUI:CreateFS(acO, "CENTER", "large")
         header:SetText(L["Control_AddonControl"])
         header:SetPoint("TOP", acO, "TOP", 0, -9)
 

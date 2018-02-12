@@ -40,7 +40,7 @@ do  --Replacement for UIDropDownMenu
         local fstr = button:CreateFontString()
         fstr:SetJustifyH("LEFT")
         fstr:SetJustifyV("MIDDLE")
-        fstr:SetFontObject(_G.RealUIFont_PixelSmall)
+        fstr:SetFontObject("SystemFont_Shadow_Med1")
         fstr:SetPoint("LEFT", button, "LEFT", 0, 0)
         button.Text = fstr
 

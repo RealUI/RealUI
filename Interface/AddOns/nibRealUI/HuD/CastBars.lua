@@ -94,15 +94,17 @@ end
 
 function CastBars:SetAnchors(castbar, unit)
     CastBars:debug("Set config cast", unit)
+    local size = db[unit].size
 
-    local iconX, iconY = 3, -2
-    local iconPoint, iconRelPoint = "TOP", "BOTTOM"
-    if not db.text.textOnBottom then
-        iconPoint, iconRelPoint = "BOTTOM", "TOP"
+    local iconX
+    local iconY = 2
+    local iconPoint, iconRelPoint = "BOTTOM", "TOP"
+    if db.text.textOnBottom then
+        iconPoint, iconRelPoint = "TOP", "BOTTOM"
         iconY = -iconY
     end
 
-    local textX, textY = 0, -2
+    local textX, textY = 2, 0
     local textPoint, textRelPoint = "TOP", "TOP"
     local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
 
@@ -113,11 +115,12 @@ function CastBars:SetAnchors(castbar, unit)
     local horizPoint, horizRelPoint
     if unit == "player" then
         if db.text.textInside then
-            castbar.Text:SetJustifyH("RIGHT")
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            iconX = -iconX
+            iconX = db.text.textOnBottom and 0 or -size.y
+            textX = -textX
         else
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
+            iconX = db.text.textOnBottom and size.y or 0
         end
         castbar.Text:SetJustifyH(horizPoint)
         castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
@@ -126,9 +129,11 @@ function CastBars:SetAnchors(castbar, unit)
     elseif unit == "target" then
         if db.text.textInside then
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
+            iconX = db.text.textOnBottom and 0 or size.y
         else
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            iconX = -iconX
+            iconX = db.text.textOnBottom and -size.y or 0
+            textX = -textX
         end
         castbar.Text:SetJustifyH(horizPoint)
         castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
@@ -334,11 +339,11 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
 
     local Text = Castbar:CreateFontString(nil, "OVERLAY")
     Castbar.Text = Text
-    Text:SetFontObject(_G.RealUIFont_Pixel)
+    Text:SetFontObject("SystemFont_Shadow_Med1_Outline")
 
     local Time = Castbar:CreateFontString(nil, "OVERLAY")
     Castbar.Time = Time
-    Time:SetFontObject(_G.RealUIFont_PixelNumbers)
+    Time:SetFontObject("NumberFont_Outline_Large")
 
     color = db.colors.latency
     local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)

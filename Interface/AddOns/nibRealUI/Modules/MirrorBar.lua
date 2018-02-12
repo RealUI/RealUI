@@ -171,8 +171,8 @@ function MirrorBar:CreateFrames()
     MBFrames.bar:SetPoint("BOTTOMRIGHT", MBFrames.bg, "BOTTOMRIGHT", -1, 1)
 
     MBFrames.text = MBFrames.bar:CreateFontString(nil, "OVERLAY")
-    MBFrames.text:SetPoint("CENTER", MBFrames.bar, "CENTER", 1.5, -0.5)
-    MBFrames.text:SetFontObject(_G.RealUIFont_Pixel)
+    MBFrames.text:SetPoint("CENTER", MBFrames.bar)
+    MBFrames.text:SetFontObject("SystemFont_Shadow_Med1")
     MBFrames.text:SetTextColor(1, 1, 1, 1)
 
     -- Update Power

@@ -23,46 +23,6 @@ end
 RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
 
--- Localized Fonts
-do
-    local LSM = _G.LibStub("LibSharedMedia-3.0")
-    local lsmFonts = LSM:List("font")
-    local function findFont(font, backup)
-        local fontPath, fontSize, fontArgs = font:GetFont()
-        if not fontPath then
-            fontPath, fontSize, fontArgs = backup:GetFont()
-            font:SetFont(fontPath, fontSize, fontArgs)
-        end
-        local fontName, path
-        for i = 1, #lsmFonts do
-            fontName = lsmFonts[i]
-            path = LSM:Fetch("font", fontName)
-            if path == fontPath then
-                local tab = {
-                    fontName,
-                    fontSize,
-                    fontArgs,
-                    fontPath,
-                }
-                return tab
-            end
-        end
-    end
-    local fonts = {
-        standard = findFont(_G.RealUIFont_Normal, _G.SystemFont_Small),
-        chat = findFont(_G.RealUIFont_Chat, _G.NumberFont_Normal_Med),
-        crit = findFont(_G.RealUIFont_Crit, _G.NumberFont_Outline_Huge),
-        header = findFont(_G.RealUIFont_Header, _G.QuestFont_Huge),
-        pixel = {
-            small =    findFont(_G.RealUIFont_PixelSmall, _G.SystemFont_Small),
-            large =    findFont(_G.RealUIFont_PixelLarge, _G.SystemFont_Med1),
-            numbers =  findFont(_G.RealUIFont_PixelNumbers, _G.SystemFont_Large),
-            cooldown = findFont(_G.RealUIFont_PixelCooldown, _G.SystemFont_Large),
-        }
-    }
-    RealUI.media.font = fonts
-end
-
 RealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
         ["HuDX"] = 0,

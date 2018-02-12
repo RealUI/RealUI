@@ -16,9 +16,6 @@ local function UpdateTabStyle(self, style)
     Chat_Tabs:debug("UpdateTabStyle", self, self:GetName(), self.UpdateTabs, style)
     local text = _G[self:GetName().."Text"]
 
-    text:SetFont(_G.RealUIFont_PixelSmall:GetFont())
-    text:SetShadowColor(0, 0, 0, 0)
-
     -- Update Tab Appearance
     if not style then
         if self.alerting then

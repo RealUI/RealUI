@@ -9,7 +9,7 @@ local F = _G.Aurora[1]
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb, ndbc
+local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
@@ -54,7 +54,7 @@ local function AttachStatusBar(icon, unit)
     F.CreateBD(sBarBG)
 
     local timeStr = icon:CreateFontString(nil, "OVERLAY")
-    timeStr:SetFontObject(_G.RealUIFont_PixelSmall)
+    timeStr:SetFontObject("NumberFont_Outline_Med")
     timeStr:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", (unit == "pet") and 0.5 or 1.5, (unit == "pet") and 5 or 4)
     timeStr:SetJustifyH("LEFT")
 
@@ -81,14 +81,14 @@ end
 
 local function CreateTags(parent)
     parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.HealthValue:SetPoint("TOPLEFT", parent.Health, "TOPLEFT", 2.5, -6.5)
-    parent.HealthValue:SetFontObject(_G.RealUIFont_Pixel)
+    parent.HealthValue:SetPoint("LEFT", parent.Health, 1, 0)
+    parent.HealthValue:SetFontObject("SystemFont_Shadow_Med1")
     parent.HealthValue:SetJustifyH("LEFT")
     parent:Tag(parent.HealthValue, "[realui:healthPercent]")
 
     parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.Name:SetPoint("TOPRIGHT", parent.Health, "TOPRIGHT", -0.5, -6.5)
-    parent.Name:SetFontObject(_G.RealUIFont_Pixel)
+    parent.Name:SetPoint("RIGHT", parent.Health, -1, 0)
+    parent.Name:SetFontObject("SystemFont_Shadow_Med1")
     parent.Name:SetJustifyH("RIGHT")
     parent:Tag(parent.Name, "[realui:name]")
 end
@@ -165,9 +165,7 @@ local function CreateAuras(parent)
     auras.PostCreateIcon = function(self, button)
         UnitFrames:debug("Boss:PostCreateIcon", self, button)
         F.ReskinIcon(button.icon)
-        button.count:SetFontObject(_G.RealUIFont_PixelSmall)
-        local countY = ndbc.resolution == 1 and -1.5 or -2.5
-        button.count:SetPoint("TOPRIGHT", button, "TOPRIGHT", 1.5, countY)
+        button.count:SetFontObject("NumberFont_Outline_Med")
     end
     auras.PostUpdateIcon = function(self, unit, icon, index)
         UnitFrames:debug("Boss:PostUpdateIcon", self, unit, icon, index)
@@ -238,7 +236,6 @@ UnitFrames.boss = {
 _G.tinsert(UnitFrames.units, function(...)
     db = UnitFrames.db.profile
     ndb = RealUI.db.profile
-    ndbc = RealUI.db.char
 
     oUF:RegisterStyle("RealUI:boss", CreateBoss)
     oUF:SetActiveStyle("RealUI:boss")

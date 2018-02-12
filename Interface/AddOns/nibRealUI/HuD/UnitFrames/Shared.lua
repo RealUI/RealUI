@@ -118,7 +118,7 @@ local function CreateHealthBar(parent, info)
     if info.text then
         Health.text = Health:CreateFontString(nil, "OVERLAY")
         Health.text:SetPoint("BOTTOM"..info.point, Health, "TOP"..info.point, 2, 2)
-        Health.text:SetFontObject(_G.RealUIFont_Pixel)
+        Health.text:SetFontObject("SystemFont_Shadow_Med1")
         parent:Tag(Health.text, "[realui:health]")
     end
 
@@ -316,7 +316,7 @@ local function CreatePowerBar(parent, info)
 
     Power.text = Power:CreateFontString(nil, "OVERLAY")
     Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
-    Power.text:SetFontObject(_G.RealUIFont_Pixel)
+    Power.text:SetFontObject("SystemFont_Shadow_Med1")
     parent:Tag(Power.text, "[realui:power]")
 
     Power.step, Power.warn = CreateSteps(parent, height, info)

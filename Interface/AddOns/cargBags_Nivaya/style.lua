@@ -287,11 +287,11 @@ local function UpdateDimensions(self)
     end
     if self.bagToggle then
         local tBag = (self.name == "cBniv_Bag")
-        local extraHeight = (tBag and self.hintShown) and (_G.RealUI.media.font.pixel.small[2] + 4) or 0
+        local extraHeight = (tBag and self.hintShown) and (self.hint:GetStringHeight() + 4) or 0
         height = height + 24 + extraHeight
     end
     if self.Caption then        -- Space for captions
-        height = height + _G.RealUI.media.font.pixel.small[2] + 12
+        height = height + self.Caption:GetStringHeight() + 12
     end
     self:SetHeight(self.ContainerHeight + height)
 end
@@ -381,7 +381,7 @@ local createIconButton = function (name, parent, texture, point, hint, isBag)
 
     button.tooltip = button:CreateFontString()
     -- button.tooltip:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", isBag and -76 or -59, 4.5)
-    button.tooltip:SetFontObject(_G.RealUIFont_PixelSmall)
+    button.tooltip:SetFontObject("SystemFont_Shadow_Med1")
     button.tooltip:SetJustifyH("RIGHT")
     button.tooltip:SetText(hint)
     button.tooltip:SetTextColor(0.8, 0.8, 0.8)
@@ -488,7 +488,7 @@ function MyContainer:OnCreate(name, settings)
 
     -- Caption, close button
     local caption = background:CreateFontString(background, "OVERLAY", nil)
-    caption:SetFontObject(_G.RealUIFont_PixelSmall)
+    caption:SetFontObject("SystemFont_Shadow_Med1")
     if caption then
         local t = L.bagCaptions[self.name] or (tBankBags and self.name:sub(5))
         if not t then t = self.name end
@@ -711,7 +711,7 @@ function MyContainer:OnCreate(name, settings)
         Base.SetBackdrop(self.DropTarget.bg, Aurora.frameColor:GetRGBA())
 
         local fs = self:CreateFontString(nil, "OVERLAY")
-        fs:SetFontObject(_G.RealUIFont_PixelSmall)
+        fs:SetFontObject("NumberFont_Outline_Med")
         fs:SetJustifyH("LEFT")
         fs:SetPoint("BOTTOMRIGHT", self.DropTarget, "BOTTOMRIGHT", 1.5, 1.5)
         self.EmptySlotCounter = fs
@@ -746,7 +746,7 @@ function MyContainer:OnCreate(name, settings)
         -- Hint
         self.hint = background:CreateFontString(nil, "OVERLAY", nil)
         self.hint:SetPoint("BOTTOMLEFT", infoFrame, -0.5, 31.5)
-        self.hint:SetFontObject(_G.RealUIFont_PixelSmall)
+        self.hint:SetFontObject("SystemFont_Shadow_Med1")
         self.hint:SetTextColor(1, 1, 1, 0.4)
         self.hint:SetText("Ctrl + Alt + Right Click an item to assign category")
         self.hintShown = true
@@ -754,7 +754,7 @@ function MyContainer:OnCreate(name, settings)
         -- The money display
         local money = self:SpawnPlugin("TagDisplay", "[money]", self)
         money:SetPoint("TOPRIGHT", self, -25.5, -2.5)
-        money:SetFontObject(_G.RealUIFont_PixelSmall)
+        money:SetFontObject("SystemFont_Shadow_Med1")
         money:SetJustifyH("RIGHT")
         money:SetShadowColor(0, 0, 0, 0)
     end

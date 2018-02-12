@@ -8,7 +8,7 @@ local next = _G.next
 -- RealUI --
 local RealUI = private.RealUI
 local round = RealUI.Round
-local db, ndb
+local db
 
 local MODNAME = "CooldownCount"
 local CooldownCount = RealUI:NewModule(MODNAME, "AceTimer-3.0", "AceEvent-3.0")
@@ -163,23 +163,22 @@ function CooldownCount:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = RealUI.db.profile
 
     if db.position then
         db.position = nil
     end
 
-    CD_FONT = {
-        font = ndb.media.font.standard[4],
-        size = 10,
-        flags = "OUTLINE"
-    }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function CooldownCount:OnEnable()
-    setTimeFormats()
+    CD_FONT = {
+        font = RealUI:GetAddOnDB("RealUI_Skins").fonts.normal,
+        size = 10,
+        flags = "OUTLINE"
+    }
 
+    setTimeFormats()
     _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
         if not cd:IsForbidden() and not cd.noCooldownCount then
             if start > 0 then
