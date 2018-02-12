@@ -38,19 +38,24 @@ end
 local function UpdateCC(self, event, unit)
     local spellID, startTime, duration = _G.C_PvP.GetArenaCrowdControlInfo(unit)
     if spellID then
+        UnitFrames:debug("UpdateCC", startTime, duration)
         if startTime ~= 0 and duration ~= 0 then
             self.Trinket:SetCooldown(startTime / 1000.0, duration / 1000.0)
-            if db.arena.announceUse then
-                local chat = db.arena.announceChat
-                if chat == "GROUP" then
-                    chat = "INSTANCE_CHAT"
+            if not self.hasAnnounced then
+                if db.arena.announceUse then
+                    local chat = db.arena.announceChat
+                    if chat == "GROUP" then
+                        chat = "INSTANCE_CHAT"
+                    end
+                    _G.SendChatMessage("Trinket used by: ".._G.GetUnitName(unit, true), chat)
+                elseif RealUI.isDev then
+                    _G.print("Trinket used by: ".._G.GetUnitName(unit, true))
                 end
-                _G.SendChatMessage("Trinket used by: ".._G.GetUnitName(unit, true), chat)
-            elseif RealUI.isDev then
-                _G.print("Trinket used by: ".._G.GetUnitName(unit, true))
+                self.hasAnnounced = true
             end
         else
             self.Trinket:Clear();
+            self.hasAnnounced = false
         end
     end
 end
