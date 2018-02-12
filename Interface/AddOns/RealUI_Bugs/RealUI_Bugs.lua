@@ -286,6 +286,9 @@ function errorFrame.ADDON_LOADED(addon)
     if not _G.RealUI_Storage then
         _G.RealUI_Storage = {}
     end
+    if not _G.RealUI_Debug then
+        _G.RealUI_Debug = {}
+    end
 
     if addon == ADDON_NAME then
         RealUI_Version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
