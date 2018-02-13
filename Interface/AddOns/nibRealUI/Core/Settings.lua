@@ -18,17 +18,10 @@ local accountCVars = {
     -- Sound
     ["Sound_EnableErrorSpeech"] = 0,
 
-    -- Nameplates
-    ["bloatTest"] = 0,
-    ["bloatnameplates"] = 0,
-    ["bloatthreat"] = 0,
-
     -- Screenshots
-    ["screenshotFormat"] = "jpg",              -- JPG format
     ["screenshotQuality"] = "10",              -- Highest quality
 
     -- Help
-    ["showGameTips"] = 0,                      -- Turn off Loading Screen Tips
     ["showTutorials"] = 0,                     -- Turn off Tutorials
     ["UberTooltips"] = 1,                      -- Turn on Enhanced Tooltips
     ["scriptErrors"] = 1,                      -- Turn on Display Lua Errors
@@ -37,12 +30,7 @@ local accountCVars = {
     ["deselectOnClick"] = 1,                   -- Turn off Sticky Targeting (inverted)
 
     -- Combat
-    ["displaySpellActivationOverlays"] = 1,    -- Turn on Spell Alerts
     ["spellActivationOverlayOpacity"] = 0.75,  -- Spell Alert Opacity
-
-    -- Display
-    ["emphasizeMySpellEffects"] = 0,           -- Turn off Emphasize My Spell Effects
-    ["SpellTooltip_DisplayAvgValues"] = 0,     -- Turn off Display Points As Average
 
     -- Social
     ["chatBubbles"] = 0,                       -- Turn off Chat Bubbles
@@ -61,29 +49,34 @@ local accountCVars = {
     ["UnitNamePlayerPVPTitle"] = 0,            -- Turn off PvP Player Titles
     ["UnitNameEnemyGuardianName"] = 1,         -- Turn on Enemy Pet Names
     ["UnitNameEnemyTotemName"] = 1,            -- Turn on Enemy Totem Names
-    ["nameplateMotion"] = 1,                   -- Stacking Nameplates
 
     -- Camera
-    ["cameraYawSmoothSpeed"] = 210,
-    ["cameraView"] = 1,                        -- Camera Stlye
-    ["cameraDistanceMax"] = 50,                -- Camera Max Distance
-    ["cameraDistanceMaxFactor"] = 2,           -- Camera Follow Speed
+    ["cameraSmoothStyle"] = 0,                 -- Never adjust the camera
 
     -- Quality of Life
     ["guildShowOffline"] = 0,                  -- Hide Offline Guild Members
     ["profanityFilter"] = 0,                   -- Turn off Profanity Filter
 }
 local characterCVars = {
+    -- Nameplates
+    ["nameplateMotion"] = 1,          -- Stacking Nameplates
+    ["nameplateShowSelf"] = 0,        -- Hide Personal Resource Display
+
+    -- Combat
+    ["displaySpellActivationOverlays"] = 1,    -- Turn on Spell Alerts
+
+    -- Raid/Party
     ["useCompactPartyFrames"] = 1,    -- Raid-style party frames
+
+    -- Quality of Life
+    ["autoLootDefault"] = 1,                   -- Turn on Auto Loot
 }
 
 -- CVars
 local function SetDefaultCVars()
     debug("SetDefaultCVars")
     if _G.IsAddOnLoaded("MikScrollingBattleText") then
-        accountCVars["enableCombatText"] = 0   -- Turn off Combat Text
-        accountCVars["CombatDamage"] = 0       -- Turn off Combat Text - Damage
-        accountCVars["CombatHealing"] = 0      -- Turn off Combat Text - Healing
+        accountCVars["enableFloatingCombatText"] = 0   -- Turn off Combat Text
     end
 
     for cvar, value in next, accountCVars do
