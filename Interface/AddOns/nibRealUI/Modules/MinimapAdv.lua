@@ -442,16 +442,17 @@ end
 -- MINIMAP BUTTONS --
 ---------------------
 local BlackList = {
-    ["QueueStatusMinimapButton"] = true,
-    ["GarrisonLandingPageMinimapButton"] = true,
-    ["MiniMapTracking"] = true,
-    ["MiniMapMailFrame"] = true,
-    ["HelpOpenTicketButton"] = true,
-    ["GameTimeFrame"] = true,
+    QueueStatusMinimapButton = true,
+    GarrisonLandingPageMinimapButton = true,
+    MiniMapTracking = true,
+    MiniMapMailFrame = true,
+    HelpOpenTicketButton = true,
+    GameTimeFrame = true,
+    TimeManagerClockButton = true,
 }
 local OddList = {
-    ["BagSync_MinimapButton"] = true,
-    ["OutfitterMinimapButton"] = true,
+    BagSync_MinimapButton = true,
+    OutfitterMinimapButton = true,
 }
 
 local buttons = {}
@@ -1426,6 +1427,9 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     -- Hide persistent Minimap elements
     _G.GameTimeFrame:Hide()
     _G.GameTimeFrame.Show = function() end
+
+    _G.TimeManagerClockButton:Hide()
+    _G.TimeManagerClockButton.Show = function() end
 
     -- Update Minimap position and visible state
     self:UpdateShownState() -- Will also call MinimapAdv:Update
