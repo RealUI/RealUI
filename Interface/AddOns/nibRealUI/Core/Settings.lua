@@ -232,7 +232,7 @@ local function CreateInstallWindow()
 
     -- Version string
     IWF.verStr = IWF:CreateFontString(nil, "OVERLAY")
-        IWF.verStr:SetFont(_G.RealUIFont_Normal:GetFont(), 18)
+        IWF.verStr:SetFontObject("Fancy16Font")
         IWF.verStr:SetText(L["Version"].." "..RealUI:GetVerString(true))
         IWF.verStr:SetPoint("TOP", IWF, "CENTER", 0, -12)
 
@@ -262,7 +262,7 @@ local function CreateInstallWindow()
 
     IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
         IWF.installText:SetPoint("BOTTOM")
-        IWF.installText:SetFont(_G.RealUIFont_Normal:GetFont(), 18)
+        IWF.installText:SetFontObject("SystemFont_Shadow_Med1")
         IWF.installText:SetText("[ "..L["Install"].." ]")
 
     -- Combat Check

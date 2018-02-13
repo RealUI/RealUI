@@ -31,39 +31,13 @@ function qTip:Acquire(...)
     return tooltip
 end
 
-local headerFont, textFont, iconFont
-local function SetupFonts()
-    local size = Scale.Value(10)
-    local fonts = RealUI:GetAddOnDB("RealUI_Skins").fonts
-    local header = _G.CreateFont("RealUI_TooltipHeader")
-    header:SetFont(fonts.normal, size)
-    headerFont = {
-        font = fonts.normal,
-        size = size,
-        object = header
-    }
-
-    size = Scale.Value(9)
-    local text = _G.CreateFont("RealUI_TooltipText")
-    text:SetFont(fonts.chat, size)
-    textFont = {
-        font = fonts.chat,
-        size = size,
-        object = text
-    }
-
-    iconFont = {
-        font = fa.path,
-        outline = Infobar:GetFontOutline()
-    }
-end
-
+local iconFont
 local TextTableCellProvider, TextTableCellPrototype
 local function SetupTextTable()
     TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 
     local MAX_ROWS = 15
-    local ROW_HEIGHT = textFont.size
+    local ROW_HEIGHT = Scale.Value(9)
     local TABLE_WIDTH = 320
     local numTables = 0
     local extData = {}
@@ -114,7 +88,7 @@ local function SetupTextTable()
                         row[col] = cell
 
                         local text = cell:CreateFontString(nil, "ARTWORK")
-                        text:SetFont(textFont.font, textFont.size)
+                        text:SetFontObject("SystemFont_Shadow_Med1")
                         text:SetJustifyH(data.header.justify[col])
                         text:SetAllPoints()
                         cell:SetFontString(text)
@@ -275,7 +249,7 @@ local function SetupTextTable()
             test:SetColorTexture(1, 1, 1, 0.5)
             test:SetAllPoints(textTable)]]
 
-            textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable) -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
+            textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable)
             Scale.Point(textTable.header, "TOPLEFT")
             Scale.Point(textTable.header, "RIGHT")
             textTable.header:SetHeight(ROW_HEIGHT)
@@ -298,7 +272,7 @@ local function SetupTextTable()
             textTable.rows = {}
             for index = 1, MAX_ROWS do
                 local row = _G.CreateFrame("Button", "$parentRow"..index, textTable)
-                if index == 1 then -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
+                if index == 1 then
                     Scale.Point(row, "TOPLEFT", prev)
                 else
                     Scale.Point(row, "TOPLEFT", prev, "BOTTOMLEFT")
@@ -351,7 +325,7 @@ local function SetupTextTable()
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
-                header.text:SetFont(textFont.font, textFont.size)
+                header.text:SetFontObject("SystemFont_Shadow_Med1")
                 header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
@@ -386,7 +360,7 @@ local function SetupTextTable()
             local size = headerData.size[col]
             if size == "FIT" then
                 local cellWidth = header.text:GetStringWidth()
-                testCell:SetFont(textFont.font, textFont.size)
+                testCell:SetFontObject("SystemFont_Shadow_Med1")
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
@@ -456,8 +430,8 @@ local function SetupTextTable()
 end
 
 local function SetupTooltip(tooltip, block)
-    tooltip:SetHeaderFont(headerFont.object)
-    tooltip:SetFont(textFont.object)
+    tooltip:SetHeaderFont("Fancy16Font")
+    tooltip:SetFont("SystemFont_Shadow_Med1")
     tooltip:SmartAnchorTo(block)
     tooltip:SetAutoHideDelay(0.10, block)
     block.tooltip = tooltip
@@ -530,7 +504,11 @@ function Infobar:CreateBlocks()
     local ndbc = RealUI.db.char
 
     if not TextTableCellPrototype then
-        SetupFonts()
+        iconFont = {
+            font = fa.path,
+            outline = Infobar:GetFontOutline()
+        }
+
         SetupTextTable()
     end
 
@@ -671,8 +649,6 @@ function Infobar:CreateBlocks()
             OnEnable = function(block)
                 startMenu.block = block
                 startMenu.dataObj = block.dataObj
-
-                _G.Aurora.Skin.UIDropDownMenuTemplate(startMenu)
 
                 errors = _G.BugGrabber:GetDB()
                 if #errors > 0 then

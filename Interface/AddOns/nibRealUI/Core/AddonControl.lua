@@ -105,11 +105,11 @@ function AddonControl:CreateOptionsFrame()
         acO:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
         acO:Hide()
 
-    acO.okay = RealUI:CreateTextButton(_G.OKAY, acO, 100, 24, true)
+    acO.okay = RealUI:CreateTextButton(_G.OKAY, acO, 100, 24)
         acO.okay:SetPoint("BOTTOM", acO, "BOTTOM", -51, 5)
         acO.okay:SetScript("OnClick", function() self.options:Hide() end)
 
-    acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
+    acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24)
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
         acO.reloadui:SetScript("OnClick", _G.ReloadUI)
 
@@ -174,12 +174,12 @@ function AddonControl:CreateOptionsFrame()
 
             -- AddOn name
             local fs = acAddonSect:CreateFontString(nil, "OVERLAY")
-            fs:SetFontObject(_G.RealUIFont_Normal)
+            fs:SetFontObject("SystemFont_Shadow_Med1")
             fs:SetText(addon)
             if not prevLabel then
-                fs:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 6, -9.5)
+                fs:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 6, -6)
             else
-                fs:SetPoint("TOPLEFT", prevLabel, "BOTTOMLEFT", 0, -8.5)
+                fs:SetPoint("TOPLEFT", prevLabel, "BOTTOMLEFT", 0, -7)
             end
             prevLabel = fs
 
@@ -236,7 +236,7 @@ function AddonControl:CreateOptionsFrame()
             prevCBPosition = cbPosition[cnt]
 
             -- Reset
-            bReset[cnt] = RealUI:CreateTextButton("Reset", acAddonSect, 60, 18, true)
+            bReset[cnt] = RealUI:CreateTextButton("Reset", acAddonSect, 60, 18)
             bReset[cnt].addon = altAddOnTable[addon] or addon
             bReset[cnt].id = cnt
             if not prevReset then

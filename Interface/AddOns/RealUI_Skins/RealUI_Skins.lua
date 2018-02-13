@@ -251,6 +251,49 @@ function private.OnLoad()
     end
 end
 
+do -- Load LibSharedMedia
+    local LSM = _G.LibStub("LibSharedMedia-3.0")
+
+    --[[ Fonts
+        SystemFont_Shadow_Med1
+        SystemFont_Shadow_Med1_Outline
+        NumberFont_Outline_Med
+        Fancy16Font
+    ]]
+
+    -- Russian + Latin char languages
+    local LOCALE_MASK = LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
+    LSM:Register("font", "Roboto", [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf]], LOCALE_MASK)
+    LSM:Register("font", "Roboto Bold-Italic", [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf]], LOCALE_MASK)
+    LSM:Register("font", "Roboto Condensed", [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf]], LOCALE_MASK)
+    LSM:Register("font", "Roboto Slab", [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf]], LOCALE_MASK)
+
+    -- Asian fonts: These are specific to each language
+    -- zhTW
+    LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Bold.otf]], LSM.LOCALE_BIT_zhTW)
+    LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Light.otf]], LSM.LOCALE_BIT_zhTW)
+    LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf]], LSM.LOCALE_BIT_zhTW)
+    -- zhCN
+    LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Bold.otf]], LSM.LOCALE_BIT_zhCN)
+    LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Light.otf]], LSM.LOCALE_BIT_zhCN)
+    LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Regular.otf]], LSM.LOCALE_BIT_zhCN)
+    -- koKR
+    LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Bold.otf]], LSM.LOCALE_BIT_koKR)
+    LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Light.otf]], LSM.LOCALE_BIT_koKR)
+    LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf]], LSM.LOCALE_BIT_koKR)
+
+    if _G.LOCALE_enUS or _G.LOCALE_ruRU then
+        LSM.DefaultMedia.font = "Roboto"
+    else
+        LSM.DefaultMedia.font = "Noto Sans Regular"
+    end
+
+    --[[ Backgrounds ]]--
+    LSM:Register("background", "Plain", [[Interface\Buttons\WHITE8x8]])
+
+    --[[ Statusbars ]]--
+    LSM:Register("statusbar", "Plain", [[Interface\Buttons\WHITE8x8]])
+end
 
 --[[ Util functions ]]--
 function RealUI.Round(value, places)

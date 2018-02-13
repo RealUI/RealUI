@@ -12,7 +12,6 @@
 #@end-do-not-package@
 Aurora\Skin\skin.xml
 Libs\Libs.xml
-Fonts.xml
 
 RealUI_Skins.lua
 

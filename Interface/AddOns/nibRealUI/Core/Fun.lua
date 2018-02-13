@@ -234,7 +234,7 @@ function RealUI:CreateCheckbox(name, parent, label, side, size)
     f.type = "checkbox"
 
     f.text = _G[f:GetName() .. "Text"]
-    f.text:SetFontObject(_G.RealUIFont_Normal)
+    f.text:SetFontObject("SystemFont_Shadow_Med1")
     f.text:SetTextColor(1, 1, 1)
     f.text:SetText(label)
     f.text:ClearAllPoints()
@@ -260,21 +260,14 @@ function RealUI:CreateCheckbox(name, parent, label, side, size)
     return f
 end
 
-function RealUI:CreateTextButton(text, parent, template, width, height, small)
+function RealUI:CreateTextButton(text, parent, template, width, height)
     if not template then template = "UIPanelButtonTemplate" end
     if (type(template) ~= "string") then
-        template, width, height, small = "UIPanelButtonTemplate", template, width, height
+        template, width, height = "UIPanelButtonTemplate", template, width
     end
     local f = _G.CreateFrame("Button", nil, parent, template)
 
     f:SetFrameLevel(parent:GetFrameLevel() + 2)
-    if small then
-        f:SetNormalFontObject(_G.RealUIFont_Normal)
-        f:SetHighlightFontObject(_G.RealUIFont_Normal)
-    else
-        f:SetNormalFontObject(_G.GameFontHighlight)
-        f:SetHighlightFontObject(_G.GameFontHighlight)
-    end
     if width then
         f:SetSize(width, height)
     end
