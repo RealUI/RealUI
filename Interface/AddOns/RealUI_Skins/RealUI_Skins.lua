@@ -148,7 +148,7 @@ function private.OnLoad()
 
     if _G.RealUI_Storage.nibRealUI then
         local profile = _G.RealUI_Storage.nibRealUI.nibRealUIDB.profiles.RealUI
-        if profile and profile.media.font then
+        if profile and profile.media and profile.media.font then
             local font = profile.media.font
             if font.standard then
                 private.skinsDB.fonts.normal = font.standard[4]

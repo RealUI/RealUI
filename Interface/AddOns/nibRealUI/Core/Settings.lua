@@ -48,7 +48,7 @@ local accountCVars = {
     ["chatBubbles"] = 0,                       -- Turn off Chat Bubbles
     ["chatBubblesParty"] = 0,                  -- Turn off Party Chat Bubbles
     ["chatStyle"] = "classic",                 -- Chat Style = "Classic"
-    ["conversationMode"] = "inline",           -- Conversation Mode = "In-line"
+    ["whisperMode"] = "inline",                -- Whisper Mode = "In-line"
 
     -- ActionBars
     ["countdownForCooldowns"] = 0,             -- Disable Blizz cooldown count
@@ -187,7 +187,7 @@ local function CreateInstallWindow()
 
     -- Background
     local bg = IWF:CreateTexture(nil, "BACKGROUND")
-    bg:SetColorTexture(0, 0, 0, 1)
+    bg:SetColorTexture(0, 0, 0, 0.8)
     bg:SetAllPoints()
 
     -- Logo
