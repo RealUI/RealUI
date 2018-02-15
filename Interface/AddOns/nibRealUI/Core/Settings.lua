@@ -9,11 +9,6 @@ local L = RealUI.L
 local db, dbc, dbg
 local debug = RealUI.GetDebug("Settings")
 
-local Textures = {
-    Logo = [[Interface\AddOns\nibRealUI\Media\Install\Logo.tga]],
-}
-local IWF = {}
-
 local accountCVars = {
     -- Sound
     ["Sound_EnableErrorSpeech"] = 0,
@@ -152,135 +147,114 @@ local function RunStage1()
     RealUI:SetProfileKeys()
 end
 
-local function CreateIWTextureFrame(texture, width, height, position, color)
-    local frame = _G.CreateFrame("Frame", nil, IWF)
-    frame:SetParent(IWF)
-    frame:SetPoint(_G.unpack(position))
-    frame:SetFrameStrata("DIALOG")
-    frame:SetFrameLevel(IWF:GetFrameLevel() + 1)
-    frame:SetWidth(width)
-    frame:SetHeight(height)
-
-    frame.bg = frame:CreateTexture()
-    frame.bg:SetAllPoints(frame)
-    frame.bg:SetTexture(texture)
-    frame.bg:SetVertexColor(_G.unpack(color))
-
-    return frame
-end
-
 local function CreateInstallWindow()
     debug("CreateInstallWindow")
-    -- To help with debugging
-    local bdAlpha, ibSizeOffs = 0.9, 0
-    if RealUI.isDev then
-        bdAlpha = 0.5
-        ibSizeOffs = 300
-    end
 
-    -- Background
-    IWF = _G.CreateFrame("Frame", nil, _G.UIParent)
-    IWF:Hide()
-        IWF:SetParent(_G.UIParent)
-        IWF:SetAllPoints(_G.UIParent)
-        IWF:SetFrameStrata("DIALOG")
-        IWF:SetFrameLevel(0)
-    IWF:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-    })
-    IWF:SetBackdropColor(0, 0, 0, bdAlpha)
-    RealUI:AddStripeTex(IWF)
-
-    -- Logo
-    IWF.logo = CreateIWTextureFrame(Textures.Logo, 256, 256, {"BOTTOM", IWF, "CENTER", 0, 0}, {1, 1, 1, 1})
-
-    -- Line
-    local numMovers, moverLength, minSpeed = 4, 2, 6
-    local line = IWF:CreateTexture(nil, "ARTWORK")
-    line:SetPoint("TOPLEFT", IWF, "LEFT", 0, 0)
-    line:SetPoint("BOTTOMRIGHT", IWF, "RIGHT", 0, -1)
-    line:SetColorTexture(1, 1, 1, 0.2)
-    line.squareTravelLength = _G.UIParent:GetWidth() + moverLength * 2
-
-    -- Moving Line Squares
-    local lineSquares = {}
-    for i = 1, numMovers do
-        lineSquares[i] = _G.CreateFrame("Frame", nil, IWF)
-        local lS = lineSquares[i]
-
-        lS:SetSize(moverLength, 1)
-        lS.bg = lS:CreateTexture()
-            lS.bg:SetAllPoints()
-            lS.bg:SetColorTexture(1, 1, 1, 0.3)
-
-        lS.curX = _G.random(0, line.squareTravelLength) - (line.squareTravelLength / 2)
-        lS.direction = i > (numMovers / 2) and -1 or 1
-        lS.speed = _G.random(minSpeed, minSpeed + numMovers)
-        if (i > 1) and (lS.speed == lineSquares[i - 1].speed) then
-            lS.speed = lS.speed + 1
-        end
-        lS:SetScript("OnUpdate", function(s, e)
-            s:ClearAllPoints()
-            s.curX = s.curX + s.direction * s.speed
-            if s.curX > (line.squareTravelLength / 2) then
-                s.curX = -(line.squareTravelLength / 2)
-            elseif s.curX < -(line.squareTravelLength / 2) then
-                s.curX = (line.squareTravelLength / 2)
-            end
-            s:SetPoint("BOTTOM", line, "BOTTOM", s.curX, 0)
-        end)
-    end
-
-    -- Version string
-    IWF.verStr = IWF:CreateFontString(nil, "OVERLAY")
-        IWF.verStr:SetFont(_G.RealUIFont_Normal:GetFont(), 18)
-        IWF.verStr:SetText(L["Version"].." "..RealUI:GetVerString(true))
-        IWF.verStr:SetPoint("TOP", IWF, "CENTER", 0, -12)
-
-    -- Button
-    IWF.install = _G.CreateFrame("Button", "RealUI_Install", IWF, "SecureActionButtonTemplate")
-        IWF.install:SetPoint("CENTER")
-        IWF.install:SetSize(_G.UIParent:GetWidth() - ibSizeOffs, _G.UIParent:GetHeight() - ibSizeOffs)
-    IWF.install:RegisterForClicks("LeftButtonUp")
-    IWF.install:SetScript("OnClick", function()
+    local pointOfs = RealUI.isDev and 50 or 0
+    local installFrame = _G.CreateFrame("Button", "RealUI_Install", _G.UIParent, "SecureActionButtonTemplate")
+    installFrame:SetPoint("TOPLEFT", pointOfs, -pointOfs)
+    installFrame:SetPoint("BOTTOMRIGHT", -pointOfs, pointOfs)
+    installFrame:SetFrameStrata("DIALOG")
+    installFrame:RegisterForClicks("LeftButtonUp")
+    installFrame:SetScript("OnClick", function()
         RunStage1()
         _G.ReloadUI()
     end)
+    installFrame:Hide()
 
-    -- Click To Install frame + string
-    IWF.installTextFrame = _G.CreateFrame("Frame", nil, IWF)
-        IWF.installTextFrame:SetPoint("BOTTOM", 0, _G.UIParent:GetHeight() / 4)
-        IWF.installTextFrame:SetSize(2,2)
-    IWF.installTextFrame.aniGroup = IWF.installTextFrame:CreateAnimationGroup()
-        IWF.installTextFrame.aniGroup:SetLooping("BOUNCE")
-        local fade = IWF.installTextFrame.aniGroup:CreateAnimation("Alpha")
-        fade:SetDuration(1)
-        fade:SetFromAlpha(1)
-        fade:SetToAlpha(0.5)
-        fade:SetOrder(1)
-        fade:SetSmoothing("IN_OUT")
-        IWF.installTextFrame.fade = fade
-    IWF.installTextFrame.aniGroup:Play()
+    local bg = installFrame:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(0, 0, 0, 0.8)
+    bg:SetAllPoints()
 
-    IWF.installText = IWF.installTextFrame:CreateFontString(nil, "OVERLAY")
-        IWF.installText:SetPoint("BOTTOM")
-        IWF.installText:SetFont(_G.RealUIFont_Normal:GetFont(), 18)
-        IWF.installText:SetText("[ "..L["Install"].." ]")
+    local logo = installFrame:CreateTexture(nil, "ARTWORK")
+    logo:SetTexture([[Interface\AddOns\nibRealUI\Media\Install\Logo.tga]])
+    logo:SetSize(256, 256)
+    logo:SetPoint("BOTTOM", installFrame, "CENTER")
+
+    local line = installFrame:CreateTexture(nil, "ARTWORK")
+    line:SetPoint("TOPLEFT", installFrame, "LEFT", 0, 0)
+    line:SetPoint("BOTTOMRIGHT", installFrame, "RIGHT", 0, -1)
+    line:SetColorTexture(1, 1, 1, 0.2)
+
+    local lineWidth = line:GetWidth()
+    local numMovers = RealUI.Round(lineWidth / 25)
+
+    -- Moving Line Squares
+    local lineAnim1 = installFrame:CreateAnimationGroup()
+    lineAnim1:SetLooping("REPEAT")
+    local lineAnim2 = installFrame:CreateAnimationGroup()
+    lineAnim2:SetLooping("REPEAT")
+
+    local half = numMovers / 2
+    for i = 1, numMovers do
+        local dot = installFrame:CreateTexture(nil, "ARTWORK")
+        dot:SetSize(1, 1)
+        dot:SetColorTexture(1, 1, 1, 0.8)
+
+        local direction
+        if i % 2 == 1 then
+            direction = -1
+            dot:SetPoint("RIGHT", line)
+        else
+            direction = 1
+            dot:SetPoint("LEFT", line)
+        end
+
+        local anim
+        if i < half then
+            anim = lineAnim1:CreateAnimation("Translation")
+        else
+            anim = lineAnim2:CreateAnimation("Translation")
+        end
+
+        anim:SetDuration(_G.random(2, 5))
+        anim:SetOffset(direction * lineWidth, 0)
+        anim:SetStartDelay(_G.random(0, 6))
+        anim:SetOrder(1)
+        anim:SetTarget(dot)
+    end
+    lineAnim1:Play()
+    _G.C_Timer.After(4, function()
+        lineAnim2:Play()
+    end)
+
+    -- Version string
+    local verStr = installFrame:CreateFontString(nil, "OVERLAY")
+    verStr:SetFontObject("Fancy16Font")
+    verStr:SetText(L["Version"].." "..RealUI:GetVerString(true))
+    verStr:SetPoint("TOP", installFrame, "CENTER", 0, -12)
+
+    -- Click To Install
+    local installText = installFrame:CreateFontString(nil, "OVERLAY")
+    installText:SetPoint("BOTTOM", 0, installFrame:GetHeight() / 4)
+    installText:SetFontObject("SystemFont_Shadow_Large2")
+    installText:SetText("[ "..L["Install"].." ]")
+
+    local textAnim = installFrame:CreateAnimationGroup()
+    textAnim:SetLooping("BOUNCE")
+    local fade = textAnim:CreateAnimation("Alpha")
+    fade:SetDuration(2)
+    fade:SetFromAlpha(1)
+    fade:SetToAlpha(0.25)
+    fade:SetOrder(1)
+    fade:SetTarget(installText)
+    fade:SetSmoothing("IN_OUT")
+    textAnim:Play()
 
     -- Combat Check
-    IWF:RegisterEvent("PLAYER_ENTERING_WORLD")
-    IWF:RegisterEvent("PLAYER_REGEN_ENABLED")
-    IWF:RegisterEvent("PLAYER_REGEN_DISABLED")
-    IWF:SetScript("OnEvent", function(self, event)
+    installFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    installFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    installFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    installFrame:SetScript("OnEvent", function(self, event)
         if event == "PLAYER_ENTERING_WORLD" then
             if not(_G.InCombatLockdown()) then
-                IWF:Show()
+                self:Show()
             end
         elseif event == "PLAYER_REGEN_DISABLED" then
-            IWF:Hide()
+            self:Hide()
             _G.print("|cffff0000RealUI Installation paused until you leave combat.|r")
         else
-            IWF:Show()
+            self:Show()
         end
     end)
 end
