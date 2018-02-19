@@ -293,6 +293,9 @@ do -- Load LibSharedMedia
 
     --[[ Statusbars ]]--
     LSM:Register("statusbar", "Plain", [[Interface\Buttons\WHITE8x8]])
+
+    --[[ Borders ]]--
+    LSM:Register("border", "Plain", [[Interface\Buttons\WHITE8x8]])
 end
 
 --[[ Util functions ]]--
