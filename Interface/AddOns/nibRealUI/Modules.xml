@@ -30,7 +30,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Modules\MirrorBar.lua"/>
     <Script file="Modules\ObjectivesAdv.lua"/>
     <Script file="Modules\ScreenSaver.lua"/>
-    <Script file="Modules\SpeechBubbles.lua"/>
     <Script file="Modules\SpellAlerts.lua"/>
     <Script file="Modules\WorldMarker.lua"/>
     <Include file="Modules\Chat.xml"/>
