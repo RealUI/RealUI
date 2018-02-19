@@ -18,12 +18,12 @@ local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 local RealUIAddOns = {
     ["Bartender4"] =    {isAce = true, db = "Bartender4DB",     profKey = "profileKeys"},
     ["Grid2"] =         {isAce = true, db = "Grid2DB",          profKey = "profileKeys"},
-    ["KuiNameplates"] = {isAce = true, db = "KuiNameplatesGDB", profKey = "profileKeys"},
     ["Masque"] =        {isAce = true, db = "MasqueDB",         profKey = "profileKeys"},
     ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
 
     ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
+    ["Kui_Nameplates_Core"] =    {isAce = false, db = "KuiNameplatesCoreCharacterSaved", profKey = "profile"},
     ["mikScrollingBattleText"] = {isAce = false, db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
 local RealUIAddOnsOrder = {
@@ -353,7 +353,7 @@ function AddonControl:OnInitialize()
                         style = false,
                     },
                 },
-                ["KuiNameplates"] = {
+                ["Kui_Nameplates_Core"] = {
                     profiles = {
                         base =          {use = true,    key = "RealUI"},
                         layout =        {use = false,   key = "Healing"},

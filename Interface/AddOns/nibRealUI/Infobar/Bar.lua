@@ -12,7 +12,7 @@ local Base = Aurora.Base
 -- RealUI --
 local RealUI = private.RealUI
 local Scale = RealUI.Scale
-local db
+local db, ndb
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
@@ -700,6 +700,9 @@ function Infobar:CreateBar()
             local blockInfo = Infobar:GetBlockInfo(block.name)
             if block.AdjustElements then block:AdjustElements(blockInfo) end
         end
+
+        ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
+        ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
     end)
 
     -- Stripes
@@ -979,6 +982,7 @@ function Infobar:OnEnable()
     end
 
     -- Adjust ActionBar positions
-    local ndb = RealUI.db.profile
-    ndb.positions[RealUI.cLayout]["ActionBarsBotY"] = BAR_HEIGHT -- self.frame:GetTop()
+    ndb = RealUI.db.profile
+    ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
+    ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
 end
