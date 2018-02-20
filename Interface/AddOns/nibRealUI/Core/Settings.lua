@@ -48,7 +48,7 @@ local accountCVars = {
     ["chatBubbles"] = 0,                       -- Turn off Chat Bubbles
     ["chatBubblesParty"] = 0,                  -- Turn off Party Chat Bubbles
     ["chatStyle"] = "classic",                 -- Chat Style = "Classic"
-    ["conversationMode"] = "inline",           -- Conversation Mode = "In-line"
+    ["whisperMode"] = "inline",                -- Whisper Mode = "In-line"
 
     -- ActionBars
     ["countdownForCooldowns"] = 0,             -- Disable Blizz cooldown count
