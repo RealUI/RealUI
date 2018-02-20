@@ -60,6 +60,7 @@ local accountCVars = {
 local characterCVars = {
     -- Nameplates
     ["nameplateMotion"] = 1,          -- Stacking Nameplates
+    ["nameplateShowAll"] = 1,         -- Always show nameplates
     ["nameplateShowSelf"] = 0,        -- Hide Personal Resource Display
 
     -- Combat
