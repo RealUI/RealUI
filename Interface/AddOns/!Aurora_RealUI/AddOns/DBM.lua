@@ -30,34 +30,6 @@ mods["PLAYER_LOGIN"]["DBM-Core"] = function(self, Fu, Co)
         end
     end)
 
-    local barCount = 1
-
-    local styleBar = function()
-        local bar = _G["DBM_BossHealth_Bar_"..barCount]
-
-        while bar do
-            if not bar.styled then
-                local name = bar:GetName()
-                local sb = _G[name.."Bar"]
-
-                _G[name.."BarBackground"]:Hide()
-                _G[name.."BarBorder"]:SetNormalTexture("")
-
-                sb:SetStatusBarTexture(Co.media.backdrop)
-
-                Fu.CreateBDFrame(sb)
-
-                bar.styled = true
-            end
-
-            barCount = barCount + 1
-            bar = _G["DBM_BossHealth_Bar_"..barCount]
-        end
-    end
-
-    _G.hooksecurefunc(_G.DBM.BossHealth, "AddBoss", styleBar)
-    _G.hooksecurefunc(_G.DBM.BossHealth, "UpdateSettings", styleBar)
-
     -- Place this inside Core to ensure it only gets created if we actually want DBM to be skinned.
     mods["DBM-GUI"] = function(F, C)
         --print("DBM-GUI", F, C)
