@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * nibRealUI
+  * nibRealUI_Init
+  * FreebTip
+  * RealUI_Bugs
+
+### Changed ###
+
+  * Large number formatting has been tweaked based on feedback
+
+### Fixed ###
+
+  * If enabled, the arena trinket alert would spam the chat when triggered
+  * An error would occur on login with recent verions of DBM
+  * The minimap clock was not hidden
+
+
+
+
 ## [8.1 r20g] - 2018-01-16 ##
 ### Modified AddOns ###
 
