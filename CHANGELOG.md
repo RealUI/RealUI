@@ -9,9 +9,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * !Aurora_RealUI
   * nibRealUI
-  * nibRealUI_Init
-  * FreebTip
-  * RealUI_Bugs
 
 ### Changed ###
 
