@@ -135,18 +135,11 @@ local UpdateAngle do
         end
 
         if meta.hasBG then
-            local offset
-            if RealUI.is730 then
-                offset = minWidth
-            else
-                local customScale, isRetina = RealUI:GetUIScale()
-                offset = minWidth * customScale * (isRetina and 2 or 1) -- Line offsets are placed without respect for UI Scale
-            end
             if meta.leftVertex == 1 then
                 self.top:SetPoint("TOPLEFT", minWidth, 0)
                 self.bottom:SetPoint("BOTTOMLEFT", 0, 0)
 
-                self.left:SetStartPoint("TOPLEFT", offset, 0)
+                self.left:SetStartPoint("TOPLEFT", minWidth, 0)
                 _G.C_Timer.After(0, function()
                     -- The line points don't seem to update properly if done together, so we separate them by one frame.
                     self.left:SetEndPoint("BOTTOMLEFT", 0, 0)
@@ -157,7 +150,7 @@ local UpdateAngle do
 
                 self.left:SetStartPoint("TOPLEFT", 0, 0)
                 _G.C_Timer.After(0, function()
-                    self.left:SetEndPoint("BOTTOMLEFT", offset, 0)
+                    self.left:SetEndPoint("BOTTOMLEFT", minWidth, 0)
                 end)
             end
 
@@ -167,13 +160,13 @@ local UpdateAngle do
 
                 self.right:SetStartPoint("TOPRIGHT", 0, 0)
                 _G.C_Timer.After(0, function()
-                    self.right:SetEndPoint("BOTTOMRIGHT", -offset, 0)
+                    self.right:SetEndPoint("BOTTOMRIGHT", -minWidth, 0)
                 end)
             else
                 self.top:SetPoint("TOPRIGHT", -minWidth, 0)
                 self.bottom:SetPoint("BOTTOMRIGHT", 0, 0)
 
-                self.right:SetStartPoint("TOPRIGHT", -offset, 0)
+                self.right:SetStartPoint("TOPRIGHT", -minWidth, 0)
                 _G.C_Timer.After(0, function()
                     self.right:SetEndPoint("BOTTOMRIGHT", 0, 0)
                 end)

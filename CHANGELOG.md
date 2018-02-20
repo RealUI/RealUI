@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [8.1 r20h] - 2018-02-20 ##
+### Modified AddOns ###
+
+  * !Aurora_RealUI
+  * nibRealUI
+
+### Changed ###
+
+  * Large number formatting has been tweaked based on feedback
+
+### Fixed ###
+
+  * If enabled, the arena trinket alert would spam the chat when triggered
+  * An error would occur on login with recent verions of DBM
+  * The minimap clock was not hidden
+
+
+
+
 ## [8.1 r20g] - 2018-01-16 ##
 ### Modified AddOns ###
 
@@ -357,6 +376,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * The arena prep frames will now show opponent specs more reliably.
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[8.1 r20h]: https://github.com/RealUI/RealUI/compare/8.1_r20g...8.1_r20h
 [8.1 r20g]: https://github.com/RealUI/RealUI/compare/8.1_r20f...8.1_r20g
 [8.1 r20f]: https://github.com/RealUI/RealUI/compare/8.1_r20e...8.1_r20f
 [8.1 r20e]: https://github.com/RealUI/RealUI/compare/8.1_r20d...8.1_r20e
