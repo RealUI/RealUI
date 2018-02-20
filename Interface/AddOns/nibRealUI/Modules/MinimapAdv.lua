@@ -442,16 +442,17 @@ end
 -- MINIMAP BUTTONS --
 ---------------------
 local BlackList = {
-    ["QueueStatusMinimapButton"] = true,
-    ["GarrisonLandingPageMinimapButton"] = true,
-    ["MiniMapTracking"] = true,
-    ["MiniMapMailFrame"] = true,
-    ["HelpOpenTicketButton"] = true,
-    ["GameTimeFrame"] = true,
+    QueueStatusMinimapButton = true,
+    GarrisonLandingPageMinimapButton = true,
+    MiniMapTracking = true,
+    MiniMapMailFrame = true,
+    HelpOpenTicketButton = true,
+    GameTimeFrame = true,
+    TimeManagerClockButton = true,
 }
 local OddList = {
-    ["BagSync_MinimapButton"] = true,
-    ["OutfitterMinimapButton"] = true,
+    BagSync_MinimapButton = true,
+    OutfitterMinimapButton = true,
 }
 
 local buttons = {}
@@ -1082,18 +1083,10 @@ end
 local function Toggle_OnMouseDown()
     local MinimapShown = _G.Minimap:IsVisible()
     if MinimapShown then
-        if RealUI.is730 then
-            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
-        else
-            _G.PlaySound("igMiniMapClose")
-        end
+        _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
         MinimapAdv:Toggle(false)
     else
-        if RealUI.is730 then
-            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
-        else
-            _G.PlaySound("igMiniMapOpen")
-        end
+        _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
         MinimapAdv:Toggle(true)
     end
     _G.Lib_CloseDropDownMenus()
@@ -1212,20 +1205,12 @@ local function Farm_OnMouseDown()
     if ExpandedState == 0 then
         ExpandedState = 1
         MMFrames.farm.icon:SetTexture(Textures.Collapse)
-        if RealUI.is730 then
-            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
-        else
-            _G.PlaySound("igMiniMapOpen")
-        end
+        _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
         button:Hide()
     else
         ExpandedState = 0
         MMFrames.farm.icon:SetTexture(Textures.Expand)
-        if RealUI.is730 then
-            _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
-        else
-            _G.PlaySound("igMiniMapClose")
-        end
+        _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
         button:Show()
     end
     _G.Lib_CloseDropDownMenus()
@@ -1442,6 +1427,9 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     -- Hide persistent Minimap elements
     _G.GameTimeFrame:Hide()
     _G.GameTimeFrame.Show = function() end
+
+    _G.TimeManagerClockButton:Hide()
+    _G.TimeManagerClockButton.Show = function() end
 
     -- Update Minimap position and visible state
     self:UpdateShownState() -- Will also call MinimapAdv:Update

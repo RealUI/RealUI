@@ -370,11 +370,7 @@ local function SetupTextTable()
             if headerData.sort then
                 header.hl:Show()
                 header:SetScript("OnClick", function(btn)
-                    if RealUI.is730 then
-                        _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-                    else
-                        _G.PlaySound("igMainMenuOptionCheckBoxOn")
-                    end
+                    _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
                     self:SetSort(btn)
                 end)
             else

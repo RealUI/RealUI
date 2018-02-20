@@ -5,7 +5,7 @@ private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "Ace
 local RealUI = private.RealUI
 
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
-RealUI.is730 = _G.tonumber(xpac) == 7 and (_G.tonumber(major) >= 3 and _G.tonumber(minor) >= 0)
+RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 0 and _G.tonumber(minor) >= 1)
 RealUI.isDev = _G.IsAddOnLoaded("nibRealUI_Dev")
 
 RealUI.charName = _G.UnitName("player")

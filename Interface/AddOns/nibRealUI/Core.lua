@@ -414,6 +414,9 @@ function RealUI:InitCurrencyDB()
                 end
             end
 
+            if not realmDB[player] then
+                realmDB[player] = {}
+            end
             local charDB = realmDB[player]
             charDB.class = RealUI.class
             charDB.lastSeen = now

@@ -108,11 +108,7 @@
 				</Layers>
 				<Scripts>
 					<OnClick>
-						if RealUI.is730 then
-							PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-						else
-							PlaySound("igMainMenuOptionCheckBoxOn")
-						end
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 						EasyMail.ClearAll = true;
 					</OnClick>
 					<OnEnter>

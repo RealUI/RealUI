@@ -1,6 +1,8 @@
 local _, mods = ...
 
 _G.tinsert(mods["nibRealUI"], function(F, C)
+    if _G.RealUI.isAuroraUpdated then return end
+
     --print("HELLO WORLD!!!", F, C)
     local TimerTexture = [[Interface\AddOns\nibRealUI\Media\Skins\TimerTracker]]
     local function SkinBar(bar)
