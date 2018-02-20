@@ -88,11 +88,7 @@ function ScreenSaver:ToggleWarning(val)
 
             -- Play warning sound if Screen Saver is active and you get put into combat
             if _G.UnitAffectingCombat("player") and db.general.combatwarning then
-                if RealUI.is730 then
-                    _G.PlaySound(15262, "MASTER") -- Aggro_Enter_Warning_State
-                else
-                    _G.PlaySoundKitID(15262, "MASTER") -- Aggro_Enter_Warning_State
-                end
+                _G.PlaySound(15262, "MASTER") -- Aggro_Enter_Warning_State
             end
         end
     else

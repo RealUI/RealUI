@@ -466,11 +466,7 @@ function EasyMail.OnClick()
         EasyMailDropdownScrollFrame:SetVerticalScroll(0);
     end
     
-    if RealUI.is730 then
-        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-    else
-        PlaySound("igMainMenuOptionCheckBoxOn")
-    end
+    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 
@@ -640,11 +636,7 @@ end
 function EasyMail.DropdownButtonOnClick(self, button)
     local value = self.value;
     
-    if RealUI.is730 then
-        PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON)
-    else
-        PlaySound("UChatScrollButton")
-    end
+    PlaySound(SOUNDKIT.U_CHAT_SCROLL_BUTTON)
     
     if (button == "RightButton") then
         if (EasyMail.InMailList(value) > 0) then
@@ -992,11 +984,7 @@ end
 -- Start process to take all attachments from all checked mails
 ---------------------------------------------------
 function EasyMail.GetAll()
-    if RealUI.is730 then
-        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-    else
-        PlaySound("igMainMenuOptionCheckBoxOn")
-    end
+    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
     
     if (GettingAll) then
         return;
@@ -1324,12 +1312,7 @@ function EasyMail.OpenMail(index)
     ShowUIPanel(OpenMailFrame);
     
     if (not isShown) then
-        PlaySound("igSpellBookOpen");
-        if RealUI.is730 then
-            PlaySound(SOUNDKIT.IG_SPELLBOOK_OPEN)
-        else
-            PlaySound("igSpellBookOpen")
-        end
+        PlaySound(SOUNDKIT.IG_SPELLBOOK_OPEN)
     end
     
     InboxFrame_Update();
@@ -1473,11 +1456,7 @@ end
 -- Check or uncheck all checkboxes
 ---------------------------------------------------
 function EasyMail.CheckAll(flag)
-    if RealUI.is730 then
-        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-    else
-        PlaySound("igMainMenuOptionCheckBoxOn")
-    end
+    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
     
     if (not GettingAll) then
         for t = 1, #CheckBoxes do
@@ -1496,11 +1475,7 @@ end
 -- Check or uncheck all checkboxes on current inbox page
 ---------------------------------------------------
 function EasyMail.CheckPage(flag)
-    if RealUI.is730 then
-        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-    else
-        PlaySound("igMainMenuOptionCheckBoxOn")
-    end
+    PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
     
     if (not GettingAll) then
         local index = ((InboxFrame.pageNum - 1) * INBOXITEMS_TO_DISPLAY) + 1;
@@ -2025,11 +2000,7 @@ end
 -- Output a message to Blizzard's error frame
 ---------------------------------------------------
 function EasyMail.PrintError(errMsg)
-    if RealUI.is730 then
-        PlaySound(SOUNDKIT.IG_QUEST_LOG_ABANDON_QUEST)
-    else
-        PlaySound("igQuestFailed")
-    end
+    PlaySound(SOUNDKIT.IG_QUEST_LOG_ABANDON_QUEST)
     DEFAULT_CHAT_FRAME:AddMessage(EASYMAIL_ADDONNAME..": "..errMsg, 1.0, 0.1, 0.1);
 end
 
