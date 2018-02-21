@@ -150,11 +150,11 @@ local CreateHealthStatus do
             color = self.colors.reaction[reaction]
             PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         else
-            PvPIndicator:SetBackgroundColor(_G.Aurora.frameColor:GetRGBA())
+            PvPIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
         end
     end
     local function UpdateClassification(self, event)
-        local color = classification[_G.UnitClassification(self.unit)] or _G.Aurora.frameColor
+        local color = classification[_G.UnitClassification(self.unit)] or _G.Aurora.Color.frame
         self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
@@ -381,7 +381,7 @@ local CreatePowerStatus do
         end
 
         if self.LeaderIndicator.status and not self.CombatIndicator.status then
-            self.CombatIndicator:SetBackgroundColor(_G.Aurora.frameColor:GetRGBA())
+            self.CombatIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
             self.CombatIndicator:Show()
         elseif self.CombatIndicator.status then
             color = status[self.CombatIndicator.status]

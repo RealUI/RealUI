@@ -494,7 +494,7 @@ function RealUI:OnInitialize()
 
     -- Add RealUI Config button
     local configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
-    configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.highlightColor.colorStr))
+    configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.Color.highlight.colorStr))
     _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
     configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
     configBtn:SetScript("OnMouseUp", function()

@@ -11,8 +11,8 @@ function private.AddOns.Ace3()
     local AceGUI = _G.LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
 
-    local frameColor = Aurora.frameColor
-    local highlightColor = Aurora.highlightColor
+    local frameColor = Aurora.Color.frame
+    local highlightColor = Aurora.Color.highlight
 
 
     local containters = {
@@ -394,7 +394,7 @@ function private.AddOns.Ace3()
                 local disabled = button:GetDisabledTexture()
                 disabled:SetColorTexture(0, 0, 0, .3)
                 disabled:SetDrawLayer("OVERLAY")
-                Base.SetBackdrop(button, Aurora.buttonColor:GetRGBA())
+                Base.SetBackdrop(button, Aurora.Color.button:GetRGBA())
 
                 local arrow = button:CreateTexture(nil, "ARTWORK")
                 arrow:SetPoint("TOPLEFT", 4, -7)
@@ -407,7 +407,7 @@ function private.AddOns.Ace3()
                 local bg = _G.CreateFrame("Frame", nil, frame)
                 bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMLEFT", 1, 0)
                 bg:SetFrameLevel(frame:GetFrameLevel())
-                Base.SetBackdrop(bg, Aurora.buttonColor:GetRGBA())
+                Base.SetBackdrop(bg, Aurora.Color.button:GetRGBA())
 
                 if frame.displayButton then
                     bg:SetPoint("TOPLEFT", frame.displayButton, "TOPRIGHT", 3, -19)

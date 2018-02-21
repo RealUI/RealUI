@@ -406,12 +406,14 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
 
     self.freebtipUpdate = 0
 end)
+
+local frameColor = Aurora.Color.frame
 _G.GameTooltip:HookScript("OnTooltipCleared", function(self)
     if self.factionIcon then
         self.factionIcon:Hide()
     end
     if not (self.freebtipItem) then
-        self:SetBackdropBorderColor(Aurora.frameColor.r, Aurora.frameColor.g, Aurora.frameColor.b)
+        self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
     end
 end)
 

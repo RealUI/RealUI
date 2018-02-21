@@ -8,6 +8,7 @@ local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 local Aurora = _G.Aurora
 local Base = Aurora.Base
+local frameColor = Aurora.Color.frame
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -706,7 +707,7 @@ function Infobar:CreateBar()
     end)
 
     -- Stripes
-    Base.SetBackdrop(frame, Aurora.frameColor.r, Aurora.frameColor.g, Aurora.frameColor.b, db.bgAlpha)
+    Base.SetBackdrop(frame, frameColor.r, frameColor.g, frameColor.b, db.bgAlpha)
     local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
     tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
     tex:SetAlpha(db.bgAlpha * 0.6)
@@ -808,7 +809,7 @@ function Infobar:SettingsUpdate(setting, block)
         end
         block:OnEvent("SettingsUpdate")
     elseif setting == "bgAlpha" then
-        Base.SetBackdropColor(self.frame, Aurora.frameColor.r, Aurora.frameColor.g, Aurora.frameColor.b, db.bgAlpha)
+        Base.SetBackdropColor(self.frame, frameColor.r, frameColor.g, frameColor.b, db.bgAlpha)
         self.frame.tex:SetAlpha(db.bgAlpha * 0.6)
         self.frame.watch:UpdateColors()
 

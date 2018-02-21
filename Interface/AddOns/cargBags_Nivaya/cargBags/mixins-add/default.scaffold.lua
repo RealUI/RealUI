@@ -109,7 +109,7 @@ local function ItemButton_Scaffold(self)
     self.Border = _G.CreateFrame("Frame", nil, self)
     self.Border:SetPoint("TOPLEFT", self.Icon, 0, 0)
     self.Border:SetPoint("BOTTOMRIGHT", self.Icon, 0, 0)
-    _G.Aurora.Base.SetBackdrop(self.Border, _G.Aurora.frameColor:GetRGBA())
+    _G.Aurora.Base.SetBackdrop(self.Border, _G.Aurora.Color.frame:GetRGBA())
 
     self.TopString = CreateInfoString(self, "TOP")
     self.BottomString = CreateInfoString(self, "BOTTOM")

@@ -92,7 +92,7 @@ function RealUI.UpdateUIScale(newScale)
     end
 end
 
-local Scale = {}
+local ScaleAPI = {}
 local previewFrames = {}
 function RealUI.RegisterModdedFrame(frame, updateFunc)
     -- Frames that are sized via ModValue become HUGE with retina scale.
@@ -116,7 +116,7 @@ end
 
 local skinnedFrames = {}
 function RealUI:UpdateFrameStyle()
-    local color = Aurora.frameColor
+    local color = Aurora.Color.frame
     for frame, stripes in next, skinnedFrames do
         if stripes.SetAlpha then
             frame:SetBackdropColor(color.r, color.g, color.b, private.skinsDB.frameAlpha)
@@ -191,26 +191,27 @@ function private.OnLoad()
 
     private.uiScale = private.skinsDB.uiModScale
     private.UpdateUIScale = RealUI.UpdateUIScale
-    if private.disabled.uiScale then
-        RealUI.Scale = Scale
-    else
-        Aurora.Scale.Value = Scale.Value
-        RealUI.Scale = Aurora.Scale
-    end
-
     for fontType, fontPath in next, private.skinsDB.fonts do
         private.font[fontType] = fontPath
     end
 
-    local Base, Hook = Aurora.Base, Aurora.Hook
+    local Base, Scale = Aurora.Base, Aurora.Scale
+    local Hook, Color = Aurora.Hook, Aurora.Color
+    if private.disabled.uiScale then
+        RealUI.Scale = ScaleAPI
+    else
+        Aurora.Scale.Value = ScaleAPI.Value
+        RealUI.Scale = Scale
+    end
+
     function Hook.GameTooltip_OnHide(gametooltip)
-        local color = Aurora.frameColor
+        local color = Color.frame
         Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, private.skinsDB.frameAlpha)
     end
 
     function Base.Post.SetBackdrop(ret, frame, r, g, b, a)
-        if not a then
-            local color = Aurora.frameColor
+        if not r and not a then
+            local color = Color.frame
             frame:SetBackdropColor(color.r, color.g, color.b, private.skinsDB.frameAlpha)
 
             local stripes = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
@@ -253,37 +254,37 @@ function private.OnLoad()
 end
 
 --[[ Copy Scale API from Aurora until the entire UI is upgraded. ]]--
-function Scale.Value(value, getFloat)
+function ScaleAPI.Value(value, getFloat)
     local mult = getFloat and 100 or 1
     return floor((value * uiMod) * mult + 0.5) / mult
 end
 
-function Scale.Size(self, width, height)
+function ScaleAPI.Size(self, width, height)
     if not (width and height) then
         width, height = self:GetSize()
     end
-    return self:SetSize(Scale.Value(width), Scale.Value(height))
+    return self:SetSize(ScaleAPI.Value(width), ScaleAPI.Value(height))
 end
 
-function Scale.Height(self, height)
+function ScaleAPI.Height(self, height)
     if not (height) then
         height = self:GetHeight()
     end
-    return self:SetHeight(Scale.Value(height))
+    return self:SetHeight(ScaleAPI.Value(height))
 end
 
-function Scale.Width(self, width)
+function ScaleAPI.Width(self, width)
     if not (width) then
         width = self:GetWidth()
     end
-    return self:SetWidth(Scale.Value(width))
+    return self:SetWidth(ScaleAPI.Value(width))
 end
 
-function Scale.Thickness(self, thickness)
+function ScaleAPI.Thickness(self, thickness)
     if not (thickness) then
         thickness = self:GetThickness()
     end
-    return self:SetThickness(Scale.Value(thickness))
+    return self:SetThickness(ScaleAPI.Value(thickness))
 end
 
 local ScaleArgs do
@@ -309,7 +310,7 @@ local ScaleArgs do
 
         for i = 1, #args do
             if _G.type(args[i]) == "number" then
-                args[i] = Scale.Value(args[i])
+                args[i] = ScaleAPI.Value(args[i])
             end
         end
         if self.debug then
@@ -319,13 +320,13 @@ local ScaleArgs do
     end
 end
 
-function Scale.Point(self, ...)
+function ScaleAPI.Point(self, ...)
     self:SetPoint(_G.unpack(ScaleArgs(self, "Point", ...)))
 end
 
-function Scale.EndPoint(self, ...)
+function ScaleAPI.EndPoint(self, ...)
     self:SetEndPoint(_G.unpack(ScaleArgs(self, "EndPoint", ...)))
 end
-function Scale.StartPoint(self, ...)
+function ScaleAPI.StartPoint(self, ...)
     self:SetStartPoint(_G.unpack(ScaleArgs(self, "StartPoint", ...)))
 end
