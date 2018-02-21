@@ -9,7 +9,7 @@ local qTip = _G.LibStub("LibQTip-1.0")
 
 local artData = _G.LibStub("LibArtifactData-1.0", true)
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome")
-fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf]]
+fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
 
 -- RealUI --
 local RealUI = private.RealUI

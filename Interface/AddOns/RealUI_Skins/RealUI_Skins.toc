@@ -13,6 +13,7 @@
 Aurora\Skin\skin.xml
 Libs\Libs.xml
 
+Util.lua
 RealUI_Skins.lua
 
 AddOns\Ace3.lua

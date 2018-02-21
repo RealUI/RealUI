@@ -9,6 +9,7 @@ local RealUI = _G.RealUI
 local debug = RealUI.GetDebug("Skins")
 private.debug = debug
 
+local LSM = _G.LibStub("LibSharedMedia-3.0")
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
@@ -18,10 +19,10 @@ local defaults = {
         isHighRes = false,
         isPixelScale = true,
         fonts = {
-            normal = [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf]],
-            chat = [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf]],
-            crit = [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf]],
-            header = [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf]],
+            normal = LSM:Fetch("font", "Roboto"),
+            chat = LSM:Fetch("font", "Roboto Condensed"),
+            crit = LSM:Fetch("font", "Roboto Bold-Italic"),
+            header = LSM:Fetch("font", "Roboto Slab"),
         },
         addons = {
             ["**"] = true
@@ -250,87 +251,6 @@ function private.OnLoad()
         end
     end
 end
-
-do -- Load LibSharedMedia
-    local LSM = _G.LibStub("LibSharedMedia-3.0")
-
-    --[[ Fonts
-        SystemFont_Shadow_Med1
-        SystemFont_Shadow_Med1_Outline
-        NumberFont_Outline_Med
-        Fancy16Font
-    ]]
-
-    -- Russian + Latin char languages
-    local LOCALE_MASK = LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
-    LSM:Register("font", "Roboto", [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-Regular.ttf]], LOCALE_MASK)
-    LSM:Register("font", "Roboto Bold-Italic", [[Interface\AddOns\nibRealUI\Fonts\Roboto\Roboto-BoldItalic.ttf]], LOCALE_MASK)
-    LSM:Register("font", "Roboto Condensed", [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoCondensed-Regular.ttf]], LOCALE_MASK)
-    LSM:Register("font", "Roboto Slab", [[Interface\AddOns\nibRealUI\Fonts\Roboto\RobotoSlab-Regular.ttf]], LOCALE_MASK)
-
-    -- Asian fonts: These are specific to each language
-    -- zhTW
-    LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Bold.otf]], LSM.LOCALE_BIT_zhTW)
-    LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Light.otf]], LSM.LOCALE_BIT_zhTW)
-    LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf]], LSM.LOCALE_BIT_zhTW)
-    -- zhCN
-    LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Bold.otf]], LSM.LOCALE_BIT_zhCN)
-    LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Light.otf]], LSM.LOCALE_BIT_zhCN)
-    LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Regular.otf]], LSM.LOCALE_BIT_zhCN)
-    -- koKR
-    LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Bold.otf]], LSM.LOCALE_BIT_koKR)
-    LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Light.otf]], LSM.LOCALE_BIT_koKR)
-    LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf]], LSM.LOCALE_BIT_koKR)
-
-    if _G.LOCALE_enUS or _G.LOCALE_ruRU then
-        LSM.DefaultMedia.font = "Roboto"
-    else
-        LSM.DefaultMedia.font = "Noto Sans Regular"
-    end
-
-    --[[ Backgrounds ]]--
-    LSM:Register("background", "Plain", [[Interface\Buttons\WHITE8x8]])
-
-    --[[ Statusbars ]]--
-    LSM:Register("statusbar", "Plain", [[Interface\Buttons\WHITE8x8]])
-
-    --[[ Borders ]]--
-    LSM:Register("border", "Plain", [[Interface\Buttons\WHITE8x8]])
-end
-
---[[ Util functions ]]--
-function RealUI.Round(value, places)
-    local mult = 10 ^ (places or 0)
-    return floor(value * mult + 0.5) / mult
-end
-function RealUI:GetSafeVals(min, max)
-    if max == 0 then
-        return 0
-    else
-        return min / max
-    end
-end
-function RealUI:ColorTableToStr(vals)
-    return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
-end
-function RealUI.GetDurabilityColor(a, b)
-    if a and b then
-        debug("RGBColorGradient", a, b)
-        return _G.oUFembed.RGBColorGradient(a, b, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
-    else
-        debug("GetDurabilityColor", a)
-        if a < 0 then
-            return 1, 0, 0
-        elseif a <= 0.5 then
-            return 1, a * 2, 0
-        elseif a >= 1 then
-            return 0, 1, 0
-        else
-            return 2 - a * 2, 1, 0
-        end
-    end
-end
-
 
 --[[ Copy Scale API from Aurora until the entire UI is upgraded. ]]--
 function Scale.Value(value, getFloat)
