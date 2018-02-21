@@ -77,7 +77,7 @@ local function UpdateSteps(self, unit, cur, max)
     UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)
-    local percent = RealUI:GetSafeVals(cur, max)
+    local percent = RealUI.GetSafeVals(cur, max)
     local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
     for i = 1, 2 do
         --print(percent, unit, cur, max, self.colorClass)

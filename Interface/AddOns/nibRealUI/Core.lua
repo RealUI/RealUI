@@ -575,8 +575,8 @@ function RealUI:OnEnable()
     end
 
     -- Helpful messages
-    local blue = RealUI:ColorTableToStr(RealUI.media.colors.blue)
-    local red = RealUI:ColorTableToStr(RealUI.media.colors.red)
+    local blue = RealUI.GetColorString(RealUI.media.colors.blue)
+    local red = RealUI.GetColorString(RealUI.media.colors.red)
 
     if (dbc.init.installStage == -1) and (dbg.tutorial.stage == -1) then
         if not(dbg.messages.resetNew) then

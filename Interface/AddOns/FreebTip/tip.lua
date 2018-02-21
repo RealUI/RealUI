@@ -61,34 +61,30 @@ local numberize = function(val)
 end
 
 local hex = function(color)
-    return (color.r and ("|cff%02x%02x%02x"):format(color.r * 255, color.g * 255, color.b * 255)) or "|cffFFFFFF"
-end
-
-local qqColor = { r=1, g=0, b=0 }
-local nilcolor = { r=1, g=1, b=1 }
-local tapped = { r=.6, g=.6, b=.6 }
-
-local function unitColor(unit)
-    if unit then
-        if _G.UnitIsPlayer(unit) then
-            local _, class = _G.UnitClass(unit)
-            return _G.CUSTOM_CLASS_COLORS[class]
-        elseif _G.UnitIsTapDenied(unit) then
-            return tapped
-        else
-            local reaction = _G.UnitReaction(unit, "player")
-            if reaction then
-                return _G.FACTION_BAR_COLORS[reaction]
-            end
-        end
-    end
-
-    return nilcolor
+    return (color.r and ("|cff%s"):format(_G.RealUI.GetColorString(color))) or "|cffFFFFFF"
 end
 
 local function GameTooltip_UnitColor(unit)
-    local color = unitColor(unit)
-    return color.r, color.g, color.b
+    local r, g, b
+    if _G.UnitIsPlayer(unit) then
+        local _, class = _G.UnitClass(unit)
+        r = _G.CUSTOM_CLASS_COLORS[class].r;
+        g = _G.CUSTOM_CLASS_COLORS[class].g;
+        b = _G.CUSTOM_CLASS_COLORS[class].b;
+    elseif _G.UnitIsTapDenied(unit) then
+        r = 0.6
+        g = 0.6
+        b = 0.6
+    else
+        local reaction = _G.UnitReaction(unit, "player")
+        if reaction then
+            r = _G.FACTION_BAR_COLORS[reaction].r;
+            g = _G.FACTION_BAR_COLORS[reaction].g;
+            b = _G.FACTION_BAR_COLORS[reaction].b;
+        end
+    end
+
+    return r, g, b
 end
 
 local function GetUnit(self)
@@ -314,7 +310,6 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             end
         end
 
-        local color = hex(unitColor(unit))
         local isPlayer = _G.UnitIsPlayer(unit)
         if isPlayer then
             PlayerName(self, unit)
@@ -327,9 +322,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
         ns.Debug("ricon:", ricon, _G.ICON_LIST[ricon])
         if ricon and _G.ICON_LIST[ricon] then
             -- ricon can be > 8, which is outside ICON_LIST's index
-            _G.GameTooltipTextLeft1:SetFormattedText("%s %s%s", _G.ICON_LIST[ricon].."12|t", color, line1)
-        else
-            _G.GameTooltipTextLeft1:SetFormattedText("%s", color..line1)
+            _G.GameTooltipTextLeft1:SetFormattedText("%s %s", _G.ICON_LIST[ricon].."12|t", line1)
         end
         _G.GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
 
@@ -345,7 +338,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
         if level then
             local unitType
             if isPlayer then
-                unitType = ("%s %s%s"):format(_G.UnitRace(unit), color, _G.UnitClass(unit))
+                unitType = ("%s |cff%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GameTooltip_UnitColor(unit)), _G.UnitClass(unit))
             elseif IsBattlePet then
                 unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
             else
@@ -355,7 +348,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             local diff
             if level == -1 then
                 level = "??"
-                diff = qqColor
+                diff = _G.QuestDifficultyColors.impossible
             elseif IsBattlePet then
                 local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
                 if teamLevel then -- from WorldMapFrame.lua: 2522

@@ -40,7 +40,7 @@ CPFCopyButton:SetScript("OnClick", function()
     red, green, blue = CPF:GetColorRGB()
     opacity = OSF:GetValue()
 
-    CPFCopyButton:SetText(("|cff%02x%02x%02xCopy"):format(red * 255, green * 255, blue * 255))
+    CPFCopyButton:SetFormattedText("|cff%sCopy", RealUI.GetColorString(red, blue, green))
 end)
 
 -- Paste
@@ -116,7 +116,7 @@ local UpdateRGBA = function()
     CPFEditBoxes.Red:SetText(r * 255)
     CPFEditBoxes.Green:SetText(g * 255)
     CPFEditBoxes.Blue:SetText(b * 255)
-    CPFEditBoxes.Hex:SetText(("%02x%02x%02x"):format(r * 255, g * 255, b * 255))
+    CPFEditBoxes.Hex:SetText(RealUI.GetColorString(r, g, b))
 
     if CPF.hasOpacity then
         _G.ColorSwatch:SetColorTexture(r, g, b, 1 - OSF:GetValue())

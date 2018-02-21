@@ -783,7 +783,7 @@ function MinimapAdv:GetLFGList(event, arg)
             local _, numActiveApplicants = _G.C_LFGList.GetNumApplicants()
             status = _G.LFG_LIST_PENDING_APPLICANTS:format(numActiveApplicants)
         end
-        local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+        local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
         MMFrames.info.LFG.text:SetFormattedText("|cff%sLFG:|r %s", colorOrange, status)
         MMFrames.info.LFG:SetHeight(MMFrames.info.LFG.text:GetStringHeight())
         infoTexts.LFG.shown = true
@@ -825,7 +825,7 @@ function MinimapAdv:GetLFGQueue(event, ...)
                 end
             end
 
-            local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+            local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
             queueFrame.text:SetFormattedText(infoText.format, colorOrange, queueStr)
             queueFrame:SetHeight(queueFrame.text:GetStringHeight())
             queueFrame.myWait = myWait
@@ -971,8 +971,8 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
-        self:debug("IsInInstance", RealUI:ColorTableToStr(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
-        MMFrames.info.LootSpec.text:SetText("|cff"..RealUI:ColorTableToStr(RealUI.media.colors.blue).._G.LOOT..":|r "..RealUI:GetCurrentLootSpecName())
+        self:debug("IsInInstance", RealUI.GetColorString(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
+        MMFrames.info.LootSpec.text:SetFormattedText("|cff%s%s:|r %s", RealUI.GetColorString(RealUI.media.colors.blue), _G.LOOT, RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
     else
@@ -1536,7 +1536,7 @@ local function NewInfoFrame(name, parent, format)
                 else
                     queueStr = ("%s"):format(timeInQueue)
                 end
-                local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+                local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
                 self.text:SetFormattedText(format, colorOrange, queueStr)
                 self:SetHeight(self.text:GetStringHeight())
                 self.updateThrottle = 0.1;

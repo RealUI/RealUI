@@ -1337,7 +1337,7 @@ function Infobar:CreateBlocks()
                     if item.hasDura then
                         local min, max = _G.GetInventoryItemDurability(slotID)
                         if max then
-                            item.dura = RealUI:GetSafeVals(min, max)
+                            item.dura = RealUI.GetSafeVals(min, max)
                             item.min, item.max = min, max
                             if lowDur > item.dura then
                                 lowDur, lowSlot = item.dura, slotID

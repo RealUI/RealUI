@@ -1,36 +1,34 @@
 -- Lua Globals --
--- luacheck: globals floor
+-- luacheck: globals floor type
 
 local RealUI = _G.RealUI
-
 function RealUI.Round(value, places)
     local mult = 10 ^ (places or 0)
     return floor(value * mult + 0.5) / mult
 end
-function RealUI:GetSafeVals(min, max)
+function RealUI.GetSafeVals(min, max)
     if max == 0 then
         return 0
     else
         return min / max
     end
 end
-function RealUI:ColorTableToStr(vals)
-    return _G.format("%02x%02x%02x", vals[1] * 255, vals[2] * 255, vals[3] * 255)
-end
-function RealUI.GetDurabilityColor(a, b)
-    if a and b then
-        return _G.oUFembed.RGBColorGradient(a, b, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
-    else
-        if a < 0 then
-            return 1, 0, 0
-        elseif a <= 0.5 then
-            return 1, a * 2, 0
-        elseif a >= 1 then
-            return 0, 1, 0
+
+local hexColor = "%02x%02x%02x"
+function RealUI.GetColorString(red, green, blue)
+    if type(red) == "table" then
+        if red.r and red.g and red.b then
+            red, green, blue = red.r, red.g, red.b
         else
-            return 2 - a * 2, 1, 0
+            red, green, blue = red[1], red[2], red[3]
         end
     end
+
+    return hexColor:format(red * 255, green * 255, blue * 255)
+end
+
+function RealUI.GetDurabilityColor(curDura, maxDura)
+    return _G.oUFembed.RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
 end
 
 --[[ Fonts
