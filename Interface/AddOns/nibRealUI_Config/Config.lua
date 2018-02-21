@@ -25,6 +25,11 @@ local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
 local RavenTimer
+_G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
+    if self._show then
+        self:Show()
+    end
+end)
 function RealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
@@ -92,6 +97,21 @@ function RealUI:HuDTestMode(doTestMode)
             EABFrame.button:Hide()
             EABFrame.intro:Stop()
             EABFrame.outro:Play()
+        end
+    end
+
+    -- Zone Ability Button
+    local ZAFFrame = _G.ZoneAbilityFrame
+    if not _G.HasZoneAbility() then
+        if doTestMode then
+            ZAFFrame:Show()
+            ZAFFrame.SpellButton:Disable()
+            ZAFFrame._show = true
+            ZAFFrame.SpellButton.Icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
+        else
+            ZAFFrame._show = false
+            ZAFFrame.SpellButton:Enable()
+            ZAFFrame:Hide()
         end
     end
     self.isInTestMode = doTestMode

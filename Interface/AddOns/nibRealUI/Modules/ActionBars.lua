@@ -299,7 +299,7 @@ function ActionBars:ApplyABSettings(tag)
         if profileZAB then
             profileZAB["position"] = {
                 ["y"] = eabY,
-                ["x"] = -eabX,
+                ["x"] = -(eabX + 64),
                 ["point"] = "BOTTOM",
                 ["scale"] = 0.985,
                 ["growHorizontal"] = "RIGHT",

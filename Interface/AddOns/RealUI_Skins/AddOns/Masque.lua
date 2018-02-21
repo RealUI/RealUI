@@ -1,9 +1,6 @@
 local _, private = ...
 
 function private.AddOns.Masque()
-    local EAB = _G.ExtraActionButton1
-    EAB:SetNormalTexture("")
-
     local MSQ = _G.LibStub("Masque")
     MSQ:AddSkin("RealUI", {
         Author = "Nibelheim",
