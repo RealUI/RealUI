@@ -47,7 +47,10 @@ end
 _G.RealUI = RealUI
 
 local errorFrame do
+    local Skin = _G.Aurora.Skin
+
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
+    Skin.UIPanelDialogTemplate(errorFrame)
     errorFrame:SetClampedToScreen(true)
     errorFrame:SetMovable(true)
     errorFrame:SetSize(500, 350)
@@ -60,7 +63,7 @@ local errorFrame do
 
     local dragArea = _G.CreateFrame("Frame", nil, errorFrame, "TitleDragAreaTemplate")
     dragArea:SetPoint("TOPLEFT")
-    dragArea:SetPoint("BOTTOMRIGHT", errorFrame, "TOPRIGHT", -26, -26)
+    dragArea:SetPoint("BOTTOMRIGHT", errorFrame.Title)
     errorFrame.DragArea = dragArea
 
     local index = errorFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalCenter")
@@ -69,13 +72,14 @@ local errorFrame do
     errorFrame.IndexLabel = index
 
     local scrollFrame = _G.CreateFrame("ScrollFrame", nil, errorFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", 12, -30)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -30, 40)
+    Skin.UIPanelScrollFrameTemplate(scrollFrame)
+    scrollFrame:SetPoint("TOPLEFT", dragArea, "BOTTOMLEFT", 10, -10)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -19, 44)
     _G.ScrollFrame_OnLoad(scrollFrame)
     errorFrame.ScrollFrame = scrollFrame
 
     local text = _G.CreateFrame("EditBox", nil, scrollFrame)
-    text:SetSize(scrollFrame:GetSize())
+    text:SetSize(343, 194)
     text:SetAutoFocus(false)
     text:SetMultiLine(true)
     text:SetMaxLetters(0)
@@ -88,29 +92,30 @@ local errorFrame do
     scrollFrame.Text = text
 
     local reload = _G.CreateFrame("Button", nil, errorFrame, "UIPanelButtonTemplate")
+    Skin.UIPanelButtonTemplate(reload)
     reload:SetSize(96, 24)
     reload:SetText(_G.RELOADUI)
-    reload:SetPoint("BOTTOMLEFT", 10, 12)
+    reload:SetPoint("BOTTOMLEFT", 10, 10)
     reload:SetScript("OnClick", _G.ReloadUI)
     errorFrame.Reload = reload
 
     local prevError = _G.CreateFrame("Button", nil, errorFrame)
-    prevError:SetSize(32, 32)
-    prevError:SetPoint("RIGHT", index, "LEFT")
     prevError:SetNormalTexture([[Interface\Buttons\UI-SpellbookIcon-PrevPage-Up]])
     prevError:SetPushedTexture([[Interface\Buttons\UI-SpellbookIcon-PrevPage-Down]])
     prevError:SetDisabledTexture([[Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled]])
     prevError:SetHighlightTexture([[Interface\Buttons\UI-Common-MouseHilight]], "ADD")
+    Skin.NavButtonPrevious(prevError)
+    prevError:SetPoint("RIGHT", index, "LEFT")
     prevError:SetScript("OnClick", function() errorFrame:ShowPrevious() end)
     errorFrame.PreviousError = prevError
 
     local nextError = _G.CreateFrame("Button", nil, errorFrame)
-    nextError:SetSize(32, 32)
-    nextError:SetPoint("LEFT", index, "RIGHT")
     nextError:SetNormalTexture([[Interface\Buttons\UI-SpellbookIcon-NextPage-Up]])
     nextError:SetPushedTexture([[Interface\Buttons\UI-SpellbookIcon-NextPage-Down]])
     nextError:SetDisabledTexture([[Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled]])
     nextError:SetHighlightTexture([[Interface\Buttons\UI-Common-MouseHilight]], "ADD")
+    Skin.NavButtonNext(nextError)
+    nextError:SetPoint("LEFT", index, "RIGHT")
     nextError:SetScript("OnClick", function() errorFrame:ShowNext() end)
     errorFrame.NextError = nextError
 end
