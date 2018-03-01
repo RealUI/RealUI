@@ -11,8 +11,8 @@ local MODNAME = "CastBars"
 local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local Aurora = _G.Aurora
-local uninterruptible = Aurora.Colors.Create(0.5, 0.0, 0.0)
-local interruptible = Aurora.Colors.Create(0.5, 1.0, 1.0)
+local uninterruptible = Aurora.Color.Create(0.5, 0.0, 0.0)
+local interruptible = Aurora.Color.Create(0.5, 1.0, 1.0)
 
 local layoutSize
 local ChannelingTicks = {}
