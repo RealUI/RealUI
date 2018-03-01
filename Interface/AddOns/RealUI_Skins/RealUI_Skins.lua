@@ -196,7 +196,9 @@ function private.OnLoad()
     end
 
     local Base, Scale = Aurora.Base, Aurora.Scale
-    local Hook, Color = Aurora.Hook, Aurora.Color
+    local Hook, Skin = Aurora.Hook, Aurora.Skin
+    local Color = Aurora.Color
+
     if private.disabled.uiScale then
         RealUI.Scale = ScaleAPI
     else
@@ -250,6 +252,25 @@ function private.OnLoad()
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end
+
+        --f.f = "f" -- error for testing RealUI_Bugs
+    end
+
+    function private.AddOns.RealUI_Bugs()
+        local errorFrame = _G.RealUI_ErrorFrame
+        Skin.UIPanelDialogTemplate(errorFrame)
+        Skin.UIPanelScrollFrameTemplate(errorFrame.ScrollFrame)
+        Skin.UIPanelButtonTemplate(errorFrame.Reload)
+        Skin.NavButtonPrevious(errorFrame.PreviousError)
+        Skin.NavButtonNext(errorFrame.NextError)
+
+        --[[ Scale ]]--
+        errorFrame.ScrollFrame:SetPoint(errorFrame.ScrollFrame:GetPoint(1))
+        errorFrame.ScrollFrame:SetPoint(errorFrame.ScrollFrame:GetPoint(2))
+        Scale.RawSetSize(errorFrame.ScrollFrame.Text, errorFrame.ScrollFrame:GetSize())
+        errorFrame.Reload:SetPoint(errorFrame.Reload:GetPoint())
+        errorFrame.PreviousError:SetPoint(errorFrame.PreviousError:GetPoint())
+        errorFrame.NextError:SetPoint(errorFrame.NextError:GetPoint())
     end
 end
 
