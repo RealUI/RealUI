@@ -2603,7 +2603,7 @@ local uiTweaks do
                             get = function(info) return db.position.enabled end,
                             set = function(info, value)
                                 db.position.enabled = value
-                                ObjectivesAdv:UpdatePosition()
+                                ObjectivesAdv:RefreshMod()
                                 RealUI:ReloadUIDialog()
                             end,
                             order = 20,
@@ -2633,7 +2633,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.x = value
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 10,
                                 },
@@ -2645,7 +2645,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.y = value
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 20,
                                 },
@@ -2658,7 +2658,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.negheightofs = value
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 30,
                                 },
@@ -2688,7 +2688,7 @@ local uiTweaks do
                                     end,
                                     set = function(info, value)
                                         db.position.anchorto = RealUI.globals.anchorPoints[value]
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 10,
                                 },
@@ -2704,7 +2704,7 @@ local uiTweaks do
                                     end,
                                     set = function(info, value)
                                         db.position.anchorfrom = RealUI.globals.anchorPoints[value]
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 20,
                                 },
