@@ -133,7 +133,7 @@ for type, offsetFactor in next, CPFEditBoxes do
     local editbox = _G.CreateFrame("EditBox", nil, CPF)
     editbox:SetSize(50, 15)
     editbox:SetPoint("BOTTOMLEFT", (70 * offsetFactor) + 13, 34)
-    _G.Aurora.Base.SetBackdrop(editbox, _G.Aurora.Color.frame:GetRGBA())
+    _G.Aurora.Base.SetBackdrop(editbox, _G.Aurora.Color.frame)
 
     editbox:SetFontObject(_G.ChatFontNormal)
     editbox:SetAutoFocus(false)

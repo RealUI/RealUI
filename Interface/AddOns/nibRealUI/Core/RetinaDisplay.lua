@@ -39,7 +39,7 @@ local function CreateRDOptions()
     RDF:SetAllPoints(_G.UIParent)
     RDF:SetFrameStrata("DIALOG")
     RDF:SetFrameLevel(0)
-    _G.Aurora.Base.SetBackdrop(RDF, _G.Aurora.Color.frame:GetRGBA())
+    _G.Aurora.Base.SetBackdrop(RDF, _G.Aurora.Color.frame)
 
     RDF.logo = CreateIWTextureFrame(Textures.Retina, 512, 512, {"LEFT", RDF, "CENTER", -542, -52}, {1, 1, 1, 1})
 

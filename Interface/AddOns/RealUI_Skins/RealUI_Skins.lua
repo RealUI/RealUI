@@ -207,14 +207,12 @@ function private.OnLoad()
     end
 
     function Hook.GameTooltip_OnHide(gametooltip)
-        local color = Color.frame
-        Base.SetBackdropColor(gametooltip, color.r, color.g, color.b, private.skinsDB.frameAlpha)
+        Base.SetBackdropColor(gametooltip, Color.frame, private.skinsDB.frameAlpha)
     end
 
-    function Base.Post.SetBackdrop(ret, frame, r, g, b, a)
-        if not r and not a then
-            local color = Color.frame
-            frame:SetBackdropColor(color.r, color.g, color.b, private.skinsDB.frameAlpha)
+    function Base.Post.SetBackdrop(ret, frame, color, alpha)
+        if not color and not alpha then
+            frame:SetBackdropColor(Color.frame, private.skinsDB.frameAlpha)
 
             local stripes = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)

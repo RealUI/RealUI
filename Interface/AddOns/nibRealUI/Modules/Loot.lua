@@ -309,7 +309,7 @@ local createSlot = function(id)
     frame:SetScript("OnLeave", LootOnLeave)
     frame:SetScript("OnUpdate", LootOnUpdate)
 
-    _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.button:GetRGBA())
+    _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.button)
     _G.Aurora.Base.SetHighlight(frame, "backdrop")
 
     local iconFrame = _G.CreateFrame("Frame", nil, frame)

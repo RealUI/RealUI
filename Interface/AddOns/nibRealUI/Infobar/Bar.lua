@@ -707,7 +707,7 @@ function Infobar:CreateBar()
     end)
 
     -- Stripes
-    Base.SetBackdrop(frame, frameColor.r, frameColor.g, frameColor.b, db.bgAlpha)
+    Base.SetBackdrop(frame, frameColor, db.bgAlpha)
     local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
     tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
     tex:SetAlpha(db.bgAlpha * 0.6)

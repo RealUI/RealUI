@@ -708,7 +708,7 @@ function MyContainer:OnCreate(name, settings)
 
         self.DropTarget.bg = _G.CreateFrame("Frame", nil, self.DropTarget)
         self.DropTarget.bg:SetAllPoints()
-        Base.SetBackdrop(self.DropTarget.bg, Aurora.Color.frame:GetRGBA())
+        Base.SetBackdrop(self.DropTarget.bg, Aurora.Color.frame)
 
         local fs = self:CreateFontString(nil, "OVERLAY")
         fs:SetFontObject("NumberFont_Outline_Med")

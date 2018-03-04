@@ -58,7 +58,7 @@ do
         frame:SetMovable(true)
         frame:SetClampedToScreen(true)
         frame:RegisterForDrag("LeftButton")
-        _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame:GetRGBA())
+        _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame)
         frame:Hide()
 
         frame:SetScript("OnDragStart", OnDragStart)

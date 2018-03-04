@@ -19,7 +19,7 @@ function private.AddOns.Ace3()
         BlizOptionsGroup = function(widget)
         end,
         DropdownGroup = function(widget)
-            Base.SetBackdrop(widget.border, frameColor.r, frameColor.g, frameColor.b, frameColor.a)
+            Base.SetBackdrop(widget.border, frameColor)
         end,
         Frame = function(widget)
             Base.SetBackdrop(widget.frame)
@@ -50,7 +50,7 @@ function private.AddOns.Ace3()
             line3:SetColorTexture(highlightColor.r, highlightColor.g, highlightColor.b, .8)
         end,
         InlineGroup = function(widget)
-            Base.SetBackdrop(widget.content:GetParent(), frameColor.r, frameColor.g, frameColor.b, frameColor.a)
+            Base.SetBackdrop(widget.content:GetParent(), frameColor)
         end,
         ScrollFrame = function(widget)
             Skin.UIPanelScrollBarTemplate(widget.scrollbar)
@@ -65,7 +65,7 @@ function private.AddOns.Ace3()
                 return tab
             end
 
-            Base.SetBackdrop(widget.border, frameColor.r, frameColor.g, frameColor.b, frameColor.a)
+            Base.SetBackdrop(widget.border, frameColor)
         end,
         TreeGroup = function(widget)
             local _CreateButton = widget.CreateButton
@@ -83,9 +83,9 @@ function private.AddOns.Ace3()
                 self:SetBackdropColor(highlightColor.r, highlightColor.g, highlightColor.b, 0.8)
             end)
 
-            Base.SetBackdrop(widget.treeframe, frameColor.r, frameColor.g, frameColor.b, frameColor.a)
+            Base.SetBackdrop(widget.treeframe, frameColor)
             Skin.UIPanelScrollBarTemplate(widget.scrollbar)
-            Base.SetBackdrop(widget.border, frameColor.r, frameColor.g, frameColor.b, frameColor.a)
+            Base.SetBackdrop(widget.border, frameColor)
             widget.border:SetPoint("TOPLEFT", widget.treeframe, "TOPRIGHT", 1, 0)
         end,
         Window = function(widget)
@@ -213,7 +213,7 @@ function private.AddOns.Ace3()
                 bg:SetScript("OnLeave", function(self, ...) end)
                 bg:SetScript("OnMouseDown", widget.frame:GetScript("OnMouseDown"))
                 bg:SetScript("OnMouseUp", widget.frame:GetScript("OnMouseUp"))
-                Base.SetBackdrop(bg, frameColor:GetRGBA())
+                Base.SetBackdrop(bg, frameColor)
                 Base.SetHighlight(bg, "backdrop")
 
                 widget.checkbg:SetTexture("")
@@ -253,7 +253,7 @@ function private.AddOns.Ace3()
                 bg:SetSize(18, 18)
                 bg:SetPoint("TOPLEFT", 1, -3)
                 bg:SetScript("OnClick", widget.frame:GetScript("OnClick"))
-                Base.SetBackdrop(bg, frameColor:GetRGBA())
+                Base.SetBackdrop(bg, frameColor)
 
                 widget.colorSwatch:Hide()
                 local texture, checkers = select(2, widget.frame:GetRegions())
@@ -343,7 +343,7 @@ function private.AddOns.Ace3()
             MultiLineEditBox = function(widget)
                 Skin.UIPanelButtonTemplate(widget.button)
                 Skin.UIPanelScrollBarTemplate(widget.scrollBar)
-                Base.SetBackdrop(widget.scrollBG, frameColor:GetRGBA())
+                Base.SetBackdrop(widget.scrollBG, frameColor)
                 widget.scrollBG:SetPoint("TOPRIGHT", widget.scrollBar, "TOPLEFT", -3, 19)
             end,
             Slider = function(widget)
@@ -394,7 +394,7 @@ function private.AddOns.Ace3()
                 local disabled = button:GetDisabledTexture()
                 disabled:SetColorTexture(0, 0, 0, .3)
                 disabled:SetDrawLayer("OVERLAY")
-                Base.SetBackdrop(button, Aurora.Color.button:GetRGBA())
+                Base.SetBackdrop(button, Aurora.Color.button)
 
                 local arrow = button:CreateTexture(nil, "ARTWORK")
                 arrow:SetPoint("TOPLEFT", 4, -7)
@@ -407,7 +407,7 @@ function private.AddOns.Ace3()
                 local bg = _G.CreateFrame("Frame", nil, frame)
                 bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMLEFT", 1, 0)
                 bg:SetFrameLevel(frame:GetFrameLevel())
-                Base.SetBackdrop(bg, Aurora.Color.button:GetRGBA())
+                Base.SetBackdrop(bg, Aurora.Color.button)
 
                 if frame.displayButton then
                     bg:SetPoint("TOPLEFT", frame.displayButton, "TOPRIGHT", 3, -19)

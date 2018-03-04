@@ -316,14 +316,14 @@ function RealUI:AddButtonHighlight(button)
     highlight:SetPoint("CENTER", button, "CENTER", 0, 0)
     highlight:SetWidth(button:GetWidth() - 2)
     highlight:SetHeight(button:GetHeight() - 2)
-    _G.Aurora.Base.SetBackdrop(highlight, _G.Aurora.Color.highlight:GetRGBA())
+    _G.Aurora.Base.SetBackdrop(highlight, _G.Aurora.Color.highlight)
 end
 
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)
     if stripes then
         _G.Aurora.Base.SetBackdrop(frame)
     else
-        _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame:GetRGBA())
+        _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame)
     end
 end
 
