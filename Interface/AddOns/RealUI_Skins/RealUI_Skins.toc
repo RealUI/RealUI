@@ -17,4 +17,5 @@ Util.lua
 RealUI_Skins.lua
 
 AddOns\Ace3.lua
+AddOns\DBM-GUI.lua
 AddOns\Masque.lua

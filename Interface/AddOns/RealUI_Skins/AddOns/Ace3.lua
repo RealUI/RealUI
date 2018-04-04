@@ -476,4 +476,3 @@ function private.AddOns.Ace3()
         return oldRegisterAsWidget(gui, widget)
     end
 end
-
