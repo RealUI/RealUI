@@ -2327,34 +2327,36 @@ function Infobar:CreateBlocks()
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local realm_faction = realm.."-"..RealUI.charInfo.faction
                         local factionDB = currencyDB[realm][RealUI.charInfo.faction]
-                        for name, data in next, factionDB do
-                            name = charName:format(_G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
-                            local money = GetMoneyString(data.money, true)
-                            realmMoneyTotal = realmMoneyTotal + data.money
+                        if factionDB then
+                            local realm_faction = realm.."-"..RealUI.charInfo.faction
+                            for name, data in next, factionDB do
+                                name = charName:format(_G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
+                                local money = GetMoneyString(data.money, true)
+                                realmMoneyTotal = realmMoneyTotal + data.money
 
-                            _G.table.wipe(tokens)
-                            for i = 1, _G.MAX_WATCHED_TOKENS do
-                                if data["token"..i] then
-                                    local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                    local amount = data[data["token"..i]] or 0
-                                    tokens[i] = TOKEN_STRING:format(texture, amount)
-                                    tokens[i+3] = tokenName
-                                else
-                                    tokens[i] = "---"
+                                _G.table.wipe(tokens)
+                                for i = 1, _G.MAX_WATCHED_TOKENS do
+                                    if data["token"..i] then
+                                        local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                        local amount = data[data["token"..i]] or 0
+                                        tokens[i] = TOKEN_STRING:format(texture, amount)
+                                        tokens[i+3] = tokenName
+                                    else
+                                        tokens[i] = "---"
+                                    end
                                 end
-                            end
 
-                            _G.tinsert(currencyData, {
-                                id = #currencyData + 1,
-                                info = {
-                                    name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                                },
-                                meta = {
-                                    realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                }
-                            })
+                                _G.tinsert(currencyData, {
+                                    id = #currencyData + 1,
+                                    info = {
+                                        name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                                    },
+                                    meta = {
+                                        realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                                    }
+                                })
+                            end
                         end
                     end
                 end
