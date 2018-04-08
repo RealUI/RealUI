@@ -16,6 +16,8 @@ Libs\Libs.xml
 Util.lua
 RealUI_Skins.lua
 
+FrameXML\PaperDollFrame.lua
+
 AddOns\Ace3.lua
 AddOns\DBM-GUI.lua
 AddOns\Masque.lua
