@@ -17,6 +17,7 @@ Util.lua
 RealUI_Skins.lua
 
 FrameXML\PaperDollFrame.lua
+FrameXML\WorldMapFrame.lua
 
 AddOns\Ace3.lua
 AddOns\DBM-GUI.lua

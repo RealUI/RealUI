@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * nibRealUI_Config
   * RealUI_Bugs
 
+### Added ###
+
+  * Enchants and gems are now shown as small icons next to their item.
+
 ### Changed ###
 
   * !Aurora_RealUI has been renamed RealUI_Skins.
