@@ -133,7 +133,7 @@ local width, height = 65, 50
 local hudConfig, hudToggle do
     -- The HuD Config bar
     hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
-    Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 0)
+    Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
     hudConfig:SetScript("OnEvent", function(self, event, ...)
         if event == "PLAYER_REGEN_DISABLED" then
             hudToggle(true)
