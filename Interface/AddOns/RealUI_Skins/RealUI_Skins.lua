@@ -18,6 +18,8 @@ local defaults = {
         frameColor = {
             a = 0.7
         },
+        classColors = {
+        },
         uiModScale = 1,
         customScale = 1,
         isHighRes = false,
@@ -206,6 +208,7 @@ function private.OnLoad()
         _G.ReloadUI()
     end
 
+    -- Set flags
     private.disabled.bags = true
     private.disabled.mainmenubar = true
     private.disabled.pixelScale = not private.skinsDB.isPixelScale
@@ -227,6 +230,7 @@ function private.OnLoad()
         RealUI.Scale = Scale
     end
 
+    -- Initialize custom colors
     local frameColor = private.skinsDB.frameColor
     if not frameColor.r then
         frameColor.r, frameColor.g, frameColor.b = Color.frame:GetRGB()
@@ -241,6 +245,36 @@ function private.OnLoad()
         Color.button:SetRGB(buttonColor.r, buttonColor.g, buttonColor.b)
     end
 
+    local classColors = private.skinsDB.classColors
+    if not classColors[private.charClass.token] then
+        private.classColorsReset(classColors, true)
+    end
+
+    function private.classColorsHaveChanged()
+        local hasChanged = false
+        for i = 1, #_G.CLASS_SORT_ORDER do
+            local classToken = _G.CLASS_SORT_ORDER[i]
+            local color = _G.CUSTOM_CLASS_COLORS[classToken]
+            local cache = classColors[classToken]
+
+            if not color:IsEqualTo(cache) then
+                --print("Change found in", classToken)
+                color:SetRGB(cache.r, cache.g, cache.b)
+                hasChanged = true
+            end
+        end
+        return hasChanged
+    end
+    function private.classColorsInit()
+        if private.classColorsHaveChanged() then
+            private.updateHighlightColor()
+        end
+    end
+    _G.CUSTOM_CLASS_COLORS:RegisterCallback(function()
+        private.updateHighlightColor()
+    end)
+
+    -- Set overrides and hooks
     function Hook.GameTooltip_OnHide(gametooltip)
         Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
     end
@@ -268,8 +302,9 @@ function private.OnLoad()
         end
     end
 
+    -- Disable user selected addon skins
     for name, enabled in next, private.skinsDB.addons do
-        if name ~= "nibRealUI" and not enabled then
+        if not name:find("RealUI") and not enabled then
             private.AddOns[name] = private.nop
         end
     end

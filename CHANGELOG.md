@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * When at max level, enchants and gems will be shown as small icons next to their item.
   * The color of UI frames can now be changed in addition to the opacity.
   * A custom button color can now be defined.
+  * New options to change the class colors throughout the UI.
 
 ### Changed ###
 

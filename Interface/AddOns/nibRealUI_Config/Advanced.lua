@@ -552,6 +552,28 @@ local skins do
     end
 
     local Color = _G.Aurora.Color
+    local classColors do
+        classColors = {
+            name = _G.CLASS_COLORS,
+            type = "group",
+            args = {
+            }
+        }
+
+        for class, color in next, SkinsProfile.classColors do
+            classColors.args[class] = {
+                name = class,
+                type = "color",
+                get = function(info) return color.r, color.g, color.b end,
+                set = function(info, r, g, b)
+                    color.r = r
+                    color.g = g
+                    color.b = b
+                    _G.CUSTOM_CLASS_COLORS:NotifyChanges()
+                end,
+            }
+        end
+    end
     local minScale, maxScale = 0.48, 1
     local addons do
         local addonSkins = _G.Aurora.Base.GetSkinList()
@@ -731,6 +753,7 @@ local skins do
                 end,
                 order = 24,
             },
+            classColors = classColors,
             addons = addons,
             profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
