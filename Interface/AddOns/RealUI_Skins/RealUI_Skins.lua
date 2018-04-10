@@ -119,11 +119,19 @@ function RealUI.PreviewModScale()
 end
 
 local skinnedFrames = {}
+function RealUI:RegisterSkinnedFrame(frame, color, stripes)
+    skinnedFrames[frame] = {
+        color = color,
+        stripes = stripes
+    }
+end
 function RealUI:UpdateFrameStyle()
-    for frame, stripes in next, skinnedFrames do
-        if stripes.SetAlpha then
-            Aurora.Base.SetBackdropColor(frame, Aurora.Color.frame, private.skinsDB.frameColor.a)
-            stripes:SetAlpha(private.skinsDB.stripeAlpha)
+    for frame, style in next, skinnedFrames do
+        if style.stripes then
+            Aurora.Base.SetBackdropColor(frame, style.color, private.skinsDB.frameColor.a)
+            style.stripes:SetAlpha(private.skinsDB.stripeAlpha)
+        else
+            Aurora.Base.SetBackdropColor(frame, style.color)
         end
     end
 end
@@ -239,7 +247,14 @@ function private.OnLoad()
             stripes:SetHorizTile(true)
             stripes:SetVertTile(true)
             stripes:SetBlendMode("ADD")
-            skinnedFrames[frame] = stripes
+
+            r, g, b = frame:GetBackdropBorderColor()
+            if Color.frame:IsEqualTo(r, g, b, a) then
+                color = Color.frame
+            else
+                color = Color.button
+            end
+            RealUI:RegisterSkinnedFrame(frame, color, stripes)
         end
     end
 
