@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added ###
 
-  * Enchants and gems are now shown as small icons next to their item.
+  * When at max level, enchants and gems will be shown as small icons next to their item.
   * The color of UI frames can now be changed in addition to the opacity.
   * A custom button color can now be defined.
 

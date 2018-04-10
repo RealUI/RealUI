@@ -103,44 +103,49 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                     self.dura:Hide()
                 end
 
-                local itemString = itemLink:match("item[%-?%d:]+") or ""
-                local _, _, enchantID, gem1, gem2, gem3, gem4 = _G.strsplit(":", itemString)
-                if tonumber(enchantID) then
-                    self.enchant:SetTexture([[Interface\Icons\INV_Misc_EnchantedScroll]])
-                    self.enchant:Show()
-                else
-                    if ShouldHaveEnchant(slotID, quality) then
-                        self.enchant:SetTexture([[Interface\PaperDollInfoFrame\UI-GearManager-LeaveItem-Opaque]])
+                if _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL then
+                    local itemString = itemLink:match("item[%-?%d:]+") or ""
+                    local _, _, enchantID, gem1, gem2, gem3, gem4 = _G.strsplit(":", itemString)
+                    if tonumber(enchantID) then
+                        self.enchant:SetTexture([[Interface\Icons\INV_Misc_EnchantedScroll]])
                         self.enchant:Show()
                     else
-                        self.enchant:Hide()
-                    end
-                end
-
-                local gems = {tonumber(gem1), tonumber(gem2), tonumber(gem3), tonumber(gem4)}
-                local numSockets, hasMeta = GetNumSockets(itemLink)
-                private.debug("gems, sockets", #gems, numSockets)
-                local socketIdx = 0
-                if #gems > 0 then
-                    for i, gem in next, gems do
-                        self.gems[i]:SetTexture(_G.GetItemIcon(gem))
-                        self.gems[i]:Show()
-                        socketIdx = i
-                    end
-                end
-                if numSockets > 0 then
-                    for i = socketIdx + 1, socketIdx + numSockets do
-                        if hasMeta then
-                            self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Meta]])
-                            hasMeta = false
+                        if ShouldHaveEnchant(slotID, quality) then
+                            self.enchant:SetTexture([[Interface\PaperDollInfoFrame\UI-GearManager-LeaveItem-Opaque]])
+                            self.enchant:Show()
                         else
-                            self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Prismatic]])
+                            self.enchant:Hide()
                         end
-                        self.gems[i]:Show()
-                        socketIdx = i
                     end
+
+                    local gems = {tonumber(gem1), tonumber(gem2), tonumber(gem3), tonumber(gem4)}
+                    local numSockets, hasMeta = GetNumSockets(itemLink)
+                    private.debug("gems, sockets", #gems, numSockets)
+                    local socketIdx = 0
+                    if #gems > 0 then
+                        for i, gem in next, gems do
+                            self.gems[i]:SetTexture(_G.GetItemIcon(gem))
+                            self.gems[i]:Show()
+                            socketIdx = i
+                        end
+                    end
+                    if numSockets > 0 then
+                        for i = socketIdx + 1, socketIdx + numSockets do
+                            if hasMeta then
+                                self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Meta]])
+                                hasMeta = false
+                            else
+                                self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Prismatic]])
+                            end
+                            self.gems[i]:Show()
+                            socketIdx = i
+                        end
+                    end
+                    self.gems:Hide(socketIdx + 1)
+                else
+                    self.enchant:Hide()
+                    self.gems:Hide()
                 end
-                self.gems:Hide(socketIdx + 1)
             else
                 HideInfo(self)
             end
