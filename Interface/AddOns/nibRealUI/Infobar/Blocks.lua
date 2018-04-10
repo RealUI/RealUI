@@ -1627,7 +1627,9 @@ function Infobar:CreateBlocks()
                 if nextState ~= dbc.progressState then
                     r, g, b = watchStates[nextState]:GetColor()
                     bar:SetStatusBarColor(r, g, b, alpha * 1.5)
-                    bar.bg:SetColorTexture(0, 0, 0, alpha)
+
+                    local bgColor = _G.Aurora.Color.frame
+                    bar.bg:SetColorTexture(bgColor.r, bgColor.g, bgColor.b, alpha)
                 end
                 nextState = watchStates[nextState]:GetNext()
             end

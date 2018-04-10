@@ -13,7 +13,11 @@ local LSM = _G.LibStub("LibSharedMedia-3.0")
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
-        frameAlpha = 0.7,
+        buttonColor = {
+        },
+        frameColor = {
+            a = 0.7
+        },
         uiModScale = 1,
         customScale = 1,
         isHighRes = false,
@@ -116,10 +120,9 @@ end
 
 local skinnedFrames = {}
 function RealUI:UpdateFrameStyle()
-    local color = Aurora.Color.frame
     for frame, stripes in next, skinnedFrames do
         if stripes.SetAlpha then
-            frame:SetBackdropColor(color.r, color.g, color.b, private.skinsDB.frameAlpha)
+            Aurora.Base.SetBackdropColor(frame, Aurora.Color.frame, private.skinsDB.frameColor.a)
             stripes:SetAlpha(private.skinsDB.stripeAlpha)
         end
     end
@@ -140,7 +143,7 @@ function private.OnLoad()
 
     if _G.RealUI_Storage.Aurora then
         local AuroraConfig = _G.RealUI_Storage.Aurora.AuroraConfig
-        private.skinsDB.frameAlpha = AuroraConfig.alpha
+        private.skinsDB.frameColor.a = AuroraConfig.alpha
         if type(AuroraConfig.customClassColors) == "table" then
             private.skinsDB.customClassColors = AuroraConfig.customClassColors
         end
@@ -206,13 +209,28 @@ function private.OnLoad()
         RealUI.Scale = Scale
     end
 
+    local frameColor = private.skinsDB.frameColor
+    if not frameColor.r then
+        frameColor.r, frameColor.g, frameColor.b = Color.frame:GetRGB()
+    else
+        Color.frame:SetRGBA(frameColor.r, frameColor.g, frameColor.b, Color.frame.a)
+    end
+
+    local buttonColor = private.skinsDB.buttonColor
+    if not buttonColor.r then
+        buttonColor.r, buttonColor.g, buttonColor.b = Color.button:GetRGB()
+    else
+        Color.button:SetRGB(buttonColor.r, buttonColor.g, buttonColor.b)
+    end
+
     function Hook.GameTooltip_OnHide(gametooltip)
-        Base.SetBackdropColor(gametooltip, Color.frame, private.skinsDB.frameAlpha)
+        Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
     end
 
     function Base.Post.SetBackdrop(ret, frame, color, alpha)
         if not color and not alpha then
-            frame:SetBackdropColor(Color.frame, private.skinsDB.frameAlpha)
+            local r, g, b, a = frame:GetBackdropColor()
+            frame:SetBackdropColor(r, g, b, frameColor.a)
 
             local stripes = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)

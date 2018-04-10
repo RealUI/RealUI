@@ -93,7 +93,7 @@ local core do
                     order = 31,
                 },
                 bgAlpha = {
-                    name = L["Appearance_WinOpacity"],
+                    name = L["Appearance_FrameColor"],
                     type = "range",
                     isPercent = true,
                     min = 0, max = 1, step = 0.05,
@@ -550,6 +550,7 @@ local skins do
         SkinsDB.fonts[info[#info]] = LSM:Fetch("font", value)
     end
 
+    local Color = _G.Aurora.Color
     local minScale, maxScale = 0.48, 1
     local addons do
         local addonSkins = _G.Aurora.Base.GetSkinList()
@@ -563,7 +564,7 @@ local skins do
 
         for i = 1, #addonSkins do
             local name = addonSkins[i]
-            if name ~= "nibRealUI" then
+            if not name:find("RealUI") then
                 addons.args[name] = {
                     name = name,
                     type = "toggle",
@@ -580,19 +581,47 @@ local skins do
         type = "group",
         order = order,
         args = {
+            note = {
+                name = L.General_NoteReload,
+                type = "description",
+                order = -1,
+            },
             headerAppear = {
                 name = _G.APPEARANCE_LABEL,
                 type = "header",
                 order = 0,
             },
-            frameAlpha = {
-                name = L.Appearance_WinOpacity,
-                type = "range",
-                isPercent = true,
-                min = 0, max = 1, step = 0.05,
-                get = appGet,
-                set = appSet,
+            frameColor = {
+                name = L.Appearance_FrameColor,
+                type = "color",
+                hasAlpha = true,
+                get = function(info)
+                    return SkinsDB.frameColor.r, SkinsDB.frameColor.g, SkinsDB.frameColor.b, SkinsDB.frameColor.a
+                end,
+                set = function(info, r, g, b, a)
+                    Color.frame:SetRGBA(r, g, b, Color.frame.a)
+                    SkinsDB.frameColor.r = r
+                    SkinsDB.frameColor.g = g
+                    SkinsDB.frameColor.b = b
+                    SkinsDB.frameColor.a = a
+                    RealUI:UpdateFrameStyle()
+                end,
                 order = 1,
+            },
+            buttonColor = {
+                name = L.Appearance_ButtonColor,
+                type = "color",
+                get = function(info)
+                    return SkinsDB.buttonColor.r, SkinsDB.buttonColor.g, SkinsDB.buttonColor.b
+                end,
+                set = function(info, r, g, b)
+                    Color.button:SetRGBA(r, g, b)
+                    SkinsDB.buttonColor.r = r
+                    SkinsDB.buttonColor.g = g
+                    SkinsDB.buttonColor.b = b
+                    RealUI:UpdateFrameStyle()
+                end,
+                order = 2,
             },
             stripeAlpha = {
                 name = L.Appearance_StripeOpacity,
@@ -601,7 +630,7 @@ local skins do
                 min = 0, max = 1, step = 0.05,
                 get = appGet,
                 set = appSet,
-                order = 2,
+                order = 3,
             },
             headerFonts = {
                 name = L.Fonts,
