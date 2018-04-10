@@ -530,24 +530,25 @@ local skins do
     order = order + 1
 
     local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins")
+    local SkinsProfile = SkinsDB.profile
     local function appGet(info)
-        return SkinsDB[info[#info]]
+        return SkinsProfile[info[#info]]
     end
     local function appSet(info, value)
-        SkinsDB[info[#info]] = value
+        SkinsProfile[info[#info]] = value
         RealUI:UpdateFrameStyle()
     end
 
     local LSM = _G.LibStub("LibSharedMedia-3.0")
     local function fontGet(info)
         for name, path in next, _G.AceGUIWidgetLSMlists.font do
-            if path == SkinsDB.fonts[info[#info]] then
+            if path == SkinsProfile.fonts[info[#info]] then
                 return name
             end
         end
     end
     local function fontSet(info, value)
-        SkinsDB.fonts[info[#info]] = LSM:Fetch("font", value)
+        SkinsProfile.fonts[info[#info]] = LSM:Fetch("font", value)
     end
 
     local Color = _G.Aurora.Color
@@ -568,9 +569,9 @@ local skins do
                 addons.args[name] = {
                     name = name,
                     type = "toggle",
-                    get = function() return SkinsDB.addons[name] end,
+                    get = function() return SkinsProfile.addons[name] end,
                     set = function(info, value)
-                        SkinsDB.addons[name] = value
+                        SkinsProfile.addons[name] = value
                     end,
                 }
             end
@@ -596,14 +597,14 @@ local skins do
                 type = "color",
                 hasAlpha = true,
                 get = function(info)
-                    return SkinsDB.frameColor.r, SkinsDB.frameColor.g, SkinsDB.frameColor.b, SkinsDB.frameColor.a
+                    return SkinsProfile.frameColor.r, SkinsProfile.frameColor.g, SkinsProfile.frameColor.b, SkinsProfile.frameColor.a
                 end,
                 set = function(info, r, g, b, a)
                     Color.frame:SetRGBA(r, g, b, Color.frame.a)
-                    SkinsDB.frameColor.r = r
-                    SkinsDB.frameColor.g = g
-                    SkinsDB.frameColor.b = b
-                    SkinsDB.frameColor.a = a
+                    SkinsProfile.frameColor.r = r
+                    SkinsProfile.frameColor.g = g
+                    SkinsProfile.frameColor.b = b
+                    SkinsProfile.frameColor.a = a
                     RealUI:UpdateFrameStyle()
                 end,
                 order = 1,
@@ -612,13 +613,13 @@ local skins do
                 name = L.Appearance_ButtonColor,
                 type = "color",
                 get = function(info)
-                    return SkinsDB.buttonColor.r, SkinsDB.buttonColor.g, SkinsDB.buttonColor.b
+                    return SkinsProfile.buttonColor.r, SkinsProfile.buttonColor.g, SkinsProfile.buttonColor.b
                 end,
                 set = function(info, r, g, b)
                     Color.button:SetRGBA(r, g, b)
-                    SkinsDB.buttonColor.r = r
-                    SkinsDB.buttonColor.g = g
-                    SkinsDB.buttonColor.b = b
+                    SkinsProfile.buttonColor.r = r
+                    SkinsProfile.buttonColor.g = g
+                    SkinsProfile.buttonColor.b = b
                     RealUI:UpdateFrameStyle()
                 end,
                 order = 2,
@@ -676,9 +677,9 @@ local skins do
                 name = L.Appearance_HighRes,
                 desc = L.Appearance_HighResDesc,
                 type = "toggle",
-                get = function() return SkinsDB.isHighRes end,
+                get = function() return SkinsProfile.isHighRes end,
                 set = function(info, value)
-                    SkinsDB.isHighRes = value
+                    SkinsProfile.isHighRes = value
                     RealUI.UpdateUIScale()
                 end,
                 order = 21,
@@ -687,9 +688,9 @@ local skins do
                 name = L.Appearance_Pixel,
                 desc = L.Appearance_PixelDesc,
                 type = "toggle",
-                get = function() return SkinsDB.isPixelScale end,
+                get = function() return SkinsProfile.isPixelScale end,
                 set = function(info, value)
-                    SkinsDB.isPixelScale = value
+                    SkinsProfile.isPixelScale = value
                     RealUI.UpdateUIScale()
                 end,
                 order = 22
@@ -698,7 +699,7 @@ local skins do
                 name = L.Appearance_UIScale,
                 desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
                 type = "input",
-                disabled = function() return SkinsDB.isPixelScale end,
+                disabled = function() return SkinsProfile.isPixelScale end,
                 validate = function(info, value)
                     value = _G.tonumber(value)
                     if value then
@@ -711,7 +712,7 @@ local skins do
                         return "Value must be a number"
                     end
                 end,
-                get = function() return _G.tostring(SkinsDB.customScale) end,
+                get = function() return _G.tostring(SkinsProfile.customScale) end,
                 set = function(info, value)
                     RealUI.UpdateUIScale(_G.tonumber(value))
                 end,
@@ -723,14 +724,15 @@ local skins do
                 type = "range",
                 isPercent = true,
                 min = 0.5, max = 2, step = 0.05,
-                get = function(info) return SkinsDB.uiModScale end,
+                get = function(info) return SkinsProfile.uiModScale end,
                 set = function(info, value)
-                    SkinsDB.uiModScale = value
+                    SkinsProfile.uiModScale = value
                     RealUI.PreviewModScale()
                 end,
                 order = 24,
             },
-            addons = addons
+            addons = addons,
+            profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
     }
 end

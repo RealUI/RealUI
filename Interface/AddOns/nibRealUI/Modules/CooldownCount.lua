@@ -171,7 +171,7 @@ end
 
 function CooldownCount:OnEnable()
     CD_FONT = {
-        font = RealUI:GetAddOnDB("RealUI_Skins").fonts.normal,
+        font = RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.normal,
         size = 10,
         flags = "OUTLINE"
     }

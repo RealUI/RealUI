@@ -139,6 +139,16 @@ end
 function private.OnLoad()
     --print("OnLoad Aurora", Aurora, private.Aurora)
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
+    skinsDB:RegisterCallback("OnProfileChanged", function(db, newProfile)
+        RealUI:ReloadUIDialog()
+    end)
+    skinsDB:RegisterCallback("OnProfileCopied", function(db, sourceProfile)
+        RealUI:ReloadUIDialog()
+    end)
+    skinsDB:RegisterCallback("OnProfileReset", function(db)
+        RealUI:ReloadUIDialog()
+    end)
+
     private.skinsDB = skinsDB.profile
 
     -- Transfer settings
@@ -265,7 +275,7 @@ function private.OnLoad()
     end
 
     function private.AddOns.nibRealUI()
-        RealUI:RegisterAddOnDB(ADDON_NAME, private.skinsDB)
+        RealUI:RegisterAddOnDB(ADDON_NAME, skinsDB)
         if _G.nibRealUIDB.profiles.RealUI then
             local profile = _G.nibRealUIDB.profiles.RealUI
             if profile.media.font then
