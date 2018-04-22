@@ -6,10 +6,13 @@ local next, ipairs = _G.next, _G.ipairs
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
+local Aurora = _G.Aurora
+local Base = Aurora.Base
 
 -- RealUI --
 local RealUI = private.RealUI
-local db
+local Scale = RealUI.Scale
+local db, ndb
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
@@ -19,7 +22,7 @@ Infobar.locked = true
 local MOVING_BLOCK
 local blocksByData = {}
 local orderedBlocks = {}
-local BAR_HEIGHT = RealUI.ModValue(16)
+local BAR_HEIGHT = 16
 local blockFont
 
 local function IsCombatBlocked()
@@ -39,7 +42,7 @@ local function PrepareTooltip(tooltip, block)
         end
         local anchor = block.side:upper()
         Infobar:debug("SetPoint", anchor)
-        tooltip:SetPoint(("BOTTOM"..anchor), block, ("TOP"..anchor))
+        Scale.Point(tooltip, ("BOTTOM"..anchor), block, ("TOP"..anchor))
     end
 end
 
@@ -111,7 +114,7 @@ function BlockMixin:OnDragStart(button)
     x = x - (self:GetWidth()/2);
     y = y - (self:GetHeight()/2);
     self:ClearAllPoints();
-    self:SetPoint("TOPLEFT", "UIParent", "BOTTOMLEFT", x, y);
+    Scale.Point(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y);
     self:StartMoving();
     MOVING_BLOCK = self;
 end
@@ -217,35 +220,30 @@ function BlockMixin:RestorePosition()
 end
 
 function BlockMixin:AdjustElements(blockInfo)
-    local font, size, outline = blockFont.font, blockFont.size, blockFont.outline
-    local space = RealUI.ModValue(2)
+    local font, size, outline = blockFont.font, Scale.Value(blockFont.size), blockFont.outline
+    local space = 2
     local width = space
 
-    self.text:SetPoint("RIGHT", -space, 0)
+    Scale.Point(self.text, "RIGHT", -space, 0)
     self.text:SetFont(font, size, outline)
-    width = width + space + self.text:GetStringWidth()
+    width = Scale.Value(width + space) + self.text:GetStringWidth()
 
     if self.icon then
         if blockInfo.showIcon then
-            self.icon:SetPoint("LEFT", space, 0)
+            Scale.Point(self.icon, "LEFT", space, 0)
             self.icon:Show()
             local iconWidth
             if self.icon.isFont then
                 local iconFont = self.dataObj.iconFont
                 self.icon:SetFont(iconFont.font, size, outline)
-                if outline == "OUTLINE" then
-                    -- Outlined font icons are too wide for their visual
-                    iconWidth = self.icon:GetStringWidth() - space
-                else
-                    iconWidth = self.icon:GetStringWidth()
-                end
+                iconWidth = self.icon:GetStringWidth() -- Scale.Value(space)
             else
                 self.icon:SetSize(size, size)
                 iconWidth = size
             end
 
             self.checkWidth = iconWidth < 1
-            width = width + space + iconWidth
+            width = width + Scale.Value(space) + iconWidth
             Infobar:debug("icon", width)
         else
             self.icon:Hide()
@@ -256,19 +254,19 @@ function BlockMixin:AdjustElements(blockInfo)
         if self.icon and blockInfo.showIcon then
             self.label:SetPoint("LEFT", self.icon, "RIGHT", 0, 0)
         else
-            self.label:SetPoint("LEFT", space, 0)
+            Scale.Point(self.label, "LEFT", space, 0)
         end
 
         self.label:SetFont(font, size, outline)
         self.label:Show()
-        width = width + space + self.label:GetStringWidth()
+        width = width + Scale.Value(space) + self.label:GetStringWidth()
         Infobar:debug("label", self.dataObj.label, width)
     else
         self.label:Hide()
     end
 
     self:SetWidth(width)
-    self:SetHeight(BAR_HEIGHT)
+    Scale.Height(self, BAR_HEIGHT)
 end
 
 local function SortBlocks(block1, block2)
@@ -316,7 +314,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
         else
             icon = block:CreateTexture(nil, "ARTWORK")
             icon:SetTexture(dataObj.icon)
-            icon:SetSize(size, size)
+            Scale.Size(icon, size, size)
             if dataObj.iconR then
                 icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
             end
@@ -333,12 +331,11 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     label:SetText(dataObj.label or dataObj.name)
     block.label = label
 
-    local r, g, b = RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3]
     local highlight = block:CreateTexture(nil, "ARTWORK")
-    highlight:SetColorTexture(r, g, b)
-    highlight:SetHeight(1)
-    highlight:SetPoint("BOTTOMLEFT")
-    highlight:SetPoint("BOTTOMRIGHT")
+    highlight:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
+    Scale.Height(highlight, 1)
+    Scale.Point(highlight, "BOTTOMLEFT")
+    Scale.Point(highlight, "BOTTOMRIGHT")
     highlight:Hide()
     block:SetHighlightTexture(highlight)
     block.highlight = highlight
@@ -507,14 +504,14 @@ end
 ---------------------
 local DockMixin = {}
 function DockMixin:OnLoad()
-    self:SetHeight(BAR_HEIGHT)
+    Scale.Height(self, BAR_HEIGHT)
     self.anchor = "BOTTOM" .. self.side:upper()
     self.anchorAlt = "BOTTOM" .. self.alt:upper()
-    self:SetPoint(self.anchor)
-    self:SetPoint(self.anchorAlt, Infobar.frame, "BOTTOM")
+    Scale.Point(self, self.anchor)
+    Scale.Point(self, self.anchorAlt, Infobar.frame, "BOTTOM")
 
     self.insertHighlight = self:CreateTexture(nil, "ARTWORK")
-    self.insertHighlight:SetSize(1, BAR_HEIGHT)
+    Scale.Size(self.insertHighlight, 1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
     self.DOCKED_BLOCKS = {};
@@ -635,9 +632,9 @@ function DockMixin:UpdateBlocks(forceUpdate)
 
         if ( lastBlock ) then
             local xOfs = self.side == "left" and db.blockGap or -db.blockGap
-            block:SetPoint(self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
+            Scale.Point(block, self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
         else
-            block:SetPoint(self.anchor);
+            Scale.Point(block, self.anchor);
         end
         lastBlock = block
     end
@@ -679,7 +676,7 @@ function DockMixin:PlaceInsertHighlight(mouseX, mouseY)
     end
 
     self.insertHighlight:ClearAllPoints();
-    self.insertHighlight:SetPoint(self.anchor, attachFrame, self.anchorAlt, 0, 0);
+    Scale.Point(self.insertHighlight, self.anchor, attachFrame, self.anchorAlt, 0, 0);
     self.insertHighlight:Show();
 end
 
@@ -692,32 +689,24 @@ end
 --------------------
 function Infobar:CreateBar()
     local frame = _G.CreateFrame("Frame", "RealUI_Infobar", _G.UIParent)
-    frame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
-    frame:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
-    frame:SetHeight(BAR_HEIGHT)
+    Scale.Point(frame, "BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
+    Scale.Point(frame, "BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
+    Scale.Height(frame, BAR_HEIGHT)
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)
     RealUI.RegisterModdedFrame(frame, function(this)
-        BAR_HEIGHT = RealUI.ModValue(16)
-        this:SetHeight(BAR_HEIGHT)
-
-        blockFont.size = RealUI.ModValue(9)
+        Scale.Height(this, BAR_HEIGHT)
         for index, block in Infobar:IterateBlocks() do
             local blockInfo = Infobar:GetBlockInfo(block.name)
             if block.AdjustElements then block:AdjustElements(blockInfo) end
         end
+
+        ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
+        ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
     end)
 
-    -- Background
-    frame:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        edgeSize = 1,
-    })
-    frame:SetBackdropBorderColor(0, 0, 0, db.bgAlpha)
-    frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], db.bgAlpha)
-
     -- Stripes
+    Base.SetBackdrop(frame, nil, db.bgAlpha)
     local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
     tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
     tex:SetAlpha(db.bgAlpha * 0.6)
@@ -736,28 +725,28 @@ function Infobar:CreateBar()
 
     local mainBar = watch.main:GetStatusBarTexture()
     watch.main.rested = watch.main:CreateTexture(nil, "ARTWORK")
-    watch.main.rested:SetPoint("TOPLEFT", mainBar, "TOPRIGHT")
+    Scale.Point(watch.main.rested, "TOPLEFT", mainBar, "TOPRIGHT")
     watch.main.rested:Hide()
     for i = 1, 2 do
         local bar = _G.CreateFrame("StatusBar", nil, frame)
         bar:SetStatusBarTexture(RealUI.media.textures.plain)
-        bar:SetHeight(1)
+        Scale.Height(bar, 1)
         bar:SetFrameLevel(watch.main:GetFrameLevel() + 1)
         bar:Hide()
 
         local bg = bar:CreateTexture(nil, "BACKGROUND")
         bg:SetColorTexture(0, 0, 0)
-        bg:SetPoint("TOPLEFT", bar, -1, 1)
-        bg:SetPoint("BOTTOMRIGHT", bar, 1, -1)
+        Scale.Point(bg, "TOPLEFT", bar, -1, 1)
+        Scale.Point(bg, "BOTTOMRIGHT", bar, 1, -1)
         bar.bg = bg
 
         watch[i] = bar
     end
-    watch[1]:SetPoint("BOTTOMLEFT", watch.main, "TOPLEFT", 0, -1)
-    watch[1]:SetPoint("BOTTOMRIGHT", watch.main, "TOPRIGHT", 0, -1)
+    Scale.Point(watch[1], "BOTTOMLEFT", watch.main, "TOPLEFT", 0, -1)
+    Scale.Point(watch[1], "BOTTOMRIGHT", watch.main, "TOPRIGHT", 0, -1)
 
-    watch[2]:SetPoint("BOTTOMLEFT", watch.main, "TOPLEFT", 0, 1)
-    watch[2]:SetPoint("BOTTOMRIGHT", watch.main, "TOPRIGHT", 0, 1)
+    Scale.Point(watch[2], "BOTTOMLEFT", watch.main, "TOPLEFT", 0, 1)
+    Scale.Point(watch[2], "BOTTOMRIGHT", watch.main, "TOPRIGHT", 0, 1)
 
     frame.watch = watch
 
@@ -819,10 +808,8 @@ function Infobar:SettingsUpdate(setting, block)
         end
         block:OnEvent("SettingsUpdate")
     elseif setting == "bgAlpha" then
-        self.frame:SetBackdropBorderColor(0, 0, 0, db.bgAlpha)
-        self.frame:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], db.bgAlpha)
-        self.frame.tex:SetAlpha(db.bgAlpha * 0.55)
-
+        Base.SetBackdropColor(self.frame, nil, db.bgAlpha)
+        self.frame.tex:SetAlpha(db.bgAlpha * 0.6)
         self.frame.watch:UpdateColors()
 
         local outline = self:GetFontOutline()
@@ -868,7 +855,7 @@ end
 --------------------
 function Infobar:OnInitialize()
     local specgear = {}
-    for specIndex = 1, RealUI.numSpecs do
+    for specIndex = 1, #RealUI.charInfo.specs do
         specgear[specIndex] = -1
     end
     self.db = RealUI.db:RegisterNamespace(MODNAME)
@@ -972,18 +959,18 @@ function Infobar:OnInitialize()
         end
     end
 
-    local font = RealUI.db.profile.media.font.chat
-    blockFont = {
-        font = font[4],
-        size = RealUI.ModValue(9),
-        outline = self:GetFontOutline()
-    }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function Infobar:OnEnable()
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
+
+    blockFont = {
+        font = RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.chat,
+        size = RealUI.Round(BAR_HEIGHT * 0.6),
+        outline = self:GetFontOutline()
+    }
 
     self:CreateBar()
     self:CreateBlocks()
@@ -995,6 +982,7 @@ function Infobar:OnEnable()
     end
 
     -- Adjust ActionBar positions
-    local ndb = RealUI.db.profile
-    ndb.positions[RealUI.cLayout]["ActionBarsBotY"] = BAR_HEIGHT -- self.frame:GetTop()
+    ndb = RealUI.db.profile
+    ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
+    ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
 end

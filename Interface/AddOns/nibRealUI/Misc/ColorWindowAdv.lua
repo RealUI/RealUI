@@ -5,7 +5,8 @@ local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
-
+local Skin = _G.Aurora.Skin
+local Color = _G.Aurora.Color
 
 local CPF, OSF = _G.ColorPickerFrame, _G.OpacitySliderFrame
 
@@ -26,6 +27,7 @@ CPF.swatchBG:SetSize(48, 48)
 CPF.swatchBG:SetPoint("TOPLEFT", _G.ColorPickerWheel, "TOPRIGHT", 87, 0)
 CPF.swatchBG:SetHorizTile(true)
 CPF.swatchBG:SetVertTile(true)
+CPF.swatchBG:SetDesaturated(true)
 
 CPF.prevSwatch = CPF:CreateTexture(nil, "ARTWORK", nil, -3)
 CPF.prevSwatch:SetSize(32, 32)
@@ -33,43 +35,57 @@ CPF.prevSwatch:SetPoint("TOPRIGHT", CPF.swatchBG, "TOPRIGHT", 0, 0)
 
 -- Copy
 local red, green, blue, opacity
-local CPFCopyButton = RealUI:CreateTextButton("Copy", CPF, 60, 22)
+local CPFCopyButton = _G.CreateFrame("Button", nil, CPF, "UIPanelButtonTemplate")
+Skin.UIPanelButtonTemplate(CPFCopyButton)
 CPFCopyButton:SetPoint("TOP", CPF.swatchBG, "BOTTOM", 0, -5)
+CPFCopyButton:SetSize(60, 22)
+CPFCopyButton:SetText(_G.CALENDAR_COPY_EVENT)
 CPFCopyButton:SetScript("OnClick", function()
     red, green, blue = CPF:GetColorRGB()
     opacity = OSF:GetValue()
 
-    CPFCopyButton:SetText(("|cff%02x%02x%02xCopy"):format(red * 255, green * 255, blue * 255))
+    CPFCopyButton:SetFormattedText("|cff%sCopy", RealUI.GetColorString(red, blue, green))
 end)
+RealUI:RegisterSkinnedFrame(CPFCopyButton, Color.button)
 
 -- Paste
-local CPFPasteButton = RealUI:CreateTextButton("Paste", CPF, 60, 22)
+local CPFPasteButton = _G.CreateFrame("Button", nil, CPF, "UIPanelButtonTemplate")
+Skin.UIPanelButtonTemplate(CPFPasteButton)
 CPFPasteButton:SetPoint("TOP", CPFCopyButton, "BOTTOM", 0, -5)
+CPFPasteButton:SetSize(60, 22)
+CPFPasteButton:SetText(_G.CALENDAR_PASTE_EVENT)
 CPFPasteButton:SetScript("OnClick", function()
     CPF:SetColorRGB(red, green, blue)
     OSF:SetValue(opacity)
 end)
+RealUI:RegisterSkinnedFrame(CPFPasteButton, Color.button)
 
 -- Saturation slider.
-local UpdateCPFHSV = function(self)
-    local s = self:GetValue()
-    local h, _, v = CPF:GetColorHSV()
-    CPF:SetColorHSV(h, s, v)
-end
-
+-- /dump ColorPickerFrame:GetColorHSV()
+-- /dump ColorPickerFrame:GetColorRGB()
 local CPFSaturation = _G.CreateFrame("Slider", "CWA_SatSlider", CPF, "OptionsSliderTemplate")
+Skin.OptionsSliderTemplate(CPFSaturation)
 CPFSaturation:SetMinMaxValues(0, 1)
 CPFSaturation:SetValueStep(.05)
 CPFSaturation:SetOrientation("VERTICAL")
-CPFSaturation:SetThumbTexture([[Interface\Buttons\UI-SliderBar-Button-Vertical]])
+CPFSaturation:GetThumbTexture():SetSize(16, 8)
 CPFSaturation:SetHeight(OSF:GetHeight())
 CPFSaturation:SetWidth(OSF:GetWidth())
 CPFSaturation:SetPoint("TOPRIGHT", CPF.swatchBG, "TOPLEFT", -12, 0)
 _G["CWA_SatSliderLow"]:ClearAllPoints()
 _G["CWA_SatSliderHigh"]:ClearAllPoints()
 _G["CWA_SatSliderText"]:ClearAllPoints()
-CPFSaturation:SetScript("OnValueChanged", UpdateCPFHSV)
+CPFSaturation:SetScript("OnValueChanged", function(self)
+    local s = self:GetValue()
+    local h, _, v = CPF:GetColorHSV()
+    CPF:SetColorHSV(h % 360, s, v)
+end)
+local satThumb = CPFSaturation._auroraThumb
+RealUI:RegisterSkinnedFrame(satThumb, Color.button)
+RealUI:RegisterSkinnedFrame(satThumb:GetParent(), Color.frame)
 
+RealUI:RegisterSkinnedFrame(_G.ColorPickerOkayButton, Color.button)
+RealUI:RegisterSkinnedFrame(_G.ColorPickerCancelButton, Color.button)
 
 local CPFEditBoxes = {
     Red = 0,
@@ -115,7 +131,7 @@ local UpdateRGBA = function()
     CPFEditBoxes.Red:SetText(r * 255)
     CPFEditBoxes.Green:SetText(g * 255)
     CPFEditBoxes.Blue:SetText(b * 255)
-    CPFEditBoxes.Hex:SetText(("%02x%02x%02x"):format(r * 255, g * 255, b * 255))
+    CPFEditBoxes.Hex:SetText(RealUI.GetColorString(r, g, b))
 
     if CPF.hasOpacity then
         _G.ColorSwatch:SetColorTexture(r, g, b, 1 - OSF:GetValue())
@@ -129,34 +145,20 @@ local UpdateRGBA = function()
 end
 
 for type, offsetFactor in next, CPFEditBoxes do
-    local editbox = _G.CreateFrame("EditBox", nil, CPF)
-    editbox:SetHeight(15)
-    editbox:SetWidth(50)
+    local editbox = _G.CreateFrame("EditBox", nil, CPF, "InputBoxTemplate")
+    Skin.InputBoxTemplate(editbox)
+    editbox:SetSize(50, 15)
     editbox:SetPoint("BOTTOMLEFT", (70 * offsetFactor) + 13, 34)
-
-    editbox:SetBackdrop({
-        bgFile = [[Interface\ChatFrame\ChatFrameBackground]],
-    })
-    editbox:SetBackdropColor(0, 0, 0, .5)
-
-    editbox:SetFontObject(_G.ChatFontNormal)
     editbox:SetAutoFocus(false)
-    editbox:SetJustifyH("CENTER")
+    RealUI:RegisterSkinnedFrame(editbox:GetChildren(), Color.frame)
 
-    editbox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
     editbox:SetScript("OnEnterPressed", function(self)
         UpdateCPFRGB(self)
         self:ClearFocus()
     end)
-    editbox:SetScript("OnEditFocusGained", function(self)
-        self:HighlightText(0, self:GetNumLetters())
-    end)
-    editbox:SetScript("OnEditFocusLost", function(self)
-        self:HighlightText(self:GetNumLetters())
-    end)
 
     local title = editbox:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    title:SetPoint("RIGHT", editbox, "LEFT", 0, 0)
+    title:SetPoint("RIGHT", editbox, "LEFT", -5, 0)
     if type == "Hex" then
         editbox:SetMaxLetters(6)
         title:SetText("#")
@@ -188,12 +190,6 @@ end)
 CPF:HookScript("OnShow", function(self)
     --print("CPF:OnShow")
     if not CPF.moved then
-        if _G.Aurora then
-            local F = _G.Aurora[1]
-            F.Reskin(CPFCopyButton)
-            F.Reskin(CPFPasteButton)
-            F.ReskinSlider(CPFSaturation, true)
-        end
         _G.ColorSwatch:ClearAllPoints()
         _G.ColorSwatch:SetPoint("BOTTOMLEFT", CPF.swatchBG, "BOTTOMLEFT", 0, 0)
         CPF:SetHeight(210)

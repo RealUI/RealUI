@@ -37,7 +37,7 @@ local other do
                 type = "execute",
                 func = function(info, ...)
                     RealUI.Debug("Config", "Config Bar")
-                    RealUI:LoadConfig("RealUI")
+                    RealUI.LoadConfig("RealUI")
                 end,
                 order = 0,
             },
@@ -1270,7 +1270,7 @@ local classresource do
                         name = L["Resource_HideUnused"]:format(points.name),
                         desc = L["Resource_HideUnusedDesc"]:format(points.name),
                         type = "toggle",
-                        hidden = RealUI.class == "DEATHKNIGHT",
+                        hidden = RealUI.charInfo.class.token == "DEATHKNIGHT",
                         get = function(info) return pointDB.hideempty end,
                         set = function(info, value)
                             pointDB.hideempty = value
@@ -1293,7 +1293,7 @@ local classresource do
                     width = {
                         name = L["HuD_Width"],
                         type = "input",
-                        hidden = RealUI.class ~= "DEATHKNIGHT",
+                        hidden = RealUI.charInfo.class.token ~= "DEATHKNIGHT",
                         get = function(info) return tostring(pointDB.size.width) end,
                         set = function(info, value)
                             pointDB.size.width = value
@@ -1304,7 +1304,7 @@ local classresource do
                     height = {
                         name = L["HuD_Height"],
                         type = "input",
-                        hidden = RealUI.class ~= "DEATHKNIGHT",
+                        hidden = RealUI.charInfo.class.token ~= "DEATHKNIGHT",
                         get = function(info) return tostring(pointDB.size.height) end,
                         set = function(info, value)
                             pointDB.size.height = value
@@ -1316,7 +1316,7 @@ local classresource do
                         name = L["Resource_Gap"],
                         desc = L["Resource_GapDesc"]:format(points.name),
                         type = "input",
-                        hidden = RealUI.class == "PALADIN",
+                        hidden = RealUI.charInfo.class.token == "PALADIN",
                         get = function(info) return tostring(pointDB.size.gap) end,
                         set = function(info, value)
                             value = RealUI:ValidateOffset(value)

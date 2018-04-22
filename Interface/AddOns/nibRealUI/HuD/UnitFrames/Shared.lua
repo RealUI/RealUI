@@ -44,13 +44,13 @@ local function CreateSteps(parent, height, info)
         local s = parent:CreateAngle("Frame", nil, parent.overlay)
         s:SetSize(2, stepHeight)
         s:SetAngleVertex(leftVertex, rightVertex)
-        s:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+        s:SetBackgroundColor(.5, .5, .5)
         step[i] = s
 
         local w = parent:CreateAngle("Frame", nil, parent.overlay)
         w:SetSize(2, height)
         w:SetAngleVertex(leftVertex, rightVertex)
-        w:SetBackgroundColor(.5, .5, .5, RealUI.media.background[4])
+        w:SetBackgroundColor(.5, .5, .5)
         warn[i] = w
     end
     return step, warn
@@ -59,7 +59,7 @@ local function PositionSteps(self, vert)
     local width, height = self:GetSize()
     local isRight = self:GetReverseFill()
     local point, relPoint = vert..(isRight and "RIGHT" or "LEFT"), vert..(isRight and "LEFT" or "RIGHT")
-    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
     for i = 1, 2 do
         local xOfs = round(stepPoints[i] * (width - 10))
         if self:GetReversePercent() then
@@ -77,8 +77,8 @@ local function UpdateSteps(self, unit, cur, max)
     UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)
-    local percent = RealUI:GetSafeVals(cur, max)
-    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.class] or UnitFrames.steppoints.default
+    local percent = RealUI.GetSafeVals(cur, max)
+    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
     for i = 1, 2 do
         --print(percent, unit, cur, max, self.colorClass)
         if self:GetReversePercent() then
@@ -118,7 +118,7 @@ local function CreateHealthBar(parent, info)
     if info.text then
         Health.text = Health:CreateFontString(nil, "OVERLAY")
         Health.text:SetPoint("BOTTOM"..info.point, Health, "TOP"..info.point, 2, 2)
-        Health.text:SetFontObject(_G.RealUIFont_Pixel)
+        Health.text:SetFontObject("SystemFont_Shadow_Med1")
         parent:Tag(Health.text, "[realui:health]")
     end
 
@@ -134,9 +134,9 @@ local function CreateHealthBar(parent, info)
 end
 local CreateHealthStatus do
     local classification = {
-        rareelite = {1, 0.5, 0},
-        elite = {1, 1, 0},
-        rare = {0.75, 0.75, 0.75},
+        rareelite = {r=1, g=0.5, b=0},
+        elite = {r=1, g=1, b=0},
+        rare = {r=0.75, g=0.75, b=0.75},
     }
 
     local function UpdatePvP(self, event, unit)
@@ -150,13 +150,12 @@ local CreateHealthStatus do
             color = self.colors.reaction[reaction]
             PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         else
-            color = RealUI.media.background
-            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            PvPIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
         end
     end
     local function UpdateClassification(self, event)
-        local color = classification[_G.UnitClassification(self.unit)] or RealUI.media.background
-        self.Classification:SetBackgroundColor(color[1], color[2], color[3], color[4])
+        local color = classification[_G.UnitClassification(self.unit)] or _G.Aurora.Color.frame
+        self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
     function CreateHealthStatus(parent, info)
@@ -317,7 +316,7 @@ local function CreatePowerBar(parent, info)
 
     Power.text = Power:CreateFontString(nil, "OVERLAY")
     Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
-    Power.text:SetFontObject(_G.RealUIFont_Pixel)
+    Power.text:SetFontObject("SystemFont_Shadow_Med1")
     parent:Tag(Power.text, "[realui:power]")
 
     Power.step, Power.warn = CreateSteps(parent, height, info)
@@ -382,8 +381,7 @@ local CreatePowerStatus do
         end
 
         if self.LeaderIndicator.status and not self.CombatIndicator.status then
-            color = RealUI.media.background
-            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
             self.CombatIndicator:Show()
         elseif self.CombatIndicator.status then
             color = status[self.CombatIndicator.status]

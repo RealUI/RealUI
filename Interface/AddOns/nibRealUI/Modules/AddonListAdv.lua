@@ -12,6 +12,7 @@ local MODNAME = "AddonListAdv"
 local AddonListAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
+local classInfo
 
 local function OnSaveAs(self)
     local popup;
@@ -45,18 +46,47 @@ _G.StaticPopupDialogs["ALA_SaveAs"] = {
     preferredIndex = 3,
 }
 
+local RealUISet = {
+    name = "RealUI",
+    "BadBoy",
+    "BadBoy_CCleaner",
+    "BadBoy_Guilded",
+    "Bartender4",
+    "cargBags_Nivaya",
+    "EasyMail",
+    "FreebTip",
+    "Grid2",
+    "Grid2Options",
+    "Grid2RaidDebuffs",
+    "Grid2RaidDebuffsOptions",
+    "Kui_Nameplates",
+    "Kui_Nameplates_Core",
+    "Masque",
+    "MikScrollingBattleText",
+    "MSBTOptions",
+    "nibRealUI",
+    "nibRealUI_Config",
+    "Raven",
+    "Raven_Options",
+    "RealUI_Bugs",
+    "RealUI_Skins",
+    "Skada",
+}
+
 --------------
 ---- Sets ----
 --------------
 local function GetSet(name)
     --print("GetSet", name)
-    local set, db
-    if name == RealUI.classLocale then
+    if name == "RealUI" then
+        return RealUISet
+    elseif name == classInfo.locale then
         if not dbk[1] then
-            dbk[1] = {["name"] = RealUI.classLocale}
+            dbk[1] = {["name"] = classInfo.locale}
         end
-        set = dbk[1]
+        return dbk[1]
     else
+        local set, db
         for k, v in next, {dbg, dbc} do
             local setIndex = 0
             repeat
@@ -69,8 +99,8 @@ local function GetSet(name)
                 break
             end
         end
+        return set, db
     end
-    return set, db
 end
 
 function AddonListAdv:SaveSet(name, newName)
@@ -206,6 +236,24 @@ function AddonListAdv.SetDropDown_Populate(menu, level)
         info.disabled = false
         info.hasArrow = true
         local count
+
+        --[[ RealUI Set ]]
+        count = #RealUISet
+        info.text = ("%s (%d)"):format(RealUISet.name, count)
+        info.value = RealUISet.name
+        _G.Lib_UIDropDownMenu_AddButton(info)
+
+        --[[ Class Set ]]
+        if dbk and dbk[1] then
+            count = #dbk[1]
+        else
+            count = 0
+        end
+
+        info.text = ("%s (%d)"):format(classInfo.locale, count)
+        info.value = classInfo.locale
+        _G.Lib_UIDropDownMenu_AddButton(info)
+
         for i = 1, #dbg do
             --print("SetDropDown_Populate", i, dbg[i])
 
@@ -218,19 +266,6 @@ function AddonListAdv.SetDropDown_Populate(menu, level)
             info.text = ("%s (%d)"):format(dbg[i].name, count)
             info.value = dbg[i].name
             _G.Lib_UIDropDownMenu_AddButton(info)
-
-            if i == 1 then
-                -- insert class set after RealUI
-                if dbk and dbk[1] then
-                    count = #dbk[1]
-                else
-                    count = 0
-                end
-
-                info.text = ("%s (%d)"):format(RealUI.classLocale, count)
-                info.value = RealUI.classLocale
-                _G.Lib_UIDropDownMenu_AddButton(info)
-            end
         end
 
         --[[ Character Sets ]]
@@ -293,7 +328,7 @@ function AddonListAdv.SetDropDown_Populate(menu, level)
         info.func = function() self:UnloadSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
         _G.Lib_UIDropDownMenu_AddButton(info, level)
 
-        if _G.UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= RealUI.classLocale then
+        if _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= classInfo.locale then
             info.text = "Delete"
             info.func = function() self:DeleteSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
             _G.Lib_UIDropDownMenu_AddButton(info, level)
@@ -334,41 +369,31 @@ function AddonListAdv:OnInitialize()
         class = {
         },
         global = {
-            {
-                name = "RealUI",
-                "!Aurora_RealUI",
-                "!BugGrabber",
-                "Aurora",
-                "BadBoy",
-                "BadBoy_CCleaner",
-                "BadBoy_Guilded",
-                "Bartender4",
-                "BugSack",
-                "cargBags_Nivaya",
-                "EasyMail",
-                "FreebTip",
-                "FreebTipiLvl",
-                "FreebTipSpec",
-                "Grid2",
-                "Grid2Options",
-                "Grid2RaidDebuffs",
-                "Grid2RaidDebuffsOptions",
-                "Kui_Nameplates",
-                "Kui_Nameplates_Auras",
-                "Masque",
-                "MikScrollingBattleText",
-                "MSBTOptions",
-                "nibRealUI",
-                "Raven",
-                "Raven_Options",
-                "SharedMedia",
-                "Skada",
-            },
         },
     })
     dbc = self.db.char
     dbk = self.db.class
     dbg = self.db.global
+
+    if dbg[1] and dbg[1].name == "RealUI" then
+        dbg[1] = nil
+    end
+
+    classInfo = RealUI.charInfo.class
+
+    if RealUI.isDev then
+        local function AddOptDeps(optDeps)
+            for i = 1, #optDeps do
+                RealUISet[#RealUISet + 1] = optDeps[i]
+            end
+        end
+
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Bugs")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Skins")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI_Config")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("FreebTip")})
+    end
 
     self:SetEnabledState(true)
     self:RegisterEvent("PLAYER_LOGIN")
@@ -376,6 +401,7 @@ end
 
 function AddonListAdv:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    _G.UIDropDownMenu_SetSelectedValue(_G.AddonCharacterDropDown, RealUI.charInfo.name)
 
     if LoggedIn then self:RefreshMod() end
 end

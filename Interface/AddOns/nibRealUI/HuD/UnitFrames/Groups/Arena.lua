@@ -82,13 +82,13 @@ end
 local function CreateTags(parent)
     parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.HealthValue:SetPoint("TOPLEFT", 2.5, -6.5)
-    parent.HealthValue:SetFontObject(_G.RealUIFont_Pixel)
+    parent.HealthValue:SetFontObject("SystemFont_Shadow_Med1")
     parent.HealthValue:SetJustifyH("LEFT")
     parent:Tag(parent.HealthValue, "[realui:healthPercent]")
 
     parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
     parent.Name:SetPoint("TOPRIGHT", -0.5, -6.5)
-    parent.Name:SetFontObject(_G.RealUIFont_Pixel)
+    parent.Name:SetFontObject("SystemFont_Shadow_Med1")
     parent.Name:SetJustifyH("RIGHT")
     parent:Tag(parent.Name, "[realui:name]")
 end
@@ -154,7 +154,7 @@ local function CreateTrinket(parent)
     F.CreateBDFrame(trinket.timer)
 
     trinket.text = trinket:CreateFontString(nil, "OVERLAY")
-    trinket.text:SetFontObject(_G.RealUIFont_PixelSmall)
+    trinket.text:SetFontObject("NumberFont_Outline_Med")
     trinket.text:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1.5, 4)
     trinket.text:SetJustifyH("LEFT")
 

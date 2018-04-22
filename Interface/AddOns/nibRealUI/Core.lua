@@ -3,9 +3,6 @@ local ADDON_NAME, private = ...
 -- Lua Globals --
 local next, type = _G.next, _G.type
 
--- Libs --
-local C = _G.Aurora[2]
-
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
@@ -23,51 +20,8 @@ for word, letter in _G.GetAddOnMetadata(ADDON_NAME, "Version"):gmatch("(%d+)(%a*
     end
 end
 
-if not _G.REALUI_STRIPE_TEXTURES then _G.REALUI_STRIPE_TEXTURES = {} end
-if not _G.REALUI_WINDOW_FRAMES then _G.REALUI_WINDOW_FRAMES = {} end
-
 RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
-
--- Localized Fonts
-do
-    local LSM = _G.LibStub("LibSharedMedia-3.0")
-    local lsmFonts = LSM:List("font")
-    local function findFont(font, backup)
-        local fontPath, fontSize, fontArgs = font:GetFont()
-        if not fontPath then
-            fontPath, fontSize, fontArgs = backup:GetFont()
-            font:SetFont(fontPath, fontSize, fontArgs)
-        end
-        local fontName, path
-        for i = 1, #lsmFonts do
-            fontName = lsmFonts[i]
-            path = LSM:Fetch("font", fontName)
-            if path == fontPath then
-                local tab = {
-                    fontName,
-                    fontSize,
-                    fontArgs,
-                    fontPath,
-                }
-                return tab
-            end
-        end
-    end
-    local fonts = {
-        standard = findFont(_G.RealUIFont_Normal, _G.SystemFont_Small),
-        chat = findFont(_G.RealUIFont_Chat, _G.NumberFont_Normal_Med),
-        crit = findFont(_G.RealUIFont_Crit, _G.NumberFont_Outline_Huge),
-        header = findFont(_G.RealUIFont_Header, _G.QuestFont_Huge),
-        pixel = {
-            small =    findFont(_G.RealUIFont_PixelSmall, _G.SystemFont_Small),
-            large =    findFont(_G.RealUIFont_PixelLarge, _G.SystemFont_Med1),
-            numbers =  findFont(_G.RealUIFont_PixelNumbers, _G.SystemFont_Large),
-            cooldown = findFont(_G.RealUIFont_PixelCooldown, _G.SystemFont_Large),
-        }
-    }
-    RealUI.media.font = fonts
-end
 
 RealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
@@ -136,8 +90,8 @@ local defaults, charInit do
         needchatmoved = true,
     }
     local spec = {}
-    for specIndex = 1, RealUI.numSpecs do
-        local _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
+    for specIndex = 1, #RealUI.charInfo.specs do
+        local _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.charInfo.class.id, specIndex)
         debug("Spec info", specIndex, role)
         spec[specIndex] = role == "HEALER" and 2 or 1
     end
@@ -186,7 +140,6 @@ local defaults, charInit do
             settings = {
                 powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
                 fontStyle = 2,
-                stripeOpacity = 0.5,
                 hudSize = 1,
                 reverseUnitFrameBars = false,
             },
@@ -253,31 +206,6 @@ function RealUI:SetPowerMode(val)
     for k, mod in self:IterateModules() do
         if self:GetModuleEnabled(k) and mod.SetUpdateSpeed and type(mod.SetUpdateSpeed) == "function" then
             mod:SetUpdateSpeed()
-        end
-    end
-end
-
----- Style Updates ----
-function RealUI:StyleSetWindowOpacity()
-    if RealUI.isAuroraUpdated then
-        local r, g, b = _G.Aurora.frameColor:GetRGB()
-        for i = 1, #C.frames do
-            C.frames[i]:SetBackdropColor(r, g, b, _G.AuroraConfig.alpha)
-        end
-    else
-        local color = RealUI.media.window
-        for k, frame in next, _G.REALUI_WINDOW_FRAMES do
-            if frame.SetBackdropColor then
-                frame:SetBackdropColor(color[1], color[2], color[3], color[4])
-            end
-        end
-    end
-end
-
-function RealUI:StyleSetStripeOpacity()
-    for k, tex in next, _G.REALUI_STRIPE_TEXTURES do
-        if tex.SetAlpha then
-            tex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
         end
     end
 end
@@ -382,10 +310,12 @@ function RealUI:InitCurrencyDB()
     if not RealUI.realmNormalized then
         local DB = RealUI.db.global.currency
 
-        RealUI.realmNormalized = _G.GetNormalizedRealmName()
-        local realm   = RealUI.realmNormalized
-        local faction = RealUI.faction
-        local player  = RealUI.charName
+        local charInfo = RealUI.charInfo
+        charInfo.realmNormalized = _G.GetNormalizedRealmName()
+
+        local realm   = charInfo.realmNormalized
+        local faction = charInfo.faction
+        local player  = charInfo.name
 
         if not DB[realm] then
             DB[realm] = {}
@@ -418,13 +348,22 @@ function RealUI:InitCurrencyDB()
                 realmDB[player] = {}
             end
             local charDB = realmDB[player]
-            charDB.class = RealUI.class
+            charDB.class = charInfo.class.token
             charDB.lastSeen = now
         else
             DB[realm][faction] = nil
         end
     end
 end
+
+local function UpdateSpec()
+    local old = RealUI.charInfo.specs.current.index
+    local new = _G.GetSpecialization()
+    if old ~= new then
+        RealUI.charInfo.specs.current = RealUI.charInfo.specs[new]
+    end
+end
+
 
 -- Version info retrieval
 function RealUI:GetVerString(returnLong)
@@ -439,56 +378,132 @@ function RealUI:MajorVerChange(oldVer, curVer)
     return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
 end
 
--- Events
-function RealUI:VARIABLES_LOADED()
-    ---- Blizzard Bug Fixes
-    -- No Map emote
-    _G.hooksecurefunc("DoEmote", function(emote)
-        if emote == "READ" and _G.WorldMapFrame:IsShown() then
-            _G.CancelEmote()
-        end
-    end)
+
+-- To help position UI elements
+function _G.RealUI_TestRaidWarnings()
+    RealUI:ScheduleRepeatingTimer(function()
+        _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
+        _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
+    end, 5)
 end
 
--- Delayed updates
-function RealUI:UPDATE_PENDING_MAIL()
-    self:UnregisterEvent("UPDATE_PENDING_MAIL")
+function RealUI:CPU_Profiling_Toggle()
+    _G.SetCVar("scriptProfile", (_G.GetCVar("scriptProfile") == "1") and "0" or "1")
+    _G.ReloadUI()
+end
 
-    _G.CancelEmote()   -- Cancel Map Holding animation
+function RealUI:Taint_Logging_Toggle()
+    local taintLog = _G.GetCVar("taintLog")
+    _G.SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
+    _G.ReloadUI()
+end
 
-    -- Refresh WatchFrame lines and positioning
-    if _G.ObjectiveTrackerFrame and _G.ObjectiveTrackerFrame.collapsed then
-        _G.ObjectiveTracker_Collapse()
-        _G.ObjectiveTracker_Expand()
+function RealUI:ChatCommand_Config()
+    RealUI.Debug("Config", "/real")
+    dbg.tags.slashRealUITyped = true
+    RealUI.LoadConfig("HuD")
+end
+
+local configLoaded = false
+function RealUI.LoadConfig(app, section, ...)
+    debug("RealUI.LoadConfig", app, section, ...)
+    if _G.InCombatLockdown() then
+        return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Notification_Alert]])
     end
+    debug("is loaded", configLoaded)
+    if not configLoaded then
+        local reason
+        configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
+        debug("LoadAddOn", configLoaded, reason)
+        if not configLoaded then
+            _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
+        end
+    end
+    debug("ToggleConfig", RealUI.ToggleConfig)
+    RealUI.ToggleConfig(app, section, ...)
 end
 
-function RealUI:PLAYER_ENTERING_WORLD()
-    self:LockdownUpdates()
+function RealUI:OnInitialize()
+    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
+    debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
+    db = self.db.profile
+    dbc = self.db.char
+    dbg = self.db.global
+    self.media = db.media
+
+    -- Vars
+    self.key = ("%s - %s"):format(self.charInfo.name, self.charInfo.realm)
+    self.cLayout = dbc.layout.current
+    self.ncLayout = self.cLayout == 1 and 2 or 1
+
+    if _G.nibRealUICharacter then
+        debug("Keys", self.db.keys.char, _G.nibRealUIDB.profileKeys[self.db.keys.char])
+        if db.registeredChars[self.key] then
+            dbc.init.installStage = _G.nibRealUICharacter.installStage
+            dbc.init.initialized = _G.nibRealUICharacter.initialized
+            dbc.init.needchatmoved = _G.nibRealUICharacter.needchatmoved
+        end
+        _G.nibRealUICharacter = nil
+    end
+
+    -- Open before login to stop taint
+    --_G.ToggleFrame(_G.SpellBookFrame)
+
+    -- Profile change
+    debug("Char", dbc.init.installStage)
+    self.db.RegisterCallback(self, "OnProfileChanged", "ReloadUIDialog")
+    self.db.RegisterCallback(self, "OnProfileCopied", "ReloadUIDialog")
+    self.db.RegisterCallback(self, "OnProfileReset", function()
+        debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
+        RealUI.db.char.init = charInit
+        debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
+        RealUI:ReloadUIDialog()
+    end)
+
+    -- Register events
+    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
+    self:RegisterEvent("PLAYER_ENTERING_WORLD", "LockdownUpdates")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
+
+    -- Chat Commands
+    self:RegisterChatCommand("real", "ChatCommand_Config")
+    self:RegisterChatCommand("realui", "ChatCommand_Config")
+    self:RegisterChatCommand("realadv", function()
+        RealUI.Debug("Config", "/realadv")
+        RealUI.LoadConfig("RealUI")
+    end)
+    self:RegisterChatCommand("memory", "MemoryDisplay")
+    self:RegisterChatCommand("rl", _G.ReloadUI)
+    self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
+    self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+    self:RegisterChatCommand("findSpell", function(input)
+        -- /findSpell "Spell Name" (player)|target (buff)|debuff
+        local spellName, unit, auraType = self:GetArgs(input, 3)
+        _G.assert(type(spellName) == "string", "A spell name must be provided")
+        unit = unit or "player"
+        if auraType == nil then
+            -- Default this to false for player, true for target.
+            auraType = unit == "target" and "debuff" or "buff"
+        end
+        self:FindSpellID(spellName, unit, auraType)
+    end)
 
     -- Hide store button
     _G.GameMenuButtonStore:SetScale(0.00001)
     _G.GameMenuButtonStore:SetAlpha(0)
 
-    -- RealUI Config
-    local configBtn
-    if RealUI.isAuroraUpdated then
-        configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
-        configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.highlightColor.colorStr))
-        _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
-    else
-        local configStr = ("|cffffffffReal|r|cff%sUI|r Config"):format(RealUI:ColorTableToStr(RealUI.media.colors.red))
-        configBtn = RealUI:CreateTextButton(configStr, _G.GameMenuFrame, "GameMenuButtonTemplate")
-    end
+    -- Add RealUI Config button
+    local configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
+    configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.Color.highlight.colorStr))
+    _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
     configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
     configBtn:SetScript("OnMouseUp", function()
         RealUI.Debug("Config", "GameMenuFrame")
-        RealUI:LoadConfig("HuD")
+        RealUI.LoadConfig("HuD")
         _G.HideUIPanel(_G.GameMenuFrame)
     end)
 
     _G.GameMenuButtonKeybindings:SetPoint("TOP", configBtn, "BOTTOM", 0, -1)
-
     _G.hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function(menuFrame)
         debug("GameMenuFrame_UpdateVisibleButtons")
         local height = 332
@@ -511,10 +526,26 @@ function RealUI:PLAYER_ENTERING_WORLD()
         _G.FCF_SavePositionAndDimensions(_G.ChatFrame1)
         dbc.init.needchatmoved = false
     end
+
+    -- Synch user's settings
+    if dbg.tags.firsttime then
+        _G.SetCVar("synchronizeSettings", 1)
+        _G.SetCVar("synchronizeConfig", 1)
+        _G.SetCVar("synchronizeBindings", 1)
+        _G.SetCVar("synchronizeMacros", 1)
+    end
+
+    _G.SetCVar("useCompactPartyFrames", 1)
+
+    -- Done
+     _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
+    if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
+         _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
+    end
 end
 
-function RealUI:PLAYER_LOGIN()
-    debug("PLAYER_LOGIN", dbc.init.installStage)
+function RealUI:OnEnable()
+    debug("OnEnable", dbc.init.installStage)
     -- Retina Display check
     if not(dbg.tags.retinaDisplay.checked) and self:RetinaDisplayCheck() then
         self:InitRetinaDisplayOptions()
@@ -544,8 +575,8 @@ function RealUI:PLAYER_LOGIN()
     end
 
     -- Helpful messages
-    local blue = RealUI:ColorTableToStr(RealUI.media.colors.blue)
-    local red = RealUI:ColorTableToStr(RealUI.media.colors.red)
+    local blue = RealUI.GetColorString(RealUI.media.colors.blue)
+    local red = RealUI.GetColorString(RealUI.media.colors.red)
 
     if (dbc.init.installStage == -1) and (dbg.tutorial.stage == -1) then
         if not(dbg.messages.resetNew) then
@@ -571,146 +602,12 @@ function RealUI:PLAYER_LOGIN()
          _G.print(L["Slash_Taint"]:format(red, blue))
     end
 
+    UpdateSpec()
+
     -- Update styling
-    self:StyleSetStripeOpacity()
-    self:StyleSetWindowOpacity()
+    self:UpdateFrameStyle()
 end
 
--- To help position UI elements
-function _G.RealUI_TestRaidWarnings()
-    RealUI:ScheduleRepeatingTimer(function()
-        _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
-        _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
-    end, 5)
-end
-
-function RealUI:CPU_Profiling_Toggle()
-    _G.SetCVar("scriptProfile", (_G.GetCVar("scriptProfile") == "1") and "0" or "1")
-    _G.ReloadUI()
-end
-
-function RealUI:Taint_Logging_Toggle()
-    local taintLog = _G.GetCVar("taintLog")
-    _G.SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
-    _G.ReloadUI()
-end
-
-function RealUI:ChatCommand_Config()
-    RealUI.Debug("Config", "/real")
-    dbg.tags.slashRealUITyped = true
-    RealUI:LoadConfig("HuD")
-end
-
-local configLoaded = false
-function RealUI:LoadConfig(app, section, ...)
-    if _G.InCombatLockdown() then
-        return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Icons\Notification_Alert]])
-    end
-    if not configLoaded then
-        local reason
-        configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
-        if not configLoaded then
-            _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
-        end
-    end
-    self:ToggleConfig(app, section, ...)
-end
-
-function RealUI:OnInitialize()
-    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
-    debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
-    db = self.db.profile
-    dbc = self.db.char
-    dbg = self.db.global
-    self.media = db.media
-
-    -- Vars
-    self.classColor = RealUI:GetClassColor(self.class)
-    self.key = ("%s - %s"):format(self.charName, self.realm)
-    self.cLayout = dbc.layout.current
-    self.ncLayout = self.cLayout == 1 and 2 or 1
-
-    if _G.nibRealUICharacter then
-        debug("Keys", self.db.keys.char, _G.nibRealUIDB.profileKeys[self.db.keys.char])
-        if db.registeredChars[self.key] then
-            dbc.init.installStage = _G.nibRealUICharacter.installStage
-            dbc.init.initialized = _G.nibRealUICharacter.initialized
-            dbc.init.needchatmoved = _G.nibRealUICharacter.needchatmoved
-        end
-        _G.nibRealUICharacter = nil
-    end
-
-    -- Profile change
-    debug("Char", dbc.init.installStage)
-    self.db.RegisterCallback(self, "OnProfileChanged", "ReloadUIDialog")
-    self.db.RegisterCallback(self, "OnProfileCopied", "ReloadUIDialog")
-    self.db.RegisterCallback(self, "OnProfileReset", function()
-        debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
-        RealUI.db.char.init = charInit
-        debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
-        RealUI:ReloadUIDialog()
-    end)
-
-    -- Register events
-    self:RegisterEvent("PLAYER_LOGIN")
-    self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
-    self:RegisterEvent("VARIABLES_LOADED")
-    self:RegisterEvent("UPDATE_PENDING_MAIL")
-
-    -- Chat Commands
-    self:RegisterChatCommand("real", "ChatCommand_Config")
-    self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function()
-        RealUI.Debug("Config", "/realadv")
-        RealUI:LoadConfig("RealUI")
-    end)
-    self:RegisterChatCommand("memory", "MemoryDisplay")
-    self:RegisterChatCommand("rl", _G.ReloadUI)
-    self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
-    self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
-    self:RegisterChatCommand("findSpell", function(input)
-        -- /findSpell "Spell Name" (player)|target (buff)|debuff
-        local spellName, unit, auraType = self:GetArgs(input, 3)
-        _G.assert(type(spellName) == "string", "A spell name must be provided")
-        unit = unit or "player"
-        if auraType == nil then
-            -- Default this to false for player, true for target.
-            auraType = unit == "target" and "debuff" or "buff"
-        end
-        self:FindSpellID(spellName, unit, auraType)
-    end)
-
-    -- Synch user's settings
-    if dbg.tags.firsttime then
-        _G.SetCVar("synchronizeSettings", 1)
-        _G.SetCVar("synchronizeConfig", 1)
-        _G.SetCVar("synchronizeBindings", 1)
-        _G.SetCVar("synchronizeMacros", 1)
-    end
-
-    if db.settings.stripeOpacity then
-        _G.RealUI_InitDB.stripeOpacity = db.settings.stripeOpacity
-        db.settings.stripeOpacity = nil
-    end
-
-    _G.SetCVar("useCompactPartyFrames", 1)
-
-    -- Remove Interface Options cancel button because it = taint
-    --InterfaceOptionsFrameCancel:Hide()
-    --InterfaceOptionsFrameOkay:SetAllPoints(InterfaceOptionsFrameCancel)
-
-    -- Make clicking cancel the same as clicking okay
-    --InterfaceOptionsFrameCancel:SetScript("OnClick", function()
-    --  InterfaceOptionsFrameOkay:Click()
-    --end)
-
-    -- Done
-     _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
-    if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
-         _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
-    end
-end
 
 function RealUI:RegisterConfigModeModule(module)
     if module and module.ToggleConfigMode and type(module.ToggleConfigMode) == "function" then

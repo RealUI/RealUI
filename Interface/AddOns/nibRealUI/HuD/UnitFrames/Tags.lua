@@ -25,15 +25,15 @@ tags.Methods["realui:name"] = function(unit)
     local name = _G.UnitName(unit) or ""
     name = RealUI:AbbreviateName(name, UnitFrames[unitTag].nameLength)
 
-    local nameColor = "ffffff"
+    local nameColor = "ffffffff"
     if isDead then
-        nameColor = "3f3f3f"
+        nameColor = "ff3f3f3f"
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
-        nameColor = RealUI:ColorTableToStr(RealUI:GetClassColor(class))
+        nameColor = _G.CUSTOM_CLASS_COLORS[class].colorStr
     end
-    return ("|cff%s%s|r"):format(nameColor, name)
+    return ("|c%s%s|r"):format(nameColor, name)
 end
 tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 
@@ -49,11 +49,11 @@ tags.Methods["realui:level"] = function(unit)
     end
     if level <= 0 then
         level = "??"
-        levelColor = _G.GetQuestDifficultyColor(105)
+        levelColor = _G.QuestDifficultyColors.impossible
     else
         levelColor = _G.GetQuestDifficultyColor(level)
     end
-    return ("|cff%02x%02x%02x%s|r"):format(levelColor.r * 255, levelColor.g * 255, levelColor.b * 255, level)
+    return ("|cff%s%s|r"):format(RealUI.GetColorString(levelColor), level)
 end
 tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
 
@@ -86,7 +86,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     end
 
     UnitFrames:debug("realui:healthPercent", percent)
-    return ("%.1f|cff%s%%|r"):format(percent, RealUI:ColorTableToStr(oUF.colors.health))
+    return ("%.1f|cff%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
 end
 tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]
 
@@ -123,7 +123,7 @@ tags.Methods["realui:powerPercent"] = function(unit)
     end
 
     local _, ptoken = _G.UnitPowerType(unit)
-    return ("%.1f|cff%s%%|r"):format(percent, RealUI:ColorTableToStr(oUF.colors.power[ptoken]))
+    return ("%.1f|cff%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))
 end
 tags.Events["realui:powerPercent"] = tags.Events["realui:powerValue"]
 
@@ -191,6 +191,6 @@ tags.Methods["realui:range"] = function(unit)
         else
             section = 100
         end
-        return ("|cff%s%d|r"):format(RealUI:ColorTableToStr(rangeColors[section]), maxRange)
+        return ("|cff%s%d|r"):format(RealUI.GetColorString(rangeColors[section]), maxRange)
     end
 end

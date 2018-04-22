@@ -4,6 +4,9 @@ local cargBags = ns.cargBags
 -- Lua Globals --
 local next, ipairs = _G.next, _G.ipairs
 
+local Aurora = _G.Aurora
+local Base, Skin = Aurora.Base, Aurora.Skin
+
 local L = ns.L
 local bags = ns.bags
 local bagsHidden = ns.bagsHidden
@@ -31,11 +34,6 @@ local itemSlotSize = ns.options.itemSlotSize
 ------------------------------------------
 local cbNivaya = cargBags:GetImplementation("Nivaya")
 local MyContainer = cbNivaya:GetContainerClass()
-
-local function GetClassColor(class)
-    local classColors = _G.CUSTOM_CLASS_COLORS and _G.CUSTOM_CLASS_COLORS[class] or _G.RAID_CLASS_COLORS[class]
-    return {classColors.r, classColors.g, classColors.b}
-end
 
 local GetNumFreeSlots = function(bagType)
     local free, max = 0, 0
@@ -125,7 +123,9 @@ do
         end
 
         -- sort larger stacks first
-        return item1.count > item2.count
+        if item1.count and item2.count then
+            return item1.count > item2.count
+        end
     end;
     QuickSort = function(tbl) _G.table.sort(tbl, func) end
 end
@@ -287,11 +287,11 @@ local function UpdateDimensions(self)
     end
     if self.bagToggle then
         local tBag = (self.name == "cBniv_Bag")
-        local extraHeight = (tBag and self.hintShown) and (_G.RealUI.media.font.pixel.small[2] + 4) or 0
+        local extraHeight = (tBag and self.hintShown) and (self.hint:GetStringHeight() + 4) or 0
         height = height + 24 + extraHeight
     end
     if self.Caption then        -- Space for captions
-        height = height + _G.RealUI.media.font.pixel.small[2] + 12
+        height = height + self.Caption:GetStringHeight() + 12
     end
     self:SetHeight(self.ContainerHeight + height)
 end
@@ -312,14 +312,9 @@ local function SetFrameMovable(f, v)
     end
 end
 
-local classColor
 local function IconButton_OnEnter(self)
     self.mouseover = true
-
-    if not classColor then
-        classColor = GetClassColor(_G.select(2, _G.UnitClass("player")))
-    end
-    self.icon:SetVertexColor(classColor[1], classColor[2], classColor[3])
+    self.icon:SetVertexColor(_G.RealUI.charInfo.class.color:GetRGB())
 
     if self.tooltip then
         self.tooltip:Show()
@@ -386,7 +381,7 @@ local createIconButton = function (name, parent, texture, point, hint, isBag)
 
     button.tooltip = button:CreateFontString()
     -- button.tooltip:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", isBag and -76 or -59, 4.5)
-    button.tooltip:SetFontObject(_G.RealUIFont_PixelSmall)
+    button.tooltip:SetFontObject("SystemFont_Shadow_Med1")
     button.tooltip:SetJustifyH("RIGHT")
     button.tooltip:SetText(hint)
     button.tooltip:SetTextColor(0.8, 0.8, 0.8)
@@ -484,34 +479,16 @@ function MyContainer:OnCreate(name, settings)
     self:SetWidth((itemSlotSize + 2) * self.Columns + 2)
 
     -- The frame background
-    local tBankCustom = (tBankBags and not _G.cBnivCfg.BankBlack)
-    local color_rb = _G.RealUI.media.window[1]
-    local color_gb = tBankCustom and .2 or _G.RealUI.media.window[2]
-    local color_bb = tBankCustom and .3 or _G.RealUI.media.window[3]
-    local alpha_fb = _G.RealUI.media.window[4]
-
-    -- The frame background
     local background = _G.CreateFrame("Frame", nil, self)
-    background:SetBackdrop{
-        bgFile = _G.RealUI.media.textures.plain,
-        edgeFile = _G.RealUI.media.textures.plain,
-        tile = true, tileSize = 16, edgeSize = 1,
-        insets = {left = 1, right = 1, top = 1, bottom = 1},
-    }
     background:SetFrameStrata("HIGH")
     background:SetFrameLevel(1)
-    background:SetBackdropColor(color_rb,color_gb,color_bb,alpha_fb)
-    background:SetBackdropBorderColor(0, 0, 0, 1)
-
     background:SetPoint("TOPLEFT", -4, 4)
     background:SetPoint("BOTTOMRIGHT", 4, -4)
-
-    -- Stripes
-    background.tex = _G.RealUI:AddStripeTex(background)
+    Base.SetBackdrop(background)
 
     -- Caption, close button
     local caption = background:CreateFontString(background, "OVERLAY", nil)
-    caption:SetFontObject(_G.RealUIFont_PixelSmall)
+    caption:SetFontObject("SystemFont_Shadow_Med1")
     if caption then
         local t = L.bagCaptions[self.name] or (tBankBags and self.name:sub(5))
         if not t then t = self.name end
@@ -521,10 +498,8 @@ function MyContainer:OnCreate(name, settings)
 
         if tBag or tBank then
             local close = _G.CreateFrame("Button", nil, self, "UIPanelCloseButton")
-            close:SetPoint("TOPRIGHT", 8, 8)
-            if _G.Aurora and _G.Aurora[1].ReskinClose then
-                _G.Aurora[1].ReskinClose(close, "TOPRIGHT", self, "TOPRIGHT", 1, 1)
-            end
+            Skin.UIPanelCloseButton(close)
+            close:SetPoint("TOPRIGHT", 1, 1)
             close:SetScript("OnClick", function(container)
                 if cbNivaya:AtBank() then
                     _G.CloseBankFrame()
@@ -720,17 +695,6 @@ function MyContainer:OnCreate(name, settings)
         local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
         if dtNT then dtNT:SetTexture(nil) end
 
-        self.DropTarget.bg = _G.CreateFrame("Frame", nil, self.DropTarget)
-        self.DropTarget.bg:SetAllPoints()
-        self.DropTarget.bg:SetBackdrop({
-            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-            edgeFile = "Interface\\Buttons\\WHITE8x8",
-            tile = false, tileSize = 16, edgeSize = 1,
-        })
-        self.DropTarget.bg:SetBackdropColor(1, 1, 1, 0.1)
-        self.DropTarget.bg:SetBackdropBorderColor(0, 0, 0, 1)
-        self.DropTarget:SetWidth(itemSlotSize - 1)
-        self.DropTarget:SetHeight(itemSlotSize - 1)
 
         local DropTargetProcessItem = function()
             -- if CursorHasItem() then  -- Commented out to fix Guild Bank -> Bags item dragging
@@ -740,9 +704,14 @@ function MyContainer:OnCreate(name, settings)
         end
         self.DropTarget:SetScript("OnMouseUp", DropTargetProcessItem)
         self.DropTarget:SetScript("OnReceiveDrag", DropTargetProcessItem)
+        self.DropTarget:SetSize(itemSlotSize - 1, itemSlotSize - 1)
+
+        self.DropTarget.bg = _G.CreateFrame("Frame", nil, self.DropTarget)
+        self.DropTarget.bg:SetAllPoints()
+        Base.SetBackdrop(self.DropTarget.bg, Aurora.Color.frame)
 
         local fs = self:CreateFontString(nil, "OVERLAY")
-        fs:SetFontObject(_G.RealUIFont_PixelSmall)
+        fs:SetFontObject("NumberFont_Outline_Med")
         fs:SetJustifyH("LEFT")
         fs:SetPoint("BOTTOMRIGHT", self.DropTarget, "BOTTOMRIGHT", 1.5, 1.5)
         self.EmptySlotCounter = fs
@@ -777,7 +746,7 @@ function MyContainer:OnCreate(name, settings)
         -- Hint
         self.hint = background:CreateFontString(nil, "OVERLAY", nil)
         self.hint:SetPoint("BOTTOMLEFT", infoFrame, -0.5, 31.5)
-        self.hint:SetFontObject(_G.RealUIFont_PixelSmall)
+        self.hint:SetFontObject("SystemFont_Shadow_Med1")
         self.hint:SetTextColor(1, 1, 1, 0.4)
         self.hint:SetText("Ctrl + Alt + Right Click an item to assign category")
         self.hintShown = true
@@ -785,7 +754,7 @@ function MyContainer:OnCreate(name, settings)
         -- The money display
         local money = self:SpawnPlugin("TagDisplay", "[money]", self)
         money:SetPoint("TOPRIGHT", self, -25.5, -2.5)
-        money:SetFontObject(_G.RealUIFont_PixelSmall)
+        money:SetFontObject("SystemFont_Shadow_Med1")
         money:SetJustifyH("RIGHT")
         money:SetShadowColor(0, 0, 0, 0)
     end

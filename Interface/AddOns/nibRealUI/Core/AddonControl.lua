@@ -18,12 +18,12 @@ local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 local RealUIAddOns = {
     ["Bartender4"] =    {isAce = true, db = "Bartender4DB",     profKey = "profileKeys"},
     ["Grid2"] =         {isAce = true, db = "Grid2DB",          profKey = "profileKeys"},
-    ["KuiNameplates"] = {isAce = true, db = "KuiNameplatesGDB", profKey = "profileKeys"},
     ["Masque"] =        {isAce = true, db = "MasqueDB",         profKey = "profileKeys"},
     ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
 
     ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
+    ["Kui_Nameplates_Core"] =    {isAce = false, db = "KuiNameplatesCoreCharacterSaved", profKey = "profile"},
     ["mikScrollingBattleText"] = {isAce = false, db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
 local RealUIAddOnsOrder = {
@@ -105,18 +105,16 @@ function AddonControl:CreateOptionsFrame()
         acO:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
         acO:Hide()
 
-    acO.okay = RealUI:CreateTextButton(_G.OKAY, acO, 100, 24, true)
+    acO.okay = RealUI:CreateTextButton(_G.OKAY, acO, 100, 24)
         acO.okay:SetPoint("BOTTOM", acO, "BOTTOM", -51, 5)
         acO.okay:SetScript("OnClick", function() self.options:Hide() end)
 
-    acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24, true)
+    acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24)
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
         acO.reloadui:SetScript("OnClick", _G.ReloadUI)
 
-    RealUI:CreateBGSection(acO, acO.okay, acO.reloadui)
-
     -- Header
-    local header = RealUI:CreateFS(acO, "CENTER", "small")
+    local header = RealUI:CreateFS(acO, "CENTER", "large")
         header:SetText(L["Control_AddonControl"])
         header:SetPoint("TOP", acO, "TOP", 0, -9)
 
@@ -148,11 +146,10 @@ function AddonControl:CreateOptionsFrame()
         lPosition:SetWidth(40)
         lPosition:SetTextColor(C.r, C.g, C.b)
 
-    local acAddonSect = RealUI:CreateBDFrame(acO)
-    local bgColor = RealUI.media.background
-    acAddonSect:SetBackdropColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])
+    local acAddonSect = _G.CreateFrame("Frame", nil, acO)
     acAddonSect:SetPoint("TOPLEFT", acO, "TOPLEFT", 6, -42)
     acAddonSect:SetPoint("BOTTOMRIGHT", acO, "BOTTOMRIGHT", -6, 36)
+    _G.Aurora.Base.SetBackdrop(acAddonSect)
 
     local LayoutAddOns = {
         ["Bartender4"] = true,
@@ -176,13 +173,13 @@ function AddonControl:CreateOptionsFrame()
             cnt = cnt + 1
 
             -- AddOn name
-            local fs = acO:CreateFontString(nil, "OVERLAY")
-            fs:SetFontObject(_G.RealUIFont_Normal)
+            local fs = acAddonSect:CreateFontString(nil, "OVERLAY")
+            fs:SetFontObject("SystemFont_Shadow_Med1")
             fs:SetText(addon)
             if not prevLabel then
-                fs:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 6, -9.5)
+                fs:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 6, -6)
             else
-                fs:SetPoint("TOPLEFT", prevLabel, "BOTTOMLEFT", 0, -8.5)
+                fs:SetPoint("TOPLEFT", prevLabel, "BOTTOMLEFT", 0, -7)
             end
             prevLabel = fs
 
@@ -239,7 +236,7 @@ function AddonControl:CreateOptionsFrame()
             prevCBPosition = cbPosition[cnt]
 
             -- Reset
-            bReset[cnt] = RealUI:CreateTextButton("Reset", acAddonSect, 60, 18, true)
+            bReset[cnt] = RealUI:CreateTextButton("Reset", acAddonSect, 60, 18)
             bReset[cnt].addon = altAddOnTable[addon] or addon
             bReset[cnt].id = cnt
             if not prevReset then
@@ -265,8 +262,6 @@ function AddonControl:CreateOptionsFrame()
         end
     end
     acO:SetHeight(84 + (cnt * 19.25))
-    RealUI:CreateBGSection(acAddonSect, acAddonSect.firstReset, acAddonSect.lastReset)
-
     acO:Show()
 end
 
@@ -358,7 +353,7 @@ function AddonControl:OnInitialize()
                         style = false,
                     },
                 },
-                ["KuiNameplates"] = {
+                ["Kui_Nameplates_Core"] = {
                     profiles = {
                         base =          {use = true,    key = "RealUI"},
                         layout =        {use = false,   key = "Healing"},

@@ -39,13 +39,8 @@ end
 
 -- Colors
 function AltPowerBar:UpdateColors()
-    -- BG + Border
-    local color = RealUI.media.background
-    APBFrames.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
-    APBFrames.bg:SetBackdropBorderColor(0, 0, 0, 1)
-
     -- Bar
-    color = RealUI.media.colors.green
+    local color = RealUI.media.colors.green
     APBFrames.bar:SetStatusBarColor(color[1], color[2], color[3], 0.85)
 end
 
@@ -88,13 +83,7 @@ function AltPowerBar:CreateFrames()
     -- BG + Border
     APBFrames.bg = _G.CreateFrame("Frame", "RealUI_AltPowerBarBG", _G.UIParent)
     APBFrames.bg:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
-
-    APBFrames.bg:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0}
-    })
+    _G.Aurora.Base.SetBackdrop(APBFrames.bg)
 
     -- Bar + Text
     APBFrames.bar = _G.CreateFrame("StatusBar", "RealUI_AltPowerBar", APBFrames.bg)
@@ -104,8 +93,8 @@ function AltPowerBar:CreateFrames()
     APBFrames.bar:SetPoint("BOTTOMRIGHT", APBFrames.bg, "BOTTOMRIGHT", -1, 1)
 
     APBFrames.text = APBFrames.bar:CreateFontString(nil, "OVERLAY")
-    APBFrames.text:SetPoint("CENTER", APBFrames.bar, "CENTER", 1.5, -0.5)
-    APBFrames.text:SetFontObject(_G.RealUIFont_Pixel)
+    APBFrames.text:SetPoint("CENTER", APBFrames.bar)
+    APBFrames.text:SetFontObject("SystemFont_Shadow_Med1")
     APBFrames.text:SetTextColor(1, 1, 1, 1)
 
     -- Update Power

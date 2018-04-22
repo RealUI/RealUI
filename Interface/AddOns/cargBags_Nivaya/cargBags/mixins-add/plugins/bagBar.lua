@@ -86,13 +86,7 @@ function BagButton:Create(bagID)
 
     button.bg = _G.CreateFrame("Frame", nil, button)
     button.bg:SetAllPoints(button)
-    button.bg:SetBackdrop({
-        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        tile = false, tileSize = 16, edgeSize = 1,
-    })
-    button.bg:SetBackdropColor(1, 1, 1, 0)
-    button.bg:SetBackdropBorderColor(0, 0, 0, 1)
+    _G.Aurora.Base.SetBackdrop(button.bg, _G.Aurora.Color.frame)
 
     button.Icon:SetTexCoord(.08, .92, .08, .92)
     button.Icon:SetVertexColor(0.8, 0.8, 0.8)

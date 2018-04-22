@@ -5,6 +5,7 @@ local next = _G.next
 
 -- RealUI --
 local debug = _G.RealUI.GetDebug("Dev")
+_G.RealUI.isDev = true
 
 ns.debug = debug
 ns.commands = {}
@@ -128,6 +129,7 @@ _G.C_Timer.NewTicker(1, function()
     end
 end)
 
+
 local autorunScripts = {
     alert = false,
     test = false,
@@ -137,7 +139,7 @@ local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
 frame:SetScript("OnEvent", function(self, event, ...)
     lastEvent = event
-    if event == "PLAYER_ENTERING_WORLD" then
+    if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do
             if run then
                 ns.commands[command](ns.commands)
@@ -167,6 +169,55 @@ frame:SetScript("OnEvent", function(self, event, ...)
         end
     end
 end)
+
+local auroraAddons = {
+    "Aurora",
+    "nibRealUI_Dev",
+    "RealUI_Bugs",
+}
+
+local realuiAddons = {
+    "cargBags_Nivaya",
+    "EasyMail",
+    "FreebTip",
+    "nibRealUI",
+    "nibRealUI_Dev",
+    "nibRealUI_Config",
+    "RealUI_Bugs",
+    "RealUI_Skins",
+}
+
+local function AddOptDeps(list, optDeps)
+    for i = 1, #optDeps do
+        list[#list + 1] = optDeps[i]
+    end
+end
+
+for i = 1, #realuiAddons do
+    AddOptDeps(realuiAddons, {_G.GetAddOnOptionalDependencies(realuiAddons[i])})
+end
+
+function ns.commands:realui()
+    for i = 1, #realuiAddons do
+        if _G.GetAddOnInfo(realuiAddons[i]) then
+            _G.EnableAddOn(realuiAddons[i], _G.UnitName("player"))
+        end
+    end
+
+    _G.print("RealUI addons loaded.")
+    _G.AddonList_Update()
+end
+
+function ns.commands:aurora()
+    for i = 1, #auroraAddons do
+        if _G.GetAddOnInfo(auroraAddons[i]) then
+            _G.EnableAddOn(auroraAddons[i], _G.UnitName("player"))
+        end
+    end
+
+    _G.print("Aurora addons loaded.")
+    _G.AddonList_Update()
+end
 
 -- Slash Commands
 _G.SLASH_DEV1 = "/dev"

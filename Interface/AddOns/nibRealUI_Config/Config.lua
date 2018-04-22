@@ -14,7 +14,7 @@ local r, g, b = C.r, C.g, C.b
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
-local ModValue = RealUI.ModValue
+local Scale = RealUI.Scale
 --local round = RealUI.Round
 
 local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
@@ -25,6 +25,11 @@ local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
 local RavenTimer
+_G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
+    if self._show then
+        self:Show()
+    end
+end)
 function RealUI:HuDTestMode(doTestMode)
     -- Toggle Test Modes
     -- Raven
@@ -94,6 +99,21 @@ function RealUI:HuDTestMode(doTestMode)
             EABFrame.outro:Play()
         end
     end
+
+    -- Zone Ability Button
+    local ZAFFrame = _G.ZoneAbilityFrame
+    if not _G.HasZoneAbility() then
+        if doTestMode then
+            ZAFFrame:Show()
+            ZAFFrame.SpellButton:Disable()
+            ZAFFrame._show = true
+            ZAFFrame.SpellButton.Icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
+        else
+            ZAFFrame._show = false
+            ZAFFrame.SpellButton:Enable()
+            ZAFFrame:Hide()
+        end
+    end
     self.isInTestMode = doTestMode
 end
 
@@ -109,12 +129,11 @@ _G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
     notClosableByLogout = false,
 }
 
-local height = ModValue(50)
-local width = ModValue(65)
+local width, height = 65, 50
 local hudConfig, hudToggle do
     -- The HuD Config bar
     hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
-    hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 0)
+    Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
     hudConfig:SetScript("OnEvent", function(self, event, ...)
         if event == "PLAYER_REGEN_DISABLED" then
             hudToggle(true)
@@ -126,9 +145,9 @@ local hudConfig, hudToggle do
         local _, y = self.slide:GetOffset()
         hudConfig:ClearAllPoints()
         if y < 0 then
-            hudConfig:SetPoint("TOP", _G.UIParent, "TOP", 0, 0)
+            Scale.Point(hudConfig, "TOP", _G.UIParent, "TOP", 0, 0)
         else
-            hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 1)
+            Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
         end
     end)
     hudConfig.slideAnim = slideAnim
@@ -169,9 +188,9 @@ local hudConfig, hudToggle do
             -- slide out
             if skipAnim then
                 hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("BOTTOM", _G.UIParent, "TOP", 0, 0)
+                Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 0)
             else
-                slide:SetOffset(0, height)
+                slide:SetOffset(0, Scale.Value(height))
                 slideAnim:Play()
             end
             RealUI:HuDTestMode(false)
@@ -181,9 +200,9 @@ local hudConfig, hudToggle do
             -- slide in
             if skipAnim then
                 hudConfig:ClearAllPoints()
-                hudConfig:SetPoint("TOP", _G.UIParent, "TOP", 0, 0)
+                Scale.Point(hudConfig, "TOP", _G.UIParent, "TOP", 0, 0)
             else
-                slide:SetOffset(0, -height)
+                slide:SetOffset(0, Scale.Value(-height))
                 slideAnim:Play()
             end
             hudConfig:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -192,7 +211,7 @@ local hudConfig, hudToggle do
     end
 
     F.CreateBD(hudConfig)
-    _G.RealUIUINotifications:SetPoint("TOP", hudConfig, "BOTTOM")
+    Scale.Point(_G.RealUIUINotifications, "TOP", hudConfig, "BOTTOM")
     RealUI.RegisterModdedFrame(hudConfig)
 end
 
@@ -238,16 +257,16 @@ local function InitializeOptions()
         local widget = ACD.OpenFrames["HuD"]
         if widget and highlight.clicked == self.ID then
             highlight.clicked = nil
-            widget.titlebg:SetPoint("TOP", 0, 12)
+            Scale.Point(widget.titlebg, "TOP", 0, 12)
             ACD:Close("HuD")
         else
             highlight.clicked = self.ID
             ACD:Open("HuD", self.slug)
             widget = ACD.OpenFrames["HuD"]
             widget:ClearAllPoints()
-            widget:SetPoint("TOP", hudConfig, "BOTTOM")
+            Scale.Point(widget, "TOP", hudConfig, "BOTTOM")
             widget:SetTitle(self.text:GetText())
-            widget.titlebg:SetPoint("TOP", 0, 0)
+            Scale.Point(widget.titlebg, "TOP", 0, 0)
             -- the position will get reset via SetStatusTable, so we need to set our new positions there too.
             local status = widget.status or widget.localstatus
             status.top = widget.frame:GetTop()
@@ -262,14 +281,14 @@ local function InitializeOptions()
         local btn = _G.CreateFrame("Button", "$parentBtn"..i, hudConfig)
         btn.ID = i
         btn.slug = tab.slug
-        btn:SetSize(width, height)
+        Scale.Size(btn, width, height)
         btn:SetScript("OnEnter", function(self, ...)
             if slideAnim:IsPlaying() then return end
             debug("OnEnter", tab.slug)
             if highlight:IsShown() then
                 debug(highlight.hover, highlight.clicked)
                 if highlight.hover ~= self.ID then
-                    hl:SetOffset(width * (self.ID - highlight.hover), 0)
+                    hl:SetOffset(Scale.Value(width) * (self.ID - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = i
                         highlight:SetAllPoints(self)
@@ -291,7 +310,7 @@ local function InitializeOptions()
             if highlight.clicked then
                 debug(highlight.hover, highlight.clicked)
                 if highlight.hover ~= highlight.clicked then
-                    hl:SetOffset(width * (highlight.clicked - highlight.hover), 0)
+                    hl:SetOffset(Scale.Value(width) * (highlight.clicked - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = highlight.clicked
                         highlight:SetAllPoints(hudConfig[highlight.clicked])
@@ -307,10 +326,10 @@ local function InitializeOptions()
         end)
 
         if i == 1 then
-            btn:SetPoint("TOPLEFT")
+            Scale.Point(btn, "TOPLEFT")
             local check = _G.CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
             check:SetHitRectInsets(-10, -10, -1, -21)
-            check:SetPoint("CENTER", 0, 10)
+            Scale.Point(check, "CENTER", 0, 10)
             check:SetAttribute("type1", "macro")
             F.ReskinCheck(check)
             _G.SecureHandlerWrapScript(check, "OnClick", check, [[
@@ -323,29 +342,29 @@ local function InitializeOptions()
                 end
             ]])
         else
-            btn:SetPoint("TOPLEFT", prevFrame, "TOPRIGHT")
+            Scale.Point(btn, "TOPLEFT", prevFrame, "TOPRIGHT")
             btn:SetScript("OnClick", tab.onclick or tabOnClick)
 
             local icon = btn:CreateTexture(nil, "ARTWORK")
             icon:SetTexture(tab.icon)
-            icon:SetSize(ModValue(25), ModValue(25))
-            icon:SetPoint("TOP", 0, -ModValue(8))
+            Scale.Size(icon, 32, 32)
+            Scale.Point(icon, "CENTER", 0, 4)
         end
 
         local text = btn:CreateFontString()
-        text:SetFontObject(_G.GameFontHighlightSmall)
-        text:SetWidth(ModValue(58))
-        text:SetPoint("BOTTOM", 0, ModValue(5))
+        text:SetFontObject(_G.Game16Font)
+        Scale.Point(text, "BOTTOMLEFT", 0, 5)
+        Scale.Point(text, "BOTTOMRIGHT", 0, 5)
         text:SetText(tab.name)
         btn.text = text
 
         _G.tinsert(hudConfig, btn)
         prevFrame = btn
     end
-    hudConfig:SetSize(#hudConfig * width, height)
+    Scale.Size(hudConfig, #hudConfig * width, height)
 end
 
-function RealUI:ToggleConfig(app, section, ...)
+function RealUI.ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
     if not initialized then InitializeOptions() end
     if app == "HuD" then

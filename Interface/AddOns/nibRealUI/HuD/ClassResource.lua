@@ -10,7 +10,7 @@ local FramePoint = RealUI:GetModule("FramePoint")
 local MODNAME = "ClassResource"
 local ClassResource = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
-local playerClass = RealUI.class
+local playerClass = RealUI.charInfo.class.token
 local powerToken
 local powerTextures = {
     circle = [[Interface\Addons\nibRealUI\Media\PointTracking\Point]],

@@ -4,6 +4,9 @@ local _, private = ...
 local RealUI = private.RealUI
 local db, ndb, ndbc
 
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+
 local MODNAME = "ScreenSaver"
 local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
@@ -232,38 +235,31 @@ end
 
 -- Frame Creation
 function ScreenSaver:CreateFrames()
-    -- Dark Background
-    self.bg = _G.CreateFrame("Frame", nil, _G.UIParent)
-        self.bg:SetAllPoints(_G.UIParent)
-        self.bg:SetFrameStrata("BACKGROUND")
-        self.bg:SetFrameLevel(0)
-        self.bg:SetBackdrop({
-            bgFile = RealUI.media.textures.plain,
-        })
-        self.bg:SetBackdropColor(0, 0, 0, 1)
-        self.bg:SetAlpha(0)
-        self.bg:Hide()
-
     -- Panel
     self.panel = _G.CreateFrame("Frame", "RealUIScreenSaver", _G.UIParent)
         self.panel:SetFrameStrata("MEDIUM")
         self.panel:SetFrameLevel("1")
         self.panel:SetSize(_G.UIParent:GetWidth(), 21)
-        -- self.panel:SetBackdropColor(0.075, 0.075, 0.075, db.panel.opacity)
-        RealUI:CreateBD(self.panel, nil, true)
-        self.panel:SetBackdropColor(RealUI.media.window[1], RealUI.media.window[2], RealUI.media.window[3], RealUI.media.window[4])
+        Base.SetBackdrop(self.panel)
         self.panel:SetAlpha(0)
         self.panel:Hide()
         self:RepositionPanel()
 
+    -- Dark Background
+    self.bg = self.panel:CreateTexture(nil, "BACKGROUND")
+        self.bg:SetColorTexture(0, 0, 0, 1)
+        self.bg:SetAllPoints(_G.UIParent)
+        self.bg:SetAlpha(0)
+        self.bg:Hide()
+
     self.panel.left = self.panel:CreateTexture(nil, "ARTWORK")
-        self.panel.left:SetTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+        self.panel.left:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
         self.panel.left:SetPoint("LEFT", self.panel, "LEFT", 0, 0)
         self.panel.left:SetHeight(19)
         self.panel.left:SetWidth(4)
 
     self.panel.right = self.panel:CreateTexture(nil, "ARTWORK")
-        self.panel.right:SetTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+        self.panel.right:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
         self.panel.right:SetPoint("RIGHT", self.panel, "RIGHT", 0, 0)
         self.panel.right:SetHeight(19)
         self.panel.right:SetWidth(4)
@@ -271,12 +267,12 @@ function ScreenSaver:CreateFrames()
     -- Timer
     self.timeLabel = RealUI:CreateFS(self.panel, "CENTER")
         self.timeLabel:SetPoint("RIGHT", self.panel, "CENTER", 15, 0)
-        self.timeLabel:SetFontObject(_G.RealUIFont_PixelSmall)
-        self.timeLabel:SetText("|cffffffffAFK |r|cff"..RealUI:ColorTableToStr(RealUI.classColor).."TIME:")
+        self.timeLabel:SetFontObject("SystemFont_Shadow_Med1")
+        self.timeLabel:SetText("|cffffffffAFK |r|c"..RealUI.charInfo.class.color.colorStr.."TIME:")
 
     self.time = RealUI:CreateFS(self.panel, "LEFT")
         self.time:SetPoint("LEFT", self.panel, "CENTER", 17, 0)
-        self.time:SetFontObject(_G.RealUIFont_PixelSmall)
+        self.time:SetFontObject("SystemFont_Shadow_Med1")
         self.time:SetText("0s")
 end
 

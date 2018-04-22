@@ -3,13 +3,13 @@
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
 ## Version: 8.1 r20h
-## OptionalDeps: HereBeDragons-1.0, LibArtifactData-1.0, LibChatAnims, LibQTip-1.0, LibRangeCheck-2.0, LibWindow-1.1, LibStrataFix, Bartender4, Grid2, Raven
-## RequiredDeps: RealUI_Bugs, !Aurora_RealUI
+## OptionalDeps: UTF8, HereBeDragons-1.0, LibArtifactData-1.0, LibChatAnims, LibQTip-1.0, LibRangeCheck-2.0, LibWindow-1.1, LibStrataFix, Bartender4, Grid2, Raven
+## RequiredDeps: RealUI_Skins
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## X-oUF: oUFembed
 ## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
-## Globe-Pre: !Aurora_RealUI, nibRealUI_Init
+## Globe-Pre: RealUI_Bugs, RealUI_Skins
 
 Libs\Libs.xml
 

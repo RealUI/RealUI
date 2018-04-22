@@ -1,116 +1,59 @@
 local ADDON_NAME, ns = ...
 
-local mediapath = "Interface\\AddOns\\FreebTip\\media\\"
-local cfg = {
-    -- xRUI
-    font = RealUI.media.font.standard[4],
-    fontsize = 12, -- I'd suggest adjusting the scale instead of the fontsize
-    outline = "NONE",
-    tex = mediapath.."texture",
-    scale = 1, -- Scale of the tooltip. 1 = default
+-- [[ Lua Globals ]]
+-- luacheck: globals next type select ipairs
 
-    -- can use /freebtip or uncomment this to override SavedVars
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+
+local cfg = {
+    -- modifications
     --point = { "BOTTOMRIGHT", -25, 200 },
     cursor = false,
 
-    hideTitles = true,
+    hideTitles = false,
     hideRealm = true,
     hideFaction = true,
     hidePvP = true,
-
-    showFactionIcon = true,
-    factionIconSize = 32,
-    factionIconAlpha = 1,
-
-    backdrop = {
-        bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], --]]
-        edgeFile = [=[Interface\ChatFrame\ChatFrameBackground]=], --]]
-        edgeSize = 1,
-        insets = {top = 1, left = 1, bottom = 1, right = 1},
-    },
-
-    -- Background / Border / Guild - (Colors)
-    bgcolor = { r=RealUI.media.window[1], g=RealUI.media.window[2], b=RealUI.media.window[3], t=RealUI.media.window[4] }, -- background
-    bdrcolor = { r=0, g=0, b=0 }, -- border
-    gcolor = { r=1.00, g=1.00, b=0.70}, -- guild
-
-    you = "<You>",
-
-    colorborderClass = false,
-    colorborderItem = true,
-
-    combathide = false,     -- world objects
-    combathideALL = false,  -- everything
-
-    multiTip = true, -- show more than one linked item tooltip
-
     hideHealthbar = false,
 
-    powerbar = false, -- enable power bars
-    powerManaOnly = true, -- only show mana users
+    colorborderClass = true,
+    colorborderItem = true,
 
+    combathide = true,     -- world objects
+    combathideALL = false,  -- everything
+
+
+    -- additions
+    powerbar = true, -- enable power bars
+    powerManaOnly = true, -- only show mana users
+    you = "<You>",
+
+    showFactionIcon = true,
     showRank = true, -- show guild rank
 
-    auraID = false, -- show aura id
-    auraCaster = false, -- show (if possible) who applied the aura
+    multiTip = true, -- show more than one linked item tooltip
 }
 ns.cfg = cfg
 
-local GetTime = GetTime
-local find = string.find
-local format = string.format
-local select = select
-local _G = _G
-local GameTooltip = GameTooltip
-local gtSB = GameTooltipStatusBar
-local InCombatLockdown = InCombatLockdown
-local PVP = PVP
-local FACTION_ALLIANCE = FACTION_ALLIANCE
-local FACTION_HORDE = FACTION_HORDE
-local LEVEL = LEVEL
-local CHAT_FLAG_AFK = CHAT_FLAG_AFK
-local CHAT_FLAG_DND = CHAT_FLAG_DND
-local ICON_LIST = ICON_LIST
-local TARGET = TARGET
-local DEAD = DEAD
-local BOSS = BOSS
-local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or RAID_CLASS_COLORS
-local FACTION_BAR_COLORS = FACTION_BAR_COLORS
-local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
+local COALESCED_REALM_TOOLTIP1 = _G.strsplit(_G.FOREIGN_SERVER_LABEL, _G.COALESCED_REALM_TOOLTIP)
+local INTERACTIVE_REALM_TOOLTIP1 = _G.strsplit(_G.INTERACTIVE_SERVER_LABEL, _G.INTERACTIVE_REALM_TOOLTIP)
 
-local INTERACTIVE_SERVER_LABEL = INTERACTIVE_SERVER_LABEL
-local FOREIGN_SERVER_LABEL = FOREIGN_SERVER_LABEL
-local COALESCED_REALM_TOOLTIP1 = string.split(FOREIGN_SERVER_LABEL, COALESCED_REALM_TOOLTIP)
-local INTERACTIVE_REALM_TOOLTIP1 = string.split(INTERACTIVE_SERVER_LABEL, INTERACTIVE_REALM_TOOLTIP)
-
-ns.Debug = RealUI.GetDebug(ADDON_NAME)
+ns.Debug = _G.RealUI.GetDebug(ADDON_NAME)
 
 local colors = {power = {}}
-for power, color in next, PowerBarColor do
-    if(type(power) == 'string') then
+for power, color in next, _G.PowerBarColor do
+    if type(power) == "string" then
         colors.power[power] = {color.r, color.g, color.b}
     end
 end
-
-colors.power['MANA'] = {.31,.45,.63}
-colors.power['RAGE'] = {.69,.31,.31}
-
-local classification = {
-    elite = "+",
-    rare = " |cff6699ffR|r",
-    rareelite = " |cff6699ffR+|r",
-    worldboss = (" |cffFF0000%s|r"):format(BOSS)
-}
-
-local factionIcon = {
-    ["Alliance"] = "Interface\\Timer\\Alliance-Logo",
-    ["Horde"] = "Interface\\Timer\\Horde-Logo",
-}
+colors.power.MANA = {.2, .2, 1}
+colors.power.RAGE = {1, .2, .2}
 
 local numberize = function(val)
-    if(val >= 1e6) then
+    if val >= 1e6 then
         return ("%.0fm"):format(val / 1e6)
-    elseif(val >= 1e3) then
+    elseif val >= 1e3 then
         return ("%.0fk"):format(val / 1e3)
     else
         return ("%d"):format(val)
@@ -118,44 +61,41 @@ local numberize = function(val)
 end
 
 local hex = function(color)
-    return (color.r and format('|cff%02x%02x%02x', color.r * 255, color.g * 255, color.b * 255)) or "|cffFFFFFF"
-end
-
-local qqColor = { r=1, g=0, b=0 }
-local nilcolor = { r=1, g=1, b=1 }
-local tapped = { r=.6, g=.6, b=.6 }
-
-local function unitColor(unit)
-    local color
-
-    if(unit) then
-        if(UnitIsPlayer(unit)) then
-            local colors = RAID_CLASS_COLORS
-            local _, class = UnitClass(unit)
-            color = colors[class]
-        elseif UnitIsTapDenied(unit) then
-            color = tapped
-        else
-            local reaction = UnitReaction(unit, "player")
-            if(reaction) then
-                color = FACTION_BAR_COLORS[reaction]
-            end
-        end
-    end
-
-    return (color or nilcolor)
+    return (color.r and ("|cff%s"):format(_G.RealUI.GetColorString(color))) or "|cffFFFFFF"
 end
 
 local function GameTooltip_UnitColor(unit)
-    local color = unitColor(unit)
-    return color.r, color.g, color.b
+    local r, g, b
+    if _G.UnitIsPlayer(unit) then
+        local _, class = _G.UnitClass(unit)
+        r = _G.CUSTOM_CLASS_COLORS[class].r;
+        g = _G.CUSTOM_CLASS_COLORS[class].g;
+        b = _G.CUSTOM_CLASS_COLORS[class].b;
+    elseif _G.UnitIsTapDenied(unit) then
+        r = 0.6
+        g = 0.6
+        b = 0.6
+    else
+        local reaction = _G.UnitReaction(unit, "player")
+        if reaction then
+            r = _G.FACTION_BAR_COLORS[reaction].r;
+            g = _G.FACTION_BAR_COLORS[reaction].g;
+            b = _G.FACTION_BAR_COLORS[reaction].b;
+        end
+    end
+
+    return r, g, b
 end
 
-local function getUnit(self)
-    ns.Debug("getUnit", self and self:GetName())
-    local _, unit = self and self:GetUnit()
+local function GetUnit(self)
+    ns.Debug("GetUnit", self and self:GetName())
+    local _, unit
+    if self then
+        _, unit = self:GetUnit()
+    end
+
     if not unit then
-        local mFocus = GetMouseFocus()
+        local mFocus = _G.GetMouseFocus()
         if mFocus then
             -- mFocus might somehow be a FontString, which doesn't have GetAttribute
             unit = mFocus.unit or (mFocus.GetAttribute and mFocus:GetAttribute("unit"))
@@ -164,17 +104,18 @@ local function getUnit(self)
 
     return unit or "mouseover"
 end
+ns.GetUnit = GetUnit
 
 local function hideLines(self)
-    for i=3, self:NumLines() do
+    for i = 3, self:NumLines() do
         local tiptext = _G["GameTooltipTextLeft"..i]
         local linetext = tiptext:GetText()
 
-        if(linetext) then
-            if(cfg.hidePvP and linetext:find(PVP)) then
+        if linetext then
+            if cfg.hidePvP and linetext:find(_G.PVP) then
                 tiptext:SetText(nil)
                 tiptext:Hide()
-            elseif(linetext:find(COALESCED_REALM_TOOLTIP1) or linetext:find(INTERACTIVE_REALM_TOOLTIP1)) then
+            elseif linetext:find(COALESCED_REALM_TOOLTIP1) or linetext:find(INTERACTIVE_REALM_TOOLTIP1) then
                 tiptext:SetText(nil)
                 tiptext:Hide()
 
@@ -183,15 +124,15 @@ local function hideLines(self)
                 pretiptext:Hide()
 
                 self:Show()
-            elseif(linetext == FACTION_ALLIANCE) then
-                if(cfg.hideFaction) then
+            elseif linetext == _G.FACTION_ALLIANCE then
+                if cfg.hideFaction then
                     tiptext:SetText(nil)
                     tiptext:Hide()
                 else
                     tiptext:SetText("|cff7788FF"..linetext.."|r")
                 end
-            elseif(linetext == FACTION_HORDE) then
-                if(cfg.hideFaction) then
+            elseif linetext == _G.FACTION_HORDE then
+                if cfg.hideFaction then
                     tiptext:SetText(nil)
                     tiptext:Hide()
                 else
@@ -202,529 +143,394 @@ local function hideLines(self)
     end
 end
 
-local function UpdatePower(self, elapsed)
-    self.elapsed = self.elapsed + elapsed
-    if(self.elapsed < .25) then return end
-
-    local unit = getUnit(GameTooltip)
-    if(unit) then
-        local min, max = UnitPower(unit), UnitPowerMax(unit)
-        if(max ~= 0) then
-            self:SetValue(min)
-
-            local pp = numberize(min).." / "..numberize(max)
-            self.text:SetText(pp)
-        end
-    end
-
-    self.elapsed = 0
-end
-
 local function HidePower(powerbar)
-    if(powerbar) then
+    if powerbar then
         powerbar:Hide()
-
-        if(powerbar.text) then
-            powerbar.text:SetText(nil)
-        end
     end
 end
 
 local function ShowPowerBar(self, unit, statusbar)
     local powerbar = _G[self:GetName().."FreebTipPowerBar"]
-    if(not unit) then return HidePower(powerbar) end
+    if not unit then return HidePower(powerbar) end
 
-    local min, max = UnitPower(unit), UnitPowerMax(unit)
-    local ptype, ptoken = UnitPowerType(unit)
-
-    if(max == 0 or (cfg.powerManaOnly and ptoken ~= 'MANA')) then
+    local min, max = _G.UnitPower(unit), _G.UnitPowerMax(unit)
+    local _, ptoken = _G.UnitPowerType(unit)
+    if max == 0 or (cfg.powerManaOnly and ptoken ~= 'MANA') then
         return HidePower(powerbar)
     end
 
-    if(not powerbar) then
-        powerbar = CreateFrame("StatusBar", self:GetName().."FreebTipPowerBar", statusbar)
-        powerbar:SetHeight(statusbar:GetHeight())
-        powerbar:SetFrameLevel(statusbar:GetFrameLevel())
-        powerbar:SetWidth(0)
-        powerbar:SetStatusBarTexture(cfg.tex, "OVERLAY")
-        powerbar.elapsed = 0
-        powerbar:SetScript("OnUpdate", UpdatePower)
+    if not powerbar then
+        powerbar = _G.CreateFrame("StatusBar", self:GetName().."FreebTipPowerBar", statusbar)
+        powerbar:SetHeight(8)
+        powerbar:SetPoint("TOPLEFT", statusbar, "BOTTOMLEFT", 0, -2)
+        powerbar:SetPoint("TOPRIGHT", statusbar, "BOTTOMRIGHT", 0, -2)
+
+        local texture = powerbar:CreateTexture(nil, "ARTWORK")
+        texture:SetAllPoints()
+        Base.SetTexture(texture, "gradientUp")
+        powerbar:SetStatusBarTexture(texture)
 
         local bg = powerbar:CreateTexture(nil, "BACKGROUND")
-        bg:SetAllPoints(powerbar)
-        bg:SetTexture(cfg.tex)
-        bg:SetVertexColor(0.3, 0.3, 0.3, 0.5)
-    end
-    powerbar.unit = unit
+        bg:SetColorTexture(0, 0, 0)
+        bg:SetPoint("TOPLEFT", -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", 1, -1)
 
+        local text = powerbar:CreateFontString(nil, "OVERLAY")
+        text:SetPoint("CENTER", powerbar)
+        text:SetFontObject(_G.TextStatusBarText)
+        powerbar.text = text
+    end
+
+    powerbar.unit = unit
     powerbar:SetMinMaxValues(0, max)
     powerbar:SetValue(min)
+    powerbar.text:SetText(numberize(min).." / "..numberize(max))
 
-    local pcolor = colors.power[ptoken]
-    if(pcolor) then
-        powerbar:SetStatusBarColor(pcolor[1], pcolor[2], pcolor[3])
+    local color = colors.power[ptoken]
+    if color then
+        powerbar:SetStatusBarColor(color[1], color[2], color[3])
     end
-
-    powerbar:ClearAllPoints()
-    powerbar:SetPoint("LEFT", statusbar, "LEFT", 0, -(statusbar:GetHeight()) - 4)
-    powerbar:SetPoint("RIGHT", self, "RIGHT", -10, 0)
 
     powerbar:Show()
-
-    if(not powerbar.text) then
-        -- xRUI
-        powerbar.text = powerbar:CreateFontString(nil, "OVERLAY")
-        powerbar.text:SetPoint("CENTER", powerbar)
-        powerbar.text:SetFontObject(RealUIFont_PixelSmall)
-        powerbar.text:Show()
-    end
-
-    local pp = numberize(min).." / "..numberize(max)
-    powerbar.text:SetText(pp)
 end
 
-local function PlayerTitle(self, unit)
-    local unitName
-    if(cfg.hideTitles and cfg.hideRealm) then
-        unitName = UnitName(unit)
-    elseif(cfg.hideTitles) then
-        unitName = GetUnitName(unit, true)
-    elseif(cfg.hideRealm) then
-        unitName = UnitPVPName(unit) or UnitName(unit)
+local function PlayerName(self, unit)
+    local unitName, server = _G.UnitName(unit)
+    if not cfg.hideTitles then
+        -- if the unit is out of range, this will be nil
+        unitName = _G.UnitPVPName(unit) or unitName
     end
 
-    if(unitName) then GameTooltipTextLeft1:SetText(unitName) end
-
-    local relationship = UnitRealmRelationship(unit)
-    if(relationship == LE_REALM_RELATION_VIRTUAL) then
-        self:AppendText(("|cffcccccc%s|r"):format(INTERACTIVE_SERVER_LABEL))
+    if server and server ~= "" then
+        if cfg.hideRealm then
+            if _G.UnitRealmRelationship(unit) == _G.LE_REALM_RELATION_COALESCED then
+                unitName = unitName.._G.FOREIGN_SERVER_LABEL
+            end
+        else
+            unitName = unitName.."-"..server
+        end
     end
 
-    local status = UnitIsAFK(unit) and CHAT_FLAG_AFK or UnitIsDND(unit) and CHAT_FLAG_DND or
-    not UnitIsConnected(unit) and "<DC>"
+    local status
+    if not _G.UnitIsConnected(unit) then
+        status = _G.PLAYER_OFFLINE
+    elseif _G.UnitIsAFK(unit) then
+        status = _G.CHAT_FLAG_AFK
+    elseif _G.UnitIsDND(unit) then
+        status = _G.CHAT_FLAG_DND
+    end
 
-    if(status) then
-        self:AppendText((" |cff00cc00%s|r"):format(status))
+    if status then
+        _G.GameTooltipTextLeft1:SetFormattedText("%s |cff00cc00%s|r", unitName, status)
+    else
+        _G.GameTooltipTextLeft1:SetText(unitName)
     end
 end
 
-local function PlayerGuild(self, unit, unitGuild, unitRank)
-    if(unitGuild) then
-        local text2 = GameTooltipTextLeft2
-        local str = hex(cfg.gcolor).."<%s> |cff00E6A8%s|r"
-        local unitRank = cfg.showRank and unitRank or ""
-
-        text2:SetFormattedText(str, unitGuild, unitRank)
+local function PlayerGuild(self, unit)
+    local unitGuild, unitRank = _G.GetGuildInfo(unit)
+    if unitGuild then
+        unitRank = cfg.showRank and unitRank or ""
+        _G.GameTooltipTextLeft2:SetFormattedText("|cffffffb3<%s> |cff00E6A8%s|r", unitGuild, unitRank)
     end
 end
 
 local function SetStatusBar(self, unit)
-    if(gtSB:IsShown()) then
-        if(cfg.hideHealthbar) then
-            gtSB:Hide()
+    if _G.GameTooltipStatusBar:IsShown() then
+        if cfg.hideHealthbar then
+            _G.GameTooltipStatusBar:Hide()
             return
         end
 
-        if(cfg.powerbar) then
-            ShowPowerBar(self, unit, gtSB)
-        end
-
-        gtSB:ClearAllPoints()
-
-        local gtsbHeight = gtSB:GetHeight()
-        if(GameTooltipFreebTipPowerBar and GameTooltipFreebTipPowerBar:IsShown()) then
-            gtSB:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 10, ((gtsbHeight)*2)+7)
-            gtSB:SetPoint("BOTTOMRIGHT", self, -10, 0)
-        else
-            gtSB:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 10, gtsbHeight+3)
-            gtSB:SetPoint("BOTTOMRIGHT", self, -10, 0)
+        if cfg.powerbar then
+            ShowPowerBar(self, unit, _G.GameTooltipStatusBar)
         end
     end
 
-    if(unit) then
-        gtSB:SetStatusBarColor(GameTooltip_UnitColor(unit))
+    if unit then
+        _G.GameTooltipStatusBar:SetStatusBarColor(GameTooltip_UnitColor(unit))
     else
-        gtSB:SetStatusBarColor(0, .9, 0)
+        _G.GameTooltipStatusBar:SetStatusBarColor(0, .9, 0)
     end
 end
 
 local function getTarget(unit)
-    if(UnitIsUnit(unit, "player")) then
+    if _G.UnitIsUnit(unit, "player") then
         return ("|cffff0000%s|r"):format(cfg.you)
     else
-        return UnitName(unit)
+        return _G.UnitName(unit)
     end
 end
 
-local function OnSetUnit(self)
+local classification = {
+    elite = "+",
+    rare = " |cff6699ffR|r",
+    rareelite = " |cff6699ffR+|r",
+    worldboss = (" |cffFF0000%s|r"):format(_G.BOSS)
+}
+local factionIcon = {
+    Alliance = {
+        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
+        coords = {0.693359375, 0.748046875, 0.603515625, 0.732421875}
+    },
+    Horde = {
+        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
+        coords = {0.638671875, 0.693359375, 0.603515625, 0.732421875},
+    },
+    Neutral = {
+        texture = [[Interface\PVPFrame\TournamentOrganizer]],
+        coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
+    },
+}
+_G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
     ns.Debug("--- OnSetUnit ---")
-    if(cfg.combathide and InCombatLockdown()) then
+    if cfg.combathide and _G.InCombatLockdown() then
         return self:Hide()
     end
 
     hideLines(self)
 
-    local unit = getUnit(self)
+    local unit = GetUnit(self)
     ns.Debug("unit:", unit)
-    if(UnitExists(unit)) then
-        local isPlayer = UnitIsPlayer(unit)
-
-        if not (self.factionIcon) then
-            self.factionIcon = self:CreateTexture(nil, "BORDER")
-            self.factionIcon:SetPoint("CENTER", GameTooltip, "LEFT", 0, 0) -- xRUI
-        end
-
-        local faction = UnitFactionGroup(unit)
-        if cfg.showFactionIcon and (faction and factionIcon[faction]) and UnitIsPVP(unit) then -- xRUI
-            self.factionIcon:SetTexture(factionIcon[faction])
-            self.factionIcon:SetSize(cfg.factionIconSize,cfg.factionIconSize)
-            self.factionIcon:SetAlpha(cfg.factionIconAlpha)
-            self.factionIcon:Show()
-        else
-            self.factionIcon:Hide()
-        end
-
-        local color = unitColor(unit)
-        local unitGuild, unitRank
-
-        if (isPlayer) then
-            PlayerTitle(self, unit)
-            unitGuild, unitRank = GetGuildInfo(unit)
-            PlayerGuild(self, unit, unitGuild, unitRank)
-        end
-
-        local line1 = GameTooltipTextLeft1:GetText()
-
-        local ricon = GetRaidTargetIndex(unit)
-        ns.Debug("ricon:", ricon, ICON_LIST[ricon])
-        if (ricon and ICON_LIST[ricon]) then -- ricon can be > 8, which is outside ICON_LIST's index
-            line1 = ("%s %s"):format(ICON_LIST[ricon]..cfg.fontsize.."|t", line1)
-        end
-        GameTooltipTextLeft1:SetFormattedText(("%s"), hex(color)..line1)
-        GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
-
-        local level
-        if (UnitIsWildBattlePet(unit) or UnitIsBattlePetCompanion(unit)) then
-            level = UnitBattlePetLevel(unit)
-        else
-            level = UnitLevel(unit)
-        end
-
-        local dead = UnitIsDeadOrGhost(unit)
-        if (level) then
-            local unitClass = isPlayer and ("%s %s"):format((UnitRace(unit) or ""), hex(color)..(UnitClass(unit) or "").."|r") or ""
-            local creature = not isPlayer and UnitCreatureType(unit) or ""
-
-            local diff
-            if (level == -1) then
-                level = "??"
-                diff = qqColor
-            else
-                level = ("%d"):format(level)
-                diff = GetQuestDifficultyColor(level)
+    if _G.UnitExists(unit) then
+        if cfg.showFactionIcon then
+            if not self.factionIcon then
+                self.factionIcon = self:CreateTexture(nil, "BORDER")
+                self.factionIcon:SetPoint("CENTER", _G.GameTooltip, "LEFT", 0, 0)
             end
 
-            local classify = UnitClassification(unit) or ""
+            if _G.UnitIsPVP(unit) then
+                local icon = factionIcon[_G.UnitFactionGroup(unit) or "Neutral"]
+                self.factionIcon:SetTexture(icon.texture)
+                self.factionIcon:SetTexCoord(icon.coords[1], icon.coords[2], icon.coords[3], icon.coords[4])
+                self.factionIcon:SetSize(32, 38)
+                self.factionIcon:Show()
+            else
+                self.factionIcon:Hide()
+            end
+        end
+
+        local isPlayer = _G.UnitIsPlayer(unit)
+        if isPlayer then
+            PlayerName(self, unit)
+            PlayerGuild(self, unit)
+        end
+
+        local line1 = _G.GameTooltipTextLeft1:GetText()
+
+        local ricon = _G.GetRaidTargetIndex(unit)
+        ns.Debug("ricon:", ricon, _G.ICON_LIST[ricon])
+        if ricon and _G.ICON_LIST[ricon] then
+            -- ricon can be > 8, which is outside ICON_LIST's index
+            _G.GameTooltipTextLeft1:SetFormattedText("%s %s", _G.ICON_LIST[ricon].."12|t", line1)
+        end
+        _G.GameTooltipTextLeft1:SetTextColor(GameTooltip_UnitColor(unit))
+
+        local level
+        local IsBattlePet = _G.UnitIsBattlePet(unit)
+        if IsBattlePet then
+            level = _G.UnitBattlePetLevel(unit)
+        else
+            level = _G.UnitLevel(unit)
+        end
+
+        local dead = _G.UnitIsDeadOrGhost(unit)
+        if level then
+            local unitType
+            if isPlayer then
+                unitType = ("%s |cff%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GameTooltip_UnitColor(unit)), _G.UnitClass(unit))
+            elseif IsBattlePet then
+                unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
+            else
+                unitType = _G.UnitCreatureType(unit)
+            end
+
+            local diff
+            if level == -1 then
+                level = "??"
+                diff = _G.QuestDifficultyColors.impossible
+            elseif IsBattlePet then
+                local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
+                if teamLevel then -- from WorldMapFrame.lua: 2522
+                    if teamLevel < level then
+                        --add 2 to the min level because it's really hard to fight higher level pets
+                        diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2);
+                    elseif teamLevel > level then
+                        diff = _G.GetRelativeDifficultyColor(teamLevel, level);
+                    else
+                        --if your team is in the level range, no need to call the function, just make it yellow
+                        diff = _G.QuestDifficultyColors["difficult"];
+                    end
+                else
+                    --If you unlocked pet battles but have no team, level ranges are meaningless so make them grey
+                    diff = _G.QuestDifficultyColors["header"];
+                end
+            else
+                diff = _G.GetCreatureDifficultyColor(level)
+            end
+
+            local classify = _G.UnitClassification(unit) or ""
             local textLevel = ("%s%s%s|r"):format(hex(diff), level, classification[classify] or "")
 
-            local tiptextLevel
-            for i=(unitGuild and 3) or 2, self:NumLines() do
+            for i = 2, self:NumLines() do
                 local tiptext = _G["GameTooltipTextLeft"..i]
                 local linetext = tiptext:GetText()
 
-                if(linetext and linetext:find(LEVEL)) then
-                    tiptextLevel = tiptext
+                if linetext and linetext:find(_G.LEVEL) then
+                    tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType or "unitType", (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
+                    break
                 end
-            end
-
-            if (tiptextLevel) then
-                tiptextLevel:SetFormattedText(("%s %s%s %s"), textLevel, creature, unitClass,
-                (dead and "|cffCCCCCC"..DEAD.."|r" or ""))
             end
         end
 
-        if (UnitExists(unit.."target")) then
-            local tarRicon, text = GetRaidTargetIndex(unit.."target")
-            ns.Debug("tarRicon:", tarRicon, ICON_LIST[tarRicon])
-            if (tarRicon and ICON_LIST[tarRicon]) then
-                text = ("%s %s"):format(ICON_LIST[tarRicon].."10|t", getTarget(unit.."target"))
+        if _G.UnitExists(unit.."target") then
+            local tarRicon, text = (_G.GetRaidTargetIndex(unit.."target"))
+            ns.Debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
+            if tarRicon and _G.ICON_LIST[tarRicon] then
+                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", getTarget(unit.."target"))
             else
                 text = getTarget(unit.."target")
             end
 
             ns.Debug("target:", text)
-            self:AddDoubleLine(TARGET, text, NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b,
+            self:AddDoubleLine(_G.TARGET, text, _G.NORMAL_FONT_COLOR.r, _G.NORMAL_FONT_COLOR.g, _G.NORMAL_FONT_COLOR.b,
             GameTooltip_UnitColor(unit.."target"))
         end
 
-        if (dead) then
-            gtSB:Hide()
+        if dead then
+            _G.GameTooltipStatusBar:Hide()
         end
     end
 
     SetStatusBar(self, unit)
 
-    self.freebHeightSet = nil
     self.freebtipUpdate = 0
-end
-GameTooltip:HookScript("OnTooltipSetUnit", OnSetUnit)
+end)
 
-local tipCleared = function(self)
-    if(self.factionIcon) then
+local frameColor = Aurora.Color.frame
+_G.GameTooltip:HookScript("OnTooltipCleared", function(self)
+    if self.factionIcon then
         self.factionIcon:Hide()
     end
     if not (self.freebtipItem) then
-        self:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
+        self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
     end
-end
-GameTooltip:HookScript("OnTooltipCleared", tipCleared)
+end)
 
-gtSB:SetStatusBarTexture(cfg.tex)
-gtSB:SetHeight(9)
-local bg = gtSB:CreateTexture(nil, "BACKGROUND")
-bg:SetAllPoints(gtSB)
-bg:SetTexture(cfg.tex)
-bg:SetVertexColor(0.3, 0.3, 0.3, 0.5)
-
-local function gtSBValChange(self, value)
-    if(not value) then
+_G.GameTooltipStatusBar:SetHeight(8)
+_G.GameTooltipStatusBar:SetScript("OnValueChanged", function(self, value)
+    if not value then
         return
     end
     local min, max = self:GetMinMaxValues()
-    if(value < min) or (value > max) then
+    if value < min or (value > max) then
         return
     end
 
-    if(not self.text) then
+    if not self.text then
         -- xRUI
         self.text = self:CreateFontString(nil, "OVERLAY")
-        self.text:SetPoint("CENTER", gtSB)
-        self.text:SetFontObject(RealUIFont_PixelSmall)
+        self.text:SetPoint("CENTER", self)
+        self.text:SetFontObject(_G.TextStatusBarText)
     end
     self.text:Show()
     local hp = numberize(self:GetValue()).." / "..numberize(max)
     self.text:SetText(hp)
-end
-gtSB:SetScript("OnValueChanged", gtSBValChange)
-
-local itemTips = {}
-
-local style do
-    local backdrop
-    local getBackdrop = function()
-        return backdrop
-    end
-
-    local getBackdropColor = function()
-        return cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t
-    end
-
-    local getBackdropBorderColor = function()
-        return cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b
-    end
-
-    function style(frame)
-        if not frame or frame:IsForbidden() then return end
-        local frameName = frame:GetName()
-
-        if(not frame._bg) then
-            -- xRUI
-            frame:SetBackdrop(nil)
-
-            local bg
-            if frame.BackdropFrame then
-                bg = frame.BackdropFrame
-            else
-                bg = _G.CreateFrame("Frame", nil, frame)
-                bg:SetFrameLevel(frame:GetFrameLevel()-1)
-            end
-            bg:SetPoint("TOPLEFT")
-            bg:SetPoint("BOTTOMRIGHT")
-            Aurora[1].CreateBD(bg)
-            backdrop = bg:GetBackdrop()
-            bg:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
-            bg:SetBackdropBorderColor(cfg.bdrcolor.r, cfg.bdrcolor.g, cfg.bdrcolor.b)
-            frame._bg = bg
-
-            frame.GetBackdrop = getBackdrop
-            frame.GetBackdropColor = getBackdropColor
-            frame.GetBackdropBorderColor = getBackdropBorderColor
-        end
-        frame:SetScale(cfg.scale)
-
-        if(cfg.colorborderItem and frame.GetItem) then
-            frame.freebtipItem = false
-            local _, item = frame:GetItem()
-            if(item) then
-                local quality = select(3, GetItemInfo(item))
-                if(quality) then
-                    local r, g, b = GetItemQualityColor(quality)
-                    frame:SetBackdropBorderColor(r, g, b)
-                    itemTips[frameName] = nil
-                    frame.freebtipItem = true
-                else
-                    itemTips[frameName] = true
-                end
-            end
-        end
-
-        if(not frameName) then return end
-        if(frameName ~= "GameTooltip" and frame.NumLines) then
-            for index=1, frame:NumLines() do
-                if(index==1) then
-                    _G[frameName..'TextLeft'..index]:SetFontObject(GameTooltipHeaderText)
-                else
-                    _G[frameName..'TextLeft'..index]:SetFontObject(GameTooltipText)
-                end
-                _G[frameName..'TextRight'..index]:SetFontObject(GameTooltipText)
-            end
-        end
-
-        if(_G[frameName.."MoneyFrame1"]) then
-            _G[frameName.."MoneyFrame1PrefixText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame1SuffixText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame1GoldButtonText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame1SilverButtonText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame1CopperButtonText"]:SetFontObject(GameTooltipText)
-        end
-
-        if(_G[frameName.."MoneyFrame2"]) then
-            _G[frameName.."MoneyFrame2PrefixText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame2SuffixText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame2GoldButtonText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame2SilverButtonText"]:SetFontObject(GameTooltipText)
-            _G[frameName.."MoneyFrame2CopperButtonText"]:SetFontObject(GameTooltipText)
-        end
-    end
-end
-
-local itemEvent = CreateFrame"Frame"
-itemEvent:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-itemEvent:SetScript("OnEvent", function(self, event, arg1)
-    for k in next, itemTips do
-        local tip = _G[k]
-        if(tip and tip:IsShown()) then
-            style(tip)
-        end
-    end
 end)
 
+local itemTips = {}
+local function style(frame)
+    if not frame or frame:IsForbidden() then return end
+
+    local frameName = frame:GetName()
+    if cfg.colorborderItem and frame.GetItem then
+        frame.freebtipItem = false
+        local _, item = frame:GetItem()
+        if item then
+            local quality = select(3, _G.GetItemInfo(item))
+            if quality then
+                local r, g, b = _G.GetItemQualityColor(quality)
+                frame:SetBackdropBorderColor(r, g, b)
+                itemTips[frameName] = nil
+                frame.freebtipItem = true
+            else
+                itemTips[frameName] = true
+            end
+        end
+    end
+
+    if not frameName then return end
+    if frameName ~= "GameTooltip" and frame.NumLines then
+        for index=1, frame:NumLines() do
+            if index==1 then
+                _G[frameName..'TextLeft'..index]:SetFontObject(_G.GameTooltipHeaderText)
+            else
+                _G[frameName..'TextLeft'..index]:SetFontObject(_G.GameTooltipText)
+            end
+            _G[frameName..'TextRight'..index]:SetFontObject(_G.GameTooltipText)
+        end
+    end
+
+    if _G[frameName.."MoneyFrame1"] then
+        _G[frameName.."MoneyFrame1PrefixText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame1SuffixText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame1GoldButtonText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame1SilverButtonText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame1CopperButtonText"]:SetFontObject(_G.GameTooltipText)
+    end
+
+    if _G[frameName.."MoneyFrame2"] then
+        _G[frameName.."MoneyFrame2PrefixText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame2SuffixText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame2GoldButtonText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame2SilverButtonText"]:SetFontObject(_G.GameTooltipText)
+        _G[frameName.."MoneyFrame2CopperButtonText"]:SetFontObject(_G.GameTooltipText)
+    end
+end
 ns.style = style
-FreebTipStyle = style
 
 local tooltips = {
     "GameTooltip",
     "ItemRefTooltip",
     "ShoppingTooltip1",
     "ShoppingTooltip2",
-    "ShoppingTooltip3",
-    "AutoCompleteBox",
     "FriendsTooltip",
     "WorldMapTooltip",
     "WorldMapCompareTooltip1",
     "WorldMapCompareTooltip2",
-    "WorldMapCompareTooltip3",
     "ItemRefShoppingTooltip1",
     "ItemRefShoppingTooltip2",
-    "ItemRefShoppingTooltip3",
     "FloatingBattlePetTooltip",
     "BattlePetTooltip",
 }
+local eventFrame = _G.CreateFrame("Frame")
+eventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+eventFrame:SetScript("OnEvent", function(self, event)
+    if event == "PLAYER_ENTERING_WORLD" then
+        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
-local frameload = CreateFrame("Frame")
-frameload:RegisterEvent("PLAYER_ENTERING_WORLD")
-frameload:SetScript("OnEvent", function(self)
-    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+        for i, tip in ipairs(tooltips) do
+            local frame = _G[tip]
 
-    for i, tip in ipairs(tooltips) do
-        frame = _G[tip]
+            if frame then
+                frame:HookScript("OnShow", function(this)
+                    if cfg.combathideALL and _G.InCombatLockdown() then
+                        return this:Hide()
+                    end
 
-        if(frame) then
-            frame:HookScript("OnShow", function(self)
-                if(cfg.combathideALL and InCombatLockdown()) then
-                    return self:Hide()
-                end
-
-                style(self)
-            end)
-        end
-    end
-
-    style(GameTooltip)
-end)
-
-local timer = 0.1
-local function GT_OnUpdate(self, elapsed)
-    if self:IsForbidden() then return end
-    self:SetBackdropColor(cfg.bgcolor.r, cfg.bgcolor.g, cfg.bgcolor.b, cfg.bgcolor.t)
-
-    self.freebtipUpdate = (self.freebtipUpdate or timer) - elapsed
-    if(self.freebtipUpdate > 0) then return end
-    self.freebtipUpdate = timer
-
-    local unit = getUnit(self)
-    if(self:IsUnit(unit)) then
-        hideLines(self)
-
-        if(cfg.colorborderClass and UnitIsPlayer(unit)) then
-            local color = unitColor(unit)
-            self:SetBackdropBorderColor(color.r,color.g,color.b)
-        end
-    end
-
-    local numLines = self:NumLines()
-    if(self.freebHeightSet ~= numLines) then
-        if(gtSB:IsShown()) then
-            local height = gtSB:GetHeight()+6
-
-            local powbar = GameTooltipFreebTipPowerBar
-            if(powbar and powbar:IsShown()) then
-                height = (gtSB:GetHeight()*2)+9
+                    style(this)
+                end)
             end
-
-            self:SetHeight((self:GetHeight()+height))
         end
 
-        self.freebHeightSet = numLines
-    end
-end
-GameTooltip:HookScript("OnUpdate", GT_OnUpdate)
-
-GameTooltipHeaderText:SetFont(cfg.font, cfg.fontsize+2, cfg.outline)
-GameTooltipText:SetFont(cfg.font, cfg.fontsize, cfg.outline)
-GameTooltipTextSmall:SetFont(cfg.font, cfg.fontsize-2, cfg.outline)
-
-local function addAuraInfo(self, caster, spellID)
-    if(cfg.auraID and spellID) then
-        GameTooltip:AddLine("ID: "..spellID)
-        GameTooltip:Show()
-    end
-
-    if(cfg.auraCaster and caster) then
-        local color = unitColor(caster)
-        if(color) then
-            color = hex(color)
-        else
-            color = ""
+        style(_G.GameTooltip)
+    else
+        for k in next, itemTips do
+            local tip = _G[k]
+            if tip and tip:IsShown() then
+                style(tip)
+            end
         end
-
-        GameTooltip:AddLine("Applied by "..color..UnitName(caster))
-        GameTooltip:Show()
     end
-end
-
-hooksecurefunc(GameTooltip, "SetUnitAura", function(self,...)
-    local _,_,_,_,_,_,_, caster,_,_, spellID = UnitAura(...)
-
-    addAuraInfo(self, caster, spellID)
-end)
-hooksecurefunc(GameTooltip, "SetUnitBuff", function(self,...)
-    local _,_,_,_,_,_,_, caster,_,_, spellID = UnitBuff(...)
-
-    addAuraInfo(self, caster, spellID)
-end)
-hooksecurefunc(GameTooltip, "SetUnitDebuff", function(self,...)
-    local _,_,_,_,_,_,_, caster,_,_, spellID = UnitDebuff(...)
-
-    addAuraInfo(self, caster, spellID)
 end)

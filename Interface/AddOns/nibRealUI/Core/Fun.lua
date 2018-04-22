@@ -17,6 +17,16 @@ local debug = RealUI.GetDebug("Fun")
 
 
 -- Misc Functions
+private.addonDB = {}
+function RealUI:RegisterAddOnDB(addon, db)
+    if not private.addonDB[addon] then
+        private.addonDB[addon] = db
+    end
+end
+function RealUI:GetAddOnDB(addon)
+    return private.addonDB[addon]
+end
+
 local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
 function RealUI:FindSpellID(spellName, affectedUnit, auraType)
     print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
@@ -224,7 +234,7 @@ function RealUI:CreateCheckbox(name, parent, label, side, size)
     f.type = "checkbox"
 
     f.text = _G[f:GetName() .. "Text"]
-    f.text:SetFontObject(_G.RealUIFont_Normal)
+    f.text:SetFontObject("SystemFont_Shadow_Med1")
     f.text:SetTextColor(1, 1, 1)
     f.text:SetText(label)
     f.text:ClearAllPoints()
@@ -250,21 +260,14 @@ function RealUI:CreateCheckbox(name, parent, label, side, size)
     return f
 end
 
-function RealUI:CreateTextButton(text, parent, template, width, height, small)
+function RealUI:CreateTextButton(text, parent, template, width, height)
     if not template then template = "UIPanelButtonTemplate" end
     if (type(template) ~= "string") then
-        template, width, height, small = "UIPanelButtonTemplate", template, width, height
+        template, width, height = "UIPanelButtonTemplate", template, width
     end
     local f = _G.CreateFrame("Button", nil, parent, template)
 
     f:SetFrameLevel(parent:GetFrameLevel() + 2)
-    if small then
-        f:SetNormalFontObject(_G.RealUIFont_Normal)
-        f:SetHighlightFontObject(_G.RealUIFont_Normal)
-    else
-        f:SetNormalFontObject(_G.GameFontHighlight)
-        f:SetHighlightFontObject(_G.GameFontHighlight)
-    end
     if width then
         f:SetSize(width, height)
     end
@@ -313,42 +316,14 @@ function RealUI:AddButtonHighlight(button)
     highlight:SetPoint("CENTER", button, "CENTER", 0, 0)
     highlight:SetWidth(button:GetWidth() - 2)
     highlight:SetHeight(button:GetHeight() - 2)
-    highlight:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-    })
-    highlight:SetBackdropColor(0,0,0,0)
-    highlight:SetBackdropBorderColor(self.classColor[1], self.classColor[2], self.classColor[3], self.classColor[4])
+    _G.Aurora.Base.SetBackdrop(highlight, _G.Aurora.Color.highlight)
 end
 
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)
-    if RealUI.isAuroraUpdated then
-        if stripes then
-            _G.Aurora.Base.SetBackdrop(frame)
-        else
-            _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.frameColor:GetRGBA())
-        end
+    if stripes then
+        _G.Aurora.Base.SetBackdrop(frame)
     else
-        local bdColor
-        frame:SetBackdrop({
-            bgFile = RealUI.media.textures.plain,
-            edgeFile = RealUI.media.textures.plain,
-            edgeSize = 1,
-        })
-        if windowColor then
-            bdColor = RealUI.media.window
-            tinsert(_G.REALUI_WINDOW_FRAMES, frame)
-        else
-            bdColor = RealUI.media.background
-        end
-        frame:SetBackdropColor(bdColor[1], bdColor[2], bdColor[3], bdColor[4])
-        frame:SetBackdropBorderColor(0, 0, 0)
-
-        if stripes then
-            self:AddStripeTex(frame)
-        end
+        _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame)
     end
 end
 
@@ -386,46 +361,15 @@ function RealUI:CreateBG(frame, alpha)
     return bg
 end
 
-function RealUI:CreateBGSection(parent, f1, f2, ...)
-    -- Button Backgrounds
-    local x1, y1, x2, y2 = -2, 2, 2, -2
-    if ... then
-        x1, y1, x2, y2 = ...
-    end
-    local Sect1 = _G.CreateFrame("Frame", nil, parent)
-    Sect1:SetPoint("TOPLEFT", f1, "TOPLEFT", x1, y1)
-    Sect1:SetPoint("BOTTOMRIGHT", f2, "BOTTOMRIGHT", x2, y2)
-    RealUI:CreateBD(Sect1)
-    Sect1:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
-    Sect1:SetFrameLevel(parent:GetFrameLevel() + 1)
-
-    return Sect1
-end
-
-function RealUI:AddStripeTex(parent)
-    local stripeTex = parent:CreateTexture(nil, "BACKGROUND", nil, 1)
-        stripeTex:SetAllPoints()
-        stripeTex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-        stripeTex:SetAlpha(_G.RealUI_InitDB.stripeOpacity)
-        stripeTex:SetHorizTile(true)
-        stripeTex:SetVertTile(true)
-        stripeTex:SetBlendMode("ADD")
-
-    tinsert(_G.REALUI_STRIPE_TEXTURES, stripeTex)
-
-    return stripeTex
-end
-
 function RealUI:CreateFS(parent, justify, size)
     local f = parent:CreateFontString(nil, "OVERLAY")
 
-    if size == "small" then
-        f:SetFontObject(_G.RealUIFont_PixelSmall)
-    elseif size == "large" then
-        f:SetFontObject(_G.RealUIFont_PixelLarge)
+    if size == "large" then
+        f:SetFontObject("Fancy16Font")
     else
-        f:SetFontObject(_G.RealUIFont_Pixel)
+        f:SetFontObject("SystemFont_Shadow_Med1")
     end
+
     f:SetShadowColor(0, 0, 0, 0)
     if justify then f:SetJustifyH(justify) end
 
@@ -513,19 +457,6 @@ function RealUI:GetILVLColor(lvl, ilvl)
         return _G.ITEM_QUALITY_COLORS[1] -- common
     end
 end
-
-local default = {r = 1, g = 1, b = 1, colorStr = "ffffffff"}
-function RealUI:GetClassColor(class, kind)
-    local classColors = (_G.CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS)[class] or default
-    if kind == "key" then
-        return classColors
-    elseif kind == "hex" then
-        return classColors.colorStr
-    else
-        return {classColors.r, classColors.g, classColors.b}
-    end
-end
-
 
 --[[
 All color functions assume arguments are within the range 0.0 - 1.0

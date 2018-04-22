@@ -259,14 +259,12 @@ local function LootOnEnter(self)
         _G.GameTooltip:SetLootItem(slot)
         _G.CursorUpdate(self)
     end
-    self.bg:SetBackdropColor(0.15, 0.15, 0.15, RealUI.media.background[4])
 end
 
 local LootOnLeave = function(self)
     --print("LootOnLeave: ")
     _G.GameTooltip:Hide()
     _G.ResetCursor()
-    self.bg:SetBackdropColor(0, 0, 0, RealUI.media.background[4])
 end
 
 local LootOnClick = function(self)
@@ -306,18 +304,13 @@ local createSlot = function(id)
     frame:SetID(id)
     RealUILootFrame.slots[id] = frame
 
-    local bg = _G.CreateFrame("Frame", nil, frame)
-    bg:SetPoint("TOPLEFT", frame, -1, 1)
-    bg:SetPoint("BOTTOMRIGHT", frame, 1, -1)
-    bg:SetFrameLevel(frame:GetFrameLevel()-1)
-    RealUI:CreateBD(bg)
-
-    frame.bg = bg
-
     frame:SetScript("OnClick", LootOnClick)
     frame:SetScript("OnEnter", LootOnEnter)
     frame:SetScript("OnLeave", LootOnLeave)
     frame:SetScript("OnUpdate", LootOnUpdate)
+
+    _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.button)
+    _G.Aurora.Base.SetHighlight(frame, "backdrop")
 
     local iconFrame = _G.CreateFrame("Frame", nil, frame)
     iconFrame:SetHeight(LootIconSize)
@@ -328,12 +321,10 @@ local createSlot = function(id)
     iconFrame:SetPoint("RIGHT", frame, "LEFT", -2, 0)
 
     local icon = iconFrame:CreateTexture(nil, "ARTWORK")
-    icon:SetTexCoord(.08, .92, .08, .92)
     icon:SetPoint("TOPLEFT", 1, -1)
     icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    _G.Aurora.Base.CropIcon(icon, iconFrame)
     frame.icon = icon
-
-    RealUI:CreateBG(icon)
 
     local count = RealUI:CreateFS(iconFrame, "CENTER")
     count:SetPoint("TOP", iconFrame, 1, -2)

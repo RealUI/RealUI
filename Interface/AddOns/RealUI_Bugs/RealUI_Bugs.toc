@@ -4,8 +4,8 @@
 ## Author: Gethe
 ## Version: 8.1 r20h
 ## LoadWith: Blizzard_CompactRaidFrames
-## OptionalDeps: Ace3
-## SavedVariables: RealUI_Storage
+## OptionalDeps: Ace3, LibTextDump-1.0
+## SavedVariables: RealUI_Storage, RealUI_Debug
 
 Init.lua
 

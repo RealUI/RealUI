@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next max
+local next = _G.next
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -9,18 +9,19 @@ local qTip = _G.LibStub("LibQTip-1.0")
 
 local artData = _G.LibStub("LibArtifactData-1.0", true)
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome")
-fa.path = [[Interface\AddOns\nibRealUI\Fonts\FontAwesome\fontawesome-webfont.ttf]]
+fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
 
 -- RealUI --
 local RealUI = private.RealUI
+local Scale = RealUI.Scale
 local round = RealUI.Round
 local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
 local testCell = _G.UIParent:CreateFontString()
-testCell:SetPoint("CENTER")
-testCell:SetSize(500, 20)
+Scale.Point(testCell, "CENTER")
+Scale.Size(testCell, 500, 20)
 testCell:Hide()
 
 local qTipAquire = qTip.Acquire
@@ -30,41 +31,14 @@ function qTip:Acquire(...)
     return tooltip
 end
 
-local headerFont, textFont, iconFont
-local function SetupFonts()
-    local size = RealUI.ModValue(10)
-    local font = RealUI.db.profile.media.font.standard
-    local header = _G.CreateFont("RealUI_TooltipHeader")
-    header:SetFont(font[4], size)
-    headerFont = {
-        font = font[4],
-        size = size,
-        object = header
-    }
-
-    size = RealUI.ModValue(9)
-    font = RealUI.db.profile.media.font.chat
-    local text = _G.CreateFont("RealUI_TooltipText")
-    text:SetFont(font[4], size)
-    textFont = {
-        font = font[4],
-        size = size,
-        object = text
-    }
-
-    iconFont = {
-        font = fa.path,
-        outline = Infobar:GetFontOutline()
-    }
-end
-
+local iconFont
 local TextTableCellProvider, TextTableCellPrototype
 local function SetupTextTable()
     TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
 
     local MAX_ROWS = 15
-    local ROW_HEIGHT = textFont.size
-    local TABLE_WIDTH = RealUI.ModValue(320)
+    local ROW_HEIGHT = Scale.Value(9)
+    local TABLE_WIDTH = 320
     local numTables = 0
     local extData = {}
 
@@ -106,15 +80,15 @@ local function SetupTextTable()
                     if not cell then
                         cell = _G.CreateFrame("Button", "$parentCell"..col, row)
                         cell:SetID(col)
-                        cell:SetPoint("TOP")
-                        cell:SetPoint("BOTTOM")
-                        cell:SetPoint("LEFT", header[col])
-                        cell:SetPoint("RIGHT", header[col])
+                        Scale.Point(cell, "TOP")
+                        Scale.Point(cell, "BOTTOM")
+                        Scale.Point(cell, "LEFT", header[col])
+                        Scale.Point(cell, "RIGHT", header[col])
                         cell.row = row
                         row[col] = cell
 
                         local text = cell:CreateFontString(nil, "ARTWORK")
-                        text:SetFont(textFont.font, textFont.size)
+                        text:SetFontObject("SystemFont_Shadow_Med1")
                         text:SetJustifyH(data.header.justify[col])
                         text:SetAllPoints()
                         cell:SetFontString(text)
@@ -266,8 +240,8 @@ local function SetupTextTable()
         if not self.textTable then
             numTables = numTables + 1
             local textTable = _G.CreateFrame("Frame", "IL_TextTable"..numTables, self)
-            textTable:SetPoint("TOPLEFT")
-            textTable:SetPoint("BOTTOMRIGHT")
+            Scale.Point(textTable, "TOPLEFT")
+            Scale.Point(textTable, "BOTTOMRIGHT")
             textTable:EnableMouse(true)
 
             --[[ Test BG
@@ -275,20 +249,20 @@ local function SetupTextTable()
             test:SetColorTexture(1, 1, 1, 0.5)
             test:SetAllPoints(textTable)]]
 
-            textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable) -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Header")
-            textTable.header:SetPoint("TOPLEFT")
-            textTable.header:SetPoint("RIGHT")
+            textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable)
+            Scale.Point(textTable.header, "TOPLEFT")
+            Scale.Point(textTable.header, "RIGHT")
             textTable.header:SetHeight(ROW_HEIGHT)
 
             local line = textTable:CreateTexture(nil, "BACKGROUND")
             line:SetColorTexture(1, 1, 1)
-            line:SetPoint("TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
-            line:SetPoint("RIGHT")
+            Scale.Point(line, "TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
+            Scale.Point(line, "RIGHT")
             line:SetHeight(1)
 
             textTable.scrollArea = _G.CreateFrame("ScrollFrame", "$parentScroll", textTable, "FauxScrollFrameTemplate")
-            textTable.scrollArea:SetPoint("TOPLEFT", line, 0, -5)
-            textTable.scrollArea:SetPoint("BOTTOMRIGHT")
+            Scale.Point(textTable.scrollArea, "TOPLEFT", line, 0, -5)
+            Scale.Point(textTable.scrollArea, "BOTTOMRIGHT")
             textTable.scrollArea:SetScript("OnVerticalScroll", function(scroll, offset)
                 _G.FauxScrollFrame_OnVerticalScroll(scroll, offset, ROW_HEIGHT, UpdateScroll)
             end)
@@ -298,12 +272,12 @@ local function SetupTextTable()
             textTable.rows = {}
             for index = 1, MAX_ROWS do
                 local row = _G.CreateFrame("Button", "$parentRow"..index, textTable)
-                if index == 1 then -- textTable:CreateFontString(nil, "ARTWORK", "RealUIFont_Normal")
-                    row:SetPoint("TOPLEFT", prev)
+                if index == 1 then
+                    Scale.Point(row, "TOPLEFT", prev)
                 else
-                    row:SetPoint("TOPLEFT", prev, "BOTTOMLEFT")
+                    Scale.Point(row, "TOPLEFT", prev, "BOTTOMLEFT")
                 end
-                row:SetPoint("RIGHT")
+                Scale.Point(row, "RIGHT")
                 row:SetHeight(ROW_HEIGHT)
                 row:SetScript("OnEnter", function(r)
                     r.highlight:Show()
@@ -313,7 +287,7 @@ local function SetupTextTable()
                 end)
 
                 local highlight = row:CreateTexture(nil, "BACKGROUND")
-                local r, g, b = _G.unpack(RealUI.classColor)
+                local r, g, b = RealUI.charInfo.class.color:GetRGB()
                 highlight:SetColorTexture(r, g, b, 0.25)
                 highlight:SetAllPoints()
                 highlight:Hide()
@@ -330,7 +304,7 @@ local function SetupTextTable()
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         Infobar:debug("CellProto:SetupCell")
         local textTable = self.textTable
-        local width = data.width or TABLE_WIDTH
+        local width = Scale.Value(data.width or TABLE_WIDTH)
         extData[data] = extData[data] or {}
         textTable.data = data
 
@@ -342,24 +316,24 @@ local function SetupTextTable()
             if not header then
                 header = _G.CreateFrame("Button", nil, headerRow)
                 header:SetID(col)
-                header:SetPoint("TOP", 0, -4)
-                header:SetPoint("BOTTOM")
+                Scale.Point(header, "TOP", 0, -4)
+                Scale.Point(header, "BOTTOM")
                 if col == 1 then
-                    header:SetPoint("LEFT")
+                    Scale.Point(header, "LEFT")
                 else
-                    header:SetPoint("LEFT", headerRow[col-1], "RIGHT", 2, 0)
+                    Scale.Point(header, "LEFT", headerRow[col-1], "RIGHT", 2, 0)
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
-                header.text:SetFont(textFont.font, textFont.size)
+                header.text:SetFontObject("SystemFont_Shadow_Med1")
                 header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
                 header.text:SetAllPoints()
 
-                local hR, hG, hB = _G.unpack(RealUI.classColor)
+                local hR, hG, hB = RealUI.charInfo.class.color:GetRGB()
                 local highlight = header:CreateTexture(nil, "ARTWORK")
                 highlight:SetColorTexture(hR, hG, hB)
-                highlight:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
-                highlight:SetPoint("RIGHT")
+                Scale.Point(highlight, "TOPLEFT", header, "BOTTOMLEFT", 0, -5)
+                Scale.Point(highlight, "RIGHT")
                 highlight:SetHeight(3)
                 header:SetHighlightTexture(highlight)
                 header.hl = highlight
@@ -382,7 +356,7 @@ local function SetupTextTable()
             local size = headerData.size[col]
             if size == "FIT" then
                 local cellWidth = header.text:GetStringWidth()
-                testCell:SetFont(textFont.font, textFont.size)
+                testCell:SetFontObject("SystemFont_Shadow_Med1")
                 for i = 1, #data do
                     testCell:SetText(data[i].info[col])
                     local newWidth = testCell:GetStringWidth()
@@ -452,8 +426,8 @@ local function SetupTextTable()
 end
 
 local function SetupTooltip(tooltip, block)
-    tooltip:SetHeaderFont(headerFont.object)
-    tooltip:SetFont(textFont.object)
+    tooltip:SetHeaderFont("Fancy16Font")
+    tooltip:SetFont("SystemFont_Shadow_Med1")
     tooltip:SmartAnchorTo(block)
     tooltip:SetAutoHideDelay(0.10, block)
     block.tooltip = tooltip
@@ -526,7 +500,11 @@ function Infobar:CreateBlocks()
     local ndbc = RealUI.db.char
 
     if not TextTableCellPrototype then
-        SetupFonts()
+        iconFont = {
+            font = fa.path,
+            outline = Infobar:GetFontOutline()
+        }
+
         SetupTextTable()
     end
 
@@ -539,7 +517,7 @@ function Infobar:CreateBlocks()
         local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
         local menuList = {
             {text = L["Start_Config"],
-                func = function() RealUI:LoadConfig("HuD") end,
+                func = function() RealUI.LoadConfig("HuD") end,
                 notCheckable = true,
             },
             {text = L["General_Lock"],
@@ -725,15 +703,16 @@ function Infobar:CreateBlocks()
                 setTimeOptions(block)
 
                 local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                alert:SetSize(177, alert.Text:GetHeight() + 42)
-                alert:SetPoint("BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
-                alert.Arrow:SetPoint("TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
+                Scale.Point(alert, "BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
+                Scale.Point(alert.Arrow, "TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
                 alert.CloseButton:SetScript("OnClick", function(btn)
                     alert:Hide()
                     alert.isHidden = true
                 end)
                 alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                alert.Text:SetWidth(145)
+                Scale.Width(alert.Text, 145)
+
+                Scale.Size(alert, 177, alert.Text:GetStringHeight() + 42)
                 block.alert = alert
 
                 Infobar:ScheduleRepeatingTimer(function()
@@ -908,7 +887,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local time, tableWidth = _G.GetTime(), RealUI.ModValue(320)
+        local time, tableWidth = _G.GetTime(), 320
         local guildData = {}
         local headerData = {
             sort = {
@@ -976,8 +955,7 @@ function Infobar:CreateBlocks()
                         local name = _G.Ambiguate(fullName, "guild")
 
                         -- Class color names
-                        local color = RealUI:GetClassColor(class, "hex")
-                        name = _G.PLAYER_CLASS_NO_SPEC:format(color, name)
+                        name = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[class].colorStr, name)
 
                         -- Tags
                         if isMobile then
@@ -988,8 +966,7 @@ function Infobar:CreateBlocks()
                         end
 
                         -- Difficulty color levels
-                        color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl))
-                        lvl = ("%s%d|r"):format(color, lvl)
+                        lvl = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
 
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
@@ -1114,7 +1091,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local ClassLookup, tableWidth = {}, RealUI.ModValue(300)
+        local ClassLookup, tableWidth = {}, 300
         local friendsData = {}
         local headerData = {
             sort = {
@@ -1185,7 +1162,7 @@ function Infobar:CreateBlocks()
 
                         if characterName then
                             if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
-                                name = nameFormat:format(bnetFriendColor, name, RealUI:GetClassColor(ClassLookup[class], "hex"), characterName)
+                                name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
                                     name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
@@ -1240,7 +1217,7 @@ function Infobar:CreateBlocks()
                     local name, level, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
                     if isOnline then
                         -- Class color names
-                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(RealUI:GetClassColor(ClassLookup[class], "hex"), name)
+                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, name)
 
                         if status == _G.CHAT_FLAG_AFK then
                             cName = PlayerStatus[1] .. cName
@@ -1360,7 +1337,7 @@ function Infobar:CreateBlocks()
                     if item.hasDura then
                         local min, max = _G.GetInventoryItemDurability(slotID)
                         if max then
-                            item.dura = RealUI:GetSafeVals(min, max)
+                            item.dura = RealUI.GetSafeVals(min, max)
                             item.min, item.max = min, max
                             if lowDur > item.dura then
                                 lowDur, lowSlot = item.dura, slotID
@@ -1376,15 +1353,15 @@ function Infobar:CreateBlocks()
                 end
                 local alert = block.alert
                 if lowDur < 0.1 and not alert.isHidden then
-                    alert:SetSize(177, alert.Text:GetHeight() + 42)
-                    alert.Arrow:SetPoint("TOP", alert, "BOTTOM", -30, 4)
-                    alert:SetPoint("BOTTOM", block, "TOP", 30, 18)
+                    Scale.Size(alert, 177, alert.Text:GetHeight() + 42)
+                    Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", -30, 4)
+                    Scale.Point(alert, "BOTTOM", block, "TOP", 30, 18)
                     alert.CloseButton:SetScript("OnClick", function(btn)
                         alert:Hide()
                         alert.isHidden = true
                     end)
                     alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
-                    alert.Text:SetWidth(145)
+                    Scale.Width(alert.Text, 145)
                     alert:Show()
                     alert.isHidden = false
                 else
@@ -1567,7 +1544,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
                     tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
 
-                    local minAP, maxAP = artifact.power, max(artifact.power, artifact.maxPower)
+                    local minAP, maxAP = artifact.power, _G.max(artifact.power, artifact.maxPower)
                     local artStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minAP), RealUI:ReadableNumber(maxAP), (minAP/maxAP)*100)
                     lineNum = tooltip:AddLine(RealUI:ReadableNumber(artifact.unspentPower), artStatus)
                     tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
@@ -1650,7 +1627,9 @@ function Infobar:CreateBlocks()
                 if nextState ~= dbc.progressState then
                     r, g, b = watchStates[nextState]:GetColor()
                     bar:SetStatusBarColor(r, g, b, alpha * 1.5)
-                    bar.bg:SetColorTexture(0, 0, 0, alpha)
+
+                    local bgColor = _G.Aurora.Color.frame
+                    bar.bg:SetColorTexture(bgColor.r, bgColor.g, bgColor.b, alpha)
                 end
                 nextState = watchStates[nextState]:GetNext()
             end
@@ -1673,7 +1652,7 @@ function Infobar:CreateBlocks()
 
                 if _G.type(otherValue) == "number" then
                     local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                    main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
+                    Scale.Point(main.rested, "BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
                 end
 
@@ -1906,15 +1885,7 @@ function Infobar:CreateBlocks()
     end
 
     do -- Specialization
-        local specInfo, currentSpecIndex = {}
-        for specIndex = 1, RealUI.numSpecs do
-            local id, name, _, icon = _G.GetSpecializationInfoForClassID(RealUI.classID, specIndex)
-            specInfo[specIndex] = {
-                id = id,
-                name = name,
-                icon = icon,
-            }
-        end
+        local specInfo, specLines = RealUI.charInfo.specs, {}
         local equipSetsByIndex, equipSetsByID = {}, {}
         local layout = {
             L["Layout_DPSTank"],
@@ -1939,7 +1910,7 @@ function Infobar:CreateBlocks()
                     _G.SetLootSpecialization(specInfo[specIndex].id)
                 else
                     if not _G.InCombatLockdown() then
-                        if specIndex == currentSpecIndex then
+                        if specIndex == specInfo.current.index then
                             if dbc.specgear[specIndex] >= 0 then
                                 EquipmentManager_EquipSet(dbc.specgear[specIndex])
                             end
@@ -1954,7 +1925,7 @@ function Infobar:CreateBlocks()
             elseif button == "RightButton" then
                 if _G.IsAltKeyDown() then
                     dbc.specgear[specIndex] = -1
-                    tooltip:SetCell(specInfo[specIndex].line, 2, "---")
+                    tooltip:SetCell(specLines[specIndex], 2, "---")
                 else
                     local numEquipSets = _G.GetNumEquipmentSets()
                     if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then
@@ -1967,7 +1938,7 @@ function Infobar:CreateBlocks()
                             end
                         end
                     end
-                    tooltip:SetCell(specInfo[specIndex].line, 2, equipSetsByID[dbc.specgear[specIndex]].name)
+                    tooltip:SetCell(specLines[specIndex], 2, equipSetsByID[dbc.specgear[specIndex]].name)
                 end
             end
         end
@@ -1990,16 +1961,15 @@ function Infobar:CreateBlocks()
                 end
             end
 
-            for specIndex = 1, RealUI.numSpecs do
+            for specIndex = 1, #specInfo do
                 if not equipSetsByID[dbc.specgear[specIndex]] then
                     dbc.specgear[specIndex] = -1
                 end
             end
         end
         local function UpdateBlock(block)
-            currentSpecIndex = _G.GetSpecialization()
-            block.dataObj.icon = specInfo[currentSpecIndex].icon
-            block.dataObj.text = specInfo[currentSpecIndex].name
+            block.dataObj.icon = specInfo[specInfo.current.index].icon
+            block.dataObj.text = specInfo[specInfo.current.index].name
         end
 
         local lootSpec, hintLine
@@ -2034,12 +2004,12 @@ function Infobar:CreateBlocks()
 
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
-                for specIndex = 1, RealUI.numSpecs do
+                for specIndex = 1, #RealUI.charInfo.specs do
                     local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]]
                     lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
-                    specInfo[specIndex].line = lineNum
-                    if specIndex == currentSpecIndex then
+                    specLines[specIndex] = lineNum
+                    if specIndex == specInfo.current.index then
                         tooltip:SetLineTextColor(lineNum, _G.unpack(RealUI.media.colors.orange))
                     end
                 end
@@ -2060,10 +2030,10 @@ function Infobar:CreateBlocks()
                 Infobar:debug("spec: OnEvent", block.side, event, ...)
                 if event == "EQUIPMENT_SETS_CHANGED" then
                     UpdateGearSets()
-                elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
+                elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
                     UpdateBlock(block)
-                    if ndbc.layout.spec[currentSpecIndex] ~= ndbc.layout.current then
-                        ndbc.layout.current = ndbc.layout.spec[currentSpecIndex]
+                    if ndbc.layout.spec[specInfo.current.index] ~= ndbc.layout.current then
+                        ndbc.layout.current = ndbc.layout.spec[specInfo.current.index]
                         RealUI:UpdateLayout()
                     end
 
@@ -2074,7 +2044,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             events = {
-                "ACTIVE_TALENT_GROUP_CHANGED",
+                "PLAYER_SPECIALIZATION_CHANGED",
                 "EQUIPMENT_SETS_CHANGED",
                 "EQUIPMENT_SWAP_FINISHED",
                 "PLAYER_EQUIPMENT_CHANGED",
@@ -2270,7 +2240,7 @@ function Infobar:CreateBlocks()
             -- if there are no connected realms, the return is just an empty table.
             connectedRealms[1] = RealUI.realmNormalized
         end
-        local tokens, tableWidth = {}, RealUI.ModValue(250)
+        local tokens, tableWidth = {}, 250
         local currencyData = {}
         local headerData = {
             info = {
@@ -2293,7 +2263,7 @@ function Infobar:CreateBlocks()
             OnEnable = function(block)
                 Infobar:debug("currency: OnEnable", block.side)
                 currencyDB = RealUI.db.global.currency
-                charDB = currencyDB[RealUI.realmNormalized][RealUI.faction][RealUI.charName]
+                charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
                 if not currencyStates[dbc.currencyState] then
                     dbc.currencyState = "money"
                 end
@@ -2359,35 +2329,36 @@ function Infobar:CreateBlocks()
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local realm_faction = realm.."-"..RealUI.faction
-                        local factionDB = currencyDB[realm][RealUI.faction]
-                        for name, data in next, factionDB do
-                            local classColor = RealUI:GetClassColor(data.class, "hex")
-                            name = charName:format(classColor, name)
-                            local money = GetMoneyString(data.money, true)
-                            realmMoneyTotal = realmMoneyTotal + data.money
+                        local factionDB = currencyDB[realm][RealUI.charInfo.faction]
+                        if factionDB then
+                            local realm_faction = realm.."-"..RealUI.charInfo.faction
+                            for name, data in next, factionDB do
+                                name = charName:format(_G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
+                                local money = GetMoneyString(data.money, true)
+                                realmMoneyTotal = realmMoneyTotal + data.money
 
-                            _G.table.wipe(tokens)
-                            for i = 1, _G.MAX_WATCHED_TOKENS do
-                                if data["token"..i] then
-                                    local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                    local amount = data[data["token"..i]] or 0
-                                    tokens[i] = TOKEN_STRING:format(texture, amount)
-                                    tokens[i+3] = tokenName
-                                else
-                                    tokens[i] = "---"
+                                _G.table.wipe(tokens)
+                                for i = 1, _G.MAX_WATCHED_TOKENS do
+                                    if data["token"..i] then
+                                        local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                        local amount = data[data["token"..i]] or 0
+                                        tokens[i] = TOKEN_STRING:format(texture, amount)
+                                        tokens[i+3] = tokenName
+                                    else
+                                        tokens[i] = "---"
+                                    end
                                 end
-                            end
 
-                            _G.tinsert(currencyData, {
-                                id = #currencyData + 1,
-                                info = {
-                                    name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                                },
-                                meta = {
-                                    realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                }
-                            })
+                                _G.tinsert(currencyData, {
+                                    id = #currencyData + 1,
+                                    info = {
+                                        name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                                    },
+                                    meta = {
+                                        realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                                    }
+                                })
+                            end
                         end
                     end
                 end

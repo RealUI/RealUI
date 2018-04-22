@@ -57,7 +57,6 @@ end
 
 ------------------------------------------------------------------------
 
-local classColor
 local function AddTooltipInfo(tooltip, currency, includePlayer)
     local spaced
     for i = (includePlayer and 1 or 2), #playerList do
@@ -69,10 +68,8 @@ local function AddTooltipInfo(tooltip, currency, includePlayer)
                 spaced = true
             end
             local r, g, b
-            local class = realmDB[name].class
-            if class then
-                classColor = RealUI:GetClassColor(class)
-                r, g, b = classColor[1], classColor[2], classColor[3]
+            if realmDB[name].class then
+                r, g, b = _G.CUSTOM_CLASS_COLORS[realmDB[name].class]:GetRGB()
             else
                 r, g, b = 0.5, 0.5, 0.5
             end
@@ -147,7 +144,7 @@ end
 -- Initialization --
 --------------------
 function CurrencyTip:OnInitialize()
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI.faction ~= "Neutral")
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI.charInfo.faction ~= "Neutral")
 end
 
 function CurrencyTip:OnEnable()
@@ -155,11 +152,12 @@ function CurrencyTip:OnEnable()
     self:RegisterEvent("PLAYER_MONEY")
     RealUI:InitCurrencyDB()
 
-    DB = RealUI.db.global.currency
-    realmDB = DB[RealUI.realmNormalized][RealUI.faction]
-    charDB = realmDB[RealUI.charName]
+    local player  = RealUI.charInfo.name
 
-    local player  = RealUI.charName
+    DB = RealUI.db.global.currency
+    realmDB = DB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction]
+    charDB = realmDB[player]
+
     for name, data in next, realmDB do
         if name ~= player then
             _G.tinsert(playerList, name)

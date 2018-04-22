@@ -352,7 +352,7 @@ function RealUI:HideTutorial()
     _G.UIFrameFadeOut(_G.RealUITutorialBG, 0.3, 0.5, 0)
     _G.RealUITutorialLogo:Hide()
     RealUI.Debug("Config", "HideTutorial")
-    RealUI:LoadConfig("HuD")
+    RealUI.LoadConfig("HuD")
     RealUI.db.global.tutorial.stage = -1
 end
 
@@ -402,10 +402,7 @@ function RealUI:InitTutorial()
     tBG:SetFrameLevel(0)
     tBG:SetWidth(_G.UIParent:GetWidth() + 2000)
     tBG:SetHeight(_G.UIParent:GetHeight() + 2000)
-    tBG:SetBackdrop({
-        bgFile = [[Interface\AddOns\nibRealUI\Media\Plain]],
-    })
-    tBG:SetBackdropColor(0, 0, 0, 0.4)
+    _G.Aurora.Base.SetBackdrop(tBG, _G.Aurora.Color.frame)
 
     -- Logo
     local rLogo = _G.UIParent:CreateTexture("RealUITutorialLogo", "ARTWORK")
@@ -418,7 +415,7 @@ function RealUI:InitTutorial()
     btnOpen:SetPoint("CENTER")
     btnOpen:SetText(ButtonTexts.tutorial)
     btnOpen:SetAttribute("type", "macro")
-    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.charName))
+    btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.charInfo.name))
     RealUI:AddButtonHighlight(btnOpen)
 
     local btnSkip = createTextButton("RealUITutorialButtonSkip", _G.UIParent)
@@ -432,7 +429,7 @@ function RealUI:InitTutorial()
         btnSkip:Hide()
         tBG:Hide()
         RealUI.Debug("Config", "SkipTutorial")
-        RealUI:LoadConfig("HuD")
+        RealUI.LoadConfig("HuD")
         RealUI.db.global.tutorial.stage = -1
     end)
     RealUI:AddButtonHighlight(btnSkip)

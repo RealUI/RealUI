@@ -457,13 +457,7 @@ local OddList = {
 
 local buttons = {}
 local button = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
-button:SetBackdrop({
-    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    edgeSize = 1,
-})
-button:SetBackdropBorderColor(0, 0, 0)
-button:SetBackdropColor(0, 0, 0, .5)
+_G.Aurora.Base.SetBackdrop(button, _G.Aurora.Color.frame)
 button:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
 button:SetSize(136, 32)
 button:SetFrameStrata("LOW")
@@ -789,7 +783,7 @@ function MinimapAdv:GetLFGList(event, arg)
             local _, numActiveApplicants = _G.C_LFGList.GetNumApplicants()
             status = _G.LFG_LIST_PENDING_APPLICANTS:format(numActiveApplicants)
         end
-        local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+        local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
         MMFrames.info.LFG.text:SetFormattedText("|cff%sLFG:|r %s", colorOrange, status)
         MMFrames.info.LFG:SetHeight(MMFrames.info.LFG.text:GetStringHeight())
         infoTexts.LFG.shown = true
@@ -831,7 +825,7 @@ function MinimapAdv:GetLFGQueue(event, ...)
                 end
             end
 
-            local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+            local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
             queueFrame.text:SetFormattedText(infoText.format, colorOrange, queueStr)
             queueFrame:SetHeight(queueFrame.text:GetStringHeight())
             queueFrame.myWait = myWait
@@ -977,8 +971,8 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
-        self:debug("IsInInstance", RealUI:ColorTableToStr(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
-        MMFrames.info.LootSpec.text:SetText("|cff"..RealUI:ColorTableToStr(RealUI.media.colors.blue).._G.LOOT..":|r "..RealUI:GetCurrentLootSpecName())
+        self:debug("IsInInstance", RealUI.GetColorString(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
+        MMFrames.info.LootSpec.text:SetFormattedText("|cff%s%s:|r %s", RealUI.GetColorString(RealUI.media.colors.blue), _G.LOOT, RealUI:GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
     else
@@ -1099,7 +1093,7 @@ end
 local function Toggle_OnEnter()
     MMFrames.toggle.mouseover = true
 
-    MMFrames.toggle.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.toggle.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.toggle:SetFrameLevel(6)
 
     MMFrames.buttonframe.tooltip:Hide()
@@ -1123,14 +1117,14 @@ end
 ---- Config Button ----
 local function Config_OnMouseDown()
     RealUI.Debug("Config", "Minimap")
-    RealUI:LoadConfig("RealUI", "uiTweaks", "minimap")
+    RealUI.LoadConfig("RealUI", "uiTweaks", "minimap")
     _G.Lib_CloseDropDownMenus()
 end
 
 local function Config_OnEnter()
     MMFrames.config.mouseover = true
 
-    MMFrames.config.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.config.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.config:SetFrameLevel(6)
 
     if ExpandedState == 0 then
@@ -1164,7 +1158,7 @@ end
 local function Tracking_OnEnter()
     MMFrames.tracking.mouseover = true
 
-    MMFrames.tracking.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.tracking.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.tracking:SetFrameLevel(6)
 
     if ExpandedState == 0 then
@@ -1228,7 +1222,7 @@ end
 local function Farm_OnEnter()
     MMFrames.farm.mouseover = true
 
-    MMFrames.farm.icon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.farm.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.farm:SetFrameLevel(6)
 
     if ExpandedState == 0 then
@@ -1457,7 +1451,7 @@ end
 
 function MinimapAdv:PLAYER_LOGIN(event, ...)
     self:debug(event, ...)
-    MMFrames.buttonframe.edge:SetColorTexture(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.buttonframe.edge:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
 end
 
 -- Register events
@@ -1515,7 +1509,7 @@ end
 --------------------------
 
 -- Frame Template
-local function NewInfoFrame(name, parent, format, size2)
+local function NewInfoFrame(name, parent, format)
     local NewFrame = _G.CreateFrame("Frame", "MinimapAdv_"..name, parent)
     NewFrame:SetSize(_G.Minimap:GetWidth(), 12)
     NewFrame:SetFrameStrata("LOW")
@@ -1524,11 +1518,7 @@ local function NewInfoFrame(name, parent, format, size2)
     local text = NewFrame:CreateFontString(nil, "ARTWORK")
     text:SetNonSpaceWrap(true)
     text:SetAllPoints()
-    if size2 then
-        text:SetFontObject("RealUIFont_Pixel")
-    else
-        text:SetFontObject("RealUIFont_PixelSmall")
-    end
+    text:SetFontObject("SystemFont_Shadow_Med1_Outline")
     NewFrame.text = text
 
     if format then
@@ -1546,7 +1536,7 @@ local function NewInfoFrame(name, parent, format, size2)
                 else
                     queueStr = ("%s"):format(timeInQueue)
                 end
-                local colorOrange = RealUI:ColorTableToStr(RealUI.media.colors.orange)
+                local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
                 self.text:SetFormattedText(format, colorOrange, queueStr)
                 self:SetHeight(self.text:GetStringHeight())
                 self.updateThrottle = 0.1;
@@ -1605,7 +1595,7 @@ local function CreateFrames()
 
     MMFrames.buttonframe.tooltip = MMFrames.buttonframe:CreateFontString()
     MMFrames.buttonframe.tooltip:SetPoint("BOTTOMLEFT", MMFrames.buttonframe, "BOTTOMLEFT", 78.5, 4.5)
-    MMFrames.buttonframe.tooltip:SetFontObject("RealUIFont_PixelSmall")
+    MMFrames.buttonframe.tooltip:SetFontObject("SystemFont_Shadow_Med1")
     MMFrames.buttonframe.tooltip:SetTextColor(0.8, 0.8, 0.8)
     MMFrames.buttonframe.tooltip:Hide()
 
@@ -1614,7 +1604,7 @@ local function CreateFrames()
     MMFrames.buttonframe.tooltipIcon:SetWidth(16)
     MMFrames.buttonframe.tooltipIcon:SetHeight(16)
     MMFrames.buttonframe.tooltipIcon:SetTexture(Textures.TooltipIcon)
-    MMFrames.buttonframe.tooltipIcon:SetVertexColor(RealUI.classColor[1], RealUI.classColor[2], RealUI.classColor[3])
+    MMFrames.buttonframe.tooltipIcon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.buttonframe.tooltipIcon:Hide()
 
     -- Toggle Button
@@ -1640,7 +1630,7 @@ local function CreateFrames()
         local name, texture, category, nested, numTracking;
         local count = _G.GetNumTrackingTypes();
         local info;
-        local _, class = _G.UnitClass("player");
+        local class = RealUI.charInfo.class.token
 
         if (level == 1) then
             info = _G.Lib_UIDropDownMenu_CreateInfo();
@@ -1722,13 +1712,13 @@ local function CreateFrames()
     MMFrames.farm:SetScript("OnMouseDown", Farm_OnMouseDown)
 
     -- Info
-    MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap, true)
-    MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap, true)
-    MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap, true)
-    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap, nil, true)
-    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s", true)
-    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s", true)
-    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s", true)
+    MMFrames.info.Location = NewInfoFrame("Location", _G.Minimap)
+    MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap)
+    MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap)
+    MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap)
+    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s")
+    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s")
+    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s")
 
     -- Coordinates
     local lastUpdate, threshold = 0, 0.5

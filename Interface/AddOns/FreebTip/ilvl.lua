@@ -1,14 +1,10 @@
 local ADDON_NAME, ns = ...
 
-local NORMAL_FONT_COLOR = NORMAL_FONT_COLOR
-local ITEM_LEVEL_ABBR = ITEM_LEVEL_ABBR
-local GetMouseFocus = GetMouseFocus
-local GameTooltip = GameTooltip
-local GetTime = GetTime
-local UnitGUID = UnitGUID
+-- [[ Lua Globals ]]
+-- luacheck: globals next type
 
-local ItemUpgradeInfo = LibStub("LibItemUpgradeInfo-1.0")
-local LibInspect = LibStub("LibInspect")
+local ItemUpgradeInfo = _G.LibStub("LibItemUpgradeInfo-1.0")
+local LibInspect = _G.LibStub("LibInspect")
 
 local maxAge = 600 -- 10 mins
 local quickRefresh = 30
@@ -16,39 +12,26 @@ local quickRefresh = 30
 --number of secs to cache each player
 LibInspect:SetMaxAge(maxAge)
 
-ns.Debug = RealUI.GetDebug(ADDON_NAME) -- FreebTipiLvl
-
 local cache = {}
 local ilvlText = "|cffFFFFFF%d|r"
 
-local function getUnit()
-    local mFocus = GetMouseFocus()
-    if mFocus then
-        -- mFocus might somehow be a FontString, which doesn't have GetAttribute
-        unit = mFocus.unit or (mFocus.GetAttribute and mFocus:GetAttribute("unit"))
-    end
-
-    return unit or "mouseover"
-end
-
 local function ShowiLvl(score)
-    if score > 0 and not GameTooltip.freebtipiLvlSet then
-        GameTooltip:AddDoubleLine(ITEM_LEVEL_ABBR, ilvlText:format(score), NORMAL_FONT_COLOR.r,
-        NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
-        GameTooltip.freebtipiLvlSet = true
-        GameTooltip:Show()
+    if score > 0 and not _G.GameTooltip.freebtipiLvlSet then
+        _G.GameTooltip:AddDoubleLine(_G.ITEM_LEVEL_ABBR, ilvlText:format(score), _G.NORMAL_FONT_COLOR.r, _G.NORMAL_FONT_COLOR.g, _G.NORMAL_FONT_COLOR.b)
+        _G.GameTooltip.freebtipiLvlSet = true
+        _G.GameTooltip:Show()
     end
 end
 
-local iLvlUpdate = CreateFrame"Frame"
+local iLvlUpdate = _G.CreateFrame("Frame")
 iLvlUpdate:SetScript("OnUpdate", function(self, elapsed)
     self.update = (self.update or 0) + elapsed
-    if(self.update < .1) then return end
+    if self.update < .1 then return end
 
-    local unit = getUnit()
-    local guid = UnitGUID(unit)
+    local unit = ns.GetUnit()
+    local guid = _G.UnitGUID(unit)
     local cacheGUID = cache[guid]
-    if(cacheGUID) then
+    if cacheGUID then
         ShowiLvl(cacheGUID.score)
     end
 
@@ -77,36 +60,35 @@ local slots = {
 }
 
 local TwoHanders = {
-    [LE_ITEM_WEAPON_AXE2H] = true,
-    [LE_ITEM_WEAPON_MACE2H] = true,
-    [LE_ITEM_WEAPON_SWORD2H] = true,
+    [_G.LE_ITEM_WEAPON_AXE2H] = true,
+    [_G.LE_ITEM_WEAPON_MACE2H] = true,
+    [_G.LE_ITEM_WEAPON_SWORD2H] = true,
 
-    [LE_ITEM_WEAPON_POLEARM] = true,
-    [LE_ITEM_WEAPON_STAFF] = true,
+    [_G.LE_ITEM_WEAPON_POLEARM] = true,
+    [_G.LE_ITEM_WEAPON_STAFF] = true,
 
-    [LE_ITEM_WEAPON_BOWS] = true,
-    [LE_ITEM_WEAPON_CROSSBOW] = true,
-    [LE_ITEM_WEAPON_GUNS] = true,
+    [_G.LE_ITEM_WEAPON_BOWS] = true,
+    [_G.LE_ITEM_WEAPON_CROSSBOW] = true,
+    [_G.LE_ITEM_WEAPON_GUNS] = true,
 
-    [LE_ITEM_WEAPON_FISHINGPOLE] = true
+    [_G.LE_ITEM_WEAPON_FISHINGPOLE] = true
 }
 local DualWield = {
-    [LE_ITEM_WEAPON_AXE1H] = true,
-    [LE_ITEM_WEAPON_MACE1H] = true,
-    [LE_ITEM_WEAPON_SWORD1H] = true,
+    [_G.LE_ITEM_WEAPON_AXE1H] = true,
+    [_G.LE_ITEM_WEAPON_MACE1H] = true,
+    [_G.LE_ITEM_WEAPON_SWORD1H] = true,
 
-    [LE_ITEM_WEAPON_WARGLAIVE] = true,
-    [LE_ITEM_WEAPON_DAGGER] = true,
+    [_G.LE_ITEM_WEAPON_WARGLAIVE] = true,
+    [_G.LE_ITEM_WEAPON_DAGGER] = true,
 
-    [LE_ITEM_WEAPON_GENERIC] = true,
-    [LE_ITEM_ARMOR_SHIELD] = true,
+    [_G.LE_ITEM_WEAPON_GENERIC] = true,
+    [_G.LE_ITEM_ARMOR_SHIELD] = true,
 }
 
 local artifactcolor
 local function GetItemLevel(guid, data, age)
     if not artifactcolor then artifactcolor =_G.ITEM_QUALITY_COLORS[_G.LE_ITEM_QUALITY_ARTIFACT].hex end
     if ((not guid) or (data and type(data.items) ~= "table")) then return end
-
 
     local totalILvl = 0
     local hasTwoHander, isDualWield
@@ -119,6 +101,7 @@ local function GetItemLevel(guid, data, age)
             if link then
                 local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
                 if rarity and subTypeID then
+                    --ilvl = _G.GetDetailedItemLevelInfo(link)
                     if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
                         ilvl = ItemUpgradeInfo:GetUpgradedItemLevel(link)
                     end
@@ -170,7 +153,7 @@ local function GetItemLevel(guid, data, age)
     -- Artifacts are counted as one item
     if mainArtifact or offArtifact then
         ns.Debug("Artifacts", mainArtifact, offArtifact)
-        artifactILvl = max(mainArtifact or 0, offArtifact or 0)
+        artifactILvl = _G.max(mainArtifact or 0, offArtifact or 0)
         totalILvl = totalILvl + artifactILvl
 
         if offArtifact then
@@ -197,7 +180,7 @@ end
 
 local function doRefresh(guid)
     if cache[guid] then
-        return cache[guid].score == 0 or cache[guid].time < (GetTime() - maxAge)
+        return cache[guid].score == 0 or cache[guid].time < (_G.GetTime() - maxAge)
     else
         return true
     end
@@ -210,10 +193,10 @@ LibInspect:AddHook(ADDON_NAME, "items", function(guid, ...)
         if result and result > 0 then
             ns.Debug("totalILvl", result, numItems)
             score = result / numItems
-            time = GetTime()
+            time = _G.GetTime()
         else
             score = 0
-            time = GetTime() - (maxAge - quickRefresh)
+            time = _G.GetTime() - (maxAge - quickRefresh)
         end
         ns.Debug("Set score", score)
         cache[guid] = {
@@ -225,15 +208,18 @@ LibInspect:AddHook(ADDON_NAME, "items", function(guid, ...)
     end
 end)
 
-local function OnSetUnit(self)
-    local unit = getUnit()
+_G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
+    local unit = ns.GetUnit()
     self.freebtipiLvlSet = false
-    if UnitIsUnit(unit, "player") then
-        local _, avgItemLevelEquipped = GetAverageItemLevel()
+    --[[
+    LibInspect:RequestData("items", unit)
+    iLvlUpdate:Show()
+    ]]
+    if _G.UnitIsUnit(unit, "player") then
+        local _, avgItemLevelEquipped = _G.GetAverageItemLevel()
         ShowiLvl(avgItemLevelEquipped)
     else
-        local caninspect = LibInspect:RequestData("items", unit)
+        LibInspect:RequestData("items", unit)
         iLvlUpdate:Show()
     end
-end
-GameTooltip:HookScript("OnTooltipSetUnit", OnSetUnit)
+end)

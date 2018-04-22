@@ -94,15 +94,13 @@ local function CreateInfoString(button, position)
         str:SetJustifyH("RIGHT")
         str:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5)
     end
-    str:SetFontObject(_G.RealUIFont_PixelSmall)
+    str:SetFontObject("NumberFont_Outline_Med")
 
     return str
 end
 
 local function ItemButton_Scaffold(self)
     self:SetSize(37, 37)
-    local _, height = _G.RealUI:GetResolutionVals(true)
-    local bordersize = 768 / height / (_G.GetCVar("uiScale") * _G.cBnivCfg.scale)
     local name = self:GetName()
     self.Icon = _G[name.."IconTexture"]
     self.Count = _G[name.."Count"]
@@ -111,10 +109,7 @@ local function ItemButton_Scaffold(self)
     self.Border = _G.CreateFrame("Frame", nil, self)
     self.Border:SetPoint("TOPLEFT", self.Icon, 0, 0)
     self.Border:SetPoint("BOTTOMRIGHT", self.Icon, 0, 0)
-    self.Border:SetBackdrop({
-        edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = bordersize,
-    })
-    self.Border:SetBackdropBorderColor(0, 0, 0, 0)
+    _G.Aurora.Base.SetBackdrop(self.Border, _G.Aurora.Color.frame)
 
     self.TopString = CreateInfoString(self, "TOP")
     self.BottomString = CreateInfoString(self, "BOTTOM")

@@ -12,7 +12,7 @@ UnitFrames.focustarget = {
     create = function(self)
         self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
         self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
-        self.Name:SetFontObject(_G.RealUIFont_Pixel)
+        self.Name:SetFontObject("SystemFont_Shadow_Med1")
         self:Tag(self.Name, "[realui:name]")
     end,
     health = {

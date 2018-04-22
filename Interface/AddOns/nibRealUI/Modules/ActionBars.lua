@@ -187,13 +187,16 @@ function ActionBars:ApplyABSettings(tag)
 
             local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
             local bar, point = profileActionBars["actionbars"][id]
-            if id <= 3 then
-                point = BarPositions[id] == "TOP" and "CENTER" or "BOTTOM"
-            else
+            if isVertBar then
                 point = BarPositions[id]
+                bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
+            else
+                point = BarPositions[id] == "TOP" and "CENTER" or "BOTTOM"
+                bar["flyoutDirection"] = BarPositions[id] == "TOP" and "DOWN" or "UP"
             end
 
             ActionBars:debug(id, "Points", x, y, point)
+            bar["padding"] = fixedSettings.buttonPadding - 10
             bar["position"] = {
                 ["x"] = x,
                 ["y"] = y,
@@ -202,13 +205,7 @@ function ActionBars:ApplyABSettings(tag)
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
-            bar["padding"] = fixedSettings.buttonPadding - 10
 
-            if id < 4 then
-                bar["flyoutDirection"] = sidePositions[id] == "UP"
-            else
-                bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
-            end
             BTBar:SetButtons()
         end
     end
@@ -297,6 +294,20 @@ function ActionBars:ApplyABSettings(tag)
         end
         local BT4EAB = BT4:GetModule("ExtraActionBar", true)
         if BT4EAB then BT4EAB:ApplyConfig() end
+
+        local profileZAB = BT4DB["namespaces"]["ZoneAbilityBar"]["profiles"][prof]
+        if profileZAB then
+            profileZAB["position"] = {
+                ["y"] = eabY,
+                ["x"] = -(eabX + 64),
+                ["point"] = "BOTTOM",
+                ["scale"] = 0.985,
+                ["growHorizontal"] = "RIGHT",
+                ["growVertical"] = "DOWN",
+            }
+        end
+        local BT4ZAB = BT4:GetModule("ZoneAbilityBar", true)
+        if BT4ZAB then BT4ZAB:ApplyConfig() end
     end
 
     -- Stance Bar
@@ -472,7 +483,7 @@ function ActionBars:BarChatCommand()
     if not (BT4) then return end
     if not _G.InCombatLockdown() then
         RealUI.Debug("Config", "/bt")
-        RealUI:LoadConfig("HuD", "other", "actionbars")
+        RealUI.LoadConfig("HuD", "other", "actionbars")
     end
 end
 

@@ -130,14 +130,6 @@ function MirrorBar:MIRROR_TIMER_START(event, timer, value, maxValue, scale, paus
     self:UpdateShown()
 end
 
--- Colors
-function MirrorBar:UpdateColors()
-    -- BG + Border
-    local color = RealUI.media.background
-    MBFrames.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
-    MBFrames.bg:SetBackdropBorderColor(0, 0, 0, 1)
-end
-
 -- Position
 function MirrorBar:UpdatePosition()
     -- BG + Border
@@ -157,7 +149,6 @@ function MirrorBar:RefreshMod()
     db = self.db.profile
 
     MirrorBar:UpdatePosition()
-    MirrorBar:UpdateColors()
 end
 
 function MirrorBar:PLAYER_LOGIN()
@@ -170,13 +161,7 @@ function MirrorBar:CreateFrames()
     -- BG + Border
     MBFrames.bg = _G.CreateFrame("Frame", "RealUI_MirrorBar", _G.UIParent)
     MBFrames.bg:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
-
-    MBFrames.bg:SetBackdrop({
-        bgFile = RealUI.media.textures.plain,
-        edgeFile = RealUI.media.textures.plain,
-        tile = false, tileSize = 0, edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0}
-    })
+    _G.Aurora.Base.SetBackdrop(MBFrames.bg)
 
     -- Bar + Text
     MBFrames.bar = _G.CreateFrame("StatusBar", nil, MBFrames.bg)
@@ -186,8 +171,8 @@ function MirrorBar:CreateFrames()
     MBFrames.bar:SetPoint("BOTTOMRIGHT", MBFrames.bg, "BOTTOMRIGHT", -1, 1)
 
     MBFrames.text = MBFrames.bar:CreateFontString(nil, "OVERLAY")
-    MBFrames.text:SetPoint("CENTER", MBFrames.bar, "CENTER", 1.5, -0.5)
-    MBFrames.text:SetFontObject(_G.RealUIFont_Pixel)
+    MBFrames.text:SetPoint("CENTER", MBFrames.bar)
+    MBFrames.text:SetFontObject("SystemFont_Shadow_Med1")
     MBFrames.text:SetTextColor(1, 1, 1, 1)
 
     -- Update Power

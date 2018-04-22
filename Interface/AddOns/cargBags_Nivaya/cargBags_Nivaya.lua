@@ -4,6 +4,9 @@ local cargBags = ns.cargBags
 -- Lua Globals --
 local next, ipairs = _G.next, _G.ipairs
 
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+
 local cargBags_Nivaya = _G.CreateFrame("Frame", ADDON_NAME, _G.UIParent)
 cargBags_Nivaya:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
 cargBags_Nivaya:RegisterEvent("ADDON_LOADED")
@@ -27,14 +30,7 @@ do  --Replacement for UIDropDownMenu
     cbNivDropdown:SetFrameStrata("FULLSCREEN_DIALOG")
     cbNivDropdown:SetSize(defaultWidth + frameInset, 32)
     cbNivDropdown:SetClampedToScreen(true)
-
-    local inset = 1
-    cbNivDropdown:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        tile = true, tileSize = 16, edgeSize = 1,
-        insets = { left = inset, right = inset, top = inset, bottom = inset }})
-    cbNivDropdown:SetBackdropColor(_G.unpack(_G.RealUI.media.window))
-    cbNivDropdown:SetBackdropBorderColor(0, 0, 0)
+    Base.SetBackdrop(cbNivDropdown)
 
     function cbNivDropdown:CreateButton()
         local button = _G.CreateFrame("Button", nil, self)
@@ -44,7 +40,7 @@ do  --Replacement for UIDropDownMenu
         local fstr = button:CreateFontString()
         fstr:SetJustifyH("LEFT")
         fstr:SetJustifyV("MIDDLE")
-        fstr:SetFontObject(_G.RealUIFont_PixelSmall)
+        fstr:SetFontObject("SystemFont_Shadow_Med1")
         fstr:SetPoint("LEFT", button, "LEFT", 0, 0)
         button.Text = fstr
 

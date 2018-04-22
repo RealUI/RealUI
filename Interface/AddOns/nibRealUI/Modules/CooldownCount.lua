@@ -8,7 +8,7 @@ local next = _G.next
 -- RealUI --
 local RealUI = private.RealUI
 local round = RealUI.Round
-local db, ndb
+local db
 
 local MODNAME = "CooldownCount"
 local CooldownCount = RealUI:NewModule(MODNAME, "AceTimer-3.0", "AceEvent-3.0")
@@ -24,9 +24,7 @@ local DAYISH, HOURISH, MINUTEISH = 3600 * 23.5, 60 * 59.5, 59.5 --used for forma
 local HALFDAYISH, HALFHOURISH, HALFMINUTEISH = DAY/2 + 0.5, HOUR/2 + 0.5, MINUTE/2 + 0.5 --used for calculating next update times
 
 local SECONDS_FORMAT, MINUTES_FORMAT, HOURS_FORMAT, DAYS_FORMAT, EXPIRING_FORMAT
-local function ColorTableToStr(vals)
-    return ("%02x%02x%02x"):format(vals[1] * 255, vals[2] * 255, vals[3] * 255)
-end
+local GetColorString = RealUI.GetColorString
 
 --returns both what text to display, and how long until the next update
 local function getTimeText(s)
@@ -51,11 +49,11 @@ local function getTimeText(s)
 end
 
 local function setTimeFormats()
-    EXPIRING_FORMAT = "|cff"..ColorTableToStr(db.colors.expiring).."%d|r"
-    SECONDS_FORMAT = "|cff"..ColorTableToStr(db.colors.seconds).."%d|r"
-    MINUTES_FORMAT = "|cff"..ColorTableToStr(db.colors.minutes).."%dm|r"
-    HOURS_FORMAT = "|cff"..ColorTableToStr(db.colors.hours).."%dh|r"
-    DAYS_FORMAT = "|cff"..ColorTableToStr(db.colors.days).."%dd|r"
+    EXPIRING_FORMAT = "|cff"..GetColorString(db.colors.expiring).."%d|r"
+    SECONDS_FORMAT = "|cff"..GetColorString(db.colors.seconds).."%d|r"
+    MINUTES_FORMAT = "|cff"..GetColorString(db.colors.minutes).."%dm|r"
+    HOURS_FORMAT = "|cff"..GetColorString(db.colors.hours).."%dh|r"
+    DAYS_FORMAT = "|cff"..GetColorString(db.colors.days).."%dd|r"
 end
 
 ---------------
@@ -163,23 +161,22 @@ function CooldownCount:OnInitialize()
         },
     })
     db = self.db.profile
-    ndb = RealUI.db.profile
 
     if db.position then
         db.position = nil
     end
 
-    CD_FONT = {
-        font = ndb.media.font.standard[4],
-        size = 10,
-        flags = "OUTLINE"
-    }
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function CooldownCount:OnEnable()
-    setTimeFormats()
+    CD_FONT = {
+        font = RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.normal,
+        size = 10,
+        flags = "OUTLINE"
+    }
 
+    setTimeFormats()
     _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
         if not cd:IsForbidden() and not cd.noCooldownCount then
             if start > 0 then

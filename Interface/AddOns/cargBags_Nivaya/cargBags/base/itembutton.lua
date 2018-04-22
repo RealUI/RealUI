@@ -99,7 +99,7 @@ function ItemButton:Create(tpl, parent)
     bFS = _G[button:GetName().."Count"]
     bFS:ClearAllPoints()
     bFS:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1.5, 1.5);
-    bFS:SetFontObject(_G.RealUIFont_PixelSmall)
+    bFS:SetFontObject("NumberFont_Outline_Med")
 
     return button
 end

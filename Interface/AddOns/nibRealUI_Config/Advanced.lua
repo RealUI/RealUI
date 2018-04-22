@@ -11,9 +11,6 @@ local next, tostring = _G.next, _G.tostring
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
-local ndb = RealUI.db.profile
---local ndbc = RealUI.db.char
-local ndbg = RealUI.db.global
 
 local order = 0
 
@@ -96,7 +93,7 @@ local core do
                     order = 31,
                 },
                 bgAlpha = {
-                    name = L["Appearance_WinOpacity"],
+                    name = L["Appearance_FrameColor"],
                     type = "range",
                     isPercent = true,
                     min = 0, max = 1, step = 0.05,
@@ -531,442 +528,236 @@ end
 local skins do
     debug("Adv Skins")
     order = order + 1
-    local fonts do
-        local LSM = _G.LibStub("LibSharedMedia-3.0")
-        local Fonts = RealUI:GetModule("Fonts")
-        local db = Fonts.db.profile
-        local font = ndb.media.font
-        local outlines = {
-            "NONE",
-            "OUTLINE",
-            "THICKOUTLINE",
-            "OUTLINE, MONOCHROME",
-        }
-        fonts = {
-            name = L["Fonts"],
+
+    local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins")
+    local SkinsProfile = SkinsDB.profile
+    local function appGet(info)
+        return SkinsProfile[info[#info]]
+    end
+    local function appSet(info, value)
+        SkinsProfile[info[#info]] = value
+        RealUI:UpdateFrameStyle()
+    end
+
+    local LSM = _G.LibStub("LibSharedMedia-3.0")
+    local function fontGet(info)
+        for name, path in next, _G.AceGUIWidgetLSMlists.font do
+            if path == SkinsProfile.fonts[info[#info]] then
+                return name
+            end
+        end
+    end
+    local function fontSet(info, value)
+        SkinsProfile.fonts[info[#info]] = LSM:Fetch("font", value)
+    end
+
+    local Color = _G.Aurora.Color
+    local classColors do
+        classColors = {
+            name = _G.CLASS_COLORS,
             type = "group",
-            childGroups = "select",
-            order = 40,
             args = {
-                stdFonts = {
-                    name = L["Fonts_Standard"],
-                    type = "group",
-                    inline = true,
-                    order = 30,
-                    args = {
-                        sizeadjust = {
-                            name = L["Fonts_NormalOffset"],
-                            desc = L["Fonts_NormalOffsetDesc"],
-                            type = "range",
-                            min = -6, max = 6, step = 1,
-                            get = function(info) return db.standard.sizeadjust end,
-                            set = function(info, value)
-                                db.standard.sizeadjust = value
-                            end,
-                            order = 10,
-                        },
-                        changeYellow = {
-                            name = L["Fonts_ChangeYellow"],
-                            desc = L["Fonts_ChangeYellowDesc"],
-                            type = "toggle",
-                            get = function() return db.standard.changeYellow end,
-                            set = function(info, value)
-                                db.standard.changeYellow = value
-                                --Infobar:Refresh()
-                            end,
-                            order = 20,
-                        },
-                        yellowColor = {
-                            name = L["Fonts_YellowFont"],
-                            type = "color",
-                            disabled = function() return not db.standard.changeYellow end,
-                            get = function(info,r,g,b)
-                                return db.standard.yellowColor[1], db.standard.yellowColor[2], db.standard.yellowColor[3]
-                            end,
-                            set = function(info,r,g,b)
-                                db.standard.yellowColor[1] = r
-                                db.standard.yellowColor[2] = g
-                                db.standard.yellowColor[3] = b
-                            end,
-                            order = 21,
-                        },
-                        normal = {
-                            name = L["Fonts_Normal"],
-                            desc = L["Fonts_NormalDesc"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.standard[1]
-                            end,
-                            set = function(info, value)
-                                font.standard[1] = value
-                                font.standard[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 30,
-                        },
-                        header = {
-                            name = L["Fonts_Header"],
-                            desc = L["Fonts_HeaderDesc"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.header[1]
-                            end,
-                            set = function(info, value)
-                                font.header[1] = value
-                                font.header[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 40,
-                        },
-                        gap = {
-                            name = "",
-                            type = "header",
-                            order = 41,
-                        },
-                        font = {
-                            name = L["Fonts_Chat"],
-                            desc = L["Fonts_ChatDesc"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.chat[1]
-                            end,
-                            set = function(info, value)
-                                font.chat[1] = value
-                                font.chat[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 50,
-                        },
-                        outline = {
-                            name = L["Fonts_Outline"],
-                            type = "select",
-                            values = outlines,
-                            get = function()
-                                for k,v in next, outlines do
-                                    if v == font.chat[3] then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                font.chat[3] = outlines[value]
-                            end,
-                            order = 51,
-                        },
-                    },
-                },
-                small = {
-                    name = L["Fonts_PixelSmall"],
-                    type = "group",
-                    order = 10,
-                    args = {
-                        font = {
-                            name = L["Fonts_Font"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.pixel.small[1]
-                            end,
-                            set = function(info, value)
-                                font.pixel.small[1] = value
-                                font.pixel.small[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 10,
-                        },
-                        size = {
-                            name = _G.FONT_SIZE,
-                            type = "range",
-                            min = 6, max = 28, step = 1,
-                            get = function(info) return font.pixel.small[2] end,
-                            set = function(info, value)
-                                font.pixel.small[2] = value
-                            end,
-                            order = 20,
-                        },
-                        outline = {
-                            name = L["Fonts_Outline"],
-                            type = "select",
-                            values = outlines,
-                            get = function()
-                                for k,v in next, outlines do
-                                    if v == font.pixel.small[3] then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                font.pixel.small[3] = outlines[value]
-                            end,
-                            order = 30,
-                        },
-                    },
-                },
-                large = {
-                    name = L["Fonts_PixelLarge"],
-                    type = "group",
-                    order = 20,
-                    args = {
-                        font = {
-                            name = L["Fonts_Font"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.pixel.large[1]
-                            end,
-                            set = function(info, value)
-                                font.pixel.large[1] = value
-                                font.pixel.large[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 10,
-                        },
-                        size = {
-                            name = _G.FONT_SIZE,
-                            type = "range",
-                            min = 6, max = 28, step = 1,
-                            get = function(info) return font.pixel.large[2] end,
-                            set = function(info, value)
-                                font.pixel.large[2] = value
-                            end,
-                            order = 20,
-                        },
-                        outline = {
-                            name = L["Fonts_Outline"],
-                            type = "select",
-                            values = outlines,
-                            get = function()
-                                for k,v in next, outlines do
-                                    if v == font.pixel.large[3] then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                font.pixel.large[3] = outlines[value]
-                            end,
-                            order = 30,
-                        },
-                    },
-                },
-                numbers = {
-                    name = L["Fonts_PixelNumbers"],
-                    type = "group",
-                    order = 30,
-                    args = {
-                        font = {
-                            name = L["Fonts_Font"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.pixel.numbers[1]
-                            end,
-                            set = function(info, value)
-                                font.pixel.numbers[1] = value
-                                font.pixel.numbers[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 10,
-                        },
-                        size = {
-                            name = _G.FONT_SIZE,
-                            type = "range",
-                            min = 6, max = 28, step = 1,
-                            get = function(info) return font.pixel.numbers[2] end,
-                            set = function(info, value)
-                                font.pixel.numbers[2] = value
-                            end,
-                            order = 20,
-                        },
-                        outline = {
-                            name = L["Fonts_Outline"],
-                            type = "select",
-                            values = outlines,
-                            get = function()
-                                for k,v in next, outlines do
-                                    if v == font.pixel.numbers[3] then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                font.pixel.numbers[3] = outlines[value]
-                            end,
-                            order = 30,
-                        },
-                    },
-                },
-                cooldown = {
-                    name = L["Fonts_PixelCooldown"],
-                    type = "group",
-                    order = 40,
-                    args = {
-                        font = {
-                            name = L["Fonts_Font"],
-                            type = "select",
-                            dialogControl = "LSM30_Font",
-                            values = _G.AceGUIWidgetLSMlists.font,
-                            get = function()
-                                return font.pixel.cooldown[1]
-                            end,
-                            set = function(info, value)
-                                font.pixel.cooldown[1] = value
-                                font.pixel.cooldown[4] = LSM:Fetch("font", value)
-                            end,
-                            order = 10,
-                        },
-                        size = {
-                            name = _G.FONT_SIZE,
-                            type = "range",
-                            min = 6, max = 28, step = 1,
-                            get = function(info) return font.pixel.cooldown[2] end,
-                            set = function(info, value)
-                                font.pixel.cooldown[2] = value
-                            end,
-                            order = 20,
-                        },
-                        outline = {
-                            name = L["Fonts_Outline"],
-                            type = "select",
-                            values = outlines,
-                            get = function()
-                                for k,v in next, outlines do
-                                    if v == font.pixel.cooldown[3] then return k end
-                                end
-                            end,
-                            set = function(info, value)
-                                font.pixel.cooldown[3] = outlines[value]
-                            end,
-                            order = 30,
-                        },
-                    },
-                },
             }
         }
+
+        for class, color in next, SkinsProfile.classColors do
+            classColors.args[class] = {
+                name = class,
+                type = "color",
+                get = function(info) return color.r, color.g, color.b end,
+                set = function(info, r, g, b)
+                    color.r = r
+                    color.g = g
+                    color.b = b
+                    _G.CUSTOM_CLASS_COLORS:NotifyChanges()
+                end,
+            }
+        end
+    end
+    local minScale, maxScale = 0.48, 1
+    local addons do
+        local addonSkins = _G.Aurora.Base.GetSkinList()
+        addons = {
+            name = _G.ADDONS,
+            type = "group",
+            hidden = #addonSkins == 0,
+            args = {
+            }
+        }
+
+        for i = 1, #addonSkins do
+            local name = addonSkins[i]
+            if not name:find("RealUI") then
+                addons.args[name] = {
+                    name = name,
+                    type = "toggle",
+                    get = function() return SkinsProfile.addons[name] end,
+                    set = function(info, value)
+                        SkinsProfile.addons[name] = value
+                    end,
+                }
+            end
+        end
     end
     skins = {
-        name = "Skins",
-        desc = "Toggle skinning of UI frames.",
+        name = L.Appearance_Skins,
         type = "group",
         order = order,
         args = {
-            header = {
-                name = "Skins",
+            note = {
+                name = L.General_NoteReload,
+                type = "description",
+                order = -1,
+            },
+            headerAppear = {
+                name = _G.APPEARANCE_LABEL,
                 type = "header",
                 order = 0,
             },
-            windowOpacity = {
-                name = L["Appearance_WinOpacity"],
+            frameColor = {
+                name = L.Appearance_FrameColor,
+                type = "color",
+                hasAlpha = true,
+                get = function(info)
+                    return SkinsProfile.frameColor.r, SkinsProfile.frameColor.g, SkinsProfile.frameColor.b, SkinsProfile.frameColor.a
+                end,
+                set = function(info, r, g, b, a)
+                    Color.frame:SetRGBA(r, g, b, Color.frame.a)
+                    SkinsProfile.frameColor.r = r
+                    SkinsProfile.frameColor.g = g
+                    SkinsProfile.frameColor.b = b
+                    SkinsProfile.frameColor.a = a
+                    RealUI:UpdateFrameStyle()
+                end,
+                order = 1,
+            },
+            buttonColor = {
+                name = L.Appearance_ButtonColor,
+                type = "color",
+                get = function(info)
+                    return SkinsProfile.buttonColor.r, SkinsProfile.buttonColor.g, SkinsProfile.buttonColor.b
+                end,
+                set = function(info, r, g, b)
+                    Color.button:SetRGBA(r, g, b)
+                    SkinsProfile.buttonColor.r = r
+                    SkinsProfile.buttonColor.g = g
+                    SkinsProfile.buttonColor.b = b
+                    RealUI:UpdateFrameStyle()
+                end,
+                order = 2,
+            },
+            stripeAlpha = {
+                name = L.Appearance_StripeOpacity,
                 type = "range",
                 isPercent = true,
                 min = 0, max = 1, step = 0.05,
-                get = function(info) return RealUI.media.window[4] end,
-                set = function(info, value)
-                    if RealUI.isAuroraUpdated then
-                        _G.AuroraConfig.alpha = value
-                    end
-                    RealUI.media.window[4] = value
-                    RealUI:StyleSetWindowOpacity()
-                end,
+                get = appGet,
+                set = appSet,
+                order = 3,
+            },
+            headerFonts = {
+                name = L.Fonts,
+                type = "header",
                 order = 10,
             },
-            stripeOpacity = {
-                name = L["Appearance_StripeOpacity"],
-                type = "range",
-                isPercent = true,
-                min = 0, max = 1, step = 0.05,
-                get = function(info) return _G.RealUI_InitDB.stripeOpacity end,
-                set = function(info, value)
-                    _G.RealUI_InitDB.stripeOpacity = value
-                    RealUI:StyleSetStripeOpacity()
-                end,
+            normal = {
+                name = L.Fonts_Normal,
+                desc = L.Fonts_NormalDesc,
+                type = "select",
+                dialogControl = "LSM30_Font",
+                values = _G.AceGUIWidgetLSMlists.font,
+                get = fontGet,
+                set = fontSet,
+                order = 11,
+            },
+            chat = {
+                name = L.Fonts_Chat,
+                desc = L.Fonts_ChatDesc,
+                type = "select",
+                dialogControl = "LSM30_Font",
+                values = _G.AceGUIWidgetLSMlists.font,
+                get = fontGet,
+                set = fontSet,
+                order = 12,
+            },
+            header = {
+                name = L.Fonts_Header,
+                desc = L.Fonts_HeaderDesc,
+                type = "select",
+                dialogControl = "LSM30_Font",
+                values = _G.AceGUIWidgetLSMlists.font,
+                get = fontGet,
+                set = fontSet,
+                order = 13,
+            },
+            headerScale = {
+                name = _G.UI_SCALE,
+                type = "header",
                 order = 20,
             },
-            fonts = fonts,
-            addons = {
-                name = _G.ADDONS,
-                type = "group",
-                args = {
-                }
-            }
+            isHighRes = {
+                name = L.Appearance_HighRes,
+                desc = L.Appearance_HighResDesc,
+                type = "toggle",
+                get = function() return SkinsProfile.isHighRes end,
+                set = function(info, value)
+                    SkinsProfile.isHighRes = value
+                    RealUI.UpdateUIScale()
+                end,
+                order = 21,
+            },
+            isPixelScale = {
+                name = L.Appearance_Pixel,
+                desc = L.Appearance_PixelDesc,
+                type = "toggle",
+                get = function() return SkinsProfile.isPixelScale end,
+                set = function(info, value)
+                    SkinsProfile.isPixelScale = value
+                    RealUI.UpdateUIScale()
+                end,
+                order = 22
+            },
+            customScale = {
+                name = L.Appearance_UIScale,
+                desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
+                type = "input",
+                disabled = function() return SkinsProfile.isPixelScale end,
+                validate = function(info, value)
+                    value = _G.tonumber(value)
+                    if value then
+                        if value >= minScale and value <= maxScale then
+                            return true
+                        else
+                            return ("Value must be between %.2f and %.2f"):format(minScale, maxScale)
+                        end
+                    else
+                        return "Value must be a number"
+                    end
+                end,
+                get = function() return _G.tostring(SkinsProfile.customScale) end,
+                set = function(info, value)
+                    RealUI.UpdateUIScale(_G.tonumber(value))
+                end,
+                order = 23,
+            },
+            uiModScale = {
+                name = L.Appearance_ModScale,
+                desc = L.Appearance_ModScaleDesc:format(L.Infobar.."\nHUD Config"),
+                type = "range",
+                isPercent = true,
+                min = 0.5, max = 2, step = 0.05,
+                get = function(info) return SkinsProfile.uiModScale end,
+                set = function(info, value)
+                    SkinsProfile.uiModScale = value
+                    RealUI.PreviewModScale()
+                end,
+                order = 24,
+            },
+            classColors = classColors,
+            addons = addons,
+            profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
     }
-    do --[[ UI Scale ]]--
-        local UIScaler = RealUI:GetModule("UIScaler")
-        local db = UIScaler.db.profile
-        local minScale, maxScale = 0.48, 1
-        skins.args.uiScale = {
-            name = _G.UI_SCALE,
-            type = "header",
-            order = 29,
-        }
-        skins.args.retinaDisplay = {
-            name = "Retina Display",
-            desc = "Warning: Only activate if on a really high-resolution display (such as a Retina display).\n\nDouble UI scaling so that UI elements are easier to see.",
-            type = "toggle",
-            get = function() return ndbg.tags.retinaDisplay.set end,
-            set = function(info, value)
-                ndbg.tags.retinaDisplay.set = value
-                RealUI:ReloadUIDialog()
-            end,
-            order = 30,
-        }
-        skins.args.pixelPerfect = {
-            name = "Pixel Perfect",
-            desc = "Recommended: Automatically sets the scale of the UI so that UI elements appear pixel-perfect.",
-            type = "toggle",
-            get = function() return db.pixelPerfect end,
-            set = function(info, value)
-                db.pixelPerfect = value
-                UIScaler:UpdateUIScale()
-            end,
-            order = 40,
-        }
-        skins.args.customScale = {
-            name = L.Appearance_UIScale,
-            desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
-            type = "input",
-            disabled = function() return db.pixelPerfect end,
-            validate = function(info, value)
-                value = _G.tonumber(value)
-                if value then
-                    if value >= minScale and value <= maxScale then
-                        return true
-                    else
-                        return ("Value must be between %.2f and %.2f"):format(minScale, maxScale)
-                    end
-                else
-                    return "Value must be a number"
-                end
-            end,
-            get = function() return db.customScale end,
-            set = function(info, value)
-                UIScaler:UpdateUIScale(_G.tonumber(value))
-            end,
-            order = 50,
-        }
-        skins.args.uiModScale = {
-            name = L.Appearance_ModScale,
-            desc = L.Appearance_ModScaleDesc:format(L.Infobar.."\nHUD Config"),
-            type = "range",
-            isPercent = true,
-            min = 0.5, max = 2, step = 0.05,
-            get = function(info) return _G.RealUI_InitDB.uiModScale end,
-            set = function(info, value)
-                _G.RealUI_InitDB.uiModScale = value
-                RealUI.PreviewModScale()
-            end,
-            order = 60,
-        }
-    end
-    local addonSkins = RealUI:GetAddOnSkins()
-    for i = 1, #addonSkins do
-        local name = addonSkins[i]
-        skins.args.addons.args[name] = {
-            name = name,
-            type = "toggle",
-            get = function() return RealUI:GetModuleEnabled(name) end,
-            set = function(info, value)
-                RealUI:SetModuleEnabled(name, value)
-                RealUI:ReloadUIDialog()
-            end,
-        }
-    end
 end
 local uiTweaks do
     debug("Adv UITweaks")
@@ -2866,7 +2657,7 @@ local uiTweaks do
                             get = function(info) return db.position.enabled end,
                             set = function(info, value)
                                 db.position.enabled = value
-                                ObjectivesAdv:UpdatePosition()
+                                ObjectivesAdv:RefreshMod()
                                 RealUI:ReloadUIDialog()
                             end,
                             order = 20,
@@ -2896,7 +2687,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.x = value
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 10,
                                 },
@@ -2908,7 +2699,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.y = value
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 20,
                                 },
@@ -2921,7 +2712,7 @@ local uiTweaks do
                                     set = function(info, value)
                                         value = RealUI:ValidateOffset(value)
                                         db.position.negheightofs = value
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 30,
                                 },
@@ -2951,7 +2742,7 @@ local uiTweaks do
                                     end,
                                     set = function(info, value)
                                         db.position.anchorto = RealUI.globals.anchorPoints[value]
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 10,
                                 },
@@ -2967,7 +2758,7 @@ local uiTweaks do
                                     end,
                                     set = function(info, value)
                                         db.position.anchorfrom = RealUI.globals.anchorPoints[value]
-                                        ObjectivesAdv:UpdatePosition()
+                                        ObjectivesAdv:RefreshMod()
                                     end,
                                     order = 20,
                                 },
@@ -3174,149 +2965,6 @@ local uiTweaks do
             },
         }
     end
-    local speechBubbles do
-        local MODNAME = "SpeechBubbles"
-        local SpeechBubbles = RealUI:GetModule(MODNAME, true)
-        if SpeechBubbles then
-            local db = SpeechBubbles.db.profile
-            speechBubbles = {
-                name = "Speech Bubbles",
-                desc = "Skins the speech bubbles.",
-                type = "group",
-                args = {
-                    header = {
-                        name = "Speech Bubbles",
-                        type = "header",
-                        order = 10,
-                    },
-                    desc = {
-                        name = "Skins the speech bubbles.",
-                        type = "description",
-                        fontSize = "medium",
-                        order = 20,
-                    },
-                    enabled = {
-                        name = "Enabled",
-                        desc = "Enable/Disable the Speech Bubbles module.",
-                        type = "toggle",
-                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                        set = function(info, value)
-                            RealUI:SetModuleEnabled(MODNAME, value)
-                            RealUI:ReloadUIDialog()
-                        end,
-                        order = 30,
-                    },
-                    desc2 = {
-                        name = " ",
-                        type = "description",
-                        order = 31,
-                    },
-                    desc3 = {
-                        name = "Note: You will need to reload the UI (/rl) for changes to take effect.",
-                        type = "description",
-                        order = 32,
-                    },
-                    gap1 = {
-                        name = " ",
-                        type = "description",
-                        order = 33,
-                    },
-                    general = {
-                        name = "General",
-                        type = "group",
-                        inline = true,
-                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                        order = 40,
-                        args = {
-                            sendersize = {
-                                name = "Sender Name Size",
-                                type = "range",
-                                min = 6, max = 32, step = 1,
-                                get = function(info) return db.sendersize end,
-                                set = function(info, value)
-                                    db.sendersize = value
-                                end,
-                                order = 10,
-                            },
-                            hideSender = {
-                                name = "Hide Sender Name",
-                                type = "toggle",
-                                get = function() return db.hideSender end,
-                                set = function(info, value)
-                                    db.hideSender = value
-                                end,
-                                order = 11,
-                            },
-                            messagesize = {
-                                name = "Message Size",
-                                type = "range",
-                                min = 6, max = 32, step = 1,
-                                get = function(info) return db.messagesize end,
-                                set = function(info, value)
-                                    db.messagesize = value
-                                end,
-                                order = 20,
-                            },
-                            edgesize = {
-                                name = "Edge Size",
-                                type = "range",
-                                min = 0, max = 20, step = 1,
-                                get = function(info) return db.edgesize end,
-                                set = function(info, value)
-                                    db.edgesize = value
-                                end,
-                                order = 30,
-                            },
-                        },
-                    },
-                    gap2 = {
-                        name = " ",
-                        type = "description",
-                        order = 41,
-                    },
-                    colors = {
-                        name = "Colors",
-                        type = "group",
-                        inline = true,
-                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                        order = 50,
-                        args = {
-                            background = {
-                                name = "Background",
-                                type = "color",
-                                hasAlpha = true,
-                                get = function(info,r,g,b,a)
-                                    return db.colors.bg[1], db.colors.bg[2], db.colors.bg[3], db.colors.bg[4]
-                                end,
-                                set = function(info,r,g,b,a)
-                                    db.colors.bg[1] = r
-                                    db.colors.bg[2] = g
-                                    db.colors.bg[3] = b
-                                    db.colors.bg[4] = a
-                                end,
-                                order = 10,
-                            },
-                            border = {
-                                name = "Border",
-                                type = "color",
-                                hasAlpha = true,
-                                get = function(info,r,g,b,a)
-                                    return db.colors.border[1], db.colors.border[2], db.colors.border[3], db.colors.border[4]
-                                end,
-                                set = function(info,r,g,b,a)
-                                    db.colors.border[1] = r
-                                    db.colors.border[2] = g
-                                    db.colors.border[3] = b
-                                    db.colors.border[4] = a
-                                end,
-                                order = 10,
-                            },
-                        },
-                    },
-                },
-            }
-        end
-    end
 
     uiTweaks = {
         name = L["Tweaks_UITweaks"],
@@ -3340,7 +2988,6 @@ local uiTweaks do
             minimap = minimap,
             mirrorBar = mirrorBar,
             objectives = objectives,
-            speechBubbles = speechBubbles,
         }
     }
 end

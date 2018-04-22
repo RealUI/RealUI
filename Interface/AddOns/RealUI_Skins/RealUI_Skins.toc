@@ -1,0 +1,26 @@
+## Interface: 70300
+## Title: RealUI Skins
+## Notes: Blizzard Interface Skin
+## Author: Gethe
+## Version: 8.1 r20d
+## LoadWith: RealUI_Bugs
+## OptionalDeps: nibRealUI_Dev, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0
+## SavedVariables: RealUI_SkinsDB
+
+#@do-not-package@
+..\Aurora\Skin\skin.xml
+#@end-do-not-package@
+Aurora\Skin\skin.xml
+Libs\Libs.xml
+
+Util.lua
+Locale.lua
+RealUI_Skins.lua
+
+FrameXML\MailFrame.lua
+FrameXML\PaperDollFrame.lua
+FrameXML\WorldMapFrame.lua
+
+AddOns\Ace3.lua
+AddOns\DBM-GUI.lua
+AddOns\Masque.lua

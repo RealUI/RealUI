@@ -5,6 +5,7 @@ local RealUI = private.RealUI
 local db
 
 local CombatFader = RealUI:GetModule("CombatFader")
+local Scale = _G.Aurora.Scale
 
 local MODNAME = "Objectives Adv."
 local ObjectivesAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
@@ -78,35 +79,26 @@ end
 ---- Position ----
 ------------------
 -- Position
-function ObjectivesAdv:UpdatePosition()
-    if not (db.position.enabled and RealUI:GetModuleEnabled(MODNAME)) then return end
+local movingTracker = false
+local function UpdatePosition()
+    if movingTracker then return end
 
-    if not self.origSet then
-        self.origSet = _G.ObjectiveTrackerFrame.SetPoint
-        self.origClear = _G.ObjectiveTrackerFrame.ClearAllPoints
-
-        _G.ObjectiveTrackerFrame.SetPoint = function() end
-        _G.ObjectiveTrackerFrame.ClearAllPoints = function() end
-    end
-
-    self.origClear(_G.ObjectiveTrackerFrame)
-    self.origSet(_G.ObjectiveTrackerFrame, db.position.anchorfrom, "UIParent", db.position.anchorto, db.position.x, db.position.y)
-
-    _G.ObjectiveTrackerFrame:SetHeight(_G.UIParent:GetHeight() - db.position.negheightofs)
-
-    --ObjectiveTrackerFrame.HeaderMenu.MinimizeButton:SetPoint("TOPRIGHT", ObjectiveTrackerFrame, "TOPRIGHT", -12, -1)
+    movingTracker = true
+    _G.ObjectiveTrackerFrame:ClearAllPoints()
+    _G.ObjectiveTrackerFrame:SetPoint(db.position.anchorfrom, "UIParent", db.position.anchorto, db.position.x, db.position.y)
+    Scale.RawSetHeight(_G.ObjectiveTrackerFrame, _G.UIParent:GetHeight() - Scale.Value(db.position.negheightofs))
+    movingTracker = false
 end
 
 
 -----------------------
 function ObjectivesAdv:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
-
-    self:UpdatePosition()
+    UpdatePosition()
 end
 
 function ObjectivesAdv:UI_SCALE_CHANGED()
-    self:UpdatePosition()
+    UpdatePosition()
 end
 
 function ObjectivesAdv:PLAYER_ENTERING_WORLD()
@@ -116,7 +108,6 @@ end
 function ObjectivesAdv:PLAYER_LOGIN()
     LoggedIn = true
     self:RefreshMod()
-    --self:Skin()
 end
 
 function ObjectivesAdv:OnInitialize()
@@ -163,6 +154,8 @@ function ObjectivesAdv:OnInitialize()
     db = self.db.profile
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+
+    _G.hooksecurefunc(_G.ObjectiveTrackerFrame, "SetPoint", UpdatePosition)
 
     CombatFader:RegisterModForFade(MODNAME, db.hidden.combatfade)
     CombatFader:RegisterFrameForFade(MODNAME, _G.ObjectiveTrackerFrame)

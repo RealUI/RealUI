@@ -10,8 +10,11 @@ local db, ndb
 local MODNAME = "CastBars"
 local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
-local layoutSize
+local Aurora = _G.Aurora
+local uninterruptible = Aurora.Color.Create(0.5, 0.0, 0.0)
+local interruptible = Aurora.Color.Create(0.5, 1.0, 1.0)
 
+local layoutSize
 local ChannelingTicks = {}
 do
     local function RegisterSpellName(spellID, numticks, isInstant)
@@ -94,15 +97,17 @@ end
 
 function CastBars:SetAnchors(castbar, unit)
     CastBars:debug("Set config cast", unit)
+    local size = db[unit].size
 
-    local iconX, iconY = 3, -2
-    local iconPoint, iconRelPoint = "TOP", "BOTTOM"
-    if not db.text.textOnBottom then
-        iconPoint, iconRelPoint = "BOTTOM", "TOP"
+    local iconX
+    local iconY = 2
+    local iconPoint, iconRelPoint = "BOTTOM", "TOP"
+    if db.text.textOnBottom then
+        iconPoint, iconRelPoint = "TOP", "BOTTOM"
         iconY = -iconY
     end
 
-    local textX, textY = 0, -2
+    local textX, textY = 2, 0
     local textPoint, textRelPoint = "TOP", "TOP"
     local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
 
@@ -113,11 +118,12 @@ function CastBars:SetAnchors(castbar, unit)
     local horizPoint, horizRelPoint
     if unit == "player" then
         if db.text.textInside then
-            castbar.Text:SetJustifyH("RIGHT")
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            iconX = -iconX
+            iconX = db.text.textOnBottom and 0 or -size.y
+            textX = -textX
         else
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
+            iconX = db.text.textOnBottom and size.y or 0
         end
         castbar.Text:SetJustifyH(horizPoint)
         castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
@@ -126,9 +132,11 @@ function CastBars:SetAnchors(castbar, unit)
     elseif unit == "target" then
         if db.text.textInside then
             horizPoint, horizRelPoint = "LEFT", "RIGHT"
+            iconX = db.text.textOnBottom and 0 or size.y
         else
             horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            iconX = -iconX
+            iconX = db.text.textOnBottom and -size.y or 0
+            textX = -textX
         end
         castbar.Text:SetJustifyH(horizPoint)
         castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
@@ -154,11 +162,9 @@ local function PostCastStart(self, unit, name, castID, spellID)
     end
 
     if self.notInterruptible then
-        local color = db.colors.uninterruptible
-        self:SetStatusBarColor(color[1], color[2], color[3], color[4])
+        self:SetStatusBarColor(uninterruptible:GetRGB())
     else
-        local color = db.colors[unit] or db.colors.player -- unit could be a vehicle
-        self:SetStatusBarColor(color[1], color[2], color[3], color[4])
+        self:SetStatusBarColor(interruptible:GetRGB())
     end
 
     if self.tickPool then
@@ -187,13 +193,11 @@ local function PostCastInterrupted(self, unit, castID, spellID)
 end
 local function PostCastInterruptible(self, unit)
     CastBars:debug("PostCastInterruptible", unit)
-    local color = db.colors[unit]
-    self:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    self:SetStatusBarColor(interruptible:GetRGB())
 end
 local function PostCastNotInterruptible(self, unit)
     CastBars:debug("PostCastNotInterruptible", unit)
-    local color = db.colors.uninterruptible
-    self:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    self:SetStatusBarColor(uninterruptible:GetRGB())
 end
 --[==[
 local function PostCastDelayed(self, unit, name, castID, spellID)
@@ -317,11 +321,11 @@ end
 function CastBars:CreateCastBars(unitFrame, unit, unitData)
     CastBars:debug("CreateCastBars", unit)
     local info, unitDB = unitData.power or unitData.health, db[unit]
-    local size, color = unitDB.size, db.colors[unit]
+    local size = unitDB.size
     local Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
     Castbar:SetSize(size.x, size.y)
     Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
-    Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+    Castbar:SetStatusBarColor(interruptible:GetRGB())
     Castbar:SetSmooth(false)
     if db.reverse[unit] then
         Castbar:SetReverseFill(true)
@@ -330,19 +334,18 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     local Icon = Castbar:CreateTexture(nil, "OVERLAY")
     Castbar.Icon = Icon
     Icon:SetSize(unitDB.icon, unitDB.icon)
-    _G.Aurora[1].ReskinIcon(Icon)
+    Aurora.Base.CropIcon(Icon, Castbar)
 
     local Text = Castbar:CreateFontString(nil, "OVERLAY")
     Castbar.Text = Text
-    Text:SetFontObject(_G.RealUIFont_Pixel)
+    Text:SetFontObject("SystemFont_Shadow_Med1_Outline")
 
     local Time = Castbar:CreateFontString(nil, "OVERLAY")
     Castbar.Time = Time
-    Time:SetFontObject(_G.RealUIFont_PixelNumbers)
+    Time:SetFontObject("NumberFont_Outline_Large")
 
-    color = db.colors.latency
     local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)
-    SafeZone:SetColorTexture(color[1], color[2], color[3], color[4])
+    SafeZone:SetColorTexture(uninterruptible:GetRGB())
     SafeZone:SetSize(10, 10)
     Castbar.SafeZone = SafeZone
 
@@ -373,7 +376,7 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
         CastBars:debug("flashAnim:OnFinished", ...)
         Castbar:SetAlpha(1)
         Castbar.Text:SetTextColor(1, 1, 1, 1)
-        Castbar:SetStatusBarColor(color[1], color[2], color[3], color[4])
+        Castbar:SetStatusBarColor(uninterruptible:GetRGB())
         Castbar:Hide()
     end
     flashAnim:SetScript("OnFinished", PostFlash)
@@ -479,14 +482,6 @@ function CastBars:OnInitialize()
                         y = 7,
                     },
                 },
-            },
-            colors = {
-                useGlobal = true,
-                player =            {0.15, 0.61, 1.00, 1},
-                focus =             {1.00, 0.38, 0.08, 1},
-                target =            {0.15, 0.61, 1.00, 1},
-                uninterruptible =   {0.85, 0.14, 0.14, 1},
-                latency =           {0.80, 0.13, 0.13, 1},
             },
             text = {
                 textOnBottom = true,

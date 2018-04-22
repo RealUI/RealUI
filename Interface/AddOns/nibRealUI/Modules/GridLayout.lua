@@ -149,7 +149,7 @@ end
 function GridLayout:Grid2ChatCommand()
     if not _G.InCombatLockdown() then
         RealUI.Debug("Config", "/grid")
-        RealUI:LoadConfig("HuD", "unitframes", "groups", "raid")
+        RealUI.LoadConfig("HuD", "unitframes", "groups", "raid")
     end
 end
 
