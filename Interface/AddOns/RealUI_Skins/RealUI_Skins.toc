@@ -14,8 +14,10 @@ Aurora\Skin\skin.xml
 Libs\Libs.xml
 
 Util.lua
+Locale.lua
 RealUI_Skins.lua
 
+FrameXML\MailFrame.lua
 FrameXML\PaperDollFrame.lua
 FrameXML\WorldMapFrame.lua
 
