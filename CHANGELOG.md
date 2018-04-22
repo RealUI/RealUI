@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
   * !Aurora_RealUI
   * Aurora
+  * EasyMail
   * nibRealUI_Init
 
 ### New AddOns ###
@@ -35,6 +36,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   * Aurora is now embedded in RealUI_Skins.
   * All pixel fonts have been replaced with Roboto.
   * Improved tooltip info for Battle Pets
+  * Incorporated basic functions of EasyMail into RealUI_Skins
 
 ### Fixed ###
 
