@@ -340,15 +340,15 @@ local tagStrings = {
 	end]],
 
 	['curmana'] = [[function(unit)
-		return UnitPower(unit, SPELL_POWER_MANA)
+		return UnitPower(unit, Enum.PowerType.Mana)
 	end]],
 
 	['maxmana'] = [[function(unit)
-		return UnitPowerMax(unit, SPELL_POWER_MANA)
+		return UnitPowerMax(unit, Enum.PowerType.Mana)
 	end]],
 
 	['soulshards'] = [[function()
-		local num = UnitPower('player', SPELL_POWER_SOUL_SHARDS)
+		local num = UnitPower('player', Enum.PowerType.SoulShards)
 		if(num > 0) then
 			return num
 		end
@@ -356,7 +356,7 @@ local tagStrings = {
 
 	['holypower'] = [[function()
 		if(GetSpecialization() == SPEC_PALADIN_RETRIBUTION) then
-			local num = UnitPower('player', SPELL_POWER_HOLY_POWER)
+			local num = UnitPower('player', Enum.PowerType.HolyPower)
 			if(num > 0) then
 				return num
 			end
@@ -365,7 +365,7 @@ local tagStrings = {
 
 	['chi'] = [[function()
 		if(GetSpecialization() == SPEC_MONK_WINDWALKER) then
-			local num = UnitPower('player', SPELL_POWER_CHI)
+			local num = UnitPower('player', Enum.PowerType.Chi)
 			if(num > 0) then
 				return num
 			end
@@ -374,7 +374,7 @@ local tagStrings = {
 
 	['arcanecharges'] = [[function()
 		if(GetSpecialization() == SPEC_MAGE_ARCANE) then
-			local num = UnitPower('player', SPELL_POWER_ARCANE_CHARGES)
+			local num = UnitPower('player', Enum.PowerType.ArcaneCharges)
 			if(num > 0) then
 				return num
 			end
@@ -486,18 +486,18 @@ local tagEvents = {
 	['classification']      = 'UNIT_CLASSIFICATION_CHANGED',
 	['shortclassification'] = 'UNIT_CLASSIFICATION_CHANGED',
 	['group']               = 'GROUP_ROSTER_UPDATE',
-	['curpp']               = 'UNIT_POWER',
+	['curpp']               = 'UNIT_POWER_UPDATE',
 	['maxpp']               = 'UNIT_MAXPOWER',
-	['missingpp']           = 'UNIT_MAXPOWER UNIT_POWER',
-	['perpp']               = 'UNIT_MAXPOWER UNIT_POWER',
+	['missingpp']           = 'UNIT_MAXPOWER UNIT_POWER_UPDATE',
+	['perpp']               = 'UNIT_MAXPOWER UNIT_POWER_UPDATE',
 	['offline']             = 'UNIT_HEALTH UNIT_CONNECTION',
 	['status']              = 'UNIT_HEALTH PLAYER_UPDATE_RESTING UNIT_CONNECTION',
-	['curmana']             = 'UNIT_POWER UNIT_MAXPOWER',
-	['maxmana']             = 'UNIT_POWER UNIT_MAXPOWER',
-	['soulshards']          = 'UNIT_POWER',
-	['holypower']           = 'UNIT_POWER SPELLS_CHANGED',
-	['chi']                 = 'UNIT_POWER SPELLS_CHANGED',
-	['arcanecharges']       = 'UNIT_POWER SPELLS_CHANGED',
+	['curmana']             = 'UNIT_POWER_UPDATE UNIT_MAXPOWER',
+	['maxmana']             = 'UNIT_POWER_UPDATE UNIT_MAXPOWER',
+	['soulshards']          = 'UNIT_POWER_UPDATE',
+	['holypower']           = 'UNIT_POWER_UPDATE SPELLS_CHANGED',
+	['chi']                 = 'UNIT_POWER_UPDATE SPELLS_CHANGED',
+	['arcanecharges']       = 'UNIT_POWER_UPDATE SPELLS_CHANGED',
 	['powercolor']          = 'UNIT_DISPLAYPOWER',
 	['arenaspec']           = 'ARENA_PREP_OPPONENT_SPECIALIZATIONS'
 }

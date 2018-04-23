@@ -1,6 +1,7 @@
 local parent, ns = ...
 local oUF = ns.oUF
 local Private = oUF.Private
+local isBFA = oUF.isBFA
 
 local argcheck = Private.argcheck
 local error = Private.error
@@ -66,6 +67,10 @@ registering events.
              automatically considered unitless (boolean)
 --]]
 function frame_metatable.__index:RegisterEvent(event, func, unitless)
+	if not isBFA and event == "UNIT_POWER_UPDATE" then
+		event = "UNIT_POWER"
+	end
+
 	-- Block OnUpdate polled frames from registering events except for
 	-- UNIT_PORTRAIT_UPDATE and UNIT_MODEL_CHANGED which are used for
 	-- portrait updates.
@@ -125,6 +130,10 @@ Used to remove a function from the event handler list for a game event.
           the frame will be unregistered for the event
 --]]
 function frame_metatable.__index:UnregisterEvent(event, func)
+	if not isBFA and event == "UNIT_POWER_UPDATE" then
+		event = "UNIT_POWER"
+	end
+
 	argcheck(event, 2, 'string')
 
 	local curev = self[event]

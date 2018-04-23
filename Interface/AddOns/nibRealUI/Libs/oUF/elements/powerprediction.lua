@@ -42,6 +42,7 @@ A default texture will be applied if the widget is a StatusBar and doesn't have 
 
 local _, ns = ...
 local oUF = ns.oUF
+local isBFA = oUF.isBFA
 
 -- sourced from FrameXML/AlternatePowerBar.lua
 local ADDITIONAL_POWER_BAR_INDEX = ADDITIONAL_POWER_BAR_INDEX or 0
@@ -64,7 +65,12 @@ local function Update(self, event, unit)
 		element:PreUpdate(unit)
 	end
 
-	local _, _, _, _, startTime, endTime, _, _, _, spellID = UnitCastingInfo(unit)
+	local _, _, _, startTime, endTime, _, _, _, spellID --= UnitCastingInfo(unit)
+    if isBFA then
+    	_, _, _, startTime, endTime, _, _, _, spellID = UnitCastingInfo(unit)
+    else
+    	_, _, _, _, startTime, endTime, _, _, _, spellID = UnitCastingInfo(unit)
+    end
 	local mainPowerType = UnitPowerType(unit)
 	local hasAltManaBar = ALT_MANA_BAR_PAIR_DISPLAY_INFO[playerClass] and ALT_MANA_BAR_PAIR_DISPLAY_INFO[playerClass][mainPowerType]
 	local mainCost, altCost = 0, 0

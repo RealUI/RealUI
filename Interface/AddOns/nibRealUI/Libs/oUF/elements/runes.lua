@@ -18,7 +18,7 @@ A default texture will be applied if the sub-widgets are StatusBars and don't ha
 ## Options
 
 .colorSpec - Use `self.colors.runes[specID]` to color the bar based on player's spec. `specID` is defined by the return
-             value of [GetSpecialization](http://wowprogramming.com/docs/api/GetSpecialization) (boolean)
+             value of [GetSpecialization](http://wowprogramming.com/docs/api/GetSpecialization.html) (boolean)
 
 ## Sub-Widgets Options
 
@@ -127,11 +127,11 @@ local function Path(self, event, ...)
 	if(event == 'RUNE_POWER_UPDATE') then
 		return UpdateMethod(self, event, ...)
 	else
-		--[[ Override: Runes:UpdateColor(powerType)
+		--[[ Override: Runes:UpdateColor(runeIndex)
 		Used to completely override the internal function for updating the widgets' colors.
 
-		* self  - the Runes element
-		* index - the index of the updated rune (number)
+		* self      - the Runes element
+		* runeIndex - the index of the updated rune (number)
 		--]]
 		local UpdateColorMethod = element.UpdateColor or UpdateColor
 		for index = 1, #element do

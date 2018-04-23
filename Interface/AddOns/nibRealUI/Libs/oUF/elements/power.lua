@@ -35,16 +35,16 @@ The following options are listed by priority. The first check that returns true 
 .colorPower        - Use `self.colors.power[token]` to color the bar based on the unit's power type. This method will
                      fall-back to `:GetAlternativeColor()` if it can't find a color matching the token. If this function
                      isn't defined, then it will attempt to color based upon the alternative power colors returned by
-                     [UnitPowerType](http://wowprogramming.com/docs/api/UnitPowerType). Finally, if these aren't
+                     [UnitPowerType](http://wowprogramming.com/docs/api/UnitPowerType.html). Finally, if these aren't
                      defined, then it will attempt to color the bar based upon `self.colors.power[type]` (boolean)
 .colorClass        - Use `self.colors.class[class]` to color the bar based on unit class. `class` is defined by the
-                     second return of [UnitClass](http://wowprogramming.com/docs/api/UnitClass) (boolean)
+                     second return of [UnitClass](http://wowprogramming.com/docs/api/UnitClass.html) (boolean)
 .colorClassNPC     - Use `self.colors.class[class]` to color the bar if the unit is a NPC (boolean)
 .colorClassPet     - Use `self.colors.class[class]` to color the bar if the unit is player controlled, but not a player
                      (boolean)
 .colorReaction     - Use `self.colors.reaction[reaction]` to color the bar based on the player's reaction towards the
                      unit. `reaction` is defined by the return value of
-                     [UnitReaction](http://wowprogramming.com/docs/api/UnitReaction) (boolean)
+                     [UnitReaction](http://wowprogramming.com/docs/api/UnitReaction.html) (boolean)
 .colorSmooth       - Use `smoothGradient` if present or `self.colors.smooth` to color the bar with a smooth gradient
                      based on the player's current power percentage (boolean)
 
@@ -92,7 +92,7 @@ local _, ns = ...
 local oUF = ns.oUF
 
 -- sourced from FrameXML/UnitPowerBarAlt.lua
-local ALTERNATE_POWER_INDEX = ALTERNATE_POWER_INDEX or 10
+local ALTERNATE_POWER_INDEX = Enum.PowerType.Alternate or 10
 
 local function getDisplayPower(unit)
 	local _, min, _, _, _, _, showOnRaid = UnitAlternatePowerInfo(unit)
@@ -225,10 +225,10 @@ local function Update(self, event, unit)
 	* cur         - the unit's current power value (number)
 	* min         - the unit's minimum possible power value (number)
 	* max         - the unit's maximum possible power value (number)
-	* displayType - the alternative power display type if applicable (number?)[ALTERNATE_POWER_INDEX]
+	* displayType - the alternative power display type if applicable (number?)[Enum.PowerType.Alternate]
 	* arenaPrep   - indicates if the unit is an Arena Prep dummy (boolean)
 	--]]
-	element:UpdateColor(unit, cur, min, max, displayType)
+	element:UpdateColor(unit, cur, min, max, displayType, arenaPrep)
 
 	--[[ Callback: Power:PostUpdate(unit, cur, min, max)
 	Called after the element has been updated.
