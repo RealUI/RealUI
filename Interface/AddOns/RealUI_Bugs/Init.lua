@@ -16,3 +16,15 @@ for i = 1, _G.GetNumAddOns() do
         end
     end
 end
+
+
+-- Filter file load warnings
+_G.UIParent:UnregisterEvent("LUA_WARNING")
+local f = _G.CreateFrame("Frame")
+f:SetScript("OnEvent", function(self, ev, warnType, warnMessage)
+    if warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") or warnMessage:match("^%(null%)") then
+        return
+    end
+    _G.geterrorhandler()(warnMessage)
+end)
+f:RegisterEvent("LUA_WARNING")
