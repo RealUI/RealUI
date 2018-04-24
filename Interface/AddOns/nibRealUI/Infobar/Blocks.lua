@@ -1384,6 +1384,8 @@ function Infobar:CreateBlocks()
     end
 
     do -- Progress Watch
+        local C_AzeriteItem = _G.C_AzeriteItem
+        local azeriteItem, azeriteItemLocation
         local watchStates, artifactInit = {}
         watchStates["xp"] = {
             GetNext = function(XP)
@@ -1511,57 +1513,82 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Art)
-                local hasArtifact, _, power, maxPower = artData:GetArtifactPower()
-                if hasArtifact then
-                    return power, maxPower
+                if azeriteItemLocation then
+                    return C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
                 else
-                    return 0, 100
+                    local hasArtifact, _, power, maxPower = artData:GetArtifactPower()
+                    if hasArtifact then
+                        return power, maxPower
+                    else
+                        return 0, 100
+                    end
                 end
             end,
             GetColor = function(Art)
-                return .901, .8, .601
+                return 0.901, 0.8, 0.601 -- isPatch _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                local activeArtifact = _G.C_ArtifactUI.GetEquippedArtifactInfo()
-                Infobar:debug("artifact:IsValid", activeArtifact, artifactInit)
-                if activeArtifact or artifactInit then
-                    -- After a spec switch, the active artifact could be invalid
-                    if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
-                        -- async timer to prevent stack overflow
-                        _G.C_Timer.After(2, artData.ForceUpdate)
+                -- /dump C_AzeriteItem.GetAzeriteItemXPInfo(C_AzeriteItem.FindActiveAzeriteItem())
+                if azeriteItemLocation then
+                    return true
+                else
+                    local activeArtifact = _G.C_ArtifactUI.GetEquippedArtifactInfo()
+                    Infobar:debug("artifact:IsValid", activeArtifact, artifactInit)
+                    if activeArtifact or artifactInit then
+                        -- After a spec switch, the active artifact could be invalid
+                        if artData:GetNumObtainedArtifacts() ~= _G.C_ArtifactUI.GetNumObtainedArtifacts() and not activeArtifact then
+                            -- async timer to prevent stack overflow
+                            _G.C_Timer.After(2, artData.ForceUpdate)
+                            return true
+                        end
+                        return not not activeArtifact
+                    else
+                        -- Artifact info is not available until the first ARTIFACT_UPDATE, just fake it until then
                         return true
                     end
-                    return not not activeArtifact
-                else
-                    -- Artifact info is not available until the first ARTIFACT_UPDATE, just fake it until then
-                    return true
                 end
             end,
             SetTooltip = function(Art, tooltip)
                 local hasArtifact, artifact = artData:GetArtifactInfo()
 
-                if hasArtifact then
+                if azeriteItemLocation then
+                    local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
+                    local currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
+                    local xpToNextLevel = totalLevelXP - xp
+                    local title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
+
                     testCell:SetFontObject("GameTooltipText")
-                    testCell:SetText(artifact.name)
+                    testCell:SetText(title)
                     local maxWidth = _G.max(testCell:GetStringWidth(), 200)
 
                     local lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
+                    tooltip:SetCell(lineNum, colNum, title, nil, nil, 2, nil, nil, nil, maxWidth)
                     tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
-
-                    local minAP, maxAP = artifact.power, _G.max(artifact.power, artifact.maxPower)
-                    local artStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minAP), RealUI:ReadableNumber(maxAP), (minAP/maxAP)*100)
-                    lineNum = tooltip:AddLine(RealUI:ReadableNumber(artifact.unspentPower), artStatus)
-                    tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
-
-                    if artifact.numRanksPurchasable > 0 then
-                        artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
-                        lineNum, colNum = tooltip:AddLine()
-                        tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
-                        tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
-                    end
+                    tooltip:AddLine(_G.AZERITE_POWER_TOOLTIP_BODY:format(azeriteItem:GetItemName()))
                 else
-                    tooltip:AddLine(_G.SPELL_FAILED_NO_ARTIFACT_EQUIPPED)
+                    if hasArtifact then
+                        testCell:SetFontObject("GameTooltipText")
+                        testCell:SetText(artifact.name)
+                        local maxWidth = _G.max(testCell:GetStringWidth(), 200)
+
+                        local lineNum, colNum = tooltip:AddLine()
+                        tooltip:SetCell(lineNum, colNum, artifact.name, nil, nil, 2, nil, nil, nil, maxWidth)
+                        tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
+
+                        local minAP, maxAP = artifact.power, _G.max(artifact.power, artifact.maxPower)
+                        local artStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minAP), RealUI:ReadableNumber(maxAP), (minAP/maxAP)*100)
+                        lineNum = tooltip:AddLine(RealUI:ReadableNumber(artifact.unspentPower), artStatus)
+                        tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
+
+                        if artifact.numRanksPurchasable > 0 then
+                            artStatus = _G.ARTIFACT_POWER_TOOLTIP_BODY:format(artifact.numRanksPurchasable)
+                            lineNum, colNum = tooltip:AddLine()
+                            tooltip:SetCell(lineNum, colNum, artStatus, nil, nil, 2, nil, nil, nil, maxWidth)
+                            tooltip:SetCellTextColor(lineNum, colNum, 0.7, 0.7, 0.7)
+                        end
+                    else
+                        tooltip:AddLine(_G.SPELL_FAILED_NO_ARTIFACT_EQUIPPED)
+                    end
                 end
                 tooltip:AddLine(" ")
             end,
@@ -1772,7 +1799,12 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("progress: OnEvent", block.side, event, ...)
-                if event == "ARTIFACT_UPDATE" then
+                if event == "AZERITE_ITEM_EXPERIENCE_CHANGED" then
+                    azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem()
+                    if azeriteItemLocation then
+                        azeriteItem = _G.Item:CreateFromItemLocation(azeriteItemLocation)
+                    end
+                elseif event == "ARTIFACT_UPDATE" then
                     artifactInit = true
                     if not watchStates["artifact"]:IsValid() then
                         UpdateState(block)
@@ -1796,6 +1828,9 @@ function Infobar:CreateBlocks()
                 "ENABLE_XP_GAIN",
 
                 "UPDATE_FACTION",
+
+                "AZERITE_ITEM_EXPERIENCE_CHANGED",
+                "AZERITE_ITEM_POWER_LEVEL_CHANGED",
 
                 "HONOR_XP_UPDATE",
                 "HONOR_LEVEL_UPDATE",
