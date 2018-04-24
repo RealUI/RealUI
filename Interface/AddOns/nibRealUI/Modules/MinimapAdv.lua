@@ -3,13 +3,17 @@ local _, private = ...
 -- Lua Globals --
 local next, ipairs = _G.next, _G.ipairs
 
--- Libs --
-local HBD = _G.LibStub("HereBeDragons-1.0")
-local HBDP = _G.LibStub("HereBeDragons-Pins-1.0")
-
 -- RealUI --
 local RealUI = private.RealUI
 local db
+
+-- Libs --
+local HBD --= _G.LibStub("HereBeDragons-1.0")
+local HBDP --= _G.LibStub("HereBeDragons-Pins-1.0")
+if not RealUI.isPatch then
+    HBD = _G.LibStub("HereBeDragons-1.0")
+    HBDP = _G.LibStub("HereBeDragons-Pins-1.0")
+end
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
