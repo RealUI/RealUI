@@ -495,7 +495,7 @@ local CreateTextureMarkup do
 end
 
 local function Wrap(value, max) -- isPatch
-    return (value - 1) % max + 1;
+    return (value - 1) % max + 1
 end
 
 
@@ -1194,12 +1194,12 @@ function Infobar:CreateBlocks()
                         local status
                         if client == _G.BNET_CLIENT_WOW then
                             if ( not zoneName or zoneName == "" ) then
-                                status = _G.UNKNOWN;
+                                status = _G.UNKNOWN
                             else
-                                status = zoneName;
+                                status = zoneName
                             end
                         else
-                            status = gameText;
+                            status = gameText
                         end
 
                         if noteText == "" then noteText = nil end
@@ -1412,7 +1412,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             IsValid = function(XP)
-                return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL_TABLE[_G.GetExpansionLevel()]
+                return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
@@ -1451,7 +1451,21 @@ function Infobar:CreateBlocks()
             end,
             GetStats = function(Rep)
                 local name, reaction, minRep, maxRep, curRep, factionID = _G.GetWatchedFactionInfo()
-                if _G.C_Reputation.IsFactionParagon(factionID) then
+                Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
+                Rep.colorIndex = reaction
+
+                local friendshipID = _G.GetFriendshipReputation(factionID)
+                if friendshipID then
+                    local _, friendRep, _, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = _G.GetFriendshipReputation(factionID)
+                    if nextFriendThreshold then
+                        minRep, maxRep, curRep = friendThreshold, nextFriendThreshold, friendRep
+                    else
+                        -- max rank, make it look like a full bar
+                        minRep, maxRep, curRep = 0, 1, 1
+                    end
+                    Rep.colorIndex = 5     -- always color friendships green
+                    Rep.factionStandingtext = friendTextLevel
+                elseif _G.C_Reputation.IsFactionParagon(factionID) then
                     local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
                     maxRep = threshold
                     curRep = currentValue % threshold
@@ -1472,23 +1486,22 @@ function Infobar:CreateBlocks()
                 return curRep, maxRep, name
             end,
             GetColor = function(Rep)
-                local _, reaction = _G.GetWatchedFactionInfo()
-                local color = _G.FACTION_BAR_COLORS[reaction]
-                return color.r, color.g, color.b, reaction
+                local color = _G.FACTION_BAR_COLORS[Rep.colorIndex]
+                return color.r, color.g, color.b
             end,
             IsValid = function(Rep)
                 return not not _G.GetWatchedFactionInfo()
             end,
             SetTooltip = function(Rep, tooltip)
                 local curRep, maxRep, name, hasRewardPending = Rep:GetStats()
-                local r, g, b, reaction = Rep:GetColor()
+                local r, g, b = Rep:GetColor()
 
                 local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
                 local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
-                lineNum = tooltip:AddLine(_G["FACTION_STANDING_LABEL"..reaction], repStatus)
+                lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
                 tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
 

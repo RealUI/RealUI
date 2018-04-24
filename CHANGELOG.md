@@ -41,6 +41,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed ###
 
   * When on a Connected Realm the currency tracker could throw an error.
+  * The wrong faction standing and color was shown when tracking friendship reps.
 
 
 
