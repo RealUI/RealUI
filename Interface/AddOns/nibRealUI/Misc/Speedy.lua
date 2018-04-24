@@ -26,8 +26,11 @@ local events = {
 }
 
 local frameBlacklist = {
-    [_G.WorldStateAlwaysUpFrame] = true
 }
+
+if not _G.RealUI.isPatch then
+    frameBlacklist[_G.WorldStateAlwaysUpFrame] = true
+end
 
 local function canMod(frame)
     if frameBlacklist[frame] then

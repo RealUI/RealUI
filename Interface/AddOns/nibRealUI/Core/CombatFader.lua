@@ -93,7 +93,7 @@ function CombatFader:UpdateCombatState(event)
     if _G.UnitAffectingCombat("player") and not FirstLog then
         self:UnregisterAllBuckets()
     else
-        self:RegisterBucketEvent({"UNIT_HEALTH", "UNIT_POWER", "UNIT_DISPLAYPOWER"}, 0.1, "HurtEvent")
+        self:RegisterBucketEvent({"UNIT_HEALTH", RealUI.isPatch and "UNIT_POWER_UPDATE" or "UNIT_POWER", "UNIT_DISPLAYPOWER"}, 0.1, "HurtEvent")
         if event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
             FirstLog = false
         end

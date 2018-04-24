@@ -146,7 +146,9 @@ end
 function EventNotifier:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("CALENDAR_UPDATE_GUILD_EVENTS")
-    self:RegisterEvent("VIGNETTE_ADDED")
+    if not RealUI.isPatch then
+        self:RegisterEvent("VIGNETTE_ADDED")
+    end
 end
 
 function EventNotifier:OnDisable()

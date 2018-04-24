@@ -668,6 +668,7 @@ end
 
 -- Update all POIs
 function MinimapAdv:POIUpdate(...)
+    if RealUI.isPatch then return end
     self:debug("POIUpdate", ...)
     if ( (not db.poi.enabled) or (ExpandedState == 1 and db.expand.extras.hidepoi) ) then return end
     if _G.IsAddOnLoaded("Carbonite") or _G.IsAddOnLoaded("DugisGuideViewerZ") then return end
@@ -1479,13 +1480,22 @@ function MinimapAdv:RegEvents()
     -- Dungeon Difficulty
     self:RegisterEvent("GUILD_PARTY_STATE_UPDATED", "UpdateGuildPartyState")
     self:RegisterEvent("PLAYER_GUILD_UPDATE", "UpdateGuildPartyState")
-    self:RegisterBucketEvent({
-        "PLAYER_DIFFICULTY_CHANGED",
-        "UPDATE_INSTANCE_INFO",
-        "PARTY_MEMBERS_CHANGED",
-        "PARTY_MEMBER_ENABLE",
-        "PARTY_MEMBER_DISABLE",
-    }, 1, "InstanceDifficultyOnEvent")
+    if RealUI.isPatch then
+        self:RegisterBucketEvent({
+            "PLAYER_DIFFICULTY_CHANGED",
+            "UPDATE_INSTANCE_INFO",
+            "PARTY_MEMBER_ENABLE",
+            "PARTY_MEMBER_DISABLE",
+        }, 1, "InstanceDifficultyOnEvent")
+    else
+        self:RegisterBucketEvent({
+            "PLAYER_DIFFICULTY_CHANGED",
+            "UPDATE_INSTANCE_INFO",
+            "PARTY_MEMBERS_CHANGED",
+            "PARTY_MEMBER_ENABLE",
+            "PARTY_MEMBER_DISABLE",
+        }, 1, "InstanceDifficultyOnEvent")
+    end
 
     -- Queue
     self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")
@@ -1725,6 +1735,7 @@ local function CreateFrames()
     MMFrames.info.Coords = NewInfoFrame("Coords", _G.Minimap)
     MMFrames.info.Coords:SetAlpha(0.75)
     MMFrames.info.Coords:SetScript("OnUpdate", function(coordsFrame, elapsed)
+        if RealUI.isPatch then return end
         lastUpdate = lastUpdate + elapsed
         if not _G.IsInInstance() and lastUpdate > threshold then
             local x, y = _G.GetPlayerMapPosition("player")
