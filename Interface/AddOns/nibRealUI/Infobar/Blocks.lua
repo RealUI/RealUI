@@ -494,6 +494,11 @@ local CreateTextureMarkup do
     end
 end
 
+local function Wrap(value, max) -- isPatch
+    return (value - 1) % max + 1;
+end
+
+
 function Infobar:CreateBlocks()
     local db = Infobar.db.profile
     local dbc = Infobar.db.char
@@ -1885,22 +1890,13 @@ function Infobar:CreateBlocks()
     end
 
     do -- Specialization
+        local C_EquipmentSet = _G.C_EquipmentSet
         local specInfo, specLines = RealUI.charInfo.specs, {}
-        local equipSetsByIndex, equipSetsByID = {}, {}
+        local equipmentSetIDs, equipmentSetInfos = {}, {}
         local layout = {
             L["Layout_DPSTank"],
             L["Layout_Healing"]
         }
-
-        local function EquipmentManager_EquipSet(setID) -- is72
-            local name = equipSetsByID[setID].name
-            if ( _G.EquipmentSetContainsLockedItems(name) or _G.UnitCastingInfo("player") ) then
-                _G.UIErrorsFrame:AddMessage(_G.ERR_CLIENT_LOCKED_OUT, 1.0, 0.1, 0.1, 1.0);
-                return;
-            end
-
-            _G.UseEquipmentSet(name)
-        end
 
         local equipmentNeedsUpdate = false
         local function Line_OnMouseUp(line, specIndex, button)
@@ -1912,12 +1908,12 @@ function Infobar:CreateBlocks()
                     if not _G.InCombatLockdown() then
                         if specIndex == specInfo.current.index then
                             if dbc.specgear[specIndex] >= 0 then
-                                EquipmentManager_EquipSet(dbc.specgear[specIndex])
+                                _G.EquipmentManager_EquipSet(dbc.specgear[specIndex])
                             end
                         else
                             _G.SetSpecialization(specIndex)
                             if dbc.specgear[specIndex] >= 0 then
-                                    equipmentNeedsUpdate = dbc.specgear[specIndex]
+                                equipmentNeedsUpdate = dbc.specgear[specIndex]
                             end
                         end
                     end
@@ -1927,42 +1923,31 @@ function Infobar:CreateBlocks()
                     dbc.specgear[specIndex] = -1
                     tooltip:SetCell(specLines[specIndex], 2, "---")
                 else
-                    local numEquipSets = _G.GetNumEquipmentSets()
-                    if (dbc.specgear[specIndex] < 0) or (equipSetsByID[dbc.specgear[specIndex]].index == numEquipSets) then
-                        dbc.specgear[specIndex] = equipSetsByIndex[1].id
+                    local equipIndex
+                    if dbc.specgear[specIndex] < 0 then
+                        equipIndex = 1
                     else
-                        for equipIndex = equipSetsByID[dbc.specgear[specIndex]].index, numEquipSets do
-                            if dbc.specgear[specIndex] ~= equipSetsByIndex[equipIndex].id then
-                                dbc.specgear[specIndex] = equipSetsByIndex[equipIndex].id
-                                break
-                            end
-                        end
+                        equipIndex = Wrap(equipmentSetInfos[dbc.specgear[specIndex]].index + 1, #equipmentSetIDs)
                     end
-                    tooltip:SetCell(specLines[specIndex], 2, equipSetsByID[dbc.specgear[specIndex]].name)
+                    dbc.specgear[specIndex] = equipmentSetIDs[equipIndex]
+                    tooltip:SetCell(specLines[specIndex], 2, equipmentSetInfos[dbc.specgear[specIndex]].name)
                 end
             end
         end
 
         local function UpdateGearSets()
-            _G.wipe(equipSetsByIndex)
-            _G.wipe(equipSetsByID)
-            local numEquipSets = _G.GetNumEquipmentSets()
-            if numEquipSets > 0 then
-                for index = 1, numEquipSets do
-                    local equipName, _, equipID = _G.GetEquipmentSetInfo(index)
-                    equipSetsByIndex[index] = {
-                        name = equipName,
-                        id = equipID
-                    }
-                    equipSetsByID[equipID] = {
-                        name = equipName,
-                        index = index
-                    }
-                end
+            equipmentSetIDs = C_EquipmentSet.GetEquipmentSetIDs()
+            _G.wipe(equipmentSetInfos)
+            for index = 1, #equipmentSetIDs do
+                local equipName = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetIDs[index])
+                equipmentSetInfos[equipmentSetIDs[index]] = {
+                    name = equipName,
+                    index = index
+                }
             end
 
             for specIndex = 1, #specInfo do
-                if not equipSetsByID[dbc.specgear[specIndex]] then
+                if not equipmentSetInfos[dbc.specgear[specIndex]] then
                     dbc.specgear[specIndex] = -1
                 end
             end
@@ -2005,7 +1990,7 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
                 for specIndex = 1, #RealUI.charInfo.specs do
-                    local equipSet = dbc.specgear[specIndex] >= 0 and equipSetsByID[dbc.specgear[specIndex]]
+                    local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
                     lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
                     specLines[specIndex] = lineNum
