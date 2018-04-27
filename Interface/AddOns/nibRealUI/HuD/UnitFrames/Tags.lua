@@ -31,7 +31,7 @@ tags.Methods["realui:name"] = function(unit)
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
-        nameColor = _G.CUSTOM_CLASS_COLORS[class].colorStr
+        nameColor = _G.CUSTOM_CLASS_COLORS[class or "PRIEST"].colorStr
     end
     return ("|c%s%s|r"):format(nameColor, name)
 end
