@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- [[ Lua Globals ]]
--- luacheck: globals next tonumber
+-- luacheck: globals next tonumber max
 
 -- [[ Core ]]
 local Aurora = private.Aurora
@@ -65,11 +65,11 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
         local slotID = self:GetID()
         local itemLink = _G.GetInventoryItemLink("player", slotID)
         if itemLink then
-            local itemLevel = LIU:GetUpgradedItemLevel(itemLink)
-            private.debug("ItemSlotButton_Update", slotID, self:GetName(), itemLevel, _G.GetDetailedItemLevelInfo(itemLink))
+            local itemLevel = max(LIU:GetUpgradedItemLevel(itemLink) or 0, _G.GetDetailedItemLevelInfo(itemLink) or 0)
+            private.debug("ItemSlotButton_Update", slotID, self:GetName(), itemLevel)
             private.debug("itemLink", _G.strsplit("|", itemLink))
 
-            if itemLevel and itemLevel > 1 then
+            if itemLevel > 1 then
                 local quality = _G.GetInventoryItemQuality("player", slotID)
                 local color = _G.ITEM_QUALITY_COLORS[quality]
                 self.ilvl:SetTextColor(color.r, color.g, color.b)
