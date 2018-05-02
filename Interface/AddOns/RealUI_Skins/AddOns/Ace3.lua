@@ -6,13 +6,14 @@ local _, private = ...
 -- [[ Core ]]
 local Aurora = private.Aurora
 local Base, Skin = Aurora.Base, Aurora.Skin
+local Color = Aurora.Color
 
 function private.AddOns.Ace3()
     local AceGUI = _G.LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
 
-    local frameColor = Aurora.Color.frame
-    local highlightColor = Aurora.Color.highlight
+    local frameColor = Color.frame
+    local highlightColor = Color.highlight
 
 
     local containters = {
@@ -213,7 +214,7 @@ function private.AddOns.Ace3()
                 bg:SetScript("OnLeave", function(self, ...) end)
                 bg:SetScript("OnMouseDown", widget.frame:GetScript("OnMouseDown"))
                 bg:SetScript("OnMouseUp", widget.frame:GetScript("OnMouseUp"))
-                Base.SetBackdrop(bg, frameColor)
+                Base.SetBackdrop(bg, Color.button, 0.3)
                 Base.SetHighlight(bg, "backdrop")
 
                 widget.checkbg:SetTexture("")
@@ -352,26 +353,15 @@ function private.AddOns.Ace3()
 
         -- Custom
             NumberEditBox = function(widget)
-                --[[
-                F.ReskinInput(widget.editbox)
-                F.Reskin(widget.button)
-
-                for _, type in next, {"minus", "plus"} do
-                    local btn = widget[type]
-                    F.ReskinExpandOrCollapse(btn)
-
-                    local point, anchor, relPoint, x, y = btn:GetPoint()
-                    btn:SetPoint(point, anchor, relPoint, x + 2, y)
-                    btn:SetText("")
-                    btn:SetSize(17, 17)
-                end
-                widget.minus._auroraBG.plus:Hide()]]
+                Skin.InputBoxTemplate(widget.editbox)
+                Skin.UIPanelButtonTemplate(widget.button)
+                Skin.UIPanelButtonTemplate(widget.minus)
+                Skin.UIPanelButtonTemplate(widget.plus)
             end,
             SearchEditBox = function(widget)
-                --[[
-                F.ReskinInput(widget.editBox)
-                F.Reskin(widget.button)
-                F.CreateBD(widget.predictor)]]
+                Skin.InputBoxTemplate(widget.editbox)
+                Skin.UIPanelButtonTemplate(widget.button)
+                Base.SetBackdrop(widget.predictor, frameColor)
             end,
 
         -- LibSharedMedia
