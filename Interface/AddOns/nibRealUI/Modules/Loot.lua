@@ -396,7 +396,15 @@ function Loot:LOOT_READY(event, autoLoot)
     if(items > 0) then
         for i = 1, items do
             local slot = RealUILootFrame.slots[i] or createSlot(i)
-            local icon, name, quantity, quality = _G.GetLootSlotInfo(i)
+            local icon, name, quantity, currencyID, quality --= _G.GetLootSlotInfo(i)
+            if RealUI.isPatch then
+                icon, name, quantity, currencyID, quality = _G.GetLootSlotInfo(i)
+                if currencyID then
+                    name, icon, quantity, quality = _G.CurrencyContainerUtil.GetCurrencyContainerInfo(currencyID, quantity, name, icon, quality);
+                end
+            else
+                icon, name, quantity, quality = _G.GetLootSlotInfo(i)
+            end
             if icon then
                 local color = _G.ITEM_QUALITY_COLORS[quality]
 
