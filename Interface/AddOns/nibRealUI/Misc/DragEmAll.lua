@@ -108,6 +108,7 @@ local lodFrames = {
     Blizzard_TradeSkillUI = { ["TradeSkillFrame"] = false },
     Blizzard_TrainerUI = { ["ClassTrainerFrame"] = false },
     Blizzard_VoidStorageUI = { ["VoidStorageFrame"] = false, ["VoidStorageBorderFrameMouseBlockFrame"] = "VoidStorageFrame" },
+    Blizzard_WorldMap = { ["TestWorldMapFrame"] = false, ["TestWorldMapFrame.BorderFrame"] = true },
 }
 
 local parentFrame = {}
@@ -179,10 +180,6 @@ function DragEmAll:ADDON_LOADED(event, name)
     end
 end
 
-function DragEmAll:PLAYER_LOGIN()
-    self:HookFrames(frames)
-end
-
 --------------------
 -- Initialization --
 --------------------
@@ -191,6 +188,14 @@ function DragEmAll:OnInitialize()
 end
 
 function DragEmAll:OnEnable()
-    self:RegisterEvent("PLAYER_LOGIN")
+    self:HookFrames(frames)
+
+    -- Hook prior loaded addons
+    for addon, frameList in _G.next, lodFrames do
+        if _G.IsAddOnLoaded(addon) then
+            self:HookFrames(frameList)
+        end
+    end
+
     self:RegisterEvent("ADDON_LOADED")
 end
