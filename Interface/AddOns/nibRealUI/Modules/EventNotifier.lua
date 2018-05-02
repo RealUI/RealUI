@@ -13,7 +13,12 @@ local EventNotifier = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 local VignetteExclusionMapIDs = {
     [971] = true, -- Lunarfall: Alliance garrison
     [976] = true, -- Frostwall: Horde garrison
-    [1021] = true -- Scenario: The Broken Shore
+    [1021] = true, -- Scenario: The Broken Shore
+}
+local excludedUIMapIDs = {
+    [579] = true, -- Lunarfall: Alliance garrison
+    [585] = true, -- Frostwall: Horde garrison
+    [646] = true, -- Scenario: The Broken Shore
 }
 local SOUND_TIMEOUT = 20
 
@@ -81,6 +86,24 @@ function EventNotifier:CALENDAR_UPDATE_GUILD_EVENTS()
     end
 end
 
+function EventNotifier:VIGNETTE_MINIMAP_UPDATED(event, vignetteGUID, onMinimap)
+    self:debug("VIGNETTE_MINIMAP_UPDATED", vignetteGUID, onMinimap)
+    if not (db.checkMinimapRares) or excludedUIMapIDs[_G.C_Map.GetBestMapForUnit("player")] then return end
+
+    self:debug("time, id", self.lastMinimapRare.time, self.lastMinimapRare.id)
+    if onMinimap then
+        if vignetteGUID ~= self.lastMinimapRare.id then
+            local vignetteInfo = _G.C_VignetteInfo.GetVignetteInfo(vignetteGUID)
+            RealUI:Notification(vignetteInfo.name, true, "- has appeared on the MiniMap!", nil, vignetteInfo.atlasName)
+
+            if _G.GetTime() > (self.lastMinimapRare.time + SOUND_TIMEOUT) then
+                _G.PlaySound(_G.SOUNDKIT.RAID_WARNING)
+            end
+        end
+        self.lastMinimapRare.time = _G.GetTime()
+        self.lastMinimapRare.id = vignetteGUID
+    end
+end
 function EventNotifier:VIGNETTE_ADDED(event, vigID)
     self:debug("VIGNETTE_ADDED", vigID)
     if not(db.checkMinimapRares) or VignetteExclusionMapIDs[_G.GetCurrentMapAreaID()] then return end
@@ -93,8 +116,8 @@ function EventNotifier:VIGNETTE_ADDED(event, vigID)
         self:debug("points", left, right, top, bottom)
 
         -- Notify
-        if (_G.GetTime() > self.lastMinimapRare.time + SOUND_TIMEOUT) then
-            _G.PlaySoundFile([[Sound\Interface\RaidWarning.wav]])
+        if _G.GetTime() > (self.lastMinimapRare.time + SOUND_TIMEOUT) then
+            _G.PlaySound(_G.SOUNDKIT.RAID_WARNING)
         end
         RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\ObjectIconsAtlas]], left, right, top, bottom)
     end
@@ -146,7 +169,9 @@ end
 function EventNotifier:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("CALENDAR_UPDATE_GUILD_EVENTS")
-    if not RealUI.isPatch then
+    if RealUI.isPatch then
+        self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
+    else
         self:RegisterEvent("VIGNETTE_ADDED")
     end
 end

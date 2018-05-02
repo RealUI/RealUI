@@ -73,13 +73,17 @@ local function display(name, message, clickFunc, texture, ...)
         f.clickFunc = nil
     end
 
-    if _G.type(texture) == "string" then
-        icon:SetTexture(texture)
-
-        if ... then
-            icon:SetTexCoord(...)
+    if texture then
+        if _G.GetAtlasInfo(texture) then
+            icon:SetAtlas(texture)
         else
-            icon:SetTexCoord(.08, .92, .08, .92)
+            icon:SetTexture(texture)
+
+            if ... then
+                icon:SetTexCoord(...)
+            else
+                icon:SetTexCoord(.08, .92, .08, .92)
+            end
         end
     else
         icon:SetTexture("Interface\\Icons\\achievement_general")
