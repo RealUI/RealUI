@@ -1526,6 +1526,10 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Art)
+                -- /dump C_AzeriteItem.GetAzeriteItemXPInfo(C_AzeriteItem.FindActiveAzeriteItem())
+                if RealUI.isPatch then
+                    azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem()
+                end
                 if azeriteItemLocation then
                     return C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
                 else
@@ -1541,7 +1545,6 @@ function Infobar:CreateBlocks()
                 return 0.901, 0.8, 0.601 -- isPatch _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                -- /dump C_AzeriteItem.GetAzeriteItemXPInfo(C_AzeriteItem.FindActiveAzeriteItem())
                 if azeriteItemLocation then
                     return true
                 else
@@ -1565,6 +1568,10 @@ function Infobar:CreateBlocks()
                 local hasArtifact, artifact = artData:GetArtifactInfo()
 
                 if azeriteItemLocation then
+                    if not azeriteItem then
+                        azeriteItem = _G.Item:CreateFromItemLocation(azeriteItemLocation)
+                    end
+
                     local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
                     local currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
                     local xpToNextLevel = totalLevelXP - xp
@@ -1812,12 +1819,7 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("progress: OnEvent", block.side, event, ...)
-                if event == "AZERITE_ITEM_EXPERIENCE_CHANGED" then
-                    azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem()
-                    if azeriteItemLocation then
-                        azeriteItem = _G.Item:CreateFromItemLocation(azeriteItemLocation)
-                    end
-                elseif event == "ARTIFACT_UPDATE" then
+                if event == "ARTIFACT_UPDATE" then
                     artifactInit = true
                     if not watchStates["artifact"]:IsValid() then
                         UpdateState(block)
