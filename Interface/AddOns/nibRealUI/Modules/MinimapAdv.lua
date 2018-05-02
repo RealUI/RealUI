@@ -8,9 +8,12 @@ local RealUI = private.RealUI
 local db
 
 -- Libs --
-local HBD --= _G.LibStub("HereBeDragons-1.0")
-local HBDP --= _G.LibStub("HereBeDragons-Pins-1.0")
-if not RealUI.isPatch then
+local HBD --= _G.LibStub("HereBeDragons-2.0")
+local HBDP --= _G.LibStub("HereBeDragons-Pins-2.0")
+if RealUI.isPatch then
+    HBD = _G.LibStub("HereBeDragons-2.0")
+    HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
+else
     HBD = _G.LibStub("HereBeDragons-1.0")
     HBDP = _G.LibStub("HereBeDragons-Pins-1.0")
 end
@@ -588,20 +591,20 @@ local function POI_OnMouseUp(self)
 end
 
 -- Find closest POI
-function MinimapAdv:ClosestPOI(all)
-    local _, closest, closest_distance, poi_distance
+function MinimapAdv:ClosestPOI()
+    local _, closest, closestDistance, poiDistance
     for k, poi in next, self.pois do
         if poi.active then
-            _, poi_distance = HBDP:GetVectorToIcon(poi)
+            _, poiDistance = HBDP:GetVectorToIcon(poi)
 
             if closest then
-                if ( poi_distance and closest_distance and (poi_distance < closest_distance) ) then
+                if ( poiDistance and closestDistance and (poiDistance < closestDistance) ) then
                     closest = poi
-                    closest_distance = poi_distance
+                    closestDistance = poiDistance
                 end
             else
                 closest = poi
-                closest_distance = poi_distance
+                closestDistance = poiDistance
             end
         end
     end
@@ -672,7 +675,6 @@ end
 
 -- Update all POIs
 function MinimapAdv:POIUpdate(...)
-    if RealUI.isPatch then return end
     self:debug("POIUpdate", ...)
     if ( (not db.poi.enabled) or (ExpandedState == 1 and db.expand.extras.hidepoi) ) then return end
     if _G.IsAddOnLoaded("Carbonite") or _G.IsAddOnLoaded("DugisGuideViewerZ") then return end
@@ -744,7 +746,11 @@ function MinimapAdv:POIUpdate(...)
                 poi.active = true
                 poi.complete = isComplete
 
-                HBDP:AddMinimapIconMF(self, poi, mapID, mapFloor, posX, posY, true)
+                if RealUI.isPatch then
+                    HBDP:AddMinimapIconMap(self, poi, mapID, posX, posY, true, true)
+                else
+                    HBDP:AddMinimapIconMF(self, poi, mapID, mapFloor, posX, posY, true)
+                end
 
                 pois[i] = poi
             end
@@ -1739,12 +1745,15 @@ local function CreateFrames()
     MMFrames.info.Coords = NewInfoFrame("Coords", _G.Minimap)
     MMFrames.info.Coords:SetAlpha(0.75)
     MMFrames.info.Coords:SetScript("OnUpdate", function(coordsFrame, elapsed)
-        if RealUI.isPatch then return end
         lastUpdate = lastUpdate + elapsed
-        if not _G.IsInInstance() and lastUpdate > threshold then
-            local x, y = _G.GetPlayerMapPosition("player")
-            coordsFrame.text:SetText(("%.1f  %.1f"):format(x * 100, y * 100))
-            coordsFrame:SetHeight(coordsFrame.text:GetStringHeight())
+        if lastUpdate > threshold then
+            local x, y = HBD:GetPlayerZonePosition()
+            if x and y then
+                coordsFrame.text:SetText(("%.1f  %.1f"):format(x * 100, y * 100))
+                coordsFrame:SetHeight(coordsFrame.text:GetStringHeight())
+            else
+                coordsFrame.text:SetText("")
+            end
             lastUpdate = 0
         end
     end)

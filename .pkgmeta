@@ -40,7 +40,7 @@ externals:
     Interface/AddOns/nibRealUI/Libs/AceTimer-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceTimer-3.0
         tag: latest
-    Interface/AddOns/nibRealUI/Libs/HereBeDragons-1.0:
+    Interface/AddOns/nibRealUI/Libs/HereBeDragons:
         url: https://repos.wowace.com/wow/herebedragons
         tag: latest
     Interface/AddOns/nibRealUI/Libs/LibArtifactData-1.0:

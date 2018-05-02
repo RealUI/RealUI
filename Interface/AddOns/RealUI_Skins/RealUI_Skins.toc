@@ -19,7 +19,8 @@ RealUI_Skins.lua
 
 FrameXML\MailFrame.lua
 FrameXML\PaperDollFrame.lua
-FrameXML\WorldMapFrame.lua
+
+AddOns\Blizzard_WorldMap.lua
 
 AddOns\Ace3.lua
 AddOns\DBM-GUI.lua
