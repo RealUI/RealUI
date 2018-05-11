@@ -384,7 +384,7 @@ local garrisonAlerts do
     }
 end
 local bnetAlerts do
-    local toastType, toastInfo = 1, _G.BNGetFriendInfo(1)
+    local toastType, toastInfo = 1
     local toastTypes = {
         "online",
         "offline",
