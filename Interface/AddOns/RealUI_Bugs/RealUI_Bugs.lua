@@ -46,6 +46,7 @@ function RealUI.GetDebug(mod)
 end
 _G.RealUI = RealUI
 
+local debug = RealUI.GetDebug("Bugs")
 local errorFrame do
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
     errorFrame:SetClampedToScreen(true)
@@ -306,10 +307,18 @@ function errorFrame.ADDON_LOADED(addon)
     end
 end
 
+-- Redirect lua warnings
+_G.UIParent:UnregisterEvent("LUA_WARNING")
+local WARNING_FORMAT = "Warning %d: %s"
+function errorFrame.LUA_WARNING(warnType, warnMessage)
+    debug(WARNING_FORMAT:format(warnType, warnMessage))
+end
+
 _G.BugGrabber.setupCallbacks()
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_BugGrabbed")
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_CapturePaused")
 errorFrame:RegisterEvent("ADDON_LOADED")
+errorFrame:RegisterEvent("LUA_WARNING")
 errorFrame:SetScript("OnEvent", function(self, event, ...)
     if self[event] then
         self[event](...)
