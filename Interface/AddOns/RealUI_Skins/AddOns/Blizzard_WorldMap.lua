@@ -80,7 +80,7 @@ end
 end ]]
 
 function private.AddOns.Post.Blizzard_WorldMap()
-    local WorldMapFrame = _G.TestWorldMapFrame or _G.WorldMapFrame
+    local WorldMapFrame = _G.WorldMapFrame
     WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
     WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
 

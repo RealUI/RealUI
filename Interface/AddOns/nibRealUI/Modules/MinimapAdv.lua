@@ -998,6 +998,7 @@ end
 ---------------------
 function MinimapAdv:Update()
     UpdateProcessing = true     -- Stops individual update functions from calling UpdateInfoPosition
+    self:ZoneChange()
     self:DungeonDifficultyUpdate()
     self:UpdateButtonsPosition()
     UpdateProcessing = false
@@ -1414,7 +1415,6 @@ end
 
 function MinimapAdv:ZONE_CHANGED_NEW_AREA(event, ...)
     self:debug(event, ...)
-    _G.SetMapToCurrentZone()
     self:ZoneChange()
 
     -- Update POIs
@@ -1484,7 +1484,6 @@ function MinimapAdv:RegEvents()
     self:RegisterBucketEvent({
         "ZONE_CHANGED",
         "ZONE_CHANGED_INDOORS",
-        "WORLD_MAP_UPDATE",
     }, 0.2, "ZoneChange")
 
     -- Dungeon Difficulty

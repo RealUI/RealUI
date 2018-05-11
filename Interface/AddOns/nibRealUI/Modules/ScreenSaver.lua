@@ -303,7 +303,6 @@ end
 
 function ScreenSaver:OnEnable()
     self:RegisterEvent("PLAYER_FLAGS_CHANGED", "AFKEvent")
-    self:RegisterEvent("WORLD_MAP_UPDATE", "AFKEvent")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "AFKEvent")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "AFKEvent")
 
@@ -314,7 +313,6 @@ end
 
 function ScreenSaver:OnDisable()
     self:UnregisterEvent("PLAYER_FLAGS_CHANGED")
-    self:UnregisterEvent("WORLD_MAP_UPDATE")
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 
