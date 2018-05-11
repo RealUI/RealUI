@@ -279,12 +279,12 @@ function private.OnLoad()
         Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
     end
 
-    function Base.Post.SetBackdrop(ret, frame, color, alpha)
+    function Base.Post.SetBackdrop(Frame, color, alpha)
         if not color and not alpha then
-            local r, g, b, a = frame:GetBackdropColor()
-            frame:SetBackdropColor(r, g, b, frameColor.a)
+            local r, g, b, a = Frame:GetBackdropColor()
+            Frame:SetBackdropColor(r, g, b, frameColor.a)
 
-            local stripes = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
+            local stripes = Frame:CreateTexture(nil, "BACKGROUND", nil, 1)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
             stripes:SetAlpha(private.skinsDB.stripeAlpha)
             stripes:SetAllPoints()
@@ -292,13 +292,13 @@ function private.OnLoad()
             stripes:SetVertTile(true)
             stripes:SetBlendMode("ADD")
 
-            r, g, b = frame:GetBackdropBorderColor()
+            r, g, b = Frame:GetBackdropBorderColor()
             if Color.frame:IsEqualTo(r, g, b, a) then
                 color = Color.frame
             else
                 color = Color.button
             end
-            RealUI:RegisterSkinnedFrame(frame, color, stripes)
+            RealUI:RegisterSkinnedFrame(Frame, color, stripes)
         end
     end
 

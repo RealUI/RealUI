@@ -164,14 +164,14 @@ do --[[ FrameXML\MailFrame.xml ]]
         end
         UpdateCheckedItems()
     end
-    function Skin.Post.MailItemTemplate(ret, frame)
-        frame:SetSize(295, 45)
+    function Skin.Post.MailItemTemplate(Frame)
+        Frame:SetSize(295, 45)
 
-        local check = _G.CreateFrame("CheckButton", "$parentCheck", frame, "UICheckButtonTemplate")
+        local check = _G.CreateFrame("CheckButton", "$parentCheck", Frame, "UICheckButtonTemplate")
         Skin.UICheckButtonTemplate(check)
-        check:SetPoint("RIGHT", frame.Button, "LEFT", -3, 0)
+        check:SetPoint("RIGHT", Frame.Button, "LEFT", -3, 0)
         check:SetScript("OnClick", OnClick)
-        frame.checkbox = check
+        Frame.checkbox = check
     end
 end
 

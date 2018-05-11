@@ -157,22 +157,22 @@ end
 
 do --[[ FrameXML\PaperDollFrame.xml ]]
     local MAX_UPGRADES = 6
-    local function CreateRegions(button)
-        local name = button:GetName()
+    local function CreateRegions(Button)
+        local name = Button:GetName()
 
-        local ilvl = button:CreateFontString(name.."ItemLevel", "OVERLAY")
+        local ilvl = Button:CreateFontString(name.."ItemLevel", "OVERLAY")
         ilvl:SetFontObject(_G.NumberFont_Outline_Med)
         ilvl:SetPoint("BOTTOMRIGHT", 0, 1)
         ilvl:SetPoint("BOTTOMLEFT", 1, 1)
-        button.ilvl = ilvl
+        Button.ilvl = ilvl
 
         local upgrades = {}
-        local upgradeBG = button:CreateTexture(nil, "OVERLAY", nil, -8)
+        local upgradeBG = Button:CreateTexture(nil, "OVERLAY", nil, -8)
         upgradeBG:SetColorTexture(0, 0, 0, 1)
         upgrades.bg = upgradeBG
 
         for i = 1, MAX_UPGRADES do
-            local tex = button:CreateTexture(nil, "OVERLAY")
+            local tex = Button:CreateTexture(nil, "OVERLAY")
             tex:SetWidth(1)
             if i == 1 then
                 tex:SetPoint("TOPLEFT", upgradeBG)
@@ -181,9 +181,9 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
             end
             upgrades[i] = tex
         end
-        button.upgrades = upgrades
+        Button.upgrades = upgrades
 
-        local dura = _G.CreateFrame("StatusBar", nil, button)
+        local dura = _G.CreateFrame("StatusBar", nil, Button)
         dura:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
         dura:SetOrientation("VERTICAL")
         dura:SetMinMaxValues(0, 1)
@@ -193,76 +193,76 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
         duraBG:SetColorTexture(0, 0, 0, 1)
         duraBG:SetPoint("TOPLEFT", -1, 0)
         duraBG:SetPoint("BOTTOMRIGHT", 1, 0)
-        button.dura = dura
+        Button.dura = dura
 
-        local enchant = button:CreateTexture(name.."Enchant", "OVERLAY")
+        local enchant = Button:CreateTexture(name.."Enchant", "OVERLAY")
         enchant:SetTexture([[Interface\Icons\inv_misc_enchantedscroll]])
         enchant:SetSize(10, 10)
         Base.CropIcon(enchant)
-        button.enchant = enchant
+        Button.enchant = enchant
 
-        button.gems = {}
-        function button.gems:Hide(start)
+        Button.gems = {}
+        function Button.gems:Hide(start)
             for i = (start or 1), 4 do
                 self[i]:Hide()
             end
         end
         for i = 1, 4 do
-            local gem = button:CreateTexture(name.."Gem"..i, "OVERLAY")
+            local gem = Button:CreateTexture(name.."Gem"..i, "OVERLAY")
             gem:SetSize(10, 10)
             Base.CropIcon(gem)
-            button.gems[i] = gem
+            Button.gems[i] = gem
         end
     end
 
-    function Skin.Post.PaperDollItemSlotButtonLeftTemplate(ret, button)
-        CreateRegions(button)
+    function Skin.Post.PaperDollItemSlotButtonLeftTemplate(Button)
+        CreateRegions(Button)
 
-        button.ilvl:SetJustifyH("RIGHT")
-        button.ilvl:SetText("button.ilvl")
+        Button.ilvl:SetJustifyH("RIGHT")
+        Button.ilvl:SetText("Button.ilvl")
 
-        local upgrades = button.upgrades
+        local upgrades = Button.upgrades
         upgrades.bg:SetPoint("TOPLEFT", -1, 0)
-        upgrades.bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMLEFT")
+        upgrades.bg:SetPoint("BOTTOMRIGHT", Button, "BOTTOMLEFT")
 
-        button.dura:SetPoint("TOPLEFT", 1, 0)
-        button.dura:SetPoint("BOTTOMRIGHT", button, "BOTTOMLEFT", 2, 0)
+        Button.dura:SetPoint("TOPLEFT", 1, 0)
+        Button.dura:SetPoint("BOTTOMRIGHT", Button, "BOTTOMLEFT", 2, 0)
 
-        button.enchant:SetPoint("TOPLEFT", button, "TOPRIGHT", 2, -2)
+        Button.enchant:SetPoint("TOPLEFT", Button, "TOPRIGHT", 2, -2)
 
-        local gems = button.gems
-        gems[1]:SetPoint("TOPLEFT", button.enchant, "BOTTOMLEFT", 0, -2)
+        local gems = Button.gems
+        gems[1]:SetPoint("TOPLEFT", Button.enchant, "BOTTOMLEFT", 0, -2)
         gems[2]:SetPoint("TOPLEFT", gems[1], "BOTTOMLEFT", 0, -2)
         gems[3]:SetPoint("TOPLEFT", gems[1], "TOPRIGHT", 2, 0)
         gems[4]:SetPoint("TOPLEFT", gems[3], "BOTTOMLEFT", 0, -2)
     end
-    function Skin.Post.PaperDollItemSlotButtonRightTemplate(ret, button)
-        CreateRegions(button)
+    function Skin.Post.PaperDollItemSlotButtonRightTemplate(Button)
+        CreateRegions(Button)
 
-        button.ilvl:SetJustifyH("LEFT")
-        button.ilvl:SetText("button.ilvl")
+        Button.ilvl:SetJustifyH("LEFT")
+        Button.ilvl:SetText("Button.ilvl")
 
-        local upgrades = button.upgrades
+        local upgrades = Button.upgrades
         upgrades.bg:SetPoint("TOPRIGHT", 1, 0)
-        upgrades.bg:SetPoint("BOTTOMLEFT", button, "BOTTOMRIGHT")
+        upgrades.bg:SetPoint("BOTTOMLEFT", Button, "BOTTOMRIGHT")
 
-        button.dura:SetPoint("TOPRIGHT", -1, 0)
-        button.dura:SetPoint("BOTTOMLEFT", button, "BOTTOMRIGHT", -2, 0)
+        Button.dura:SetPoint("TOPRIGHT", -1, 0)
+        Button.dura:SetPoint("BOTTOMLEFT", Button, "BOTTOMRIGHT", -2, 0)
 
-        button.enchant:SetPoint("TOPRIGHT", button, "TOPLEFT", -2, -2)
-        button.gems[1]:SetPoint("TOPRIGHT", button.enchant, "BOTTOMRIGHT", 0, -2)
+        Button.enchant:SetPoint("TOPRIGHT", Button, "TOPLEFT", -2, -2)
+        Button.gems[1]:SetPoint("TOPRIGHT", Button.enchant, "BOTTOMRIGHT", 0, -2)
 
-        local gems = button.gems
-        gems[1]:SetPoint("TOPRIGHT", button.enchant, "BOTTOMRIGHT", 0, -2)
+        local gems = Button.gems
+        gems[1]:SetPoint("TOPRIGHT", Button.enchant, "BOTTOMRIGHT", 0, -2)
         gems[2]:SetPoint("TOPRIGHT", gems[1], "BOTTOMRIGHT", 0, -2)
         gems[3]:SetPoint("TOPRIGHT", gems[1], "TOPLEFT", -2, 0)
         gems[4]:SetPoint("TOPRIGHT", gems[3], "BOTTOMRIGHT", 0, -2)
     end
-    function Skin.Post.PaperDollItemSlotButtonBottomTemplate(ret, button)
-        if button:GetName():find("MainHand") then
-            Skin.Post.PaperDollItemSlotButtonRightTemplate(ret, button)
+    function Skin.Post.PaperDollItemSlotButtonBottomTemplate(Button)
+        if Button:GetName():find("MainHand") then
+            Skin.Post.PaperDollItemSlotButtonRightTemplate(Button)
         else
-            Skin.Post.PaperDollItemSlotButtonLeftTemplate(ret, button)
+            Skin.Post.PaperDollItemSlotButtonLeftTemplate(Button)
         end
     end
 end
