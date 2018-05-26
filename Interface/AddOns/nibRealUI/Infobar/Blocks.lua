@@ -796,7 +796,11 @@ function Infobar:CreateBlocks()
             OnEvent = function(block, event, ...)
                 --Infobar:debug("Clock: OnEvent", event, ...)
                 local alert = block.alert
-                block.invites = _G.CalendarGetNumPendingInvites()
+                if RealUI.isPatch then
+                    block.invites = _G.C_Calendar.GetNumPendingInvites()
+                else
+                    block.invites = _G.CalendarGetNumPendingInvites()
+                end
                 if block.invites > 0 and not alert.isHidden then
                     alert:Show()
                     alert.isHidden = false

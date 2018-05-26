@@ -279,12 +279,15 @@ function private.OnLoad()
         Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
     end
 
+    function Skin.Post.AzeriteEmpoweredItemUITemplate(Frame)
+        skinnedFrames[Frame.BorderFrame].stripes:SetParent(Frame)
+    end
     function Base.Post.SetBackdrop(Frame, color, alpha)
         if not color and not alpha then
             local r, g, b, a = Frame:GetBackdropColor()
             Frame:SetBackdropColor(r, g, b, frameColor.a)
 
-            local stripes = Frame:CreateTexture(nil, "BACKGROUND", nil, 1)
+            local stripes = Frame:CreateTexture(nil, "BACKGROUND", nil, -6)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
             stripes:SetAlpha(private.skinsDB.stripeAlpha)
             stripes:SetAllPoints()
