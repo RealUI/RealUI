@@ -125,7 +125,7 @@ end
 
 do --[[ FrameXML\MailFrame.lua ]]
     local numItems
-    function Hook.Post.InboxFrame_Update()
+    _G.hooksecurefunc(Hook, "InboxFrame_Update", function()
         local newNumItems = _G.GetInboxNumItems()
         private.debug("InboxFrame_Update", numItems, newNumItems)
 
@@ -149,7 +149,7 @@ do --[[ FrameXML\MailFrame.lua ]]
         end
 
         UpdateCheckedItems()
-    end
+    end)
 end
 
 do --[[ FrameXML\MailFrame.xml ]]
@@ -164,7 +164,7 @@ do --[[ FrameXML\MailFrame.xml ]]
         end
         UpdateCheckedItems()
     end
-    function Skin.Post.MailItemTemplate(Frame)
+    _G.hooksecurefunc(Skin, "MailItemTemplate", function(Frame)
         Frame:SetSize(295, 45)
 
         local check = _G.CreateFrame("CheckButton", "$parentCheck", Frame, "UICheckButtonTemplate")
@@ -172,10 +172,10 @@ do --[[ FrameXML\MailFrame.xml ]]
         check:SetPoint("RIGHT", Frame.Button, "LEFT", -3, 0)
         check:SetScript("OnClick", OnClick)
         Frame.checkbox = check
-    end
+    end)
 end
 
-function private.FrameXML.Post.MailFrame()
+_G.hooksecurefunc(private.FrameXML, "MailFrame", function()
     _G.MailItem1:SetPoint("TOPLEFT", 33, -(private.FRAME_TITLE_HEIGHT + 5))
 
     local openChecked = _G.CreateFrame("Button", "$parentOpenChecked", _G.InboxFrame, "UIPanelButtonTemplate")
@@ -197,4 +197,4 @@ function private.FrameXML.Post.MailFrame()
     -------------
 
     --[[ Scale ]]--
-end
+end)

@@ -156,8 +156,10 @@ function private.OnLoad()
     -- Transfer settings
     if _G.RealUI_Storage.nibRealUI_Init then
         local RealUI_InitDB = _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB
-        private.skinsDB.stripeAlpha = RealUI_InitDB.stripeOpacity
-        private.skinsDB.uiModScale = RealUI_InitDB.uiModScale
+        if RealUI_InitDB then
+            private.skinsDB.stripeAlpha = RealUI_InitDB.stripeOpacity
+            private.skinsDB.uiModScale = RealUI_InitDB.uiModScale
+        end
         _G.RealUI_Storage.nibRealUI_Init = nil
     end
 
@@ -279,10 +281,10 @@ function private.OnLoad()
         Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
     end
 
-    function Skin.Post.AzeriteEmpoweredItemUITemplate(Frame)
+    _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
         skinnedFrames[Frame.BorderFrame].stripes:SetParent(Frame)
-    end
-    function Base.Post.SetBackdrop(Frame, color, alpha)
+    end)
+    _G.hooksecurefunc(Base, "SetBackdrop", function(Frame, color, alpha)
         if not color and not alpha then
             local r, g, b, a = Frame:GetBackdropColor()
             Frame:SetBackdropColor(r, g, b, frameColor.a)
@@ -303,7 +305,7 @@ function private.OnLoad()
             end
             RealUI:RegisterSkinnedFrame(Frame, color, stripes)
         end
-    end
+    end)
 
     -- Disable user selected addon skins
     for name, enabled in next, private.skinsDB.addons do

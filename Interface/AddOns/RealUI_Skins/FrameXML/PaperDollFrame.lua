@@ -215,7 +215,7 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
         end
     end
 
-    function Skin.Post.PaperDollItemSlotButtonLeftTemplate(Button)
+    _G.hooksecurefunc(Skin, "PaperDollItemSlotButtonLeftTemplate", function(Button)
         CreateRegions(Button)
 
         Button.ilvl:SetJustifyH("RIGHT")
@@ -235,8 +235,8 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
         gems[2]:SetPoint("TOPLEFT", gems[1], "BOTTOMLEFT", 0, -2)
         gems[3]:SetPoint("TOPLEFT", gems[1], "TOPRIGHT", 2, 0)
         gems[4]:SetPoint("TOPLEFT", gems[3], "BOTTOMLEFT", 0, -2)
-    end
-    function Skin.Post.PaperDollItemSlotButtonRightTemplate(Button)
+    end)
+    _G.hooksecurefunc(Skin, "PaperDollItemSlotButtonRightTemplate", function(Button)
         CreateRegions(Button)
 
         Button.ilvl:SetJustifyH("LEFT")
@@ -257,16 +257,16 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
         gems[2]:SetPoint("TOPRIGHT", gems[1], "BOTTOMRIGHT", 0, -2)
         gems[3]:SetPoint("TOPRIGHT", gems[1], "TOPLEFT", -2, 0)
         gems[4]:SetPoint("TOPRIGHT", gems[3], "BOTTOMRIGHT", 0, -2)
-    end
-    function Skin.Post.PaperDollItemSlotButtonBottomTemplate(Button)
+    end)
+    function Skin.PaperDollItemSlotButtonBottomTemplate(Button)
         if Button:GetName():find("MainHand") then
-            Skin.Post.PaperDollItemSlotButtonRightTemplate(Button)
+            Skin.PaperDollItemSlotButtonRightTemplate(Button)
         else
-            Skin.Post.PaperDollItemSlotButtonLeftTemplate(Button)
+            Skin.PaperDollItemSlotButtonLeftTemplate(Button)
         end
     end
 end
 
-function private.FrameXML.Post.PaperDollFrame()
+_G.hooksecurefunc(private.FrameXML, "PaperDollFrame", function()
     _G.hooksecurefunc("PaperDollItemSlotButton_Update", Hook.PaperDollItemSlotButton_Update)
-end
+end)

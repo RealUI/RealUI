@@ -79,39 +79,50 @@ end
 --[[ do AddOns\Blizzard_WorldMap.xml
 end ]]
 
-function private.AddOns.Post.Blizzard_WorldMap()
-    local WorldMapFrame = _G.WorldMapFrame
-    WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
-    WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
+if private.isPatch then
+    _G.hooksecurefunc(private.AddOns, "Blizzard_WorldMap", function()
+        local WorldMapFrame = _G.WorldMapFrame
+        WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
+        WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
 
-    local player = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
-    if private.isPatch then
+        local player = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
         player:SetPoint("LEFT", WorldMapFrame.BorderFrame.TitleText, 40, 0)
-    else
-        player:SetPoint("TOPLEFT", 40.5, -10.5)
-    end
-    player:SetFontObject(_G.SystemFont_Shadow_Med1)
-    player:SetJustifyH("LEFT")
-    player:SetText("")
+        player:SetFontObject(_G.SystemFont_Shadow_Med1)
+        player:SetJustifyH("LEFT")
+        player:SetText("")
 
-    local mouse = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
-    if private.isPatch then
+        local mouse = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
         mouse:SetPoint("LEFT", WorldMapFrame.BorderFrame.TitleText, 160, 0)
-    else
+        mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
+        mouse:SetJustifyH("LEFT")
+        mouse:SetText("")
+
+        WorldMapFrame._ruiCoords = {
+            player = player,
+            mouse = mouse
+        }
+    end)
+else
+    _G.hooksecurefunc(private.FrameXML, "WorldMapFrame", function()
+        local WorldMapFrame = _G.WorldMapFrame
+        WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
+        WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
+
+        local player = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
+        player:SetPoint("TOPLEFT", 40.5, -10.5)
+        player:SetFontObject(_G.SystemFont_Shadow_Med1)
+        player:SetJustifyH("LEFT")
+        player:SetText("")
+
+        local mouse = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
         mouse:SetPoint("TOPLEFT", 160.5, -10.5)
-    end
-    mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
-    mouse:SetJustifyH("LEFT")
-    mouse:SetText("")
+        mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
+        mouse:SetJustifyH("LEFT")
+        mouse:SetText("")
 
-    WorldMapFrame._ruiCoords = {
-        player = player,
-        mouse = mouse
-    }
-end
-
-function private.FrameXML.Post.WorldMapFrame()
-    if not private.isPatch then
-        private.AddOns.Post.Blizzard_WorldMap()
-    end
+        WorldMapFrame._ruiCoords = {
+            player = player,
+            mouse = mouse
+        }
+    end)
 end
