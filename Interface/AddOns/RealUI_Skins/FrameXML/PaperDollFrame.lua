@@ -14,12 +14,12 @@ local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 do --[[ FrameXML\PaperDollFrame.lua ]]
     local ShouldHaveEnchant, GetNumSockets do
         local enchantSlots = {
-            [2] = true, -- Neck
-            [15] = true, -- Cloak
+            [2] = not private.isPatch, -- Neck
+            [15] = not private.isPatch, -- Cloak
             [11] = true, -- Ring 1
             [12] = true, -- Ring 2
-            [16] = true, -- Main Hand
-            [17] = true, -- Off Hand
+            [16] = private.isPatch, -- Main Hand
+            [17] = private.isPatch, -- Off Hand
         }
         function ShouldHaveEnchant(slotID, quality)
             return enchantSlots[slotID] and quality ~= _G.LE_ITEM_QUALITY_ARTIFACT
@@ -111,7 +111,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                         self.enchant:Show()
                     else
                         if ShouldHaveEnchant(slotID, quality) then
-                            self.enchant:SetTexture([[Interface\PaperDollInfoFrame\UI-GearManager-LeaveItem-Opaque]])
+                            self.enchant:SetTexture([[Interface\Buttons\UI-GroupLoot-Pass-Up]])
                             self.enchant:Show()
                         else
                             self.enchant:Hide()
