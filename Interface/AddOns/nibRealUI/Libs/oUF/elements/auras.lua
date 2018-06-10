@@ -153,9 +153,6 @@ local function updateIcon(element, unit, index, offset, filter, isDebuff, visibl
 		timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
 	end
 
-	-- count may be nil sometimes
-	count = count or 0
-
 	if(name) then
 		local position = visible + offset + 1
 		local button = element[position]

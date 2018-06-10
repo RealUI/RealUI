@@ -186,16 +186,16 @@ local tagStrings = {
 	end]],
 
 	['raidcolor'] = [[function(u)
-		local _, x = UnitClass(u)
-		if(x) then
-			return Hex(_COLORS.class[x])
+		local _, class = UnitClass(u)
+		if(class) then
+			return Hex(_COLORS.class[class])
 		else
-			local id = u:match'arena(%d)$'
+			local id = u:match('arena(%d)$')
 			if(id) then
 				local specID = GetArenaOpponentSpec(tonumber(id))
 				if(specID and specID > 0) then
-					_, _, _, _, _, _, x = GetSpecializationInfoByID(specID)
-					return Hex(_COLORS.class[x])
+					_, _, _, _, _, class = GetSpecializationInfoByID(specID)
+					return Hex(_COLORS.class[class])
 				end
 			end
 		end
@@ -408,7 +408,7 @@ local tagStrings = {
 	end]],
 
 	['arenaspec'] = [[function(u)
-		local id = u:match'arena(%d)$'
+		local id = u:match('arena(%d)$')
 		if(id) then
 			local specID = GetArenaOpponentSpec(tonumber(id))
 			if(specID and specID > 0) then
@@ -499,7 +499,7 @@ local tagEvents = {
 	['chi']                 = 'UNIT_POWER_UPDATE SPELLS_CHANGED',
 	['arcanecharges']       = 'UNIT_POWER_UPDATE SPELLS_CHANGED',
 	['powercolor']          = 'UNIT_DISPLAYPOWER',
-	['arenaspec']           = 'ARENA_PREP_OPPONENT_SPECIALIZATIONS'
+	['arenaspec']           = 'ARENA_PREP_OPPONENT_SPECIALIZATIONS',
 }
 
 local unitlessEvents = {
@@ -516,9 +516,9 @@ local frame = CreateFrame('Frame')
 frame:SetScript('OnEvent', function(self, event, unit)
 	local strings = events[event]
 	if(strings) then
-		for _, fontstring in next, strings do
-			if(fontstring:IsVisible() and (unitlessEvents[event] or fontstring.parent.unit == unit)) then
-				fontstring:UpdateTag()
+		for _, fs in next, strings do
+			if(fs:IsVisible() and (unitlessEvents[event] or fs.parent.unit == unit or (fs.extraUnits and fs.extraUnits[unit]))) then
+				fs:UpdateTag()
 			end
 		end
 	end
@@ -553,7 +553,12 @@ local function createOnUpdate(timer)
 	end
 end
 
-local function onShow(self)
+--[[ Tags: frame:ForceUpdateTags()
+Used to forcefully update all tags on a frame.
+
+* self - the unit frame from which to update the tags
+--]]
+local function ForceUpdate(self)
 	for _, fs in next, self.__tags do
 		fs:UpdateTag()
 	end
@@ -604,19 +609,20 @@ local tagPool = {}
 local funcPool = {}
 local tmp = {}
 
---[[ Tags: frame:Tag(fs, tagstr)
+--[[ Tags: frame:Tag(fs, tagstr, ...)
 Used to register a tag on a unit frame.
 
 * self   - the unit frame on which to register the tag
 * fs     - the font string to display the tag (FontString)
 * tagstr - the tag string (string)
+* ...    - additional optional unitID(s) the tag should update for
 --]]
-local function Tag(self, fs, tagstr)
+local function Tag(self, fs, tagstr, ...)
 	if(not fs or not tagstr) then return end
 
 	if(not self.__tags) then
 		self.__tags = {}
-		table.insert(self.__elements, onShow)
+		table.insert(self.__elements, ForceUpdate)
 	else
 		-- Since people ignore everything that's good practice - unregister the tag
 		-- if it already exists.
@@ -772,6 +778,17 @@ local function Tag(self, fs, tagstr)
 		createOnUpdate(timer)
 	else
 		registerEvents(fs, tagstr)
+
+		if(...) then
+			if(not fs.extraUnits) then
+				fs.extraUnits = {}
+			end
+
+			for index = 1, select('#', ...) do
+				local unit = select(index, ...)
+				fs.extraUnits[unit] = true
+			end
+		end
 	end
 
 	table.insert(self.__tags, fs)
@@ -812,3 +829,4 @@ oUF.Tags = {
 
 oUF:RegisterMetaFunction('Tag', Tag)
 oUF:RegisterMetaFunction('Untag', Untag)
+oUF:RegisterMetaFunction('ForceUpdateTags', ForceUpdate)

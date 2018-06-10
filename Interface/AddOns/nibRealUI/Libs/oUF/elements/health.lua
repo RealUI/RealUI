@@ -78,14 +78,11 @@ The following options are listed by priority. The first check that returns true 
 local _, ns = ...
 local oUF = ns.oUF
 
-local function UpdateColor(element, unit, cur, max, arenaPrep)
+local function UpdateColor(element, unit, cur, max)
 	local parent = element.__owner
 
 	local r, g, b, t
-	if(element.colorClass and arenaPrep) then
-		local _, _, _, _, _, _, class = GetSpecializationInfoByID(GetArenaOpponentSpec(self.id))
-		t = self.colors.class[class]
-	elseif(element.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
+	if(element.colorTapping and not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
 		t = parent.colors.tapped
 	elseif(element.colorDisconnected and element.disconnected) then
 		t = parent.colors.disconnected
@@ -118,8 +115,7 @@ local function UpdateColor(element, unit, cur, max, arenaPrep)
 end
 
 local function Update(self, event, unit)
-	local arenaPrep = event == 'ArenaPreparation'
-	if(not unit or self.unit ~= unit and not arenaPrep) then return end
+	if(not unit or self.unit ~= unit) then return end
 	local element = self.Health
 
 	--[[ Callback: Health:PreUpdate(unit)
@@ -132,13 +128,7 @@ local function Update(self, event, unit)
 		element:PreUpdate(unit)
 	end
 
-	local cur, max
-	if(arenaPrep) then
-		cur, max = 1, 1
-	else
-		cur, max = UnitHealth(unit), UnitHealthMax(unit)
-	end
-
+	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
 	local disconnected = not UnitIsConnected(unit)
 	element:SetMinMaxValues(0, max)
 
@@ -157,9 +147,8 @@ local function Update(self, event, unit)
 	* unit - the unit for which the update has been triggered (string)
 	* cur  - the unit's current health value (number)
 	* max  - the unit's maximum possible health value (number)
-	* arenaPrep - indicates if the unit is an Arena Prep dummy (boolean)
 	--]]
-	element:UpdateColor(unit, cur, max, arenaPrep)
+	element:UpdateColor(unit, cur, max)
 
 	--[[ Callback: Health:PostUpdate(unit, cur, max)
 	Called after the element has been updated.

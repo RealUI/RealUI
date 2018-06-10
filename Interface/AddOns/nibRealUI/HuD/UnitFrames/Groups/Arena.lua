@@ -77,6 +77,11 @@ local function CreateHealthBar(parent)
     end
 
     F.CreateBDFrame(parent.Health, 0)
+
+    function parent.Health:PostUpdateArenaPreparation(specID)
+        local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
+        parent.Trinket.icon:SetTexture(specIcon)
+    end
 end
 
 local function CreateTags(parent)
@@ -189,13 +194,6 @@ local function CreateArena(self)
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
     self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
-
-    function self.PostUpdate(this, event)
-        if event == "ArenaPreparation" then
-            local _, _, _, specIcon = _G.GetSpecializationInfoByID(_G.GetArenaOpponentSpec(self.id))
-            this.Trinket.icon:SetTexture(specIcon)
-        end
-    end
 end
 
 UnitFrames.arena = {

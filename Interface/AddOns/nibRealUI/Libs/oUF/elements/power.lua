@@ -101,15 +101,12 @@ local function getDisplayPower(unit)
 	end
 end
 
-local function UpdateColor(element, unit, cur, min, max, displayType, arenaPrep)
+local function UpdateColor(element, unit, cur, min, max, displayType)
 	local parent = element.__owner
 	local ptype, ptoken, altR, altG, altB = UnitPowerType(unit)
 
 	local r, g, b, t
-	if(element.colorClass and arenaPrep) then
-		local _, _, _, _, _, _, class = GetSpecializationInfoByID(GetArenaOpponentSpec(self.id))
-		t = parent.colors.class[class]
-	elseif(element.colorTapping and element.tapped) then
+	if(element.colorTapping and element.tapped) then
 		t = parent.colors.tapped
 	elseif(element.colorDisconnected and element.disconnected) then
 		t = parent.colors.disconnected
@@ -178,8 +175,7 @@ local function UpdateColor(element, unit, cur, min, max, displayType, arenaPrep)
 end
 
 local function Update(self, event, unit)
-	local arenaPrep = event == 'ArenaPreparation'
-	if(self.unit ~= unit and not arenaPrep) then return end
+	if(self.unit ~= unit) then return end
 	local element = self.Power
 
 	--[[ Callback: Power:PreUpdate(unit)
@@ -197,13 +193,7 @@ local function Update(self, event, unit)
 		displayType, min = getDisplayPower(unit)
 	end
 
-	local cur, max
-	if(arenaPrep) then
-		cur, max = 1, 1
-	else
-		cur, max = UnitPower(unit, displayType), UnitPowerMax(unit, displayType)
-	end
-
+	local cur, max = UnitPower(unit, displayType), UnitPowerMax(unit, displayType)
 	local disconnected = not UnitIsConnected(unit)
 	local tapped = not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)
 	element:SetMinMaxValues(min or 0, max)
@@ -226,9 +216,8 @@ local function Update(self, event, unit)
 	* min         - the unit's minimum possible power value (number)
 	* max         - the unit's maximum possible power value (number)
 	* displayType - the alternative power display type if applicable (number?)[Enum.PowerType.Alternate]
-	* arenaPrep   - indicates if the unit is an Arena Prep dummy (boolean)
 	--]]
-	element:UpdateColor(unit, cur, min, max, displayType, arenaPrep)
+	element:UpdateColor(unit, cur, min, max, displayType)
 
 	--[[ Callback: Power:PostUpdate(unit, cur, min, max)
 	Called after the element has been updated.

@@ -28,6 +28,11 @@ else
 end
 ]]
 
+local PetBattleFrameHider = CreateFrame('Frame', (global or parent) .. '_PetBattleFrameHider', UIParent, 'SecureHandlerStateTemplate')
+PetBattleFrameHider:SetAllPoints()
+PetBattleFrameHider:SetFrameStrata('LOW')
+RegisterStateDriver(PetBattleFrameHider, 'visibility', '[petbattle] hide; show')
+
 -- updating of "invalid" units.
 local function enableTargetUpdate(object)
 	object.onUpdateFrequency = object.onUpdateFrequency or .5
@@ -69,26 +74,6 @@ local function updateActiveUnit(self, event, unit)
 		self:UpdateAllElements('RefreshUnit')
 
 		return true
-	end
-end
-
-local function updateArenaPreparation(self, event)
-	if(event == 'ARENA_OPPONENT_UPDATE' and not self:IsEnabled()) then
-		self:Enable()
-		self:UnregisterEvent(event, updateArenaPreparation)
-	elseif(event == 'PLAYER_ENTERING_WORLD' and not UnitExists(self.unit)) then
-		updateArenaPreparation(self, 'ARENA_PREP_OPPONENT_SPECIALIZATIONS')
-	elseif(event == 'ARENA_PREP_OPPONENT_SPECIALIZATIONS') then
-		local specID = GetArenaOpponentSpec(self.id)
-		if(specID) then
-			if(self:IsEnabled()) then
-				self:Disable()
-				self:RegisterEvent('ARENA_OPPONENT_UPDATE', updateArenaPreparation)
-			end
-
-			self:Show()
-			self:ForceUpdateAllElements('ArenaPreparation')
-		end
 	end
 end
 
@@ -190,6 +175,14 @@ for k, v in next, {
 		return active and active[name]
 	end,
 
+	--[[ frame:IsEnabled()
+
+	Used to check if the given frame is enabled or not. This is a reference to `UnitWatchRegistered`.
+
+	* self - unit frame
+	--]]
+	IsEnabled = UnitWatchRegistered,
+
 	--[[ frame:Enable(asState)
 	Used to toggle the visibility of a unit frame based on the existence of its unit. This is a reference to
 	`RegisterUnitWatch`.
@@ -215,24 +208,6 @@ for k, v in next, {
 	* self - unit frame
 	--]]
 	IsEnabled = UnitWatchRegistered,
-
-	ForceUpdateAllElements = function(self, event)
-		assert(type(event) == 'string', "Invalid argument 'event' in UpdateAllElements.")
-
-		if(self.PreUpdate) then
-			self:PreUpdate(event)
-		end
-
-		local unit = self.unit
-		for _, func in next, self.__elements do
-			func(self, event, unit)
-		end
-
-		if(self.PostUpdate) then
-			self:PostUpdate(event)
-		end
-	end,
-
 	--[[ frame:UpdateAllElements(event)
 	Used to update all enabled elements on the given frame.
 
@@ -240,8 +215,21 @@ for k, v in next, {
 	* event - event name to pass to the elements' update functions (string)
 	--]]
 	UpdateAllElements = function(self, event)
-		if(UnitExists(self.unit)) then
-			self:ForceUpdateAllElements(event)
+		local unit = self.unit
+		if(not UnitExists(unit)) then return end
+
+		assert(type(event) == 'string', "Invalid argument 'event' in UpdateAllElements.")
+
+		if(self.PreUpdate) then
+			self:PreUpdate(event)
+		end
+
+		for _, func in next, self.__elements do
+			func(self, event, unit)
+		end
+
+		if(self.PostUpdate) then
+			self:PostUpdate(event)
 		end
 	end,
 } do
@@ -328,6 +316,13 @@ local function initObject(unit, style, styleFunc, header, ...)
 			else
 				oUF:HandleUnit(object)
 			end
+
+			-- Arena preparation
+			if(unit and unit:match('arena%d?$')) then
+				object:RegisterEvent('ARENA_PREP_OPPONENT_SPECIALIZATIONS', Private.UpdateArenaPreperation, true)
+				-- the event handler only fires for visible frames, so we have to hook it
+				object:HookScript('OnEvent', Private.UpdateArenaPreperation)
+			end
 		else
 			-- Used to update frames when they change position in a group.
 			object:RegisterEvent('GROUP_ROSTER_UPDATE', object.UpdateAllElements)
@@ -359,12 +354,6 @@ local function initObject(unit, style, styleFunc, header, ...)
 
 		for _, func in next, callback do
 			func(object)
-		end
-
-		-- Arena preparation fluff
-		if(unit and unit:match'(arena)%d?$' == 'arena') then
-			object:RegisterEvent('ARENA_PREP_OPPONENT_SPECIALIZATIONS', updateArenaPreparation, true)
-			object:HookScript('OnEvent', updateArenaPreparation)
 		end
 
 		-- Make Clique kinda happy
@@ -649,7 +638,7 @@ do
 
 		local isPetHeader = template:match('PetHeader')
 		local name = overrideName or generateName(nil, ...)
-		local header = CreateFrame('Frame', name, oUF_PetBattleFrameHider, template)
+		local header = CreateFrame('Frame', name, PetBattleFrameHider, template)
 
 		header:SetAttribute('template', 'oUF_ClickCastUnitTemplate')
 		for i = 1, select('#', ...), 2 do
@@ -773,7 +762,7 @@ function oUF:Spawn(unit, overrideName)
 	unit = unit:lower()
 
 	local name = overrideName or generateName(unit)
-	local object = CreateFrame('Button', name, oUF_PetBattleFrameHider, 'SecureUnitButtonTemplate')
+	local object = CreateFrame('Button', name, PetBattleFrameHider, 'SecureUnitButtonTemplate')
 	Private.UpdateUnits(object, unit)
 
 	self:DisableBlizzard(unit)
@@ -916,7 +905,9 @@ oUF.headers = headers
 
 if(global) then
 	if(parent ~= 'oUF' and global == 'oUF') then
-		error('%s is doing it wrong and setting its global to oUF.', parent)
+		error('%s is doing it wrong and setting its global to "oUF".', parent)
+	elseif(_G[global]) then
+		error('%s is setting its global to an existing name "%s".', parent, global)
 	else
 		_G[global] = oUF
 	end
