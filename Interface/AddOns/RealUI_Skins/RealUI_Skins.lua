@@ -277,8 +277,14 @@ function private.OnLoad()
     end)
 
     -- Set overrides and hooks
-    function Hook.GameTooltip_OnHide(gametooltip)
-        Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
+    if private.isPatch then
+        function Hook.GameTooltip_SetBackdropStyle(self, style)
+            Base.SetBackdrop(self, Color.frame, frameColor.a)
+        end
+    else
+        function Hook.GameTooltip_OnHide(gametooltip)
+            Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
+        end
     end
 
     _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)

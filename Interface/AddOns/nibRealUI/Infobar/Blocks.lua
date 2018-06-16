@@ -1634,7 +1634,11 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Honor)
-                return _G.UnitHonor("player"), _G.UnitHonorMax("player"), _G.GetHonorExhaustion()
+                if RealUI.isPatch then
+                    return _G.UnitHonor("player"), _G.UnitHonorMax("player")
+                else
+                    return _G.UnitHonor("player"), _G.UnitHonorMax("player"), _G.GetHonorExhaustion()
+                end
             end,
             GetColor = function(Honor, isRested)
                 if isRested then
@@ -1649,8 +1653,8 @@ function Infobar:CreateBlocks()
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
 
-                local honorStatus
-                if _G.CanPrestige() then
+                local honorStatus --= ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                if not RealUI.isPatch and _G.CanPrestige() then
                     honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
                 else
                     honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)

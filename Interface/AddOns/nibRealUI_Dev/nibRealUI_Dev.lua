@@ -110,6 +110,7 @@ local taintCheck = {
     WorldMap_UpdateQuestBonusObjectives = false,
     NUM_WORLDMAP_DEBUG_ZONEMAP = false,
     WorldMapFrame = false,
+    CUF_SHOW_BORDER = false,
 }
 local eventWhitelist = {
     ADDONS_UNLOADING = true,
