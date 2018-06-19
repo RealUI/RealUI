@@ -2,6 +2,17 @@
 -- luacheck: globals floor type
 
 local RealUI = _G.RealUI
+
+local addonDB = {}
+function RealUI:RegisterAddOnDB(addon, db)
+    if not addonDB[addon] then
+        addonDB[addon] = db
+    end
+end
+function RealUI:GetAddOnDB(addon)
+    return addonDB[addon]
+end
+
 function RealUI.Round(value, places)
     local mult = 10 ^ (places or 0)
     return floor(value * mult + 0.5) / mult

@@ -152,6 +152,7 @@ function private.OnLoad()
     end)
 
     private.skinsDB = skinsDB.profile
+    RealUI:RegisterAddOnDB(ADDON_NAME, skinsDB)
 
     -- Transfer settings
     if _G.RealUI_Storage.nibRealUI_Init then
@@ -172,7 +173,7 @@ function private.OnLoad()
         _G.RealUI_Storage.Aurora = nil
     end
 
-    if _G.RealUI_Storage.nibRealUI then
+    if _G.RealUI_Storage.nibRealUI and _G.RealUI_Storage.nibRealUI.nibRealUIDB then
         local profile = _G.RealUI_Storage.nibRealUI.nibRealUIDB.profiles.RealUI
         if profile and profile.media and profile.media.font then
             local font = profile.media.font
@@ -321,7 +322,6 @@ function private.OnLoad()
     end
 
     function private.AddOns.nibRealUI()
-        RealUI:RegisterAddOnDB(ADDON_NAME, skinsDB)
         if _G.nibRealUIDB.profiles.RealUI then
             local profile = _G.nibRealUIDB.profiles.RealUI
             if profile.media.font then

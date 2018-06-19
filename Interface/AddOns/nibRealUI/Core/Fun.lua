@@ -17,16 +17,6 @@ local debug = RealUI.GetDebug("Fun")
 
 
 -- Misc Functions
-private.addonDB = {}
-function RealUI:RegisterAddOnDB(addon, db)
-    if not private.addonDB[addon] then
-        private.addonDB[addon] = db
-    end
-end
-function RealUI:GetAddOnDB(addon)
-    return private.addonDB[addon]
-end
-
 local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
 function RealUI:FindSpellID(spellName, affectedUnit, auraType)
     print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
@@ -308,15 +298,6 @@ function RealUI:CreateWindow(name, width, height, closeOnEsc, draggable, hideClo
     RealUI:CreateBD(f, nil, true, true)
 
     return f
-end
-
-function RealUI:AddButtonHighlight(button)
-    -- Button Highlight
-    local highlight = _G.CreateFrame("Frame", nil, button)
-    highlight:SetPoint("CENTER", button, "CENTER", 0, 0)
-    highlight:SetWidth(button:GetWidth() - 2)
-    highlight:SetHeight(button:GetHeight() - 2)
-    _G.Aurora.Base.SetBackdrop(highlight, _G.Aurora.Color.highlight)
 end
 
 function RealUI:CreateBD(frame, alpha, stripes, windowColor)

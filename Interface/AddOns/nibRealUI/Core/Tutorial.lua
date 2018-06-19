@@ -416,7 +416,6 @@ function RealUI:InitTutorial()
     btnOpen:SetText(ButtonTexts.tutorial)
     btnOpen:SetAttribute("type", "macro")
     btnOpen:SetAttribute("macrotext", macroOpen:format(RealUI.charInfo.name))
-    RealUI:AddButtonHighlight(btnOpen)
 
     local btnSkip = createTextButton("RealUITutorialButtonSkip", _G.UIParent)
     btnSkip:SetPoint("CENTER", 0, -54)
@@ -432,7 +431,6 @@ function RealUI:InitTutorial()
         RealUI.LoadConfig("HuD")
         RealUI.db.global.tutorial.stage = -1
     end)
-    RealUI:AddButtonHighlight(btnSkip)
 
     local btnClose = createTextButton("RealUITutorialButtonClose", _G.HelpPlate)
     btnClose:SetPoint("CENTER")
@@ -440,7 +438,6 @@ function RealUI:InitTutorial()
     btnClose:SetAttribute("type", "macro")
     btnClose:SetAttribute("macrotext", macroClose)
     btnClose:Hide()
-    RealUI:AddButtonHighlight(btnClose)
 
     -- Skin Buttons
     local F = _G.Aurora[1]

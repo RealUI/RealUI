@@ -28,9 +28,6 @@ externals:
     Interface/AddOns/nibRealUI/Libs/AceConsole-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConsole-3.0
         tag: latest
-    Interface/AddOns/nibRealUI/Libs/AceDB-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
-        tag: latest
     Interface/AddOns/nibRealUI/Libs/AceEvent-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
         tag: latest
@@ -89,6 +86,9 @@ externals:
 
     Interface/AddOns/RealUI_Skins/Aurora:
         url: https://github.com/Haleth/Aurora.git
+        tag: latest
+    Interface/AddOns/RealUI_Skins/Libs/AceDB-3.0:
+        url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
         tag: latest
     Interface/AddOns/RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
         url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
