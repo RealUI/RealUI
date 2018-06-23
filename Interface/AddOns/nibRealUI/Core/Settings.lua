@@ -307,23 +307,31 @@ local function ApplyMiniPatches(patches)
     end
 end
 
-local function MiniPatchInstallation()
+local function MiniPatchInstallation(newVer)
     local curVer = RealUI.verinfo
     local oldVer = dbg.verinfo
     local minipatches = RealUI.minipatches
 
     -- Find out which Mini Patches are needed
     local patches = {}
-    debug("minipatch", oldVer[3], curVer[3])
-    if oldVer[3] then
-        for i = oldVer[3] + 1, curVer[3] do
-            debug("checking", i)
-            if minipatches[i] then
-                -- This needs to be an array to ensure patches are applied sequentially.
-                _G.tinsert(patches, minipatches[i])
+
+    debug("minipatch", newVer, oldVer[3], curVer[3])
+    if newVer then
+        if minipatches[0] then
+            _G.tinsert(patches, minipatches[0])
+        end
+    else
+        if oldVer[3] then
+            for i = oldVer[3] + 1, curVer[3] do
+                debug("checking", i)
+                if minipatches[i] then
+                    -- This needs to be an array to ensure patches are applied sequentially.
+                    _G.tinsert(patches, minipatches[i])
+                end
             end
         end
     end
+
 
     debug("TOC minipatch", dbg.patchedTOC, RealUI.TOC)
     if dbg.patchedTOC ~= RealUI.TOC then
@@ -362,16 +370,8 @@ function RealUI:InstallProcedure()
     ---- Version checking
     local curVer = RealUI.verinfo
     local oldVer = (dbg.verinfo[1] and dbg.verinfo) or RealUI.verinfo
-    local newVer = RealUI:MajorVerChange(oldVer, curVer)
+    local newVer = RealUI:GetVersionChange(oldVer, curVer)
     debug("Version", curVer, oldVer, newVer)
-
-    -- Reset DB if new Major version
-    if newVer == "major" then
-        RealUI.db:ResetDB("RealUI")
-        if _G.StaticPopup1 then
-            _G.StaticPopup1:Hide()
-        end
-    end
 
     db.registeredChars[self.key] = true
     dbg.minipatches = nil
@@ -380,9 +380,7 @@ function RealUI:InstallProcedure()
     debug("Stage", dbc.init.installStage)
     if dbc.init.installStage > -1 then
         PrimaryInstallation()
-
-    -- Mini Patch
     else
-        MiniPatchInstallation()
+        MiniPatchInstallation(newVer)
     end
 end

@@ -322,20 +322,6 @@ function private.OnLoad()
     end
 
     function private.AddOns.nibRealUI()
-        if _G.nibRealUIDB.profiles.RealUI then
-            local profile = _G.nibRealUIDB.profiles.RealUI
-            if profile.media.font then
-                profile.media.font = nil
-            end
-
-            if _G.nibRealUIDB.global.retinaDisplay then
-                _G.nibRealUIDB.global.retinaDisplay = nil
-            end
-
-            if _G.nibRealUIDB.namespaces.UIScaler then
-                _G.nibRealUIDB.namespaces.UIScaler = nil
-            end
-        end
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end

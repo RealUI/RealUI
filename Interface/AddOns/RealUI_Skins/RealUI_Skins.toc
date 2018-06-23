@@ -4,7 +4,7 @@
 ## Author: Gethe
 ## Version: 8.1 r20d
 ## LoadWith: RealUI_Bugs
-## OptionalDeps: nibRealUI_Dev, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0
+## OptionalDeps: nibRealUI_Dev, Masque, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0
 ## SavedVariables: RealUI_SkinsDB
 
 #@do-not-package@

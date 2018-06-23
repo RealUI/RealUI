@@ -1,7 +1,7 @@
 local ADDON_NAME, private = ...
 
 -- Lua Globals --
-local next, type = _G.next, _G.type
+-- luacheck: globals next type strsplit
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -9,16 +9,9 @@ local L = RealUI.L
 local db, dbc, dbg
 local debug = RealUI.GetDebug("Core")
 
-RealUI.verinfo = {}
-for word, letter in _G.GetAddOnMetadata(ADDON_NAME, "Version"):gmatch("(%d+)(%a*)") do
-    debug(word, letter)
-    if _G.tonumber(word) then
-        _G.tinsert(RealUI.verinfo, _G.tonumber(word))
-    end
-    if letter ~= "" then
-        _G.tinsert(RealUI.verinfo, letter)
-    end
-end
+local version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
+RealUI.verinfo = {strsplit(".", version)}
+RealUI.verinfo.string = version
 
 RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
@@ -366,15 +359,10 @@ end
 
 
 -- Version info retrieval
-function RealUI:GetVerString(returnLong)
-    local verinfo = RealUI.verinfo
-    if returnLong then
-        return ("|cFFFF6014%d|r.|cFF269BFF%d|r |cFF21E521r%d%s|r"):format(verinfo[1], verinfo[2], verinfo[3], verinfo[4] or "")
-    else
-        return ("%s.%s"):format(verinfo[1], verinfo[2])
-    end
+function RealUI:GetVerString()
+    return RealUI.verinfo.string
 end
-function RealUI:MajorVerChange(oldVer, curVer)
+function RealUI:GetVersionChange(oldVer, curVer)
     return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
 end
 
