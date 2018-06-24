@@ -1,7 +1,7 @@
 local ADDON_NAME, private = ...
 
 -- Lua Globals --
--- luacheck: globals next type strsplit
+-- luacheck: globals next type strsplit tonumber
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -11,6 +11,9 @@ local debug = RealUI.GetDebug("Core")
 
 local version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
 RealUI.verinfo = {strsplit(".", version)}
+for i = 1, 3 do
+    RealUI.verinfo[i] = tonumber(RealUI.verinfo[i])
+end
 RealUI.verinfo.string = version
 
 RealUI.oocFunctions = {}
