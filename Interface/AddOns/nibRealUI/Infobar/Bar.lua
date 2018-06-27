@@ -340,6 +340,32 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     block:SetHighlightTexture(highlight)
     block.highlight = highlight
 
+    local pulse = block:CreateTexture(nil, "ARTWORK")
+    pulse:SetTexture([[Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight-yellow]])
+    pulse:SetBlendMode("ADD")
+    pulse:SetAlpha(0)
+    Scale.Point(pulse, "TOPLEFT")
+    Scale.Point(pulse, "BOTTOMRIGHT")
+
+    local AnimationGroup = block:CreateAnimationGroup()
+    AnimationGroup:SetToFinalAlpha(true)
+    AnimationGroup:SetLooping("REPEAT")
+    block.pulseAnim = AnimationGroup
+
+    local fadeIn = AnimationGroup:CreateAnimation('Alpha')
+    fadeIn:SetTarget(pulse)
+    fadeIn:SetFromAlpha(0)
+    fadeIn:SetToAlpha(1)
+    fadeIn:SetDuration(1)
+    fadeIn:SetOrder(1)
+
+    local fadeOut = AnimationGroup:CreateAnimation('Alpha')
+    fadeOut:SetTarget(pulse)
+    fadeOut:SetFromAlpha(1)
+    fadeOut:SetToAlpha(0)
+    fadeOut:SetDuration(1)
+    fadeOut:SetOrder(2)
+
     block:SetScript("OnEnter", block.OnEnter)
     block:SetScript("OnLeave", block.OnLeave)
 
