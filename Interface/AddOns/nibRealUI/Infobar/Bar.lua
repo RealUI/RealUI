@@ -111,16 +111,16 @@ function BlockMixin:OnDragStart(button)
     dock:RemoveBlock(self)
 
     local x, y = self:GetCenter();
-    x = x - (self:GetWidth()/2);
-    y = y - (self:GetHeight()/2);
+    x = x - (self:GetWidth()/Scale.Value(2));
+    y = y - (self:GetHeight()/Scale.Value(2));
     self:ClearAllPoints();
-    Scale.Point(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y);
+    Scale.RawSetPoint(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y);
     self:StartMoving();
     MOVING_BLOCK = self;
 end
 
 function BlockMixin:OnDragStop(button)
-    Infobar:debug("OnDragStart", self.name, button)
+    Infobar:debug("OnDragStop", self.name, button)
     self:StopMovingOrSizing()
 
     local dock = Infobar.frame[self.side]

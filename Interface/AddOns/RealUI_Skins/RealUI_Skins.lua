@@ -232,6 +232,21 @@ function private.OnLoad()
         Aurora.Scale.Value = ScaleAPI.Value
         RealUI.Scale = Scale
     end
+    local positionMethods = {
+        "RawSetSize",
+        "RawSetHeight",
+        "RawSetWidth",
+        "RawSetPoint",
+        "RawSetStartPoint",
+        "RawSetEndPoint",
+        "RawSetThickness",
+        "RawSetAtlas",
+    }
+    for _, methodName in next, positionMethods do
+        RealUI.Scale[methodName] = Scale[methodName]
+    end
+
+
 
     -- Initialize custom colors
     local frameColor = private.skinsDB.frameColor
