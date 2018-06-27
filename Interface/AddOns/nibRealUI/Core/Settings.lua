@@ -295,9 +295,7 @@ end
 -- Mini Patch
 local function ApplyMiniPatches(patches)
     for i = 1, #patches do
-        local patch = i + dbg.verinfo[3]
-        debug("Apply", patch)
-        patches[i](patch)
+        patches[i]()
     end
 
     -- Set version info

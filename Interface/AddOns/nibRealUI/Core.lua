@@ -366,7 +366,11 @@ function RealUI:GetVerString()
     return RealUI.verinfo.string
 end
 function RealUI:GetVersionChange(oldVer, curVer)
-    return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
+    if oldVer[1] == 2 then
+        return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
+    else
+        return "major"
+    end
 end
 
 
