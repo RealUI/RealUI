@@ -407,8 +407,8 @@ function RealUI:InitTutorial()
     -- Logo
     local rLogo = _G.UIParent:CreateTexture("RealUITutorialLogo", "ARTWORK")
     rLogo:SetTexture([[Interface\AddOns\nibRealUI\Media\Logo]])
-    rLogo:SetSize(64, 64)
-    rLogo:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 65)
+    rLogo:SetSize(160, 160)
+    rLogo:SetPoint("BOTTOM", _G.UIParent, "CENTER", 0, 32)
 
     -- Buttons
     local btnOpen = createTextButton("RealUITutorialButtonOpen", _G.UIParent)

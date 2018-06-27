@@ -167,7 +167,7 @@ local function CreateInstallWindow()
     bg:SetAllPoints()
 
     local logo = installFrame:CreateTexture(nil, "ARTWORK")
-    logo:SetTexture([[Interface\AddOns\nibRealUI\Media\Install\Logo.tga]])
+    logo:SetTexture([[Interface\AddOns\nibRealUI\Media\Logo]])
     logo:SetSize(256, 256)
     logo:SetPoint("BOTTOM", installFrame, "CENTER")
 
