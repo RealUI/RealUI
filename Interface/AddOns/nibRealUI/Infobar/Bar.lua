@@ -110,13 +110,13 @@ function BlockMixin:OnDragStart(button)
     local dock = Infobar.frame[self.side]
     dock:RemoveBlock(self)
 
-    local x, y = self:GetCenter();
-    x = x - (self:GetWidth()/Scale.Value(2));
-    y = y - (self:GetHeight()/Scale.Value(2));
-    self:ClearAllPoints();
-    Scale.RawSetPoint(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y);
-    self:StartMoving();
-    MOVING_BLOCK = self;
+    local x, y = self:GetCenter()
+    x = x - (self:GetWidth()/Scale.Value(2))
+    y = y - (self:GetHeight()/Scale.Value(2))
+    self:ClearAllPoints()
+    Scale.RawSetPoint(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y)
+    self:StartMoving()
+    MOVING_BLOCK = self
 end
 
 function BlockMixin:OnDragStop(button)
@@ -127,8 +127,8 @@ function BlockMixin:OnDragStop(button)
     dock:HideInsertHighlight()
 
     if ( dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) ) then
-        local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition();
-        mouseX, mouseY = mouseX / scale, mouseY / scale;
+        local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition()
+        mouseX, mouseY = mouseX / scale, mouseY / scale
 
         -- DockFrame
         dock:AddBlock(self, dock:GetInsertIndex(mouseX, mouseY))
@@ -137,7 +137,7 @@ function BlockMixin:OnDragStop(button)
         self:RestorePosition()
     end
 
-    self:SavePosition();
+    self:SavePosition()
 
     MOVING_BLOCK = nil
 end
@@ -169,40 +169,40 @@ function BlockMixin:OnUpdate(elapsed)
     end
 
     if self == MOVING_BLOCK then
-        local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition();
-        cursorX, cursorY = cursorX / scale, cursorY / scale;
+        local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition()
+        cursorX, cursorY = cursorX / scale, cursorY / scale
         local dock = Infobar.frame[self.side]
         if dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) then
-            dock:PlaceInsertHighlight(cursorX, cursorY);
+            dock:PlaceInsertHighlight(cursorX, cursorY)
         else
-            dock:HideInsertHighlight();
+            dock:HideInsertHighlight()
         end
-        self:UpdateButtonSide();
+        self:UpdateButtonSide()
 
         if not _G.IsMouseButtonDown(self.dragButton) then
             self:OnDragStop(self.dragButton)
-            self.dragButton = nil;
+            self.dragButton = nil
             MOVING_BLOCK = nil
         end
     end
 end
 
 function BlockMixin:UpdateButtonSide()
-    local xOfs =  self:GetCenter();
+    local xOfs =  self:GetCenter()
     local uiCenter = _G.UIParent:GetWidth() / 2
-    local changed = nil;
+    local changed = nil
     if xOfs < uiCenter then
         if self.side ~= "left" then
             self.side = "left"
-            changed = 1;
+            changed = 1
         end
     else
         if self.side ~= "right" then
             self.side = "right"
-            changed = 1;
+            changed = 1
         end
     end
-    return changed;
+    return changed
 end
 
 function BlockMixin:SavePosition()
@@ -540,27 +540,27 @@ function DockMixin:OnLoad()
     Scale.Size(self.insertHighlight, 1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
-    self.DOCKED_BLOCKS = {};
+    self.DOCKED_BLOCKS = {}
     self.ADJUSTED_BLOCKS = {} -- blocks that are not in thier saved position
-    self.isDirty = true;    --You dirty, dirty frame
+    self.isDirty = true    --You dirty, dirty frame
 end
 
 function DockMixin:SetPrimary(block)
-    self.primary = block;
-    self:AddBlock(block, 1);
+    self.primary = block
+    self:AddBlock(block, 1)
 end
 
 function DockMixin:AddBlock(block, position)
     if ( not self.primary ) then
-        _G.error("Need a primary block before another can be added.");
+        _G.error("Need a primary block before another can be added.")
     end
 
     if ( self:HasDockedBlock(block) ) then
-        return; --We're already docked...
+        return --We're already docked...
     end
 
-    self.isDirty = true;
-    block.isDocked = true;
+    self.isDirty = true
+    block.isDocked = true
 
     local adjustedPosition = position
     for i = 1, #self.ADJUSTED_BLOCKS do
@@ -571,10 +571,10 @@ function DockMixin:AddBlock(block, position)
     end
 
     if ( adjustedPosition and adjustedPosition <= #self.DOCKED_BLOCKS + 1 ) then
-        _G.assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition);
-        _G.tinsert(self.DOCKED_BLOCKS, adjustedPosition, block);
+        _G.assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition)
+        _G.tinsert(self.DOCKED_BLOCKS, adjustedPosition, block)
     else
-        _G.tinsert(self.DOCKED_BLOCKS, block);
+        _G.tinsert(self.DOCKED_BLOCKS, block)
     end
 
     if position > #self.DOCKED_BLOCKS or adjustedPosition ~= position then
@@ -593,37 +593,37 @@ function DockMixin:AddBlock(block, position)
         })
     end
 
-    self:HideInsertHighlight();
+    self:HideInsertHighlight()
 
     if ( self.primary ~= block ) then
-        block:ClearAllPoints();
-        block:SetMovable(false);
-        block:SetResizable(false);
+        block:ClearAllPoints()
+        block:SetMovable(false)
+        block:SetResizable(false)
     end
 
-    self:UpdateBlocks();
+    self:UpdateBlocks()
 end
 
 function DockMixin:RemoveBlock(block)
-    _G.assert(block ~= self.primary or #self.DOCKED_BLOCKS == 1);
-    self.isDirty = true;
-    _G.tDeleteItem(self.DOCKED_BLOCKS, block);
-    block.isDocked = false;
-    block:SetMovable(true);
+    _G.assert(block ~= self.primary or #self.DOCKED_BLOCKS == 1)
+    self.isDirty = true
+    _G.tDeleteItem(self.DOCKED_BLOCKS, block)
+    block.isDocked = false
+    block:SetMovable(true)
 
-    block:Show();
-    self:UpdateBlocks();
+    block:Show()
+    self:UpdateBlocks()
 end
 
 function DockMixin:HasDockedBlock(block)
-    return _G.tContains(self.DOCKED_BLOCKS, block);
+    return _G.tContains(self.DOCKED_BLOCKS, block)
 end
 
 local toBeRemoved = {}
 function DockMixin:UpdateBlocks(forceUpdate)
     if ( not self.isDirty and not forceUpdate ) then
         --No changes have been made since the last update.
-        return;
+        return
     end
 
     local lastBlock
@@ -654,60 +654,60 @@ function DockMixin:UpdateBlocks(forceUpdate)
         end
         block.index = index + indexAdjust
         block:SavePosition()
-        block:Show();
+        block:Show()
 
         if ( lastBlock ) then
             local xOfs = self.side == "left" and db.blockGap or -db.blockGap
-            Scale.Point(block, self.anchor, lastBlock, self.anchorAlt, xOfs, 0);
+            Scale.Point(block, self.anchor, lastBlock, self.anchorAlt, xOfs, 0)
         else
-            Scale.Point(block, self.anchor);
+            Scale.Point(block, self.anchor)
         end
         lastBlock = block
     end
 
-    self.isDirty = false;
+    self.isDirty = false
 
     return true
 end
 
 function DockMixin:GetInsertIndex(mouseX, mouseY)
-    local maxPosition = 0;
+    local maxPosition = 0
     for index, block in ipairs(self.DOCKED_BLOCKS) do
         if self.side == "left" then
             if mouseX < (block:GetLeft() + block:GetRight()) / 2 and  --Find the first block we're on the left of. (Being on top of the block, but left of the center counts)
                 block ~= self.primary then   --We never count as being to the left of the primary block.
-                return index;
+                return index
             end
         elseif self.side == "right" then
             if mouseX > (block:GetLeft() + block:GetRight()) / 2 and
                 block ~= self.primary then
-                return index;
+                return index
             end
         end
-        maxPosition = index;
+        maxPosition = index
     end
     --We aren't to the left of anything, so we're going into the far-right position.
-    return maxPosition + 1;
+    return maxPosition + 1
 end
 
 function DockMixin:PlaceInsertHighlight(mouseX, mouseY)
-    local insert = self:GetInsertIndex(mouseX, mouseY);
+    local insert = self:GetInsertIndex(mouseX, mouseY)
 
-    local attachFrame = self.primary;
+    local attachFrame = self.primary
 
     for index, block in ipairs(self.DOCKED_BLOCKS) do
         if ( index < insert ) then
-            attachFrame = block;
+            attachFrame = block
         end
     end
 
-    self.insertHighlight:ClearAllPoints();
-    Scale.Point(self.insertHighlight, self.anchor, attachFrame, self.anchorAlt, 0, 0);
-    self.insertHighlight:Show();
+    self.insertHighlight:ClearAllPoints()
+    Scale.Point(self.insertHighlight, self.anchor, attachFrame, self.anchorAlt, 0, 0)
+    self.insertHighlight:Show()
 end
 
 function DockMixin:HideInsertHighlight()
-    self.insertHighlight:Hide();
+    self.insertHighlight:Hide()
 end
 
 --------------------
