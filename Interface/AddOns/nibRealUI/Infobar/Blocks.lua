@@ -1597,7 +1597,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             IsValid = function(Honor)
-                return _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL_TABLE[_G.LE_EXPANSION_LEVEL_CURRENT]
+                return true
             end,
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
