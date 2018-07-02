@@ -426,7 +426,7 @@ end
 
 local function SetupTooltip(tooltip, block)
     tooltip:SetHeaderFont("Fancy16Font")
-    tooltip:SetFont("SystemFont_Shadow_Med1")
+    tooltip:SetFontObject("SystemFont_Shadow_Med1")
     tooltip:SmartAnchorTo(block)
     tooltip:SetAutoHideDelay(0.10, block)
     block.tooltip = tooltip
