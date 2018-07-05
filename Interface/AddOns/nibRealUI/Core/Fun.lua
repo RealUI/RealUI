@@ -18,25 +18,39 @@ local debug = RealUI.GetDebug("Fun")
 
 -- Misc Functions
 local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
+local function SpellPredicate(spellName, arg2, arg3, ...)
+    local name, _, _, _, _, _, _, _, _, bfaSpellID, spellID = ...
+    spellID = RealUI.isPatch and bfaSpellID or spellID
+
+    if spellName == name then
+        print(("spellID for %s is %d"):format(spellName, spellID))
+        numRun = numRun + 1
+    end
+
+    if numRun > 3 then
+        numRun = 0
+        spellFinder:UnregisterEvent("UNIT_AURA")
+        return true
+    end
+end
+
+-- /run RealUI:FindSpellID("Lone Wolf")
+-- /run RealUI:FindSpellID("Windrunning")
 function RealUI:FindSpellID(spellName, affectedUnit, auraType)
+    affectedUnit = affectedUnit or "player"
+    auraType = auraType or "buff"
+
     print(("RealUI is now looking for %s %s: %s."):format(affectedUnit, auraType, spellName))
     spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
     spellFinder:SetScript("OnEvent", function(frame, event, unit)
         local filter = (auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
-        for auraIndex = 1, 40 do
-            local name, _, _, _, _, _, _, _, _, _, spellID = _G.UnitAura(unit, auraIndex, filter)
-            debug("FindSpellID", auraIndex, name, spellID)
-            if spellName == name then
-                print(("spellID for %s is %d"):format(spellName, spellID))
-                numRun = numRun + 1
-            end
-
-            if name == nil then
-                if numRun > 3 then
-                    numRun = 0
-                    frame:UnregisterEvent("UNIT_AURA")
+        if RealUI.isPatch then
+            _G.AuraUtil.FindAura(SpellPredicate, unit, filter, spellName)
+        else
+            for auraIndex = 1, 100 do
+                if SpellPredicate(spellName, nil, nil, _G.UnitAura(unit, auraIndex, filter)) then
+                    break
                 end
-                break
             end
         end
     end)
