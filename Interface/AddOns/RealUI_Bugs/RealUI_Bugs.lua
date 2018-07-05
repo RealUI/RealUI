@@ -121,7 +121,7 @@ local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Herror:%s|h[%s: %s]|h|r]=]
 local REALUI_ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
 |cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
-|cFFFFD200Version:|r %s
+|cFFFFD200RealUI Version:|r %s
 |cFFFFD200Locals:|r
 |cFFFFFFFF%s|r]]
 local ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
@@ -220,15 +220,8 @@ local function GetNavigationButtonEnabledStates(count, index)
     return false, false;
 end
 
-local function IsErrorFromRealUI(err)
-    if err.message:find("RealUI") or err.stack:find("RealUI") then
-        return true
-    elseif (err.message:find("Nivaya") or err.stack:find("Nivaya")) and _G.RealUI.hasCargBags then
-        return true
-    end
-end
-
-local RealUI_Version
+local _, _, _, _, reason = _G.GetAddOnInfo("nibRealUI")
+local hasRealUI, RealUI_Version = reason ~= "MISSING", _G.GetAddOnMetadata(ADDON_NAME, "Version")
 function errorFrame:Update()
     local errors = _G.BugGrabber:GetDB()
     local numErrors = #errors
@@ -248,7 +241,7 @@ function errorFrame:Update()
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
 
-        if IsErrorFromRealUI(err) then
+        if hasRealUI then
             editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, RealUI_Version, locals))
         else
             editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
@@ -291,9 +284,7 @@ function errorFrame.ADDON_LOADED(addon)
         _G.RealUI_Debug = {}
     end
 
-    if addon == ADDON_NAME then
-        RealUI_Version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
-    elseif addon == "nibRealUI" then
+    if addon == "nibRealUI" then
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
     elseif addon == "nibRealUI_Init" then
