@@ -2,7 +2,7 @@
 ## Title: RealUI Bugs
 ## Notes: Bug catcher
 ## Author: Gethe
-## Version: 8.1 r20h
+## Version: 2.0.0.Beta3
 ## LoadWith: Blizzard_CompactRaidFrames
 ## OptionalDeps: Ace3, LibTextDump-1.0
 ## SavedVariables: RealUI_Storage, RealUI_Debug

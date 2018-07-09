@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased] ##
+## [2.0.0.Beta3] - 2018-07-07 ##
 ### Removed AddOns ###
 
   * !Aurora_RealUI
@@ -47,3 +48,4 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.0.Beta3]: https://github.com/RealUI/RealUI/compare/8.1_r20h...2.0.0.Beta3

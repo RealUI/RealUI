@@ -2,7 +2,7 @@
 ## Title: RealUI Skins
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe
-## Version: 8.1 r20d
+## Version: 2.0.0.Beta3
 ## LoadWith: RealUI_Bugs
 ## OptionalDeps: nibRealUI_Dev, Masque, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0
 ## SavedVariables: RealUI_SkinsDB
