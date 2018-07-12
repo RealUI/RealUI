@@ -449,10 +449,8 @@ local function style(frame)
         if item then
             local quality = select(3, _G.GetItemInfo(item))
             if quality then
-                local r, g, b = _G.GetItemQualityColor(quality)
-                frame:SetBackdropBorderColor(r, g, b)
                 itemTips[frameName] = nil
-                frame.freebtipItem = true
+                frame.freebtipItem = quality
             else
                 itemTips[frameName] = true
             end

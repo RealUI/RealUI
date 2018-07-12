@@ -296,6 +296,9 @@ function private.OnLoad()
     if private.isPatch then
         function Hook.GameTooltip_SetBackdropStyle(self, style)
             Base.SetBackdrop(self, Color.frame, frameColor.a)
+            if self.freebtipItem then
+                self:SetBackdropBorderColor(_G.GetItemQualityColor(self.freebtipItem))
+            end
         end
     else
         function Hook.GameTooltip_OnHide(gametooltip)
