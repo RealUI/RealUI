@@ -412,9 +412,7 @@ _G.GameTooltip:HookScript("OnTooltipCleared", function(self)
     if self.factionIcon then
         self.factionIcon:Hide()
     end
-    if not (self.freebtipItem) then
-        self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
-    end
+    self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end)
 
 _G.GameTooltipStatusBar:SetHeight(8)
@@ -444,15 +442,20 @@ local function style(frame)
 
     local frameName = frame:GetName()
     if cfg.colorborderItem and frame.GetItem then
-        frame.freebtipItem = false
-        local _, item = frame:GetItem()
-        if item then
-            local quality = select(3, _G.GetItemInfo(item))
-            if quality then
-                itemTips[frameName] = nil
-                frame.freebtipItem = quality
-            else
-                itemTips[frameName] = true
+        if RealUI.isPatch then
+            frame._setQualityColors = true
+        else
+            frame.freebtipItem = false
+            local _, item = frame:GetItem()
+            if item then
+                local quality = select(3, _G.GetItemInfo(item))
+                if quality then
+                    itemTips[frameName] = nil
+                    frame:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
+                    frame.freebtipItem = quality
+                else
+                    itemTips[frameName] = true
+                end
             end
         end
     end
