@@ -4,7 +4,7 @@
 ## Author: Gethe
 ## Version: 2.0.0.Beta3
 ## LoadWith: RealUI_Bugs
-## OptionalDeps: nibRealUI_Dev, Masque, LibSharedMedia-3.0, LibItemUpgradeInfo-1.0
+## OptionalDeps: LibItemUpgradeInfo-1.0, LibSharedMedia-3.0, Masque, nibRealUI_Dev
 ## SavedVariables: RealUI_SkinsDB
 
 #@do-not-package@
