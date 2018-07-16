@@ -7,7 +7,7 @@ local next = _G.next
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 
-local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome")
+local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
 fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
 
 -- RealUI --

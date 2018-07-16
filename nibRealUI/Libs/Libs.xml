@@ -20,7 +20,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="HereBeDragons\HereBeDragons-Pins-1.0.lua"/>
     <Script file="LibArtifactData-1.0\LibArtifactData-1.0.lua"/>
     <Script file="libdatabroker-1.1\LibDataBroker-1.1.lua"/>
-    <Include file="LibIconFonts-1.0\lib.xml" />
+    <Include file="LibIconFonts\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
     <Include file="oUF\oUF.xml"/>
 

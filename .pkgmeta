@@ -39,6 +39,9 @@ externals:
     nibRealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
+    nibRealUI/Libs/LibIconFonts:
+        url: https://github.com/Gethe/LibIconFonts.git
+        tag: latest
     nibRealUI/Libs/LibQTip-1.0:
         url: https://repos.wowace.com/wow/libqtip-1-0/trunk
         tag: latest
