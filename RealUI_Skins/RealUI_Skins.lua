@@ -302,12 +302,10 @@ function private.OnLoad()
     if private.isPatch then
         function Hook.GameTooltip_SetBackdropStyle(self, style)
             Base.SetBackdrop(self, Color.frame, frameColor.a)
-            print("SetBackdropStyle", self.freebtipItem)
             if self._setQualityColors then
                 local _, itemLink = self:GetItem()
-                print("SetBackdropStyle:itemLink", itemLink)
                 if itemLink then
-                    local quality = C_Item.GetItemQualityByID(itemLink)
+                    local quality = _G.C_Item.GetItemQualityByID(itemLink)
                     if quality then
                         self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
                     end

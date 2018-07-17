@@ -442,7 +442,7 @@ local function style(frame)
 
     local frameName = frame:GetName()
     if cfg.colorborderItem and frame.GetItem then
-        if RealUI.isPatch then
+        if _G.RealUI.isPatch then
             frame._setQualityColors = true
         else
             frame.freebtipItem = false
