@@ -52,8 +52,32 @@ RealUI.media = {
     },
 }
 
-local uiScaleChanging
-local uiMod, pixelScale
+local moddedFrames, pixelScale = {}
+local function ResetScale(frame)
+    -- Frames that are sized via ModValue become HUGE with retina scale.
+    if private.skinsDB.isHighRes then
+        frame:SetScale(private.skinsDB.customScale)
+    elseif private.skinsDB.customScale > pixelScale then
+        frame:SetScale(pixelScale)
+    end
+end
+local function UpdateModScale()
+    private.uiScale = private.skinsDB.uiModScale
+    private.UpdateUIScale()
+    for frame, func in next, moddedFrames do
+        ResetScale(frame)
+        if func then
+            func(frame)
+        end
+    end
+end
+
+function RealUI.RegisterModdedFrame(frame, updateFunc)
+    ResetScale(frame)
+    moddedFrames[frame] = updateFunc or false
+end
+
+local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
     if uiScaleChanging then return end
 
@@ -81,44 +105,26 @@ function RealUI.UpdateUIScale(newScale)
     end
     private.debug("uiScale", oldScale, uiScale)
 
-    if oldScale ~= newScale or max(cvarScale, parentScale) ~= uiScale then
-        uiScaleChanging = true
-        -- Set Scale (WoW CVar can't go below .64)
+    uiScaleChanging = true
+    private.debug("update uiScale")
+    if cvarScale ~= uiScale then
+        --[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
+            WorldMap and map action button. As such, we only use that if we absolutly have to.
 
-        if cvarScale ~= uiScale then
-            --[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
-                WorldMap and map action button. As such, we only use that if we absolutly have to.]]
-            _G.SetCVar("uiScale", max(uiScale, 0.64))
-        end
-        if parentScale ~= uiScale then
-            _G.UIParent:SetScale(uiScale)
-        end
-        private.skinsDB.customScale = newScale
-        uiScaleChanging = false
+            WoW CVar can't go below .64
+        ]]
+        _G.SetCVar("uiScale", max(uiScale, 0.64))
     end
+    if parentScale ~= uiScale then
+        _G.UIParent:SetScale(uiScale)
+    end
+
+    private.skinsDB.customScale = newScale
+    UpdateModScale()
+    uiScaleChanging = false
 end
 
 local ScaleAPI = {}
-local previewFrames = {}
-function RealUI.RegisterModdedFrame(frame, updateFunc)
-    -- Frames that are sized via ModValue become HUGE with retina scale.
-    if private.skinsDB.isHighRes then
-        frame:SetScale(private.skinsDB.customScale)
-    elseif private.skinsDB.customScale > pixelScale then
-        frame:SetScale(pixelScale)
-    end
-
-    if updateFunc then
-        previewFrames[frame] = updateFunc
-    end
-end
-function RealUI.PreviewModScale()
-    private.uiScale = private.skinsDB.uiModScale
-    private.UpdateUIScale()
-    for frame, func in next, previewFrames do
-        func(frame)
-    end
-end
 
 local skinnedFrames = {}
 function RealUI:RegisterSkinnedFrame(frame, color, stripes)
@@ -347,7 +353,23 @@ function private.OnLoad()
         end
     end
 
+
+    -- Hide default UI Scale slider and replace with RealUI button
+    _G["Advanced_UseUIScale"]:Hide()
+    _G["Advanced_UIScaleSlider"]:Hide()
+
+    local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
+    scaleBtn:SetSize(200, 24)
+    scaleBtn:SetText("RealUI UI Scaler")
+    scaleBtn:SetPoint("TOPLEFT", _G.Advanced_UIScaleSlider, 20, 0)
+    scaleBtn:SetScript("OnClick", function()
+        private.debug("UI Scale from Blizz")
+        RealUI.LoadConfig("RealUI", "skins")
+    end)
+
     function private.AddOns.nibRealUI()
+        Skin.UIPanelButtonTemplate(scaleBtn)
+
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end

@@ -749,7 +749,7 @@ local skins do
                 get = function(info) return SkinsProfile.uiModScale end,
                 set = function(info, value)
                     SkinsProfile.uiModScale = value
-                    RealUI.PreviewModScale()
+                    RealUI.UpdateUIScale()
                 end,
                 order = 24,
             },
