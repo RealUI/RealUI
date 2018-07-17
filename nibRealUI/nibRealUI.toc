@@ -1,0 +1,25 @@
+## Interface: 70300
+## Title: nib|cffffffffReal|r|cffbf3333UI|r
+## Notes: The essential core of RealUI
+## Author: Nibelheim, Gethe
+## Version: 2.0.0
+## OptionalDeps: Bartender4, Grid2, HereBeDragons, LibArtifactData-1.0, LibChatAnims, LibIconFonts, LibQTip-1.0, LibRangeCheck-2.0, LibStrataFix, LibWindow-1.1, Raven, UTF8
+## RequiredDeps: RealUI_Skins
+## SavedVariables: nibRealUIDB
+## SavedVariablesPerCharacter: nibRealUICharacter
+## X-oUF: oUFembed
+## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
+## Globe-Pre: RealUI_Bugs, RealUI_Skins
+
+Libs\Libs.xml
+
+Init.lua
+
+Locale.xml
+
+Core.lua
+Core.xml
+Modules.xml
+HuD.xml
+
+Bindings.xml

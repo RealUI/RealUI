@@ -2,33 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "Interface\\AddOns\\!Aurora_RealUI"
-		},
-		{
-			"path": "Interface\\AddOns\\cargBags_Nivaya"
-		},
-		{
-			"path": "Interface\\AddOns\\EasyMail"
-		},
-		{
-			"path": "Interface\\AddOns\\FreebTip"
-		},
-		{
-			"path": "Interface\\AddOns\\nibRealUI"
-		},
-		{
-			"path": "Interface\\AddOns\\nibRealUI_Config"
-		},
-		{
-			"path": "Interface\\AddOns\\nibRealUI_Dev"
-		},
-		{
-			"path": "Interface\\AddOns\\nibRealUI_Init"
-		},
-		{
-			"path": "Interface\\AddOns\\RealUI_Bugs"
-		},
-		{
+			"path": ".",
 			"file_exclude_patterns":
 			[
 				"*.sublime*",
@@ -37,10 +11,7 @@
 			[
 				".idea",
 				".release",
-				"Interface",
 			],
-			"name": "Docs",
-			"path": "."
 		}
 	],
     "syntax_override": {

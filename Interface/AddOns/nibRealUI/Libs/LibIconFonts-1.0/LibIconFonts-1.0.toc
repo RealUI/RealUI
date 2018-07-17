@@ -1,8 +1,0 @@
-## Interface: 60000
-## Title: Lib: IconFonts-1.0
-## Notes: A library that provides icon fonts.
-## Author: Gethe
-
-LibStub\LibStub.lua
-lib.xml
-tests.lua

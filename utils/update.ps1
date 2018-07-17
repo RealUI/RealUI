@@ -4,12 +4,11 @@ Write-Host "Current version: $oldVersion"
 $newVersion = Read-Host "Enter a new version, or press enter to skip"
 $addons = @(
     "./utils/version.txt",
-    "./Interface/AddOns/!Aurora_RealUI/!Aurora_RealUI.toc",
-    "./Interface/AddOns/cargBags_Nivaya/cargBags_Nivaya.toc",
-    "./Interface/AddOns/nibRealUI/nibRealUI.toc",
-    "./Interface/AddOns/nibRealUI_Config/nibRealUI_Config.toc",
-    "./Interface/AddOns/nibRealUI_Init/nibRealUI_Init.toc"
-    "./Interface/AddOns/RealUI_Bugs/RealUI_Bugs.toc"
+    "./cargBags_Nivaya/cargBags_Nivaya.toc",
+    "./nibRealUI/nibRealUI.toc",
+    "./nibRealUI_Config/nibRealUI_Config.toc",
+    "./RealUI_Bugs/RealUI_Bugs.toc"
+    "./RealUI_Skins/RealUI_Skins.toc"
 )
 
 # replace version strings
