@@ -172,11 +172,9 @@ function RealUI:SetLowResOptimizations(...)
     dbg.tags.lowResOptimized = true
 end
 
-function RealUI:LowResOptimizationCheck(...)
-    local _, resHeight = RealUI:GetResolutionVals()
-    if (resHeight < 900) and not(dbg.tags.lowResOptimized) then
-        RealUI:SetLowResOptimizations(...)
-    end
+function RealUI:IsUsingLowResDisplay()
+    local _, resHeight = _G.GetPhysicalScreenSize()
+    return resHeight < 900
 end
 
 function RealUI:IsUsingHighResDisplay()
@@ -532,18 +530,6 @@ function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
     RealUI:InitCurrencyDB()
 
-    -- Low Res optimization check
-    if (dbc.init.installStage == -1) then
-        self:LowResOptimizationCheck()
-    end
-
-    -- Tutorial
-    if (dbc.init.installStage == -1) then
-        if (dbg.tutorial.stage == 0) then
-            self:InitTutorial()
-        end
-    end
-
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
 
@@ -556,19 +542,27 @@ function RealUI:OnEnable()
     local blue = RealUI.GetColorString(RealUI.media.colors.blue)
     local red = RealUI.GetColorString(RealUI.media.colors.red)
 
-    if (dbc.init.installStage == -1) and (dbg.tutorial.stage == -1) then
-        if not(dbg.messages.resetNew) then
-            -- This part should be in the bag addon
-            if _G.IsAddOnLoaded("cargBags_Nivaya") then
-                _G.hooksecurefunc(_G.Nivaya, "OnShow", function()
-                    if RealUI.db.global.messages.resetNew then return end
-                    RealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-                    RealUI.db.global.messages.resetNew = true
-                end)
-            end
+    if dbc.init.installStage == -1 then
+        if self:IsUsingLowResDisplay() and not dbg.tags.lowResOptimized then
+            self:SetLowResOptimizations()
         end
-        if not _G.LOCALE_enUS then
-             _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+
+        if dbg.tutorial.stage > -1 then
+            self:InitTutorial()
+        else
+            if not(dbg.messages.resetNew) then
+                -- This part should be in the bag addon
+                if _G.IsAddOnLoaded("cargBags_Nivaya") then
+                    _G.hooksecurefunc(_G.Nivaya, "OnShow", function()
+                        if dbg.messages.resetNew then return end
+                        self:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
+                        self.db.global.messages.resetNew = true
+                    end)
+                end
+            end
+            if not _G.LOCALE_enUS then
+                 _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+            end
         end
     end
 
