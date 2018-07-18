@@ -102,8 +102,6 @@ local defaults, charInit do
                 slashRealUITyped = false,   -- To disable "Type /realui" message
             },
             messages = {
-                resetNew = false,
-                largeHuDOption = false,
             },
             verinfo = {},
             patchedTOC = 0,
@@ -526,6 +524,16 @@ function RealUI:OnInitialize()
     end
 end
 
+local onLoadMessages = {
+    --[[
+    test = {
+        text = "This is a test",
+        func = function(...)
+            _G.print("Test message clicked!!")
+        end,
+    }
+    ]]
+}
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
     RealUI:InitCurrencyDB()
@@ -547,14 +555,13 @@ function RealUI:OnEnable()
         if dbg.tutorial.stage > -1 then
             self:InitTutorial()
         else
-            if not(dbg.messages.resetNew) then
-                -- This part should be in the bag addon
-                if _G.IsAddOnLoaded("cargBags_Nivaya") then
-                    _G.hooksecurefunc(_G.Nivaya, "OnShow", function()
-                        if dbg.messages.resetNew then return end
-                        self:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-                        self.db.global.messages.resetNew = true
-                    end)
+            -- Helpful messages
+            for name, messageInfo in next, onLoadMessages do
+                if not dbg.messages[name] then
+                    self:Notification(name, true, messageInfo.text, messageInfo.func, messageInfo.icon)
+                    if name ~= "test" then
+                        dbg.messages[name] = true
+                    end
                 end
             end
             if not _G.LOCALE_enUS then
