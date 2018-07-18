@@ -538,9 +538,6 @@ function RealUI:OnEnable()
         RealUI:UpdateLayout()
     end
 
-    -- Helpful messages
-    local blue = RealUI.GetColorString(RealUI.media.colors.blue)
-    local red = RealUI.GetColorString(RealUI.media.colors.red)
 
     if dbc.init.installStage == -1 then
         if self:IsUsingLowResDisplay() and not dbg.tags.lowResOptimized then
@@ -568,10 +565,10 @@ function RealUI:OnEnable()
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if _G.GetCVar("scriptProfile") == "1" then
-         _G.print(L["Slash_Profile"]:format(red, blue))
+         _G.print(L["Slash_Profile"])
     end
     if _G.GetCVar("taintLog") ~= "0" then
-         _G.print(L["Slash_Taint"]:format(red, blue))
+         _G.print(L["Slash_Taint"])
     end
 
     UpdateSpec()
