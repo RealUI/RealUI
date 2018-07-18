@@ -1516,8 +1516,14 @@ function Infobar:CreateBlocks()
             GetNext = function(Art)
                 if watchStates["honor"]:IsValid() then
                     return "honor"
-                else
+                elseif watchStates["xp"]:IsValid() then
                     return "xp"
+                elseif watchStates["rep"]:IsValid() then
+                    return "rep"
+                elseif watchStates["artifact"]:IsValid() then
+                    return "artifact"
+                else
+                    return nil
                 end
             end,
             GetStats = function(Art)
@@ -1564,7 +1570,9 @@ function Infobar:CreateBlocks()
         watchStates["honor"] = {
             hint = L["Progress_OpenHonor"],
             GetNext = function(Honor)
-                if watchStates["rep"]:IsValid() then
+                if watchStates["xp"]:IsValid() then
+                    return "xp"
+                elseif watchStates["rep"]:IsValid() then
                     return "rep"
                 elseif watchStates["artifact"]:IsValid() then
                     return "artifact"
