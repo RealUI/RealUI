@@ -130,7 +130,7 @@ local defaults, charInit do
             settings = {
                 powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
                 fontStyle = 2,
-                hudSize = 1,
+                hudSize = 2,
                 reverseUnitFrameBars = false,
             },
             media = RealUI.media
@@ -164,6 +164,7 @@ function RealUI:SetLowResOptimizations(...)
     if (dbp[RealUI.ncLayout]["HuDY"] == dp[RealUI.ncLayout]["HuDY"]) then
         dbp[RealUI.ncLayout]["HuDY"] = -5
     end
+    db.settings.hudSize = 1
 
     RealUI:UpdateLayout()
 
