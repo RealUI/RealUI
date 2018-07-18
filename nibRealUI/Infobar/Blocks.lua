@@ -1591,7 +1591,8 @@ function Infobar:CreateBlocks()
                 local minHonor, maxHonor = Honor:GetStats()
                 local honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
 
-                local lineNum = tooltip:AddLine(_G.HONOR.._G.HEADER_COLON, honorStatus)
+                local level = _G.UnitHonorLevel("player")
+                local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                 tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
 
