@@ -493,10 +493,6 @@ local CreateTextureMarkup do
     end
 end
 
-local function Wrap(value, max) -- isPatch
-    return (value - 1) % max + 1
-end
-
 
 function Infobar:CreateBlocks()
     local db = Infobar.db.profile
@@ -795,11 +791,7 @@ function Infobar:CreateBlocks()
             OnEvent = function(block, event, ...)
                 --Infobar:debug("Clock: OnEvent", event, ...)
                 local alert = block.alert
-                if RealUI.isPatch then
-                    block.invites = _G.C_Calendar.GetNumPendingInvites()
-                else
-                    block.invites = _G.CalendarGetNumPendingInvites()
-                end
+                block.invites = _G.C_Calendar.GetNumPendingInvites()
                 if block.invites > 0 and not alert.isHidden then
                     alert:Show()
                     alert.isHidden = false
@@ -1530,7 +1522,7 @@ function Infobar:CreateBlocks()
             end,
             GetStats = function(Art)
                 -- /dump C_AzeriteItem.GetAzeriteItemXPInfo(C_AzeriteItem.FindActiveAzeriteItem())
-                azeriteItemLocation = RealUI.isPatch and C_AzeriteItem.FindActiveAzeriteItem()
+                azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem()
 
                 if azeriteItemLocation then
                     if not azeriteItem then
@@ -1542,10 +1534,10 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetColor = function(Art)
-                return 0.901, 0.8, 0.601 -- isPatch _G.ARTIFACT_BAR_COLOR:GetRGB()
+                return _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                return RealUI.isPatch and C_AzeriteItem.HasActiveAzeriteItem()
+                return C_AzeriteItem.HasActiveAzeriteItem()
             end,
             SetTooltip = function(Art, tooltip)
                 local xp, totalLevelXP, name = Art:GetStats()
@@ -1583,11 +1575,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Honor)
-                if RealUI.isPatch then
-                    return _G.UnitHonor("player"), _G.UnitHonorMax("player")
-                else
-                    return _G.UnitHonor("player"), _G.UnitHonorMax("player"), _G.GetHonorExhaustion()
-                end
+                return _G.UnitHonor("player"), _G.UnitHonorMax("player")
             end,
             GetColor = function(Honor, isRested)
                 if isRested then
@@ -1601,13 +1589,7 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
-
-                local honorStatus --= ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
-                if not RealUI.isPatch and _G.CanPrestige() then
-                    honorStatus = _G.PVP_HONOR_PRESTIGE_AVAILABLE
-                else
-                    honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
-                end
+                local honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
 
                 local lineNum = tooltip:AddLine(_G.HONOR.._G.HEADER_COLON, honorStatus)
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
@@ -1922,7 +1904,7 @@ function Infobar:CreateBlocks()
                     if dbc.specgear[specIndex] < 0 then
                         equipIndex = 1
                     else
-                        equipIndex = Wrap(equipmentSetInfos[dbc.specgear[specIndex]].index + 1, #equipmentSetIDs)
+                        equipIndex = _G.Wrap(equipmentSetInfos[dbc.specgear[specIndex]].index + 1, #equipmentSetIDs)
                     end
                     dbc.specgear[specIndex] = equipmentSetIDs[equipIndex]
                     tooltip:SetCell(specLines[specIndex], 2, equipmentSetInfos[dbc.specgear[specIndex]].name)

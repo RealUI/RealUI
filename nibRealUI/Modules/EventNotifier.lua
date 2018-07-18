@@ -28,33 +28,16 @@ local numInvites = 0 -- store amount of invites to compare later, and only show 
 
 local function GetGuildInvites()
     local numGuildInvites = 0
-    if RealUI.isPatch then
-        local date = _G.C_Calendar.GetDate()
-        for index = 1, _G.C_Calendar.GetNumGuildEvents() do
-            local info = _G.C_Calendar.GetGuildEventInfo(index)
-            local monthOffset = info.month - date.month
-            local numDayEvents = _G.C_Calendar.GetNumDayEvents(monthOffset, info.monthDay)
+    local date = _G.C_Calendar.GetDate()
+    for index = 1, _G.C_Calendar.GetNumGuildEvents() do
+        local info = _G.C_Calendar.GetGuildEventInfo(index)
+        local monthOffset = info.month - date.month
+        local numDayEvents = _G.C_Calendar.GetNumDayEvents(monthOffset, info.monthDay)
 
-            for i = 1, numDayEvents do
-                local event = _G.C_Calendar.GetDayEvent(monthOffset, info.monthDay, i)
-                if event.inviteStatus == _G.CALENDAR_INVITESTATUS_NOT_SIGNEDUP then
-                    numGuildInvites = numGuildInvites + 1
-                end
-            end
-        end
-    else
-        local _, currentMonth = _G.CalendarGetDate()
-
-        for idx = 1, _G.CalendarGetNumGuildEvents() do
-            local month, day = _G.CalendarGetGuildEventInfo(idx)
-            local monthOffset = month - currentMonth
-            local numDayEvents = _G.CalendarGetNumDayEvents(monthOffset, day)
-
-            for i = 1, numDayEvents do
-                local event = _G.C_Calendar.GetDayEvent(monthOffset, day, i)
-                if event.inviteStatus == _G.CALENDAR_INVITESTATUS_NOT_SIGNEDUP then
-                    numGuildInvites = numGuildInvites + 1
-                end
+        for i = 1, numDayEvents do
+            local event = _G.C_Calendar.GetDayEvent(monthOffset, info.monthDay, i)
+            if event.inviteStatus == _G.CALENDAR_INVITESTATUS_NOT_SIGNEDUP then
+                numGuildInvites = numGuildInvites + 1
             end
         end
     end
@@ -69,12 +52,7 @@ end
 
 local function alertEvents()
     if _G.CalendarFrame and _G.CalendarFrame:IsShown() then return end
-    local num --= _G.C_Calendar.GetNumPendingInvites()
-    if RealUI.isPatch then
-        num = _G.C_Calendar.GetNumPendingInvites()
-    else
-        num = _G.CalendarGetNumPendingInvites()
-    end
+    local num = _G.C_Calendar.GetNumPendingInvites()
     if num ~= numInvites then
         if num > 0 then
             RealUI:Notification("Pending Invites", false, ("You have %s pending calendar |4invite:invites;."):format(num), toggleCalendar)
@@ -159,11 +137,7 @@ end
 
 function EventNotifier:PLAYER_ENTERING_WORLD()
     if db.checkEvents or db.checkGuildEvents then
-        if RealUI.isPatch then
-            _G.C_Calendar.OpenCalendar()
-        else
-            _G.OpenCalendar()
-        end
+        _G.C_Calendar.OpenCalendar()
         self:RegisterEvent("CALENDAR_UPDATE_PENDING_INVITES")
     end
 
@@ -194,11 +168,7 @@ end
 function EventNotifier:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("CALENDAR_UPDATE_GUILD_EVENTS")
-    if RealUI.isPatch then
-        self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
-    else
-        self:RegisterEvent("VIGNETTE_ADDED")
-    end
+    self:RegisterEvent("VIGNETTE_MINIMAP_UPDATED")
 end
 
 function EventNotifier:OnDisable()

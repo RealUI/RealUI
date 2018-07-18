@@ -304,22 +304,16 @@ function private.OnLoad()
     end
 
 
-    if private.isPatch then
-        function Hook.GameTooltip_SetBackdropStyle(self, style)
-            Base.SetBackdrop(self, Color.frame, frameColor.a)
-            if self._setQualityColors then
-                local _, itemLink = self:GetItem()
-                if itemLink then
-                    local quality = _G.C_Item.GetItemQualityByID(itemLink)
-                    if quality then
-                        self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
-                    end
+    function Hook.GameTooltip_SetBackdropStyle(self, style)
+        Base.SetBackdrop(self, Color.frame, frameColor.a)
+        if self._setQualityColors then
+            local _, itemLink = self:GetItem()
+            if itemLink then
+                local quality = _G.C_Item.GetItemQualityByID(itemLink)
+                if quality then
+                    self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
                 end
             end
-        end
-    else
-        function Hook.GameTooltip_OnHide(gametooltip)
-            Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
         end
     end
 

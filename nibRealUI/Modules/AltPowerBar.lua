@@ -142,11 +142,7 @@ end
 
 function AltPowerBar:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
-    if RealUI.isPatch then
-        self:RegisterEvent("UNIT_POWER_UPDATE", "PowerUpdate")
-    else
-        self:RegisterEvent("UNIT_POWER", "PowerUpdate")
-    end
+    self:RegisterEvent("UNIT_POWER_UPDATE", "PowerUpdate")
     self:RegisterEvent("UNIT_POWER_BAR_SHOW", "PowerUpdate")
     self:RegisterEvent("UNIT_POWER_BAR_HIDE", "PowerUpdate")
 
@@ -161,11 +157,7 @@ end
 
 function AltPowerBar:OnDisable()
     self:UnregisterEvent("PLAYER_LOGIN")
-    if RealUI.isPatch then
-        self:UnregisterEvent("UNIT_POWER_UPDATE")
-    else
-        self:UnregisterEvent("UNIT_POWER")
-    end
+    self:UnregisterEvent("UNIT_POWER_UPDATE")
     self:UnregisterEvent("UNIT_POWER_BAR_SHOW")
     self:UnregisterEvent("UNIT_POWER_BAR_HIDE")
 

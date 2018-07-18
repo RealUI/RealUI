@@ -8,15 +8,8 @@ local RealUI = private.RealUI
 local db
 
 -- Libs --
-local HBD --= _G.LibStub("HereBeDragons-2.0")
-local HBDP --= _G.LibStub("HereBeDragons-Pins-2.0")
-if RealUI.isPatch then
-    HBD = _G.LibStub("HereBeDragons-2.0")
-    HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
-else
-    HBD = _G.LibStub("HereBeDragons-1.0")
-    HBDP = _G.LibStub("HereBeDragons-Pins-1.0")
-end
+local HBD = _G.LibStub("HereBeDragons-2.0")
+local HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -746,11 +739,7 @@ function MinimapAdv:POIUpdate(...)
                 poi.active = true
                 poi.complete = isComplete
 
-                if RealUI.isPatch then
-                    HBDP:AddMinimapIconMap(self, poi, mapID, posX, posY, true, true)
-                else
-                    HBDP:AddMinimapIconMF(self, poi, mapID, mapFloor, posX, posY, true)
-                end
+                HBDP:AddMinimapIconMap(self, poi, mapID, posX, posY, true, true)
 
                 pois[i] = poi
             end
@@ -1489,22 +1478,12 @@ function MinimapAdv:RegEvents()
     -- Dungeon Difficulty
     self:RegisterEvent("GUILD_PARTY_STATE_UPDATED", "UpdateGuildPartyState")
     self:RegisterEvent("PLAYER_GUILD_UPDATE", "UpdateGuildPartyState")
-    if RealUI.isPatch then
-        self:RegisterBucketEvent({
-            "PLAYER_DIFFICULTY_CHANGED",
-            "UPDATE_INSTANCE_INFO",
-            "PARTY_MEMBER_ENABLE",
-            "PARTY_MEMBER_DISABLE",
-        }, 1, "InstanceDifficultyOnEvent")
-    else
-        self:RegisterBucketEvent({
-            "PLAYER_DIFFICULTY_CHANGED",
-            "UPDATE_INSTANCE_INFO",
-            "PARTY_MEMBERS_CHANGED",
-            "PARTY_MEMBER_ENABLE",
-            "PARTY_MEMBER_DISABLE",
-        }, 1, "InstanceDifficultyOnEvent")
-    end
+    self:RegisterBucketEvent({
+        "PLAYER_DIFFICULTY_CHANGED",
+        "UPDATE_INSTANCE_INFO",
+        "PARTY_MEMBER_ENABLE",
+        "PARTY_MEMBER_DISABLE",
+    }, 1, "InstanceDifficultyOnEvent")
 
     -- Queue
     self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")

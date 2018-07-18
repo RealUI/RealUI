@@ -14,12 +14,12 @@ local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 do --[[ FrameXML\PaperDollFrame.lua ]]
     local ShouldHaveEnchant, GetNumSockets do
         local enchantSlots = {
-            [2] = not private.isPatch, -- Neck
-            [15] = not private.isPatch, -- Cloak
+            [2] = _G.MAX_PLAYER_LEVEL == 110, -- Neck
+            [15] = _G.MAX_PLAYER_LEVEL == 110, -- Cloak
             [11] = true, -- Ring 1
             [12] = true, -- Ring 2
-            [16] = private.isPatch, -- Main Hand
-            [17] = private.isPatch, -- Off Hand
+            [16] = _G.MAX_PLAYER_LEVEL == 120, -- Main Hand
+            [17] = _G.MAX_PLAYER_LEVEL == 120, -- Off Hand
         }
         function ShouldHaveEnchant(slotID, quality)
             return enchantSlots[slotID] and quality ~= _G.LE_ITEM_QUALITY_ARTIFACT
