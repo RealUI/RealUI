@@ -98,10 +98,6 @@ local defaults, charInit do
             },
             tags = {
                 firsttime = true,
-                retinaDisplay = {
-                    checked = false,
-                    set = false,
-                },
                 lowResOptimized = false,
                 slashRealUITyped = false,   -- To disable "Type /realui" message
             },
@@ -183,16 +179,9 @@ function RealUI:LowResOptimizationCheck(...)
     end
 end
 
--- Check if user is using a Retina Display
-function RealUI:RetinaDisplayCheck()
-    local resWidth, resHeight = RealUI:GetResolutionVals()
-    if (resWidth > 2560) and (resHeight > 1600) then
-        return true
-    else
-        dbg.tags.retinaDisplay.checked = true
-        dbg.tags.retinaDisplay.set = false
-        return false
-    end
+function RealUI:IsUsingHighResDisplay()
+    local _, resHeight = _G.GetPhysicalScreenSize()
+    return resHeight >= 1440
 end
 
 -- Power Mode
@@ -541,12 +530,6 @@ end
 
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
-    -- Retina Display check
-    if not(dbg.tags.retinaDisplay.checked) and self:RetinaDisplayCheck() then
-        self:InitRetinaDisplayOptions()
-        return
-    end
-
     RealUI:InitCurrencyDB()
 
     -- Low Res optimization check

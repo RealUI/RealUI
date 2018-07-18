@@ -226,9 +226,34 @@ local function CreateInstallWindow()
 
     -- Click To Install
     local installText = installFrame:CreateFontString(nil, "OVERLAY")
-    installText:SetPoint("BOTTOM", 0, installFrame:GetHeight() / 4)
+    installText:SetPoint("BOTTOM", 0, installFrame:GetHeight() / 3)
     installText:SetFontObject("SystemFont_Shadow_Large2")
     installText:SetText("[ "..L["Install"].." ]")
+
+    if RealUI:IsUsingHighResDisplay() then
+        local skinsDB = RealUI:GetAddOnDB("RealUI_Skins").profile
+
+        local setHighRes = _G.CreateFrame("CheckButton", nil, installFrame, "OptionsBaseCheckButtonTemplate")
+        setHighRes:SetPoint("TOPLEFT", installText, "BOTTOMLEFT", -10, -20)
+        setHighRes:SetScript("OnClick", function(self)
+            local isChecked = self:GetChecked()
+            if isChecked then
+                _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+            else
+                _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+            end
+            skinsDB.isHighRes = isChecked
+            _G.ReloadUI()
+        end)
+        setHighRes.tooltipText = L["Install_UseHighResDec"]
+        setHighRes:SetChecked(skinsDB.isHighRes)
+        _G.Aurora.Skin.OptionsBaseCheckButtonTemplate(setHighRes)
+
+        local highResText = setHighRes:CreateFontString(nil, "OVERLAY")
+        highResText:SetPoint("LEFT", setHighRes, "RIGHT", 0, 0)
+        highResText:SetFontObject("SystemFont_Shadow_Med1")
+        highResText:SetText(L["Install_UseHighRes"])
+    end
 
     local textAnim = installFrame:CreateAnimationGroup()
     textAnim:SetLooping("BOUNCE")

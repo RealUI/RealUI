@@ -119,7 +119,7 @@ function RealUI:GetResolutionVals(raw)
         return resWidth, resHeight
     end
 
-    if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
+    if RealUI:GetAddOnDB("RealUI_Skins").profile.isHighRes then
         resHeight = resHeight / 2
         resWidth = resWidth / 2
     end
