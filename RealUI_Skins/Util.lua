@@ -79,6 +79,15 @@ else
     LSM.DefaultMedia.font = "Noto Sans Regular"
 end
 
+-- Add the old pixel fonts for those that want them
+LOCALE_MASK = LSM.LOCALE_BIT_koKR + LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_zhCN + LSM.LOCALE_BIT_zhTW + LSM.LOCALE_BIT_western
+LSM:Register("font", "pixel_small", [[Interface\AddOns\RealUI_Skins\Media\pixel_small.ttf]])
+LSM:Register("font", "pixel_large", [[Interface\AddOns\RealUI_Skins\Media\pixel_large.ttf]])
+LSM:Register("font", "pixel_numbers", [[Interface\AddOns\RealUI_Skins\Media\pixel_numbers.ttf]], LOCALE_MASK)
+LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pixel_cooldown.ttf]], LOCALE_MASK)
+LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
+
+
 --[[ Backgrounds ]]--
 LSM:Register("background", "Plain", [[Interface\Buttons\WHITE8x8]])
 
