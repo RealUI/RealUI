@@ -9,7 +9,7 @@ addons:
 
 before_install: luarocks install --local luacheck
 
-before_script: /home/travis/.luarocks/bin/luacheck . -q
+before_script: /home/travis/.luarocks/bin/luacheck .
 script: bash utils/release.sh -p 88269 -w 16068
 
 #jobs:
