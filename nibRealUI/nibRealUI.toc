@@ -1,4 +1,4 @@
-## Interface: 70300
+## Interface: 80000
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
