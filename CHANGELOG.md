@@ -1,4 +1,28 @@
-﻿## [2.0.0] - 2018-07-16 ##
+﻿## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_Bugs
+  * RealUI_Skins
+
+### Added ###
+
+  * Brought back the pixel font files for those that like them.
+
+### Changed ###
+
+  * On a fresh install, the high res option is now offered from the standard install frame.
+
+### Fixed ###
+
+  * Progress watch did not cycle back to XP.
+  * Various font errors with other addons due to the expected font not existing anymore.
+  * LFG role icons were solid green.
+
+
+
+
+## [2.0.0] - 2018-07-16 ##
 ### Removed AddOns ###
 
   * !Aurora_RealUI
