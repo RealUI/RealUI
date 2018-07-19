@@ -1,8 +1,8 @@
-## Interface: 70300
+## Interface: 80000
 ## Title: nib|cffffffffReal|r|cffbf3333UI|r Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
-## Version: 2.0.0
+## Version: 2.0.1
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI
 ## LoadOnDemand: 1
