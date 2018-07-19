@@ -29,7 +29,7 @@ if ($newVersion -eq "") {
     (Get-Content $changelog) | Foreach {
         if ($_ -match "Unreleased") {
             if ($_ -match "##") {
-                $_ + $newHeader
+                $newHeader
             } else {
                 $_ + $newLink
             }
