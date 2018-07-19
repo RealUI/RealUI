@@ -19,11 +19,7 @@ do --[[ AddOns\Blizzard_WorldMap.lua ]]
     local function updateCoords(self)
         local coords = self._ruiCoords
         if not HBD then
-            if private.isPatch then
-                HBD = _G.LibStub("HereBeDragons-2.0")
-            else
-                HBD = _G.LibStub("HereBeDragons-1.0")
-            end
+            HBD = _G.LibStub("HereBeDragons-2.0")
         end
 
         -- Player
@@ -38,31 +34,14 @@ do --[[ AddOns\Blizzard_WorldMap.lua ]]
         end
 
         -- Mouse
-        if private.isPatch then
-            if self.ScrollContainer:IsMouseOver() then
-                local cursorX, cursorY = self:GetNormalizedCursorPosition()
+        if self.ScrollContainer:IsMouseOver() then
+            local cursorX, cursorY = self:GetNormalizedCursorPosition()
 
-                cursorX = round(100 * cursorX, 1)
-                cursorY = round(100 * cursorY, 1)
-                coords.mouse:SetText(coordinateFormat:format(_G.MOUSE_LABEL, cursorX, cursorY))
-            else
-                coords.mouse:SetText("")
-            end
+            cursorX = round(100 * cursorX, 1)
+            cursorY = round(100 * cursorY, 1)
+            coords.mouse:SetText(coordinateFormat:format(_G.MOUSE_LABEL, cursorX, cursorY))
         else
-            if _G.WorldMapScrollFrame:IsMouseOver() then
-                local scale = _G.WorldMapDetailFrame:GetEffectiveScale()
-                local width, height = _G.WorldMapDetailFrame:GetSize()
-                local centerX, centerY = _G.WorldMapDetailFrame:GetCenter()
-                local cursorX, cursorY = _G.GetCursorPosition()
-                local adjustedX = (cursorX / scale - (centerX - width / 2)) / width
-                local adjustedY = ((centerY + height / 2) - cursorY / scale) / height
-
-                adjustedX = round(100 * adjustedX, 1)
-                adjustedY = round(100 * adjustedY, 1)
-                coords.mouse:SetText(coordinateFormat:format(_G.MOUSE_LABEL, adjustedX, adjustedY))
-            else
-                coords.mouse:SetText("")
-            end
+            coords.mouse:SetText("")
         end
     end
 
@@ -79,50 +58,25 @@ end
 --[[ do AddOns\Blizzard_WorldMap.xml
 end ]]
 
-if private.isPatch then
-    _G.hooksecurefunc(private.AddOns, "Blizzard_WorldMap", function()
-        local WorldMapFrame = _G.WorldMapFrame
-        WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
-        WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
+_G.hooksecurefunc(private.AddOns, "Blizzard_WorldMap", function()
+    local WorldMapFrame = _G.WorldMapFrame
+    WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
+    WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
 
-        local player = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
-        player:SetPoint("LEFT", WorldMapFrame.BorderFrame.TitleText, 40, 0)
-        player:SetFontObject(_G.SystemFont_Shadow_Med1)
-        player:SetJustifyH("LEFT")
-        player:SetText("")
+    local player = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
+    player:SetPoint("LEFT", WorldMapFrame.BorderFrame.TitleText, 40, 0)
+    player:SetFontObject(_G.SystemFont_Shadow_Med1)
+    player:SetJustifyH("LEFT")
+    player:SetText("")
 
-        local mouse = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
-        mouse:SetPoint("LEFT", WorldMapFrame.BorderFrame.TitleText, 160, 0)
-        mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
-        mouse:SetJustifyH("LEFT")
-        mouse:SetText("")
+    local mouse = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
+    mouse:SetPoint("LEFT", WorldMapFrame.BorderFrame.TitleText, 160, 0)
+    mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
+    mouse:SetJustifyH("LEFT")
+    mouse:SetText("")
 
-        WorldMapFrame._ruiCoords = {
-            player = player,
-            mouse = mouse
-        }
-    end)
-else
-    _G.hooksecurefunc(private.FrameXML, "WorldMapFrame", function()
-        local WorldMapFrame = _G.WorldMapFrame
-        WorldMapFrame:HookScript("OnShow", Hook.WorldMapMixin_OnShow)
-        WorldMapFrame:HookScript("OnHide", Hook.WorldMapMixin_OnHide)
-
-        local player = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
-        player:SetPoint("TOPLEFT", 40.5, -10.5)
-        player:SetFontObject(_G.SystemFont_Shadow_Med1)
-        player:SetJustifyH("LEFT")
-        player:SetText("")
-
-        local mouse = WorldMapFrame.BorderFrame:CreateFontString(nil, "OVERLAY")
-        mouse:SetPoint("TOPLEFT", 160.5, -10.5)
-        mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
-        mouse:SetJustifyH("LEFT")
-        mouse:SetText("")
-
-        WorldMapFrame._ruiCoords = {
-            player = player,
-            mouse = mouse
-        }
-    end)
-end
+    WorldMapFrame._ruiCoords = {
+        player = player,
+        mouse = mouse
+    }
+end)

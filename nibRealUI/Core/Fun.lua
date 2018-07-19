@@ -19,8 +19,7 @@ local debug = RealUI.GetDebug("Fun")
 -- Misc Functions
 local spellFinder, numRun = _G.CreateFrame("FRAME"), 0
 local function SpellPredicate(spellName, arg2, arg3, ...)
-    local name, _, _, _, _, _, _, _, _, bfaSpellID, spellID = ...
-    spellID = RealUI.isPatch and bfaSpellID or spellID
+    local name, _, _, _, _, _, _, _, _, spellID = ...
 
     if spellName == name then
         print(("spellID for %s is %d"):format(spellName, spellID))
@@ -44,15 +43,7 @@ function RealUI:FindSpellID(spellName, affectedUnit, auraType)
     spellFinder:RegisterUnitEvent("UNIT_AURA", affectedUnit)
     spellFinder:SetScript("OnEvent", function(frame, event, unit)
         local filter = (auraType == "buff" and "HELPFUL PLAYER" or "HARMFUL PLAYER")
-        if RealUI.isPatch then
-            _G.AuraUtil.FindAura(SpellPredicate, unit, filter, spellName)
-        else
-            for auraIndex = 1, 100 do
-                if SpellPredicate(spellName, nil, nil, _G.UnitAura(unit, auraIndex, filter)) then
-                    break
-                end
-            end
-        end
+        _G.AuraUtil.FindAura(SpellPredicate, unit, filter, spellName)
     end)
 end
 
@@ -119,7 +110,7 @@ function RealUI:GetResolutionVals(raw)
         return resWidth, resHeight
     end
 
-    if self.db.global.tags.retinaDisplay.checked and self.db.global.tags.retinaDisplay.set then
+    if RealUI:GetAddOnDB("RealUI_Skins").profile.isHighRes then
         resHeight = resHeight / 2
         resWidth = resWidth / 2
     end

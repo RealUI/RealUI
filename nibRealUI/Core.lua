@@ -98,16 +98,10 @@ local defaults, charInit do
             },
             tags = {
                 firsttime = true,
-                retinaDisplay = {
-                    checked = false,
-                    set = false,
-                },
                 lowResOptimized = false,
                 slashRealUITyped = false,   -- To disable "Type /realui" message
             },
             messages = {
-                resetNew = false,
-                largeHuDOption = false,
             },
             verinfo = {},
             patchedTOC = 0,
@@ -136,7 +130,7 @@ local defaults, charInit do
             settings = {
                 powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
                 fontStyle = 2,
-                hudSize = 1,
+                hudSize = 2,
                 reverseUnitFrameBars = false,
             },
             media = RealUI.media
@@ -170,29 +164,21 @@ function RealUI:SetLowResOptimizations(...)
     if (dbp[RealUI.ncLayout]["HuDY"] == dp[RealUI.ncLayout]["HuDY"]) then
         dbp[RealUI.ncLayout]["HuDY"] = -5
     end
+    db.settings.hudSize = 1
 
     RealUI:UpdateLayout()
 
     dbg.tags.lowResOptimized = true
 end
 
-function RealUI:LowResOptimizationCheck(...)
-    local _, resHeight = RealUI:GetResolutionVals()
-    if (resHeight < 900) and not(dbg.tags.lowResOptimized) then
-        RealUI:SetLowResOptimizations(...)
-    end
+function RealUI:IsUsingLowResDisplay()
+    local _, resHeight = _G.GetPhysicalScreenSize()
+    return resHeight < 900
 end
 
--- Check if user is using a Retina Display
-function RealUI:RetinaDisplayCheck()
-    local resWidth, resHeight = RealUI:GetResolutionVals()
-    if (resWidth > 2560) and (resHeight > 1600) then
-        return true
-    else
-        dbg.tags.retinaDisplay.checked = true
-        dbg.tags.retinaDisplay.set = false
-        return false
-    end
+function RealUI:IsUsingHighResDisplay()
+    local _, resHeight = _G.GetPhysicalScreenSize()
+    return resHeight >= 1440
 end
 
 -- Power Mode
@@ -539,27 +525,19 @@ function RealUI:OnInitialize()
     end
 end
 
+local onLoadMessages = {
+    --[[
+    test = {
+        text = "This is a test",
+        func = function(...)
+            _G.print("Test message clicked!!")
+        end,
+    }
+    ]]
+}
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
-    -- Retina Display check
-    if not(dbg.tags.retinaDisplay.checked) and self:RetinaDisplayCheck() then
-        self:InitRetinaDisplayOptions()
-        return
-    end
-
     RealUI:InitCurrencyDB()
-
-    -- Low Res optimization check
-    if (dbc.init.installStage == -1) then
-        self:LowResOptimizationCheck()
-    end
-
-    -- Tutorial
-    if (dbc.init.installStage == -1) then
-        if (dbg.tutorial.stage == 0) then
-            self:InitTutorial()
-        end
-    end
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
@@ -569,32 +547,36 @@ function RealUI:OnEnable()
         RealUI:UpdateLayout()
     end
 
-    -- Helpful messages
-    local blue = RealUI.GetColorString(RealUI.media.colors.blue)
-    local red = RealUI.GetColorString(RealUI.media.colors.red)
 
-    if (dbc.init.installStage == -1) and (dbg.tutorial.stage == -1) then
-        if not(dbg.messages.resetNew) then
-            -- This part should be in the bag addon
-            if _G.IsAddOnLoaded("cargBags_Nivaya") then
-                _G.hooksecurefunc(_G.Nivaya, "OnShow", function()
-                    if RealUI.db.global.messages.resetNew then return end
-                    RealUI:Notification("Inventory", true, "Categorize New Items with the Reset New button.", nil, [[Interface\AddOns\cargBags_Nivaya\media\ResetNew_Large]], 0, 1, 0, 1)
-                    RealUI.db.global.messages.resetNew = true
-                end)
-            end
+    if dbc.init.installStage == -1 then
+        if self:IsUsingLowResDisplay() and not dbg.tags.lowResOptimized then
+            self:SetLowResOptimizations()
         end
-        if not _G.LOCALE_enUS then
-             _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+
+        if dbg.tutorial.stage > -1 then
+            self:InitTutorial()
+        else
+            -- Helpful messages
+            for name, messageInfo in next, onLoadMessages do
+                if not dbg.messages[name] then
+                    self:Notification(name, true, messageInfo.text, messageInfo.func, messageInfo.icon)
+                    if name ~= "test" then
+                        dbg.messages[name] = true
+                    end
+                end
+            end
+            if not _G.LOCALE_enUS then
+                 _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+            end
         end
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if _G.GetCVar("scriptProfile") == "1" then
-         _G.print(L["Slash_Profile"]:format(red, blue))
+         _G.print(L["Slash_Profile"])
     end
     if _G.GetCVar("taintLog") ~= "0" then
-         _G.print(L["Slash_Taint"]:format(red, blue))
+         _G.print(L["Slash_Taint"])
     end
 
     UpdateSpec()

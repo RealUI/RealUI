@@ -5,7 +5,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Core\Fun.lua"/>
     <Include file="Core\AddonData.xml"/>
     <Script file="Core\AddonControl.lua"/>
-    <Script file="Core\RetinaDisplay.lua"/>
     <Script file="Core\MiniPatches.lua"/>
     <Script file="Core\Settings.lua"/>
     <Script file="Core\Positioners.lua"/>

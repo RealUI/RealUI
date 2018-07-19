@@ -2,6 +2,7 @@
 auth.*
 
 **/test.lua
+RealUI_Skins/Aurora
 
 ## IntelliJ ##
 *.iws

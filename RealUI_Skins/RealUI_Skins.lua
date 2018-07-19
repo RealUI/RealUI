@@ -232,28 +232,6 @@ function private.OnLoad()
     local Hook, Skin = Aurora.Hook, Aurora.Skin
     local Color = Aurora.Color
 
-    if private.disabled.uiScale then
-        RealUI.Scale = ScaleAPI
-    else
-        Aurora.Scale.Value = ScaleAPI.Value
-        RealUI.Scale = Scale
-    end
-    local positionMethods = {
-        "RawSetSize",
-        "RawSetHeight",
-        "RawSetWidth",
-        "RawSetPoint",
-        "RawSetStartPoint",
-        "RawSetEndPoint",
-        "RawSetThickness",
-        "RawSetAtlas",
-    }
-    for _, methodName in next, positionMethods do
-        RealUI.Scale[methodName] = Scale[methodName]
-    end
-
-
-
     -- Initialize custom colors
     local frameColor = private.skinsDB.frameColor
     if not frameColor.r then
@@ -299,22 +277,43 @@ function private.OnLoad()
     end)
 
     -- Set overrides and hooks
-    if private.isPatch then
-        function Hook.GameTooltip_SetBackdropStyle(self, style)
-            Base.SetBackdrop(self, Color.frame, frameColor.a)
-            if self._setQualityColors then
-                local _, itemLink = self:GetItem()
-                if itemLink then
-                    local quality = _G.C_Item.GetItemQualityByID(itemLink)
-                    if quality then
-                        self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
-                    end
+    local C = Aurora[2]
+    C.media.arrowDown = [[Interface\AddOns\RealUI_Skins\Aurora\media\arrow-down-active]]
+    C.media.arrowRight = [[Interface\AddOns\RealUI_Skins\Aurora\media\arrow-right-active]]
+    C.media.checked = [[Interface\AddOns\RealUI_Skins\Aurora\media\CheckButtonHilight]]
+    C.media.roleIcons = [[Interface\AddOns\RealUI_Skins\Aurora\media\UI-LFG-ICON-ROLES]]
+
+    if private.disabled.uiScale then
+        RealUI.Scale = ScaleAPI
+    else
+        Aurora.Scale.Value = ScaleAPI.Value
+        RealUI.Scale = Scale
+    end
+    local positionMethods = {
+        "RawSetSize",
+        "RawSetHeight",
+        "RawSetWidth",
+        "RawSetPoint",
+        "RawSetStartPoint",
+        "RawSetEndPoint",
+        "RawSetThickness",
+        "RawSetAtlas",
+    }
+    for _, methodName in next, positionMethods do
+        RealUI.Scale[methodName] = Scale[methodName]
+    end
+
+
+    function Hook.GameTooltip_SetBackdropStyle(self, style)
+        Base.SetBackdrop(self, Color.frame, frameColor.a)
+        if self._setQualityColors then
+            local _, itemLink = self:GetItem()
+            if itemLink then
+                local quality = _G.C_Item.GetItemQualityByID(itemLink)
+                if quality then
+                    self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
                 end
             end
-        end
-    else
-        function Hook.GameTooltip_OnHide(gametooltip)
-            Base.SetBackdropColor(gametooltip, Color.frame, frameColor.a)
         end
     end
 
