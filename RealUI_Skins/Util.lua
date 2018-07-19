@@ -79,7 +79,11 @@ else
     LSM.DefaultMedia.font = "Noto Sans Regular"
 end
 
--- Add the old pixel fonts for those that want them
+-- Legacy fonts for anyone that has them stuck in saved vars
+LSM:Register("font", "Standard", [[Interface\AddOns\RealUI_Skins\Media\Roboto-Regular.ttf]], LOCALE_MASK)
+LSM:Register("font", "Standard Regular", [[Interface\AddOns\RealUI_Skins\Media\Roboto-Regular.ttf]], LOCALE_MASK)
+LSM:Register("font", "Standard Medium", [[Interface\AddOns\RealUI_Skins\Media\Roboto-Regular.ttf]], LOCALE_MASK)
+
 LOCALE_MASK = LSM.LOCALE_BIT_koKR + LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_zhCN + LSM.LOCALE_BIT_zhTW + LSM.LOCALE_BIT_western
 LSM:Register("font", "pixel_small", [[Interface\AddOns\RealUI_Skins\Media\pixel_small.ttf]])
 LSM:Register("font", "pixel_large", [[Interface\AddOns\RealUI_Skins\Media\pixel_large.ttf]])
