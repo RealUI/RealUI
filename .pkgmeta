@@ -33,9 +33,6 @@ externals:
     nibRealUI/Libs/HereBeDragons:
         url: https://repos.wowace.com/wow/herebedragons
         tag: latest
-    nibRealUI/Libs/LibArtifactData-1.0:
-        url: https://github.com/Rainrider/LibArtifactData-1.0.git
-        tag: latest
     nibRealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest

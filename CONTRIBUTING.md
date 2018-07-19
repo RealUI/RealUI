@@ -48,7 +48,6 @@ Most of the libraries used are not included in the repo since they will get brou
   * [AceGUI-3.0-SharedMediaWidets](https://mods.curse.com/addons/wow/ace-gui-3-0-shared-media-widgets)
   * [Aurora](https://mods.curse.com/addons/wow/278735-aurora)
   * [HereBeDragons](https://mods.curse.com/addons/wow/herebedragons)
-  * [LibArtifactData-1.0](https://mods.curse.com/addons/wow/libartifactdata-1-0)
   * [LibChatAnims](https://mods.curse.com/addons/wow/libchatanims)
   * [LibInspect](https://mods.curse.com/addons/wow/libinspect)
   * [LibItemUpgradeInfo-1.0](https://mods.curse.com/addons/wow/libitemupgradeinfo-1-0)
