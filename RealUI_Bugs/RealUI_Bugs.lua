@@ -304,10 +304,10 @@ local WARNING_FORMAT = "Warning %d: %s"
 function errorFrame.LUA_WARNING(warnType, warnMessage)
     if RealUI.isDev then
         if warnMessage:match("^%(null%)") then
-            debug(WARNING_FORMAT:format(warnType, warnMessage))
+            return debug(WARNING_FORMAT:format(warnType, warnMessage))
         elseif warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") then
             if warnMessage:lower():find("lib") then
-                debug(WARNING_FORMAT:format(warnType, warnMessage))
+                return debug(WARNING_FORMAT:format(warnType, warnMessage))
             end
         end
     end
