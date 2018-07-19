@@ -1,6 +1,5 @@
 exclude_files = {
     "/.release/**",
-    "/utils/**",
     "**/Libs/**",
     "**/Locale/**"
 }
