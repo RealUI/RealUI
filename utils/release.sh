@@ -39,13 +39,21 @@ if [ -n "$TRAVIS" ]; then
 		echo "Not packaging \"${TRAVIS_BRANCH}\"."
 		exit 0
 	fi
+	# don't need to run the packager if there is a tag pending
+	if [ -z "$TRAVIS_TAG" ]; then
+		TRAVIS_TAG=$( git -C "$TRAVIS_BUILD_DIR" tag --points-at )
+		if [ -n "$TRAVIS_TAG" ]; then
+			echo "Found future tag \"${TRAVIS_TAG}\", not packaging."
+			exit 0
+		fi
+	fi
 fi
 
 # Script return code
 exit_code=0
 
 # Game versions for uploading
-game_version=7.3.5
+game_version=
 game_version_id=
 toc_version=
 
@@ -1775,7 +1783,7 @@ declare -A extAddOns=(
 	["Grid2"]="https://www.wowace.com/projects/grid2/files/latest"
 	["KNP"]="https://wow.curseforge.com/projects/kuinameplates/files/latest"
 	["Masque"]="https://www.wowace.com/projects/masque/files/latest"
-	["MSBT"]="https://github.com/arbi316/MSBT.git"
+	["MSBT"]="https://wow.curseforge.com/projects/mik-scrolling-battle-text/files/latest"
 	["PhanxChat"]="https://wow.curseforge.com/projects/phanxchat/files/latest"
 	["Raven"]="https://wow.curseforge.com/projects/raven/files/latest"
 	["Skada"]="https://www.wowace.com/projects/skada/files/latest"
