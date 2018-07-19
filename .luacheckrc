@@ -1,15 +1,7 @@
 exclude_files = {
     "/.release/**",
-    "/utils/**",
     "**/Libs/**",
-    "**/Locale/**",
-    "**/*.blp",
-    "**/*.BLP",
-    "**/*.ttf",
-    "**/*.toc",
-    "**/*.txt",
-    "**/*.xml",
-    "**/*.md",
+    "**/Locale/**"
 }
 
 max_line_length = false

@@ -1,3 +1,6 @@
+:: Run luacheck 
+call luacheck . -q || pause && EXIT 
+
 :: Increment version
 powershell .\utils\update.ps1
 
