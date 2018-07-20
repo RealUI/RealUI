@@ -63,7 +63,6 @@ local function ResetScale(frame)
 end
 local function UpdateModScale()
     private.uiScale = private.skinsDB.uiModScale
-    private.UpdateUIScale()
     for frame, func in next, moddedFrames do
         ResetScale(frame)
         if func then
@@ -84,6 +83,7 @@ function RealUI.UpdateUIScale(newScale)
     local _, pysHeight = _G.GetPhysicalScreenSize()
     uiMod = (pysHeight / 768) * (private.uiScale or 1)
     pixelScale = 768 / pysHeight
+    private.debug("pixel scale", pixelScale, uiMod)
 
     -- Get Scale
     local oldScale = private.skinsDB.customScale
@@ -92,21 +92,21 @@ function RealUI.UpdateUIScale(newScale)
     end
 
     local cvarScale, parentScale = tonumber(_G.GetCVar("uiscale")), RealUI.Round(_G.UIParent:GetScale(), 2)
-    private.debug("scale", pixelScale, cvarScale, parentScale)
+    private.debug("current scale", oldScale, cvarScale, parentScale)
 
     if not newScale then
         newScale = _G.min(cvarScale, parentScale)
     end
     private.debug("newScale", newScale)
 
+
     local uiScale = newScale
     if private.skinsDB.isHighRes then
         uiScale = uiScale * 2
     end
-    private.debug("uiScale", oldScale, uiScale)
 
     uiScaleChanging = true
-    private.debug("update uiScale")
+    private.debug("update uiScale", uiScale)
     if cvarScale ~= uiScale then
         --[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
             WorldMap and map action button. As such, we only use that if we absolutly have to.
