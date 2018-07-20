@@ -914,7 +914,9 @@ function Infobar:CreateBlocks()
             suffix = "",
             OnEnable = function(block, ...)
                 Infobar:debug("Guild: OnEnable", block.side, ...)
-                if not _G.IsInGuild() then
+                if _G.IsInGuild() then
+                    UpdateRanks()
+                else
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                     Infobar:HideBlock(block.name, block.dataObj, info)
                 end
