@@ -67,7 +67,6 @@ button.isPlayer - indicates if the aura caster is the player or their vehicle (b
 
 local _, ns = ...
 local oUF = ns.oUF
-local isBFA = oUF.isBFA
 
 local VISIBLE = 1
 local HIDDEN = 0
@@ -141,17 +140,7 @@ end
 local function updateIcon(element, unit, index, offset, filter, isDebuff, visible)
 	local name, texture, count, debuffType, duration, expiration, caster, isStealable,
 		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
-		timeMod, effect1, effect2, effect3 --= UnitAura(unit, index, filter)
-
-	if isBFA then
-		name, texture, count, debuffType, duration, expiration, caster, isStealable,
-		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
 		timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
-	else
-		name, _, texture, count, debuffType, duration, expiration, caster, isStealable,
-		nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,
-		timeMod, effect1, effect2, effect3 = UnitAura(unit, index, filter)
-	end
 
 	if(name) then
 		local position = visible + offset + 1
