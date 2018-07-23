@@ -276,6 +276,14 @@ end
 function errorFrame:BugGrabber_CapturePaused()
     --print("Too many errors")
 end
+
+
+local defaultFont
+if _G.LOCALE_enUS or _G.LOCALE_ruRU then
+    defaultFont = "Roboto"
+else
+    defaultFont = "Noto Sans Regular"
+end
 function errorFrame.ADDON_LOADED(addon)
     if not _G.RealUI_Storage then
         _G.RealUI_Storage = {}
@@ -295,6 +303,15 @@ function errorFrame.ADDON_LOADED(addon)
         -- Store saved variables for future transition to a new addon
         _G.RealUI_Storage.Aurora = {}
         _G.RealUI_Storage.Aurora.AuroraConfig = _G.AuroraConfig
+    end
+
+    local LSM = _G.LibStub("LibSharedMedia-3.0", true)
+    if LSM then
+        -- Somehow LSM:Fetch() is returning nil, which likly means that the default is set to nil at some point
+        if LSM.DefaultMedia.font ~= defaultFont then
+            debug(addon, " changed the LSM default font to ", LSM.DefaultMedia.font)
+            LSM.DefaultMedia.font = defaultFont
+        end
     end
 end
 
