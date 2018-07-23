@@ -323,13 +323,14 @@ function errorFrame.LUA_WARNING(warnType, warnMessage)
         return
     end
 
-    if RealUI.isDev then
+    --if RealUI.isDev then
         if warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") then
             if warnMessage:lower():find("lib") then
                 return debug(WARNING_FORMAT:format(warnType, warnMessage))
             end
+            return
         end
-    end
+    --end
     _G.geterrorhandler()(warnMessage)
 end
 
