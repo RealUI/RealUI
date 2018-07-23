@@ -81,9 +81,8 @@ LSM:Register("font", "pixel_numbers", [[Interface\AddOns\RealUI_Skins\Media\pixe
 LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pixel_cooldown.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
 
-if _G.LOCALE_enUS or _G.LOCALE_ruRU then
-    LSM.DefaultMedia.font = "Roboto"
-else
+LSM.DefaultMedia.font = "Roboto"
+if _G.LOCALE_zhTW or _G.LOCALE_zhCN or _G.LOCALE_koKR then
     LSM.DefaultMedia.font = "Noto Sans Regular"
 end
 

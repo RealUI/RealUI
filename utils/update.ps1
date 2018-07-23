@@ -22,7 +22,7 @@ if ($newVersion -eq "") {
         Set-Content $path
     }
 
-    $newHeader = "`n## [$newVersion] - $(Get-Date -UFormat "%Y-%m-%d") ##"
+    $newHeader = "## [$newVersion] - $(Get-Date -UFormat "%Y-%m-%d") ##"
     $newLink = "`n[$newVersion]: https://github.com/RealUI/RealUI/compare/$($oldVersion.Replace(" ", "_"))...$($newVersion.Replace(" ", "_"))"
 
     $changelog = "./CHANGELOG.md"
