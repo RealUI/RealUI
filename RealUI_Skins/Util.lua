@@ -73,19 +73,18 @@ LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSa
 LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Light.otf]], LSM.LOCALE_BIT_koKR)
 LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf]], LSM.LOCALE_BIT_koKR)
 
-if _G.LOCALE_enUS or _G.LOCALE_ruRU then
-    LSM.DefaultMedia.font = "Roboto"
-else
-    LSM.DefaultMedia.font = "Noto Sans Regular"
-end
-
--- Add the old pixel fonts for those that want them
+-- Pixel fonts because some people like them
 LOCALE_MASK = LSM.LOCALE_BIT_koKR + LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_zhCN + LSM.LOCALE_BIT_zhTW + LSM.LOCALE_BIT_western
 LSM:Register("font", "pixel_small", [[Interface\AddOns\RealUI_Skins\Media\pixel_small.ttf]])
 LSM:Register("font", "pixel_large", [[Interface\AddOns\RealUI_Skins\Media\pixel_large.ttf]])
 LSM:Register("font", "pixel_numbers", [[Interface\AddOns\RealUI_Skins\Media\pixel_numbers.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pixel_cooldown.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
+
+LSM.DefaultMedia.font = "Roboto"
+if _G.LOCALE_zhTW or _G.LOCALE_zhCN or _G.LOCALE_koKR then
+    LSM.DefaultMedia.font = "Noto Sans Regular"
+end
 
 
 --[[ Backgrounds ]]--

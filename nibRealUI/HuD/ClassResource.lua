@@ -1,5 +1,8 @@
 local _, private = ...
 
+-- Lua Globals --
+-- luacheck: globals next
+
 -- RealUI --
 local RealUI = private.RealUI
 local db, pointDB, barDB
@@ -167,30 +170,37 @@ function ClassResource:CreateRunes(unitFrame, unit)
 
     local size = pointDB.size
     for index = 1, MAX_RUNES do
-        local Rune = _G.CreateFrame("StatusBar", "Rune"..index, Runes)
+        local Rune = _G.CreateFrame("StatusBar", nil, Runes)
         Rune:SetOrientation("VERTICAL")
         Rune:SetSize(size.width, size.height)
         PositionRune(Rune, index)
 
         local tex = Rune:CreateTexture(nil, "ARTWORK")
+        tex:SetTexture([[Interface\Buttons\WHITE8x8]])
         Rune:SetStatusBarTexture(tex)
         Rune.tex = tex
 
         local runeBG = Rune:CreateTexture(nil, "BACKGROUND")
-        runeBG:SetColorTexture(0, 0, 0)
-        runeBG:SetPoint("TOPLEFT", tex, -1, 1)
-        runeBG:SetPoint("BOTTOMRIGHT", tex, 1, -1)
+        runeBG:SetTexture([[Interface\Buttons\WHITE8x8]])
+        runeBG:SetPoint("TOPLEFT", Rune, -1, 1)
+        runeBG:SetPoint("BOTTOMRIGHT", Rune, 1, -1)
+        runeBG.multiplier = 0.2
+        Rune.bg = runeBG
 
         Runes[index] = Rune
     end
 
     Runes.colorSpec = true
-    function Runes.PostUpdate(element, rune, runeID, start, duration, isReady)
-        local color = unitFrame.colors.power.RUNES
-        if isReady then
-            rune.tex:SetColorTexture(color[1], color[2], color[3])
-        else
-            rune.tex:SetColorTexture(color[1], color[2], color[3], 0.4)
+    function Runes.PostUpdate(element, runemap)
+        local rune, runeReady, _
+        for index, runeID in next, runemap do
+            rune = element[index]
+            _, _, runeReady = _G.GetRuneCooldown(runeID)
+            if runeReady then
+                rune.tex:SetAlpha(1)
+            else
+                rune.tex:SetAlpha(0.5)
+            end
         end
     end
 

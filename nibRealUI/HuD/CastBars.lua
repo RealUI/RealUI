@@ -155,8 +155,8 @@ function CastBars:UpdateAnchors()
     end
 end
 
-local function PostCastStart(self, unit, name, castID, spellID)
-    CastBars:debug("PostCastStart", unit, name, castID, spellID)
+local function PostCastStart(self, unit, name)
+    CastBars:debug("PostCastStart", unit, name)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
@@ -172,12 +172,12 @@ local function PostCastStart(self, unit, name, castID, spellID)
     end
 end
 --[==[
-local function PostCastFailed(self, unit, castID, spellID)
-    CastBars:debug("PostCastFailed", unit, castID, spellID)
+local function PostCastFailed(self, unit)
+    CastBars:debug("PostCastFailed", unit)
 end
 ]==]
-local function PostCastInterrupted(self, unit, castID, spellID)
-    CastBars:debug("PostCastInterrupted", unit, castID, spellID)
+local function PostCastInterrupted(self, unit)
+    CastBars:debug("PostCastInterrupted", unit)
     self.castid = nil
     if not self.flashAnim:IsPlaying() then
         CastBars:debug("PlayFlash")
@@ -200,27 +200,27 @@ local function PostCastNotInterruptible(self, unit)
     self:SetStatusBarColor(uninterruptible:GetRGB())
 end
 --[==[
-local function PostCastDelayed(self, unit, name, castID, spellID)
-    CastBars:debug("PostCastDelayed", unit, name, castID, spellID)
+local function PostCastDelayed(self, unit, name)
+    CastBars:debug("PostCastDelayed", unit, name)
 end
-local function PostCastStop(self, unit, name, castID, spellID)
-    CastBars:debug("PostCastStop", unit, name, castID, spellID)
+local function PostCastStop(self, unit, name)
+    CastBars:debug("PostCastStop", unit, name)
 end
 ]==]
 
-local function PostChannelStart(self, unit, name, spellID)
-    CastBars:debug("PostChannelStart", unit, name, spellID)
+local function PostChannelStart(self, unit, name)
+    CastBars:debug("PostChannelStart", unit, name)
     if self.SetBarTicks then
         self.tickPool:ReleaseAll()
         self:SetBarTicks(ChannelingTicks[name])
     end
 end
 --[==[
-local function PostChannelUpdate(self, unit, name, spellID)
-    CastBars:debug("PostChannelUpdate", unit, name, spellID)
+local function PostChannelUpdate(self, unit, name)
+    CastBars:debug("PostChannelUpdate", unit, name)
 end
-local function PostChannelStop(self, unit, name, spellID)
-    CastBars:debug("PostChannelStop", unit, name, spellID)
+local function PostChannelStop(self, unit, name)
+    CastBars:debug("PostChannelStop", unit, name)
 end
 ]==]
 

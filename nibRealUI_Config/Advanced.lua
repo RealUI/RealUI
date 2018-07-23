@@ -702,7 +702,7 @@ local skins do
                 get = function() return SkinsProfile.isHighRes end,
                 set = function(info, value)
                     SkinsProfile.isHighRes = value
-                    RealUI.UpdateUIScale()
+                    RealUI.UpdateUIScale(SkinsProfile.customScale)
                 end,
                 order = 21,
             },

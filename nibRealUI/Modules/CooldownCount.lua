@@ -87,8 +87,6 @@ function Timer:UpdateText()
     if round(remain) > 0 then
         local text = self.text
         local formatStr, time, nextUpdate = getTimeText(remain)
-        text:SetFormattedText(formatStr, time)
-        text:Show()
 
         local size = CD_FONT.size
         for i = 1, #sizeAdjust do
@@ -99,6 +97,9 @@ function Timer:UpdateText()
             end
         end
         text:SetFont(CD_FONT.font, size, CD_FONT.flags)
+
+        text:SetFormattedText(formatStr, time)
+        text:Show()
         return self:SetNextUpdate(nextUpdate)
     else
         return self:Stop()

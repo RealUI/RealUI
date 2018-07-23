@@ -1,4 +1,25 @@
-﻿## [2.0.1] - 2018-07-19 ##
+## [2.0.2] - 2018-07-23 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_Skins
+
+### Changed ###
+
+  * Death Knight rune bars are now colored by spec.
+
+### Fixed ###
+
+  * Infobar tooltips were too small when using the High Res scale option.
+  * Various font errors with other addons (again, hopfully for good).
+  * An error when mousing over the guild Infobar block too early.
+
+
+
+
+## [2.0.1] - 2018-07-19 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -66,5 +87,6 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.2]: https://github.com/RealUI/RealUI/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/RealUI/RealUI/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/RealUI/RealUI/compare/8.1_r20h...2.0.0

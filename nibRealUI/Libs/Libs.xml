@@ -18,7 +18,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="HereBeDragons\HereBeDragons-Pins-2.0.lua"/>
     <Script file="HereBeDragons\HereBeDragons-1.0.lua"/>
     <Script file="HereBeDragons\HereBeDragons-Pins-1.0.lua"/>
-    <Script file="LibArtifactData-1.0\LibArtifactData-1.0.lua"/>
     <Script file="libdatabroker-1.1\LibDataBroker-1.1.lua"/>
     <Include file="LibIconFonts\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
@@ -27,7 +26,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <!-- Fixes -->
     <Script file="Fixes\InspectFix.lua"/>
     <Script file="Fixes\BlizzBugsSuck.lua"/>
-    <Script file="Fixes\Taint.lua"/>
+    <!--Script file="Fixes\Taint.lua"/-->
     <Script file="Fixes\DropdownMenu\EasyMenu.lua"/>
     <Include file="Fixes\DropdownMenu\UIDropDownMenu.xml"/>
 </Ui>

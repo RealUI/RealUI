@@ -23,13 +23,6 @@ Scale.Point(testCell, "CENTER")
 Scale.Size(testCell, 500, 20)
 testCell:Hide()
 
-local qTipAquire = qTip.Acquire
-function qTip:Acquire(...)
-    local tooltip = qTipAquire(self, ...)
-    RealUI.RegisterModdedFrame(tooltip)
-    return tooltip
-end
-
 local iconFont
 local TextTableCellProvider, TextTableCellPrototype
 local function SetupTextTable()
@@ -46,18 +39,18 @@ local function SetupTextTable()
         self.row:GetScript("OnEnter")(self.row)
         local text = self:GetTooltipText()
         if text then
-            GTT_FrameLevel = _G.GameTooltip:GetFrameLevel()
-            _G.GameTooltip:SetFrameLevel(1000)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
-            _G.GameTooltip:SetText(text)
-            _G.GameTooltip:Show()
+            GTT_FrameLevel = _G.RealUI_InfobarTooltip:GetFrameLevel()
+            _G.RealUI_InfobarTooltip:SetFrameLevel(1000)
+            _G.RealUI_InfobarTooltip:SetOwner(self, "ANCHOR_TOP")
+            _G.RealUI_InfobarTooltip:SetText(text)
+            _G.RealUI_InfobarTooltip:Show()
         end
     end
     local function Cell_OnLeave(self)
         self.row:GetScript("OnLeave")(self.row)
-        if GTT_FrameLevel and _G.GameTooltip:IsShown() then
-            _G.GameTooltip:SetFrameLevel(GTT_FrameLevel)
-            _G.GameTooltip:Hide()
+        if GTT_FrameLevel and _G.RealUI_InfobarTooltip:IsShown() then
+            _G.RealUI_InfobarTooltip:SetFrameLevel(GTT_FrameLevel)
+            _G.RealUI_InfobarTooltip:Hide()
         end
     end
 
@@ -429,6 +422,7 @@ local function SetupTooltip(tooltip, block)
     tooltip:SetFont("SystemFont_Shadow_Med1")
     tooltip:SmartAnchorTo(block)
     tooltip:SetAutoHideDelay(0.10, block)
+    --RealUI.RegisterModdedFrame(tooltip)
     block.tooltip = tooltip
 end
 
@@ -914,7 +908,9 @@ function Infobar:CreateBlocks()
             suffix = "",
             OnEnable = function(block, ...)
                 Infobar:debug("Guild: OnEnable", block.side, ...)
-                if not _G.IsInGuild() then
+                if _G.IsInGuild() then
+                    UpdateRanks()
+                else
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                     Infobar:HideBlock(block.name, block.dataObj, info)
                 end

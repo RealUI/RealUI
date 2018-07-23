@@ -29,13 +29,16 @@ local function IsCombatBlocked()
     return _G.InCombatLockdown() and not db.combatTips
 end
 
+local infobarTooltip = _G.CreateFrame("GameTooltip", "RealUI_InfobarTooltip", _G.UIParent, "GameTooltipTemplate")
+Aurora.Skin.GameTooltipTemplate(infobarTooltip)
+
 ----------------------
 -- Block Management --
 ----------------------
 local function PrepareTooltip(tooltip, block)
     Infobar:debug("PrepareTooltip", tooltip, block and block.name)
     if tooltip and block then
-        RealUI.RegisterModdedFrame(tooltip)
+        --RealUI.RegisterModdedFrame(tooltip)
         tooltip:ClearAllPoints()
         if tooltip.SetOwner then
             tooltip:SetOwner(block, ("ANCHOR_NONE"))
@@ -65,14 +68,14 @@ function BlockMixin:OnEnter()
         dataObj.OnEnter(self)
 
     elseif dataObj.OnTooltipShow then
-        PrepareTooltip(_G.GameTooltip, self)
-        dataObj.OnTooltipShow(_G.GameTooltip)
-        _G.GameTooltip:Show()
+        PrepareTooltip(infobarTooltip, self)
+        dataObj.OnTooltipShow(infobarTooltip)
+        infobarTooltip:Show()
 
     elseif dataObj.tooltiptext then
-        PrepareTooltip(_G.GameTooltip, self)
-        _G.GameTooltip:SetText(dataObj.tooltiptext)
-        _G.GameTooltip:Show()
+        PrepareTooltip(infobarTooltip, self)
+        infobarTooltip:SetText(dataObj.tooltiptext)
+        infobarTooltip:Show()
     end
 end
 
@@ -84,7 +87,7 @@ function BlockMixin:OnLeave()
     local dataObj  = self.dataObj
 
     if dataObj.OnTooltipShow then
-        _G.GameTooltip:Hide()
+        infobarTooltip:Hide()
     end
 
     if dataObj.OnLeave then
@@ -92,7 +95,7 @@ function BlockMixin:OnLeave()
     elseif dataObj.tooltip then
         dataObj.tooltip:Hide()
     else
-        _G.GameTooltip:Hide()
+        infobarTooltip:Hide()
     end
 end
 
@@ -732,7 +735,8 @@ function Infobar:CreateBar()
     end)
 
     -- Stripes
-    Base.SetBackdrop(frame, nil, db.bgAlpha)
+    Base.SetBackdrop(frame, Aurora.Color.frame, db.bgAlpha)
+    frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
     local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
     tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
     tex:SetAlpha(db.bgAlpha * 0.6)
@@ -834,7 +838,8 @@ function Infobar:SettingsUpdate(setting, block)
         end
         block:OnEvent("SettingsUpdate")
     elseif setting == "bgAlpha" then
-        Base.SetBackdropColor(self.frame, nil, db.bgAlpha)
+        self.frame:SetBackdropColor(Aurora.Color.frame, db.bgAlpha)
+        self.frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
         self.frame.tex:SetAlpha(db.bgAlpha * 0.6)
         self.frame.watch:UpdateColors()
 
