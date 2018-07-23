@@ -319,10 +319,12 @@ end
 _G.UIParent:UnregisterEvent("LUA_WARNING")
 local WARNING_FORMAT = "Warning %d: %s"
 function errorFrame.LUA_WARNING(warnType, warnMessage)
+    if warnMessage:match("^%(null%)") then
+        return
+    end
+
     if RealUI.isDev then
-        if warnMessage:match("^%(null%)") then
-            return debug(WARNING_FORMAT:format(warnType, warnMessage))
-        elseif warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") then
+        if warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") then
             if warnMessage:lower():find("lib") then
                 return debug(WARNING_FORMAT:format(warnType, warnMessage))
             end
