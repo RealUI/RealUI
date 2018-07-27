@@ -36,6 +36,9 @@ externals:
     nibRealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
+    nibRealUI/Libs/LibDropDown:
+        url: https://github.com/p3lim-wow/LibDropDown.git
+        tag: latest
     nibRealUI/Libs/LibIconFonts:
         url: https://github.com/Gethe/LibIconFonts.git
         tag: latest
@@ -44,9 +47,6 @@ externals:
         tag: latest
     nibRealUI/Libs/LibRangeCheck-2.0:
         url: https://repos.wowace.com/wow/librangecheck-2-0/trunk/LibRangeCheck-2.0
-        tag: latest
-    nibRealUI/Libs/LibStrataFix:
-        url: https://repos.wowace.com/wow/libstratafix/trunk
         tag: latest
     nibRealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1

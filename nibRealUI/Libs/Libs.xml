@@ -2,10 +2,10 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!-- Libs -->
+    <!--@non-debug@
     <Script file="UTF8\utf8data.lua"/>
     <Script file="UTF8\utf8.lua"/>
     <Script file="LibChatAnims\LibChatAnims.lua"/>
-    <Script file="LibStrataFix\LibStrataFix.lua"/>
     <Script file="AceAddon-3.0\AceAddon-3.0.lua"/>
     <Script file="AceConsole-3.0\AceConsole-3.0.lua"/>
     <Script file="AceEvent-3.0\AceEvent-3.0.lua"/>
@@ -16,17 +16,16 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="LibWindow-1.1\LibWindow-1.1.lua"/>
     <Script file="HereBeDragons\HereBeDragons-2.0.lua"/>
     <Script file="HereBeDragons\HereBeDragons-Pins-2.0.lua"/>
-    <Script file="HereBeDragons\HereBeDragons-1.0.lua"/>
-    <Script file="HereBeDragons\HereBeDragons-Pins-1.0.lua"/>
-    <Script file="libdatabroker-1.1\LibDataBroker-1.1.lua"/>
+    <Include file="LibDropDown\embed.xml" />
     <Include file="LibIconFonts\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
+    @end-non-debug@-->
+    <Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
     <Include file="oUF\oUF.xml"/>
 
     <!-- Fixes -->
-    <Script file="Fixes\InspectFix.lua"/>
     <Script file="Fixes\BlizzBugsSuck.lua"/>
-    <Script file="Fixes\DropdownMenu\EasyMenu.lua"/>
-    <Include file="Fixes\DropdownMenu\UIDropDownMenu.xml"/>
+    <Script file="Fixes\InspectFix.lua"/>
+    <Script file="Fixes\LibStrataFix.lua"/>
     <Script file="Fixes\Taint.lua"/>
 </Ui>
