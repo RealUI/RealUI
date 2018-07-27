@@ -66,7 +66,7 @@ local errorFrame do
 
     local scrollFrame = _G.CreateFrame("ScrollFrame", nil, errorFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("TOPLEFT", dragArea, "BOTTOMLEFT", 10, -10)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -21, 44)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -23, 44)
     _G.ScrollFrame_OnLoad(scrollFrame)
     errorFrame.ScrollFrame = scrollFrame
 
@@ -289,14 +289,6 @@ function errorFrame.ADDON_LOADED(addon)
     if addon == "nibRealUI" then
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
-    elseif addon == "nibRealUI_Init" then
-        -- Store saved variables for future transition to a new addon
-        _G.RealUI_Storage.nibRealUI_Init = {}
-        _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB = _G.RealUI_InitDB
-    elseif addon == "Aurora" then
-        -- Store saved variables for future transition to a new addon
-        _G.RealUI_Storage.Aurora = {}
-        _G.RealUI_Storage.Aurora.AuroraConfig = _G.AuroraConfig
     end
 end
 
