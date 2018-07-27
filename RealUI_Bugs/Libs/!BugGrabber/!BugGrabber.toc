@@ -1,4 +1,4 @@
-## Interface: 70100
+## Interface: 80000
 ## Title: BugGrabber
 ## Notes: Grabs bugs for the bug sack.
 ## Notes-deDE: Grabs bugs for the bug sack.
@@ -16,10 +16,6 @@
 ## X-License: GPL v2 or later.
 ## X-Category: Development Tools
 ## SavedVariables: BugGrabberDB
-## X-Curse-Packaged-Version: r220-release
-## X-Curse-Project-Name: !BugGrabber
-## X-Curse-Project-ID: bug-grabber
-## X-Curse-Repository-ID: wow/bug-grabber/mainline
 
 BugGrabber.lua
 locales.lua

@@ -46,7 +46,7 @@ function RealUI.GetDebug(mod)
 end
 _G.RealUI = RealUI
 
-local debug = RealUI.GetDebug("Bugs")
+--local debug = RealUI.GetDebug("Bugs")
 local errorFrame do
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
     errorFrame:SetClampedToScreen(true)
@@ -298,25 +298,6 @@ function errorFrame.ADDON_LOADED(addon)
         _G.RealUI_Storage.Aurora = {}
         _G.RealUI_Storage.Aurora.AuroraConfig = _G.AuroraConfig
     end
-end
-
--- Redirect lua warnings
-_G.UIParent:UnregisterEvent("LUA_WARNING")
-local WARNING_FORMAT = "Warning %d: %s"
-function errorFrame.LUA_WARNING(warnType, warnMessage)
-    if warnMessage:match("^%(null%)") then
-        return
-    end
-
-    --if RealUI.isDev then
-        if warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") then
-            if warnMessage:lower():find("lib") then
-                return debug(WARNING_FORMAT:format(warnType, warnMessage))
-            end
-            return
-        end
-    --end
-    _G.geterrorhandler()(warnMessage)
 end
 
 _G.BugGrabber.setupCallbacks()
