@@ -54,3 +54,18 @@ RealUI.globals = {
         "TOOLTIP"
     }
 }
+
+
+local black = _G.Aurora.Color.black
+local a = RealUI:GetAddOnDB("RealUI_Skins").profile.frameColor.a
+local LDD = _G.LibStub("LibDropDown")
+LDD:RegisterStyle("REALUI", {
+    padding = 10,
+    spacing = 1,
+    backdrop = {
+        bgFile = [[Interface\Buttons\WHITE8x8]],
+        edgeFile = [[Interface\Buttons\WHITE8x8]], edgeSize = 1,
+    },
+    backdropColor = _G.CreateColor(black.r, black.g, black.b, a),
+    backdropBorderColor = black,
+})

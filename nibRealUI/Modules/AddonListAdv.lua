@@ -2,7 +2,10 @@
 local _, private = ...
 
 -- Lua Globals --
-local next, table = _G.next, _G.table
+-- luacheck: globals next unpack table wipe
+
+-- Libs --
+local LDD = _G.LibStub("LibDropDown")
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -53,7 +56,6 @@ local RealUISet = {
     "BadBoy_Guilded",
     "Bartender4",
     "cargBags_Nivaya",
-    "EasyMail",
     "FreebTip",
     "Grid2",
     "Grid2Options",
@@ -78,7 +80,7 @@ local RealUISet = {
 --------------
 local function GetSet(name)
     --print("GetSet", name)
-    if name == "RealUI" then
+    if name == RealUISet.name then
         return RealUISet
     elseif name == classInfo.locale then
         if not dbk[1] then
@@ -199,157 +201,140 @@ function AddonListAdv:RenameSet(set, name)
     _G.print(("Set [%s] renamed to [%s]."):format(oldName, set.name))
 end
 
-function AddonListAdv:SetsOnClick(btn)
-    --print("SetsOnClick", self, self.GetName and self:GetName())
-    if not _G.AddonList.setsDD then
-        --print("Create setsDD")
-        _G.AddonList.setsDD = _G.CreateFrame("Frame", "ALAdvSetsDD", nil, "Lib_UIDropDownMenuTemplate")
-        _G.Lib_UIDropDownMenu_Initialize(_G.AddonList.setsDD, AddonListAdv.SetDropDown_Populate, "MENU")--
-        --UIDropDownMenu_SetAnchor(AddonList.setsDD, "TOPLEFT", "BOTTOMLEFT")
+local setsButton = RealUI:CreateTextButton("Sets", _G.AddonList, 100, 22)
+setsButton:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
+setsButton:SetScript("OnClick", function(self)
+    self.menu:ClearLines()
+    self.menu:GetMenuList()
+    self.menu:Toggle()
+end)
+
+local setsMenu = LDD:NewMenu(setsButton, "RealUIAddonListDropDown")
+setsMenu:SetAnchor("TOPLEFT", setsButton, "BOTTOMLEFT", 5, -5)
+setsMenu:SetStyle("REALUI")
+setsButton.menu = setsMenu
+
+local info = {}
+local function GetSetOptions(setName)
+    local menu = {
+        {text = setName,
+            isTitle = true
+        },
+        {text = "Load",
+            func = function() AddonListAdv:ClearSelectionAndLoadSet(setName) end
+        },
+        {text = "Add to current selection",
+            func = function() AddonListAdv:LoadSet(setName) end
+        },
+        {text = "Remove from current selection",
+            func = function() AddonListAdv:UnloadSet(setName) end
+        },
+    }
+
+    if setName ~= RealUISet.name then
+        table.insert(menu, 2, {
+            text = "Save",
+            func = function() AddonListAdv:SaveSet(setName) end
+        })
     end
-    _G.Lib_ToggleDropDownMenu(1, nil, _G.AddonList.setsDD, _G.AddonList.sets, 0, 0)
-end
-function AddonListAdv:Skin()
-    if not _G.AddonList.sets then
-        _G.AddonList.sets = RealUI:CreateTextButton("Sets", _G.AddonList, 100, 22)
-        _G.AddonList.sets:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
-        _G.AddonList.sets:SetScript("OnClick", self.SetsOnClick)
+
+    if setName ~= RealUISet.name and setName ~= classInfo.locale then
+        table.insert(menu, {
+            text = "Delete",
+            func = function() AddonListAdv:DeleteSet(setName) end
+        })
+
+        table.insert(menu, {
+            text = "Rename",
+            func = function()
+                AddonListAdv.savingSet = setName
+                _G.StaticPopup_Show("ALA_SaveAs", setName)
+                LDD:CloseAll()
+            end
+        })
     end
+    return menu
 end
+function setsMenu:GetMenuList()
+    --[[ Account Sets ]]--
+    wipe(info)
+    info.isTitle = true
+    info.text = "Account Sets"
+    setsMenu:AddLine(info)
 
-function AddonListAdv.SetDropDown_Populate(menu, level)
-    --print("SetDropDown_Populate", level)
-    local self = AddonListAdv
-    local info
 
-    if level == 1 then
-        info = _G.Lib_UIDropDownMenu_CreateInfo()
-        info.notCheckable = true
+    -- RealUI --
+    wipe(info)
+    local count = #RealUISet
+    info.text = ("%s (%d)"):format(RealUISet.name, count)
+    info.menu = GetSetOptions(RealUISet.name)
+    setsMenu:AddLine(info)
 
-        --[[ Account Sets ]]
-        info.isTitle = true
-        info.hasArrow = false
-        info.text = "Account Sets"
-        _G.Lib_UIDropDownMenu_AddButton(info)
 
-        info.isTitle = false
-        info.disabled = false
-        info.hasArrow = true
-        local count
+    -- Class --
+    wipe(info)
+    if dbk and dbk[1] then
+        count = #dbk[1]
+    else
+        count = 0
+    end
 
-        --[[ RealUI Set ]]
-        count = #RealUISet
-        info.text = ("%s (%d)"):format(RealUISet.name, count)
-        info.value = RealUISet.name
-        _G.Lib_UIDropDownMenu_AddButton(info)
+    info.text = ("%s (%d)"):format(classInfo.locale, count)
+    info.value = classInfo.locale
+    info.menu = GetSetOptions(classInfo.locale)
+    setsMenu:AddLine(info)
 
-        --[[ Class Set ]]
-        if dbk and dbk[1] then
-            count = #dbk[1]
+    -- Global --
+    for i = 1, #dbg do
+        --print("SetDropDown_Populate", i, dbg[i])
+
+        if dbg and dbg[i] then
+            count = #dbg[i]
         else
             count = 0
         end
 
-        info.text = ("%s (%d)"):format(classInfo.locale, count)
-        info.value = classInfo.locale
-        _G.Lib_UIDropDownMenu_AddButton(info)
-
-        for i = 1, #dbg do
-            --print("SetDropDown_Populate", i, dbg[i])
-
-            if dbg and dbg[i] then
-                count = #dbg[i]
-            else
-                count = 0
-            end
-
-            info.text = ("%s (%d)"):format(dbg[i].name, count)
-            info.value = dbg[i].name
-            _G.Lib_UIDropDownMenu_AddButton(info)
-        end
-
-        --[[ Character Sets ]]
-        info.isTitle = true
-        info.hasArrow = false
-        info.text = "Character Sets"
-        _G.Lib_UIDropDownMenu_AddButton(info)
-
-        info.isTitle = false
-        info.disabled = false
-        info.hasArrow = true
-        for i = 1, #dbc do
-            --print("SetDropDown_Populate", i, dbc[i])
-            if dbc and dbc[i] then
-                count = #dbc[i]
-            else
-                count = 0
-            end
-
-            info.text = ("%s (%d)"):format(dbc[i].name, count)
-            info.value = dbc[i].name
-            _G.Lib_UIDropDownMenu_AddButton(info)
-        end
-
-        -- New set.
-        info.text = "Create a new set"
-        info.hasArrow = false
-        info.func = function()
-            _G.StaticPopup_Show("ALA_SaveAs")
-        end
-        _G.Lib_UIDropDownMenu_AddButton(info)
-    elseif level == 2 then
-        info = _G.Lib_UIDropDownMenu_CreateInfo()
-        local setName = _G.LIB_UIDROPDOWNMENU_MENU_VALUE
-        info.text = setName
-        info.isTitle = true
-        info.notCheckable = true
-        _G.Lib_UIDropDownMenu_AddButton(info, level)
-
-        info = _G.Lib_UIDropDownMenu_CreateInfo()
-        info.notCheckable = true
-
-        if _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" then
-            info.text = "Save"
-            info.func = function() self:SaveSet(setName) end
-            _G.Lib_UIDropDownMenu_AddButton(info, level)
-        end
-
-        info.text = "Load"
-        info.func = function() self:ClearSelectionAndLoadSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
-        _G.Lib_UIDropDownMenu_AddButton(info, level)
-
-
-        info.text = "Add to current selection"
-        info.func = function() self:LoadSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
-        _G.Lib_UIDropDownMenu_AddButton(info, level)
-
-
-        info.text = "Remove from current selection"
-        info.func = function() self:UnloadSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
-        _G.Lib_UIDropDownMenu_AddButton(info, level)
-
-        if _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= "RealUI" and _G.LIB_UIDROPDOWNMENU_MENU_VALUE ~= classInfo.locale then
-            info.text = "Delete"
-            info.func = function() self:DeleteSet(_G.LIB_UIDROPDOWNMENU_MENU_VALUE) end
-            _G.Lib_UIDropDownMenu_AddButton(info, level)
-
-            info.text = "Rename"
-            info.func = function()
-                self.savingSet = _G.LIB_UIDROPDOWNMENU_MENU_VALUE
-                _G.StaticPopup_Show("ALA_SaveAs", setName)
-                _G.Lib_CloseDropDownMenus(1)
-            end
-            _G.Lib_UIDropDownMenu_AddButton(info, level)
-        end
+        info.text = ("%s (%d)"):format(dbg[i].name, count)
+        info.value = dbg[i].name
+        setsMenu:AddLine(info)
     end
+
+
+    --[[ Character Sets ]]--
+    wipe(info)
+    info.text = "Character Sets"
+    info.isTitle = true
+    setsMenu:AddLine(info)
+
+    for i = 1, #dbc do
+        wipe(info)
+       --print("SetDropDown_Populate", i, dbc[i])
+        if dbc and dbc[i] then
+            count = #dbc[i]
+        else
+            count = 0
+        end
+
+        info.text = ("%s (%d)"):format(dbc[i].name, count)
+        info.value = dbc[i].name
+        info.menu = GetSetOptions(dbc[i].name)
+        setsMenu:AddLine(info)
+    end
+
+
+    -- New Set --
+    wipe(info)
+    info.text = "Create a new set"
+    info.func = function()
+        _G.StaticPopup_Show("ALA_SaveAs")
+    end
+    setsMenu:AddLine(info)
 end
 
 
 -----------------------
 function AddonListAdv:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
-
-    self:Skin()
 end
 
 function AddonListAdv:PLAYER_ENTERING_WORLD()

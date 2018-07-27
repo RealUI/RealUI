@@ -1,13 +1,14 @@
 local _, private = ...
 
 -- Lua Globals --
-local next, ipairs = _G.next, _G.ipairs
+-- luacheck: globals next ipairs unpack tinsert
 
 -- RealUI --
 local RealUI = private.RealUI
 local db
 
 -- Libs --
+local LDD = _G.LibStub("LibDropDown")
 local HBD = _G.LibStub("HereBeDragons-2.0")
 local HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
 
@@ -201,8 +202,8 @@ function MinimapAdv:UpdateInfoPosition()
                 end)
                 if db.information.hideRaidFilters then
                     -- These buttons are only relevant if using the Blizzard frames
-                    _G.SetRaidProfileOption(_G.GetActiveRaidProfile(), "shown", false); _G.CompactRaidFrameManager_SetSetting("IsShown", false) -- Hide CRF
-                    _G.SetRaidProfileOption(_G.GetActiveRaidProfile(), "locked", true); _G.CompactRaidFrameManager_SetSetting("Locked", true) -- Lock CRF
+                    _G.SetRaidProfileOption(_G.GetActiveRaidProfile(), "shown", false) _G.CompactRaidFrameManager_SetSetting("IsShown", false) -- Hide CRF
+                    _G.SetRaidProfileOption(_G.GetActiveRaidProfile(), "locked", true) _G.CompactRaidFrameManager_SetSetting("Locked", true) -- Lock CRF
                     _G.hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(CRFM)
                         self:debug("AdjustCRFManager", _G.InCombatLockdown())
                         if _G.InCombatLockdown() then
@@ -220,10 +221,10 @@ function MinimapAdv:UpdateInfoPosition()
                         _G.FlowContainer_RemoveObject(container, CRFM.displayFrame.hiddenModeToggle)
                         CRFM.displayFrame.hiddenModeToggle:Hide()
 
-                        _G.FlowContainer_ResumeUpdates(container);
+                        _G.FlowContainer_ResumeUpdates(container)
 
-                        local _, usedY = _G.FlowContainer_GetUsedBounds(container);
-                        CRFM:SetHeight(usedY + 40);
+                        local _, usedY = _G.FlowContainer_GetUsedBounds(container)
+                        CRFM:SetHeight(usedY + 40)
                     end)
                 end
                 self.hookedCRFM = true
@@ -1045,7 +1046,7 @@ function MinimapAdv:FadeButtons()
     local scale = mapPoints.scale
 
     if _G.Minimap:IsVisible() then
-        if _G.Minimap.mouseover or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
+        if _G.Minimap.mouseover or MMFrames.tracking.dropdown:IsVisible() or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
 
             if ExpandedState == 0 then
@@ -1153,7 +1154,7 @@ end
 
 ---- Tracking Button ----
 local function Tracking_OnMouseDown()
-    _G.Lib_ToggleDropDownMenu(1, nil, MMFrames.tracking.dropdown, "MinimapAdv_Tracking", 0, 0)
+    MMFrames.tracking.dropdown:Toggle()
 end
 
 local function Tracking_OnEnter()
@@ -1524,7 +1525,7 @@ local function NewInfoFrame(name, parent, format)
             if not self.queuedTime then return end
             --Don't update every tick (can't do 1 second beause it might be 1.01 seconds and we'll miss a tick.
             --Also can't do slightly less than 1 second (0.9) because we'll end up with some lingering numbers
-            self.updateThrottle = (self.updateThrottle or 0.1) - elapsed;
+            self.updateThrottle = (self.updateThrottle or 0.1) - elapsed
             if ( self.updateThrottle <= 0 ) then
                 local queueStr
                 local timeInQueue = ConvertSecondstoTime(_G.GetTime() - self.queuedTime)
@@ -1537,7 +1538,7 @@ local function NewInfoFrame(name, parent, format)
                 local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
                 self.text:SetFormattedText(format, colorOrange, queueStr)
                 self:SetHeight(self.text:GetStringHeight())
-                self.updateThrottle = 0.1;
+                self.updateThrottle = 0.1
             end
         end)
     end
@@ -1623,85 +1624,82 @@ local function CreateFrames()
     MMFrames.tracking:SetScript("OnLeave", Tracking_OnLeave)
     MMFrames.tracking:SetScript("OnMouseDown", Tracking_OnMouseDown)
 
-    local dropdown = _G.CreateFrame("Frame", "MMAdvTrackingDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
-    _G.Lib_UIDropDownMenu_Initialize(dropdown, function(self, level)
-        local name, texture, category, nested, numTracking;
-        local count = _G.GetNumTrackingTypes();
-        local info;
-        local class = RealUI.charInfo.class.token
+    local menu = LDD:NewMenu(MMFrames.tracking, "RealUIMinimapTrackingDropDown")
+    menu:SetAnchor("TOPLEFT", MMFrames.tracking, "BOTTOMLEFT", 5, -5)
+    menu:SetStyle("REALUI")
+    MMFrames.tracking.dropdown = menu
 
-        if (level == 1) then
-            info = _G.Lib_UIDropDownMenu_CreateInfo();
-            info.text = _G.MINIMAP_TRACKING_NONE;
-            info.checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive;
-            info.func = _G.ClearAllTracking;
-            info.icon = nil;
-            info.arg1 = nil;
-            info.isNotRadio = true;
-            info.keepShownOnClick = true;
-            _G.Lib_UIDropDownMenu_AddButton(info, level);
+    local menuList = {
+        {text = _G.MINIMAP_TRACKING_NONE,
+            checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive,
+            func = _G.ClearAllTracking
+        },
+    }
+    do
+        local name, texture, category, nested, numTracking
+        local count = _G.GetNumTrackingTypes()
+        local classToken = RealUI.charInfo.class.token
 
-            if (class == "HUNTER") then --only show hunter dropdown for hunters
-                numTracking = 0;
-                -- make sure there are at least two options in dropdown
-                for id = 1, count do
-                    _, _, _, category, nested = _G.GetTrackingInfo(id);
-                    if (nested == _G.HUNTER_TRACKING and category == "spell") then
-                        numTracking = numTracking + 1;
-                    end
-                end
-                if (numTracking > 1) then
-                    info.text = _G.HUNTER_TRACKING_TEXT;
-                    info.func =  nil;
-                    info.notCheckable = true;
-                    info.keepShownOnClick = false;
-                    info.hasArrow = true;
-                    info.value = _G.HUNTER_TRACKING;
-                    _G.Lib_UIDropDownMenu_AddButton(info, level)
+        local hunterTracking
+        if classToken == "HUNTER" then --only show hunter dropdown for hunters
+            numTracking = 0
+            -- make sure there are at least two options in dropdown
+            for id = 1, count do
+                _, _, _, category, nested = _G.GetTrackingInfo(id)
+                if (nested == _G.HUNTER_TRACKING and category == "spell") then
+                    numTracking = numTracking + 1
                 end
             end
-
-            info.text = _G.TOWNSFOLK_TRACKING_TEXT;
-            info.func =  nil;
-            info.notCheckable = true;
-            info.keepShownOnClick = false;
-            info.hasArrow = true;
-            info.value = _G.TOWNSFOLK;
-            _G.Lib_UIDropDownMenu_AddButton(info, level)
+            if numTracking > 1 then
+                hunterTracking = {
+                    text = _G.HUNTER_TRACKING_TEXT,
+                    menu = {}
+                }
+                tinsert(menuList, hunterTracking)
+            end
         end
 
-        for id=1, count do
-            name, texture, _, category, nested  = _G.GetTrackingInfo(id);
-            info = _G.Lib_UIDropDownMenu_CreateInfo();
-            info.text = name;
-            info.checked = _G.MiniMapTrackingDropDownButton_IsActive;
-            info.func = _G.MiniMapTracking_SetTracking;
-            info.icon = texture;
-            info.arg1 = id;
-            info.isNotRadio = true;
-            info.keepShownOnClick = true;
-            if ( category == "spell" ) then
-                info.tCoordLeft = 0.0625;
-                info.tCoordRight = 0.9;
-                info.tCoordTop = 0.0625;
-                info.tCoordBottom = 0.9;
+        local townsfolk = {
+            text = _G.TOWNSFOLK_TRACKING_TEXT,
+            menu = {}
+        }
+        tinsert(menuList, townsfolk)
+
+        for id = 1, count do
+            name, texture, _, category, nested  = _G.GetTrackingInfo(id)
+            local info = {
+                text = name,
+                icon = texture,
+                checked = function(self)
+                    local _, _, active = _G.GetTrackingInfo(id)
+                    return active
+                end,
+                func = function(self)
+                    local state = not self:GetCheckedState()
+                    self:SetCheckedState(state)
+                    _G.SetTracking(id, state)
+                end,
+                keepShown = true
+            }
+
+            if category == "spell" then
+                info.iconTexCoords = {0.0625, 0.9, 0.0625, 0.9}
             else
-                info.tCoordLeft = 0;
-                info.tCoordRight = 1;
-                info.tCoordTop = 0;
-                info.tCoordBottom = 1;
+                info.iconTexCoords = {0, 1, 0, 1}
             end
-            if (level == 1 and
-                (nested < 0 or -- this tracking shouldn't be nested
-                (nested == _G.HUNTER_TRACKING and class ~= "HUNTER") or
-                (numTracking == 1 and category == "spell"))) then -- this is a hunter tracking ability, but you only have one
-                _G.Lib_UIDropDownMenu_AddButton(info, level);
-            elseif (level == 2 and (nested == _G.TOWNSFOLK or (nested == _G.HUNTER_TRACKING and class == "HUNTER")) and nested == _G.LIB_UIDROPDOWNMENU_MENU_VALUE) then
-                _G.Lib_UIDropDownMenu_AddButton(info, level);
+
+            if (nested < 0 or -- this tracking shouldn't be nested
+                    (nested == _G.HUNTER_TRACKING and classToken ~= "HUNTER") or
+                    (numTracking == 1 and category == "spell")) then -- this is a hunter tracking ability, but you only have one
+                tinsert(menuList, info)
+            elseif nested == _G.TOWNSFOLK then
+                tinsert(townsfolk.menu, info)
+            elseif nested == _G.HUNTER_TRACKING and classToken == "HUNTER" then
+                tinsert(hunterTracking.menu, info)
             end
         end
-    end, "MENU")
-    MMFrames.tracking.dropdown = dropdown
+    end
+    menu:AddLines(unpack(menuList))
 
     -- Farm Button
     MMFrames.farm = CreateButton("MinimapAdv_Farm", Textures.Expand, 4)

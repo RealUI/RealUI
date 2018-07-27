@@ -460,12 +460,12 @@ end
 
 function Loot:OPEN_MASTER_LOOT_LIST()
     --print("OPEN_MASTER_LOOT_LIST: ")--..tostring(GetLootSlotType(slot)))
-    _G.Lib_ToggleDropDownMenu(1, nil, self.dropdown, RealUILootFrame.slots[_G.LootFrame.selectedSlot], 0, 0)
+    --_G.Lib_ToggleDropDownMenu(1, nil, self.dropdown, RealUILootFrame.slots[_G.LootFrame.selectedSlot], 0, 0)
 end
 
 function Loot:UPDATE_MASTER_LOOT_LIST()
     --print("UPDATE_MASTER_LOOT_LIST: ")
-    _G.Lib_UIDropDownMenu_Refresh(self.dropdown)
+    --_G.Lib_UIDropDownMenu_Refresh(self.dropdown)
 end
 
 function Loot:InitializeLoot()
@@ -534,6 +534,7 @@ end
 function Loot:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
 
+    --[[
     local function MasterLooterFrame_Show()
         local itemFrame = _G.MasterLooterFrame.Item;
         itemFrame.ItemName:SetText(_G.LootFrame.selectedItemName);
@@ -568,4 +569,5 @@ function Loot:OnEnable()
         _G.Lib_UIDropDownMenu_AddButton(info);
     end, "MENU")
     self.dropdown = dropdown
+    ]]
 end

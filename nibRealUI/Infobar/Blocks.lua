@@ -1,9 +1,10 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next unpack tinsert
 
 -- Libs --
+local LDD = _G.LibStub("LibDropDown")
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 
@@ -508,11 +509,18 @@ function Infobar:CreateBlocks()
 
     --[[ Static Blocks ]]--
     do  -- Start
-        local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
+        local guildText
+        if _G.CommunitiesFrame_IsEnabled() then
+            guildText = _G.GUILD_AND_COMMUNITIES
+        elseif _G.IsInGuild() then
+            guildText = _G.GUILD
+        else
+            guildText = _G.LOOKINGFORGUILD
+        end
+
         local menuList = {
             {text = L["Start_Config"],
                 func = function() RealUI.LoadConfig("HuD") end,
-                notCheckable = true,
             },
             {text = L["General_Lock"],
                 func = function()
@@ -524,20 +532,15 @@ function Infobar:CreateBlocks()
                 end,
                 checked = function() return Infobar.locked end,
             },
-            {text = "",
-                notCheckable = true,
-                disabled = true,
-            },
+            {isSpacer = true},
             {text = _G.CHARACTER_BUTTON,
                 func = function() _G.ToggleCharacter("PaperDollFrame") end,
-                notCheckable = true,
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
                 func = function()
                     -- ToggleSpellBook causes taint
                     _G.ToggleFrame(_G.SpellBookFrame)
                 end,
-                notCheckable = true,
             },
             {text = _G.TALENTS_BUTTON,
                 func = function()
@@ -547,67 +550,45 @@ function Infobar:CreateBlocks()
 
                     _G.ShowUIPanel(_G.PlayerTalentFrame)
                 end,
-                notCheckable = true,
                 disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
             },
             {text = _G.ACHIEVEMENT_BUTTON,
                 func = function() _G.ToggleAchievementFrame() end,
-                notCheckable = true,
             },
             {text = _G.QUESTLOG_BUTTON,
                 func = function() _G.ToggleQuestLog() end,
-                notCheckable = true,
             },
-            {text = _G.IsInGuild() and _G.GUILD or _G.LOOKINGFORGUILD,
-                func = function()
-                    if _G.IsInGuild() then
-                        if not _G.GuildFrame then _G.GuildFrame_LoadUI() end
-                        _G.GuildFrame_Toggle()
-                    else
-                        if not _G.LookingForGuildFrame then _G.LookingForGuildFrame_LoadUI() end
-                        _G.LookingForGuildFrame_Toggle()
-                    end
-                end,
-                notCheckable = true,
-                disabled = _G.IsTrialAccount() or (_G.IsVeteranTrialAccount() and not _G.IsInGuild()),
+            {text = guildText,
+                func = _G.ToggleGuildFrame,
+                disabled = _G.IsCommunitiesUIDisabledByTrialAccount(),
             },
             {text = _G.SOCIAL_BUTTON,
                 func = function() _G.ToggleFriendsFrame(1) end,
-                notCheckable = true,
             },
             {text = _G.DUNGEONS_BUTTON,
                 func = function() _G.PVEFrame_ToggleFrame() end,
-                notCheckable = true,
                 disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
             },
             {text = _G.COLLECTIONS,
                 func = function() _G.ToggleCollectionsJournal() end,
-                notCheckable = true,
             },
             {text = _G.ADVENTURE_JOURNAL,
                 func = function() _G.ToggleEncounterJournal() end,
-                notCheckable = true,
             },
             {text = _G.BLIZZARD_STORE,
                 func = function() _G.ToggleStoreUI() end,
-                notCheckable = true,
             },
             {text = _G.HELP_BUTTON,
                 func = function() _G.ToggleHelpFrame() end,
-                notCheckable = true,
             },
-            {text = "",
-                notCheckable = true,
-                disabled = true,
-            },
+            {isSpacer = true},
             {text = _G.CANCEL,
-                func = function() _G.Lib_CloseDropDownMenus() end,
-                notCheckable = true,
+                func = function() LDD:CloseAll() end,
             },
         }
 
         local errors
-        function startMenu:BugGrabber_BugGrabbed(callback, errorObject)
+        local function ShowBugIcon(menu, callback, errorObject)
             --[[errorObject = {
                 message = sanitizedMessage,
                 stack = table.concat(tmp, "\n"),
@@ -617,19 +598,22 @@ function Infobar:CreateBlocks()
                 counter = 1,
             }]]
 
-            if not self.dataObj.value then
-                _G.tinsert(menuList, 3, {
+            if not menu.dataObj.value then
+                menu:ClearLines()
+                Infobar:debug("insert error line", #menuList)
+                tinsert(menuList, 3, {
                     text = _G.SHOW_LUA_ERRORS,
                     func = function() _G.RealUI_ErrorFrame:ShowError() end,
-                    notCheckable = true,
                 })
-                self.dataObj.icon = fa["bug"]
-                self.dataObj.iconR, self.dataObj.iconG, self.dataObj.iconB = 0.75, 0.15, 0.15
+
+                Infobar:debug("add lines", #menuList)
+                menu:AddLines(unpack(menuList))
+                menu.dataObj.icon = fa["bug"]
+                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = 0.75, 0.15, 0.15
             end
 
-            self.dataObj.value = #errors
+            menu.dataObj.value = #errors
         end
-        _G.BugGrabber.RegisterCallback(startMenu, "BugGrabber_BugGrabbed")
 
         LDB:NewDataObject("start", {
             name = L["Start"],
@@ -637,20 +621,25 @@ function Infobar:CreateBlocks()
             icon = fa["bars"],
             iconFont = iconFont,
             OnEnable = function(block)
-                startMenu.block = block
-                startMenu.dataObj = block.dataObj
+                local menu = LDD:NewMenu(block, "RealUIStartDropDown")
+                menu:SetAnchor("BOTTOMLEFT", Infobar.frame, "TOPLEFT")
+                menu:SetStyle("REALUI")
+                menu:AddLines(unpack(menuList))
+                _G.BugGrabber.RegisterCallback(menu, "BugGrabber_BugGrabbed", ShowBugIcon, menu)
+
+                block.menu = menu
+                menu.dataObj = block.dataObj
 
                 errors = _G.BugGrabber:GetDB()
                 if #errors > 0 then
-                    startMenu:BugGrabber_BugGrabbed("OnEnable", errors[#errors])
+                    ShowBugIcon(menu, "OnEnable", errors[#errors])
                 end
             end,
             OnEnter = function(block, ...)
                 Infobar:debug("Start: OnEnter", block.side, ...)
-                _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
+                block.menu:Toggle()
             end,
         })
-        _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", Infobar.frame, "TOPLEFT")
     end
 
     do  -- Clock
