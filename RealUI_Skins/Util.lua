@@ -1,3 +1,5 @@
+local _, private = ...
+
 -- Lua Globals --
 -- luacheck: globals floor type
 
@@ -68,8 +70,14 @@ LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pix
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
 
 LSM.DefaultMedia.font = "Roboto"
+private.fontNames = {
+    normal = "Roboto",
+    chat = "Roboto Condensed",
+    crit = "Roboto Bold-Italic",
+    header = "Roboto Slab",
+}
 if RealUI.InitAsianFonts then
-    RealUI:InitAsianFonts(LSM)
+    private.fontNames = RealUI:InitAsianFonts(LSM)
 end
 
 

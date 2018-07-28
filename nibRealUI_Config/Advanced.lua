@@ -539,16 +539,11 @@ local skins do
         RealUI:UpdateFrameStyle()
     end
 
-    local LSM = _G.LibStub("LibSharedMedia-3.0")
     local function fontGet(info)
-        for name, path in next, _G.AceGUIWidgetLSMlists.font do
-            if path == SkinsProfile.fonts[info[#info]] then
-                return name
-            end
-        end
+        return SkinsProfile.fonts[info[#info]]
     end
     local function fontSet(info, value)
-        SkinsProfile.fonts[info[#info]] = LSM:Fetch("font", value)
+        SkinsProfile.fonts[info[#info]] = value
     end
 
     local Color = _G.Aurora.Color
