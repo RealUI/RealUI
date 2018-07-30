@@ -2013,7 +2013,7 @@ function Infobar:CreateBlocks()
         local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
         local COPPER_AMOUNT_STRING = "%d|cffbf734f%s|r"
         local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
-        local charName = "|c%s%s|r"
+        local charName = "%s |c%s%s|r"
 
         local currencyDB, charDB
         local ignore = _G.LOCALE_koKR or _G.LOCALE_zhCN or _G.LOCALE_zhTW
@@ -2030,6 +2030,15 @@ function Infobar:CreateBlocks()
             local silver = _G.floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
             local copper = money % _G.COPPER_PER_SILVER
             return gold, silver, copper
+        end
+        local neutralTCoords = {0.140625, 0.28125, 0.5625, 0.84375}
+        local function GetInlineFactionIcon(faction)
+            local coords = _G.QUEST_TAG_TCOORDS[faction:upper()] or neutralTCoords
+            return _G.CreateTextureMarkup(_G.QUEST_ICONS_FILE, _G.QUEST_ICONS_FILE_WIDTH, _G.QUEST_ICONS_FILE_HEIGHT, 16, 16
+            , coords[1]
+            , coords[2] - 0.02 -- Offset to stop bleeding from next image
+            , coords[3]
+            , coords[4], 0, 2)
         end
         local function GetMoneyString(money, useFirst)
             local goldString, silverString, copperString
@@ -2289,35 +2298,38 @@ function Infobar:CreateBlocks()
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local factionDB = currencyDB[realm][RealUI.charInfo.faction]
-                        if factionDB then
-                            local realm_faction = realm.."-"..RealUI.charInfo.faction
-                            for name, data in next, factionDB do
-                                name = charName:format(_G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
-                                local money = GetMoneyString(data.money, true)
-                                realmMoneyTotal = realmMoneyTotal + data.money
+                        local realmDB = currencyDB[realm]
+                        for faction, factionDB in next, realmDB do
+                            if factionDB then
+                                local realm_faction = realm.."-"..faction
+                                local factionIcon = GetInlineFactionIcon(faction)
+                                for name, data in next, factionDB do
+                                    name = charName:format(factionIcon, _G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
+                                    local money = GetMoneyString(data.money, true)
+                                    realmMoneyTotal = realmMoneyTotal + data.money
 
-                                _G.table.wipe(tokens)
-                                for i = 1, _G.MAX_WATCHED_TOKENS do
-                                    if data["token"..i] then
-                                        local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                        local amount = data[data["token"..i]] or 0
-                                        tokens[i] = TOKEN_STRING:format(texture, amount)
-                                        tokens[i+3] = tokenName
-                                    else
-                                        tokens[i] = "---"
+                                    _G.table.wipe(tokens)
+                                    for i = 1, _G.MAX_WATCHED_TOKENS do
+                                        if data["token"..i] then
+                                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                            local amount = data[data["token"..i]] or 0
+                                            tokens[i] = TOKEN_STRING:format(texture, amount)
+                                            tokens[i+3] = tokenName
+                                        else
+                                            tokens[i] = "---"
+                                        end
                                     end
-                                end
 
-                                _G.tinsert(currencyData, {
-                                    id = #currencyData + 1,
-                                    info = {
-                                        name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                                    },
-                                    meta = {
-                                        realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                    }
-                                })
+                                    _G.tinsert(currencyData, {
+                                        id = #currencyData + 1,
+                                        info = {
+                                            name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                                        },
+                                        meta = {
+                                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                                        }
+                                    })
+                                end
                             end
                         end
                     end
