@@ -2194,7 +2194,7 @@ function Infobar:CreateBlocks()
         local connectedRealms = _G.GetAutoCompleteRealms()
         if not connectedRealms[1] then
             -- if there are no connected realms, the return is just an empty table.
-            connectedRealms[1] = RealUI.realmNormalized
+            connectedRealms[1] = RealUI.charInfo.realmNormalized
         end
         local tokens, tableWidth = {}, 250
         local currencyData = {}
