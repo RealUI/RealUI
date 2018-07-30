@@ -6,6 +6,9 @@ ignore:
     - *.sublime*
     - package.bat
     - nibRealUI_Dev
+    - RealUI_Chat
+    - RealUI_Inventory
+    - RealUI_Tooltips
 
 externals:
     FreebTip/LibInspect:
