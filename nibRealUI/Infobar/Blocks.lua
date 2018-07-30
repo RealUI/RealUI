@@ -2224,6 +2224,10 @@ function Infobar:CreateBlocks()
                     dbc.currencyState = "money"
                 end
 
+                if RealUI.charInfo.faction == "Neutral" then
+                    block:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
+                end
+
                 _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
                     local trackedIndex, trackedName = currencyStates[dbc.currencyState].index, currencyStates[dbc.currencyState].name
                     local changeIndex = UpdateTrackedCurrency(block)
@@ -2332,6 +2336,9 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("currency: OnEvent", block.side, event, ...)
+                if event == "NEUTRAL_FACTION_SELECT_RESULT" then
+                    charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
+                end
                 UpdateBlock(block)
             end,
             events = {
