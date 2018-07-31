@@ -2036,7 +2036,7 @@ function Infobar:CreateBlocks()
             local coords = _G.QUEST_TAG_TCOORDS[faction:upper()] or neutralTCoords
             return _G.CreateTextureMarkup(_G.QUEST_ICONS_FILE, _G.QUEST_ICONS_FILE_WIDTH, _G.QUEST_ICONS_FILE_HEIGHT, 16, 16
             , coords[1]
-            , coords[2] - 0.02 -- Offset to stop bleeding from next image
+            , coords[2]
             , coords[3]
             , coords[4], 0, 2)
         end
