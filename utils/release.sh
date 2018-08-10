@@ -1783,6 +1783,7 @@ declare -A extAddOns=(
 	["KNP"]="https://wow.curseforge.com/projects/kuinameplates/files/latest"
 	["Masque"]="https://www.wowace.com/projects/masque/files/latest"
 	["MSBT"]="https://wow.curseforge.com/projects/mik-scrolling-battle-text/files/latest"
+	["PhanxChat"]="https://wow.curseforge.com/projects/phanxchat/files/latest"
 	["Raven"]="https://wow.curseforge.com/projects/raven/files/latest"
 	["Skada"]="https://www.wowace.com/projects/skada/files/latest"
 )
@@ -1796,6 +1797,7 @@ declare -A extFolders=(
 	["KNP"]="Kui_Media Kui_Nameplates Kui_Nameplates_Core Kui_Nameplates_Core_Config"
 	["Masque"]="Masque"
 	["MSBT"]="MikScrollingBattleText MSBTOptions"
+	["PhanxChat"]="PhanxChat"
 	["Raven"]="Raven Raven_Options"
 	["Skada"]="Skada"
 )
