@@ -41,7 +41,6 @@ externals:
         tag: latest
     nibRealUI/Libs/LibDropDown:
         url: https://github.com/p3lim-wow/LibDropDown.git
-        tag: latest
     nibRealUI/Libs/LibIconFonts:
         url: https://github.com/Gethe/LibIconFonts.git
         tag: latest
