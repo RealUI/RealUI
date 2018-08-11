@@ -7,7 +7,6 @@
 ## OptionalDeps: LibItemUpgradeInfo-1.0, LibSharedMedia-3.0, Masque, nibRealUI_Dev, RealUI_AsianFonts
 ## SavedVariables: RealUI_SkinsDB
 
-Aurora\Skin\skin.xml
 Libs\Libs.xml
 
 Util.lua
