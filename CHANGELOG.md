@@ -1,3 +1,29 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_Skins
+
+### Added ###
+
+  * Proper support for new optional addon, RealUI_AsianFonts.
+
+### Changed ###
+
+  * Currency tracker will now list all characters on a realm.
+  * Updated default Grid2 settings.
+  * Improved font storage.
+
+### Fixed ###
+
+  * The currency tracker would break when playing a character not on a Connected Realm.
+  * Various issues when playing a neutral character.
+
+
+
+
 ## [2.0.2] - 2018-07-23 ##
 ### Modified AddOns ###
 
@@ -13,7 +39,7 @@
 ### Fixed ###
 
   * Infobar tooltips were too small when using the High Res scale option.
-  * Various font errors with other addons (again, hopfully for good).
+  * Various font errors with other addons (again, hopefully for good).
   * An error when mousing over the guild Infobar block too early.
 
 
