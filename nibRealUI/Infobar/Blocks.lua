@@ -1392,7 +1392,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             IsValid = function(XP)
-                return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL
+                return not _G.IsPlayerAtEffectiveMaxLevel()
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
