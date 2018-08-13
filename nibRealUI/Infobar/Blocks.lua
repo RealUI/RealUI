@@ -347,6 +347,11 @@ local function SetupTextTable()
             header.text:SetJustifyH(headerData.justify[col])
 
             local size = headerData.size[col]
+            if size == "FILL" then
+                filler = header
+                size = "FIT"
+            end
+
             if size == "FIT" then
                 local cellWidth = header.text:GetStringWidth()
                 testCell:SetFontObject("SystemFont_Shadow_Med1")
@@ -356,9 +361,9 @@ local function SetupTextTable()
                     if newWidth > cellWidth then cellWidth = newWidth end
                 end
                 header:SetWidth(cellWidth)
-                remainingWidth = remainingWidth - cellWidth
-            elseif size == "FILL" then
-                filler = header
+                if filler ~= header then
+                    remainingWidth = remainingWidth - cellWidth
+                end
             else
                 flex[header] = size
             end
@@ -370,7 +375,7 @@ local function SetupTextTable()
             header:SetWidth(headerWidth)
             Infobar:debug("Width", headerWidth, remainingWidth)
         end
-        filler:SetWidth(_G.max(remainingWidth, filler.text:GetStringWidth()))
+        filler:SetWidth(_G.max(remainingWidth, filler:GetWidth()))
 
         Infobar:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
         if extData[data].sortColumn then
