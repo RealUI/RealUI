@@ -1745,6 +1745,10 @@ function Infobar:CreateBlocks()
                     else
                         block.pulseAnim:Finish()
                     end
+                elseif event == "UPDATE_EXPANSION_LEVEL" then
+                    if not watchStates.xp:IsValid() then
+                        dbc.progressState = "xp"
+                    end
                 elseif event == "UPDATE_FACTION" then
                     if not watchStates[dbc.progressState]:IsValid() then
                         UpdateState(block)
@@ -1754,6 +1758,7 @@ function Infobar:CreateBlocks()
                 UpdateProgress(block)
             end,
             events = {
+                "UPDATE_EXPANSION_LEVEL",
                 "PLAYER_LEVEL_UP",
                 "UPDATE_EXHAUSTION",
 
