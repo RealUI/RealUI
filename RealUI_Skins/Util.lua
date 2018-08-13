@@ -1,3 +1,5 @@
+local _, private = ...
+
 -- Lua Globals --
 -- luacheck: globals floor type
 
@@ -59,20 +61,6 @@ LSM:Register("font", "Roboto Bold-Italic", [[Interface\AddOns\RealUI_Skins\Media
 LSM:Register("font", "Roboto Condensed", [[Interface\AddOns\RealUI_Skins\Media\RobotoCondensed-Regular.ttf]], LOCALE_MASK)
 LSM:Register("font", "Roboto Slab", [[Interface\AddOns\RealUI_Skins\Media\RobotoSlab-Regular.ttf]], LOCALE_MASK)
 
--- Asian fonts: These are specific to each language
--- zhTW
-LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Bold.otf]], LSM.LOCALE_BIT_zhTW)
-LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Light.otf]], LSM.LOCALE_BIT_zhTW)
-LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKtc-Regular.otf]], LSM.LOCALE_BIT_zhTW)
--- zhCN
-LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Bold.otf]], LSM.LOCALE_BIT_zhCN)
-LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Light.otf]], LSM.LOCALE_BIT_zhCN)
-LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKsc-Regular.otf]], LSM.LOCALE_BIT_zhCN)
--- koKR
-LSM:Register("font", "Noto Sans Bold", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Bold.otf]], LSM.LOCALE_BIT_koKR)
-LSM:Register("font", "Noto Sans Light", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Light.otf]], LSM.LOCALE_BIT_koKR)
-LSM:Register("font", "Noto Sans Regular", [[Interface\AddOns\nibRealUI\Fonts\NotoSansCJKkr-Regular.otf]], LSM.LOCALE_BIT_koKR)
-
 -- Pixel fonts because some people like them
 LOCALE_MASK = LSM.LOCALE_BIT_koKR + LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_zhCN + LSM.LOCALE_BIT_zhTW + LSM.LOCALE_BIT_western
 LSM:Register("font", "pixel_small", [[Interface\AddOns\RealUI_Skins\Media\pixel_small.ttf]])
@@ -82,8 +70,14 @@ LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pix
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
 
 LSM.DefaultMedia.font = "Roboto"
-if _G.LOCALE_zhTW or _G.LOCALE_zhCN or _G.LOCALE_koKR then
-    LSM.DefaultMedia.font = "Noto Sans Regular"
+private.fontNames = {
+    normal = "Roboto",
+    chat = "Roboto Condensed",
+    crit = "Roboto Bold-Italic",
+    header = "Roboto Slab",
+}
+if RealUI.InitAsianFonts then
+    private.fontNames = RealUI:InitAsianFonts(LSM)
 end
 
 

@@ -2,9 +2,6 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!--@non-debug@
-    <Script file="LibStub\LibStub.lua"/>
-    <Include file="CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
-    <Include file="LibTextDump-1.0\lib.xml"/>
+    <Script file="LibInspect\LibInspect.lua"/>
     @end-non-debug@-->
-    <Include file="!BugGrabber\load.xml"/>
 </Ui>

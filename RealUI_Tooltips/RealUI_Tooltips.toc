@@ -1,0 +1,11 @@
+## Interface: 80000
+## Title: RealUI Tooltips
+## Notes: Useful tooltip mods
+## Author: Gethe
+## Version: 2.0.3
+## RequiredDeps: nibRealUI
+## SavedVariables: RealUI_TooltipsDB
+
+Libs\Libs.xml
+
+RealUI_Tooltips.lua

@@ -46,7 +46,7 @@ function RealUI.GetDebug(mod)
 end
 _G.RealUI = RealUI
 
-local debug = RealUI.GetDebug("Bugs")
+--local debug = RealUI.GetDebug("Bugs")
 local errorFrame do
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
     errorFrame:SetClampedToScreen(true)
@@ -66,7 +66,7 @@ local errorFrame do
 
     local scrollFrame = _G.CreateFrame("ScrollFrame", nil, errorFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("TOPLEFT", dragArea, "BOTTOMLEFT", 10, -10)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -21, 44)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -23, 44)
     _G.ScrollFrame_OnLoad(scrollFrame)
     errorFrame.ScrollFrame = scrollFrame
 
@@ -289,34 +289,7 @@ function errorFrame.ADDON_LOADED(addon)
     if addon == "nibRealUI" then
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
-    elseif addon == "nibRealUI_Init" then
-        -- Store saved variables for future transition to a new addon
-        _G.RealUI_Storage.nibRealUI_Init = {}
-        _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB = _G.RealUI_InitDB
-    elseif addon == "Aurora" then
-        -- Store saved variables for future transition to a new addon
-        _G.RealUI_Storage.Aurora = {}
-        _G.RealUI_Storage.Aurora.AuroraConfig = _G.AuroraConfig
     end
-end
-
--- Redirect lua warnings
-_G.UIParent:UnregisterEvent("LUA_WARNING")
-local WARNING_FORMAT = "Warning %d: %s"
-function errorFrame.LUA_WARNING(warnType, warnMessage)
-    if warnMessage:match("^%(null%)") then
-        return
-    end
-
-    --if RealUI.isDev then
-        if warnMessage:match("^Couldn't open") or warnMessage:match("^Error loading") then
-            if warnMessage:lower():find("lib") then
-                return debug(WARNING_FORMAT:format(warnType, warnMessage))
-            end
-            return
-        end
-    --end
-    _G.geterrorhandler()(warnMessage)
 end
 
 _G.BugGrabber.setupCallbacks()

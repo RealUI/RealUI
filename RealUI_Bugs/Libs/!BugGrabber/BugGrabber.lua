@@ -1,5 +1,5 @@
 --
--- $Id: BugGrabber.lua 215 2016-03-07 19:26:46Z nevcairiel $
+-- $Id: BugGrabber.lua 234 2018-07-27 00:10:22Z funkydude $
 --
 -- The BugSack and !BugGrabber team is:
 -- Current Developer: Funkydude
@@ -96,8 +96,6 @@ local L = {
 -- Locals
 --
 
-local frame = CreateFrame("Frame")
-
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
 for i = 1, GetNumAddOns() do
@@ -176,8 +174,12 @@ local function printErrorObject(err)
 	end
 	if not found then
 		print(err.message)
-		print(err.stack)
-		print(err.locals)
+		if err.stack then
+			print(err.stack)
+		end
+		if err.locals then
+			print(err.locals)
+		end
 	end
 end
 
@@ -289,7 +291,7 @@ do
 	local msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
 	local msgsAllowedLastTime = GetTime()
 	local lastWarningTime = 0
-	function grabError(errorMessage)
+	function grabError(errorMessage, isSimple)
 		-- Flood protection --
 		msgsAllowed = msgsAllowed + (GetTime()-msgsAllowedLastTime)*BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
 		msgsAllowedLastTime = GetTime()
@@ -340,25 +342,33 @@ do
 		local errorObject = found
 
 		if not errorObject then
-			local stack = debugstack(3)
-
-			-- Scan for version numbers in the stack
-			for line in stack:gmatch("(.-)\n") do
-				tmp[#tmp+1] = findVersions(line)
-			end
-
 			-- Store the error
-			local inCombat = InCombatLockdown() or UnitAffectingCombat("player")
-			errorObject = {
-				message = sanitizedMessage,
-				stack = table.concat(tmp, "\n"),
-				locals = inCombat and "" or debuglocals(3),
-				session = addon:GetSessionId(),
-				time = date("%Y/%m/%d %H:%M:%S"),
-				counter = 1,
-			}
+			if isSimple then
+				errorObject = {
+					message = sanitizedMessage,
+					session = addon:GetSessionId(),
+					time = date("%Y/%m/%d %H:%M:%S"),
+					counter = 1,
+				}
+			else
+				local stack = debugstack(3)
 
-			wipe(tmp)
+				-- Scan for version numbers in the stack
+				for line in stack:gmatch("(.-)\n") do
+					tmp[#tmp+1] = findVersions(line)
+				end
+				local inCombat = InCombatLockdown() or UnitAffectingCombat("player")
+				errorObject = {
+					message = sanitizedMessage,
+					stack = table.concat(tmp, "\n"),
+					locals = inCombat and "InCombatSkipped" or debuglocals(3),
+					session = addon:GetSessionId(),
+					time = date("%Y/%m/%d %H:%M:%S"),
+					counter = 1,
+				}
+
+				wipe(tmp)
+			end
 		end
 
 		if not isBugGrabbedRegistered then
@@ -412,7 +422,7 @@ do
 end
 
 function addon:GetErrorByPlayerAndID(player, id)
-	if player == playerName then return self:GetErrorByID(id) end
+	if player == playerName then return addon:GetErrorByID(id) end
 	print(L.ERROR_UNABLE)
 end
 
@@ -432,7 +442,7 @@ function addon:GetSessionId() return BugGrabberDB and BugGrabberDB.session or -1
 function addon:IsPaused() return paused end
 
 function addon:HandleBugLink(player, id)
-	local errorObject = self:GetErrorByPlayerAndID(player, id)
+	local errorObject = addon:GetErrorByPlayerAndID(player, id)
 	if errorObject then
 		printErrorObject(errorObject)
 	end
@@ -503,6 +513,21 @@ local function initDatabase()
 	initDatabase = nil
 end
 
+local events = {}
+do
+	local frame = CreateFrame("Frame")
+	frame:SetScript("OnEvent", function(_, event, ...) events[event](events, event, ...) end)
+	frame:RegisterEvent("ADDON_LOADED")
+	frame:RegisterEvent("PLAYER_LOGIN")
+	frame:RegisterEvent("ADDON_ACTION_BLOCKED")
+	frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
+	frame:RegisterEvent("LUA_WARNING")
+	local function noop() end -- Prevent abusive addons
+	frame.RegisterEvent = noop
+	frame.UnregisterEvent = noop
+	frame.SetScript = noop
+end
+
 do
 	local function createSwatter()
 		-- Need this so Stubby will feed us errors instead of just
@@ -517,7 +542,7 @@ do
 	end
 
 	local swatterDisabled = nil
-	function frame:ADDON_LOADED(event, msg)
+	function events:ADDON_LOADED(_, msg)
 		if not callbacks then setupCallbacks() end
 		if msg == "Stubby" then createSwatter() end
 		if initDatabase then
@@ -557,30 +582,34 @@ do
 	end
 end
 
-function frame:PLAYER_LOGIN()
+function events:PLAYER_LOGIN()
 	if not callbacks then setupCallbacks() end
 	real_seterrorhandler(grabError)
 end
-local badAddons = {}
-function frame:ADDON_ACTION_FORBIDDEN(event, addonName, addonFunc)
-	local name = addonName or "<name>"
-	if not badAddons[name] then
-		badAddons[name] = true
-		grabError(L.ADDON_CALL_PROTECTED:format(event, name or "<name>", addonFunc or "<func>"))
+do
+	local badAddons = {}
+	function events:ADDON_ACTION_FORBIDDEN(event, addonName, addonFunc)
+		local name = addonName or "<name>"
+		if not badAddons[name] then
+			badAddons[name] = true
+			grabError(L.ADDON_CALL_PROTECTED:format(event, name or "<name>", addonFunc or "<func>"))
+		end
 	end
 end
-frame.ADDON_ACTION_BLOCKED = frame.ADDON_ACTION_FORBIDDEN -- XXX Unused?
-frame:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
-frame:RegisterEvent("ADDON_LOADED")
-frame:RegisterEvent("PLAYER_LOGIN")
-frame:RegisterEvent("ADDON_ACTION_BLOCKED")
-frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
+events.ADDON_ACTION_BLOCKED = events.ADDON_ACTION_FORBIDDEN
+function events:LUA_WARNING(_, warnType, warningText)
+	-- Temporary hack for the few dropdown libraries that exist that were designed poorly
+	-- Hopefully we will see a rewrite of dropdowns soon
+	if warnType == 0 and warningText:find("DropDown", nil, true) then return end
+	grabError(warningText, true)
+end
 
+UIParent:UnregisterEvent("LUA_WARNING")
 real_seterrorhandler(grabError)
 function seterrorhandler() --[[ noop ]] end
 
 -- Set up slash command
 _G.SlashCmdList.BugGrabber = slashHandler
 _G.SLASH_BugGrabber1 = "/buggrabber"
-_G.BugGrabber = addon
+_G.BugGrabber = setmetatable({}, { __index = addon, __newindex = function() grabError("Modifications not allowed.") end, __metatable = false })
 

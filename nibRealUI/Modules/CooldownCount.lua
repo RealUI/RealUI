@@ -172,7 +172,7 @@ end
 
 function CooldownCount:OnEnable()
     CD_FONT = {
-        font = RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.normal,
+        font = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.normal),
         size = 10,
         flags = "OUTLINE"
     }

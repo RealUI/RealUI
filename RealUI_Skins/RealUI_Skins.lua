@@ -24,12 +24,7 @@ local defaults = {
         customScale = 1,
         isHighRes = false,
         isPixelScale = true,
-        fonts = {
-            normal = LSM:Fetch("font", "Roboto"),
-            chat = LSM:Fetch("font", "Roboto Condensed"),
-            crit = LSM:Fetch("font", "Roboto Bold-Italic"),
-            header = LSM:Fetch("font", "Roboto Slab"),
-        },
+        fonts = private.fontNames,
         addons = {
             ["**"] = true
         }
@@ -224,8 +219,18 @@ function private.OnLoad()
 
     private.uiScale = private.skinsDB.uiModScale
     private.UpdateUIScale = RealUI.UpdateUIScale
-    for fontType, fontPath in next, private.skinsDB.fonts do
-        private.font[fontType] = fontPath
+
+    -- convert existing fields from paths to names
+    for fontType, fontNameorPath in next, private.skinsDB.fonts do
+        for name, path in next, LSM.MediaTable.font do
+            if path == fontNameorPath then
+                private.skinsDB.fonts[fontType] = name
+                break
+            end
+        end
+    end
+    for fontType, fontName in next, private.skinsDB.fonts do
+        private.font[fontType] = LSM:Fetch("font", fontName)
     end
 
     local Base, Scale = Aurora.Base, Aurora.Scale

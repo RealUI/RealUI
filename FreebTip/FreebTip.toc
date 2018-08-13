@@ -7,7 +7,7 @@
 ## OptionalDeps: LibInspect
 ## SavedVariables: FreebTipDB
 
-LibInspect\LibInspect.lua
+Libs.xml
 
 tip.lua
 anchor.lua

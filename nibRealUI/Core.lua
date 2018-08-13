@@ -289,7 +289,7 @@ end
 
 local THIRTY_DAYS = 60 * 60 * 24 * 30
 function RealUI:InitCurrencyDB()
-    if not RealUI.realmNormalized then
+    if not RealUI.charInfo.realmNormalized then
         local DB = RealUI.db.global.currency
 
         local charInfo = RealUI.charInfo
@@ -303,13 +303,7 @@ function RealUI:InitCurrencyDB()
             DB[realm] = {}
         end
 
-        for k, v in next, DB[realm] do
-            if k ~= "Alliance" and k ~= "Horde" then
-                DB[realm][k] = nil
-            end
-        end
-
-        if faction and faction ~= "Neutral" then
+        if faction then
             if not DB[realm][faction] then
                 DB[realm][faction] = {}
             end
@@ -332,8 +326,6 @@ function RealUI:InitCurrencyDB()
             local charDB = realmDB[player]
             charDB.class = charInfo.class.token
             charDB.lastSeen = now
-        else
-            DB[realm][faction] = nil
         end
     end
 end

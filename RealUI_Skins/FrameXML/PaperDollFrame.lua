@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- [[ Lua Globals ]]
--- luacheck: globals next tonumber max
+-- luacheck: globals next tonumber max type
 
 -- [[ Core ]]
 local Aurora = private.Aurora
@@ -14,15 +14,19 @@ local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 do --[[ FrameXML\PaperDollFrame.lua ]]
     local ShouldHaveEnchant, GetNumSockets do
         local enchantSlots = {
-            [2] = _G.MAX_PLAYER_LEVEL == 110, -- Neck
-            [15] = _G.MAX_PLAYER_LEVEL == 110, -- Cloak
+            [2] = 110, -- Neck
+            [15] = 110, -- Cloak
             [11] = true, -- Ring 1
             [12] = true, -- Ring 2
-            [16] = _G.MAX_PLAYER_LEVEL == 120, -- Main Hand
-            [17] = _G.MAX_PLAYER_LEVEL == 120, -- Off Hand
+            [16] = 120, -- Main Hand
+            [17] = 120, -- Off Hand
         }
         function ShouldHaveEnchant(slotID, quality)
-            return enchantSlots[slotID] and quality ~= _G.LE_ITEM_QUALITY_ARTIFACT
+            local canEnchant = enchantSlots[slotID]
+            if type(canEnchant) == "number" then
+                canEnchant = _G.GetEffectivePlayerMaxLevel() == canEnchant
+            end
+            return canEnchant and quality ~= _G.LE_ITEM_QUALITY_ARTIFACT
         end
 
         local scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
@@ -103,7 +107,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                     self.dura:Hide()
                 end
 
-                if _G.UnitLevel("player") >= _G.MAX_PLAYER_LEVEL then
+                if _G.IsPlayerAtEffectiveMaxLevel() then
                     local itemString = itemLink:match("item[%-?%d:]+") or ""
                     local _, _, enchantID, gem1, gem2, gem3, gem4 = _G.strsplit(":", itemString)
                     if tonumber(enchantID) then

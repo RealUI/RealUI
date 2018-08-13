@@ -1,9 +1,10 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next unpack tinsert
 
 -- Libs --
+local LDD = _G.LibStub("LibDropDown")
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 
@@ -508,11 +509,18 @@ function Infobar:CreateBlocks()
 
     --[[ Static Blocks ]]--
     do  -- Start
-        local startMenu = _G.CreateFrame("Frame", "RealUIStartDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
+        local guildText
+        if _G.CommunitiesFrame_IsEnabled() then
+            guildText = _G.GUILD_AND_COMMUNITIES
+        elseif _G.IsInGuild() then
+            guildText = _G.GUILD
+        else
+            guildText = _G.LOOKINGFORGUILD
+        end
+
         local menuList = {
             {text = L["Start_Config"],
                 func = function() RealUI.LoadConfig("HuD") end,
-                notCheckable = true,
             },
             {text = L["General_Lock"],
                 func = function()
@@ -524,20 +532,15 @@ function Infobar:CreateBlocks()
                 end,
                 checked = function() return Infobar.locked end,
             },
-            {text = "",
-                notCheckable = true,
-                disabled = true,
-            },
+            {isSpacer = true},
             {text = _G.CHARACTER_BUTTON,
                 func = function() _G.ToggleCharacter("PaperDollFrame") end,
-                notCheckable = true,
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
                 func = function()
                     -- ToggleSpellBook causes taint
                     _G.ToggleFrame(_G.SpellBookFrame)
                 end,
-                notCheckable = true,
             },
             {text = _G.TALENTS_BUTTON,
                 func = function()
@@ -547,67 +550,45 @@ function Infobar:CreateBlocks()
 
                     _G.ShowUIPanel(_G.PlayerTalentFrame)
                 end,
-                notCheckable = true,
                 disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
             },
             {text = _G.ACHIEVEMENT_BUTTON,
                 func = function() _G.ToggleAchievementFrame() end,
-                notCheckable = true,
             },
             {text = _G.QUESTLOG_BUTTON,
                 func = function() _G.ToggleQuestLog() end,
-                notCheckable = true,
             },
-            {text = _G.IsInGuild() and _G.GUILD or _G.LOOKINGFORGUILD,
-                func = function()
-                    if _G.IsInGuild() then
-                        if not _G.GuildFrame then _G.GuildFrame_LoadUI() end
-                        _G.GuildFrame_Toggle()
-                    else
-                        if not _G.LookingForGuildFrame then _G.LookingForGuildFrame_LoadUI() end
-                        _G.LookingForGuildFrame_Toggle()
-                    end
-                end,
-                notCheckable = true,
-                disabled = _G.IsTrialAccount() or (_G.IsVeteranTrialAccount() and not _G.IsInGuild()),
+            {text = guildText,
+                func = _G.ToggleGuildFrame,
+                disabled = _G.IsCommunitiesUIDisabledByTrialAccount(),
             },
             {text = _G.SOCIAL_BUTTON,
                 func = function() _G.ToggleFriendsFrame(1) end,
-                notCheckable = true,
             },
             {text = _G.DUNGEONS_BUTTON,
                 func = function() _G.PVEFrame_ToggleFrame() end,
-                notCheckable = true,
                 disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
             },
             {text = _G.COLLECTIONS,
                 func = function() _G.ToggleCollectionsJournal() end,
-                notCheckable = true,
             },
             {text = _G.ADVENTURE_JOURNAL,
                 func = function() _G.ToggleEncounterJournal() end,
-                notCheckable = true,
             },
             {text = _G.BLIZZARD_STORE,
                 func = function() _G.ToggleStoreUI() end,
-                notCheckable = true,
             },
             {text = _G.HELP_BUTTON,
                 func = function() _G.ToggleHelpFrame() end,
-                notCheckable = true,
             },
-            {text = "",
-                notCheckable = true,
-                disabled = true,
-            },
+            {isSpacer = true},
             {text = _G.CANCEL,
-                func = function() _G.Lib_CloseDropDownMenus() end,
-                notCheckable = true,
+                func = function() LDD:CloseAll() end,
             },
         }
 
         local errors
-        function startMenu:BugGrabber_BugGrabbed(callback, errorObject)
+        local function ShowBugIcon(menu, callback, errorObject)
             --[[errorObject = {
                 message = sanitizedMessage,
                 stack = table.concat(tmp, "\n"),
@@ -617,19 +598,22 @@ function Infobar:CreateBlocks()
                 counter = 1,
             }]]
 
-            if not self.dataObj.value then
-                _G.tinsert(menuList, 3, {
+            if not menu.dataObj.value then
+                menu:ClearLines()
+                Infobar:debug("insert error line", #menuList)
+                tinsert(menuList, 3, {
                     text = _G.SHOW_LUA_ERRORS,
                     func = function() _G.RealUI_ErrorFrame:ShowError() end,
-                    notCheckable = true,
                 })
-                self.dataObj.icon = fa["bug"]
-                self.dataObj.iconR, self.dataObj.iconG, self.dataObj.iconB = 0.75, 0.15, 0.15
+
+                Infobar:debug("add lines", #menuList)
+                menu:AddLines(unpack(menuList))
+                menu.dataObj.icon = fa["bug"]
+                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = 0.75, 0.15, 0.15
             end
 
-            self.dataObj.value = #errors
+            menu.dataObj.value = #errors
         end
-        _G.BugGrabber.RegisterCallback(startMenu, "BugGrabber_BugGrabbed")
 
         LDB:NewDataObject("start", {
             name = L["Start"],
@@ -637,20 +621,25 @@ function Infobar:CreateBlocks()
             icon = fa["bars"],
             iconFont = iconFont,
             OnEnable = function(block)
-                startMenu.block = block
-                startMenu.dataObj = block.dataObj
+                local menu = LDD:NewMenu(block, "RealUIStartDropDown")
+                menu:SetAnchor("BOTTOMLEFT", Infobar.frame, "TOPLEFT")
+                menu:SetStyle("REALUI")
+                menu:AddLines(unpack(menuList))
+                _G.BugGrabber.RegisterCallback(menu, "BugGrabber_BugGrabbed", ShowBugIcon, menu)
+
+                block.menu = menu
+                menu.dataObj = block.dataObj
 
                 errors = _G.BugGrabber:GetDB()
                 if #errors > 0 then
-                    startMenu:BugGrabber_BugGrabbed("OnEnable", errors[#errors])
+                    ShowBugIcon(menu, "OnEnable", errors[#errors])
                 end
             end,
             OnEnter = function(block, ...)
                 Infobar:debug("Start: OnEnter", block.side, ...)
-                _G.Lib_EasyMenu(menuList, startMenu, block, 0, 0, "MENU", 1)
+                block.menu:Toggle()
             end,
         })
-        _G.Lib_UIDropDownMenu_SetAnchor(startMenu, 0, 0, "BOTTOMLEFT", Infobar.frame, "TOPLEFT")
     end
 
     do  -- Clock
@@ -1403,7 +1392,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             IsValid = function(XP)
-                return _G.UnitLevel("player") < _G.MAX_PLAYER_LEVEL
+                return not _G.IsPlayerAtEffectiveMaxLevel()
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
@@ -1756,6 +1745,10 @@ function Infobar:CreateBlocks()
                     else
                         block.pulseAnim:Finish()
                     end
+                elseif event == "UPDATE_EXPANSION_LEVEL" then
+                    if not watchStates.xp:IsValid() then
+                        dbc.progressState = "xp"
+                    end
                 elseif event == "UPDATE_FACTION" then
                     if not watchStates[dbc.progressState]:IsValid() then
                         UpdateState(block)
@@ -1765,6 +1758,7 @@ function Infobar:CreateBlocks()
                 UpdateProgress(block)
             end,
             events = {
+                "UPDATE_EXPANSION_LEVEL",
                 "PLAYER_LEVEL_UP",
                 "UPDATE_EXHAUSTION",
 
@@ -2024,7 +2018,7 @@ function Infobar:CreateBlocks()
         local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
         local COPPER_AMOUNT_STRING = "%d|cffbf734f%s|r"
         local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
-        local charName = "|c%s%s|r"
+        local charName = "%s |c%s%s|r"
 
         local currencyDB, charDB
         local ignore = _G.LOCALE_koKR or _G.LOCALE_zhCN or _G.LOCALE_zhTW
@@ -2041,6 +2035,15 @@ function Infobar:CreateBlocks()
             local silver = _G.floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
             local copper = money % _G.COPPER_PER_SILVER
             return gold, silver, copper
+        end
+        local neutralTCoords = {0.140625, 0.28125, 0.5625, 0.84375}
+        local function GetInlineFactionIcon(faction)
+            local coords = _G.QUEST_TAG_TCOORDS[faction:upper()] or neutralTCoords
+            return _G.CreateTextureMarkup(_G.QUEST_ICONS_FILE, _G.QUEST_ICONS_FILE_WIDTH, _G.QUEST_ICONS_FILE_HEIGHT, 16, 16
+            , coords[1]
+            , coords[2]
+            , coords[3]
+            , coords[4], 0, 2)
         end
         local function GetMoneyString(money, useFirst)
             local goldString, silverString, copperString
@@ -2205,7 +2208,7 @@ function Infobar:CreateBlocks()
         local connectedRealms = _G.GetAutoCompleteRealms()
         if not connectedRealms[1] then
             -- if there are no connected realms, the return is just an empty table.
-            connectedRealms[1] = RealUI.realmNormalized
+            connectedRealms[1] = RealUI.charInfo.realmNormalized
         end
         local tokens, tableWidth = {}, 250
         local currencyData = {}
@@ -2233,6 +2236,10 @@ function Infobar:CreateBlocks()
                 charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
                 if not currencyStates[dbc.currencyState] then
                     dbc.currencyState = "money"
+                end
+
+                if RealUI.charInfo.faction == "Neutral" then
+                    block:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
                 end
 
                 _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
@@ -2296,35 +2303,38 @@ function Infobar:CreateBlocks()
                 for index = 1, #connectedRealms do
                     local realm = connectedRealms[index]
                     if currencyDB[realm] then
-                        local factionDB = currencyDB[realm][RealUI.charInfo.faction]
-                        if factionDB then
-                            local realm_faction = realm.."-"..RealUI.charInfo.faction
-                            for name, data in next, factionDB do
-                                name = charName:format(_G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
-                                local money = GetMoneyString(data.money, true)
-                                realmMoneyTotal = realmMoneyTotal + data.money
+                        local realmDB = currencyDB[realm]
+                        for faction, factionDB in next, realmDB do
+                            if factionDB then
+                                local realm_faction = realm.."-"..faction
+                                local factionIcon = GetInlineFactionIcon(faction)
+                                for name, data in next, factionDB do
+                                    name = charName:format(factionIcon, _G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
+                                    local money = GetMoneyString(data.money, true)
+                                    realmMoneyTotal = realmMoneyTotal + data.money
 
-                                _G.table.wipe(tokens)
-                                for i = 1, _G.MAX_WATCHED_TOKENS do
-                                    if data["token"..i] then
-                                        local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                        local amount = data[data["token"..i]] or 0
-                                        tokens[i] = TOKEN_STRING:format(texture, amount)
-                                        tokens[i+3] = tokenName
-                                    else
-                                        tokens[i] = "---"
+                                    _G.table.wipe(tokens)
+                                    for i = 1, _G.MAX_WATCHED_TOKENS do
+                                        if data["token"..i] then
+                                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                            local amount = data[data["token"..i]] or 0
+                                            tokens[i] = TOKEN_STRING:format(texture, amount)
+                                            tokens[i+3] = tokenName
+                                        else
+                                            tokens[i] = "---"
+                                        end
                                     end
-                                end
 
-                                _G.tinsert(currencyData, {
-                                    id = #currencyData + 1,
-                                    info = {
-                                        name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                                    },
-                                    meta = {
-                                        realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                    }
-                                })
+                                    _G.tinsert(currencyData, {
+                                        id = #currencyData + 1,
+                                        info = {
+                                            name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                                        },
+                                        meta = {
+                                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                                        }
+                                    })
+                                end
                             end
                         end
                     end
@@ -2343,6 +2353,9 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("currency: OnEvent", block.side, event, ...)
+                if event == "NEUTRAL_FACTION_SELECT_RESULT" then
+                    charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
+                end
                 UpdateBlock(block)
             end,
             events = {

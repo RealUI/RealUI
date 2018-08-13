@@ -1,16 +1,16 @@
 $oldVersion = Get-Content "./utils/version.txt"
 Write-Host "Current version: $oldVersion"
 
-$newVersion = Read-Host "Enter a new version, or press enter to skip"
-$addons = @(
-    "./utils/version.txt",
-    "./cargBags_Nivaya/cargBags_Nivaya.toc",
-    "./nibRealUI/nibRealUI.toc",
-    "./nibRealUI_Config/nibRealUI_Config.toc",
-    "./RealUI_Bugs/RealUI_Bugs.toc"
-    "./RealUI_Skins/RealUI_Skins.toc"
-)
+$addons = {@()}.Invoke()
+Get-ChildItem -Path "." -Filter "*RealUI_*" | % {
+    $addons.Add("./$_/$_.toc")
+}
 
+$addons.Add("./utils/version.txt")
+$addons.Add("./cargBags_Nivaya/cargBags_Nivaya.toc")
+$addons.Add("./nibRealUI/nibRealUI.toc")
+
+$newVersion = Read-Host "Enter a new version, or press enter to skip"
 # replace version strings
 if ($newVersion -eq "") {
     Write-Host "Skipping version update"

@@ -1,0 +1,12 @@
+## Interface: 80000
+## Title: RealUI Inventory
+## Notes: Categorized bags designed for RealUI
+## Author: Gethe
+## Version: 2.0.3
+## RequiredDeps: nibRealUI
+## OptionalDeps: LibContainer
+## SavedVariables: RealUI_InventoryDB
+
+Libs\Libs.xml
+
+RealUI_Inventory.lua

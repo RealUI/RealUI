@@ -131,6 +131,14 @@ function CurrencyTip:SetUpHooks()
     end)
 end
 
+function CurrencyTip:NEUTRAL_FACTION_SELECT_RESULT(...)
+    self:debug("CURRENCY_DISPLAY_UPDATE", ...)
+    local charInfo  = RealUI.charInfo
+    charInfo.faction = _G.UnitFactionGroup("player")
+    DB[charInfo.realmNormalized][charInfo.faction][charInfo.name] = DB[charInfo.realmNormalized]["Neutral"][charInfo.name]
+    DB[charInfo.realmNormalized]["Neutral"][charInfo.name] = nil
+    UpdateCurrency()
+end
 function CurrencyTip:CURRENCY_DISPLAY_UPDATE(...)
     self:debug("CURRENCY_DISPLAY_UPDATE", ...)
     UpdateCurrency()
@@ -144,12 +152,16 @@ end
 -- Initialization --
 --------------------
 function CurrencyTip:OnInitialize()
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI.charInfo.faction ~= "Neutral")
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function CurrencyTip:OnEnable()
     self:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
     self:RegisterEvent("PLAYER_MONEY")
+    if RealUI.charInfo.faction == "Neutral" then
+        self:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
+    end
+
     RealUI:InitCurrencyDB()
 
     local player  = RealUI.charInfo.name
