@@ -437,6 +437,34 @@ function RealUI:OnInitialize()
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
     self:RegisterEvent("PLAYER_ENTERING_WORLD", "LockdownUpdates")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
+    self:RegisterEvent("ADDON_LOADED", function()
+        if RealUI.recheckFonts then
+            local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins").profile
+            local LSM = _G.LibStub("LibSharedMedia-3.0")
+            for fontType in next, RealUI.recheckFonts do
+                local font = SkinsDB.fonts[fontType]
+                if type(font) == "table" then
+                    for name, path in next, LSM.MediaTable.font do
+                        if font.name == name then
+                            RealUI.recheckFonts[fontType] = nil
+                            SkinsDB.fonts[fontType] = {
+                                name = name,
+                                path = path
+                            }
+                            break
+                        elseif font.name == "" and font.path == path then
+                            RealUI.recheckFonts[fontType] = nil
+                            SkinsDB.fonts[fontType] = {
+                                name = name,
+                                path = path
+                            }
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end)
 
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
