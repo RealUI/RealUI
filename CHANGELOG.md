@@ -1,4 +1,23 @@
-﻿## [2.0.3] - 2018-08-12 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Changed ###
+
+  * The minimum width for infobar name columns should now be the longest name.
+
+### Fixed ###
+
+  * Fonts that were not provided by RealUI would not get saved.
+  * The infobar start menu was not scaled when using the HighRes option.
+
+
+
+
+## [2.0.3] - 2018-08-12 ##
 ### Modified AddOns ###
 
   * nibRealUI
