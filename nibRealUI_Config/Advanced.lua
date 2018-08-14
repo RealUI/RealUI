@@ -539,11 +539,17 @@ local skins do
         RealUI:UpdateFrameStyle()
     end
 
+    local LSM = _G.LibStub("LibSharedMedia-3.0")
     local function fontGet(info)
-        return SkinsProfile.fonts[info[#info]]
+        return SkinsProfile.fonts[info[#info]].name
     end
     local function fontSet(info, value)
-        SkinsProfile.fonts[info[#info]] = value
+        --[[
+            We have to save the path because Skins gets loaded before other
+            addons have a chance to properly register thier fonts.
+        ]]
+        SkinsProfile.fonts[info[#info]].name = value
+        SkinsProfile.fonts[info[#info]].path = LSM:Fetch("font", value)
     end
 
     local Color = _G.Aurora.Color

@@ -10,6 +10,13 @@ local debug = RealUI.GetDebug("Skins")
 private.debug = debug
 
 local LSM = _G.LibStub("LibSharedMedia-3.0")
+local fonts = {}
+for fontType, fontName in next, private.fontNames do
+    fonts[fontType] = {
+        name = fontName,
+        path = LSM:Fetch("font", fontName)
+    }
+end
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
@@ -24,7 +31,7 @@ local defaults = {
         customScale = 1,
         isHighRes = false,
         isPixelScale = true,
-        fonts = private.fontNames,
+        fonts = fonts,
         addons = {
             ["**"] = true
         }
@@ -220,17 +227,42 @@ function private.OnLoad()
     private.uiScale = private.skinsDB.uiModScale
     private.UpdateUIScale = RealUI.UpdateUIScale
 
-    -- convert existing fields from paths to names
-    for fontType, fontNameorPath in next, private.skinsDB.fonts do
-        for name, path in next, LSM.MediaTable.font do
-            if path == fontNameorPath then
-                private.skinsDB.fonts[fontType] = name
-                break
+    -- convert existing fields /dump LibStub("LibSharedMedia-3.0"):Fetch("font", "font")
+    local recheckFonts
+    for fontType, font in next, private.skinsDB.fonts do
+        if type(font) ~= "table" then
+            for name, path in next, LSM.MediaTable.font do
+                if font == name or font == path then
+                    private.skinsDB.fonts[fontType] = {
+                        name = name,
+                        path = path
+                    }
+                    break
+                end
+            end
+            if type(font) ~= "table" then
+                recheckFonts = recheckFonts or {}
+                if font:lower():find("interface") then
+                    private.skinsDB.fonts[fontType] = {
+                        name = "",
+                        path = font
+                    }
+                    recheckFonts[fontType] = true
+                elseif font ~= "" then
+                    private.skinsDB.fonts[fontType] = {
+                        name = font,
+                        path = LSM:Fetch("font", font)
+                    }
+                    recheckFonts[fontType] = true
+                else
+                    private.skinsDB.fonts[fontType] = fonts[fontType]
+                end
             end
         end
     end
-    for fontType, fontName in next, private.skinsDB.fonts do
-        private.font[fontType] = LSM:Fetch("font", fontName)
+    RealUI.recheckFonts = recheckFonts
+    for fontType, font in next, private.skinsDB.fonts do
+        private.font[fontType] = font.path or LSM:Fetch("font", font.name)
     end
 
     local Base, Scale = Aurora.Base, Aurora.Scale
