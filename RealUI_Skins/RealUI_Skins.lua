@@ -430,6 +430,10 @@ function private.OnLoad()
 end
 
 --[[ Copy Scale API from Aurora until the entire UI is upgraded. ]]--
+function ScaleAPI.GetUIScale()
+    return uiMod or 1
+end
+
 function ScaleAPI.Value(value, getFloat)
     local mult = getFloat and 100 or 1
     return floor((value * uiMod) * mult + 0.5) / mult
