@@ -1085,7 +1085,7 @@ local function Toggle_OnMouseDown()
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
         MinimapAdv:Toggle(true)
     end
-    _G.Lib_CloseDropDownMenus()
+    LDD:CloseAll()
 end
 
 function MinimapAdv:ToggleBind()
@@ -1120,7 +1120,7 @@ end
 local function Config_OnMouseDown()
     RealUI.Debug("Config", "Minimap")
     RealUI.LoadConfig("RealUI", "uiTweaks", "minimap")
-    _G.Lib_CloseDropDownMenus()
+    LDD:CloseAll()
 end
 
 local function Config_OnEnter()
@@ -1209,7 +1209,7 @@ local function Farm_OnMouseDown()
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
         button:Show()
     end
-    _G.Lib_CloseDropDownMenus()
+    LDD:CloseAll()
 
     MinimapAdv:ToggleGatherer()
     MinimapAdv:UpdateMinimapPosition()
