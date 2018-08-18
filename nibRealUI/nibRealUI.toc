@@ -3,8 +3,8 @@
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
 ## Version: 2.0.4
+## RequiredDeps: RealUI_Bugs, RealUI_Skins
 ## OptionalDeps: Bartender4, Grid2, HereBeDragons, LibChatAnims, LibDropDown, LibIconFonts, LibQTip-1.0, LibRangeCheck-2.0, LibWindow-1.1, Raven, UTF8
-## RequiredDeps: RealUI_Skins
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## X-oUF: oUFembed

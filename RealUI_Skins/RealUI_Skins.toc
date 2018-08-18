@@ -4,6 +4,7 @@
 ## Author: Gethe
 ## Version: 2.0.4
 ## LoadWith: RealUI_Bugs
+## RequiredDeps: RealUI_Bugs
 ## OptionalDeps: LibItemUpgradeInfo-1.0, LibSharedMedia-3.0, Masque, nibRealUI_Dev, RealUI_AsianFonts
 ## SavedVariables: RealUI_SkinsDB
 
