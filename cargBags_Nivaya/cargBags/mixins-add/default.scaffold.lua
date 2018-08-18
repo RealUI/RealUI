@@ -28,40 +28,30 @@ local _, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local select = _G.select
+-- luacheck: globals select tonumber
 
 -- Upgrade Level retrieval
-local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 local GetItemLevelBonusFromRelic do
-    local cache, scanTip = {}
     local relicBoostPattern = _G.RELIC_TOOLTIP_ILVL_INCREASE:gsub("%%d", "(%%d+)")
+    local scanningTooltip = _G.RealUIScanningTooltip
     function GetItemLevelBonusFromRelic(itemLink)
-        if cache[itemLink] then
-            return cache[itemLink]
-        end
-
         local iLvl = _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(itemLink)
         if not iLvl then
-            if not scanTip then
-                scanTip = _G.CreateFrame("GameTooltip", "cBTooltip", _G.UIParent, "GameTooltipTemplate")
-            end
-
-            scanTip:SetOwner(_G.UIParent, "ANCHOR_NONE")
-            local success = _G.pcall(scanTip.SetHyperlink, scanTip, itemLink)
+            scanningTooltip:ClearLines()
+            local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
             if not success then
                 return 0
             end
 
-            for i = 5 , 6 do
-                local text = _G["cBTooltipTextLeft"..i]:GetText()
-                iLvl = _G.tonumber(text:match(relicBoostPattern))
-                if iLvl then break end
+            for i = 5, 6 do
+                local l = _G["RealUIScanningTooltipTextLeft"..i]
+                if l and l:GetText() then
+                    iLvl = tonumber(l:GetText():match(relicBoostPattern))
+                    if iLvl then break end
+                end
             end
-
-            scanTip:Hide()
         end
 
-        cache[itemLink] = iLvl
         return iLvl or 0
     end
 end
@@ -158,8 +148,8 @@ local function ItemButton_Update(self, item)
 
     -- Item Level
     if item.link then
-        if LIU and item.rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
-            item.level = LIU:GetUpgradedItemLevel(item.link)
+        if item.rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
+            item.level = _G.RealUI.GetItemLevel(item.link)
         end
 
         if _G.IsArtifactRelicItem(item.link) then

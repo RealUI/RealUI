@@ -3,7 +3,6 @@ local ADDON_NAME, ns = ...
 -- [[ Lua Globals ]]
 -- luacheck: globals next type
 
-local ItemUpgradeInfo = _G.LibStub("LibItemUpgradeInfo-1.0")
 local LibInspect = _G.LibStub("LibInspect")
 
 local maxAge = 600 -- 10 mins
@@ -103,11 +102,11 @@ local function GetItemLevel(guid, data, age)
                 if rarity and subTypeID then
                     --ilvl = _G.GetDetailedItemLevelInfo(link)
                     if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
-                        ilvl = ItemUpgradeInfo:GetUpgradedItemLevel(link)
+                        ilvl = _G.RealUI.GetItemLevel(link)
                     end
 
                     ns.Debug(ilvl, _G.strsplit("|", link))
-                    if not ilvl then
+                    if not ilvl or ilvl == 0 then
                         return ns.Debug("No ilvl data for", slot)
                     end
 

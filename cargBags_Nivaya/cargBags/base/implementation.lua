@@ -21,8 +21,7 @@ local _, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local next, max = _G.next, _G.max
-local tonumber, strsplit = _G.tonumber, _G.strsplit
+-- luacheck: globals next tonumber strsplit
 
 
 --[[!
@@ -331,7 +330,6 @@ end
     @param item <table> [optional]
     @return item <table>
 ]]
-local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 local infoGather = {}
 function Implementation:GetItemInfo(bagID, slotID)
     local item = self:GetItem(bagID, slotID, true)
@@ -409,7 +407,7 @@ function Implementation:GetItemInfo(bagID, slotID)
                 item.isQuestItem, item.questID, item.questActive = _G.GetContainerItemQuestInfo(bagID, slotID)
             end
             if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
-                level = max(LIU:GetUpgradedItemLevel(link) or 0, _G.GetDetailedItemLevelInfo(link) or 0)
+                level = _G.RealUI.GetItemLevel(link)
             end
 
             id = id or itemID

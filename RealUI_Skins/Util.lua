@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals floor type
+-- luacheck: globals floor type pcall tonumber
 
 local RealUI = _G.RealUI
 
@@ -42,6 +42,29 @@ end
 
 function RealUI.GetDurabilityColor(curDura, maxDura)
     return _G.oUFembed.RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
+end
+
+local scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
+scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
+
+local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
+function RealUI.GetItemLevel(itemLink)
+    scanningTooltip:ClearLines()
+    local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
+    if not success then
+        return 0
+    end
+
+    local iLvl
+    for i = 1, 5 do
+        local l = _G["RealUIScanningTooltipTextLeft"..i]
+        if l and l:GetText() then
+            iLvl = _G.tonumber(l:GetText():match(itemLevelPattern))
+            if iLvl then break end
+        end
+    end
+
+    return iLvl or 0
 end
 
 --[[ Fonts
