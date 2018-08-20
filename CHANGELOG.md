@@ -1,4 +1,20 @@
-﻿## [2.0.4] - 2018-08-14 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * cargBags_Nivaya
+  * FreebTip
+  * RealUI_Skins
+
+### Fixed ###
+
+  * Item level displays in bags and the character sheet did not match the tooltip.
+  * Various errors when using the minimap.
+
+
+
+
+## [2.0.4] - 2018-08-14 ##
 ### Modified AddOns ###
 
   * nibRealUI
