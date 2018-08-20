@@ -1326,6 +1326,7 @@ local function Garrison_OnLeave(self)
 end
 local function Garrison_OnEnter(self)
     MinimapAdv:debug("Garrison_OnEnter")
+    if not self.title then return end
     local isLeft = db.position.anchorto:find("LEFT")
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
