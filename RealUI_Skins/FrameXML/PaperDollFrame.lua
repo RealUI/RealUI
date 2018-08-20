@@ -29,11 +29,14 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
             return canEnchant and quality ~= _G.LE_ITEM_QUALITY_ARTIFACT
         end
 
-        local scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
-        scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
+        local scanningTooltip = _G.RealUIScanningTooltip
         function GetNumSockets(itemLink)
             scanningTooltip:ClearLines()
-            scanningTooltip:SetHyperlink(itemLink)
+            local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
+            if not success then
+                return 0
+            end
+
             local numSockets, hasMeta = 0, false
             for i = 5, 20 do
                 local l = _G["RealUIScanningTooltipTextLeft"..i]
@@ -69,7 +72,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
         local slotID = self:GetID()
         local itemLink = _G.GetInventoryItemLink("player", slotID)
         if itemLink then
-            local itemLevel = max(LIU:GetUpgradedItemLevel(itemLink) or 0, _G.GetDetailedItemLevelInfo(itemLink) or 0)
+            local itemLevel = RealUI.GetItemLevel(itemLink)
             private.debug("ItemSlotButton_Update", slotID, self:GetName(), itemLevel)
             private.debug("itemLink", _G.strsplit("|", itemLink))
 
