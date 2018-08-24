@@ -424,90 +424,6 @@ local unitframes do
                         end,
                         order = 41,
                     },
-                    headerFade = {
-                        name = L["CombatFade"],
-                        type = "header",
-                        order = 45,
-                    },
-                    enableFade = {
-                        name = L["General_Enabled"],
-                        desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
-                        type = "toggle",
-                        get = function(info) return db.misc.combatfade.enabled end,
-                        set = function(info, value)
-                            db.misc.combatfade.enabled = value
-                        end,
-                        order = 49,
-                    },
-                    combatFade = {
-                        name = "",
-                        type = "group",
-                        inline = true,
-                        disabled = function() return not db.misc.combatfade.enabled end,
-                        order = 50,
-                        args = {
-                            incombat = {
-                                name = L["CombatFade_InCombat"],
-                                type = "range",
-                                isPercent = true,
-                                min = 0, max = 1, step = 0.05,
-                                get = function(info) return db.misc.combatfade.opacity.incombat end,
-                                set = function(info, value)
-                                    db.misc.combatfade.opacity.incombat = value
-                                    CombatFader:RefreshMod()
-                                end,
-                                order = 10,
-                            },
-                            harmtarget = {
-                                name = L["CombatFade_HarmTarget"],
-                                type = "range",
-                                isPercent = true,
-                                min = 0, max = 1, step = 0.05,
-                                get = function(info) return db.misc.combatfade.opacity.harmtarget end,
-                                set = function(info, value)
-                                    db.misc.combatfade.opacity.harmtarget = value
-                                    CombatFader:RefreshMod()
-                                end,
-                                order = 20,
-                            },
-                            target = {
-                                name = L["CombatFade_Target"],
-                                type = "range",
-                                isPercent = true,
-                                min = 0, max = 1, step = 0.05,
-                                get = function(info) return db.misc.combatfade.opacity.target end,
-                                set = function(info, value)
-                                    db.misc.combatfade.opacity.target = value
-                                    CombatFader:RefreshMod()
-                                end,
-                                order = 30,
-                            },
-                            hurt = {
-                                name = L["CombatFade_Hurt"],
-                                type = "range",
-                                isPercent = true,
-                                min = 0, max = 1, step = 0.05,
-                                get = function(info) return db.misc.combatfade.opacity.hurt end,
-                                set = function(info, value)
-                                    db.misc.combatfade.opacity.hurt = value
-                                    CombatFader:RefreshMod()
-                                end,
-                                order = 40,
-                            },
-                            outofcombat = {
-                                name = L["CombatFade_NoCombat"],
-                                type = "range",
-                                isPercent = true,
-                                min = 0, max = 1, step = 0.05,
-                                get = function(info) return db.misc.combatfade.opacity.outofcombat end,
-                                set = function(info, value)
-                                    db.misc.combatfade.opacity.outofcombat = value
-                                    CombatFader:RefreshMod()
-                                end,
-                                order = 50,
-                            },
-                        }
-                    }
                 }
             },
             units = {
@@ -736,6 +652,7 @@ local unitframes do
             },
         },
     }
+    CombatFader:AddFadeConfig("UnitFrames", unitframes.args.general, 50)
     do -- import hideRaidFilters from minimap
         local MinimapAdv = RealUI:GetModule("MinimapAdv")
         local mmDB = MinimapAdv.db.profile

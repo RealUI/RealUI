@@ -12,6 +12,7 @@ local next, tostring = _G.next, _G.tostring
 local RealUI = _G.RealUI
 local L = RealUI.L
 
+local CombatFader = RealUI:GetModule("CombatFader")
 local order = 0
 
 --[[
@@ -2916,55 +2917,11 @@ local uiTweaks do
                                 },
                             },
                         },
-                        --[[fade = {
-                            type = "group",
-                            name = L["General_CombatFade"],
-                            inline = true,
-                            order = 40,
-                            args = {
-                                incombat = {
-                                    type = "range",
-                                    name = "In-combat",
-                                    min = 0, max = 1, step = 0.05,
-                                    isPercent = true,
-                                    get = function(info) return db.elements[ke].opacity.outofcombat end,
-                                    set = function(info, value)
-                                        db.elements[ke].opacity.outofcombat = value
-                                        CombatFader:OptionsRefresh()
-                                    end,
-                                    order = 10,
-                                },
-                                harmtarget = {
-                                    type = "range",
-                                    name = "Attackable Target",
-                                    min = 0, max = 1, step = 0.05,
-                                    isPercent = true,
-                                    get = function(info) return db.elements[ke].opacity.harmtarget end,
-                                    set = function(info, value)
-                                        db.elements[ke].opacity.harmtarget = value
-                                        CombatFader:OptionsRefresh()
-                                    end,
-                                    order = 20,
-                                },
-                                outofcombat = {
-                                    type = "range",
-                                    name = "Out-of-combat",
-                                    min = 0, max = 1, step = 0.05,
-                                    isPercent = true,
-                                    get = function(info) return db.elements[ke].opacity.incombat end,
-                                    set = function(info, value)
-                                        --print("OutCombat", ke)
-                                        db.elements[ke].opacity.incombat = value
-                                        CombatFader:OptionsRefresh()
-                                    end,
-                                    order = 30,
-                                },
-                            },
-                        },]]
                     },
                 },
             },
         }
+        CombatFader:AddFadeConfig(MODNAME, objectives, 50, true)
     end
 
     uiTweaks = {
