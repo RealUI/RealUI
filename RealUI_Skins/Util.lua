@@ -47,8 +47,13 @@ end
 local scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
 scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 
+local cache = {}
 local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
 function RealUI.GetItemLevel(itemLink)
+    if cache[itemLink] then
+        return cache[itemLink]
+    end
+
     scanningTooltip:ClearLines()
     local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
     if not success then
@@ -60,7 +65,10 @@ function RealUI.GetItemLevel(itemLink)
         local l = _G["RealUIScanningTooltipTextLeft"..i]
         if l and l:GetText() then
             iLvl = _G.tonumber(l:GetText():match(itemLevelPattern))
-            if iLvl then break end
+            if iLvl then
+                cache[itemLink] = iLvl
+                break
+            end
         end
     end
 
