@@ -78,6 +78,10 @@ function RealUI.RegisterModdedFrame(frame, updateFunc)
     moddedFrames[frame] = updateFunc or false
 end
 
+function RealUI.GetInterfaceSize()
+    return _G.GetPhysicalScreenSize()
+end
+
 local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
     if uiScaleChanging then return end

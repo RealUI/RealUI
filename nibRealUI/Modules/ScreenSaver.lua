@@ -70,10 +70,7 @@ AFKTimer:SetScript("OnUpdate", function(self, elapsed)
             end
         end
 
-        -- Make sure Size is still good
-        ScreenSaver.bg:SetWidth(_G.UIParent:GetWidth() + 5000)
-        ScreenSaver.bg:SetHeight(_G.UIParent:GetHeight() + 2000)
-        ScreenSaver.panel:SetWidth(_G.UIParent:GetWidth())
+        ScreenSaver:UpdateFrames()
 
         -- Update AFK Time
         ScreenSaver:UpdateAFKTime(AFKTimer.elapsed)
@@ -199,9 +196,11 @@ end
 function ScreenSaver:RepositionPanel(...)
     if ... and not db.panel.automove then return end
     self.panel:ClearAllPoints()
+
+    local _, height = RealUI.GetInterfaceSize()
     self.panel:SetPoint("BOTTOM", _G.UIParent, "CENTER", 0, _G.math.random(
         ndb.positions[ndbc.layout.current]["HuDY"] + 100,
-        (_G.UIParent:GetHeight() / 2) - 180
+        height / 2 - 180
     ))
 end
 
@@ -210,10 +209,9 @@ function ScreenSaver:UpdateFrames()
     -- self.panel:SetBackdropColor(0.075, 0.075, 0.075, db.panel.opacity)
 
     -- Make sure Size is still good
-    self.bg:SetWidth(_G.UIParent:GetWidth() + 5000)
-    self.bg:SetHeight(_G.UIParent:GetHeight() + 2000)
-
-    self.panel:SetSize(_G.UIParent:GetWidth(), 21)
+    local width, height = RealUI.GetInterfaceSize()
+    self.bg:SetSize(width, height)
+    self.panel:SetSize(width, 21)
 end
 
 -- Initialize / Refresh
@@ -239,7 +237,6 @@ function ScreenSaver:CreateFrames()
     self.panel = _G.CreateFrame("Frame", "RealUIScreenSaver", _G.UIParent)
         self.panel:SetFrameStrata("MEDIUM")
         self.panel:SetFrameLevel("1")
-        self.panel:SetSize(_G.UIParent:GetWidth(), 21)
         Base.SetBackdrop(self.panel)
         self.panel:SetAlpha(0)
         self.panel:Hide()
@@ -248,9 +245,11 @@ function ScreenSaver:CreateFrames()
     -- Dark Background
     self.bg = self.panel:CreateTexture(nil, "BACKGROUND")
         self.bg:SetColorTexture(0, 0, 0, 1)
-        self.bg:SetAllPoints(_G.UIParent)
+        self.bg:SetPoint("CENTER", _G.UIParent)
         self.bg:SetAlpha(0)
         self.bg:Hide()
+
+    self:UpdateFrames()
 
     self.panel.left = self.panel:CreateTexture(nil, "ARTWORK")
         self.panel.left:SetColorTexture(RealUI.charInfo.class.color:GetRGB())

@@ -19,7 +19,7 @@ local hudSize = ndb.settings.hudSize
 local round = RealUI.Round
 
 local CombatFader = RealUI:GetModule("CombatFader")
-local uiWidth, uiHeight = _G.UIParent:GetSize()
+local uiWidth, uiHeight = RealUI.GetInterfaceSize()
 
 local other do
     debug("HuD Other")
