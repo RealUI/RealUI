@@ -1,5 +1,32 @@
 local ADDON_NAME, private = ...
 
+local loaded = _G.LoadAddOn("RealUI_Skins")
+local tries = 1
+while not loaded do
+    loaded = _G.LoadAddOn("RealUI_Skins")
+    tries = tries + 1
+    if tries > 3 then
+        _G.StaticPopupDialogs["REALUI_SKINS_NOT_FOUND"] = {
+            text = "Module \"Skins\" was not found. RealUI will now be disabled.",
+            button1 = _G.OKAY,
+            OnShow = function(self)
+                self:SetScale(2)
+                self:ClearAllPoints()
+                self:SetPoint("CENTER")
+            end,
+            OnAccept = function(self, data)
+                _G.DisableAddOn("RealUI")
+                _G.ReloadUI()
+            end,
+            timeout = 0,
+            exclusive = 1,
+            whileDead = 1,
+        }
+        _G.StaticPopup_Show("REALUI_SKINS_NOT_FOUND")
+        break
+    end
+end
+
 -- RealUI --
 private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local RealUI = private.RealUI
