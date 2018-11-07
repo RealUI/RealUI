@@ -1528,8 +1528,17 @@ function Infobar:CreateBlocks()
                         azeriteItem = _G.Item:CreateFromItemLocation(azeriteItemLocation)
                     end
 
-                    local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
-                    return xp, totalLevelXP, azeriteItem:GetItemName()
+                    local xp, totalLevelXP, currentLevel
+                    --if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then -- isPatch
+                    if azeriteItemLocation.bagID and azeriteItemLocation.bagID >= _G.NUM_BAG_SLOTS then
+                        xp, totalLevelXP = 0, 1
+                        currentLevel = -1
+                    else
+                        xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
+                        currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
+                    end
+
+                    return xp, totalLevelXP, azeriteItem:GetItemName(), currentLevel
                 end
             end,
             GetColor = function(Art)
@@ -1539,11 +1548,15 @@ function Infobar:CreateBlocks()
                 return C_AzeriteItem.HasActiveAzeriteItem()
             end,
             SetTooltip = function(Art, tooltip)
-                local xp, totalLevelXP, name = Art:GetStats()
-
-                local currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
+                local xp, totalLevelXP, name, currentLevel = Art:GetStats()
                 local xpToNextLevel = totalLevelXP - xp
-                local title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
+
+                local title
+                if currentLevel == -1 then
+                    title = _G.HEART_OF_AZEROTH_MISSING_ERROR
+                else
+                    title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
+                end
 
                 testCell:SetFontObject("GameTooltipText")
                 testCell:SetText(title)
