@@ -1,5 +1,5 @@
 ## Interface: 80000
-## Title: nib|cffffffffReal|r|cffbf3333UI|r
+## Title: nibRealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
 ## Version: 2.0.5
