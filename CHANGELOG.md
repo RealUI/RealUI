@@ -1,4 +1,25 @@
-﻿## [2.0.5] - 2018-08-20 ##
+﻿## [2.0.6] - 2018-12-11 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_Skins
+
+### Changed ###
+
+  * Updated for 8.1
+  * RealUI wil now disable itself if RealUI_Skins is not enabled
+
+### Fixed ###
+
+  * Custom UI scale would not save.
+  * Various issues with boss frame auras.
+
+
+
+
+## [2.0.5] - 2018-08-20 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -148,6 +169,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.6]: https://github.com/RealUI/RealUI/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/RealUI/RealUI/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/RealUI/RealUI/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/RealUI/RealUI/compare/2.0.2...2.0.3
