@@ -4,25 +4,22 @@ local ADDON_NAME = ...
 -- luacheck: globals select tostring next
 
 local LTD, debugger = _G.LibStub("LibTextDump-1.0"), {}
-local function CreateDebugFrame(mod)
-    if debugger[mod] then
-        return
+local function GetDebugFrame(mod)
+    if not debugger[mod] then
+        local function save(buffer)
+            _G.RealUI_Debug[mod] = buffer
+        end
+        debugger[mod] = LTD:New(("%s Debug Output"):format(mod), 640, 473, save)
+        debugger[mod].numDuped = 0
+        debugger[mod].prevLine = ""
     end
-    local function save(buffer)
-        _G.RealUI_Debug[mod] = buffer
-    end
-    debugger[mod] = LTD:New(("%s Debug Output"):format(mod), 640, 473, save)
-    debugger[mod].numDuped = 0
-    debugger[mod].prevLine = ""
     return debugger[mod]
 end
 
 local RealUI = {}
 function RealUI.Debug(mod, ...)
-    local modDebug = debugger[mod]
-    if not modDebug then
-        modDebug = CreateDebugFrame(mod)
-    end
+    local modDebug = GetDebugFrame(mod)
+
     local text = ""
     for i = 1, select("#", ...) do
         local arg = select(i, ...)
@@ -330,10 +327,8 @@ function _G.SlashCmdList.DEBUG(mod, editBox)
             _G.print(k, debugger[k]:Lines())
         end
     else
-        local modDebug = debugger[mod]
-        if not modDebug then
-            modDebug = CreateDebugFrame(mod)
-        end
+        local modDebug = GetDebugFrame(mod)
+
         if mod == "test" then
             _G.print("Generating test...")
             for i = 1, 100 do
