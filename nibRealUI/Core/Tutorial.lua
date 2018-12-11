@@ -1,4 +1,4 @@
-﻿local _, private = ...
+local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -341,7 +341,7 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
         end)
     end
     _G.HelpPlate:SetPoint("CENTER", parent, "CENTER", 0, 0 )
-    _G.HelpPlate:SetSize(_G.UIParent:GetWidth(), _G.UIParent:GetHeight() )
+    _G.HelpPlate:SetSize(RealUI.GetInterfaceSize())
     _G.HelpPlate.userToggled = true
     _G.HelpPlate:Show()
 end
@@ -400,8 +400,7 @@ function RealUI:InitTutorial()
     tBG:SetPoint("CENTER")
     tBG:SetFrameStrata("BACKGROUND")
     tBG:SetFrameLevel(0)
-    tBG:SetWidth(_G.UIParent:GetWidth() + 2000)
-    tBG:SetHeight(_G.UIParent:GetHeight() + 2000)
+    tBG:SetSize(RealUI.GetInterfaceSize())
     _G.Aurora.Base.SetBackdrop(tBG, _G.Aurora.Color.frame)
 
     -- Logo

@@ -1,5 +1,5 @@
 ## Interface: 80000
-## Title: nib|cffffffffReal|r|cffbf3333UI|r Dev
+## Title: nibRealUI Dev
 ## Notes: Development assistant for RealUI
 ## RequiredDeps: RealUI_Bugs
 ## LoadWith: RealUI_Bugs

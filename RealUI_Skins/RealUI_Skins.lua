@@ -78,6 +78,10 @@ function RealUI.RegisterModdedFrame(frame, updateFunc)
     moddedFrames[frame] = updateFunc or false
 end
 
+function RealUI.GetInterfaceSize()
+    return _G.GetPhysicalScreenSize()
+end
+
 local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
     if uiScaleChanging then return end
@@ -87,17 +91,17 @@ function RealUI.UpdateUIScale(newScale)
     pixelScale = 768 / pysHeight
     private.debug("pixel scale", pixelScale, uiMod)
 
-    -- Get Scale
     local oldScale = private.skinsDB.customScale
+    local cvarScale, parentScale = tonumber(_G.GetCVar("uiscale")), RealUI.Round(_G.UIParent:GetScale(), 2)
+    private.debug("current scale", oldScale, cvarScale, parentScale)
+
+    -- Get Scale
     if private.skinsDB.isPixelScale then
         newScale = pixelScale
     end
 
-    local cvarScale, parentScale = tonumber(_G.GetCVar("uiscale")), RealUI.Round(_G.UIParent:GetScale(), 2)
-    private.debug("current scale", oldScale, cvarScale, parentScale)
-
     if not newScale then
-        newScale = _G.min(cvarScale, parentScale)
+        newScale = oldScale
     end
     private.debug("newScale", newScale)
 
@@ -342,13 +346,15 @@ function private.OnLoad()
 
 
     function Hook.GameTooltip_SetBackdropStyle(self, style)
-        Base.SetBackdrop(self, Color.frame, frameColor.a)
-        if self._setQualityColors then
-            local _, itemLink = self:GetItem()
-            if itemLink then
-                local quality = _G.C_Item.GetItemQualityByID(itemLink)
-                if quality then
-                    self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
+        if not self.IsEmbedded then
+            Base.SetBackdrop(self, Color.frame, frameColor.a)
+            if self._setQualityColors then
+                local _, itemLink = self:GetItem()
+                if itemLink then
+                    local quality = _G.C_Item.GetItemQualityByID(itemLink)
+                    if quality then
+                        self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
+                    end
                 end
             end
         end

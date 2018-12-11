@@ -9,8 +9,8 @@ local db
 
 -- Libs --
 local LDD = _G.LibStub("LibDropDown")
-local HBD = _G.LibStub("HereBeDragons-2.0")
-local HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
+local HBD = _G.LibStub("HereBeDragons-2.0", true)
+local HBDP = _G.LibStub("HereBeDragons-Pins-2.0", true)
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -1882,6 +1882,12 @@ function MinimapAdv:OnInitialize()
 end
 
 function MinimapAdv:OnEnable()
+    if not HBD then
+        _G.LoadAddOn("HereBeDragons")
+        HBD = _G.LibStub("HereBeDragons-2.0")
+        HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
+    end
+
     -- Create frames, register events, begin the Minimap
     SetUpMinimapFrame()
     CreateFrames()

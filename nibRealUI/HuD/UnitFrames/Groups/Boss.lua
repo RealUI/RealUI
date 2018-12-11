@@ -135,22 +135,22 @@ local function CreateAuras(parent)
     auras.numDebuffs = db.boss.debuffCount
     auras["growth-x"] = "LEFT"
     auras.disableCooldown = true
-    auras.CustomFilter = function(self, ...)
-        --    unit, icon, name, rank, texture, count, dtype, duration, timeLeft, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
-        local _, icon, _, _, _, _, _, duration, timeLeft, caster = ...
+    auras.CustomFilter = function(self, unit, button, ...)
+        --    name, texture, count, debuffType, duration, expiration, caster
+        local _, _, _, _, duration, expiration, caster = ...
         if not caster then return false end
-        UnitFrames:debug("Boss:CustomFilter", self, icon, duration, timeLeft, caster)
+        UnitFrames:debug("Boss:CustomFilter", self, button, duration, expiration, caster)
 
-        if (duration and duration > 0) then
-            icon.startTime = timeLeft - duration
-            icon.endTime = timeLeft
+        if duration and duration > 0 then
+            button.startTime = expiration - duration
+            button.endTime = expiration
         else
-            icon.endTime = nil
+            button.endTime = nil
         end
-        icon.needsUpdate = true
+        button.needsUpdate = true
 
         -- Cast by Player
-        if icon.isPlayer and UnitFrames.db.profile.boss.showPlayerAuras then return true end
+        if button.isPlayer and UnitFrames.db.profile.boss.showPlayerAuras then return true end
 
         -- Cast by NPC
         if UnitFrames.db.profile.boss.showNPCAuras then

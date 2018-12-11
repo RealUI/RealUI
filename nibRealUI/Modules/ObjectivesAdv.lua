@@ -10,8 +10,6 @@ local Scale = _G.Aurora.Scale
 local MODNAME = "Objectives Adv."
 local ObjectivesAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-local LoggedIn = false
-
 ---------------------
 -- Collapse / Hide --
 ---------------------
@@ -105,9 +103,18 @@ function ObjectivesAdv:PLAYER_ENTERING_WORLD()
     ObjectivesAdv:UpdatePlayerLocation()
 end
 
-function ObjectivesAdv:PLAYER_LOGIN()
-    LoggedIn = true
-    self:RefreshMod()
+function ObjectivesAdv:ADDON_LOADED()
+    if _G.ObjectiveTrackerFrame then
+        self:RegisterEvent("PLAYER_ENTERING_WORLD")
+        self:RegisterEvent("UI_SCALE_CHANGED")
+        self:UnregisterEvent("ADDON_LOADED")
+
+        _G.hooksecurefunc(_G.ObjectiveTrackerFrame, "SetPoint", UpdatePosition)
+        CombatFader:RegisterModForFade(MODNAME, db.hidden.combatfade)
+        CombatFader:RegisterFrameForFade(MODNAME, _G.ObjectiveTrackerFrame)
+
+        self:RefreshMod()
+    end
 end
 
 function ObjectivesAdv:OnInitialize()
@@ -154,20 +161,14 @@ function ObjectivesAdv:OnInitialize()
     db = self.db.profile
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-
-    _G.hooksecurefunc(_G.ObjectiveTrackerFrame, "SetPoint", UpdatePosition)
-
-    CombatFader:RegisterModForFade(MODNAME, db.hidden.combatfade)
-    CombatFader:RegisterFrameForFade(MODNAME, _G.ObjectiveTrackerFrame)
-
-    self:RegisterEvent("PLAYER_LOGIN")
 end
 
 function ObjectivesAdv:OnEnable()
-    self:RegisterEvent("PLAYER_ENTERING_WORLD")
-    self:RegisterEvent("UI_SCALE_CHANGED")
-
-    if LoggedIn then self:RefreshMod() end
+    if not _G.ObjectiveTrackerFrame then
+        self:RegisterEvent("ADDON_LOADED")
+    else
+        self:ADDON_LOADED()
+    end
 end
 
 function ObjectivesAdv:OnDisable()

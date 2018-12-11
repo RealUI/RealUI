@@ -192,7 +192,7 @@ end
 
 function BlockMixin:UpdateButtonSide()
     local xOfs =  self:GetCenter()
-    local uiCenter = _G.UIParent:GetWidth() / 2
+    local uiCenter = Infobar.frame:GetWidth() / 2
     local changed = nil
     if xOfs < uiCenter then
         if self.side ~= "left" then
@@ -718,13 +718,12 @@ end
 --------------------
 function Infobar:CreateBar()
     local frame = _G.CreateFrame("Frame", "RealUI_Infobar", _G.UIParent)
-    Scale.Point(frame, "BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT",  0, 0)
-    Scale.Point(frame, "BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT",  0, 0)
-    Scale.Height(frame, BAR_HEIGHT)
+    frame:SetPoint("BOTTOM", _G.UIParent)
+    Scale.Size(frame, RealUI.GetInterfaceSize(), BAR_HEIGHT)
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)
     RealUI.RegisterModdedFrame(frame, function(this)
-        Scale.Height(this, BAR_HEIGHT)
+        Scale.Size(this, RealUI.GetInterfaceSize(), BAR_HEIGHT)
         for index, block in Infobar:IterateBlocks() do
             local blockInfo = Infobar:GetBlockInfo(block.name)
             if block.AdjustElements then block:AdjustElements(blockInfo) end
