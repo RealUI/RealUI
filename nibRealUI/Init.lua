@@ -15,7 +15,7 @@ while not loaded do
                 self:SetPoint("CENTER")
             end,
             OnAccept = function(self, data)
-                _G.DisableAddOn("RealUI")
+                _G.DisableAddOn("nibRealUI")
                 _G.ReloadUI()
             end,
             timeout = 0,
