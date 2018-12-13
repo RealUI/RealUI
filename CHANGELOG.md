@@ -1,4 +1,17 @@
-﻿## [2.0.6] - 2018-12-11 ##
+## [2.0.7] - 2018-12-13 ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Fixed ###
+
+  * Various errors with MinimapAdv.
+  * Various bug and errors with the UI skin.
+
+
+
+
+## [2.0.6] - 2018-12-11 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -169,6 +182,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.7]: https://github.com/RealUI/RealUI/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/RealUI/RealUI/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/RealUI/RealUI/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/RealUI/RealUI/compare/2.0.3...2.0.4
