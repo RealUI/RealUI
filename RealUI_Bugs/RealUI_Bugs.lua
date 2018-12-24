@@ -63,7 +63,7 @@ local errorFrame do
 
     local scrollFrame = _G.CreateFrame("ScrollFrame", nil, errorFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("TOPLEFT", dragArea, "BOTTOMLEFT", 10, -10)
-    scrollFrame:SetPoint("BOTTOMRIGHT", -23, 44)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -28, 44)
     _G.ScrollFrame_OnLoad(scrollFrame)
     errorFrame.ScrollFrame = scrollFrame
 

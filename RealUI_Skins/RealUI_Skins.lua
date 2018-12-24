@@ -361,14 +361,15 @@ function private.OnLoad()
     end
 
     _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
-        skinnedFrames[Frame.BorderFrame].stripes:SetParent(Frame)
+        skinnedFrames[Frame.BorderFrame.NineSlice].stripes:SetParent(Frame)
     end)
     _G.hooksecurefunc(Base, "SetBackdrop", function(Frame, color, alpha)
         if not color and not alpha then
             local r, g, b, a = Frame:GetBackdropColor()
             Frame:SetBackdropColor(r, g, b, frameColor.a)
 
-            local stripes = Frame:CreateTexture(nil, "BACKGROUND", nil, -6)
+            local bg = Frame:GetBackdropTexture("bg")
+            local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
             stripes:SetAlpha(private.skinsDB.stripeAlpha)
             stripes:SetAllPoints()
@@ -424,14 +425,6 @@ function private.OnLoad()
         Skin.UIPanelButtonTemplate(errorFrame.Reload)
         Skin.NavButtonPrevious(errorFrame.PreviousError)
         Skin.NavButtonNext(errorFrame.NextError)
-
-        --[[ Scale ]]--
-        errorFrame.ScrollFrame:SetPoint(errorFrame.ScrollFrame:GetPoint(1))
-        errorFrame.ScrollFrame:SetPoint(errorFrame.ScrollFrame:GetPoint(2))
-        Scale.RawSetSize(errorFrame.ScrollFrame.Text, errorFrame.ScrollFrame:GetSize())
-        errorFrame.Reload:SetPoint(errorFrame.Reload:GetPoint())
-        errorFrame.PreviousError:SetPoint(errorFrame.PreviousError:GetPoint())
-        errorFrame.NextError:SetPoint(errorFrame.NextError:GetPoint())
     end
 end
 

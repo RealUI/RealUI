@@ -1,3 +1,18 @@
+## [2.0.8] - 2018-12-24 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_Bugs
+  * RealUI_Skins
+
+### Fixed ###
+
+  * Infobar icons would not display properly for non-english locales.
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
 ## [2.0.7] - 2018-12-13 ##
 ### Modified AddOns ###
 
@@ -182,6 +197,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.8]: https://github.com/RealUI/RealUI/compare/2.0.7...2.0.8
 [2.0.7]: https://github.com/RealUI/RealUI/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/RealUI/RealUI/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/RealUI/RealUI/compare/2.0.4...2.0.5

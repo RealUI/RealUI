@@ -4,11 +4,9 @@ local _, private = ...
 local RealUI = private.RealUI
 local db
 
-local CombatFader = RealUI:GetModule("CombatFader")
-local Scale = _G.Aurora.Scale
-
 local MODNAME = "Objectives Adv."
 local ObjectivesAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
+local CombatFader = RealUI:GetModule("CombatFader")
 
 ---------------------
 -- Collapse / Hide --
@@ -84,7 +82,7 @@ local function UpdatePosition()
     movingTracker = true
     _G.ObjectiveTrackerFrame:ClearAllPoints()
     _G.ObjectiveTrackerFrame:SetPoint(db.position.anchorfrom, "UIParent", db.position.anchorto, db.position.x, db.position.y)
-    Scale.RawSetHeight(_G.ObjectiveTrackerFrame, _G.UIParent:GetHeight() - Scale.Value(db.position.negheightofs))
+    _G.ObjectiveTrackerFrame:SetHeight(_G.UIParent:GetHeight() - db.position.negheightofs)
     movingTracker = false
 end
 
