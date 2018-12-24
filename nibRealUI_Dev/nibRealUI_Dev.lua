@@ -135,6 +135,7 @@ local autorunScripts = {
     alert = false,
     test = false,
     testFrame = false,
+    mouse = true,
 }
 local frame = _G.CreateFrame("Frame")
 frame:RegisterAllEvents()
@@ -218,6 +219,41 @@ function ns.commands:aurora()
 
     _G.print("Aurora addons loaded.")
     _G.AddonList_Update()
+end
+
+function ns.commands:mouse()
+    local r, g, b = 1, 1, 1
+    local pollingRate, numLines = 0.05, 15
+
+    local lines = {}
+    for i = 1, numLines do
+        local line = _G.UIParent:CreateLine()
+        line:SetThickness(_G.Lerp(5, 1, (i - 1)/numLines))
+        line:SetColorTexture(1, 1, 1)
+
+        lines[i] = {line = line, x = 0, y = 0}
+    end
+
+    local function mouse()
+        local scale = _G.UIParent:GetEffectiveScale()
+        local startX, startY = _G.GetCursorPosition()
+
+        for i = 1, numLines do
+            local info = lines[i]
+
+            local startA, endA = _G.Lerp(1, 0, (i - 1)/numLines), _G.Lerp(1, 0, i/numLines)
+            info.line:SetGradientAlpha("HORIZONTAL", r, g, b, startA, r, g, b, endA)
+
+            local endX, endY = info.x, info.y
+            info.line:SetStartPoint("BOTTOMLEFT", startX / scale, startY / scale)
+            info.line:SetEndPoint("BOTTOMLEFT", endX / scale, endY / scale)
+
+            info.x, info.y = startX, startY
+            startX, startY = endX, endY
+        end
+    end
+
+    _G.C_Timer.NewTicker(pollingRate, mouse)
 end
 
 -- Slash Commands
