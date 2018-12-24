@@ -10,7 +10,6 @@ local RealUI = _G.RealUI
 ]]
 
 local LSM = _G.LibStub("LibSharedMedia-3.0")
-LSM:Register("font", "Font Awesome", [[Interface\AddOns\RealUI_Skins\Media\fontawesome-webfont.ttf]])
 
 -- Russian + Latin char languages
 local LOCALE_MASK = LSM.LOCALE_BIT_ruRU + LSM.LOCALE_BIT_western
@@ -26,6 +25,9 @@ LSM:Register("font", "pixel_large", [[Interface\AddOns\RealUI_Skins\Media\pixel_
 LSM:Register("font", "pixel_numbers", [[Interface\AddOns\RealUI_Skins\Media\pixel_numbers.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pixel_cooldown.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
+
+-- Icon Font
+LSM:Register("font", "Font Awesome", [[Interface\AddOns\RealUI_Skins\Media\fontawesome-webfont.ttf]], LOCALE_MASK)
 
 LSM.DefaultMedia.font = "Roboto"
 private.fontNames = {
