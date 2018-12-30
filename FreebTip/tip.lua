@@ -68,9 +68,9 @@ local function GameTooltip_UnitColor(unit)
     local r, g, b
     if _G.UnitIsPlayer(unit) then
         local _, class = _G.UnitClass(unit)
-        r = _G.CUSTOM_CLASS_COLORS[class].r;
-        g = _G.CUSTOM_CLASS_COLORS[class].g;
-        b = _G.CUSTOM_CLASS_COLORS[class].b;
+        r = _G.CUSTOM_CLASS_COLORS[class].r
+        g = _G.CUSTOM_CLASS_COLORS[class].g
+        b = _G.CUSTOM_CLASS_COLORS[class].b
     elseif _G.UnitIsTapDenied(unit) then
         r = 0.6
         g = 0.6
@@ -78,9 +78,9 @@ local function GameTooltip_UnitColor(unit)
     else
         local reaction = _G.UnitReaction(unit, "player")
         if reaction then
-            r = _G.FACTION_BAR_COLORS[reaction].r;
-            g = _G.FACTION_BAR_COLORS[reaction].g;
-            b = _G.FACTION_BAR_COLORS[reaction].b;
+            r = _G.FACTION_BAR_COLORS[reaction].r
+            g = _G.FACTION_BAR_COLORS[reaction].g
+            b = _G.FACTION_BAR_COLORS[reaction].b
         end
     end
 
@@ -354,16 +354,16 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
                 if teamLevel then -- from WorldMapFrame.lua: 2522
                     if teamLevel < level then
                         --add 2 to the min level because it's really hard to fight higher level pets
-                        diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2);
+                        diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2)
                     elseif teamLevel > level then
-                        diff = _G.GetRelativeDifficultyColor(teamLevel, level);
+                        diff = _G.GetRelativeDifficultyColor(teamLevel, level)
                     else
                         --if your team is in the level range, no need to call the function, just make it yellow
-                        diff = _G.QuestDifficultyColors["difficult"];
+                        diff = _G.QuestDifficultyColors["difficult"]
                     end
                 else
                     --If you unlocked pet battles but have no team, level ranges are meaningless so make them grey
-                    diff = _G.QuestDifficultyColors["header"];
+                    diff = _G.QuestDifficultyColors["header"]
                 end
             else
                 diff = _G.GetCreatureDifficultyColor(level)
