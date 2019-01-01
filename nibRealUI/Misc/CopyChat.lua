@@ -34,7 +34,7 @@ local function copyChat(self)
     end
 
     if (lineCount > 0) then
-        dump.frame.TitleText:SetText(chat:GetName() .. " Copy Frame")
+        dump.frame.title:SetText(chat:GetName() .. " Copy Frame")
 
         dump:Display()
     end
