@@ -132,8 +132,7 @@ end)
 
 
 local autorunScripts = {
-    alert = false,
-    test = false,
+    test = true,
     testFrame = false,
     mouse = true,
 }
@@ -144,7 +143,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do
             if run then
-                ns.commands[command](ns.commands)
+                ns.commands[command](ns.commands, true)
             end
         end
     end
@@ -254,6 +253,22 @@ function ns.commands:mouse()
     end
 
     _G.C_Timer.NewTicker(pollingRate, mouse)
+end
+
+function ns.commands:test(isAutorun)
+    local AceConfig = _G.LibStub("AceConfig-3.0", true)
+    if AceConfig then
+        if ns.test.init then
+            ns.test.init = nil
+            AceConfig:RegisterOptionsTable("test", ns.test)
+        end
+
+        _G.C_Timer.After(0, function()
+            _G.LibStub("AceConfigDialog-3.0"):Open("test")
+        end)
+    else
+        _G.print("AceConfig does not exist.")
+    end
 end
 
 -- Slash Commands
