@@ -4,6 +4,10 @@ local _, private = ...
 local RealUI = private.RealUI
 local loc = RealUI.locale
 
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+local Color = Aurora.Color
+
 local ToolTipColors = {
     "|cFF269CFF",   -- Header 1
     "|cFFFF8000",   -- Header 2
@@ -258,22 +262,7 @@ local RealUI_HelpPlate = {
     },
 }
 
--- Skin Help Plate frames
-local function SkinHelpPlateFrames()
-    if _G.Aurora then
-        for i = 1, _G.HelpPlateTooltip:GetNumRegions() do
-            local region = _G.select(i, _G.HelpPlateTooltip:GetRegions())
-            if region:GetObjectType() == "Texture" then
-                region:SetTexture(nil)
-            end
-        end
-
-        _G.Aurora[1].SetBD(_G.HelpPlateTooltip)
-    end
-end
-
 local HP_CP
-
 local function RealUITutorial_HelpPlate_AnimateOut()
     if ( HP_CP ) then
         for i = 1, #_G.HELP_PLATE_BUTTONS do
@@ -363,7 +352,6 @@ function RealUI:ShowTutorial_Stage1()
     end
 
     _G.HelpPlate:EnableMouse(false)
-    SkinHelpPlateFrames()
 end
 
 local function createTextButton(name, parent)
@@ -372,6 +360,8 @@ local function createTextButton(name, parent)
     btn:SetFrameStrata("DIALOG")
     btn:SetFrameLevel(50)
     btn:SetSize(110, 50)
+    Base.SetBackdrop(btn, Color.button)
+    Base.SetHighlight(btn, "backdrop")
     return btn
 end
 
@@ -437,14 +427,6 @@ function RealUI:InitTutorial()
     btnClose:SetAttribute("type", "macro")
     btnClose:SetAttribute("macrotext", macroClose)
     btnClose:Hide()
-
-    -- Skin Buttons
-    local F = _G.Aurora[1]
-    if F then
-        F.Reskin(btnOpen)
-        F.Reskin(btnSkip)
-        F.Reskin(btnClose)
-    end
 end
 
 function _G.TestTutorial()

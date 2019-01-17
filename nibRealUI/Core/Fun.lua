@@ -8,7 +8,8 @@ local print, tonumber = _G.print, _G.tonumber
 local Clamp = _G.Clamp
 
 -- Libs --
-local F = _G.Aurora[1]
+local Aurora = _G.Aurora
+local Skin = Aurora.Skin
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -248,10 +249,7 @@ function RealUI:CreateCheckbox(name, parent, label, side, size)
     cbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
     cbg:SetFrameLevel(f:GetFrameLevel() - 1)
 
-    if F and F.ReskinCheck then
-        F.ReskinCheck(f)
-    end
-
+    Skin.ChatConfigCheckButtonTemplate(f)
     return f
 end
 
@@ -268,10 +266,7 @@ function RealUI:CreateTextButton(text, parent, template, width, height)
     end
     f:SetText(text)
 
-    if F and F.Reskin then
-        F.Reskin(f)
-    end
-
+    Skin[template](f)
     return f
 end
 
@@ -294,9 +289,7 @@ function RealUI:CreateWindow(name, width, height, closeOnEsc, draggable, hideClo
             f.close = _G.CreateFrame("Button", nil, f, "UIPanelCloseButton")
             f.close:SetPoint("TOPRIGHT", 6, 4)
             f.close:SetScript("OnClick", function(button) button:GetParent():Hide() end)
-            if F and F.ReskinClose then
-                F.ReskinClose(f.close)
-            end
+            Skin.UIPanelCloseButton(f.close)
         end
     end
 
