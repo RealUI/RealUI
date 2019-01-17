@@ -66,7 +66,7 @@ end
 
 local function GameTooltip_UnitColor(unit)
     local r, g, b
-    if _G.UnitIsPlayer(unit) then
+    if _G.UnitPlayerControlled(unit) then
         local _, class = _G.UnitClass(unit)
         r = _G.CUSTOM_CLASS_COLORS[class].r
         g = _G.CUSTOM_CLASS_COLORS[class].g
@@ -81,6 +81,10 @@ local function GameTooltip_UnitColor(unit)
             r = _G.FACTION_BAR_COLORS[reaction].r
             g = _G.FACTION_BAR_COLORS[reaction].g
             b = _G.FACTION_BAR_COLORS[reaction].b
+        else
+            r = 1.0
+            g = 1.0
+            b = 1.0
         end
     end
 
