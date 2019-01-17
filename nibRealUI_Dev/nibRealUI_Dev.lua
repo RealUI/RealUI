@@ -26,17 +26,23 @@ local BlizzAddons = {
     "Blizzard_SecureTransferUI",
     "Blizzard_Deprecated",
     "Blizzard_Console",
+    "Blizzard_Channels",
+    "Blizzard_UIWidgets",
+    "Blizzard_WorldMap",
 
     -- LoD
     "Blizzard_AchievementUI",
     "Blizzard_AdventureMap",
+    "Blizzard_AlliedRacesUI",
     "Blizzard_APIDocumentation",
     "Blizzard_ArchaeologyUI",
     "Blizzard_ArenaUI",
     "Blizzard_ArtifactUI",
     "Blizzard_AuctionUI",
+    "Blizzard_AzeriteRespecUI",
+    "Blizzard_AzeriteUI",
     "Blizzard_BarbershopUI",
-    "Blizzard_BattlefieldMinimap",
+    "Blizzard_BattlefieldMap",
     "Blizzard_BindingUI",
     "Blizzard_BlackMarketUI",
     "Blizzard_BoostTutorial",
@@ -47,6 +53,7 @@ local BlizzAddons = {
     "Blizzard_CombatLog",
     "Blizzard_CombatText",
     "Blizzard_Commentator",
+    "Blizzard_Communities",
     "Blizzard_Contribution",
     "Blizzard_DeathRecap",
     "Blizzard_DebugTools",
@@ -58,8 +65,11 @@ local BlizzAddons = {
     "Blizzard_GMSurveyUI",
     "Blizzard_GuildBankUI",
     "Blizzard_GuildControlUI",
+    "Blizzard_GuildRecruitmentUI",
     "Blizzard_GuildUI",
     "Blizzard_InspectUI",
+    "Blizzard_IslandsPartyPoseUI",
+    "Blizzard_IslandsQueueUI",
     "Blizzard_ItemSocketingUI",
     "Blizzard_ItemUpgradeUI",
     "Blizzard_LookingForGuildUI",
@@ -68,9 +78,12 @@ local BlizzAddons = {
     "Blizzard_MovePad",
     "Blizzard_ObliterumUI",
     "Blizzard_OrderHallUI",
+    "Blizzard_PartyPoseUI",
+    "Blizzard_PTRFeedback",
     "Blizzard_PVPUI",
     "Blizzard_QuestChoice",
     "Blizzard_RaidUI",
+    "Blizzard_ScrappingMachineUI",
     "Blizzard_SharedMapDataProviders",
     "Blizzard_SocialUI",
     "Blizzard_TalentUI",
@@ -81,6 +94,8 @@ local BlizzAddons = {
     "Blizzard_Tutorial",
     "Blizzard_TutorialTemplates",
     "Blizzard_VoidStorageUI",
+    "Blizzard_WarboardUI",
+    "Blizzard_WarfrontsPartyPoseUI",
 }
 
 for i = 1, #BlizzAddons do
@@ -132,7 +147,7 @@ end)
 
 
 local autorunScripts = {
-    test = true,
+    test = false,
     testFrame = false,
     mouse = true,
 }
