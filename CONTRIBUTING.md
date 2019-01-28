@@ -42,13 +42,15 @@ If you would like to contribute code, a [pull request](https://help.github.com/a
 
 Given the file structure of this project, it's recommended to setup symbolic links between the addons in the repo and your AddOns folder for the game. To facilitate this, [a script is available](https://gist.github.com/Gethe/aa3325ed88b2a92d23ec276c7383e034) to perform this setup. Be sure to update the file path to suit your own install directories. The script was written in Powershell, but it should be fairly simple to convert into another language if desired.
 
-Most of the libraries used are not included in the repo since they will get brought in when a new release is packaged. These libraries will need to be installed separately to ensure RealUI works properly. All of these are available via Curse.
-  
+Most of the libraries used are not included in the repo since they will get brought in when a new release is packaged. These libraries will need to be installed separately to ensure RealUI works properly. Most* of these are available via Curse.
+
   * [Ace3](https://mods.curse.com/addons/wow/ace3)
   * [AceGUI-3.0-SharedMediaWidets](https://mods.curse.com/addons/wow/ace-gui-3-0-shared-media-widgets)
   * [Aurora](https://mods.curse.com/addons/wow/278735-aurora)
   * [HereBeDragons](https://mods.curse.com/addons/wow/herebedragons)
   * [LibChatAnims](https://mods.curse.com/addons/wow/libchatanims)
+  * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)*
+  * [LibIconFonts](https://github.com/Gethe/LibIconFonts)*
   * [LibInspect](https://mods.curse.com/addons/wow/libinspect)
   * [LibItemUpgradeInfo-1.0](https://mods.curse.com/addons/wow/libitemupgradeinfo-1-0)
   * [LibQTip-1.0](https://mods.curse.com/addons/wow/libqtip-1-0)
