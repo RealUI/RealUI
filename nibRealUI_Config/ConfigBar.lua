@@ -321,7 +321,8 @@ local other do
 end
 local unitframes do
     debug("HuD UnitFrames")
-    local UnitFrames = RealUI:GetModule("UnitFrames")
+    local MODNAME = "UnitFrames"
+    local UnitFrames = RealUI:GetModule(MODNAME)
     local db = UnitFrames.db.profile
     unitframes = {
         name = _G.UNITFRAME_LABEL,
@@ -334,7 +335,7 @@ local unitframes do
                 name = L["General_Enabled"],
                 desc = L["General_EnabledDesc"]:format("RealUI ".._G.UNITFRAME_LABEL),
                 type = "toggle",
-                get = function(info) return RealUI:GetModuleEnabled("UnitFrames") end,
+                get = function(info) return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value)
                     RealUI:SetModuleEnabled("UnitFrames", value)
                     CloseHuDWindow()
@@ -344,6 +345,7 @@ local unitframes do
             general = {
                 name = _G.GENERAL,
                 type = "group",
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 10,
                 args = {
                     classColor = {
@@ -430,6 +432,7 @@ local unitframes do
                 name = L["UnitFrames_Units"],
                 type = "group",
                 childGroups = "tab",
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 20,
                 args = {
                     player = {
@@ -474,6 +477,7 @@ local unitframes do
                 name = _G.GROUPS,
                 type = "group",
                 childGroups = "tab",
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 30,
                 args = {
                     boss = {
@@ -972,19 +976,20 @@ local unitframes do
 end
 local castbars do
     debug("HuD CastBars")
-    local CastBars = RealUI:GetModule("CastBars")
+    local MODNAME = "CastBars"
+    local CastBars = RealUI:GetModule(MODNAME)
     local db = CastBars.db.profile
     castbars = {
-        name = L["CastBars"],
+        name = L[MODNAME],
         icon = [[Interface\AddOns\nibRealUI\Media\Config\ActionBars]],
         type = "group",
         order = 3,
         args = {
             enable = {
                 name = L["General_Enabled"],
-                desc = L["General_EnabledDesc"]:format(L["CastBars"]),
+                desc = L["General_EnabledDesc"]:format(L[MODNAME]),
                 type = "toggle",
-                get = function(info) return RealUI:GetModuleEnabled("CastBars") end,
+                get = function(info) return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value)
                     RealUI:SetModuleEnabled("CastBars", value)
                     CloseHuDWindow()
@@ -996,6 +1001,7 @@ local castbars do
                 name = L["HuD_ReverseBars"],
                 type = "group",
                 inline = true,
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 20,
                 args = {
                     player = {
@@ -1024,6 +1030,7 @@ local castbars do
                 name = _G.LOCALE_TEXT_LABEL,
                 type = "group",
                 inline = true,
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 50,
                 args = {
                     horizontal = {
@@ -1059,6 +1066,7 @@ local castbars do
                 name = "",
                 type = "group",
                 inline = true,
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 60,
                 args = {
                     player = {

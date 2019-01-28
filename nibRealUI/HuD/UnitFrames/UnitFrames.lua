@@ -157,6 +157,7 @@ function UnitFrames:OnInitialize()
 
     self.layoutSize = ndb.settings.hudSize
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
 end
 
 function UnitFrames:OnEnable()
@@ -165,6 +166,5 @@ function UnitFrames:OnEnable()
     oUF.colors.power.MANA = RealUI:ColorDesaturate(0.1, oUF.colors.power.MANA)
     oUF.colors.power.MANA = RealUI:ColorShift(-0.07, oUF.colors.power.MANA)
 
-    CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
     self:InitializeLayout()
 end
