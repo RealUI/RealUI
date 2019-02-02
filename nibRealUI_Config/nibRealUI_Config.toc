@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 80100
 ## Title: nibRealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
