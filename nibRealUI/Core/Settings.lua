@@ -124,6 +124,8 @@ local function RunStage1()
         RealUI:LoadAddonData()
     end
 
+    RealUI:LoadAddonProfiles()
+
     -- Make Chat windows transparent (again)
     _G.SetChatWindowAlpha(1, 0)
     _G.SetChatWindowAlpha(2, 0)
@@ -135,7 +137,7 @@ end
 local function CreateInstallWindow()
     debug("CreateInstallWindow")
 
-    local pointOfs = RealUI.isDev and 50 or 0
+    local pointOfs = RealUI.isDev and 500 or 0
     local installFrame = _G.CreateFrame("Button", "RealUI_Install", _G.UIParent, "SecureActionButtonTemplate")
     installFrame:SetPoint("TOPLEFT", pointOfs, -pointOfs)
     installFrame:SetPoint("BOTTOMRIGHT", -pointOfs, pointOfs)

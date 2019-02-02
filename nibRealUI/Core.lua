@@ -77,7 +77,7 @@ local defaults, charInit do
     }
     local spec = {}
     for specIndex = 1, #RealUI.charInfo.specs do
-        local _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.charInfo.class.id, specIndex)
+        local role = RealUI.charInfo.specs[specIndex].role
         debug("Spec info", specIndex, role)
         spec[specIndex] = role == "HEALER" and 2 or 1
     end
