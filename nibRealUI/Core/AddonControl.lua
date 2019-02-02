@@ -292,15 +292,15 @@ function RealUI:GetAddonControlSettings(addon)
 end
 
 function RealUI:DoesAddonMove(addon)
-    return db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use
+    return db.addonControl[addon] and (db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonLayout(addon)
-    return db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use
+    return db.addonControl[addon] and (db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonStyle(addon)
-    return db.addonControl[addon].control.style and db.addonControl[addon].profiles.base.use
+    return db.addonControl[addon] and (db.addonControl[addon].control.style and db.addonControl[addon].profiles.base.use)
 end
 
 -------------

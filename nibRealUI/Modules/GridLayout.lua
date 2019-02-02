@@ -23,7 +23,9 @@ end
 function GridLayout:OnEnable()
     self:debug("OnEnable")
 
-    RealUI:ToggleAddonPositionControl("Grid2", false)
+    if RealUI:DoesAddonMove("Grid2") then
+        RealUI:ToggleAddonPositionControl("Grid2", false)
+    end
     self:RegisterChatCommand("grid", "Grid2ChatCommand")
 end
 

@@ -3,7 +3,7 @@ local _, private = ...
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.AddOns.Grid2 = function()
+function RealUI.AddOns.Grid2()
     local namespaces = _G.Grid2DB.namespaces
     local Grid2Layout = namespaces.Grid2Layout.profiles
     Grid2Layout["RealUI-Healing"] = {
@@ -78,6 +78,9 @@ RealUI.AddOns.Grid2 = function()
         ["orientation"] = "HORIZONTAL",
     }
 
+    if not namespaces.Grid2RaidDebuffs.profiles then
+        namespaces.Grid2RaidDebuffs.profiles = {}
+    end
     local Grid2RaidDebuffs = namespaces.Grid2RaidDebuffs.profiles
     Grid2RaidDebuffs["RealUI-Healing"] = {
         ["enabledModules"] = {
