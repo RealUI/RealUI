@@ -13,20 +13,19 @@ function GridLayout:Grid2ChatCommand()
 end
 
 function GridLayout:OnInitialize()
-    if _G.Grid2 and _G.Grid2Layout and _G.Grid2Frame then
-        self:SetEnabledState(true)
-    else
-        self:SetEnabledState(false)
-    end
+    self:SetEnabledState(not not _G.Grid2)
 end
 
 function GridLayout:OnEnable()
     self:debug("OnEnable")
-
-    if RealUI:DoesAddonMove("Grid2") then
-        RealUI:ToggleAddonPositionControl("Grid2", false)
-    end
     self:RegisterChatCommand("grid", "Grid2ChatCommand")
+
+
+    local AddonControl = RealUI:GetModule("AddonControl")
+    if AddonControl.db.profile.addonControl.Grid2 then
+        AddonControl.db.profile.addonControl.Grid2 = nil
+        _G.StaticPopup_Show("RealUI_ResetAddonProfile", "Grid2")
+    end
 end
 
 function GridLayout:OnDisable()

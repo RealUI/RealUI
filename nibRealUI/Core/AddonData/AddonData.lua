@@ -5,6 +5,7 @@ local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
+local L = RealUI.L
 
 RealUI.AddOns = {}
 function RealUI:LoadAddonData()
@@ -32,3 +33,17 @@ function RealUI:LoadSpecificAddOnData(addon, skipReload)
     if skipReload then return end
     self:ReloadUIDialog()
 end
+
+_G.StaticPopupDialogs["RealUI_ResetAddonProfile"] = {
+    text = L["Patch_UpdateAddonSettings"],
+    button1 = _G.YES,
+    button2 = _G.NO,
+    OnAccept = function(self)
+        RealUI:LoadSpecificAddOnData(self.text.text_arg1)
+    end,
+    OnCancel = function() end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    notClosableByLogout = false,
+}
