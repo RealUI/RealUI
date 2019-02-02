@@ -17,7 +17,6 @@ local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local RealUIAddOns = {
     ["Bartender4"] =    {isAce = true, db = "Bartender4DB",     profKey = "profileKeys"},
-    ["Grid2"] =         {isAce = true, db = "Grid2DB",          profKey = "profileKeys"},
     ["Masque"] =        {isAce = true, db = "MasqueDB",         profKey = "profileKeys"},
     ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
@@ -31,7 +30,6 @@ local RealUIAddOnsOrder = {
     "Masque",
     "mikScrollingBattleText",
     "Bartender4",
-    "Grid2",
     "Raven",
     "Skada",
 }
@@ -369,16 +367,6 @@ function AddonControl:OnInitialize()
                     control = {
                         position = true,
                         style = false,
-                    },
-                },
-                ["Grid2"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI"},
-                        layout =        {use = true,    key = "Healing"},
-                    },
-                    control = {
-                        position = true,
-                        style = true,
                     },
                 },
                 ["Skada"] = {

@@ -228,12 +228,6 @@ function RealUI:SetLayout()
         AB:ApplyABSettings()
     end
 
-    -- Grid Layout changer
-    if self:GetModuleEnabled("GridLayout") then
-        local GL = self:GetModule("GridLayout", true)
-        if GL then GL:SettingsUpdate("RealUI:SetLayout") end
-    end
-
     -- FrameMover
     if self:GetModuleEnabled("FrameMover") then
         local FM = self:GetModule("FrameMover", true)
