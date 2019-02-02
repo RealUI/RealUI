@@ -149,12 +149,10 @@ function AddonControl:CreateOptionsFrame()
 
     local LayoutAddOns = {
         ["Bartender4"] = true,
-        ["Grid2"] = true,
     }
     local PositionAddOns = {
         ["DBM"] = true,
         ["Bartender4"] = true,
-        ["Grid2"] = true,
         ["Raven"] = true,
         ["mikScrollingBattleText"] = true,
     }
