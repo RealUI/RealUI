@@ -52,13 +52,7 @@ function ActionBars:ApplyABSettings(tag)
 
     local barSettings = db[RealUI.cLayout]
     local numTopBars = barSettings.centerPositions - 1
-    local numBotBars = 3 - numTopBars
     local padding = fixedSettings.buttonPadding
-
-    -- update grid position
-    if RealUI:DoesAddonMove("Grid2") then
-        ndb.positions[RealUI.cLayout]["GridBottomY"] = (buttonSizes.bars + padding) * numBotBars + 3
-    end
 
     local sidePositions
     if barSettings.sidePositions == 1 then

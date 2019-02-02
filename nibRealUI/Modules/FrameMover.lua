@@ -12,16 +12,8 @@ local MODNAME = "FrameMover"
 local FrameMover = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local EnteredWorld
-local FramesMoving
-
 local FrameList = {
     addons = {
-        grid2 = {
-            name = "Grid2",
-            hashealing = true,
-            frames = {[1] = {name = "Grid2LayoutFrame"},},
-            frameshealing = {[1] = {name = "Grid2LayoutFrame"},},
-        },
         raven = {
             name = "Raven",
             frames = {
@@ -81,7 +73,6 @@ FrameMover.FrameList = FrameList
 
 local isAddonControl = {
     raven = "Raven",
-    grid2 = "Grid2"
 }
 FrameMover.isAddonControl = isAddonControl
 
@@ -102,8 +93,6 @@ local function MoveFrameGroup(FramesTable, DBTable)
     FrameMover:debug("MoveFrameGroup")
     local FrameDB
     for idx = 1, #FramesTable do
-        FramesMoving = true
-
         local frame = _G[FramesTable[idx].name]
         if not frame then return end
 
@@ -116,7 +105,6 @@ local function MoveFrameGroup(FramesTable, DBTable)
         end
 
         if FrameDB.scale then frame:SetScale(FrameDB.scale) end
-        FramesMoving = false
     end
 end
 FrameMover.MoveFrameGroup = MoveFrameGroup
@@ -200,17 +188,6 @@ local function Hook_Raven()
     if _G.RavenBarGroupBuffs then _G.RavenBarGroupBuffs:SetClampedToScreen(false) end
 end
 
--- Grid2 - Top stop LayoutFrame re-anchoring itself to UIParent
-local function Hook_Grid2()
-    if not _G.Grid2LayoutFrame then return end
-    _G.hooksecurefunc(_G.Grid2LayoutFrame, "SetPoint", function(...)
-        FrameMover:debug("Grid2LayoutFrame:SetPoint")
-        if FramesMoving then return end
-        FrameMover:debug("SetPoint", ...)
-        FrameMover:MoveAddons("grid2")
-    end)
-end
-
 function FrameMover:RefreshMod()
     db = self.db.profile
     self:MoveUIFrames()
@@ -221,7 +198,6 @@ function FrameMover:PLAYER_ENTERING_WORLD()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
 
     if not EnteredWorld then
-        Hook_Grid2()
         Hook_Raven()
         Hook_VSI()
 
@@ -241,15 +217,6 @@ function FrameMover:OnInitialize()
                 ["**"] = {
                     move = true,
                     healing = false,
-                },
-                grid2 = {
-                    healing = true,
-                    frames = {
-                        [1] = {name = "Grid2LayoutFrame", parent = "RealUIPositionersGridBottom", point = "BOTTOM", rpoint = "BOTTOM", x = -0.5, y = 0},
-                    },
-                    frameshealing = {
-                        [1] = {name = "Grid2LayoutFrame", parent = "RealUIPositionersGridTop", point = "TOP", rpoint = "TOP", x = -0.5, y = 0},
-                    },
                 },
                 raven = {
                     frames = {

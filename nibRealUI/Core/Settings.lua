@@ -121,22 +121,7 @@ local function RunStage1()
         dbg.tutorial.stage = 0
 
         ---- Addon Data
-        -- Initialize Grid2
-        if _G.Grid2 and _G.Grid2.LoadConfig then
-            _G.Grid2:LoadConfig()
-        end
-
-        -- Addon settings
         RealUI:LoadAddonData()
-
-        ---- Extra addon tweaks
-        -- Grid - Healing frame height
-        local _, resHeight = RealUI:GetResolutionVals()
-        if resHeight < 900 then
-            if _G.Grid2DB and _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"] then
-                _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"]["frameHeight"] = 25
-            end
-        end
     end
 
     -- Make Chat windows transparent (again)
