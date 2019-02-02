@@ -274,7 +274,7 @@ function ns.commands:test(isAutorun)
     local AceConfig = _G.LibStub("AceConfig-3.0", true)
     if AceConfig then
         if ns.test.init then
-            ns.test.init = nil
+            ns.test.init()
             AceConfig:RegisterOptionsTable("test", ns.test)
         end
 
