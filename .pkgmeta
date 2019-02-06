@@ -81,7 +81,7 @@ externals:
 
     RealUI_Skins/Aurora:
         url: https://github.com/Haleth/Aurora.git
-        tag: 8.1.0.3
+        tag: 8.1.0.4
     RealUI_Skins/Libs/AceDB-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
         tag: latest
