@@ -1343,12 +1343,13 @@ function Infobar:CreateBlocks()
                 itemSlots.lowSlot = lowSlot
                 if not block.alert then
                     block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                    _G.Aurora.Skin.MicroButtonAlertTemplate(block.alert)
                 end
                 local alert = block.alert
                 if lowDur < 0.1 and not alert.isHidden then
-                    Scale.Size(alert, 177, alert.Text:GetHeight() + 42)
-                    Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", -30, 4)
-                    Scale.Point(alert, "BOTTOM", block, "TOP", 30, 18)
+                    Scale.Size(alert, 100, alert.Text:GetHeight() + 42)
+                    Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
+                    Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
                     alert.CloseButton:SetScript("OnClick", function(btn)
                         alert:Hide()
                         alert.isHidden = true

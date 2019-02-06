@@ -275,7 +275,6 @@ function ClassResource:ToggleConfigMode(val)
             else
                 for i = 1, MAX_RUNES do
                     self.points[i]:SetValue(i / MAX_RUNES)
-                    self.points:PostUpdate(self.points[i], i, 0, MAX_RUNES, i == MAX_RUNES)
                 end
             end
         end

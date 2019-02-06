@@ -321,7 +321,8 @@ local other do
 end
 local unitframes do
     debug("HuD UnitFrames")
-    local UnitFrames = RealUI:GetModule("UnitFrames")
+    local MODNAME = "UnitFrames"
+    local UnitFrames = RealUI:GetModule(MODNAME)
     local db = UnitFrames.db.profile
     unitframes = {
         name = _G.UNITFRAME_LABEL,
@@ -334,7 +335,7 @@ local unitframes do
                 name = L["General_Enabled"],
                 desc = L["General_EnabledDesc"]:format("RealUI ".._G.UNITFRAME_LABEL),
                 type = "toggle",
-                get = function(info) return RealUI:GetModuleEnabled("UnitFrames") end,
+                get = function(info) return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value)
                     RealUI:SetModuleEnabled("UnitFrames", value)
                     CloseHuDWindow()
@@ -344,6 +345,7 @@ local unitframes do
             general = {
                 name = _G.GENERAL,
                 type = "group",
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 10,
                 args = {
                     classColor = {
@@ -430,6 +432,7 @@ local unitframes do
                 name = L["UnitFrames_Units"],
                 type = "group",
                 childGroups = "tab",
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 20,
                 args = {
                     player = {
@@ -474,6 +477,7 @@ local unitframes do
                 name = _G.GROUPS,
                 type = "group",
                 childGroups = "tab",
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 30,
                 args = {
                     boss = {
@@ -609,42 +613,6 @@ local unitframes do
                                     _G.Grid2:OnChatCommand("")
                                 end,
                                 order = 0,
-                            },
-                            layout = {
-                                name = L["Control_Layout"],
-                                desc = L["Control_LayoutDesc"]:format("Grid2"),
-                                type = "toggle",
-                                disabled = not _G.Grid2,
-                                get = function() return RealUI:GetModuleEnabled("GridLayout") end,
-                                set = function(info, value)
-                                    RealUI:SetModuleEnabled("GridLayout", value)
-                                end,
-                                order = 10,
-                            },
-                            position = {
-                                name = L["Control_Position"],
-                                desc = L["Control_PositionDesc"]:format("Grid2"),
-                                type = "toggle",
-                                disabled = not _G.Grid2,
-                                get = function() return RealUI:DoesAddonMove("Grid2") end,
-                                set = function(info, value)
-                                    RealUI:ToggleAddonPositionControl("Grid2", value)
-                                end,
-                                order = 20,
-                            },
-                            dps = {
-                                name = L["Layout_DPSTank"],
-                                type = "group",
-                                disabled = not _G.Grid2,
-                                order = 30,
-                                args = {}
-                            },
-                            healing = {
-                                name = L["Layout_Healing"],
-                                type = "group",
-                                disabled = not _G.Grid2,
-                                order = 40,
-                                args = {}
                             },
                         }
                     },
@@ -819,172 +787,25 @@ local unitframes do
                 set = function(info, value) db.boss.gap = value end,
                 order = 6,
             }
-        else
-            local GridLayout = RealUI:GetModule("GridLayout")
-            local glDB = GridLayout.db.profile
-            for i, layout in next, {"dps", "healing"} do
-                local args = group.args[layout].args
-                local anchor = (layout == "dps") and "Bottom" or "Top"
-                args.horizontal = {
-                    name = L["HuD_Horizontal"],
-                    disabled = function() return not RealUI:DoesAddonMove("Grid2") end,
-                    type = "range",
-                    width = "full",
-                    min = -round(uiWidth * 0.4),
-                    max = round(uiWidth * 0.4),
-                    step = 1,
-                    bigStep = 4,
-                    get = function(info) return ndb.positions[RealUI.cLayout]["Grid"..anchor.."X"] end,
-                    set = function(info, value)
-                        ndb.positions[RealUI.cLayout]["Grid"..anchor.."X"] = value
-                        RealUI:UpdatePositioners()
-                    end,
-                    order = 4,
-                }
-                args.vertical = {
-                    name = L["HuD_Vertical"],
-                    disabled = function() return not RealUI:DoesAddonMove("Grid2") end,
-                    type = "range",
-                    width = "full",
-                    min = layout == "dps" and 0 or -round(uiWidth * 0.2),
-                    max = round(uiHeight * 0.5),
-                    step = 1,
-                    bigStep = 2,
-                    get = function(info) return ndb.positions[RealUI.cLayout]["Grid"..anchor.."Y"] end,
-                    set = function(info, value)
-                        ndb.positions[RealUI.cLayout]["Grid"..anchor.."Y"] = value
-                        RealUI:UpdatePositioners()
-                    end,
-                    order = 6,
-                }
-                args.horizGroups = {
-                    name = _G.COMPACT_UNIT_FRAME_PROFILE_HORIZONTALGROUPS,
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "group",
-                    inline = true,
-                    order = 10,
-                    args = {
-                        smallGroups = {
-                            name = L["Raid_SmallGroup"],
-                            desc = L["Raid_SmallGroupDesc"],
-                            type = "toggle",
-                            get = function() return glDB[layout].hGroups.normal end,
-                            set = function(info, value)
-                                glDB[layout].hGroups.normal = value
-                                GridLayout:SettingsUpdate()
-                            end,
-                            order = 10,
-                        },
-                        largeGroups = {
-                            name = L["Raid_LargeGroup"],
-                            desc = L["Raid_LargeGroupDesc"],
-                            type = "toggle",
-                            get = function() return glDB[layout].hGroups.raid end,
-                            set = function(info, value)
-                                glDB[layout].hGroups.raid = value
-                                GridLayout:SettingsUpdate()
-                            end,
-                            order = 20,
-                        },
-                    },
-                }
-                args.showPets = {
-                    name = _G.SHOW_PARTY_PETS_TEXT,
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "toggle",
-                    get = function() return glDB[layout].showPet end,
-                    set = function(info, value)
-                        glDB[layout].showPet = value
-                        GridLayout:SettingsUpdate()
-                    end,
-                    order = 20,
-                }
-                args.showSolo = {
-                    name = L["Raid_ShowSolo"],
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "toggle",
-                    get = function() return glDB[layout].showSolo end,
-                    set = function(info, value)
-                        glDB[layout].showSolo = value
-                        GridLayout:SettingsUpdate()
-                    end,
-                    order = 30,
-                }
-                local prof = (layout == "dps") and "RealUI" or "RealUI-Healing"
-                local Grid2DB = _G.Grid2DB and _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"][prof]
-                args.height = {
-                    name = _G.RAID_FRAMES_HEIGHT,
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "range",
-                    min = 20, max = 80, step = 1,
-                    get = function(info)
-                        debug("Get Grid Height", Grid2DB, Grid2DB and Grid2DB["frameHeight"])
-                        return Grid2DB and Grid2DB["frameHeight"]
-                    end,
-                    set = function(info, value)
-                        debug("Set Grid Height", Grid2DB, Grid2DB and Grid2DB["frameHeight"])
-                        if Grid2DB and Grid2DB["frameHeight"] then
-                            Grid2DB["frameHeight"] = value
-                        end
-                        GridLayout:SettingsUpdate()
-                    end,
-                    order = 40,
-                }
-                args.width = {
-                    name = _G.RAID_FRAMES_WIDTH,
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "range",
-                    min = 40, max = 110, step = 1,
-                    get = function(info) return glDB[layout].width.normal end,
-                    set = function(info, value)
-                        glDB[layout].width.normal = value
-                        GridLayout:SettingsUpdate()
-                    end,
-                    order = 40,
-                }
-                args.width30 = {
-                    name = L["Raid_30Width"],
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "range",
-                    min = 40, max = 110, step = 1,
-                    get = function(info) return glDB[layout].width[30] end,
-                    set = function(info, value)
-                        glDB[layout].width[30] = value
-                        GridLayout:SettingsUpdate()
-                    end,
-                    order = 40,
-                }
-                args.width40 = {
-                    name = L["Raid_40Width"],
-                    disabled = function() return not RealUI:GetModuleEnabled("GridLayout") end,
-                    type = "range",
-                    min = 40, max = 110, step = 1,
-                    get = function(info) return glDB[layout].width[40] end,
-                    set = function(info, value)
-                        glDB[layout].width[40] = value
-                        GridLayout:SettingsUpdate()
-                    end,
-                    order = 40,
-                }
-            end
         end
     end
 end
 local castbars do
     debug("HuD CastBars")
-    local CastBars = RealUI:GetModule("CastBars")
+    local MODNAME = "CastBars"
+    local CastBars = RealUI:GetModule(MODNAME)
     local db = CastBars.db.profile
     castbars = {
-        name = L["CastBars"],
+        name = L[MODNAME],
         icon = [[Interface\AddOns\nibRealUI\Media\Config\ActionBars]],
         type = "group",
         order = 3,
         args = {
             enable = {
                 name = L["General_Enabled"],
-                desc = L["General_EnabledDesc"]:format(L["CastBars"]),
+                desc = L["General_EnabledDesc"]:format(L[MODNAME]),
                 type = "toggle",
-                get = function(info) return RealUI:GetModuleEnabled("CastBars") end,
+                get = function(info) return RealUI:GetModuleEnabled(MODNAME) end,
                 set = function(info, value)
                     RealUI:SetModuleEnabled("CastBars", value)
                     CloseHuDWindow()
@@ -996,6 +817,7 @@ local castbars do
                 name = L["HuD_ReverseBars"],
                 type = "group",
                 inline = true,
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 20,
                 args = {
                     player = {
@@ -1024,6 +846,7 @@ local castbars do
                 name = _G.LOCALE_TEXT_LABEL,
                 type = "group",
                 inline = true,
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 50,
                 args = {
                     horizontal = {
@@ -1059,6 +882,7 @@ local castbars do
                 name = "",
                 type = "group",
                 inline = true,
+                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
                 order = 60,
                 args = {
                     player = {

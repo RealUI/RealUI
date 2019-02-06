@@ -17,7 +17,6 @@ local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local RealUIAddOns = {
     ["Bartender4"] =    {isAce = true, db = "Bartender4DB",     profKey = "profileKeys"},
-    ["Grid2"] =         {isAce = true, db = "Grid2DB",          profKey = "profileKeys"},
     ["Masque"] =        {isAce = true, db = "MasqueDB",         profKey = "profileKeys"},
     ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
@@ -31,7 +30,6 @@ local RealUIAddOnsOrder = {
     "Masque",
     "mikScrollingBattleText",
     "Bartender4",
-    "Grid2",
     "Raven",
     "Skada",
 }
@@ -97,9 +95,7 @@ end
 function AddonControl:CreateOptionsFrame()
     if self.options then return end
 
-    local C
-    if _G.Aurora then C = _G.Aurora[2] end
-
+    local color = _G.Aurora.Color.highlight
     self.options = RealUI:CreateWindow("RealUIAddonControlOptions", 330, 240, true, true)
     local acO = self.options
         acO:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
@@ -123,28 +119,28 @@ function AddonControl:CreateOptionsFrame()
         lAddon:SetPoint("TOPLEFT", acO, "TOPLEFT", 12, -30)
         lAddon:SetText("AddOn")
         lAddon:SetWidth(130)
-        lAddon:SetTextColor(C.r, C.g, C.b)
+        lAddon:SetTextColor(color:GetRGB())
 
     -- Label Base
     local lBase = RealUI:CreateFS(acO, "CENTER", "small")
         lBase:SetPoint("LEFT", lAddon, "RIGHT", 0, 0)
         lBase:SetText("Base")
         lBase:SetWidth(40)
-        lBase:SetTextColor(C.r, C.g, C.b)
+        lBase:SetTextColor(color:GetRGB())
 
     -- Label Layout
     local lLayout = RealUI:CreateFS(acO, "CENTER", "small")
         lLayout:SetPoint("LEFT", lBase, "RIGHT", 0, 0)
         lLayout:SetText("Layout")
         lLayout:SetWidth(40)
-        lLayout:SetTextColor(C.r, C.g, C.b)
+        lLayout:SetTextColor(color:GetRGB())
 
     -- Label Position
     local lPosition = RealUI:CreateFS(acO, "CENTER", "small")
         lPosition:SetPoint("LEFT", lLayout, "RIGHT", 0, 0)
         lPosition:SetText("Pos")
         lPosition:SetWidth(40)
-        lPosition:SetTextColor(C.r, C.g, C.b)
+        lPosition:SetTextColor(color:GetRGB())
 
     local acAddonSect = _G.CreateFrame("Frame", nil, acO)
     acAddonSect:SetPoint("TOPLEFT", acO, "TOPLEFT", 6, -42)
@@ -153,12 +149,10 @@ function AddonControl:CreateOptionsFrame()
 
     local LayoutAddOns = {
         ["Bartender4"] = true,
-        ["Grid2"] = true,
     }
     local PositionAddOns = {
         ["DBM"] = true,
         ["Bartender4"] = true,
-        ["Grid2"] = true,
         ["Raven"] = true,
         ["mikScrollingBattleText"] = true,
     }
@@ -296,15 +290,15 @@ function RealUI:GetAddonControlSettings(addon)
 end
 
 function RealUI:DoesAddonMove(addon)
-    return db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use
+    return db.addonControl[addon] and (db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonLayout(addon)
-    return db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use
+    return db.addonControl[addon] and (db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonStyle(addon)
-    return db.addonControl[addon].control.style and db.addonControl[addon].profiles.base.use
+    return db.addonControl[addon] and (db.addonControl[addon].control.style and db.addonControl[addon].profiles.base.use)
 end
 
 -------------
@@ -371,16 +365,6 @@ function AddonControl:OnInitialize()
                     control = {
                         position = true,
                         style = false,
-                    },
-                },
-                ["Grid2"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI"},
-                        layout =        {use = true,    key = "Healing"},
-                    },
-                    control = {
-                        position = true,
-                        style = true,
                     },
                 },
                 ["Skada"] = {

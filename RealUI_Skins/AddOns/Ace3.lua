@@ -257,10 +257,9 @@ function private.AddOns.Ace3()
                 Base.SetBackdrop(bg, frameColor)
 
                 widget.colorSwatch:Hide()
-                local texture, checkers = select(2, widget.frame:GetRegions())
-                texture:Hide()
-                checkers:SetAllPoints(bg)
-                checkers:SetDrawLayer("BACKGROUND")
+                widget.colorSwatch.background:Hide()
+                widget.colorSwatch.checkers:SetAllPoints(bg)
+                widget.colorSwatch.checkers:SetDrawLayer("BACKGROUND")
             end,
             ["Dropdown-Item"] = function(widget)
                 local highlight = widget.highlight

@@ -125,6 +125,8 @@ local function CreateHealthBar(parent, info)
     Health.step, Health.warn = CreateSteps(parent, height, info)
     Health.barType = "health"
     Health.colorClass = db.overlay.classColor
+    Health.colorTapping = true
+    Health.colorDisconnected = true
     Health.colorHealth = true
     Health.frequentUpdates = true
 

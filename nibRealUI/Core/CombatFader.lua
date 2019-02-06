@@ -150,6 +150,7 @@ local keyList = {
     outofcombat = L["CombatFade_NoCombat"],
 }
 function CombatFader:AddFadeConfig(mod, configDB, startOrder, notInline)
+    if not RealUI:GetModuleEnabled(mod) then return end
     _G.assert(modules[mod], mod.." has not yet been registered.")
     local modDB = modules[mod].options
 

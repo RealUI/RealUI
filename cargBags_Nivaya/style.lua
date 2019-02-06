@@ -499,7 +499,7 @@ function MyContainer:OnCreate(name, settings)
         if tBag or tBank then
             local close = _G.CreateFrame("Button", nil, self, "UIPanelCloseButton")
             Skin.UIPanelCloseButton(close)
-            close:SetPoint("TOPRIGHT", 1, 1)
+            close:SetPoint("TOPRIGHT", 10, 10)
             close:SetScript("OnClick", function(container)
                 if cbNivaya:AtBank() then
                     _G.CloseBankFrame()

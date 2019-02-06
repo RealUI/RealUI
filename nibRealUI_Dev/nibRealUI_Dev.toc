@@ -1,10 +1,10 @@
-## Interface: 80000
+## Interface: 80100
 ## Title: nibRealUI Dev
 ## Notes: Development assistant for RealUI
 ## RequiredDeps: RealUI_Bugs
 ## LoadWith: RealUI_Bugs
 
-nibRealUI_Dev.lua
+../Aurora/test.lua
 
-alert.lua
+nibRealUI_Dev.lua
 test.lua

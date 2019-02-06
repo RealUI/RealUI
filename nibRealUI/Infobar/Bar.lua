@@ -718,7 +718,8 @@ end
 --------------------
 function Infobar:CreateBar()
     local frame = _G.CreateFrame("Frame", "RealUI_Infobar", _G.UIParent)
-    frame:SetPoint("BOTTOM", _G.UIParent)
+    frame:SetPoint("BOTTOMLEFT", _G.UIParent)
+    frame:SetPoint("BOTTOMRIGHT", _G.UIParent)
     Scale.Size(frame, RealUI.GetInterfaceSize(), BAR_HEIGHT)
     frame:SetFrameStrata("LOW")
     frame:SetFrameLevel(0)

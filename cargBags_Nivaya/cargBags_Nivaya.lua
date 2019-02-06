@@ -5,7 +5,7 @@ local cargBags = ns.cargBags
 local next, ipairs = _G.next, _G.ipairs
 
 local Aurora = _G.Aurora
-local Base = Aurora.Base
+local Base, Skin = Aurora.Base, Aurora.Skin
 
 local cargBags_Nivaya = _G.CreateFrame("Frame", ADDON_NAME, _G.UIParent)
 cargBags_Nivaya:SetScript("OnEvent", function(self, event, ...) self[event](self, event, ...) end)
@@ -768,10 +768,9 @@ Event:SetScript('OnEvent', function(self, event, ...)
                 bags.bank.reagentBtn:Show()
                 buyReagent:Hide()
             end)
-            if _G.Aurora then
-                _G.Aurora[1].Reskin(buyReagent)
-            end
             buyReagent:RegisterEvent("REAGENTBANK_PURCHASED")
+
+            Skin.UIPanelButtonTemplate(buyReagent)
         end
 
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")

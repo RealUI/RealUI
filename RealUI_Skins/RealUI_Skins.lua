@@ -415,6 +415,10 @@ function private.OnLoad()
             private.AddOns.Ace3()
         end
 
+        -- Since we load Blizzard_WorldMap before RealUI_Skins, this frame is created before we
+        -- get to hook the creation functions. As such, we need to run this to finish it's skin.
+        Skin.NavBarTemplate(_G.WorldMapFrame.NavBar)
+
         --f.f = "f" -- error for testing RealUI_Bugs
     end
 

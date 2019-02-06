@@ -121,23 +121,10 @@ local function RunStage1()
         dbg.tutorial.stage = 0
 
         ---- Addon Data
-        -- Initialize Grid2
-        if _G.Grid2 and _G.Grid2.LoadConfig then
-            _G.Grid2:LoadConfig()
-        end
-
-        -- Addon settings
         RealUI:LoadAddonData()
-
-        ---- Extra addon tweaks
-        -- Grid - Healing frame height
-        local _, resHeight = RealUI:GetResolutionVals()
-        if resHeight < 900 then
-            if _G.Grid2DB and _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"] then
-                _G.Grid2DB["namespaces"]["Grid2Frame"]["profiles"]["RealUI-Healing"]["frameHeight"] = 25
-            end
-        end
     end
+
+    RealUI:LoadAddonProfiles()
 
     -- Make Chat windows transparent (again)
     _G.SetChatWindowAlpha(1, 0)
@@ -150,7 +137,7 @@ end
 local function CreateInstallWindow()
     debug("CreateInstallWindow")
 
-    local pointOfs = RealUI.isDev and 50 or 0
+    local pointOfs = RealUI.isDev and 500 or 0
     local installFrame = _G.CreateFrame("Button", "RealUI_Install", _G.UIParent, "SecureActionButtonTemplate")
     installFrame:SetPoint("TOPLEFT", pointOfs, -pointOfs)
     installFrame:SetPoint("BOTTOMRIGHT", -pointOfs, pointOfs)

@@ -26,10 +26,6 @@ RealUI.defaultPositions = {
         ["UFHorizontal"] = 200,
         ["ActionBarsY"] = -161.5,
         ["ActionBarsBotY"] = 16,
-        ["GridTopX"] = 0,
-        ["GridTopY"] = -197.5,
-        ["GridBottomX"] = 0,
-        ["GridBottomY"] = 58,
         ["CastBarPlayerX"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetX"] = 0,
@@ -44,10 +40,6 @@ RealUI.defaultPositions = {
         ["UFHorizontal"] = 200,
         ["ActionBarsY"] = -115.5,
         ["ActionBarsBotY"] = 16,
-        ["GridTopX"] = 0,
-        ["GridTopY"] = -197.5,
-        ["GridBottomX"] = 0,
-        ["GridBottomY"] = 58,
         ["CastBarPlayerX"] = 0,
         ["CastBarPlayerY"] = -20,
         ["CastBarTargetX"] = 0,
@@ -64,7 +56,6 @@ RealUI.hudSizeOffsets = {
         ["UFHorizontal"] = 0,
         ["SpellAlertWidth"] = 0,
         ["ActionBarsY"] = 0,
-        ["GridTopY"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetY"] = 0,
     },
@@ -72,7 +63,6 @@ RealUI.hudSizeOffsets = {
         ["UFHorizontal"] = 100,
         ["SpellAlertWidth"] = 100,
         ["ActionBarsY"] = -20,
-        ["GridTopY"] = -20,
         ["CastBarPlayerY"] = -20,
         ["CastBarTargetY"] = -20,
     },
@@ -87,7 +77,7 @@ local defaults, charInit do
     }
     local spec = {}
     for specIndex = 1, #RealUI.charInfo.specs do
-        local _, _, _, _, role = _G.GetSpecializationInfoForClassID(RealUI.charInfo.class.id, specIndex)
+        local role = RealUI.charInfo.specs[specIndex].role
         debug("Spec info", specIndex, role)
         spec[specIndex] = role == "HEALER" and 2 or 1
     end
@@ -226,12 +216,6 @@ function RealUI:SetLayout()
         local AB = self:GetModule("ActionBars", true)
         AB:RefreshDoodads()
         AB:ApplyABSettings()
-    end
-
-    -- Grid Layout changer
-    if self:GetModuleEnabled("GridLayout") then
-        local GL = self:GetModule("GridLayout", true)
-        if GL then GL:SettingsUpdate("RealUI:SetLayout") end
     end
 
     -- FrameMover

@@ -26,17 +26,23 @@ local BlizzAddons = {
     "Blizzard_SecureTransferUI",
     "Blizzard_Deprecated",
     "Blizzard_Console",
+    "Blizzard_Channels",
+    "Blizzard_UIWidgets",
+    "Blizzard_WorldMap",
 
     -- LoD
     "Blizzard_AchievementUI",
     "Blizzard_AdventureMap",
+    "Blizzard_AlliedRacesUI",
     "Blizzard_APIDocumentation",
     "Blizzard_ArchaeologyUI",
     "Blizzard_ArenaUI",
     "Blizzard_ArtifactUI",
     "Blizzard_AuctionUI",
+    "Blizzard_AzeriteRespecUI",
+    "Blizzard_AzeriteUI",
     "Blizzard_BarbershopUI",
-    "Blizzard_BattlefieldMinimap",
+    "Blizzard_BattlefieldMap",
     "Blizzard_BindingUI",
     "Blizzard_BlackMarketUI",
     "Blizzard_BoostTutorial",
@@ -47,6 +53,7 @@ local BlizzAddons = {
     "Blizzard_CombatLog",
     "Blizzard_CombatText",
     "Blizzard_Commentator",
+    "Blizzard_Communities",
     "Blizzard_Contribution",
     "Blizzard_DeathRecap",
     "Blizzard_DebugTools",
@@ -58,8 +65,11 @@ local BlizzAddons = {
     "Blizzard_GMSurveyUI",
     "Blizzard_GuildBankUI",
     "Blizzard_GuildControlUI",
+    "Blizzard_GuildRecruitmentUI",
     "Blizzard_GuildUI",
     "Blizzard_InspectUI",
+    "Blizzard_IslandsPartyPoseUI",
+    "Blizzard_IslandsQueueUI",
     "Blizzard_ItemSocketingUI",
     "Blizzard_ItemUpgradeUI",
     "Blizzard_LookingForGuildUI",
@@ -68,9 +78,12 @@ local BlizzAddons = {
     "Blizzard_MovePad",
     "Blizzard_ObliterumUI",
     "Blizzard_OrderHallUI",
+    "Blizzard_PartyPoseUI",
+    "Blizzard_PTRFeedback",
     "Blizzard_PVPUI",
     "Blizzard_QuestChoice",
     "Blizzard_RaidUI",
+    "Blizzard_ScrappingMachineUI",
     "Blizzard_SharedMapDataProviders",
     "Blizzard_SocialUI",
     "Blizzard_TalentUI",
@@ -81,6 +94,8 @@ local BlizzAddons = {
     "Blizzard_Tutorial",
     "Blizzard_TutorialTemplates",
     "Blizzard_VoidStorageUI",
+    "Blizzard_WarboardUI",
+    "Blizzard_WarfrontsPartyPoseUI",
 }
 
 for i = 1, #BlizzAddons do
@@ -132,7 +147,6 @@ end)
 
 
 local autorunScripts = {
-    alert = false,
     test = false,
     testFrame = false,
     mouse = true,
@@ -144,7 +158,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
     if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do
             if run then
-                ns.commands[command](ns.commands)
+                ns.commands[command](ns.commands, true)
             end
         end
     end
@@ -254,6 +268,22 @@ function ns.commands:mouse()
     end
 
     _G.C_Timer.NewTicker(pollingRate, mouse)
+end
+
+function ns.commands:test(isAutorun)
+    local AceConfig = _G.LibStub("AceConfig-3.0", true)
+    if AceConfig then
+        if ns.test.init then
+            ns.test.init()
+            AceConfig:RegisterOptionsTable("test", ns.test)
+        end
+
+        _G.C_Timer.After(0, function()
+            _G.LibStub("AceConfigDialog-3.0"):Open("test")
+        end)
+    else
+        _G.print("AceConfig does not exist.")
+    end
 end
 
 -- Slash Commands

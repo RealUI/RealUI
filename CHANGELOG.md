@@ -1,3 +1,24 @@
+## [2.0.9] - 2019-02-02 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_Skins
+
+### Changed ###
+
+  * Updated Grid2 settings
+  * Grid2 is no longer tied to Addon Control
+
+### Fixed ###
+
+  * Death Knights would get an error when enabling config mode.
+  * An error when opening the chat copy frame.
+  * Disabling the unit frames would cause an error when opening the config.
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
 ## [2.0.8] - 2018-12-24 ##
 ### Modified AddOns ###
 
@@ -197,6 +218,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.9]: https://github.com/RealUI/RealUI/compare/2.0.8...2.0.9
 [2.0.8]: https://github.com/RealUI/RealUI/compare/2.0.7...2.0.8
 [2.0.7]: https://github.com/RealUI/RealUI/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/RealUI/RealUI/compare/2.0.5...2.0.6
