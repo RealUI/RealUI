@@ -10,11 +10,6 @@ local MODNAME = "EventNotifier"
 local EventNotifier = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 -- For maps where we don't want notifications of vignettes
-local VignetteExclusionMapIDs = {
-    [971] = true, -- Lunarfall: Alliance garrison
-    [976] = true, -- Frostwall: Horde garrison
-    [1021] = true, -- Scenario: The Broken Shore
-}
 local excludedUIMapIDs = {
     [579] = true, -- Lunarfall: Alliance garrison
     [585] = true, -- Frostwall: Horde garrison
@@ -102,28 +97,6 @@ function EventNotifier:VIGNETTE_MINIMAP_UPDATED(event, vignetteGUID, onMinimap)
         self.lastMinimapRare.time = _G.GetTime()
         self.lastMinimapRare.id = vignetteGUID
     end
-end
-function EventNotifier:VIGNETTE_ADDED(event, vigID)
-    self:debug("VIGNETTE_ADDED", vigID)
-    if not(db.checkMinimapRares) or VignetteExclusionMapIDs[_G.GetCurrentMapAreaID()] then return end
-
-    if (vigID ~= self.lastMinimapRare.id) then
-        -- Vignette Info C_Vignettes.GetVignetteInfoFromInstanceID(C_Vignettes.GetVignetteGUID(1))
-        local _, _, name, objectIcon = _G.C_Vignettes.GetVignetteInfoFromInstanceID(vigID)
-        self:debug("info", name, objectIcon)
-        local left, right, top, bottom = _G.GetObjectIconTextureCoords(objectIcon)
-        self:debug("points", left, right, top, bottom)
-
-        -- Notify
-        if _G.GetTime() > (self.lastMinimapRare.time + SOUND_TIMEOUT) then
-            _G.PlaySound(_G.SOUNDKIT.RAID_WARNING)
-        end
-        RealUI:Notification(name, true, "- has appeared on the MiniMap!", nil, [[Interface\MINIMAP\ObjectIconsAtlas]], left, right, top, bottom)
-    end
-
-    -- Set last Vignette data
-    self.lastMinimapRare.time = _G.GetTime()
-    self.lastMinimapRare.id = vigID
 end
 
 function EventNotifier:CALENDAR_UPDATE_PENDING_INVITES()
