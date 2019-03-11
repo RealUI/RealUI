@@ -86,16 +86,17 @@ function EventNotifier:VIGNETTE_MINIMAP_UPDATED(event, vignetteGUID, onMinimap)
 
     self:debug("time, id", self.lastMinimapRare.time, self.lastMinimapRare.id)
     if onMinimap then
-        if vignetteGUID ~= self.lastMinimapRare.id then
-            local vignetteInfo = _G.C_VignetteInfo.GetVignetteInfo(vignetteGUID)
+        local vignetteInfo = _G.C_VignetteInfo.GetVignetteInfo(vignetteGUID)
+        if vignetteInfo and vignetteGUID ~= self.lastMinimapRare.id then
             RealUI:Notification(vignetteInfo.name, true, "- has appeared on the MiniMap!", nil, vignetteInfo.atlasName)
+            self.lastMinimapRare.id = vignetteGUID
 
-            if _G.GetTime() > (self.lastMinimapRare.time + SOUND_TIMEOUT) then
+            local time = _G.GetTime()
+            if time > (self.lastMinimapRare.time + SOUND_TIMEOUT) then
                 _G.PlaySound(_G.SOUNDKIT.RAID_WARNING)
+                self.lastMinimapRare.time = time
             end
         end
-        self.lastMinimapRare.time = _G.GetTime()
-        self.lastMinimapRare.id = vignetteGUID
     end
 end
 
