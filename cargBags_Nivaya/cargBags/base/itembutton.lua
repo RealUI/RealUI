@@ -42,7 +42,7 @@ function ItemButton:GetTemplate(bagID)
     elseif bagID then
         return "ContainerFrameItemButtonTemplate", _G["ContainerFrame"..bagID + 1]
     else
-        return "ItemButtonTemplate"
+        return ""
     end
 end
 
@@ -84,7 +84,7 @@ function ItemButton:Create(tpl, parent)
     impl.numSlots = (impl.numSlots or 0) + 1
     local name = ("%sSlot%d"):format(impl.name, impl.numSlots)
 
-    local button = _G.setmetatable(_G.CreateFrame("Button", name, parent, tpl), self.__index)
+    local button = _G.setmetatable(_G.CreateFrame("ItemButton", name, parent, tpl), self.__index)
 
     if button.Scaffold then button:Scaffold(tpl) end
     if button.OnCreate then button:OnCreate(tpl) end

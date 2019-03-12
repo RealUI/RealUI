@@ -691,7 +691,7 @@ function MyContainer:OnCreate(name, settings)
 
     -- Item drop target
     if (tBag or tBank or tReagent) then
-        self.DropTarget = _G.CreateFrame("Button", self.name.."DropTarget", self, "ItemButtonTemplate")
+        self.DropTarget = _G.CreateFrame("ItemButton", self.name.."DropTarget", self)
         local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
         if dtNT then dtNT:SetTexture(nil) end
 
@@ -782,10 +782,3 @@ function MyButton:OnAdd()
         end
     end)
 end
-
-------------------------------------------
--- BagButton specific
-------------------------------------------
-local BagButton = cbNivaya:GetClass("BagButton", true, "BagButton")
-
-function BagButton:OnCreate() self:GetCheckedTexture():SetVertexColor(1, 0.8, 0, 0.8) end
