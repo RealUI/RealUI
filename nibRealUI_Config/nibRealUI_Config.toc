@@ -2,7 +2,7 @@
 ## Title: nibRealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
-## Version: 2.0.9
+## Version: 2.0.10
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI
 ## LoadOnDemand: 1
