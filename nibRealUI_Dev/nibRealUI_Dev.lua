@@ -270,22 +270,6 @@ function ns.commands:mouse()
     _G.C_Timer.NewTicker(pollingRate, mouse)
 end
 
-function ns.commands:test(isAutorun)
-    local AceConfig = _G.LibStub("AceConfig-3.0", true)
-    if AceConfig then
-        if ns.test.init then
-            ns.test.init()
-            AceConfig:RegisterOptionsTable("test", ns.test)
-        end
-
-        _G.C_Timer.After(0, function()
-            _G.LibStub("AceConfigDialog-3.0"):Open("test")
-        end)
-    else
-        _G.print("AceConfig does not exist.")
-    end
-end
-
 -- Slash Commands
 _G.SLASH_DEV1 = "/dev"
 function _G.SlashCmdList.DEV(msg, editBox)

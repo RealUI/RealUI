@@ -55,7 +55,7 @@ function BagButton:Create(bagID)
     buttonNum = buttonNum + 1
     local name = addon .. "BagButton" .. buttonNum
 
-    local button = _G.setmetatable(_G.CreateFrame("CheckButton", name, nil, "ItemButtonTemplate"), self.__index)
+    local button = _G.setmetatable(_G.CreateFrame("ItemButton", name, nil), self.__index)
 
     local invID = _G.ContainerIDToInventoryID(bagID)
     button.invID = invID
@@ -74,7 +74,13 @@ function BagButton:Create(bagID)
 
     button:RegisterForDrag("LeftButton", "RightButton")
     button:RegisterForClicks("anyUp")
-    button:SetCheckedTexture(self.checkedTex, "ADD")
+
+    local checked = button:CreateTexture(nil, "OVERLAY")
+    checked:SetTexture(self.checkedTex)
+    checked:SetVertexColor(1, 0.8, 0, 0.8)
+    checked:SetBlendMode("ADD")
+    checked:SetAllPoints()
+    button.checked = checked
 
     button:SetSize(32, 32)
 
@@ -99,6 +105,10 @@ function BagButton:Create(bagID)
     return button
 end
 
+function BagButton:GetBagID()
+    return self.bagID
+end
+
 function BagButton:Update()
     local icon = _G.GetInventoryItemTexture("player", self.GetInventorySlot and self:GetInventorySlot() or self.invID)
     self.Icon:SetTexture(icon or self.bgTex)
@@ -108,7 +118,7 @@ function BagButton:Update()
         if self.bagID - _G.NUM_BAG_SLOTS <= _G.GetNumBankSlots() then
             self.Icon:SetVertexColor(1, 1, 1)
             self.tooltipText = _G.BANK_BAG
-            self.notBought = nil
+            self.notBought = false
         else
             self.Icon:SetVertexColor(1, 0, 0)
             self.tooltipText = _G.BANK_BAG_PURCHASE
@@ -116,7 +126,7 @@ function BagButton:Update()
         end
     end
 
-    self:SetChecked(not self.hidden and not self.notBought)
+    self.checked:SetShown(not self.hidden and not self.notBought)
 
     if self.OnUpdate then self:OnUpdate() end
 end
@@ -159,7 +169,7 @@ end
 
 function BagButton:OnClick()
     if self.notBought then
-        self:SetChecked(nil)
+        self.checked:Hide()
         _G.BankFrame.nextSlotCost = _G.GetBankSlotCost(_G.GetNumBankSlots())
         return _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
     end

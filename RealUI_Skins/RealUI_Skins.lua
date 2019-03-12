@@ -269,7 +269,7 @@ function private.OnLoad()
         private.font[fontType] = font.path or LSM:Fetch("font", font.name)
     end
 
-    local Base, Scale = Aurora.Base, Aurora.Scale
+    local Base = Aurora.Base
     local Hook, Skin = Aurora.Hook, Aurora.Skin
     local Color = Aurora.Color
 
@@ -323,27 +323,6 @@ function private.OnLoad()
     C.media.arrowRight = [[Interface\AddOns\RealUI_Skins\Aurora\media\arrow-right-active]]
     C.media.checked = [[Interface\AddOns\RealUI_Skins\Aurora\media\CheckButtonHilight]]
     C.media.roleIcons = [[Interface\AddOns\RealUI_Skins\Aurora\media\UI-LFG-ICON-ROLES]]
-
-    if private.disabled.uiScale then
-        RealUI.Scale = ScaleAPI
-    else
-        Aurora.Scale.Value = ScaleAPI.Value
-        RealUI.Scale = Scale
-    end
-    local positionMethods = {
-        "RawSetSize",
-        "RawSetHeight",
-        "RawSetWidth",
-        "RawSetPoint",
-        "RawSetStartPoint",
-        "RawSetEndPoint",
-        "RawSetThickness",
-        "RawSetAtlas",
-    }
-    for _, methodName in next, positionMethods do
-        RealUI.Scale[methodName] = Scale[methodName]
-    end
-
 
     function Hook.GameTooltip_SetBackdropStyle(self, style)
         if not self.IsEmbedded then
@@ -513,3 +492,16 @@ end
 function ScaleAPI.StartPoint(self, ...)
     self:SetStartPoint(_G.unpack(ScaleArgs(self, "StartPoint", ...)))
 end
+
+-- Raw methods --
+local positionMethods = {
+    "Size",
+    "Height",
+    "Width",
+    "Point",
+}
+local mt = _G.getmetatable(_G.UIParent).__index
+for _, method in next, positionMethods do
+    ScaleAPI["Raw"..method] = mt["Set"..method]
+end
+RealUI.Scale = ScaleAPI

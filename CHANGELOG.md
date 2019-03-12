@@ -1,3 +1,22 @@
+﻿## [2.0.10] - 2019-03-12 ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya
+  * nibRealUI
+  * RealUI_Skins
+
+### Changed ###
+
+  * Updated for patch 8.1.5
+
+### Fixed ###
+
+  * Errors when moving Infobar blocks.
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
 ## [2.0.9] - 2019-02-02 ##
 ### Modified AddOns ###
 
@@ -218,6 +237,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.10]: https://github.com/RealUI/RealUI/compare/2.0.9...2.0.10
 [2.0.9]: https://github.com/RealUI/RealUI/compare/2.0.8...2.0.9
 [2.0.8]: https://github.com/RealUI/RealUI/compare/2.0.7...2.0.8
 [2.0.7]: https://github.com/RealUI/RealUI/compare/2.0.6...2.0.7

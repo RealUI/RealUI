@@ -4,7 +4,7 @@
 ## RequiredDeps: RealUI_Bugs
 ## LoadWith: RealUI_Bugs
 
-../Aurora/test.lua
-
 nibRealUI_Dev.lua
 test.lua
+
+../Aurora/test.lua
