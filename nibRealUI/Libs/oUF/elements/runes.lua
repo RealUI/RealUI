@@ -180,7 +180,7 @@ end
 
 local function Enable(self, unit)
 	local element = self.Runes
-	if(element and unit == 'player') then
+	if(element and UnitIsUnit(unit, 'player')) then
 		element.__owner = self
 		element.ForceUpdate = ForceUpdate
 
@@ -191,7 +191,7 @@ local function Enable(self, unit)
 			end
 		end
 
-		self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', Path, true)
+		self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', Path)
 		self:RegisterEvent('RUNE_POWER_UPDATE', Path, true)
 
 		return true
