@@ -73,9 +73,6 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
         local itemLink = _G.GetInventoryItemLink("player", slotID)
         if itemLink then
             local itemLevel = RealUI.GetItemLevel(itemLink)
-            private.debug("ItemSlotButton_Update", slotID, self:GetName(), itemLevel)
-            private.debug("itemLink", _G.strsplit("|", itemLink))
-
             if itemLevel > 1 then
                 local quality = _G.GetInventoryItemQuality("player", slotID)
                 local color = _G.ITEM_QUALITY_COLORS[quality]
@@ -127,7 +124,6 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
 
                     local gems = {tonumber(gem1), tonumber(gem2), tonumber(gem3), tonumber(gem4)}
                     local numSockets, hasMeta = GetNumSockets(itemLink)
-                    private.debug("gems, sockets", #gems, numSockets)
                     local socketIdx = 0
                     if #gems > 0 then
                         for i, gem in next, gems do
