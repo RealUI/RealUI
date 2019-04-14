@@ -9,7 +9,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Misc\DragEmAll.lua"/>
     <Script file="Misc\Misc.lua"/>
     <Script file="Misc\GuildFinderSort.lua"/>
-    <Script file="Misc\LFGQueueTimer.lua"/>
     <Script file="Misc\Screenshots.lua"/>
     <Script file="Misc\StopAddonSpam.lua"/>
 
