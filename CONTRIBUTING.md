@@ -46,7 +46,7 @@ Most of the libraries used are not included in the repo since they will get brou
 
   * [Ace3](https://mods.curse.com/addons/wow/ace3)
   * [AceGUI-3.0-SharedMediaWidets](https://mods.curse.com/addons/wow/ace-gui-3-0-shared-media-widgets)
-  * [Aurora](https://mods.curse.com/addons/wow/278735-aurora)
+  * [Aurora](https://mods.curse.com/addons/wow/aurora)
   * [HereBeDragons](https://mods.curse.com/addons/wow/herebedragons)
   * [LibChatAnims](https://mods.curse.com/addons/wow/libchatanims)
   * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)*
@@ -59,6 +59,7 @@ Most of the libraries used are not included in the repo since they will get brou
   * [LibStrataFix](https://mods.curse.com/addons/wow/libstratafix)
   * [LibTextDump-1.0](https://mods.curse.com/addons/wow/libtextdump-1-0)
   * [LibWindow-1.1](https://mods.curse.com/addons/wow/libwindow-1-1)
+  * [oUF](https://mods.curse.com/addons/wow/ouf)
   * [UTF8](https://mods.curse.com/addons/wow/utf8)
 
 

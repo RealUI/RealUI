@@ -53,6 +53,9 @@ externals:
     nibRealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
+    nibRealUI/Libs/oUF:
+        url: https://github.com/oUF-wow/oUF.git
+        tag: latest
     nibRealUI/Libs/UTF8:
         url: https://repos.wowace.com/wow/utf8/trunk
         tag: latest
@@ -103,7 +106,3 @@ move-folders:
     nibRealUI/nibRealUI_Config: nibRealUI_Config
     nibRealUI/RealUI_Bugs: RealUI_Bugs
     nibRealUI/RealUI_Skins: RealUI_Skins
-
-tools-used:
-    - ouf
-

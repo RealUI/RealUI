@@ -19,9 +19,9 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Include file="LibDropDown\embed.xml" />
     <Include file="LibIconFonts\lib.xml" />
     <Include file="LibQTip-1.0\lib.xml" />
+    <Include file="oUF\oUF.xml"/>
     @end-non-debug@-->
     <Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
-    <Include file="oUF\oUF.xml"/>
 
     <!-- Fixes -->
     <Script file="Fixes\BlizzBugsSuck.lua"/>

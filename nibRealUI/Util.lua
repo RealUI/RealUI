@@ -1,3 +1,5 @@
+local _, private = ...
+
 -- Lua Globals --
 -- luacheck: globals floor type pcall tonumber
 
@@ -11,6 +13,10 @@ function RealUI:RegisterAddOnDB(addon, db)
 end
 function RealUI:GetAddOnDB(addon)
     return addonDB[addon]
+end
+
+if not private.oUF then
+    private.oUF = _G.oUF
 end
 
 
@@ -47,7 +53,7 @@ function RealUI.GetColorString(red, green, blue)
 end
 
 function RealUI.GetDurabilityColor(curDura, maxDura)
-    return _G.oUFembed.RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
+    return private.oUF.RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
 end
 
 

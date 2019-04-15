@@ -1,5 +1,5 @@
-:: Run luacheck 
-call luacheck . -q || pause && EXIT 
+:: Run luacheck
+call luacheck . -q || pause && EXIT
 
 :: Increment version
 powershell .\utils\update.ps1
@@ -20,6 +20,6 @@ powershell .\utils\update.ps1
 ::   -p curse-id      Set the project id used on CurseForge for localization and uploading.
 ::   -w wowi-id       Set the addon id used on WoWInterface for uploading.
 ::   -g game-version  Set the game version to use for CurseForge uploading.
-bash -c "./utils/release.sh -do -p 88269 -w 16068"
+bash -c "../../packager/release.sh -do -p 88269 -w 16068"
 
 pause

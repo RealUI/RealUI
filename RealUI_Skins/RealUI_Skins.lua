@@ -502,6 +502,6 @@ local positionMethods = {
 }
 local mt = _G.getmetatable(_G.UIParent).__index
 for _, method in next, positionMethods do
-    ScaleAPI["Raw"..method] = mt["Set"..method]
+    ScaleAPI["RawSet"..method] = mt["Set"..method]
 end
 RealUI.Scale = ScaleAPI
