@@ -28,7 +28,7 @@ local BlizzAddons = {
     "Blizzard_Deprecated",
     "Blizzard_Console",
     "Blizzard_Channels",
-    "Blizzard_PTRFeedback", -- Only on PTR/Beta
+    "Blizzard_PTRFeedback", -- Only loaded on PTR/Beta
     "Blizzard_WorldMap",
     "Blizzard_PVPMatch",
 
