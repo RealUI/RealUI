@@ -12,7 +12,7 @@ ns.commands = {}
 
 --_G.GAME_LOCALE ="deDE"
 local BlizzAddons = {
-    -- Not LoD, in order of load
+    -- Not LoD, listed in order of load
     "Blizzard_CompactRaidFrames",
     "Blizzard_ClientSavedVariables",
     "Blizzard_CUFProfiles",
@@ -20,6 +20,7 @@ local BlizzAddons = {
     "Blizzard_TokenUI",
     "Blizzard_StoreUI", -- can be loaded in GlueXML
     "Blizzard_AuthChallengeUI", -- can be loaded in GlueXML
+    "Blizzard_UIWidgets",
     "Blizzard_ObjectiveTracker",
     "Blizzard_WowTokenUI",
     "Blizzard_NamePlates",
@@ -27,8 +28,9 @@ local BlizzAddons = {
     "Blizzard_Deprecated",
     "Blizzard_Console",
     "Blizzard_Channels",
-    "Blizzard_UIWidgets",
+    "Blizzard_PTRFeedback", -- Only on PTR/Beta
     "Blizzard_WorldMap",
+    "Blizzard_PVPMatch",
 
     -- LoD
     "Blizzard_AchievementUI",
@@ -39,6 +41,7 @@ local BlizzAddons = {
     "Blizzard_ArenaUI",
     "Blizzard_ArtifactUI",
     "Blizzard_AuctionUI",
+    "Blizzard_AzeriteEssenceUI",
     "Blizzard_AzeriteRespecUI",
     "Blizzard_AzeriteUI",
     "Blizzard_BarbershopUI",
@@ -79,7 +82,6 @@ local BlizzAddons = {
     "Blizzard_ObliterumUI",
     "Blizzard_OrderHallUI",
     "Blizzard_PartyPoseUI",
-    "Blizzard_PTRFeedback",
     "Blizzard_PVPUI",
     "Blizzard_QuestChoice",
     "Blizzard_RaidUI",
