@@ -27,7 +27,7 @@ local other do
     local dbActionBars = ActionBars.db.profile
     other = {
         name = _G.BINDING_HEADER_OTHER,
-        icon = [[Interface\AddOns\nibRealUI\Media\Config\Other]],
+        icon = "sliders",
         type = "group",
         childGroups = "tab",
         order = 1,
@@ -326,7 +326,7 @@ local unitframes do
     local db = UnitFrames.db.profile
     unitframes = {
         name = _G.UNITFRAME_LABEL,
-        icon = [[Interface\AddOns\nibRealUI\Media\Config\Grid]],
+        icon = "th",
         type = "group",
         childGroups = "tab",
         order = 2,
@@ -797,7 +797,7 @@ local castbars do
     local db = CastBars.db.profile
     castbars = {
         name = L[MODNAME],
-        icon = [[Interface\AddOns\nibRealUI\Media\Config\ActionBars]],
+        icon = "bolt",
         type = "group",
         order = 3,
         args = {
@@ -1074,7 +1074,7 @@ local classresource do
 
         classresource = {
             name = L["Resource"],
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Advanced]],
+            icon = "cogs",
             type = "group",
             childGroups = "tab",
             order = 4,
@@ -1117,7 +1117,7 @@ options.HuD = {
         classresource = classresource,
         close = { -- This is for button creation
             name = _G.CLOSE,
-            icon = [[Interface\AddOns\nibRealUI\Media\Config\Close]],
+            icon = "close",
             type = "group",
             order = -1,
             args = {

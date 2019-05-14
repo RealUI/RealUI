@@ -11,6 +11,9 @@ local ACD = _G.LibStub("AceConfigDialog-3.0")
 local F, C = _G.Aurora[1], _G.Aurora[2]
 local r, g, b = C.r, C.g, C.b
 
+local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
+fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
+
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
@@ -345,17 +348,19 @@ local function InitializeOptions()
             Scale.Point(btn, "TOPLEFT", prevFrame, "TOPRIGHT")
             btn:SetScript("OnClick", tab.onclick or tabOnClick)
 
-            local icon = btn:CreateTexture(nil, "ARTWORK")
-            icon:SetTexture(tab.icon)
-            Scale.Size(icon, 32, 32)
-            Scale.Point(icon, "CENTER", 0, 4)
+            local icon = btn:CreateFontString(nil, "ARTWORK")
+            icon:SetFont(fa.path, 40)
+            icon:SetText(fa[tab.icon])
+            Scale.Point(icon, "TOPLEFT", 0, 0)
+            Scale.Point(icon, "BOTTOMRIGHT", 0, 20)
         end
 
-        local text = btn:CreateFontString()
+        local text = btn:CreateFontString(nil, "ARTWORK")
         text:SetFontObject(_G.Game16Font)
-        Scale.Point(text, "BOTTOMLEFT", 0, 5)
-        Scale.Point(text, "BOTTOMRIGHT", 0, 5)
+        text:SetSpacing(-1)
         text:SetText(tab.name)
+        Scale.Point(text, "TOPLEFT", btn, "BOTTOMLEFT", 0, 23)
+        Scale.Point(text, "BOTTOMRIGHT", 0, 0)
         btn.text = text
 
         _G.tinsert(hudConfig, btn)
