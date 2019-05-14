@@ -153,9 +153,9 @@ local autorunScripts = {
     testFrame = false,
     mouse = true,
 }
-local frame = _G.CreateFrame("Frame")
-frame:RegisterAllEvents()
-frame:SetScript("OnEvent", function(self, event, ...)
+local eventFrame = _G.CreateFrame("Frame")
+eventFrame:RegisterAllEvents()
+eventFrame:SetScript("OnEvent", function(self, event, ...)
     lastEvent = event
     if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do
@@ -241,9 +241,14 @@ function ns.commands:mouse()
     local r, g, b = 1, 1, 1
     local pollingRate, numLines = 0.05, 15
 
+    local frame = _G.CreateFrame("Frame", nil, _G.UIParent)
+    frame:SetFrameStrata("DIALOG")
+    frame:SetSize(1, 1)
+    frame:SetPoint("TOPLEFT")
+
     local lines = {}
     for i = 1, numLines do
-        local line = _G.UIParent:CreateLine()
+        local line = frame:CreateLine()
         line:SetThickness(_G.Lerp(5, 1, (i - 1)/numLines))
         line:SetColorTexture(1, 1, 1)
 
@@ -251,7 +256,7 @@ function ns.commands:mouse()
     end
 
     local function mouse()
-        local scale = _G.UIParent:GetEffectiveScale()
+        local scale = frame:GetEffectiveScale()
         local startX, startY = _G.GetCursorPosition()
 
         for i = 1, numLines do
@@ -261,8 +266,8 @@ function ns.commands:mouse()
             info.line:SetGradientAlpha("HORIZONTAL", r, g, b, startA, r, g, b, endA)
 
             local endX, endY = info.x, info.y
-            info.line:SetStartPoint("BOTTOMLEFT", startX / scale, startY / scale)
-            info.line:SetEndPoint("BOTTOMLEFT", endX / scale, endY / scale)
+            info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX / scale, startY / scale)
+            info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX / scale, endY / scale)
 
             info.x, info.y = startX, startY
             startX, startY = endX, endY
