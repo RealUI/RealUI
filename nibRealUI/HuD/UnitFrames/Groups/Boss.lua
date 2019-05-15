@@ -5,7 +5,8 @@ local floor = _G.math.floor
 
 -- Libs --
 local oUF = private.oUF
-local F = _G.Aurora[1]
+local Base = _G.Aurora.Base
+local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -51,7 +52,7 @@ local function AttachStatusBar(icon, unit)
     sBarBG:SetPoint("TOPLEFT", sBar, -1, 1)
     sBarBG:SetPoint("BOTTOMRIGHT", sBar, 1, -1)
     sBarBG:SetFrameLevel(icon:GetFrameLevel() + 1)
-    F.CreateBD(sBarBG)
+    Base.SetBackdrop(sBarBG, Color.black, 0.7)
 
     local timeStr = icon:CreateFontString(nil, "OVERLAY")
     timeStr:SetFontObject("NumberFont_Outline_Med")
@@ -164,7 +165,7 @@ local function CreateAuras(parent)
     end
     auras.PostCreateIcon = function(self, button)
         UnitFrames:debug("Boss:PostCreateIcon", self, button)
-        F.ReskinIcon(button.icon)
+        Base.CropIcon(button.icon, button)
         button.count:SetFontObject("NumberFont_Outline_Med")
     end
     auras.PostUpdateIcon = function(self, unit, icon, index)
@@ -212,7 +213,7 @@ end
 
 local function CreateBoss(self)
     self:SetSize(135, 24)
-    F.CreateBD(self, 0.7)
+    Base.SetBackdrop(self, Color.black, 0.7)
 
     CreateHealthBar(self)
     CreateTags(self)
@@ -251,7 +252,7 @@ end)
 
 function RealUI:BossConfig(toggle)
     for i = 1, _G.MAX_BOSS_FRAMES do
-        local f = _G["RealUIBossFrame" .. i]
+        local f = _G["RealUIArenaFrame" .. i]
         if toggle then
             if not f.__realunit then
                 f.__realunit = f:GetAttribute("unit") or f.unit

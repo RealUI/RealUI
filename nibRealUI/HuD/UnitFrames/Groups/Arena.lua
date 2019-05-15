@@ -5,7 +5,8 @@ local floor = _G.math.floor
 
 -- Libs --
 local oUF = private.oUF
-local F = _G.Aurora[1]
+local Base = _G.Aurora.Base
+local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -63,8 +64,8 @@ end
 --[[ Parts ]]--
 local function CreateHealthBar(parent)
     parent.Health = _G.CreateFrame("StatusBar", nil, parent)
-    parent.Health:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 3)
-    parent.Health:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
+    parent.Health:SetPoint("BOTTOMLEFT", 1, 4)
+    parent.Health:SetPoint("TOPRIGHT", -1, -1)
     parent.Health:SetStatusBarTexture(RealUI.media.textures.plain)
     local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
@@ -75,8 +76,6 @@ local function CreateHealthBar(parent)
             self:SetValue(max - self:GetValue())
         end
     end
-
-    F.CreateBDFrame(parent.Health, 0)
 
     function parent.Health:PostUpdateArenaPreparation(specID)
         local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
@@ -99,20 +98,18 @@ local function CreateTags(parent)
 end
 
 local function CreatePowerBar(parent)
-    parent.Power = _G.CreateFrame("StatusBar", nil, parent)
-    parent.Power:SetFrameStrata("MEDIUM")
-    parent.Power:SetFrameLevel(6)
-    parent.Power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
-    parent.Power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 0, 2)
-    parent.Power:SetStatusBarTexture(RealUI.media.textures.plain)
-    local color = parent.colors.power["MANA"]
-    parent.Power:SetStatusBarColor(color[1], color[2], color[3], color[4])
-    parent.Power.colorPower = true
-    parent.Power.PostUpdate = function(bar, unit, cur, min, max)
+    local power = _G.CreateFrame("StatusBar", nil, parent)
+    power:SetFrameStrata("MEDIUM")
+    power:SetFrameLevel(6)
+    power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 1)
+    power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 3)
+    power:SetStatusBarTexture(RealUI.media.textures.plain)
+    power.colorPower = true
+    power.PostUpdate = function(bar, unit, cur, min, max)
         bar:SetShown(max > 0)
     end
 
-    F.CreateBDFrame(parent.Power, 0)
+    parent.Power = power
 end
 
 local function CreateTrinket(parent)
@@ -146,7 +143,7 @@ local function CreateTrinket(parent)
     trinket.icon = trinket:CreateTexture(nil, "BACKGROUND")
     trinket.icon:SetAllPoints()
     trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-Horde]])
-    F.ReskinIcon(trinket.icon)
+    Base.CropIcon(trinket.icon, trinket)
 
     trinket.timer = _G.CreateFrame("StatusBar", nil, trinket)
     trinket.timer:SetMinMaxValues(0, 1)
@@ -156,7 +153,7 @@ local function CreateTrinket(parent)
     trinket.timer:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1, 1)
     trinket.timer:SetPoint("TOPRIGHT", trinket, "BOTTOMRIGHT", -1, 3)
     trinket.timer:SetFrameLevel(trinket:GetFrameLevel() + 2)
-    F.CreateBDFrame(trinket.timer)
+    Base.SetBackdrop(trinket.timer, Color.frame)
 
     trinket.text = trinket:CreateFontString(nil, "OVERLAY")
     trinket.text:SetFontObject("NumberFont_Outline_Med")
@@ -180,7 +177,7 @@ end
 local function CreateArena(self)
     --print("CreateArena", self.unit)
     self:SetSize(135, 22)
-    F.CreateBD(self, 0.7)
+    Base.SetBackdrop(self, Color.frame, 0.7)
 
     CreateHealthBar(self)
     CreateTags(self)

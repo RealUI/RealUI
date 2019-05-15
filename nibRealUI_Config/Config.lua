@@ -8,8 +8,9 @@ local next = _G.next
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
 local ACD = _G.LibStub("AceConfigDialog-3.0")
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local Base = _G.Aurora.Base
+local Skin = _G.Aurora.Skin
+local Color = _G.Aurora.Color
 
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
 fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
@@ -66,6 +67,7 @@ function RealUI:HuDTestMode(doTestMode)
     if not _G.ObjectiveTrackerFrame.collapsed then
         _G.ObjectiveTrackerFrame:SetShown(not doTestMode)
     end
+
     -- Boss Frames
     RealUI:BossConfig(doTestMode)
 
@@ -162,9 +164,7 @@ local hudConfig, hudToggle do
 
     -- Highlight frame
     local highlight = _G.CreateFrame("Frame", "RealUIHuDConfig", hudConfig)
-    F.CreateBD(highlight, 0.0)
-    highlight:SetBackdropColor(r, g, b, 0.3)
-    highlight:SetBackdropBorderColor(r, g, b)
+    Base.SetBackdrop(highlight, Color.highlight)
     highlight:Hide()
     hudConfig.highlight = highlight
 
@@ -213,7 +213,7 @@ local hudConfig, hudToggle do
         end
     end
 
-    F.CreateBD(hudConfig)
+    Base.SetBackdrop(hudConfig)
     Scale.Point(_G.RealUIUINotifications, "TOP", hudConfig, "BOTTOM")
     RealUI.RegisterModdedFrame(hudConfig)
 end
@@ -331,10 +331,11 @@ local function InitializeOptions()
         if i == 1 then
             Scale.Point(btn, "TOPLEFT")
             local check = _G.CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
-            check:SetHitRectInsets(-10, -10, -1, -21)
+            Skin.UICheckButtonTemplate(check)
             Scale.Point(check, "CENTER", 0, 10)
+            check:SetHitRectInsets(-10, -10, -1, -21)
+
             check:SetAttribute("type1", "macro")
-            F.ReskinCheck(check)
             _G.SecureHandlerWrapScript(check, "OnClick", check, [[
                 if self:GetID() == 1 then
                     self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUI:HuDTestMode(false)"))
