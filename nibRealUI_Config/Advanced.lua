@@ -2409,7 +2409,7 @@ local uiTweaks do
                                     get = function(info) return db.poi.fadeEdge end,
                                     set = function(info, value)
                                         db.poi.fadeEdge = value
-                                        MinimapAdv:POIUpdate()
+                                        MinimapAdv:UpdatePOIVisibility()
                                     end,
                                     order = 10,
                                 },
@@ -2437,7 +2437,7 @@ local uiTweaks do
                                     get = function(info) return db.poi.icons.scale end,
                                     set = function(info, value)
                                         db.poi.icons.scale = value
-                                        MinimapAdv:POIUpdate()
+                                        MinimapAdv:UpdatePOIVisibility()
                                     end,
                                     order = 10,
                                 },
@@ -2445,11 +2445,11 @@ local uiTweaks do
                                     name = "Opacity",
                                     type = "range",
                                     isPercent = true,
-                                    min = 0.1, max = 1, step = 0.05,
+                                    min = 0.5, max = 1, step = 0.01,
                                     get = function(info) return db.poi.icons.opacity end,
                                     set = function(info, value)
                                         db.poi.icons.opacity = value
-                                        MinimapAdv:POIUpdate()
+                                        MinimapAdv:UpdatePOIVisibility()
                                     end,
                                     order = 10,
                                 },

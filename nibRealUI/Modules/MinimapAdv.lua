@@ -35,10 +35,6 @@ local Textures = {
 }
 
 local MMFrames = MinimapAdv.Frames
-
-local pois = {}
-MinimapAdv.pois = pois
-
 local ExpandedState = 0
 local UpdateProcessing = false
 
@@ -88,12 +84,12 @@ end
 -- Farm Mode - Hide POI option
 function MinimapAdv:UpdateFarmModePOI()
     if ExpandedState == 0 then
-        self:POIUpdate()
+        self:POIUpdate("UpdateFarmModePOI", ExpandedState)
     else
         if db.expand.extras.hidepoi then
             self:RemoveAllPOIs()
         else
-            self:POIUpdate()
+            self:POIUpdate("UpdateFarmModePOI", ExpandedState)
         end
     end
 end
@@ -506,7 +502,7 @@ end
 
 local function UpdateMMButtonsTable()
     for i, child in next, {_G.Minimap:GetChildren()} do
-        if not(BlackList[child:GetName()]) then
+        if not (BlackList[child:GetName()] or child.questID) then
             if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 and child:IsShown() then
                 MoveMMButton(child)
             end
@@ -537,242 +533,215 @@ end)
 -- INFORMATION UPDATES --
 -------------------------
 ---- POI ----
--- POI Frame events
--- Show Tooltip
-local POITooltip = _G.CreateFrame("GameTooltip", "QuestPointerTooltip", _G.UIParent, "GameTooltipTemplate")
-local function POI_OnEnter(self)
+local poiTable
+
+local MinimapPOIMixin = {}
+function MinimapPOIMixin:OnEnter()
     -- Set Tooltip's parent
     if _G.UIParent:IsVisible() then
-        POITooltip:SetParent(_G.UIParent)
+        _G.GameTooltip:SetParent(_G.UIParent)
     else
-        POITooltip:SetParent(self)
+        _G.GameTooltip:SetParent(self)
     end
 
     -- Set Tooltip position
     local mapPoints = GetPositionData()
     local mm_anchor = mapPoints.anchor
     if mm_anchor == "TOPLEFT" then
-        POITooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 10, -10)
+        _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 10, -10)
     elseif mm_anchor == "BOTTOMLEFT" then
-        POITooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 5, 5)
+        _G.GameTooltip:SetOwner(self, "ANCHOR_TOPRIGHT", 5, 5)
     end
 
     -- Add Hyperlink
-    local link = _G.GetQuestLink(self.questLogIndex)
+    local link = _G.GetQuestLink(self.questID)
     if link then
-        POITooltip:SetHyperlink(link)
-    end
-
-    if _G.Aurora then
-        _G.Aurora[1].SetBD(POITooltip)
+        _G.GameTooltip:SetHyperlink(link)
     end
 end
-
--- Hide Tooltip
-local function POI_OnLeave(self)
-    POITooltip:Hide()
+function MinimapPOIMixin:OnLeave()
+    _G.GameTooltip:Hide()
+end
+function MinimapPOIMixin:OnClick()
+    _G.QuestPOIButton_OnClick(self)
+    _G.QuestMapFrame_OpenToQuestDetails(self.questID)
 end
 
--- Open World Map at appropriate quest
-local function POI_OnMouseUp(self)
-    _G.WorldMapFrame:Show()
-    local frame = _G["WorldMapQuestFrame"..self.index]
-    if not frame then
+function MinimapPOIMixin:UpdateAlpha()
+    local isOnEdge = HBDP:IsMinimapIconOnEdge(self)
+    if isOnEdge == nil then
+        _G.C_Timer.After(0, function()
+            self:UpdateAlpha()
+        end)
         return
     end
-    _G.WorldMapFrame_SelectQuestFrame(frame)
-    MinimapAdv:SelectSpecificPOI(self)
-end
 
--- Find closest POI
-function MinimapAdv:ClosestPOI()
-    local _, closest, closestDistance, poiDistance
-    for k, poi in next, self.pois do
-        if poi.active then
-            _, poiDistance = HBDP:GetVectorToIcon(poi)
+    self:Show()
+    if isOnEdge then
+        self:SetAlpha(db.poi.icons.opacity * (db.poi.fadeEdge and 0.6 or 1))
+    else
+        self:SetAlpha(db.poi.icons.opacity)
 
-            if closest then
-                if ( poiDistance and closestDistance and (poiDistance < closestDistance) ) then
-                    closest = poi
-                    closestDistance = poiDistance
-                end
-            else
-                closest = poi
-                closestDistance = poiDistance
-            end
-        end
-    end
-    return closest
-end
-
-function MinimapAdv:SelectSpecificPOI(poi)
-    _G.QuestPOI_SelectButton(poi.poiButton)
-    _G.SetSuperTrackedQuestID(poi.questId)
-    MinimapAdv:UpdatePOIGlow()
-end
-
--- Select Closest POI
-function MinimapAdv:SelectClosestPOI()
-    if not db.poi.enabled then return end
-    if _G.IsAddOnLoaded("Carbonite") or _G.IsAddOnLoaded("DugisGuideViewerZ") then return end
-
-    local closest = self:ClosestPOI()
-    if closest then
-        self:SelectSpecificPOI(closest)
-    end
-end
-
--- Update POI at edge of Minimap
-function MinimapAdv:UpdatePOIEdges()
-    for id, poi in next, pois do
-        if poi.active then
-            if HBDP:IsMinimapIconOnEdge(poi) then
-                poi.poiButton:Show()
-                poi.poiButton:SetAlpha(db.poi.icons.opacity * (db.poi.fadeEdge and 0.6 or 1))
-            else
-                -- Hide completed POIs when close enough to see the ?
-                if poi.complete then
-                    poi.poiButton:Hide()
-                else
-                    poi.poiButton:Show()
-                end
-                poi.poiButton:SetAlpha(db.poi.icons.opacity)
-            end
+        if _G.IsQuestComplete(self.questID) then
+            self:Hide()
         end
     end
 end
+function MinimapPOIMixin:UpdateScale()
+    local scale = db.poi.icons.scale
+    local size50 = 50 * scale
+    local size32 = 32 * scale
 
--- Update POI highlight
-function MinimapAdv:UpdatePOIGlow()
-    for i, poi in next, pois do
-        if _G.GetSuperTrackedQuestID() == poi.questId then
-            _G.QuestPOI_SelectButton(poi.poiButton)
-            poi:SetFrameLevel(_G.Minimap:GetFrameLevel() + 3)
+    if self.Number then
+        self.Glow:SetSize(size50, size50)
+        self.Number:SetSize(size32, size32)
+        self.NormalTexture:SetSize(size32, size32)
+        self.HighlightTexture:SetSize(size32, size32)
+        self.PushedTexture:SetSize(size32, size32)
+    else
+        self.Glow:SetSize(size50, size50)
+        if self.style == "waypoint" then
+            self.Icon:SetSize(13 * scale, 17 * scale)
         else
-            _G.QuestPOI_ClearSelection(_G.Minimap)
-            poi:SetFrameLevel(_G.Minimap:GetFrameLevel() + 2)
+            self.Icon:SetSize(24 * scale, 24 * scale)
+        end
+        self.FullHighlightTexture:SetSize(size32, size32)
+        self.IconHighlightTexture:SetSize(size32, size32)
+        self.NormalTexture:SetSize(size32, size32)
+        self.PushedTexture:SetSize(size32, size32)
+    end
+end
+
+function MinimapPOIMixin:Add()
+    local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(self.questInfo.x, self.questInfo.y, self.zoneInfo.mapID)
+    HBDP:AddMinimapIconWorld(MinimapAdv, self, instanceID, xCoord, yCoord, true)
+end
+function MinimapPOIMixin:Remove()
+    HBDP:RemoveMinimapIcon(MinimapAdv, self)
+    self.used = nil
+end
+
+
+local function AddPOIsForZone(zoneInfo, numNumericQuests)
+    local quests = _G.C_QuestLog.GetQuestsOnMap(zoneInfo.mapID)
+    for _, questInfo in next, quests do
+        local questID = questInfo.questID
+        local questLogIndex = _G.GetQuestLogIndexByID(questID)
+        local _, _, _, _, _, _, _, _, _, _, _, hasLocalPOI, _, _, _, isHidden = _G.GetQuestLogTitle(questLogIndex)
+
+        if not isHidden and hasLocalPOI then
+            -- Check if there's already a POI for this quest.
+            local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
+            if not poiButton then
+                if _G.IsQuestComplete(questID) then
+                    poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "normal")
+                else
+                    numNumericQuests = numNumericQuests + 1
+                    poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "numeric", numNumericQuests)
+                end
+            end
+            poiButton.questInfo = questInfo
+            poiButton.zoneInfo = zoneInfo
+
+            if _G.IsQuestWatched(questLogIndex) or not db.poi.watchedOnly then
+                poiButton:Add()
+                if _G.GetSuperTrackedQuestID() == questID then
+                    _G.QuestPOI_SelectButton(poiButton)
+                end
+            end
+        end
+    end
+    return numNumericQuests
+end
+
+function MinimapAdv:POIUpdate(event, ...)
+    self:debug("POIUpdate", event, ...)
+    if not db.poi.enabled or (ExpandedState == 1 and db.expand.extras.hidepoi) then return end
+
+    local currentMapID, continentMapID = _G.C_Map.GetBestMapForUnit("player")
+    if currentMapID then
+        local mapInfo = _G.C_Map.GetMapInfo(currentMapID)
+        while mapInfo.mapType ~= _G.Enum.UIMapType.Continent do
+            mapInfo = _G.C_Map.GetMapInfo(mapInfo.parentMapID)
+        end
+
+        continentMapID = mapInfo.mapID
+    end
+
+    if continentMapID then
+        local zoneMapInfo = _G.MapUtil.GetMapParentInfo(currentMapID, _G.Enum.UIMapType.Zone, true)
+
+        if not zoneMapInfo then
+            return
+        end
+
+        self:RemoveAllPOIs()
+
+        -- Add current map first, which may be lower than the zone maps added later.
+        local numNumericQuests = AddPOIsForZone(_G.C_Map.GetMapInfo(currentMapID), 0)
+
+        local childrenZones = _G.C_Map.GetMapChildrenInfo(continentMapID, _G.Enum.UIMapType.Zone)
+        for _, zoneInfo in next, childrenZones do
+            numNumericQuests = AddPOIsForZone(zoneInfo, numNumericQuests)
+        end
+    end
+end
+
+function MinimapAdv:UpdatePOIVisibility(event, ...)
+    self:debug("UpdatePOIVisibility", event, ...)
+    for _, poiType in next, poiTable do
+        for _, poiButton in next, poiType do
+            if poiButton.used then
+                poiButton:UpdateScale()
+                poiButton:UpdateAlpha()
+            end
         end
     end
 end
 
 function MinimapAdv:RemoveAllPOIs()
-    for i, poi in next, pois do
-        HBDP:RemoveMinimapIcon(poi)
-        if poi.poiButton then
-            poi.poiButton:Hide()
-            poi.poiButton:SetParent(_G.Minimap)
-            poi.poiButton = nil
-        end
-        poi.active = false
-    end
-end
-
--- Update all POIs
-function MinimapAdv:POIUpdate(...)
-    self:debug("POIUpdate", ...)
-    if ( (not db.poi.enabled) or (ExpandedState == 1 and db.expand.extras.hidepoi) ) then return end
-    if _G.IsAddOnLoaded("Carbonite") or _G.IsAddOnLoaded("DugisGuideViewerZ") then return end
-
-    self:RemoveAllPOIs()
-
-    local mapID, mapFloor = HBD:GetPlayerZone()
-
-    -- Update was probably triggered by World Map browsing. Don't update any POIs.
-    if not (mapID and mapFloor) then return end
-
-    _G.QuestPOIUpdateIcons()
-
-    local numNumericQuests = 0
-    local numCompletedQuests = 0
-    local numEntries = _G.QuestMapUpdateAllQuests()
-    -- Iterate through all available quests, retrieving POI info
-    for i = 1, numEntries do
-        local questID, questLogIndex = _G.QuestPOIGetQuestIDByVisibleIndex(i)
-        if questID then
-            local _, posX, posY = _G.QuestPOIGetIconInfo(questID)
-            if ( posX and posY and (_G.IsQuestWatched(questLogIndex) or not db.poi.watchedOnly) ) then
-                local title, _, _, _, _, isComplete, _, _, _, _, _, _, _, isStory = _G.GetQuestLogTitle(questLogIndex)
-                local numObjectives = _G.GetNumQuestLeaderBoards(questLogIndex)
-                if isComplete and isComplete < 0 then
-                    isComplete = false
-                elseif numObjectives == 0 then
-                    isComplete = true
-                end
-
-                -- Create POI arrow
-                local poi = pois[i]
-                if not poi then
-                    poi = _G.CreateFrame("Frame", "QuestPointerPOI"..i, _G.Minimap)
-                    poi:SetFrameLevel(_G.Minimap:GetFrameLevel() + 2)
-                    poi:SetWidth(10)
-                    poi:SetHeight(10)
-                    poi:SetScript("OnEnter", POI_OnEnter)
-                    poi:SetScript("OnLeave", POI_OnLeave)
-                    poi:SetScript("OnMouseUp", POI_OnMouseUp)
-                    poi:EnableMouse()
-                end
-
-                -- Create POI button
-                local poiButton
-                if isComplete then
-                    -- Using QUEST_POI_COMPLETE_SWAP gets the ? without any circle
-                    -- Using QUEST_POI_COMPLETE_IN gets the ? in a brownish circle
-                    numCompletedQuests = numCompletedQuests + 1
-                    poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID)--, "completed", numCompletedQuests)
-                else
-                    numNumericQuests = numNumericQuests + 1
-                    poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "numeric", numNumericQuests, isStory)
-                end
-                poiButton:SetPoint("CENTER", poi)
-                poiButton:SetScale(db.poi.icons.scale)
-                poiButton:SetParent(poi)
-                poiButton:EnableMouse(false)
-                poi.poiButton = poiButton
-
-                poi.index = i
-                poi.questID = questID
-                poi.questLogIndex = questLogIndex
-                poi.mapID = mapID
-                poi.mapFloor = mapFloor
-                poi.x = posX
-                poi.y = posY
-                poi.title = title
-                poi.active = true
-                poi.complete = isComplete
-
-                HBDP:AddMinimapIconMap(self, poi, mapID, posX, posY, true, true)
-
-                pois[i] = poi
-            end
+    for _, poiType in next, poiTable do
+        for _, poiButton in next, poiType do
+            poiButton:Remove()
         end
     end
-    self:UpdatePOIEdges()
-    self:UpdatePOIGlow()
+    _G.QuestPOI_ClearSelection(_G.Minimap)
 end
 
 function MinimapAdv:InitializePOI()
-    -- Update POI timer
-    local GlowTimer = _G.CreateFrame("Frame")
-    GlowTimer.elapsed = 0
-    GlowTimer:SetScript("OnUpdate", function(timer, elapsed)
-        timer.elapsed = timer.elapsed + elapsed
-        if ( (timer.elapsed > 2) and (not _G.WorldMapFrame:IsShown()) and db.poi.enabled ) then
-            timer.elapsed = 0
-            MinimapAdv:UpdatePOIGlow()
-        end
+    _G.QuestPOI_Initialize(_G.Minimap, function(poiButton)
+        _G.Mixin(poiButton, MinimapPOIMixin)
+        poiButton:SetScript("OnEnter", poiButton.OnEnter)
+        poiButton:SetScript("OnLeave", poiButton.OnLeave)
+        poiButton:SetScript("OnClick", poiButton.OnClick)
+
+        poiButton:UpdateScale()
+        poiButton:UpdateAlpha()
     end)
+    poiTable = _G.Minimap.poiTable
 end
 
 function MinimapAdv:UpdatePOIEnabled()
-    if db.poi.enabled and not(_G.IsAddOnLoaded("Carbonite") or _G.IsAddOnLoaded("DugisGuideViewerZ")) then
-        _G.QuestPOI_Initialize(_G.Minimap, function() end)
-        self:POIUpdate()
-        self:InitializePOI()
+    if db.poi.enabled then
+        if not poiTable then
+            self:InitializePOI()
+        end
+
+        self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
+        self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
+        self:RegisterEvent("SUPER_TRACKED_QUEST_CHANGED", "POIUpdate")
+        self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
     else
         self:RemoveAllPOIs()
+        self:UnregisterEvent("QUEST_POI_UPDATE")
+        self:UnregisterEvent("QUEST_LOG_UPDATE")
+        self:UnregisterEvent("SUPER_TRACKED_QUEST_CHANGED")
+        self:UnregisterEvent("QUEST_WATCH_LIST_CHANGED")
     end
 end
 
+
+---- LFG ----
 function MinimapAdv:GetLFGList(event, arg)
     self:debug("GetLFGList", event, arg)
     local active, _, _, _, _, _, _, old_autoAccept, autoAccept = _G.C_LFGList.GetActiveEntryInfo()
@@ -1406,10 +1375,7 @@ end
 
 function MinimapAdv:ZONE_CHANGED_NEW_AREA(event, ...)
     self:debug(event, ...)
-    self:ZoneChange()
-
-    -- Update POIs
-    self:POIUpdate()
+    self:ZoneChange(event, ...)
 end
 
 function MinimapAdv:MINIMAP_UPDATE_ZOOM(event, ...)
@@ -1430,9 +1396,6 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     -- Update Minimap position and visible state
     self:UpdateShownState() -- Will also call MinimapAdv:Update
     self:UpdateMinimapPosition()
-
-    -- Update POIs
-    self:UpdatePOIEnabled()
 end
 
 -- Hide default Clock Button
@@ -1494,14 +1457,6 @@ function MinimapAdv:RegEvents()
     self:RegisterEvent("LFG_LIST_APPLICANT_UPDATED", "GetLFGList")
     self:RegisterEvent("LFG_LIST_ACTIVE_ENTRY_UPDATE", "GetLFGList")
     self:GetLFGList("OnEnable", true)
-
-    -- POI
-    self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
-    self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
-
-    local UpdatePOICall = function() self:POIUpdate() end
-    _G.hooksecurefunc("AddQuestWatch", UpdatePOICall)
-    _G.hooksecurefunc("RemoveQuestWatch", UpdatePOICall)
 end
 
 --------------------------
@@ -1871,7 +1826,7 @@ function MinimapAdv:OnInitialize()
                 fadeEdge = true,
                 icons = {
                     scale = 0.7,
-                    opacity = 1,
+                    opacity = .85,
                 },
             },
         },
@@ -1892,6 +1847,8 @@ function MinimapAdv:OnEnable()
     SetUpMinimapFrame()
     CreateFrames()
     self:RegEvents()
+    --self:POIUpdate("MinimapAdv:OnEnable")
+    self:UpdatePOIEnabled()
 
     -- Community defined API
     function _G.GetMinimapShape()
