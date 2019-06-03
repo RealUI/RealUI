@@ -35,7 +35,7 @@ local Textures = {
 }
 
 local MMFrames = MinimapAdv.Frames
-local ExpandedState = 0
+local isInFarmMode = false
 local UpdateProcessing = false
 
 ----------
@@ -74,24 +74,16 @@ end
 ---------------------------
 -- Clickthrough
 function MinimapAdv:UpdateClickthrough()
-    if ( (ExpandedState == 0) or (not db.expand.extras.clickthrough) ) then
-        _G.Minimap:EnableMouse(true)
-    else
+    if isInFarmMode and db.expand.extras.clickthrough then
         _G.Minimap:EnableMouse(false)
+    else
+        _G.Minimap:EnableMouse(true)
     end
 end
 
 -- Farm Mode - Hide POI option
 function MinimapAdv:UpdateFarmModePOI()
-    if ExpandedState == 0 then
-        self:POIUpdate("UpdateFarmModePOI", ExpandedState)
-    else
-        if db.expand.extras.hidepoi then
-            self:RemoveAllPOIs()
-        else
-            self:POIUpdate("UpdateFarmModePOI", ExpandedState)
-        end
-    end
+    self:POIUpdate("UpdateFarmModePOI", isInFarmMode)
 end
 
 -- Get size and position data
@@ -99,23 +91,23 @@ local function GetPositionData()
     -- Get Normal or Expanded data
     local mapPoints
 
-    if ExpandedState == 0 then
-        mapPoints = {
-            xofs = db.position.x,
-            yofs = db.position.y,
-            anchor = db.position.anchorto,
-            scale = db.position.scale,
-            opacity = 1,
-            isTop = db.position.anchorto:find("TOP"),
-            isLeft = db.position.anchorto:find("LEFT"),
-        }
-    else
+    if isInFarmMode then
         mapPoints = {
             xofs = db.expand.position.x,
             yofs = db.expand.position.y,
             anchor = db.expand.position.anchorto,
             scale = db.expand.appearance.scale,
             opacity = db.expand.appearance.opacity,
+            isTop = db.position.anchorto:find("TOP"),
+            isLeft = db.position.anchorto:find("LEFT"),
+        }
+    else
+        mapPoints = {
+            xofs = db.position.x,
+            yofs = db.position.y,
+            anchor = db.position.anchorto,
+            scale = db.position.scale,
+            opacity = 1,
             isTop = db.position.anchorto:find("TOP"),
             isLeft = db.position.anchorto:find("LEFT"),
         }
@@ -128,7 +120,7 @@ end
 function MinimapAdv:UpdateInfoPosition()
     self:debug("UpdateInfoPosition")
     self.numText = 1
-    if _G.Minimap:IsVisible() and (ExpandedState == 0) then
+    if _G.Minimap:IsVisible() and not isInFarmMode then
         local mapPoints = GetPositionData()
         local isTop = mapPoints.isTop
         local isLeft = mapPoints.isLeft
@@ -284,7 +276,7 @@ function MinimapAdv:UpdateButtonsPosition()
     end
 
     -- Tracking
-    if _G.Minimap:IsVisible() and ExpandedState == 0 then
+    if _G.Minimap:IsVisible() and not isInFarmMode then
         MMFrames.tracking:Show()
         _G.tinsert(frameOrder, "tracking")
         bfWidth = bfWidth + 15
@@ -294,7 +286,7 @@ function MinimapAdv:UpdateButtonsPosition()
     end
 
     -- Farm mode
-    if ( _G.Minimap:IsVisible() and (not _G.IsInInstance()) ) then
+    if _G.Minimap:IsVisible() and not _G.IsInInstance() then
         MMFrames.farm:Show()
         _G.tinsert(frameOrder, "farm")
         bfWidth = bfWidth + 15
@@ -656,7 +648,10 @@ end
 
 function MinimapAdv:POIUpdate(event, ...)
     self:debug("POIUpdate", event, ...)
-    if not db.poi.enabled or (ExpandedState == 1 and db.expand.extras.hidepoi) then return end
+    if not db.poi.enabled then return end
+    if isInFarmMode and db.expand.extras.hidepoi then
+        return self:RemoveAllPOIs()
+    end
 
     local currentMapID, continentMapID = _G.C_Map.GetBestMapForUnit("player")
     if currentMapID then
@@ -993,8 +988,8 @@ function MinimapAdv:UpdateShownState()
         end
 
         -- Disable Farm Mode while in dungeon
-        if ExpandedState ~= 0 then
-            ExpandedState = 0
+        if isInFarmMode then
+            isInFarmMode = false
             self:ToggleGatherer()
             self:UpdateMinimapPosition()
         end
@@ -1018,7 +1013,7 @@ function MinimapAdv:FadeButtons()
         if _G.Minimap.mouseover or MMFrames.tracking.dropdown:IsVisible() or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
 
-            if ExpandedState == 0 then
+            if not isInFarmMode then
                 MMFrames.tracking:Show()
                 numButtons = numButtons + 1
             end
@@ -1027,7 +1022,7 @@ function MinimapAdv:FadeButtons()
                 numButtons = numButtons + 1
             end
 
-            if MMFrames.buttonframe.tooltip:IsShown() and (ExpandedState == 0) then
+            if MMFrames.buttonframe.tooltip:IsShown() and not isInFarmMode then
                 MMFrames.buttonframe:SetWidth(_G.Minimap:GetWidth() * scale + 2)
             else
                 MMFrames.buttonframe.tooltip:Hide()
@@ -1098,7 +1093,7 @@ local function Config_OnEnter()
     MMFrames.config.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.config:SetFrameLevel(6)
 
-    if ExpandedState == 0 then
+    if not isInFarmMode then
         MMFrames.buttonframe.tooltip:SetText("Options")
         MMFrames.buttonframe.tooltip:Show()
         MMFrames.buttonframe.tooltipIcon:Show()
@@ -1132,7 +1127,7 @@ local function Tracking_OnEnter()
     MMFrames.tracking.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.tracking:SetFrameLevel(6)
 
-    if ExpandedState == 0 then
+    if not isInFarmMode then
         MMFrames.buttonframe.tooltip:SetText("Tracking")
         MMFrames.buttonframe.tooltip:Show()
         MMFrames.buttonframe.tooltipIcon:Show()
@@ -1159,7 +1154,7 @@ end
 function MinimapAdv:ToggleGatherer()
     if ( (not db.expand.extras.gatherertoggle) or (not _G.Gatherer) ) then return end
 
-    if ExpandedState == 1 then
+    if isInFarmMode then
         _G.Gatherer.Config.SetSetting("minimap.enable", true)
     else
         _G.Gatherer.Config.SetSetting("minimap.enable", false)
@@ -1167,16 +1162,16 @@ function MinimapAdv:ToggleGatherer()
 end
 
 local function Farm_OnMouseDown()
-    if ExpandedState == 0 then
-        ExpandedState = 1
-        MMFrames.farm.icon:SetTexture(Textures.Collapse)
-        _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
-        button:Hide()
-    else
-        ExpandedState = 0
+    if isInFarmMode then
+        isInFarmMode = false
         MMFrames.farm.icon:SetTexture(Textures.Expand)
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
         button:Show()
+    else
+        isInFarmMode = true
+        MMFrames.farm.icon:SetTexture(Textures.Collapse)
+        _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
+        button:Hide()
     end
     LDD:CloseAll()
 
@@ -1196,7 +1191,7 @@ local function Farm_OnEnter()
     MMFrames.farm.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
     MMFrames.farm:SetFrameLevel(6)
 
-    if ExpandedState == 0 then
+    if not isInFarmMode then
         MMFrames.buttonframe.tooltip:SetText("Farm Mode")
         MMFrames.buttonframe.tooltip:Show()
         MMFrames.buttonframe.tooltipIcon:Show()
