@@ -417,8 +417,10 @@ function MinimapAdv:UpdateMinimapPosition()
     _G.ButtonCollectFrame:ClearAllPoints()
     if isTop then
         _G.ButtonCollectFrame:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
+        _G.ButtonCollectFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
     else
         _G.ButtonCollectFrame:SetPoint("BOTTOMLEFT", _G.Minimap, "TOPLEFT", -1, 5)
+        _G.ButtonCollectFrame:SetPoint("BOTTOMRIGHT", _G.Minimap, "TOPRIGHT", 1, 5)
     end
 
     -- Update the rest of the Minimap
@@ -444,58 +446,49 @@ local OddList = {
     OutfitterMinimapButton = true,
 }
 
-local buttons = {}
-local button = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
-_G.Aurora.Base.SetBackdrop(button, _G.Aurora.Color.frame)
-button:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
-button:SetSize(136, 32)
-button:SetFrameStrata("LOW")
-button:SetFrameLevel(10)
-button:EnableMouse(true)
-button:SetAlpha(0)
-button:Show()
-button:HookScript("OnEnter", fadeIn)
-button:HookScript("OnLeave", fadeOut)
-local line = _G.floor(button:GetWidth() / 32)
+local buttonSize, buttonsPerRow = 32, 4
+local buttonFrame = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.Minimap)
+_G.Aurora.Base.SetBackdrop(buttonFrame, _G.Aurora.Color.frame)
+buttonFrame:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
+buttonFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
+buttonFrame:SetHeight(buttonSize)
+buttonFrame:SetAlpha(0)
+buttonFrame:EnableMouse(true)
+buttonFrame:HookScript("OnEnter", fadeIn)
+buttonFrame:HookScript("OnLeave", fadeOut)
 
-local function PositionAndStyle()
-    local row = 0
-    for i = 1, #buttons do
-        if not buttons[i].styled then
-            buttons[i]:SetParent(button)
-            buttons[i]:ClearAllPoints()
-            --print("Eval", i, i + line - 1, _G.floor(row+1) * line, row)
-            if i + line - 1 == _G.floor(row + 1) * line then
-                --print("Row start", i)
-                buttons[i]:SetPoint("TOPLEFT", button, "TOPLEFT", 0, -(row * 32))
-            else
-                --print("Row cont.", i)
-                buttons[i]:SetPoint("TOPLEFT", buttons[i - 1], "TOPRIGHT", 2, 0)
-            end
-            row = i / line
-            buttons[i].ClearAllPoints = function() return end
-            buttons[i].SetPoint = function() return end
-            buttons[i]:HookScript("OnEnter", function() fadeIn(button) end)
-            buttons[i]:HookScript("OnLeave", function() fadeOut(button) end)
-            buttons[i].styled = true
+local buttonGap = buttonFrame:GetWidth() / buttonsPerRow - buttonSize
+local function MoveMMButton(button)
+    if not button then return end
+
+    MinimapAdv:debug("MoveMMButton", button:GetName(), button.styled)
+    if button.styled then return end
+
+    button:SetParent(buttonFrame)
+    _G.tinsert(buttonFrame, button)
+
+    local index = #buttonFrame
+    button:ClearAllPoints()
+    if index == 1 then
+        button:SetPoint("TOPLEFT", buttonFrame, "TOPLEFT", buttonGap, -buttonGap)
+    else
+        if (index % buttonsPerRow) == 1 then
+            button:SetPoint("TOPLEFT", buttonFrame[index - buttonsPerRow], "BOTTOMLEFT", 0, -buttonGap)
+        else
+            button:SetPoint("TOPLEFT", buttonFrame[index - 1], "TOPRIGHT", buttonGap, 0)
         end
     end
-    button:SetHeight(_G.ceil(row) * 32)
-end
-
-local function MoveMMButton(mmb)
-    if not mmb then return end
-    if mmb.mmStyled then return end
-
-    mmb:SetParent(button)
-    _G.tinsert(buttons, mmb)
-    mmb.mmStyled = true
+    button.ClearAllPoints = function() return end
+    button.SetPoint = function() return end
+    button:HookScript("OnEnter", function() fadeIn(buttonFrame) end)
+    button:HookScript("OnLeave", function() fadeOut(buttonFrame) end)
+    button.styled = true
 end
 
 local function UpdateMMButtonsTable()
     for i, child in next, {_G.Minimap:GetChildren()} do
-        if not (BlackList[child:GetName()] or child.questID) then
-            if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 and child:IsShown() then
+        if not BlackList[child:GetName()] and not child.questID then
+            if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
                 MoveMMButton(child)
             end
         end
@@ -504,22 +497,21 @@ local function UpdateMMButtonsTable()
         MoveMMButton(_G[f])
     end
 
-    if #buttons == 0 then
-        button:Hide()
+
+    if #buttonFrame > 0 then
+        local numRows = _G.ceil(#buttonFrame / buttonsPerRow)
+        buttonFrame:SetHeight(numRows * buttonSize + numRows * buttonGap)
+        buttonFrame:Show()
     else
-        button:Show()
+        buttonFrame:Hide()
     end
 end
 
-local collect = _G.CreateFrame("Frame")
-collect:RegisterEvent("PLAYER_ENTERING_WORLD")
-collect:SetScript("OnEvent", function(self, event)
-    self:UnregisterEvent(event)
+local function RefreshMinimapButtons(...)
     if db.information.minimapbuttons then
         UpdateMMButtonsTable()
-        PositionAndStyle()
     end
-end)
+end
 
 -------------------------
 -- INFORMATION UPDATES --
@@ -1166,12 +1158,12 @@ local function Farm_OnMouseDown()
         isInFarmMode = false
         MMFrames.farm.icon:SetTexture(Textures.Expand)
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
-        button:Show()
+        buttonFrame:Show()
     else
         isInFarmMode = true
         MMFrames.farm.icon:SetTexture(Textures.Collapse)
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
-        button:Hide()
+        buttonFrame:Hide()
     end
     LDD:CloseAll()
 
@@ -1389,6 +1381,7 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     _G.TimeManagerClockButton.Show = function() end
 
     -- Update Minimap position and visible state
+    RefreshMinimapButtons(event, ...)
     self:UpdateShownState() -- Will also call MinimapAdv:Update
     self:UpdateMinimapPosition()
 end
@@ -1407,6 +1400,8 @@ function MinimapAdv:ADDON_LOADED(event, ...)
         _G.OrderHallCommandBar.SetShown = HideCommandBar
         _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     end
+
+    RefreshMinimapButtons(event, ...)
 end
 
 function MinimapAdv:PLAYER_LOGIN(event, ...)
