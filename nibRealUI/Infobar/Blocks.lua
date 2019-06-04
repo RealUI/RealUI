@@ -1530,8 +1530,7 @@ function Infobar:CreateBlocks()
                     end
 
                     local xp, totalLevelXP, currentLevel
-                    --if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then -- isPatch
-                    if azeriteItemLocation.bagID and azeriteItemLocation.bagID >= _G.NUM_BAG_SLOTS then
+                    if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then
                         xp, totalLevelXP = 0, 1
                         currentLevel = -1
                     else
@@ -1546,7 +1545,11 @@ function Infobar:CreateBlocks()
                 return _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                return C_AzeriteItem.HasActiveAzeriteItem()
+                if RealUI.isPatch then
+                    return C_AzeriteItem.HasActiveAzeriteItem() and not C_AzeriteItem.IsAzeriteItemAtMaxLevel()
+                else
+                    return C_AzeriteItem.HasActiveAzeriteItem()
+                end
             end,
             SetTooltip = function(Art, tooltip)
                 local xp, totalLevelXP, name, currentLevel = Art:GetStats()
