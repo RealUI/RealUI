@@ -613,7 +613,8 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
         local questLogIndex = _G.GetQuestLogIndexByID(questID)
         local _, _, _, _, _, _, _, _, _, _, _, hasLocalPOI, _, _, _, isHidden = _G.GetQuestLogTitle(questLogIndex)
 
-        if not isHidden and hasLocalPOI then
+        local isSuperTracked = _G.GetSuperTrackedQuestID() == questID
+        if (not isHidden and hasLocalPOI) or isSuperTracked then
             -- Check if there's already a POI for this quest.
             local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
             if not poiButton then
@@ -629,7 +630,7 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
 
             if _G.IsQuestWatched(questLogIndex) or not db.poi.watchedOnly then
                 poiButton:Add()
-                if _G.GetSuperTrackedQuestID() == questID then
+                if isSuperTracked then
                     _G.QuestPOI_SelectButton(poiButton)
                 end
             end
