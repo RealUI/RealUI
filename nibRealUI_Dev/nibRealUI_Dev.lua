@@ -153,6 +153,10 @@ local autorunScripts = {
     testFrame = false,
     mouse = true,
 }
+
+local autorunAddon = {
+    --fstack = "Blizzard_DebugTools",
+}
 local eventFrame = _G.CreateFrame("Frame")
 eventFrame:RegisterAllEvents()
 eventFrame:SetScript("OnEvent", function(self, event, ...)
@@ -173,6 +177,12 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
 
         if addonName:match("Blizzard") or addonName:match("RealUI") then
             debug("Loaded:", addonName)
+        end
+
+        for command, addon in next, autorunAddon do
+            if addon and addon == addonName then
+                ns.commands[command](ns.commands, true)
+            end
         end
     elseif not seenEvent[event] then
         debug(event)
