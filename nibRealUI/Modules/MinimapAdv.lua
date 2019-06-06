@@ -608,6 +608,8 @@ end
 
 local function AddPOIsForZone(zoneInfo, numNumericQuests)
     local quests = _G.C_QuestLog.GetQuestsOnMap(zoneInfo.mapID)
+    if not quests then return numNumericQuests end
+
     for _, questInfo in next, quests do
         local questID = questInfo.questID
         local questLogIndex = _G.GetQuestLogIndexByID(questID)
@@ -649,20 +651,18 @@ function MinimapAdv:POIUpdate(event, ...)
     local currentMapID, continentMapID = _G.C_Map.GetBestMapForUnit("player")
     if currentMapID then
         local mapInfo = _G.C_Map.GetMapInfo(currentMapID)
-        while mapInfo.mapType ~= _G.Enum.UIMapType.Continent do
-            mapInfo = _G.C_Map.GetMapInfo(mapInfo.parentMapID)
-        end
-
-        continentMapID = mapInfo.mapID
+        repeat
+            local exit = false
+            if mapInfo.mapType < _G.Enum.UIMapType.Continent then
+                exit = true
+            else
+                continentMapID = mapInfo.mapID
+                mapInfo = _G.C_Map.GetMapInfo(mapInfo.parentMapID)
+            end
+        until exit
     end
 
     if continentMapID then
-        local zoneMapInfo = _G.MapUtil.GetMapParentInfo(currentMapID, _G.Enum.UIMapType.Zone, true)
-
-        if not zoneMapInfo then
-            return
-        end
-
         self:RemoveAllPOIs()
 
         -- Add current map first, which may be lower than the zone maps added later.
