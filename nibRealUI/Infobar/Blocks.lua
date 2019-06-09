@@ -1291,6 +1291,20 @@ function Infobar:CreateBlocks()
             icon = fa["heartbeat"],
             iconFont = iconFont,
             text = 1,
+            OnEnable = function(block)
+                local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                _G.Aurora.Skin.MicroButtonAlertTemplate(alert)
+                alert.CloseButton:SetScript("OnClick", function(btn)
+                    alert:Hide()
+                    alert.isHidden = true
+                end)
+
+                Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
+                Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
+                Scale.Width(alert, 100)
+
+                block.alert= alert
+            end,
             OnClick = function(block, ...)
                 Infobar:debug("Durability: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
@@ -1341,21 +1355,10 @@ function Infobar:CreateBlocks()
                     end
                 end
                 itemSlots.lowSlot = lowSlot
-                if not block.alert then
-                    block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                    _G.Aurora.Skin.MicroButtonAlertTemplate(block.alert)
-                end
+
                 local alert = block.alert
                 if lowDur < 0.1 and not alert.isHidden then
-                    Scale.Size(alert, 100, alert.Text:GetHeight() + 42)
-                    Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
-                    Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
-                    alert.CloseButton:SetScript("OnClick", function(btn)
-                        alert:Hide()
-                        alert.isHidden = true
-                    end)
                     alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
-                    Scale.Width(alert.Text, 145)
                     alert:Show()
                     alert.isHidden = false
                 else

@@ -53,7 +53,7 @@ function RealUI.GetColorString(red, green, blue)
 end
 
 function RealUI.GetDurabilityColor(curDura, maxDura)
-    return private.oUF.RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
+    return private.oUF:RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
 end
 
 
