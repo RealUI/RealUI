@@ -105,7 +105,7 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
     ClassPower:SetSize(16, 16)
     if hasPoints then
-        self:PositionFrame(ClassPower, pointDB.position)
+        FramePoint:PositionFrame(self, ClassPower, pointDB.position)
     else
         ClassPower:SetPoint("CENTER", -160, -40.5)
     end
@@ -165,7 +165,7 @@ function ClassResource:CreateRunes(unitFrame, unit)
     self:debug("CreateRunes", unit)
     local Runes = _G.CreateFrame("Frame", nil, _G.UIParent)
     CombatFader:RegisterFrameForFade(MODNAME, Runes)
-    self:PositionFrame(Runes, pointDB.position)
+    FramePoint:PositionFrame(self, Runes, pointDB.position)
     Runes:SetSize(16, 16)
 
     local size = pointDB.size
@@ -211,7 +211,7 @@ function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
     local size = barDB.size
     local Stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
-    self:PositionFrame(Stagger, barDB.position)
+    FramePoint:PositionFrame(self, Stagger, barDB.position)
     Stagger:SetSize(size.width, size.height)
     Stagger:SetAngleVertex(1, 3)
 
@@ -260,18 +260,18 @@ function ClassResource:Setup(unitFrame, unit)
     end
 end
 
-function ClassResource:ToggleConfigMode(val)
-    if self.configMode == val then return end
-    self.configMode = val
+function ClassResource:ToggleConfigMode(isConfigMode)
+    if self.configMode == isConfigMode then return end
+    self.configMode = isConfigMode
 
-    if val then
+    if isConfigMode then
         if self.points then
             self.points:SetAlpha(1)
             if hasPoints then
                 for i = 1, 5 do
-                    self.points[i]:SetShown(val)
+                    self.points[i]:SetShown(isConfigMode)
                 end
-                self.points:PostUpdate(val and 3 or 0, val and 5 or 0, true, powerToken)
+                self.points:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, powerToken)
             else
                 for i = 1, MAX_RUNES do
                     self.points[i]:SetValue(i / MAX_RUNES)
@@ -381,10 +381,5 @@ function ClassResource:OnEnable()
     self:debug("OnEnable")
 
     CombatFader:RegisterModForFade(MODNAME, db.combatfade)
-    FramePoint:RegisterMod(self, function(this, isLocked)
-        if not RealUI.isInTestMode then
-            self:ToggleConfigMode(not isLocked)
-        end
-    end)
-    RealUI:RegisterConfigModeModule(self)
+    FramePoint:RegisterMod(self)
 end

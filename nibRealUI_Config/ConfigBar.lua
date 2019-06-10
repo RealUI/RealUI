@@ -19,6 +19,7 @@ local hudSize = ndb.settings.hudSize
 local round = RealUI.Round
 
 local CombatFader = RealUI:GetModule("CombatFader")
+local FramePoint = RealUI:GetModule("FramePoint")
 local uiWidth, uiHeight = RealUI.GetInterfaceSize()
 
 local other do
@@ -998,9 +999,57 @@ local classresource do
                         end,
                         order = 20,
                     },
+                    headerPos = {
+                        name = L["General_Position"],
+                        type = "header",
+                        order = 30,
+                    },
+                    position = {
+                        name = "",
+                        type = "group",
+                        inline = true,
+                        order = 31,
+                        args = {
+                            lock = {
+                                name = L["General_Lock"],
+                                desc = L["General_LockDesc"],
+                                type = "toggle",
+                                get = function(info) return FramePoint:IsModLocked(ClassResource) end,
+                                set = function(info, value)
+                                    FramePoint:ToggleMod(ClassResource)
+                                end,
+                                order = 0,
+                            },
+                            x = {
+                                name = L["General_XOffset"],
+                                desc = L["General_XOffsetDesc"],
+                                type = "input",
+                                dialogControl = "NumberEditBox",
+                                get = function(info)
+                                    return _G.tostring(barDB.position.x)
+                                end,
+                                set = function(info, value)
+                                    barDB.position.x = round(_G.tonumber(value))
+                                    FramePoint:RestorePosition(ClassResource)
+                                end,
+                                order = 10,
+                            },
+                            y = {
+                                name = L["General_YOffset"],
+                                desc = L["General_YOffsetDesc"],
+                                type = "input",
+                                dialogControl = "NumberEditBox",
+                                get = function(info) return _G.tostring(barDB.position.y) end,
+                                set = function(info, value)
+                                    barDB.position.y = round(_G.tonumber(value))
+                                    FramePoint:RestorePosition(ClassResource)
+                                end,
+                                order = 20,
+                            },
+                        },
+                    }
                 },
             }
-            ClassResource:AddPositionConfig(barOptions, barDB.position, 50)
 
             pointOptions = {
                 name = points.name,
@@ -1066,10 +1115,58 @@ local classresource do
                         end,
                         order = 25,
                     },
+                    headerPos = {
+                        name = L["General_Position"],
+                        type = "header",
+                        order = 75,
+                    },
+                    position = {
+                        name = "",
+                        type = "group",
+                        inline = true,
+                        order = 76,
+                        args = {
+                            lock = {
+                                name = L["General_Lock"],
+                                desc = L["General_LockDesc"],
+                                type = "toggle",
+                                get = function(info) return FramePoint:IsModLocked(ClassResource) end,
+                                set = function(info, value)
+                                    FramePoint:ToggleMod(ClassResource)
+                                end,
+                                order = 0,
+                            },
+                            x = {
+                                name = L["General_XOffset"],
+                                desc = L["General_XOffsetDesc"],
+                                type = "input",
+                                dialogControl = "NumberEditBox",
+                                get = function(info)
+                                    return _G.tostring(pointDB.position.x)
+                                end,
+                                set = function(info, value)
+                                    pointDB.position.x = round(_G.tonumber(value))
+                                    FramePoint:RestorePosition(ClassResource)
+                                end,
+                                order = 10,
+                            },
+                            y = {
+                                name = L["General_YOffset"],
+                                desc = L["General_YOffsetDesc"],
+                                type = "input",
+                                dialogControl = "NumberEditBox",
+                                get = function(info) return _G.tostring(pointDB.position.y) end,
+                                set = function(info, value)
+                                    pointDB.position.y = round(_G.tonumber(value))
+                                    FramePoint:RestorePosition(ClassResource)
+                                end,
+                                order = 20,
+                            },
+                        },
+                    }
                 },
             }
             CombatFader:AddFadeConfig("ClassResource", pointOptions, 50)
-            ClassResource:AddPositionConfig(pointOptions, pointDB.position, 75)
         end
 
         classresource = {
