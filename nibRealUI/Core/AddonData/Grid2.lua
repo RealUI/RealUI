@@ -1557,6 +1557,8 @@ function RealUI.AddOns.Grid2()
 end
 
 function RealUI.Profiles.Grid2()
+    if not _G.Grid2 then return end
+
     local db = _G.Grid2.profiles.char
     db.enabled = true
     for specIndex = 1, #RealUI.charInfo.specs do
