@@ -321,7 +321,7 @@ local function InitializeOptions()
                     hl:SetOffset(Scale.Value(width) * (highlight.clicked - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = highlight.clicked
-                        highlight:SetAllPoints(hudConfig[highlight.clicked])
+                        highlight:SetAllPoints(tabs[highlight.clicked].button)
                     end)
                     hlAnim:Play()
                 elseif hlAnim:IsPlaying() then
