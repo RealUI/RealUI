@@ -365,6 +365,10 @@ function AngleStatusBarMixin:GetOrientation()
 end
 
 --[[ Frame Construction ]]--
+local function SetPixels(texture)
+    texture:SetTexelSnappingBias(0.0)
+    texture:SetSnapToPixelGrid(false)
+end
 local function CreateAngleFrame(name, parent)
     local frame = _G.CreateFrame("Frame", name, parent)
     frame:SetScript("OnSizeChanged", OnSizeChanged)
@@ -378,6 +382,7 @@ local function CreateAngleFrame(name, parent)
     local bg = frame:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(0, 0, 0, 0.5)
     bg:SetAllPoints()
+    SetPixels(bg)
     frame.bg = bg
 
     local top = frame:CreateTexture(nil, "BORDER")
@@ -385,6 +390,7 @@ local function CreateAngleFrame(name, parent)
     top:SetPoint("TOPLEFT")
     top:SetPoint("TOPRIGHT")
     top:SetHeight(1)
+    SetPixels(top)
     frame.top = top
 
     local bottom = frame:CreateTexture(nil, "BORDER")
@@ -392,6 +398,7 @@ local function CreateAngleFrame(name, parent)
     bottom:SetPoint("BOTTOMLEFT")
     bottom:SetPoint("BOTTOMRIGHT")
     bottom:SetHeight(1)
+    SetPixels(bottom)
     frame.bottom = bottom
 
     local left = frame:CreateLine(nil, "BORDER")
@@ -399,6 +406,7 @@ local function CreateAngleFrame(name, parent)
     left:SetThickness(0.5)
     left:SetStartPoint("TOPLEFT")
     left:SetEndPoint("BOTTOMLEFT")
+    SetPixels(left)
     frame.left = left
 
     local right = frame:CreateLine(nil, "BORDER")
@@ -406,6 +414,7 @@ local function CreateAngleFrame(name, parent)
     right:SetThickness(0.5)
     right:SetStartPoint("TOPRIGHT")
     right:SetEndPoint("BOTTOMRIGHT")
+    SetPixels(right)
     frame.right = right
 
     return frame
