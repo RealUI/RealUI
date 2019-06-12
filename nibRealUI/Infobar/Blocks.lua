@@ -523,6 +523,12 @@ function Infobar:CreateBlocks()
             guildText = _G.LOOKINGFORGUILD
         end
 
+        local function ToggleUI(this, button, func, arg)
+            if _G.InCombatLockdown() then return end
+
+            _G[func](arg)
+        end
+
         local menuList = {
             {text = L["Start_Config"],
                 func = function() RealUI.LoadConfig("HuD") end,
@@ -539,16 +545,18 @@ function Infobar:CreateBlocks()
             },
             {isSpacer = true},
             {text = _G.CHARACTER_BUTTON,
-                func = function() _G.ToggleCharacter("PaperDollFrame") end,
+                func = ToggleUI,
+                args = {"ToggleCharacter", "PaperDollFrame"},
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
-                func = function()
+                func = ToggleUI,
                     -- ToggleSpellBook causes taint
-                    _G.ToggleFrame(_G.SpellBookFrame)
-                end,
+                args = {"ToggleFrame", _G.SpellBookFrame},
             },
             {text = _G.TALENTS_BUTTON,
                 func = function()
+                    if _G.InCombatLockdown() then return end
+
                     if not _G.PlayerTalentFrame then
                         _G.TalentFrame_LoadUI()
                     end
@@ -558,33 +566,42 @@ function Infobar:CreateBlocks()
                 disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
             },
             {text = _G.ACHIEVEMENT_BUTTON,
-                func = function() _G.ToggleAchievementFrame() end,
+                func = ToggleUI,
+                args = {"ToggleAchievementFrame"},
             },
             {text = _G.QUESTLOG_BUTTON,
-                func = function() _G.ToggleQuestLog() end,
+                func = ToggleUI,
+                args = {"ToggleQuestLog"},
             },
             {text = guildText,
-                func = _G.ToggleGuildFrame,
+                func = ToggleUI,
+                args = {"ToggleGuildFrame"},
                 disabled = _G.IsCommunitiesUIDisabledByTrialAccount(),
             },
             {text = _G.SOCIAL_BUTTON,
-                func = function() _G.ToggleFriendsFrame(1) end,
+                func = ToggleUI,
+                args = {"ToggleFriendsFrame", 1},
             },
             {text = _G.DUNGEONS_BUTTON,
-                func = function() _G.PVEFrame_ToggleFrame() end,
+                func = ToggleUI,
+                args = {"PVEFrame_ToggleFrame"},
                 disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
             },
             {text = _G.COLLECTIONS,
-                func = function() _G.ToggleCollectionsJournal() end,
+                func = ToggleUI,
+                args = {"ToggleCollectionsJournal"},
             },
             {text = _G.ADVENTURE_JOURNAL,
-                func = function() _G.ToggleEncounterJournal() end,
+                func = ToggleUI,
+                args = {"ToggleEncounterJournal"},
             },
             {text = _G.BLIZZARD_STORE,
-                func = function() _G.ToggleStoreUI() end,
+                func = ToggleUI,
+                args = {"ToggleStoreUI"},
             },
             {text = _G.HELP_BUTTON,
-                func = function() _G.ToggleHelpFrame() end,
+                func = ToggleUI,
+                args = {"ToggleHelpFrame"},
             },
             {isSpacer = true},
             {text = _G.CANCEL,
