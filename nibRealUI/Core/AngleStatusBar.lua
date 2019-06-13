@@ -521,6 +521,29 @@ function AngleStatusBar:CreateAngle(frameType, name, parent)
 end
 oUF:RegisterMetaFunction("CreateAngle", AngleStatusBar.CreateAngle) -- oUF magic
 
+local pointToVertex = {
+    ["TOPLEFT"] = 1,
+    ["BOTTOMLEFT"] = 2,
+    ["TOPRIGHT"] = 3,
+    ["BOTTOMRIGHT"] = 4,
+}
+function AngleStatusBar:AttachFrame(frame, point, bar, relPoint, xOffset, yOffset)
+    local meta = bars[bar]
+
+    local vertex = pointToVertex[relPoint]
+    if vertex then
+        if meta.leftVertex == vertex then
+            xOffset = meta.minWidth
+        end
+
+        if meta.rightVertex == vertex then
+            xOffset = -meta.minWidth
+        end
+    end
+
+    frame:SetPoint(point, bar, relPoint, xOffset, yOffset)
+end
+
 local function TestASB(reverseFill, reversePer) -- luacheck: ignore
     local testBars = {}
     local info = {
