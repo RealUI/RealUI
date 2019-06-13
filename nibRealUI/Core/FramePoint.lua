@@ -71,23 +71,20 @@ function FramePoint:RestorePosition(mod)
     end
 end
 
+FramePoint.OnDragStart = LibWin.OnDragStart
+FramePoint.OnDragStop = LibWin.OnDragStop
 function FramePoint:PositionFrame(mod, frame, position)
     local dragFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
     _G.Aurora.Base.SetBackdrop(dragFrame, _G.Aurora.Color.white, 0.2)
 
+    local module = modules[mod]
     dragFrame:SetSize(frame:GetSize())
     dragFrame:SetHitRectInsets(-5, -5, -5, -5)
     dragFrame:SetMovable(true)
     dragFrame:EnableMouse(true)
     dragFrame:RegisterForDrag("LeftButton")
-    dragFrame:SetScript("OnDragStart", LibWin.OnDragStart)
-    dragFrame:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-        if mod.OnDragStop then
-            -- this is to live update a gui
-            mod:OnDragStop(...)
-        end
-    end)
+    dragFrame:SetScript("OnDragStart", module.OnDragStart)
+    dragFrame:SetScript("OnDragStop", module.OnDragStop)
     dragFrame:Hide()
 
     local name = dragFrame:CreateFontString(nil, "BACKGROUND", "Game12Font")
@@ -109,9 +106,11 @@ function FramePoint:IsModLocked(mod)
     return modules[mod].isLocked
 end
 
-function FramePoint:RegisterMod(mod)
+function FramePoint:RegisterMod(mod, OnDragStart, OnDragStop)
     modules[mod] = {
         frames = {},
         isLocked = true,
+        OnDragStart = OnDragStart or LibWin.OnDragStart,
+        OnDragStop = OnDragStop or LibWin.OnDragStop,
     }
 end

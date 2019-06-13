@@ -5,7 +5,10 @@ local next = _G.next
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
+local db
+
+local FramePoint = RealUI:GetModule("FramePoint")
+local ASB = RealUI:GetModule("AngleStatusBar")
 
 local MODNAME = "CastBars"
 local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
@@ -14,7 +17,24 @@ local Aurora = _G.Aurora
 local uninterruptible = Aurora.Color.Create(0.5, 0.0, 0.0)
 local interruptible = Aurora.Color.Create(0.5, 1.0, 1.0)
 
-local layoutSize
+local castbarSizes = {
+    player = {
+        x = 230,
+        y = 8,
+        icon = 28,
+    },
+    target = {
+        x = 230,
+        y = 8,
+        icon = 28,
+    },
+    focus = {
+        x = 126,
+        y = 5,
+        icon = 16,
+    },
+}
+
 local ChannelingTicks = {}
 do
     local function RegisterSpellName(spellID, numticks, isInstant)
@@ -78,6 +98,7 @@ end
 function CastBars:SetBarTicks(tickInfo)
     CastBars:debug("SetBarTicks", tickInfo)
     if not tickInfo then return end
+    local size = castbarSizes.player
 
     local numTicks = tickInfo.ticks
     local haste = _G.UnitSpellHaste("player") / 100 + 1
@@ -87,7 +108,7 @@ function CastBars:SetBarTicks(tickInfo)
         if i == 1 and tickInfo.isInstant then
             xOfs = 0
         else
-            xOfs = _G.floor(db.size[layoutSize].width * ((i - 1) / numTicks))
+            xOfs = _G.floor((size.x * db.player.scale) * ((i - 1) / numTicks))
         end
         local tick = self.tickPool:Acquire()
         tick:SetPoint("TOPRIGHT", -xOfs, 0)
@@ -95,63 +116,76 @@ function CastBars:SetBarTicks(tickInfo)
     end
 end
 
-function CastBars:SetAnchors(castbar, unit)
+function CastBars:UpdateAnchors(unit)
     CastBars:debug("Set config cast", unit)
-    local size = db[unit].size
+    local castbar = CastBars[unit]
+    local unitDB = db[unit]
+    local size = castbarSizes[unit]
 
-    local iconX
-    local iconY = 2
-    local iconPoint, iconRelPoint = "BOTTOM", "TOP"
-    if db.text.textOnBottom then
-        iconPoint, iconRelPoint = "TOP", "BOTTOM"
-        iconY = -iconY
-    end
+    castbar:SetSize(size.x * unitDB.scale, size.y * unitDB.scale)
+    castbar.Icon:SetSize(size.icon * unitDB.scale, size.icon * unitDB.scale)
 
-    local textX, textY = 2, 0
-    local textPoint, textRelPoint = "TOP", "TOP"
-    local timePoint, timeRelPoint = "BOTTOM", "BOTTOM"
-
-    castbar.Time:ClearAllPoints()
-    castbar.Text:ClearAllPoints()
-    castbar.Icon:ClearAllPoints()
-
-    local horizPoint, horizRelPoint
-    if unit == "player" then
-        if db.text.textInside then
-            horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            iconX = db.text.textOnBottom and 0 or -size.y
-            textX = -textX
-        else
-            horizPoint, horizRelPoint = "LEFT", "RIGHT"
-            iconX = db.text.textOnBottom and size.y or 0
-        end
-        castbar.Text:SetJustifyH(horizPoint)
-        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
-        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, textX, textY)
-        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, textX, textY)
-    elseif unit == "target" then
-        if db.text.textInside then
-            horizPoint, horizRelPoint = "LEFT", "RIGHT"
-            iconX = db.text.textOnBottom and 0 or size.y
-        else
-            horizPoint, horizRelPoint = "RIGHT", "LEFT"
-            iconX = db.text.textOnBottom and -size.y or 0
-            textX = -textX
-        end
-        castbar.Text:SetJustifyH(horizPoint)
-        castbar.Icon:SetPoint(iconPoint..horizPoint, castbar, iconRelPoint..horizPoint, iconX, iconY)
-        castbar.Text:SetPoint(textPoint..horizPoint, castbar.Icon, textRelPoint..horizRelPoint, textX, textY)
-        castbar.Time:SetPoint(timePoint..horizPoint, castbar.Icon, timeRelPoint..horizRelPoint, textX, textY)
-    elseif unit == "focus" then
+    if unit == "focus" then
         castbar.Icon:SetPoint("BOTTOMLEFT", castbar, "BOTTOMRIGHT", 2, 1)
         castbar.Text:SetPoint("BOTTOMRIGHT", castbar, "TOPRIGHT", 0, 2)
         castbar.Time:SetPoint("BOTTOMLEFT", castbar.Icon, "BOTTOMRIGHT", 2, 0)
-    end
-end
+    else
 
-function CastBars:UpdateAnchors()
-    for _, unit in next, {"player", "target"} do
-        self:SetAnchors(CastBars[unit], unit)
+        local iconX, iconY
+        local iconPoint, iconRelPoint
+
+        local textX, textY
+        local textPoint, textRelPoint
+        local timePoint, timeRelPoint
+
+        local setOnTop = unitDB.text:find("TOP")
+        if setOnTop then
+            iconY = 2
+            iconPoint, iconRelPoint = "BOTTOM", "TOP"
+
+            textY = 0
+            textPoint = "BOTTOM"
+            timePoint = "TOP"
+        else
+            iconY = -2
+            iconPoint, iconRelPoint = "TOP", "BOTTOM"
+
+            textY = 0
+            textPoint = "TOP"
+            timePoint = "BOTTOM"
+        end
+
+        local horizPoint
+        local setOnLeft = unitDB.text:find("LEFT")
+        if setOnLeft then
+            horizPoint = "LEFT"
+
+            iconX = 0
+            iconPoint, iconRelPoint = iconPoint..horizPoint, iconRelPoint..horizPoint
+
+            textX = 2
+            textPoint, textRelPoint = textPoint..horizPoint, textPoint.."RIGHT"
+            timePoint, timeRelPoint = timePoint..horizPoint, timePoint.."RIGHT"
+        else
+            horizPoint = "RIGHT"
+
+            iconX = 0
+            iconPoint, iconRelPoint = iconPoint..horizPoint, iconRelPoint..horizPoint
+
+            textX = -2
+            textPoint, textRelPoint = textPoint..horizPoint, textPoint.."LEFT"
+            timePoint, timeRelPoint = timePoint..horizPoint, timePoint.."LEFT"
+        end
+
+        castbar.Text:SetJustifyH(horizPoint)
+
+        castbar.Time:ClearAllPoints()
+        castbar.Text:ClearAllPoints()
+        castbar.Icon:ClearAllPoints()
+
+        ASB:AttachFrame(castbar.Icon, iconPoint, castbar, iconRelPoint, iconX, iconY)
+        castbar.Text:SetPoint(textPoint, castbar.Icon, textRelPoint, textX, textY)
+        castbar.Time:SetPoint(timePoint, castbar.Icon, timeRelPoint, textX, textY)
     end
 end
 
@@ -319,30 +353,22 @@ local function OnUpdate(self, elapsed)
 end
 
 function CastBars:CreateCastBars(unitFrame, unit, unitData)
-    CastBars:debug("CreateCastBars", unit)
+    self:debug("CreateCastBars", unit)
     local info, unitDB = unitData.power or unitData.health, db[unit]
-    local size = unitDB.size
-    local Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
-    Castbar:SetSize(size.x, size.y)
+    local size = castbarSizes[unit]
+
+    unitFrame.Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
+    local Castbar = unitFrame.Castbar
     Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
     Castbar:SetStatusBarColor(interruptible:GetRGB())
     Castbar:SetSmooth(false)
-    if db.reverse[unit] then
-        Castbar:SetReverseFill(true)
-    end
+    Castbar:SetReverseFill(unitDB.reverse)
 
-    local Icon = Castbar:CreateTexture(nil, "OVERLAY")
-    Castbar.Icon = Icon
-    Icon:SetSize(unitDB.icon, unitDB.icon)
-    Aurora.Base.CropIcon(Icon, Castbar)
+    Castbar.Icon = Castbar:CreateTexture(nil, "OVERLAY")
+    Aurora.Base.CropIcon(Castbar.Icon, Castbar)
 
-    local Text = Castbar:CreateFontString(nil, "OVERLAY")
-    Castbar.Text = Text
-    Text:SetFontObject("SystemFont_Shadow_Med1_Outline")
-
-    local Time = Castbar:CreateFontString(nil, "OVERLAY")
-    Castbar.Time = Time
-    Time:SetFontObject("NumberFont_Outline_Large")
+    Castbar.Text = Castbar:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1_Outline")
+    Castbar.Time = Castbar:CreateFontString(nil, "OVERLAY", "NumberFont_Outline_Large")
 
     local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)
     SafeZone:SetColorTexture(uninterruptible:GetRGB())
@@ -350,25 +376,17 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     Castbar.SafeZone = SafeZone
 
     if unit == "player" then
-        Castbar:SetPoint("TOPRIGHT", _G.RealUIPositionersCastBarPlayer, "TOPRIGHT", 0, 0)
         Castbar.tickPool = _G.CreateObjectPool(function(pool)
             local tick = unitFrame:CreateAngle("Texture", nil, Castbar)
             tick:SetColorTexture(1, 1, 1, 0.5)
-            tick:SetSize(2, size.y)
+            tick:SetSize(2, size.y * unitDB.scale)
             return tick
         end, function(pool, tick)
             tick:ClearAllPoints()
             tick:Hide()
         end)
         Castbar.SetBarTicks = CastBars.SetBarTicks
-    elseif unit == "target" then
-        CastBars:debug("Set positions", unit)
-        Castbar:SetPoint("TOPLEFT", _G.RealUIPositionersCastBarTarget, "TOPLEFT", 0, 0)
-    elseif unit == "focus" then
-        CastBars:debug("Set positions", unit)
-        Castbar:SetPoint("BOTTOMRIGHT", unitFrame, "TOPRIGHT", 5, 1)
     end
-    CastBars:SetAnchors(Castbar, unit)
 
     local flashAnim = Castbar:CreateAnimationGroup()
     Castbar.flashAnim = flashAnim
@@ -405,7 +423,14 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     Castbar.OnUpdate = OnUpdate
 
     unitFrame.Castbar = Castbar
-    CastBars[unit] = Castbar
+    self[unit] = Castbar
+    self:UpdateAnchors(unit)
+    FramePoint:PositionFrame(self, Castbar, unitDB.position)
+end
+
+local function OnDragStop(castbar)
+    FramePoint.OnDragStart(castbar)
+    _G.LibStub("AceConfigRegistry-3.0"):NotifyChange("HuD")
 end
 
 function CastBars:ToggleConfigMode(isConfigMode)
@@ -439,63 +464,44 @@ function CastBars:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
-            reverse = {
-                player = true,
-                target = false,
-            },
             player = {
-                size = {x = 230, y = 8},
-                position = {x = 0, y = 0},
-                icon = 28,
+                position = {
+                    point = "CENTER",
+                    x = -121,
+                    y = -141,
+                },
+                scale = 1,
+                text = "BOTTOMRIGHT",
+                reverse = true,
                 debug = false
             },
             target = {
-                size = {x = 230, y = 8},
-                position = {x = 0, y = 0},
-                icon = 28,
+                position = {
+                    point = "CENTER",
+                    x = 121,
+                    y = -141,
+                },
+                scale = 1,
+                text = "BOTTOMLEFT",
+                reverse = false,
                 debug = false
             },
             focus = {
-                size = {x = 146, y = 5},
-                position = {x = 0, y = 0},
-                icon = 16,
+                position = {
+                    point = "LEFT",
+                    x = 432,
+                    y = -72.5,
+                },
+                scale = 1,
+                reverse = true,
                 debug = false
-            },
-            size = {
-                [1] = {
-                    width = 200,
-                    height = 6,
-                    focus = {
-                        width = 126,
-                        height = 4,
-                        x = 3,
-                        y = 6,
-                    },
-                },
-                [2] = {
-                    width = 230,
-                    height = 8,
-                    focus = {
-                        width = 146,
-                        height = 5,
-                        x = 4,
-                        y = 7,
-                    },
-                },
-            },
-            text = {
-                textOnBottom = true,
-                textInside = true,
             },
         },
     })
     db = self.db.profile
-    ndb = RealUI.db.profile
-
-    layoutSize = ndb.settings.hudSize
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    RealUI:RegisterConfigModeModule(self)
+    FramePoint:RegisterMod(self, nil, OnDragStop)
 end
 
 function CastBars:OnEnable()

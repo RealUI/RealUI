@@ -796,10 +796,98 @@ local castbars do
     local MODNAME = "CastBars"
     local CastBars = RealUI:GetModule(MODNAME)
     local db = CastBars.db.profile
+
+    local function CreateFrameOptions(unit, order)
+        local unitDB = db[unit]
+        return {
+            name = _G[unit:upper()],
+            type = "group",
+            order = order,
+            args = {
+                reverse = {
+                    name = L["HuD_ReverseBars"],
+                    type = "toggle",
+                    get = function() return unitDB.reverse end,
+                    set = function(info, value)
+                        unitDB.reverse = value
+                        CastBars[unit]:SetReverseFill(value)
+                    end,
+                    order = 1,
+                },
+                text = {
+                    name = _G.LOCALE_TEXT_LABEL,
+                    type = "select",
+                    hidden = unit == "focus",
+                    values = RealUI.globals.cornerPoints,
+                    get = function(info)
+                        for k,v in next, RealUI.globals.cornerPoints do
+                            if v == unitDB.text then return k end
+                        end
+                    end,
+                    set = function(info, value)
+                        unitDB.text = RealUI.globals.cornerPoints[value]
+                        CastBars:UpdateAnchors(unit)
+                    end,
+                    order = 2,
+                },
+                position = {
+                    name = L["General_Position"],
+                    type = "group",
+                    inline = true,
+                    order = 3,
+                    args = {
+                        point = {
+                            name = L["General_AnchorPoint"],
+                            type = "select",
+                            values = RealUI.globals.anchorPoints,
+                            get = function(info)
+                                for k,v in next, RealUI.globals.anchorPoints do
+                                    if v == unitDB.position.point then return k end
+                                end
+                            end,
+                            set = function(info, value)
+                                unitDB.position.point = RealUI.globals.anchorPoints[value]
+                                FramePoint:RestorePosition(CastBars)
+                            end,
+                            order = 10,
+                        },
+                        x = {
+                            name = L["General_XOffset"],
+                            desc = L["General_XOffsetDesc"],
+                            type = "input",
+                            dialogControl = "NumberEditBox",
+                            get = function(info)
+                                return _G.tostring(unitDB.position.x)
+                            end,
+                            set = function(info, value)
+                                unitDB.position.x = round(_G.tonumber(value), 1)
+                                FramePoint:RestorePosition(CastBars)
+                            end,
+                            order = 11,
+                        },
+                        y = {
+                            name = L["General_YOffset"],
+                            desc = L["General_YOffsetDesc"],
+                            type = "input",
+                            dialogControl = "NumberEditBox",
+                            get = function(info) return _G.tostring(unitDB.position.y) end,
+                            set = function(info, value)
+                                unitDB.position.y = round(_G.tonumber(value), 1)
+                                FramePoint:RestorePosition(CastBars)
+                            end,
+                            order = 12,
+                        },
+                    }
+                }
+            }
+        }
+    end
+
     castbars = {
         name = L[MODNAME],
         icon = "bolt",
         type = "group",
+        childGroups = "tab",
         order = 3,
         args = {
             enable = {
@@ -812,154 +900,25 @@ local castbars do
                     CloseHuDWindow()
                     RealUI:ReloadUIDialog()
                 end,
-                order = 10,
+                order = 1,
             },
-            reverse = {
-                name = L["HuD_ReverseBars"],
-                type = "group",
-                inline = true,
-                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
-                order = 20,
-                args = {
-                    player = {
-                        name = _G.PLAYER,
-                        type = "toggle",
-                        get = function() return db.reverse.player end,
-                        set = function(info, value)
-                            db.reverse.player = value
-                            CastBars["player"]:SetReverseFill(value)
-                        end,
-                        order = 10,
-                    },
-                    target = {
-                        name = _G.TARGET,
-                        type = "toggle",
-                        get = function() return db.reverse.target end,
-                        set = function(info, value)
-                            db.reverse.target = value
-                            CastBars["target"]:SetReverseFill(value)
-                        end,
-                        order = 10,
-                    },
-                },
+            lock = {
+                name = L["General_Lock"],
+                desc = L["General_LockDesc"],
+                type = "toggle",
+                get = function(info) return FramePoint:IsModLocked(CastBars) end,
+                set = function(info, value)
+                    if value then
+                        FramePoint:LockMod(CastBars)
+                    else
+                        FramePoint:UnlockMod(CastBars)
+                    end
+                end,
+                order = 2,
             },
-            text = {
-                name = _G.LOCALE_TEXT_LABEL,
-                type = "group",
-                inline = true,
-                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
-                order = 50,
-                args = {
-                    horizontal = {
-                        name = L["CastBars_Inside"],
-                        desc = L["CastBars_InsideDesc"],
-                        type = "toggle",
-                        get = function() return db.text.textInside end,
-                        set = function(info, value)
-                            db.text.textInside = value
-                            CastBars:UpdateAnchors()
-                        end,
-                        order = 10,
-                    },
-                    vertical = {
-                        name = L["CastBars_Bottom"],
-                        desc = L["CastBars_BottomDesc"],
-                        type = "toggle",
-                        get = function() return db.text.textOnBottom end,
-                        set = function(info, value)
-                            db.text.textOnBottom = value
-                            CastBars:UpdateAnchors()
-                        end,
-                        order = 20,
-                    },
-                },
-            },
-            header = {
-                name = L["General_Position"],
-                type = "header",
-                order = 59,
-            },
-            position = {
-                name = "",
-                type = "group",
-                inline = true,
-                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME)) end,
-                order = 60,
-                args = {
-                    player = {
-                        name = _G.PLAYER,
-                        type = "group",
-                        args = {
-                            horizontal = {
-                                name = L["HuD_Horizontal"],
-                                type = "range",
-                                width = "full",
-                                min = -round(uiWidth * 0.2),
-                                max = round(uiWidth * 0.2),
-                                step = 1,
-                                bigStep = 4,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarPlayerX"] end,
-                                set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["CastBarPlayerX"] = value
-                                    RealUI:UpdatePositioners()
-                                end,
-                                order = 10,
-                            },
-                            vertical = {
-                                name = L["HuD_Vertical"],
-                                type = "range",
-                                width = "full",
-                                min = -round(uiHeight * 0.2),
-                                max = round(uiHeight * 0.2),
-                                step = 1,
-                                bigStep = 2,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarPlayerY"] end,
-                                set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["CastBarPlayerY"] = value
-                                    RealUI:UpdatePositioners()
-                                end,
-                                order = 20,
-                            }
-                        }
-                    },
-                    target = {
-                        name = _G.TARGET,
-                        type = "group",
-                        args = {
-                            horizontal = {
-                                name = L["HuD_Horizontal"],
-                                type = "range",
-                                width = "full",
-                                min = -round(uiWidth * 0.2),
-                                max = round(uiWidth * 0.2),
-                                step = 1,
-                                bigStep = 4,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarTargetX"] end,
-                                set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["CastBarTargetX"] = value
-                                    RealUI:UpdatePositioners()
-                                end,
-                                order = 10,
-                            },
-                            vertical = {
-                                name = L["HuD_Vertical"],
-                                type = "range",
-                                width = "full",
-                                min = -round(uiHeight * 0.2),
-                                max = round(uiHeight * 0.2),
-                                step = 1,
-                                bigStep = 2,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["CastBarTargetY"] end,
-                                set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["CastBarTargetY"] = value
-                                    RealUI:UpdatePositioners()
-                                end,
-                                order = 20,
-                            }
-                        }
-                    }
-                }
-            }
+            player = CreateFrameOptions("player", 10),
+            target = CreateFrameOptions("target", 20),
+            focus = CreateFrameOptions("focus", 30),
         }
     }
 end

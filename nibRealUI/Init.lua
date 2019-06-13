@@ -72,6 +72,12 @@ RealUI.globals = {
         "LEFT",       "CENTER", "RIGHT",
         "BOTTOMLEFT", "BOTTOM", "BOTTOMRIGHT",
     },
+    cornerPoints = {
+        "TOPLEFT",
+        "TOPRIGHT",
+        "BOTTOMLEFT",
+        "BOTTOMRIGHT",
+    },
     stratas = {
         "BACKGROUND",
         "LOW",
