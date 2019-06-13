@@ -2975,3 +2975,4 @@ options.RealUI = {
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }
 }
+_G.LibStub("LibDualSpec-1.0"):EnhanceOptions(options.RealUI.args.profiles, RealUI.db)

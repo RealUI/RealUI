@@ -50,6 +50,15 @@ RealUI.defaultPositions = {
     },
 }
 
+private.profileToLayout = {
+    ["RealUI"] = 1,
+    ["RealUI-Healing"] = 2
+}
+private.layoutToProfile = {
+    "RealUI",
+    "RealUI-Healing"
+}
+
 -- Offset some UI Elements for Large/Small HuD size settings
 RealUI.hudSizeOffsets = {
     [1] = {
@@ -381,7 +390,20 @@ function RealUI.LoadConfig(app, section, ...)
 end
 
 function RealUI:OnInitialize()
-    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
+    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, private.layoutToProfile[1])
+    _G.LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "RealUI")
+
+    self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
+    for specIndex = 1, #RealUI.charInfo.specs do
+        local spec = RealUI.charInfo.specs[specIndex]
+        if spec.role == "HEALER" then
+            self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
+        end
+    end
+
+    self.db:SetProfile(private.layoutToProfile[1]) -- set back to default
+
+
     debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
     db = self.db.profile
     dbc = self.db.char
