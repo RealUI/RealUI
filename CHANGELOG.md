@@ -1,4 +1,24 @@
-﻿## [2.0.11] - 2019-04-15 ##
+## [2.0.12] - 2019-06-14 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+
+### Changed ###
+
+  * Converted spec layouts into profiles
+  * Improve minimap POIs
+  * Updated Config Bar icons
+
+### Fixed ###
+
+  * Error on first install if Grid2 is not enabled.
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.0.11] - 2019-04-15 ##
 ### Modified AddOns ###
 
   * cargBags_Nivaya
@@ -251,6 +271,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.12]: https://github.com/RealUI/RealUI/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/RealUI/RealUI/compare/2.0.10...2.0.11
 [2.0.10]: https://github.com/RealUI/RealUI/compare/2.0.9...2.0.10
 [2.0.9]: https://github.com/RealUI/RealUI/compare/2.0.8...2.0.9
