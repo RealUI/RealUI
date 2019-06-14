@@ -485,9 +485,14 @@ function Loot:InitializeLoot()
     self:RegisterEvent("UPDATE_MASTER_LOOT_LIST")
 end
 
+function Loot:PLAYER_LOGIN()
+    self:RefreshMod()
+end
+
 -----------------------
 function Loot:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
+    db = self.db.profile
 
     if db.loot.enabled then
         self:InitializeLoot()
@@ -495,10 +500,6 @@ function Loot:RefreshMod()
     if db.roll.enabled then
         self:InitializeGroupLoot()
     end
-end
-
-function Loot:PLAYER_LOGIN()
-    self:RefreshMod()
 end
 
 function Loot:OnInitialize()

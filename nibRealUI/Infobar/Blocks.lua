@@ -495,7 +495,6 @@ end
 
 
 function Infobar:CreateBlocks()
-    local db = Infobar.db.profile
     local dbc = Infobar.db.char
     local ndbc = RealUI.db.char
 
@@ -1642,7 +1641,7 @@ function Infobar:CreateBlocks()
         }
 
         function Infobar.frame.watch:UpdateColors()
-            local alpha = _G.Lerp(0.4, 0.5, (db.bgAlpha / 1))
+            local alpha = _G.Lerp(0.4, 0.5, (Infobar.db.profile.bgAlpha / 1))
 
             local main = self.main
             local r, g, b = watchStates[dbc.progressState]:GetColor()
@@ -1671,7 +1670,7 @@ function Infobar:CreateBlocks()
             block.dataObj.icon = fa["thermometer-"..round(value * 4)]
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
-            if db.showBars then
+            if Infobar.db.profile.showBars then
                 local watch = Infobar.frame.watch
                 Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
@@ -1914,12 +1913,8 @@ function Infobar:CreateBlocks()
         local C_EquipmentSet = _G.C_EquipmentSet
         local specInfo, specLines = RealUI.charInfo.specs, {}
         local equipmentSetIDs, equipmentSetInfos = {}, {}
-        local layout = {
-            L["Layout_DPSTank"],
-            L["Layout_Healing"]
-        }
-
         local equipmentNeedsUpdate = false
+
         local function Line_OnMouseUp(line, specIndex, button)
             local tooltip = line:GetParent():GetParent():GetParent()
             if button == "LeftButton" then

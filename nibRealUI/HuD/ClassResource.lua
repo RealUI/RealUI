@@ -380,6 +380,6 @@ end
 function ClassResource:OnEnable()
     self:debug("OnEnable")
 
-    CombatFader:RegisterModForFade(MODNAME, db.combatfade)
+    CombatFader:RegisterModForFade(MODNAME, "class", "combatfade")
     FramePoint:RegisterMod(self)
 end

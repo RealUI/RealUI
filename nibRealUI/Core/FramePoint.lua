@@ -73,7 +73,7 @@ end
 
 FramePoint.OnDragStart = LibWin.OnDragStart
 FramePoint.OnDragStop = LibWin.OnDragStop
-function FramePoint:PositionFrame(mod, frame, position)
+function FramePoint:PositionFrame(mod, frame, optionPath)
     local dragFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
     _G.Aurora.Base.SetBackdrop(dragFrame, _G.Aurora.Color.white, 0.2)
 
@@ -93,17 +93,26 @@ function FramePoint:PositionFrame(mod, frame, position)
 
     frame:SetPoint("TOPLEFT", dragFrame)
 
-    LibWin.RegisterConfig(dragFrame, position)
+    LibWin.RegisterConfig(dragFrame, RealUI.GetOptions(mod.moduleName, optionPath))
     LibWin.RestorePosition(dragFrame)
 
     modules[mod].frames[frame] = {
-        position = position,
+        optionPath = optionPath,
         dragFrame = dragFrame,
     }
 end
 
 function FramePoint:IsModLocked(mod)
     return modules[mod].isLocked
+end
+
+function FramePoint:RefreshMod()
+    for mod, module in next, modules do
+        for frame, meta in next, module.frames do
+            LibWin.RegisterConfig(meta.dragFrame, RealUI.GetOptions(mod.moduleName, meta.optionPath))
+            LibWin.RestorePosition(meta.dragFrame)
+        end
+    end
 end
 
 function FramePoint:RegisterMod(mod, OnDragStart, OnDragStop)

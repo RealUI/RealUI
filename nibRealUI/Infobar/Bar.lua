@@ -884,6 +884,11 @@ end
 --------------------
 -- Initialization --
 --------------------
+function Infobar:RefreshMod()
+    db = self.db.profile
+    self:SettingsUpdate()
+end
+
 function Infobar:OnInitialize()
     local specgear = {}
     for specIndex = 1, #RealUI.charInfo.specs do
@@ -974,12 +979,6 @@ function Infobar:OnInitialize()
         },
     })
     db = self.db.profile
-    --[[
-    dbc = self.db.char
-    dbg = self.db.global
-    ndbc = RealUI.db.char
-    ndbg = RealUI.db.global
-    ]]
 
     function self:GetFontOutline(alpha)
         alpha = alpha or db.bgAlpha

@@ -116,12 +116,13 @@ function CastBars:SetBarTicks(tickInfo)
     end
 end
 
-function CastBars:UpdateAnchors(unit)
+function CastBars:UpdateSettings(unit)
     CastBars:debug("Set config cast", unit)
     local castbar = CastBars[unit]
     local unitDB = db[unit]
     local size = castbarSizes[unit]
 
+    castbar:SetReverseFill(unitDB.reverse)
     castbar:SetSize(size.x * unitDB.scale, size.y * unitDB.scale)
     castbar.Icon:SetSize(size.icon * unitDB.scale, size.icon * unitDB.scale)
 
@@ -130,7 +131,6 @@ function CastBars:UpdateAnchors(unit)
         castbar.Text:SetPoint("BOTTOMRIGHT", castbar, "TOPRIGHT", 0, 2)
         castbar.Time:SetPoint("BOTTOMLEFT", castbar.Icon, "BOTTOMRIGHT", 2, 0)
     else
-
         local iconX, iconY
         local iconPoint, iconRelPoint
 
@@ -424,12 +424,12 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
 
     unitFrame.Castbar = Castbar
     self[unit] = Castbar
-    self:UpdateAnchors(unit)
-    FramePoint:PositionFrame(self, Castbar, unitDB.position)
+    self:UpdateSettings(unit)
+    FramePoint:PositionFrame(self, Castbar, {"profile", unit, "position"})
 end
 
 local function OnDragStop(castbar)
-    FramePoint.OnDragStart(castbar)
+    FramePoint.OnDragStop(castbar)
     _G.LibStub("AceConfigRegistry-3.0"):NotifyChange("HuD")
 end
 
@@ -458,6 +458,15 @@ function CastBars:ToggleConfigMode(isConfigMode)
             end)
         end
     end
+end
+
+function CastBars:RefreshMod()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+    db = self.db.profile
+
+    self:UpdateSettings("player")
+    self:UpdateSettings("target")
+    self:UpdateSettings("focus")
 end
 
 function CastBars:OnInitialize()

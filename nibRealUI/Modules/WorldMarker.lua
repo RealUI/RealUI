@@ -176,6 +176,17 @@ local function CreateFrames()
     FramesCreated = true
 end
 
+function WorldMarker:PLAYER_LOGIN()
+    LoggedIn = true
+
+    WorldMarker:RefreshMod()
+    _G.hooksecurefunc(_G.Minimap, "SetSize", function()
+        if not(_G.InCombatLockdown()) then
+            WorldMarker:UpdatePosition()
+        end
+    end)
+end
+
 ---------------
 function WorldMarker:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) or not _G.IsAddOnLoaded("Blizzard_CompactRaidFrames") then return end
@@ -198,17 +209,6 @@ function WorldMarker:RefreshMod()
         WorldMarker:UpdatePosition()
         WorldMarker:UpdateVisibility()
     end
-end
-
-function WorldMarker:PLAYER_LOGIN()
-    LoggedIn = true
-
-    WorldMarker:RefreshMod()
-    _G.hooksecurefunc(_G.Minimap, "SetSize", function()
-        if not(_G.InCombatLockdown()) then
-            WorldMarker:UpdatePosition()
-        end
-    end)
 end
 
 function WorldMarker:OnInitialize()

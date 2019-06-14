@@ -53,7 +53,8 @@ function RealUI.GetColorString(red, green, blue)
 end
 
 function RealUI.GetDurabilityColor(curDura, maxDura)
-    return private.oUF:RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
+    local low, mid, high = _G.Aurora.Color.red, _G.Aurora.Color.yellow, _G.Aurora.Color.blue
+    return private.oUF:RGBColorGradient(curDura, maxDura or 1, low.r,low.g,low.b, mid.r,mid.g,mid.b, high.r,high.g,high.b)
 end
 
 
@@ -89,4 +90,12 @@ function RealUI.GetItemLevel(itemLink)
     end
 
     return iLvl or 0
+end
+
+function RealUI.GetOptions(modName, path)
+    local options = RealUI:GetModule(modName).db
+    for i = 1, #path do
+        options = options[path[i]]
+    end
+    return options
 end

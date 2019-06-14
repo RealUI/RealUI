@@ -148,6 +148,11 @@ function Chat_Tabs:PLAYER_LOGIN()
 end
 
 ------------
+function Chat_Tabs:RefreshMod()
+    db = Chat.db.profile.modules.tabs
+    self:UpdateTabs()
+end
+
 function Chat_Tabs:OnInitialize()
     db = Chat.db.profile.modules.tabs
 

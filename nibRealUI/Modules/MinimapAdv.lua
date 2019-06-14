@@ -1767,6 +1767,12 @@ local function SetUpMinimapFrame()
 end
 
 ----------
+function MinimapAdv:RefreshMod()
+    db = self.db.profile
+    self:Update()
+    self:UpdatePOIEnabled()
+end
+
 function MinimapAdv:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

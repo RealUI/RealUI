@@ -95,6 +95,14 @@ local function CreatePositioners()
     end
 end
 
+function Positioners:RefreshMod()
+    db = self.db.profile
+    ndb = RealUI.db.profile
+    ndbc = RealUI.db.char
+
+    RealUI:UpdatePositioners()
+end
+
 function Positioners:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

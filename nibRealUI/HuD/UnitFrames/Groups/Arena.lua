@@ -10,8 +10,6 @@ local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
-
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
 --[[ Utils ]]--
@@ -43,8 +41,8 @@ local function UpdateCC(self, event, unit)
         if startTime ~= 0 and duration ~= 0 then
             self.Trinket:SetCooldown(startTime / 1000.0, duration / 1000.0)
             if not self.hasAnnounced then
-                if db.arena.announceUse then
-                    local chat = db.arena.announceChat
+                if UnitFrames.db.profile.arena.announceUse then
+                    local chat = UnitFrames.db.profile.arena.announceChat
                     if chat == "GROUP" then
                         chat = "INSTANCE_CHAT"
                     end
@@ -70,7 +68,7 @@ local function CreateHealthBar(parent)
     local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Health.frequentUpdates = true
-    if not(ndb.settings.reverseUnitFrameBars) then
+    if not(RealUI.db.profile.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
         parent.Health.PostUpdate = function(self, unit, cur, max)
             self:SetValue(max - self:GetValue())
@@ -199,9 +197,7 @@ UnitFrames.arena = {
 
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
-    db = UnitFrames.db.profile
-    ndb = RealUI.db.profile
-    if not db.arena.enabled then return end
+    if not UnitFrames.db.profile.arena.enabled then return end
 
     oUF:RegisterStyle("RealUI:arena", CreateArena)
     oUF:SetActiveStyle("RealUI:arena")
@@ -209,9 +205,9 @@ _G.tinsert(UnitFrames.units, function(...)
     for i = 1, _G.MAX_BOSS_FRAMES do
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
         if i == 1 then
-            arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
+            arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.x, UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.y)
         else
-            arena:SetPoint("TOP", "RealUIArenaFrame"..(i-1), "BOTTOM", 0, -db.boss.gap)
+            arena:SetPoint("TOP", "RealUIArenaFrame"..(i-1), "BOTTOM", 0, -UnitFrames.db.profile.boss.gap)
         end
     end
 end)

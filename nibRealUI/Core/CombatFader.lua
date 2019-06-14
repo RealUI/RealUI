@@ -43,7 +43,7 @@ CombatFader.FadeIt = FadeIt
 function CombatFader:FadeFrames()
     self:debug("FadeFrames")
     for modName, module in next, modules do
-        local options = module.options
+        local options = RealUI.GetOptions(modName, module.path)
         if options.enabled then
             -- Retrieve opacity for current status
             local newOpacity = options.opacity[status]
@@ -120,9 +120,9 @@ end
 --- Register a module to fade based on combat state.
 -- @param mod The name of the mod registering
 -- @param options A table detailing what level of opacity for each state.
-function CombatFader:RegisterModForFade(mod, options)
+function CombatFader:RegisterModForFade(mod, ...)
     modules[mod] = {
-        options = options,
+        path = {...},
         frames = {},
     }
 end
@@ -152,7 +152,7 @@ local keyList = {
 function CombatFader:AddFadeConfig(mod, configDB, startOrder, notInline)
     if not RealUI:GetModuleEnabled(mod) then return end
     _G.assert(modules[mod], mod.." has not yet been registered.")
-    local modDB = modules[mod].options
+    local modDB = RealUI.GetOptions(mod, modules[mod].path)
 
     local args = {}
     for order, key in next, keyOrder do

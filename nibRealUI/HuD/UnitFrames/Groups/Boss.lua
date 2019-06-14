@@ -10,8 +10,6 @@ local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
-
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
 --[[ Utils ]]--
@@ -71,7 +69,7 @@ local function CreateHealthBar(parent)
     local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Health.frequentUpdates = true
-    if not(ndb.settings.reverseUnitFrameBars) then
+    if not(RealUI.db.profile.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
         parent.Health.PostUpdate = function(self, unit, cur, max)
             self:SetValue(max - self:GetValue())
@@ -125,15 +123,16 @@ local function CreateAltPowerBar(parent)
 end
 
 local function CreateAuras(parent)
+    local bossDB = UnitFrames.db.profile.boss
     UnitFrames:debug("Boss:CreateAuras")
     local auras = _G.CreateFrame("Frame", nil, parent)
-    auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((db.boss.buffCount + db.boss.debuffCount) - 1) + 4, 1)
-    auras:SetWidth((23) * (db.boss.buffCount + db.boss.debuffCount))
+    auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((bossDB.buffCount + bossDB.debuffCount) - 1) + 4, 1)
+    auras:SetWidth((23) * (bossDB.buffCount + bossDB.debuffCount))
     auras:SetHeight(22)
     auras.size = parent:GetHeight() - 2
     auras.spacing = 3
-    auras.numBuffs = db.boss.buffCount
-    auras.numDebuffs = db.boss.debuffCount
+    auras.numBuffs = bossDB.buffCount
+    auras.numDebuffs = bossDB.debuffCount
     auras["growth-x"] = "LEFT"
     auras.disableCooldown = true
     auras.CustomFilter = function(self, unit, button, ...)
@@ -235,17 +234,14 @@ UnitFrames.boss = {
 
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
-    db = UnitFrames.db.profile
-    ndb = RealUI.db.profile
-
     oUF:RegisterStyle("RealUI:boss", CreateBoss)
     oUF:SetActiveStyle("RealUI:boss")
     for i = 1, _G.MAX_BOSS_FRAMES do
         local boss = oUF:Spawn("boss" .. i, "RealUIBossFrame" .. i)
         if (i == 1) then
-            boss:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
+            boss:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.x, UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.y)
         else
-            boss:SetPoint("TOP", _G["RealUIBossFrame" .. i - 1], "BOTTOM", 0, -db.boss.gap)
+            boss:SetPoint("TOP", _G["RealUIBossFrame" .. i - 1], "BOTTOM", 0, -UnitFrames.db.profile.boss.gap)
         end
     end
 end)

@@ -13,9 +13,6 @@ local ACD = _G.LibStub("AceConfigDialog-3.0")
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
-local ndb = RealUI.db.profile
-local ndbc = RealUI.db.char
-local hudSize = ndb.settings.hudSize
 local round = RealUI.Round
 
 local CombatFader = RealUI:GetModule("CombatFader")
@@ -24,8 +21,8 @@ local uiWidth, uiHeight = RealUI.GetInterfaceSize()
 
 local other do
     debug("HuD Other")
-    local ActionBars = RealUI:GetModule("ActionBars")
-    local dbActionBars = ActionBars.db.profile
+    local MODNAME = "ActionBars"
+    local ActionBars = RealUI:GetModule(MODNAME)
     other = {
         name = _G.BINDING_HEADER_OTHER,
         icon = "sliders",
@@ -65,11 +62,11 @@ local other do
                             }
                         end,
                         get = function(info)
-                            return ndbc.layout.current
+                            return RealUI.db.char.layout.current
                         end,
                         set = function(info, value)
-                            ndbc.layout.current = value
-                            ndbc.layout.spec[_G.GetSpecialization()] = value
+                            RealUI.db.char.layout.current = value
+                            RealUI.db.char.layout.spec[_G.GetSpecialization()] = value
                             RealUI:UpdateLayout()
                         end,
                         order = 10,
@@ -78,15 +75,15 @@ local other do
                         name = L["Layout_Link"],
                         desc = L["Layout_LinkDesc"],
                         type = "toggle",
-                        get = function() return ndb.positionsLink end,
+                        get = function() return RealUI.db.profile.positionsLink end,
                         set = function(info, value)
-                            ndb.positionsLink = value
+                            RealUI.db.profile.positionsLink = value
 
-                            RealUI.cLayout = ndbc.layout.current
+                            RealUI.cLayout = RealUI.db.char.layout.current
                             RealUI.ncLayout = RealUI.cLayout == 1 and 2 or 1
 
                             if value then
-                                ndb.positions[RealUI.ncLayout] = RealUI:DeepCopy(ndb.positions[RealUI.cLayout])
+                                RealUI.db.profile.positions[RealUI.ncLayout] = RealUI:DeepCopy(RealUI.db.profile.positions[RealUI.cLayout])
                             end
                         end,
                         order = 20,
@@ -95,9 +92,9 @@ local other do
                         name = L["HuD_UseLarge"],
                         desc = L["HuD_UseLargeDesc"],
                         type = "toggle",
-                        get = function() return ndb.settings.hudSize == 2 end,
+                        get = function() return RealUI.db.profile.settings.hudSize == 2 end,
                         set = function(info, value)
-                            ndb.settings.hudSize = value and 2 or 1
+                            RealUI.db.profile.settings.hudSize = value and 2 or 1
                             _G.StaticPopup_Show("RUI_ChangeHuDSize")
                         end,
                         order = 30,
@@ -112,9 +109,9 @@ local other do
                         step = 1,
                         bigStep = 4,
                         order = 40,
-                        get = function(info) return ndb.positions[RealUI.cLayout]["HuDY"] end,
+                        get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["HuDY"] end,
                         set = function(info, value)
-                            ndb.positions[RealUI.cLayout]["HuDY"] = value
+                            RealUI.db.profile.positions[RealUI.cLayout]["HuDY"] = value
                             RealUI:UpdatePositioners()
                         end,
                     }
@@ -146,9 +143,9 @@ local other do
                         step = 1,
                         bigStep = 4,
                         order = 30,
-                        get = function(info) return ndb.positions[RealUI.cLayout]["SpellAlertWidth"] end,
+                        get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["SpellAlertWidth"] end,
                         set = function(info, value)
-                            ndb.positions[RealUI.cLayout]["SpellAlertWidth"] = value
+                            RealUI.db.profile.positions[RealUI.cLayout]["SpellAlertWidth"] = value
                             RealUI:UpdatePositioners()
                         end,
                     }
@@ -171,9 +168,9 @@ local other do
                         name = L["ActionBars_ShowDoodads"],
                         desc = L["ActionBars_ShowDoodadsDesc"],
                         type = "toggle",
-                        get = function() return dbActionBars.showDoodads end,
+                        get = function() return ActionBars.db.profile.showDoodads end,
                         set = function(info, value)
-                            dbActionBars.showDoodads = value
+                            ActionBars.db.profile.showDoodads = value
                             ActionBars:RefreshDoodads()
                         end,
                         order = 20,
@@ -224,9 +221,9 @@ local other do
                                         name = L["ActionBars_Move"]:format(L["ActionBars_Stance"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Stance"]),
                                         type = "toggle",
-                                        get = function() return dbActionBars[RealUI.cLayout].moveBars.stance end,
+                                        get = function() return ActionBars.db.profile[RealUI.cLayout].moveBars.stance end,
                                         set = function(info, value)
-                                            dbActionBars[RealUI.cLayout].moveBars.stance = value
+                                            ActionBars.db.profile[RealUI.cLayout].moveBars.stance = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 10,
@@ -235,9 +232,9 @@ local other do
                                         name = L["ActionBars_Move"]:format(L["ActionBars_Pet"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Pet"]),
                                         type = "toggle",
-                                        get = function() return dbActionBars[RealUI.cLayout].moveBars.pet end,
+                                        get = function() return ActionBars.db.profile[RealUI.cLayout].moveBars.pet end,
                                         set = function(info, value)
-                                            dbActionBars[RealUI.cLayout].moveBars.pet = value
+                                            ActionBars.db.profile[RealUI.cLayout].moveBars.pet = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 20,
@@ -246,9 +243,9 @@ local other do
                                         name = L["ActionBars_Move"]:format(L["ActionBars_EAB"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_EAB"]),
                                         type = "toggle",
-                                        get = function() return dbActionBars[RealUI.cLayout].moveBars.eab end,
+                                        get = function() return ActionBars.db.profile[RealUI.cLayout].moveBars.eab end,
                                         set = function(info, value)
-                                            dbActionBars[RealUI.cLayout].moveBars.eab = value
+                                            ActionBars.db.profile[RealUI.cLayout].moveBars.eab = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 30,
@@ -268,10 +265,10 @@ local other do
                                     }
                                 end,
                                 get = function(info)
-                                    return dbActionBars[RealUI.cLayout].centerPositions
+                                    return ActionBars.db.profile[RealUI.cLayout].centerPositions
                                 end,
                                 set = function(info, value)
-                                    dbActionBars[RealUI.cLayout].centerPositions = value
+                                    ActionBars.db.profile[RealUI.cLayout].centerPositions = value
                                     ActionBars:ApplyABSettings()
                                     RealUI:UpdatePositioners()
                                 end,
@@ -289,10 +286,10 @@ local other do
                                     }
                                 end,
                                 get = function(info)
-                                    return dbActionBars[RealUI.cLayout].sidePositions
+                                    return ActionBars.db.profile[RealUI.cLayout].sidePositions
                                 end,
                                 set = function(info, value)
-                                    dbActionBars[RealUI.cLayout].sidePositions = value
+                                    ActionBars.db.profile[RealUI.cLayout].sidePositions = value
                                     ActionBars:ApplyABSettings()
                                     RealUI:UpdatePositioners()
                                 end,
@@ -306,9 +303,9 @@ local other do
                                 min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
                                 step = 1, bigStep = 4,
                                 order = -1,
-                                get = function(info) return ndb.positions[RealUI.cLayout]["ActionBarsY"] end,
+                                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["ActionBarsY"] end,
                                 set = function(info, value)
-                                    ndb.positions[RealUI.cLayout]["ActionBarsY"] = value - .5
+                                    RealUI.db.profile.positions[RealUI.cLayout]["ActionBarsY"] = value - .5
                                     ActionBars:ApplyABSettings()
                                     RealUI:UpdatePositioners()
                                 end,
@@ -324,7 +321,6 @@ local unitframes do
     debug("HuD UnitFrames")
     local MODNAME = "UnitFrames"
     local UnitFrames = RealUI:GetModule(MODNAME)
-    local db = UnitFrames.db.profile
     unitframes = {
         name = _G.UNITFRAME_LABEL,
         icon = "th",
@@ -352,9 +348,9 @@ local unitframes do
                     classColor = {
                         name = L["Appearance_ClassColorHealth"],
                         type = "toggle",
-                        get = function() return db.overlay.classColor end,
+                        get = function() return UnitFrames.db.profile.overlay.classColor end,
                         set = function(info, value)
-                            db.overlay.classColor = value
+                            UnitFrames.db.profile.overlay.classColor = value
                             UnitFrames:RefreshUnits("ClassColorBars")
                         end,
                         order = 10,
@@ -362,18 +358,18 @@ local unitframes do
                     classColorNames = {
                         name = L["Appearance_ClassColorNames"],
                         type = "toggle",
-                        get = function() return db.overlay.classColorNames end,
+                        get = function() return UnitFrames.db.profile.overlay.classColorNames end,
                         set = function(info, value)
-                            db.overlay.classColorNames = value
+                            UnitFrames.db.profile.overlay.classColorNames = value
                         end,
                         order = 15,
                     },
                     reverseBars = {
                         name = L["HuD_ReverseBars"],
                         type = "toggle",
-                        get = function() return ndb.settings.reverseUnitFrameBars end,
+                        get = function() return RealUI.db.profile.settings.reverseUnitFrameBars end,
                         set = function(info, value)
-                            ndb.settings.reverseUnitFrameBars = value
+                            RealUI.db.profile.settings.reverseUnitFrameBars = value
                             UnitFrames:RefreshUnits("ReverseBars")
                         end,
                         order = 20,
@@ -390,10 +386,10 @@ local unitframes do
                             }
                         end,
                         get = function(info)
-                            return db.misc.statusText
+                            return UnitFrames.db.profile.misc.statusText
                         end,
                         set = function(info, value)
-                            db.misc.statusText = value
+                            UnitFrames.db.profile.misc.statusText = value
                             UnitFrames:RefreshUnits("StatusText")
                         end,
                         order = 30,
@@ -402,9 +398,9 @@ local unitframes do
                         name = L["UnitFrames_SetFocus"],
                         desc = L["UnitFrames_SetFocusDesc"],
                         type = "toggle",
-                        get = function() return db.misc.focusclick end,
+                        get = function() return UnitFrames.db.profile.misc.focusclick end,
                         set = function(info, value)
-                            db.misc.focusclick = value
+                            UnitFrames.db.profile.misc.focusclick = value
                         end,
                         order = 40,
                     },
@@ -418,12 +414,12 @@ local unitframes do
                                 alt = _G.ALT_KEY_TEXT,
                             }
                         end,
-                        disabled = function() return not db.misc.focusclick end,
+                        disabled = function() return not UnitFrames.db.profile.misc.focusclick end,
                         get = function(info)
-                            return db.misc.focuskey
+                            return UnitFrames.db.profile.misc.focuskey
                         end,
                         set = function(info, value)
-                            db.misc.focuskey = value
+                            UnitFrames.db.profile.misc.focuskey = value
                         end,
                         order = 41,
                     },
@@ -490,9 +486,9 @@ local unitframes do
                                 name = L["UnitFrames_PlayerAuras"],
                                 desc = L["UnitFrames_PlayerAurasDesc"],
                                 type = "toggle",
-                                get = function() return db.boss.showPlayerAuras end,
+                                get = function() return UnitFrames.db.profile.boss.showPlayerAuras end,
                                 set = function(info, value)
-                                    db.boss.showPlayerAuras = value
+                                    UnitFrames.db.profile.boss.showPlayerAuras = value
                                 end,
                                 order = 10,
                             },
@@ -500,9 +496,9 @@ local unitframes do
                                 name = L["UnitFrames_NPCAuras"],
                                 desc = L["UnitFrames_NPCAurasDesc"],
                                 type = "toggle",
-                                get = function() return db.boss.showNPCAuras end,
+                                get = function() return UnitFrames.db.profile.boss.showNPCAuras end,
                                 set = function(info, value)
-                                    db.boss.showNPCAuras = value
+                                    UnitFrames.db.profile.boss.showNPCAuras = value
                                 end,
                                 order = 20,
                             },
@@ -510,16 +506,16 @@ local unitframes do
                                 name = L["UnitFrames_BuffCount"],
                                 type = "range",
                                 min = 1, max = 8, step = 1,
-                                get = function(info) return db.boss.buffCount end,
-                                set = function(info, value) db.boss.buffCount = value end,
+                                get = function(info) return UnitFrames.db.profile.boss.buffCount end,
+                                set = function(info, value) UnitFrames.db.profile.boss.buffCount = value end,
                                 order = 30,
                             },
                             debuffCount = {
                                 name = L["UnitFrames_DebuffCount"],
                                 type = "range",
                                 min = 1, max = 8, step = 1,
-                                get = function(info) return db.boss.debuffCount end,
-                                set = function(info, value) db.boss.debuffCount = value end,
+                                get = function(info) return UnitFrames.db.profile.boss.debuffCount end,
+                                set = function(info, value) UnitFrames.db.profile.boss.debuffCount = value end,
                                 order = 40,
                             },
 
@@ -534,9 +530,9 @@ local unitframes do
                                 name = L["General_Enabled"],
                                 desc = L["General_EnabledDesc"]:format("RealUI ".._G.SHOW_ARENA_ENEMY_FRAMES_TEXT),
                                 type = "toggle",
-                                get = function() return db.arena.enabled end,
+                                get = function() return UnitFrames.db.profile.arena.enabled end,
                                 set = function(info, value)
-                                    db.arena.enabled = value
+                                    UnitFrames.db.profile.arena.enabled = value
                                 end,
                                 order = 10,
                             },
@@ -544,16 +540,16 @@ local unitframes do
                                 name = "",
                                 type = "group",
                                 inline = true,
-                                disabled = function() return not db.arena.enabled end,
+                                disabled = function() return not UnitFrames.db.profile.arena.enabled end,
                                 order = 20,
                                 args = {
                                     announceUse = {
                                         name = L["UnitFrames_AnnounceTrink"],
                                         desc = L["UnitFrames_AnnounceTrinkDesc"],
                                         type = "toggle",
-                                        get = function() return db.arena.announceUse end,
+                                        get = function() return UnitFrames.db.profile.arena.announceUse end,
                                         set = function(info, value)
-                                            db.arena.announceUse = value
+                                            UnitFrames.db.profile.arena.announceUse = value
                                         end,
                                         order = 10,
                                     },
@@ -567,12 +563,12 @@ local unitframes do
                                                 say = _G.CHAT_MSG_SAY,
                                             }
                                         end,
-                                        disabled = function() return not db.arena.announceUse end,
+                                        disabled = function() return not UnitFrames.db.profile.arena.announceUse end,
                                         get = function(info)
-                                            return _G.strlower(db.arena.announceChat)
+                                            return _G.strlower(UnitFrames.db.profile.arena.announceChat)
                                         end,
                                         set = function(info, value)
-                                            db.arena.announceChat = value
+                                            UnitFrames.db.profile.arena.announceChat = value
                                         end,
                                         order = 20,
                                     },
@@ -624,39 +620,37 @@ local unitframes do
     CombatFader:AddFadeConfig("UnitFrames", unitframes.args.general, 50)
     do -- import hideRaidFilters from minimap
         local MinimapAdv = RealUI:GetModule("MinimapAdv")
-        local mmDB = MinimapAdv.db.profile
         unitframes.args.groups.args.raid.args.hideRaidFilters = {
             type = "toggle",
             name = L["Raid_HideRaidFilter"],
             desc = L["Raid_HideRaidFilterDesc"],
-            get = function(info) return mmDB.information.hideRaidFilters end,
+            get = function(info) return MinimapAdv.db.profile.information.hideRaidFilters end,
             set = function(info, value)
-                mmDB.information.hideRaidFilters = value
+                MinimapAdv.db.profile.information.hideRaidFilters = value
             end,
             order = 50,
         }
     end
     local units = unitframes.args.units.args
     for unitSlug, unit in next, units do
-        local position = db.positions[hudSize][unitSlug]
         unit.args.x = {
             name = L["General_XOffset"],
             type = "input",
             order = 10,
-            get = function(info) return tostring(position.x) end,
+            get = function(info) return tostring(UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].x) end,
             set = function(info, value)
                 value = RealUI:ValidateOffset(value)
-                position.x = value
+                UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].x = value
             end,
         }
         unit.args.y = {
             name = L["General_YOffset"],
             type = "input",
             order = 20,
-            get = function(info) return tostring(position.y) end,
+            get = function(info) return tostring(UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y) end,
             set = function(info, value)
                 value = RealUI:ValidateOffset(value)
-                position.y = value
+                UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y = value
             end,
         }
         if unitSlug == "player" or unitSlug == "target" then
@@ -670,9 +664,9 @@ local unitframes do
                 step = 1,
                 bigStep = 4,
                 order = 30,
-                get = function(info) return ndb.positions[RealUI.cLayout]["UFHorizontal"] end,
+                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["UFHorizontal"] end,
                 set = function(info, value)
-                    ndb.positions[RealUI.cLayout]["UFHorizontal"] = value
+                    RealUI.db.profile.positions[RealUI.cLayout]["UFHorizontal"] = value
                     RealUI:UpdatePositioners()
                 end,
             }
@@ -757,9 +751,9 @@ local unitframes do
                 max = -30,
                 step = 1,
                 bigStep = 4,
-                get = function(info) return ndb.positions[RealUI.cLayout]["BossX"] end,
+                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["BossX"] end,
                 set = function(info, value)
-                    ndb.positions[RealUI.cLayout]["BossX"] = value
+                    RealUI.db.profile.positions[RealUI.cLayout]["BossX"] = value
                     RealUI:UpdatePositioners()
                 end,
                 order = 2,
@@ -772,9 +766,9 @@ local unitframes do
                 max = round(uiHeight * 0.4),
                 step = 1,
                 bigStep = 2,
-                get = function(info) return ndb.positions[RealUI.cLayout]["BossY"] end,
+                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["BossY"] end,
                 set = function(info, value)
-                    ndb.positions[RealUI.cLayout]["BossY"] = value
+                    RealUI.db.profile.positions[RealUI.cLayout]["BossY"] = value
                     RealUI:UpdatePositioners()
                 end,
                 order = 4,
@@ -784,8 +778,8 @@ local unitframes do
                 desc = L["UnitFrames_GapDesc"],
                 type = "range",
                 min = 0, max = 10, step = 1,
-                get = function(info) return db.boss.gap end,
-                set = function(info, value) db.boss.gap = value end,
+                get = function(info) return UnitFrames.db.profile.boss.gap end,
+                set = function(info, value) UnitFrames.db.profile.boss.gap = value end,
                 order = 6,
             }
         end
@@ -795,10 +789,8 @@ local castbars do
     debug("HuD CastBars")
     local MODNAME = "CastBars"
     local CastBars = RealUI:GetModule(MODNAME)
-    local db = CastBars.db.profile
 
     local function CreateFrameOptions(unit, order)
-        local unitDB = db[unit]
         return {
             name = _G[unit:upper()],
             type = "group",
@@ -807,10 +799,10 @@ local castbars do
                 reverse = {
                     name = L["HuD_ReverseBars"],
                     type = "toggle",
-                    get = function() return unitDB.reverse end,
+                    get = function() return CastBars.db.profile[unit].reverse end,
                     set = function(info, value)
-                        unitDB.reverse = value
-                        CastBars[unit]:SetReverseFill(value)
+                        CastBars.db.profile[unit].reverse = value
+                        CastBars:UpdateSettings(unit)
                     end,
                     order = 1,
                 },
@@ -821,12 +813,12 @@ local castbars do
                     values = RealUI.globals.cornerPoints,
                     get = function(info)
                         for k,v in next, RealUI.globals.cornerPoints do
-                            if v == unitDB.text then return k end
+                            if v == CastBars.db.profile[unit].text then return k end
                         end
                     end,
                     set = function(info, value)
-                        unitDB.text = RealUI.globals.cornerPoints[value]
-                        CastBars:UpdateAnchors(unit)
+                        CastBars.db.profile[unit].text = RealUI.globals.cornerPoints[value]
+                        CastBars:UpdateSettings(unit)
                     end,
                     order = 2,
                 },
@@ -842,11 +834,11 @@ local castbars do
                             values = RealUI.globals.anchorPoints,
                             get = function(info)
                                 for k,v in next, RealUI.globals.anchorPoints do
-                                    if v == unitDB.position.point then return k end
+                                    if v == CastBars.db.profile[unit].position.point then return k end
                                 end
                             end,
                             set = function(info, value)
-                                unitDB.position.point = RealUI.globals.anchorPoints[value]
+                                CastBars.db.profile[unit].position.point = RealUI.globals.anchorPoints[value]
                                 FramePoint:RestorePosition(CastBars)
                             end,
                             order = 10,
@@ -857,10 +849,10 @@ local castbars do
                             type = "input",
                             dialogControl = "NumberEditBox",
                             get = function(info)
-                                return _G.tostring(unitDB.position.x)
+                                return _G.tostring(CastBars.db.profile[unit].position.x)
                             end,
                             set = function(info, value)
-                                unitDB.position.x = round(_G.tonumber(value), 1)
+                                CastBars.db.profile[unit].position.x = round(_G.tonumber(value), 1)
                                 FramePoint:RestorePosition(CastBars)
                             end,
                             order = 11,
@@ -870,9 +862,9 @@ local castbars do
                             desc = L["General_YOffsetDesc"],
                             type = "input",
                             dialogControl = "NumberEditBox",
-                            get = function(info) return _G.tostring(unitDB.position.y) end,
+                            get = function(info) return _G.tostring(CastBars.db.profile[unit].position.y) end,
                             set = function(info, value)
-                                unitDB.position.y = round(_G.tonumber(value), 1)
+                                CastBars.db.profile[unit].position.y = round(_G.tonumber(value), 1)
                                 FramePoint:RestorePosition(CastBars)
                             end,
                             order = 12,
@@ -924,9 +916,9 @@ local castbars do
 end
 local classresource do
     debug("HuD ClassResource")
-    local ClassResource = RealUI:GetModule("ClassResource")
-    local db = ClassResource.db.class
-    local pointDB, barDB = db.points, db.bar
+    local MODNAME = "ClassResource"
+    local ClassResource = RealUI:GetModule(MODNAME)
+
     local points, bars = ClassResource:GetResources()
     debug("points and bars", points, bars)
     if points or bars then
@@ -941,9 +933,9 @@ local classresource do
                     width = {
                         name = L["HuD_Width"],
                         type = "input",
-                        get = function(info) return tostring(barDB.size.width) end,
+                        get = function(info) return tostring(ClassResource.db.class.bar.size.width) end,
                         set = function(info, value)
-                            barDB.size.width = value
+                            ClassResource.db.class.bar.size.width = value
                             ClassResource:SettingsUpdate("bar", "size")
                         end,
                         order = 10,
@@ -951,9 +943,9 @@ local classresource do
                     height = {
                         name = L["HuD_Height"],
                         type = "input",
-                        get = function(info) return tostring(barDB.size.height) end,
+                        get = function(info) return tostring(ClassResource.db.class.bar.size.height) end,
                         set = function(info, value)
-                            barDB.size.height = value
+                            ClassResource.db.class.bar.size.height = value
                             ClassResource:SettingsUpdate("bar", "size")
                         end,
                         order = 20,
@@ -985,10 +977,10 @@ local classresource do
                                 type = "input",
                                 dialogControl = "NumberEditBox",
                                 get = function(info)
-                                    return _G.tostring(barDB.position.x)
+                                    return _G.tostring(ClassResource.db.class.bar.position.x)
                                 end,
                                 set = function(info, value)
-                                    barDB.position.x = round(_G.tonumber(value))
+                                    ClassResource.db.class.bar.position.x = round(_G.tonumber(value))
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
                                 order = 10,
@@ -998,9 +990,9 @@ local classresource do
                                 desc = L["General_YOffsetDesc"],
                                 type = "input",
                                 dialogControl = "NumberEditBox",
-                                get = function(info) return _G.tostring(barDB.position.y) end,
+                                get = function(info) return _G.tostring(ClassResource.db.class.bar.position.y) end,
                                 set = function(info, value)
-                                    barDB.position.y = round(_G.tonumber(value))
+                                    ClassResource.db.class.bar.position.y = round(_G.tonumber(value))
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
                                 order = 20,
@@ -1020,9 +1012,9 @@ local classresource do
                         desc = L["Resource_HideUnusedDesc"]:format(points.name),
                         type = "toggle",
                         hidden = RealUI.charInfo.class.token == "DEATHKNIGHT",
-                        get = function(info) return pointDB.hideempty end,
+                        get = function(info) return ClassResource.db.class.points.hideempty end,
                         set = function(info, value)
-                            pointDB.hideempty = value
+                            ClassResource.db.class.points.hideempty = value
                             ClassResource:ForceUpdate()
                         end,
                         order = 5,
@@ -1032,9 +1024,9 @@ local classresource do
                         desc = L["Resource_ReverseDesc"]:format(points.name),
                         type = "toggle",
                         hidden = points.token ~= "COMBO_POINTS",
-                        get = function(info) return pointDB.reverse end,
+                        get = function(info) return ClassResource.db.class.points.reverse end,
                         set = function(info, value)
-                            pointDB.reverse = value
+                            ClassResource.db.class.points.reverse = value
                             ClassResource:SettingsUpdate("points", "gap")
                         end,
                         order = 10,
@@ -1043,9 +1035,9 @@ local classresource do
                         name = L["HuD_Width"],
                         type = "input",
                         hidden = RealUI.charInfo.class.token ~= "DEATHKNIGHT",
-                        get = function(info) return tostring(pointDB.size.width) end,
+                        get = function(info) return tostring(ClassResource.db.class.points.size.width) end,
                         set = function(info, value)
-                            pointDB.size.width = value
+                            ClassResource.db.class.points.size.width = value
                             ClassResource:SettingsUpdate("points", "size")
                         end,
                         order = 15,
@@ -1054,9 +1046,9 @@ local classresource do
                         name = L["HuD_Height"],
                         type = "input",
                         hidden = RealUI.charInfo.class.token ~= "DEATHKNIGHT",
-                        get = function(info) return tostring(pointDB.size.height) end,
+                        get = function(info) return tostring(ClassResource.db.class.points.size.height) end,
                         set = function(info, value)
-                            pointDB.size.height = value
+                            ClassResource.db.class.points.size.height = value
                             ClassResource:SettingsUpdate("points", "size")
                         end,
                         order = 20,
@@ -1066,10 +1058,10 @@ local classresource do
                         desc = L["Resource_GapDesc"]:format(points.name),
                         type = "input",
                         hidden = RealUI.charInfo.class.token == "PALADIN",
-                        get = function(info) return tostring(pointDB.size.gap) end,
+                        get = function(info) return tostring(ClassResource.db.class.points.size.gap) end,
                         set = function(info, value)
                             value = RealUI:ValidateOffset(value)
-                            pointDB.size.gap = value
+                            ClassResource.db.class.points.size.gap = value
                             ClassResource:SettingsUpdate("points", "gap")
                         end,
                         order = 25,
@@ -1101,10 +1093,10 @@ local classresource do
                                 type = "input",
                                 dialogControl = "NumberEditBox",
                                 get = function(info)
-                                    return _G.tostring(pointDB.position.x)
+                                    return _G.tostring(ClassResource.db.class.points.position.x)
                                 end,
                                 set = function(info, value)
-                                    pointDB.position.x = round(_G.tonumber(value))
+                                    ClassResource.db.class.points.position.x = round(_G.tonumber(value))
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
                                 order = 10,
@@ -1114,9 +1106,9 @@ local classresource do
                                 desc = L["General_YOffsetDesc"],
                                 type = "input",
                                 dialogControl = "NumberEditBox",
-                                get = function(info) return _G.tostring(pointDB.position.y) end,
+                                get = function(info) return _G.tostring(ClassResource.db.class.points.position.y) end,
                                 set = function(info, value)
-                                    pointDB.position.y = round(_G.tonumber(value))
+                                    ClassResource.db.class.points.position.y = round(_G.tonumber(value))
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
                                 order = 20,

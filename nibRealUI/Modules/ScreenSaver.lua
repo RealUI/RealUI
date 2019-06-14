@@ -214,17 +214,6 @@ function ScreenSaver:UpdateFrames()
     self.panel:SetSize(width, 21)
 end
 
--- Initialize / Refresh
-function ScreenSaver:RefreshMod()
-    if not RealUI:GetModuleEnabled(MODNAME) then return end
-
-    db = self.db.profile
-    ndb = RealUI.db.profile
-
-    self:UpdateFrames()
-    self:AFKEvent()
-end
-
 function ScreenSaver:PLAYER_LOGIN()
     LoggedIn = true
 
@@ -276,6 +265,16 @@ function ScreenSaver:CreateFrames()
 end
 
 ----
+function ScreenSaver:RefreshMod()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+
+    db = self.db.profile
+    ndb = RealUI.db.profile
+
+    self:UpdateFrames()
+    self:AFKEvent()
+end
+
 function ScreenSaver:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
