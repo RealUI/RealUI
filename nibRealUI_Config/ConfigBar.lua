@@ -617,7 +617,7 @@ local unitframes do
             },
         },
     }
-    CombatFader:AddFadeConfig("UnitFrames", unitframes.args.general, 50)
+    CombatFader:AddFadeConfig("UnitFrames", unitframes.args.general, 50, true)
     do -- import hideRaidFilters from minimap
         local MinimapAdv = RealUI:GetModule("MinimapAdv")
         unitframes.args.groups.args.raid.args.hideRaidFilters = {
@@ -1117,7 +1117,7 @@ local classresource do
                     }
                 }
             }
-            CombatFader:AddFadeConfig("ClassResource", pointOptions, 50)
+            CombatFader:AddFadeConfig("ClassResource", pointOptions, 50, true)
         end
 
         classresource = {

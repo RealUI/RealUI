@@ -2824,7 +2824,7 @@ local uiTweaks do
                 },
             },
         }
-        CombatFader:AddFadeConfig(MODNAME, objectives, 50, true)
+        CombatFader:AddFadeConfig(MODNAME, objectives, 50)
     end
 
     uiTweaks = {
