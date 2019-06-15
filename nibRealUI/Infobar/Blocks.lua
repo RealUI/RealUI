@@ -1424,7 +1424,7 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
-                local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
+                local xpStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
                 local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                 tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
@@ -1508,7 +1508,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
-                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
+                local repStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
                 tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
@@ -1581,14 +1581,13 @@ function Infobar:CreateBlocks()
                     title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
                 end
 
-                testCell:SetFontObject("GameTooltipText")
-                testCell:SetText(title)
-                local maxWidth = _G.max(testCell:GetStringWidth(), 200)
-
                 local lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, title, nil, nil, 2, nil, nil, nil, maxWidth)
+                tooltip:SetCell(lineNum, colNum, title, nil, nil, 2)
                 tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
-                tooltip:AddLine(_G.AZERITE_POWER_TOOLTIP_BODY:format(name))
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, _G.AZERITE_POWER_TOOLTIP_BODY:format(name), nil, nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.grayLight:GetRGB())
 
                 tooltip:AddLine(" ")
             end,
@@ -1626,7 +1625,7 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
-                local honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
 
                 local level = _G.UnitHonorLevel("player")
                 local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
