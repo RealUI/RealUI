@@ -53,7 +53,7 @@ function RealUI.GetColorString(red, green, blue)
 end
 
 function RealUI.GetDurabilityColor(curDura, maxDura)
-    local low, mid, high = _G.Aurora.Color.red, _G.Aurora.Color.yellow, _G.Aurora.Color.blue
+    local low, mid, high = _G.Aurora.Color.red, _G.Aurora.Color.yellow, _G.Aurora.Color.green
     return private.oUF:RGBColorGradient(curDura, maxDura or 1, low.r,low.g,low.b, mid.r,mid.g,mid.b, high.r,high.g,high.b)
 end
 
