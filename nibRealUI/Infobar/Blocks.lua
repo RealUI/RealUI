@@ -1934,7 +1934,7 @@ function Infobar:CreateBlocks()
                         end
                     end
                 end
-            elseif button == "RightButton" then
+            elseif button == "RightButton" and #equipmentSetIDs > 0 then
                 if _G.IsAltKeyDown() then
                     dbc.specgear[specIndex] = -1
                     tooltip:SetCell(specLines[specIndex], 2, "---")
@@ -1973,13 +1973,20 @@ function Infobar:CreateBlocks()
             block.dataObj.text = specInfo[specInfo.current.index].name
         end
 
-        local lootSpec, hintLine
+        local lootSpec, hintSpec, hintGear
         local function Spec_TooltipOnUpdate(tooltip)
-            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, 3)
+            local numColumns = tooltip:GetColumnCount()
+            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, numColumns)
+            tooltip:SetCell(hintGear, 1, nil, nil, numColumns)
+
             if tooltip:IsMouseOver() then
-                tooltip:SetCell(hintLine, 1, L["Spec_ChangeSpec"], nil, 3)
+                tooltip:SetCell(hintSpec, 1, L["Spec_ChangeSpec"], nil, numColumns)
+                if #equipmentSetIDs > 0 then
+                    tooltip:SetCell(hintGear, 1, L["Spec_ChangeGear"], nil, numColumns)
+                    tooltip:SetCellTextColor(hintGear, 1, Color.green:GetRGB())
+                end
             else
-                tooltip:SetCell(hintLine, 1, L["Spec_Open"], nil, 3)
+                tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, numColumns)
             end
         end
 
@@ -1998,7 +2005,7 @@ function Infobar:CreateBlocks()
                 if qTip:IsAcquired(block) then return end
                 --Infobar:debug("spec: OnEnter", block.side, ...)
 
-                local tooltip = qTip:Acquire(block, 3, "LEFT", "LEFT", "LEFT")
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "LEFT")
                 SetupTooltip(tooltip, block)
                 tooltip:SetScript("OnUpdate", Spec_TooltipOnUpdate)
                 local lineNum, colNum
@@ -2006,8 +2013,14 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
                 for specIndex = 1, #RealUI.charInfo.specs do
-                    local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
-                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
+                    if #equipmentSetIDs > 0 then
+                        tooltip:AddColumn("LEFT")
+                        local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
+                        lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", RealUI.db:GetDualSpecProfile(specIndex))
+                    else
+                        lineNum = tooltip:AddLine(specInfo[specIndex].name, RealUI.db:GetDualSpecProfile(specIndex))
+                    end
+
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
                     specLines[specIndex] = lineNum
                     if specIndex == specInfo.current.index then
@@ -2017,8 +2030,9 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddLine(" ")
                 lootSpec = tooltip:AddLine()
-                hintLine = tooltip:AddLine()
-                tooltip:SetCell(hintLine, 1, L["Spec_Open"], nil, 3)
+                hintSpec = tooltip:AddLine()
+                hintGear = tooltip:AddLine()
+                tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, tooltip:GetColumnCount())
                 tooltip:SetCellTextColor(hintLine, 1, 0, 1, 0)
 
                 tooltip:Show()
