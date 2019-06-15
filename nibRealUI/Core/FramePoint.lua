@@ -89,9 +89,9 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
 
     local name = dragFrame:CreateFontString(nil, "BACKGROUND", "Game12Font")
     name:SetText(frame:GetDebugName())
-    name:SetAllPoints()
+    name:SetPoint("CENTER")
 
-    frame:SetPoint("TOPLEFT", dragFrame)
+    frame:SetPoint("CENTER", dragFrame)
 
     LibWin.RegisterConfig(dragFrame, RealUI.GetOptions(mod.moduleName, optionPath))
     LibWin.RestorePosition(dragFrame)

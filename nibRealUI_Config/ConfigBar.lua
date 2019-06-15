@@ -938,7 +938,7 @@ local classresource do
                             ClassResource.db.class.bar.size.width = value
                             ClassResource:SettingsUpdate("bar", "size")
                         end,
-                        order = 10,
+                        order = 1,
                     },
                     height = {
                         name = L["HuD_Height"],
@@ -948,28 +948,28 @@ local classresource do
                             ClassResource.db.class.bar.size.height = value
                             ClassResource:SettingsUpdate("bar", "size")
                         end,
-                        order = 20,
-                    },
-                    headerPos = {
-                        name = L["General_Position"],
-                        type = "header",
-                        order = 30,
+                        order = 2,
                     },
                     position = {
-                        name = "",
+                        name = L["General_Position"],
                         type = "group",
                         inline = true,
-                        order = 31,
+                        order = 3,
                         args = {
-                            lock = {
-                                name = L["General_Lock"],
-                                desc = L["General_LockDesc"],
-                                type = "toggle",
-                                get = function(info) return FramePoint:IsModLocked(ClassResource) end,
-                                set = function(info, value)
-                                    FramePoint:ToggleMod(ClassResource)
+                            point = {
+                                name = L["General_AnchorPoint"],
+                                type = "select",
+                                values = RealUI.globals.anchorPoints,
+                                get = function(info)
+                                    for k,v in next, RealUI.globals.anchorPoints do
+                                        if v == ClassResource.db.class.bar.position.point then return k end
+                                    end
                                 end,
-                                order = 0,
+                                set = function(info, value)
+                                    ClassResource.db.class.bar.position.point = RealUI.globals.anchorPoints[value]
+                                    FramePoint:RestorePosition(ClassResource)
+                                end,
+                                order = 1,
                             },
                             x = {
                                 name = L["General_XOffset"],
@@ -980,10 +980,10 @@ local classresource do
                                     return _G.tostring(ClassResource.db.class.bar.position.x)
                                 end,
                                 set = function(info, value)
-                                    ClassResource.db.class.bar.position.x = round(_G.tonumber(value))
+                                    ClassResource.db.class.bar.position.x = round(_G.tonumber(value), 1)
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
-                                order = 10,
+                                order = 2,
                             },
                             y = {
                                 name = L["General_YOffset"],
@@ -992,14 +992,14 @@ local classresource do
                                 dialogControl = "NumberEditBox",
                                 get = function(info) return _G.tostring(ClassResource.db.class.bar.position.y) end,
                                 set = function(info, value)
-                                    ClassResource.db.class.bar.position.y = round(_G.tonumber(value))
+                                    ClassResource.db.class.bar.position.y = round(_G.tonumber(value), 1)
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
-                                order = 20,
+                                order = 3,
                             },
-                        },
+                        }
                     }
-                },
+                }
             }
 
             pointOptions = {
@@ -1017,7 +1017,7 @@ local classresource do
                             ClassResource.db.class.points.hideempty = value
                             ClassResource:ForceUpdate()
                         end,
-                        order = 5,
+                        order = 1,
                     },
                     reverse = {
                         name = L["Resource_Reverse"],
@@ -1029,7 +1029,7 @@ local classresource do
                             ClassResource.db.class.points.reverse = value
                             ClassResource:SettingsUpdate("points", "gap")
                         end,
-                        order = 10,
+                        order = 2,
                     },
                     width = {
                         name = L["HuD_Width"],
@@ -1040,7 +1040,7 @@ local classresource do
                             ClassResource.db.class.points.size.width = value
                             ClassResource:SettingsUpdate("points", "size")
                         end,
-                        order = 15,
+                        order = 10,
                     },
                     height = {
                         name = L["HuD_Height"],
@@ -1051,7 +1051,7 @@ local classresource do
                             ClassResource.db.class.points.size.height = value
                             ClassResource:SettingsUpdate("points", "size")
                         end,
-                        order = 20,
+                        order = 11,
                     },
                     gap = {
                         name = L["Resource_Gap"],
@@ -1064,28 +1064,28 @@ local classresource do
                             ClassResource.db.class.points.size.gap = value
                             ClassResource:SettingsUpdate("points", "gap")
                         end,
-                        order = 25,
-                    },
-                    headerPos = {
-                        name = L["General_Position"],
-                        type = "header",
-                        order = 75,
+                        order = 12,
                     },
                     position = {
-                        name = "",
+                        name = L["General_Position"],
                         type = "group",
                         inline = true,
-                        order = 76,
+                        order = 20,
                         args = {
-                            lock = {
-                                name = L["General_Lock"],
-                                desc = L["General_LockDesc"],
-                                type = "toggle",
-                                get = function(info) return FramePoint:IsModLocked(ClassResource) end,
-                                set = function(info, value)
-                                    FramePoint:ToggleMod(ClassResource)
+                            point = {
+                                name = L["General_AnchorPoint"],
+                                type = "select",
+                                values = RealUI.globals.anchorPoints,
+                                get = function(info)
+                                    for k,v in next, RealUI.globals.anchorPoints do
+                                        if v == ClassResource.db.class.points.position.point then return k end
+                                    end
                                 end,
-                                order = 0,
+                                set = function(info, value)
+                                    ClassResource.db.class.points.position.point = RealUI.globals.anchorPoints[value]
+                                    FramePoint:RestorePosition(ClassResource)
+                                end,
+                                order = 1,
                             },
                             x = {
                                 name = L["General_XOffset"],
@@ -1096,10 +1096,10 @@ local classresource do
                                     return _G.tostring(ClassResource.db.class.points.position.x)
                                 end,
                                 set = function(info, value)
-                                    ClassResource.db.class.points.position.x = round(_G.tonumber(value))
+                                    ClassResource.db.class.points.position.x = round(_G.tonumber(value), 1)
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
-                                order = 10,
+                                order = 2,
                             },
                             y = {
                                 name = L["General_YOffset"],
@@ -1108,14 +1108,14 @@ local classresource do
                                 dialogControl = "NumberEditBox",
                                 get = function(info) return _G.tostring(ClassResource.db.class.points.position.y) end,
                                 set = function(info, value)
-                                    ClassResource.db.class.points.position.y = round(_G.tonumber(value))
+                                    ClassResource.db.class.points.position.y = round(_G.tonumber(value), 1)
                                     FramePoint:RestorePosition(ClassResource)
                                 end,
-                                order = 20,
+                                order = 3,
                             },
-                        },
+                        }
                     }
-                },
+                }
             }
             CombatFader:AddFadeConfig("ClassResource", pointOptions, 50)
         end
@@ -1139,7 +1139,21 @@ local classresource do
                         CloseHuDWindow()
                         RealUI:ReloadUIDialog()
                     end,
-                    order = 10,
+                    order = 1,
+                },
+                lock = {
+                    name = L["General_Lock"],
+                    desc = L["General_LockDesc"],
+                    type = "toggle",
+                    get = function(info) return FramePoint:IsModLocked(ClassResource) end,
+                    set = function(info, value)
+                        if value then
+                            FramePoint:LockMod(ClassResource)
+                        else
+                            FramePoint:UnlockMod(ClassResource)
+                        end
+                    end,
+                    order = 2,
                 },
                 bars = barOptions,
                 points = pointOptions,
