@@ -1,10 +1,11 @@
 local ADDON_NAME, ns = ...
 
 -- [[ Lua Globals ]]
--- luacheck: globals next type select ipairs
+-- luacheck: globals next type select ipairs time
 
 local Aurora = _G.Aurora
 local Base = Aurora.Base
+local round = _G.RealUI.Round
 
 local cfg = {
     -- modifications
@@ -49,6 +50,7 @@ for power, color in next, _G.PowerBarColor do
 end
 colors.power.MANA = {.2, .2, 1}
 colors.power.RAGE = {1, .2, .2}
+local normal = _G.NORMAL_FONT_COLOR
 
 local numberize = function(val)
     if val >= 1e6 then
@@ -258,14 +260,6 @@ local function SetStatusBar(self, unit)
     end
 end
 
-local function getTarget(unit)
-    if _G.UnitIsUnit(unit, "player") then
-        return ("|cffff0000%s|r"):format(cfg.you)
-    else
-        return _G.UnitName(unit)
-    end
-end
-
 local classification = {
     elite = "+",
     rare = " |cff6699ffR|r",
@@ -286,6 +280,309 @@ local factionIcon = {
         coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
     },
 }
+local GetInfo do
+    local cache = {}
+    local slots = {
+        "Head",
+        "Neck",
+        "Shoulder",
+        "Shirt",
+        "Chest",
+        "Waist",
+        "Legs",
+        "Feet",
+        "Wrist",
+        "Hands",
+        "Finger0",
+        "Finger1",
+        "Trinket0",
+        "Trinket1",
+        "Back",
+        "MainHand",
+        "SecondaryHand",
+    }
+    local TwoHanders = {
+        [_G.LE_ITEM_WEAPON_AXE2H] = true,
+        [_G.LE_ITEM_WEAPON_MACE2H] = true,
+        [_G.LE_ITEM_WEAPON_SWORD2H] = true,
+
+        [_G.LE_ITEM_WEAPON_POLEARM] = true,
+        [_G.LE_ITEM_WEAPON_STAFF] = true,
+
+        [_G.LE_ITEM_WEAPON_BOWS] = true,
+        [_G.LE_ITEM_WEAPON_CROSSBOW] = true,
+        [_G.LE_ITEM_WEAPON_GUNS] = true,
+
+        [_G.LE_ITEM_WEAPON_FISHINGPOLE] = true
+    }
+    local DualWield = {
+        [_G.LE_ITEM_WEAPON_AXE1H] = true,
+        [_G.LE_ITEM_WEAPON_MACE1H] = true,
+        [_G.LE_ITEM_WEAPON_SWORD1H] = true,
+
+        [_G.LE_ITEM_WEAPON_WARGLAIVE] = true,
+        [_G.LE_ITEM_WEAPON_DAGGER] = true,
+
+        [_G.LE_ITEM_WEAPON_GENERIC] = true,
+        [_G.LE_ITEM_ARMOR_SHIELD] = true,
+    }
+
+    local maxAge = 600
+    local quickRefresh = 10
+
+    local inspectFrame = _G.CreateFrame("Frame")
+    inspectFrame:RegisterEvent("INSPECT_READY")
+    inspectFrame:SetScript("OnEvent", function(self, event, guid)
+        if not cache[guid] or _G.UnitGUID(cache[guid].unit) ~= guid then return end
+        local unit = cache[guid].unit
+
+
+        if not _G.CanInspect(unit) then return end
+        cache[guid].time = time()
+        local isMissingInfo
+
+        do -- spec
+            local specID = _G.GetInspectSpecialization(unit)
+            if specID then
+                local _, specName = _G.GetSpecializationInfoByID(specID, _G.UnitSex(unit))
+                cache[guid].spec = specName
+            else
+                isMissingInfo = true
+            end
+        end
+
+        do -- item level
+            local totalILvl = 0
+            local hasTwoHander, isDualWield
+            local artifactILvl, mainArtifact, offArtifact
+
+            for id, slot in next, slots do
+                if slot ~= "Shirt" then
+                    local link = _G.GetInventoryItemLink(cache[guid].unit, id)
+                    ns.Debug(id, slot)
+                    if link then
+                        local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
+                        if rarity and subTypeID then
+                            if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
+                                ilvl = _G.RealUI.GetItemLevel(link)
+                            end
+
+                            ns.Debug(ilvl, _G.strsplit("|", link))
+                            if not ilvl or ilvl == 0 then
+                                ns.Debug("No ilvl data for", slot)
+                                isMissingInfo = true
+                            end
+
+                            if slot == "MainHand" or slot == "SecondaryHand" then
+                                if rarity == _G.LE_ITEM_QUALITY_ARTIFACT then
+                                    if slot == "MainHand" then
+                                        mainArtifact = ilvl
+                                    elseif slot == "SecondaryHand" then
+                                        offArtifact = ilvl
+                                    end
+                                else
+                                    totalILvl = totalILvl + ilvl
+                                end
+
+                                ns.Debug("itemClass", subTypeID)
+
+                                if subTypeID then
+                                    if slot == "MainHand" then
+                                        hasTwoHander = TwoHanders[subTypeID] and ilvl
+                                    elseif slot == "SecondaryHand" then
+                                        if hasTwoHander then
+                                            isDualWield = TwoHanders[subTypeID] -- Titan's Grip
+                                        else
+                                            isDualWield = DualWield[subTypeID]
+                                        end
+                                    end
+                                end
+                            else
+                                totalILvl = totalILvl + ilvl
+                            end
+                        else
+                            ns.Debug("No item info for", slot)
+                            isMissingInfo = true
+                        end
+                    else
+                        ns.Debug("No item link for", slot)
+                        if slot ~= "SecondaryHand" then
+                            isMissingInfo = true
+                        end
+                    end
+                end
+            end
+
+            if not isMissingInfo then
+                -- Artifacts are counted as one item
+                if mainArtifact or offArtifact then
+                    ns.Debug("Artifacts", mainArtifact, offArtifact)
+                    artifactILvl = _G.max(mainArtifact or 0, offArtifact or 0)
+                    totalILvl = totalILvl + artifactILvl
+
+                    if offArtifact then
+                        totalILvl = totalILvl + artifactILvl
+                    end
+
+                    if artifactILvl <= 750 then
+                        totalILvl = nil
+                    end
+                end
+
+                local numItems = 15
+                if hasTwoHander or isDualWield then
+                    numItems = 16
+                end
+
+                if hasTwoHander and not isDualWield then
+                    -- Two handers are counted twice
+                    totalILvl = totalILvl + hasTwoHander
+                end
+
+                local ilvl
+                if totalILvl and totalILvl > 0 then
+                    ns.Debug("totalILvl", totalILvl, numItems)
+                    ilvl = round(totalILvl / numItems)
+                end
+                cache[guid].ilvl = ilvl
+            end
+        end
+
+        if isMissingInfo then
+            cache[guid].time = cache[guid].time - (maxAge - quickRefresh)
+        end
+    end)
+
+    local function IsCacheFresh(guid)
+        if cache[guid] and cache[guid].time then
+            return (time() - cache[guid].time) < maxAge
+        end
+    end
+    function GetInfo(infoType, unit)
+        local guid = _G.UnitGUID(unit)
+        if IsCacheFresh(guid) then
+            return cache[guid][infoType]
+        else
+            if _G.CanInspect(unit) then
+                if not cache[guid] then
+                    cache[guid] = {
+                        unit = unit
+                    }
+                end
+
+                _G.NotifyInspect(unit)
+            end
+        end
+    end
+end
+
+local AddTargetInfo, ClearTargetInfo do -- Target
+    local targetLine
+
+    local function GetTarget(unit)
+        if _G.UnitIsUnit(unit, "player") then
+            return ("|cffff0000%s|r"):format(cfg.you)
+        else
+            return _G.UnitName(unit)
+        end
+    end
+
+    function AddTargetInfo(unit)
+        if not _G.UnitExists(unit) then return end
+
+        local tarRicon, text = (_G.GetRaidTargetIndex(unit))
+        ns.Debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
+
+        if tarRicon and _G.ICON_LIST[tarRicon] then
+            text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", GetTarget(unit))
+        else
+            text = GetTarget(unit)
+        end
+
+        if targetLine and text then
+            _G["GameTooltipTextLeft"..targetLine]:SetText(_G.TARGET)
+            _G["GameTooltipTextRight"..targetLine]:SetText(text)
+        elseif not targetLine then
+            _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normal.r, normal.g, normal.b, GameTooltip_UnitColor(unit))
+            targetLine = _G.GameTooltip:NumLines()
+        end
+    end
+    function ClearTargetInfo()
+        targetLine = nil
+    end
+end
+
+local AddSpecInfo, ClearSpecInfo do -- Spec
+    local specLine
+    local function GetSpec(unit)
+        return GetInfo("spec", unit)
+    end
+
+    function AddSpecInfo(isPlayer, unit)
+        if not isPlayer then return end
+
+        local spec = GetSpec(unit)
+        if specLine and spec then
+            _G["GameTooltipTextLeft"..specLine]:SetText(_G.SPECIALIZATION)
+            _G["GameTooltipTextRight"..specLine]:SetText(spec)
+        elseif not specLine then
+            _G.GameTooltip:AddDoubleLine(_G.SPECIALIZATION, spec or _G.SEARCH_LOADING_TEXT, normal.r, normal.g, normal.b, 1,1,1)
+            specLine = _G.GameTooltip:NumLines()
+        end
+    end
+    function ClearSpecInfo()
+        specLine = nil
+    end
+end
+
+local AddItemLevelInfo, ClearItemLevelInfo do -- ItemLevel
+    local iLvlLine
+
+    local function GetItemLevel(unit)
+        if _G.UnitIsUnit(unit, "player") then
+            local _, avgItemLevelEquipped = _G.GetAverageItemLevel()
+            return avgItemLevelEquipped
+        else
+            return GetInfo("ilvl", unit)
+        end
+    end
+
+    function AddItemLevelInfo(isPlayer, unit)
+        if not isPlayer then return end
+
+        local iLvl = GetItemLevel(unit)
+        if iLvl and iLvl <= 0 then
+            iLvl  = nil
+        end
+
+        if iLvlLine and iLvl then
+            _G["GameTooltipTextLeft"..iLvlLine]:SetText(_G.ITEM_LEVEL_ABBR)
+            _G["GameTooltipTextRight"..iLvlLine]:SetText(iLvl)
+        elseif not iLvlLine then
+            _G.GameTooltip:AddDoubleLine(_G.ITEM_LEVEL_ABBR, iLvl or _G.SEARCH_LOADING_TEXT, normal.r, normal.g, normal.b, 1,1,1)
+            iLvlLine = _G.GameTooltip:NumLines()
+        end
+    end
+    function ClearItemLevelInfo()
+        iLvlLine = nil
+    end
+end
+
+local updateFrame = _G.CreateFrame("Frame")
+updateFrame:SetScript("OnUpdate", function(self, elapsed)
+    self.freebtipUpdate = (self.freebtipUpdate or 0) + elapsed
+    if self.freebtipUpdate < 1 then return end
+
+    local unit = GetUnit(_G.GameTooltip)
+    local isPlayer = _G.UnitIsPlayer(unit)
+
+    AddTargetInfo(unit.."target")
+    AddSpecInfo(isPlayer, unit)
+    AddItemLevelInfo(isPlayer, unit)
+
+    self.freebtipUpdate = 0
+end)
+
 _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
     ns.Debug("--- OnSetUnit ---")
     if cfg.combathide and _G.InCombatLockdown() then
@@ -387,28 +684,19 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             end
         end
 
-        if _G.UnitExists(unit.."target") then
-            local tarRicon, text = (_G.GetRaidTargetIndex(unit.."target"))
-            ns.Debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
-            if tarRicon and _G.ICON_LIST[tarRicon] then
-                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", getTarget(unit.."target"))
-            else
-                text = getTarget(unit.."target")
-            end
-
-            ns.Debug("target:", text)
-            self:AddDoubleLine(_G.TARGET, text, _G.NORMAL_FONT_COLOR.r, _G.NORMAL_FONT_COLOR.g, _G.NORMAL_FONT_COLOR.b,
-            GameTooltip_UnitColor(unit.."target"))
-        end
+        AddTargetInfo(unit.."target")
+        AddSpecInfo(isPlayer, unit)
+        AddItemLevelInfo(isPlayer, unit)
 
         if dead then
             _G.GameTooltipStatusBar:Hide()
         end
+
+        updateFrame:Show()
+        self.freebtipUpdate = 0
     end
 
     SetStatusBar(self, unit)
-
-    self.freebtipUpdate = 0
 end)
 
 local frameColor = Aurora.Color.frame
@@ -416,7 +704,14 @@ _G.GameTooltip:HookScript("OnTooltipCleared", function(self)
     if self.factionIcon then
         self.factionIcon:Hide()
     end
+
+    ClearTargetInfo()
+    ClearSpecInfo()
+    ClearItemLevelInfo()
+
     self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
+
+    updateFrame:Hide()
 end)
 
 _G.GameTooltipStatusBar:SetHeight(8)
