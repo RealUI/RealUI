@@ -188,12 +188,6 @@ local function Hook_Raven()
     if _G.RavenBarGroupBuffs then _G.RavenBarGroupBuffs:SetClampedToScreen(false) end
 end
 
-function FrameMover:RefreshMod()
-    db = self.db.profile
-    self:MoveUIFrames()
-    self:MoveAddons()
-end
-
 function FrameMover:PLAYER_ENTERING_WORLD()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
 
@@ -209,6 +203,12 @@ function FrameMover:PLAYER_ENTERING_WORLD()
 end
 
 ----
+function FrameMover:RefreshMod()
+    db = self.db.profile
+    self:MoveUIFrames()
+    self:MoveAddons()
+end
+
 function FrameMover:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

@@ -43,7 +43,7 @@ CombatFader.FadeIt = FadeIt
 function CombatFader:FadeFrames()
     self:debug("FadeFrames")
     for modName, module in next, modules do
-        local options = module.options
+        local options = RealUI.GetOptions(modName, module.path)
         if options.enabled then
             -- Retrieve opacity for current status
             local newOpacity = options.opacity[status]
@@ -120,9 +120,9 @@ end
 --- Register a module to fade based on combat state.
 -- @param mod The name of the mod registering
 -- @param options A table detailing what level of opacity for each state.
-function CombatFader:RegisterModForFade(mod, options)
+function CombatFader:RegisterModForFade(mod, ...)
     modules[mod] = {
-        options = options,
+        path = {...},
         frames = {},
     }
 end
@@ -149,10 +149,9 @@ local keyList = {
     target = L["CombatFade_Target"],
     outofcombat = L["CombatFade_NoCombat"],
 }
-function CombatFader:AddFadeConfig(mod, configDB, startOrder, notInline)
+function CombatFader:AddFadeConfig(mod, configDB, startOrder, inline)
     if not RealUI:GetModuleEnabled(mod) then return end
     _G.assert(modules[mod], mod.." has not yet been registered.")
-    local modDB = modules[mod].options
 
     local args = {}
     for order, key in next, keyOrder do
@@ -161,73 +160,42 @@ function CombatFader:AddFadeConfig(mod, configDB, startOrder, notInline)
             type = "range",
             isPercent = true,
             min = 0, max = 1, step = 0.05,
-            get = function(info) return modDB.opacity[key] end,
+            get = function(info) return RealUI.GetOptions(mod, modules[mod].path).opacity[key] end,
             set = function(info, value)
-                modDB.opacity[key] = value
+                RealUI.GetOptions(mod, modules[mod].path).opacity[key] = value
                 CombatFader:RefreshMod()
             end,
             order = order,
         }
     end
 
-    if notInline then
-        configDB.args.fadeConfig = {
-            name = L["CombatFade"],
-            type = "group",
-            order = startOrder,
-            args = {
-                desc = {
-                    name = L["CombatFade_Desc"],
-                    type = "description",
-                    order = 0,
-                },
-                enable = {
-                    name = L["General_Enabled"],
-                    desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
-                    type = "toggle",
-                    get = function(info) return modDB.enabled end,
-                    set = function(info, value)
-                        modDB.enabled = value
-                        CombatFader:RefreshMod()
-                    end,
-                    order = 1,
-                },
-                config = {
-                    name = "",
-                    type = "group",
-                    inline = true,
-                    disabled = function() return not modDB.enabled end,
-                    order = 30,
-                    args = args,
-                }
+    configDB.args.fadeConfig = {
+        name = L["CombatFade"],
+        type = "group",
+        inline = inline,
+        order = startOrder,
+        args = {
+            enable = {
+                name = L["General_Enabled"],
+                desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
+                type = "toggle",
+                get = function(info) return RealUI.GetOptions(mod, modules[mod].path).enabled end,
+                set = function(info, value)
+                    RealUI.GetOptions(mod, modules[mod].path).enabled = value
+                    CombatFader:RefreshMod()
+                end,
+                order = 1,
+            },
+            config = {
+                name = "",
+                type = "group",
+                inline = true,
+                disabled = function() return not RealUI.GetOptions(mod, modules[mod].path).enabled end,
+                order = 30,
+                args = args,
             }
         }
-    else
-        configDB.args.fadeHeader = {
-            name = L["CombatFade"],
-            type = "header",
-            order = startOrder,
-        }
-        configDB.args.fadeEnable = {
-            name = L["General_Enabled"],
-            desc = L["General_EnabledDesc"]:format(L["CombatFade"]),
-            type = "toggle",
-            get = function(info) return modDB.enabled end,
-            set = function(info, value)
-                modDB.enabled = value
-                CombatFader:RefreshMod()
-            end,
-            order = startOrder + 1,
-        }
-        configDB.args.fadeConfig = {
-            name = "",
-            type = "group",
-            inline = true,
-            disabled = function() return not modDB.enabled end,
-            order = startOrder + 5,
-            args = args,
-        }
-    end
+    }
 end
 
 function CombatFader:OnInitialize()

@@ -123,11 +123,11 @@ function EventNotifier:PLAYER_ENTERING_WORLD()
     end
 end
 
-----
+----------
 function EventNotifier:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
-        profile = {
+        profile = { --TODO: convert to global
             checkEvents = true,
             checkGuildEvents = true,
             checkMinimapRares = true,

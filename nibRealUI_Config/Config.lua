@@ -8,14 +8,20 @@ local next = _G.next
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
 local ACD = _G.LibStub("AceConfigDialog-3.0")
-local F, C = _G.Aurora[1], _G.Aurora[2]
-local r, g, b = C.r, C.g, C.b
+local Base = _G.Aurora.Base
+local Skin = _G.Aurora.Skin
+local Color = _G.Aurora.Color
+
+local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
+fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
 
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
 local Scale = RealUI.Scale
 --local round = RealUI.Round
+
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local _, MOD_NAME = _G.strsplit("_", ADDON_NAME)
 local initialized = false
@@ -30,18 +36,20 @@ _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
         self:Show()
     end
 end)
-function RealUI:HuDTestMode(doTestMode)
+function RealUI:HuDTestMode(isConfigMode)
+    FramePoint:ToggleAll(not isConfigMode)
+
     -- Toggle Test Modes
     -- Raven
     local Raven = _G.Raven
     if Raven then
-        if doTestMode then
+        if isConfigMode then
             Raven:TestBarGroups()
             RavenTimer = _G.C_Timer.NewTicker(51, function()
                 Raven:TestBarGroups()
             end)
         else
-            if self.isInTestMode then
+            if self.isConfigMode then
                 RavenTimer:Cancel()
                 RavenTimer = nil
                 Raven:TestBarGroups()
@@ -49,22 +57,23 @@ function RealUI:HuDTestMode(doTestMode)
         end
     end
 
-    RealUI:ToggleGridTestMode(doTestMode)
+    RealUI:ToggleGridTestMode(isConfigMode)
 
     -- RealUI Modules
     for k, mod in next, RealUI.configModeModules do
         debug("Config Test", mod.moduleName)
         if mod:IsEnabled() then
             debug("Is enabled")
-            mod:ToggleConfigMode(doTestMode)
+            mod:ToggleConfigMode(isConfigMode)
         end
     end
 
     if not _G.ObjectiveTrackerFrame.collapsed then
-        _G.ObjectiveTrackerFrame:SetShown(not doTestMode)
+        _G.ObjectiveTrackerFrame:SetShown(not isConfigMode)
     end
+
     -- Boss Frames
-    RealUI:BossConfig(doTestMode)
+    RealUI:BossConfig(isConfigMode)
 
     -- Spell Alerts
     local sAlert = {
@@ -74,7 +83,7 @@ function RealUI:HuDTestMode(doTestMode)
         scale = 1,
         r = 255, g = 255, b = 255,
     }
-    if doTestMode then
+    if isConfigMode then
         _G.SpellActivationOverlay_ShowAllOverlays(_G.SpellActivationOverlayFrame, sAlert.id, sAlert.texture, sAlert.positions, sAlert.scale, sAlert.r, sAlert.g, sAlert.b);
     else
         _G.SpellActivationOverlay_HideOverlays(_G.SpellActivationOverlayFrame, sAlert.id)
@@ -83,7 +92,7 @@ function RealUI:HuDTestMode(doTestMode)
     -- Extra Action Button
     local EABFrame = _G.ExtraActionBarFrame
     if not _G.HasExtraActionBar() then
-        if doTestMode then
+        if isConfigMode then
             EABFrame.button:Show()
             EABFrame:Show()
             EABFrame.outro:Stop()
@@ -103,7 +112,7 @@ function RealUI:HuDTestMode(doTestMode)
     -- Zone Ability Button
     local ZAFFrame = _G.ZoneAbilityFrame
     if not _G.HasZoneAbility() then
-        if doTestMode then
+        if isConfigMode then
             ZAFFrame:Show()
             ZAFFrame.SpellButton:Disable()
             ZAFFrame._show = true
@@ -114,7 +123,7 @@ function RealUI:HuDTestMode(doTestMode)
             ZAFFrame:Hide()
         end
     end
-    self.isInTestMode = doTestMode
+    self.isConfigMode = isConfigMode
 end
 
 _G.StaticPopupDialogs["RUI_ChangeHuDSize"] = {
@@ -159,9 +168,7 @@ local hudConfig, hudToggle do
 
     -- Highlight frame
     local highlight = _G.CreateFrame("Frame", "RealUIHuDConfig", hudConfig)
-    F.CreateBD(highlight, 0.0)
-    highlight:SetBackdropColor(r, g, b, 0.3)
-    highlight:SetBackdropBorderColor(r, g, b)
+    Base.SetBackdrop(highlight, Color.highlight)
     highlight:Hide()
     hudConfig.highlight = highlight
 
@@ -210,11 +217,12 @@ local hudConfig, hudToggle do
         end
     end
 
-    F.CreateBD(hudConfig)
+    Base.SetBackdrop(hudConfig)
     Scale.Point(_G.RealUIUINotifications, "TOP", hudConfig, "BOTTOM")
     RealUI.RegisterModdedFrame(hudConfig)
 end
 
+local tabs = {}
 local function InitializeOptions()
     debug("InitializeOptions", options.RealUI, options.HuD)
     if not (options.RealUI and options.HuD) then
@@ -234,7 +242,6 @@ local function InitializeOptions()
     initialized = true
 
     -- Buttons
-    local tabs = {}
     for slug, tab in next, options.HuD.args do
         debug("init tabs", slug, tab.order)
         _G.tinsert(tabs, tab.order + 2, {
@@ -278,7 +285,8 @@ local function InitializeOptions()
     for i = 1, #tabs do
         local tab = tabs[i]
         debug("iter tabs", i, tab.slug)
-        local btn = _G.CreateFrame("Button", "$parentBtn"..i, hudConfig)
+        hudConfig[tab.slug] = _G.CreateFrame("Button", "$parentBtn"..i, hudConfig)
+        local btn = hudConfig[tab.slug]
         btn.ID = i
         btn.slug = tab.slug
         Scale.Size(btn, width, height)
@@ -313,7 +321,7 @@ local function InitializeOptions()
                     hl:SetOffset(Scale.Value(width) * (highlight.clicked - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = highlight.clicked
-                        highlight:SetAllPoints(hudConfig[highlight.clicked])
+                        highlight:SetAllPoints(tabs[highlight.clicked].button)
                     end)
                     hlAnim:Play()
                 elseif hlAnim:IsPlaying() then
@@ -328,10 +336,11 @@ local function InitializeOptions()
         if i == 1 then
             Scale.Point(btn, "TOPLEFT")
             local check = _G.CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
-            check:SetHitRectInsets(-10, -10, -1, -21)
+            Skin.UICheckButtonTemplate(check)
             Scale.Point(check, "CENTER", 0, 10)
+            check:SetHitRectInsets(-10, -10, -1, -21)
+
             check:SetAttribute("type1", "macro")
-            F.ReskinCheck(check)
             _G.SecureHandlerWrapScript(check, "OnClick", check, [[
                 if self:GetID() == 1 then
                     self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUI:HuDTestMode(false)"))
@@ -345,23 +354,26 @@ local function InitializeOptions()
             Scale.Point(btn, "TOPLEFT", prevFrame, "TOPRIGHT")
             btn:SetScript("OnClick", tab.onclick or tabOnClick)
 
-            local icon = btn:CreateTexture(nil, "ARTWORK")
-            icon:SetTexture(tab.icon)
-            Scale.Size(icon, 32, 32)
-            Scale.Point(icon, "CENTER", 0, 4)
+            local icon = btn:CreateFontString(nil, "ARTWORK")
+            icon:SetFont(fa.path, 40)
+            icon:SetText(fa[tab.icon])
+            Scale.Point(icon, "TOPLEFT", 0, 0)
+            Scale.Point(icon, "BOTTOMRIGHT", 0, 20)
         end
 
-        local text = btn:CreateFontString()
+        local text = btn:CreateFontString(nil, "ARTWORK")
         text:SetFontObject(_G.Game16Font)
-        Scale.Point(text, "BOTTOMLEFT", 0, 5)
-        Scale.Point(text, "BOTTOMRIGHT", 0, 5)
+        text:SetSpacing(-1)
         text:SetText(tab.name)
+        Scale.Point(text, "TOPLEFT", btn, "BOTTOMLEFT", 0, 23)
+        Scale.Point(text, "BOTTOMRIGHT", 0, 0)
         btn.text = text
 
-        _G.tinsert(hudConfig, btn)
+        tab.button = btn
         prevFrame = btn
     end
-    Scale.Size(hudConfig, #hudConfig * width, height)
+    hudConfig.tabs = tabs
+    Scale.Size(hudConfig, #tabs * width, height)
 end
 
 function RealUI.ToggleConfig(app, section, ...)
@@ -372,9 +384,9 @@ function RealUI.ToggleConfig(app, section, ...)
             hudToggle(section)
         end
         if section then
-            debug("Highlight", section, #hudConfig)
-            for i = 1, #hudConfig do
-                local tab = hudConfig[i]
+            debug("Highlight", section, #tabs)
+            for i = 1, #tabs do
+                local tab = tabs[i]
                 if tab.slug == section then
                     tab:GetScript("OnClick")(tab)
                     hudConfig.highlight.hover = i

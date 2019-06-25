@@ -53,7 +53,8 @@ function RealUI.GetColorString(red, green, blue)
 end
 
 function RealUI.GetDurabilityColor(curDura, maxDura)
-    return private.oUF.RGBColorGradient(curDura, maxDura or 1, 0.9,0.1,0.1, 0.9,0.9,0.1, 0.1,0.9,0.1)
+    local low, mid, high = _G.Aurora.Color.red, _G.Aurora.Color.yellow, _G.Aurora.Color.green
+    return private.oUF:RGBColorGradient(curDura, maxDura or 1, low.r,low.g,low.b, mid.r,mid.g,mid.b, high.r,high.g,high.b)
 end
 
 
@@ -66,6 +67,11 @@ scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 local cache = {}
 local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
 function RealUI.GetItemLevel(itemLink)
+    local iLvl = _G.GetDetailedItemLevelInfo(itemLink)
+    if iLvl and iLvl > 0 then
+        return iLvl
+    end
+
     if cache[itemLink] then
         return cache[itemLink]
     end
@@ -76,7 +82,6 @@ function RealUI.GetItemLevel(itemLink)
         return 0
     end
 
-    local iLvl
     for i = 1, 5 do
         local l = _G["RealUIScanningTooltipTextLeft"..i]
         if l and l:GetText() then
@@ -89,4 +94,12 @@ function RealUI.GetItemLevel(itemLink)
     end
 
     return iLvl or 0
+end
+
+function RealUI.GetOptions(modName, path)
+    local options = RealUI:GetModule(modName).db
+    for i = 1, #path do
+        options = options[path[i]]
+    end
+    return options
 end

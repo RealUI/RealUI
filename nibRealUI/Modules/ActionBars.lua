@@ -1,8 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
-local math = _G.math
+-- luacheck: globals math
 
 -- Libs --
 local BT4, BT4DB, BT4Profile
@@ -481,6 +480,20 @@ function ActionBars:BarChatCommand()
     end
 end
 
+function ActionBars:RefreshMod()
+    db = self.db.profile
+    ndb = RealUI.db.profile
+    ndbc = RealUI.db.char
+
+    self:RefreshDoodads()
+    self:ApplyABSettings()
+end
+
+function ActionBars:OnProfileUpdate(...)
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and (RealUI:DoesAddonMove("Bartender4") or RealUI:DoesAddonLayout("Bartender4")))
+    self:RefreshMod()
+end
+
 function ActionBars:OnInitialize()
     self:debug("OnInitialize")
     self.db = RealUI.db:RegisterNamespace(MODNAME)
@@ -510,27 +523,6 @@ function ActionBars:OnInitialize()
     db = self.db.profile
     ndb = RealUI.db.profile
     ndbc = RealUI.db.char
-
-    -- Migratre settings from ndb
-    local abSettings = _G.nibRealUIDB.profiles.RealUI.actionBarSettings
-    if abSettings then
-        local function setSettings(newDB, oldDB)
-            for setting, value in next, newDB do
-                if _G.type(value) == "table" then
-                    setSettings(value, oldDB and oldDB[setting])
-                else
-                    if oldDB and oldDB[setting] ~= nil then
-                        newDB[setting] = oldDB[setting]
-                    end
-                end
-            end
-        end
-
-        for i = 1, 2 do
-            setSettings(db[i], abSettings[i])
-        end
-        _G.nibRealUIDB.profiles.RealUI.actionBarSettings = nil
-    end
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and (RealUI:DoesAddonMove("Bartender4") or RealUI:DoesAddonLayout("Bartender4")))
 end

@@ -51,7 +51,6 @@ Most of the libraries used are not included in the repo since they will get brou
   * [LibChatAnims](https://mods.curse.com/addons/wow/libchatanims)
   * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)*
   * [LibIconFonts](https://github.com/Gethe/LibIconFonts)*
-  * [LibInspect](https://mods.curse.com/addons/wow/libinspect)
   * [LibItemUpgradeInfo-1.0](https://mods.curse.com/addons/wow/libitemupgradeinfo-1-0)
   * [LibQTip-1.0](https://mods.curse.com/addons/wow/libqtip-1-0)
   * [LibRangeCheck-2.0](https://mods.curse.com/addons/wow/librangecheck-2-0)

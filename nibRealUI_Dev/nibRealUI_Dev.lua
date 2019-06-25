@@ -12,7 +12,7 @@ ns.commands = {}
 
 --_G.GAME_LOCALE ="deDE"
 local BlizzAddons = {
-    -- Not LoD, in order of load
+    -- Not LoD, listed in order of load
     "Blizzard_CompactRaidFrames",
     "Blizzard_ClientSavedVariables",
     "Blizzard_CUFProfiles",
@@ -20,6 +20,7 @@ local BlizzAddons = {
     "Blizzard_TokenUI",
     "Blizzard_StoreUI", -- can be loaded in GlueXML
     "Blizzard_AuthChallengeUI", -- can be loaded in GlueXML
+    "Blizzard_UIWidgets",
     "Blizzard_ObjectiveTracker",
     "Blizzard_WowTokenUI",
     "Blizzard_NamePlates",
@@ -27,8 +28,9 @@ local BlizzAddons = {
     "Blizzard_Deprecated",
     "Blizzard_Console",
     "Blizzard_Channels",
-    "Blizzard_UIWidgets",
+    "Blizzard_PTRFeedback", -- Only loaded on PTR/Beta
     "Blizzard_WorldMap",
+    "Blizzard_PVPMatch",
 
     -- LoD
     "Blizzard_AchievementUI",
@@ -39,6 +41,7 @@ local BlizzAddons = {
     "Blizzard_ArenaUI",
     "Blizzard_ArtifactUI",
     "Blizzard_AuctionUI",
+    "Blizzard_AzeriteEssenceUI",
     "Blizzard_AzeriteRespecUI",
     "Blizzard_AzeriteUI",
     "Blizzard_BarbershopUI",
@@ -79,7 +82,6 @@ local BlizzAddons = {
     "Blizzard_ObliterumUI",
     "Blizzard_OrderHallUI",
     "Blizzard_PartyPoseUI",
-    "Blizzard_PTRFeedback",
     "Blizzard_PVPUI",
     "Blizzard_QuestChoice",
     "Blizzard_RaidUI",
@@ -151,9 +153,13 @@ local autorunScripts = {
     testFrame = false,
     mouse = true,
 }
-local frame = _G.CreateFrame("Frame")
-frame:RegisterAllEvents()
-frame:SetScript("OnEvent", function(self, event, ...)
+
+local autorunAddon = {
+    --fstack = "Blizzard_DebugTools",
+}
+local eventFrame = _G.CreateFrame("Frame")
+eventFrame:RegisterAllEvents()
+eventFrame:SetScript("OnEvent", function(self, event, ...)
     lastEvent = event
     if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do
@@ -171,6 +177,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
 
         if addonName:match("Blizzard") or addonName:match("RealUI") then
             debug("Loaded:", addonName)
+        end
+
+        for command, addon in next, autorunAddon do
+            if addon and addon == addonName then
+                ns.commands[command](ns.commands, true)
+            end
         end
     elseif not seenEvent[event] then
         debug(event)
@@ -239,9 +251,14 @@ function ns.commands:mouse()
     local r, g, b = 1, 1, 1
     local pollingRate, numLines = 0.05, 15
 
+    local frame = _G.CreateFrame("Frame", nil, _G.UIParent)
+    frame:SetFrameStrata("DIALOG")
+    frame:SetSize(1, 1)
+    frame:SetPoint("TOPLEFT")
+
     local lines = {}
     for i = 1, numLines do
-        local line = _G.UIParent:CreateLine()
+        local line = frame:CreateLine()
         line:SetThickness(_G.Lerp(5, 1, (i - 1)/numLines))
         line:SetColorTexture(1, 1, 1)
 
@@ -249,7 +266,7 @@ function ns.commands:mouse()
     end
 
     local function mouse()
-        local scale = _G.UIParent:GetEffectiveScale()
+        local scale = frame:GetEffectiveScale()
         local startX, startY = _G.GetCursorPosition()
 
         for i = 1, numLines do
@@ -259,8 +276,8 @@ function ns.commands:mouse()
             info.line:SetGradientAlpha("HORIZONTAL", r, g, b, startA, r, g, b, endA)
 
             local endX, endY = info.x, info.y
-            info.line:SetStartPoint("BOTTOMLEFT", startX / scale, startY / scale)
-            info.line:SetEndPoint("BOTTOMLEFT", endX / scale, endY / scale)
+            info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX / scale, startY / scale)
+            info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX / scale, endY / scale)
 
             info.x, info.y = startX, startY
             startX, startY = endX, endY

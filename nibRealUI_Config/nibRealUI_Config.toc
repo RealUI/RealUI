@@ -1,8 +1,8 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: nibRealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
-## Version: 2.0.11
+## Version: 2.0.12
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI
 ## LoadOnDemand: 1

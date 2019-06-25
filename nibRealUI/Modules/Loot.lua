@@ -246,7 +246,8 @@ RealUILootFrame:SetToplevel(true)
 RealUILootFrame:SetHeight(64)
 
 RealUILootFrame.close = _G.CreateFrame("Button", "RealUI_Loot_Close", RealUILootFrame, "UIPanelCloseButton")
---RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
+_G.Aurora.Skin.UIPanelCloseButton(RealUILootFrame.close)
+RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
 RealUILootFrame.slots = {}
 
 local function LootOnEnter(self)
@@ -484,22 +485,20 @@ function Loot:InitializeLoot()
     self:RegisterEvent("UPDATE_MASTER_LOOT_LIST")
 end
 
+function Loot:PLAYER_LOGIN()
+    self:RefreshMod()
+end
+
 -----------------------
 function Loot:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
+    db = self.db.profile
 
     if db.loot.enabled then
         self:InitializeLoot()
     end
     if db.roll.enabled then
         self:InitializeGroupLoot()
-    end
-end
-
-function Loot:PLAYER_LOGIN()
-    self:RefreshMod()
-    if _G.Aurora and _G.Aurora[1].ReskinClose then
-        _G.Aurora[1].ReskinClose(RealUILootFrame.close, "BOTTOMRIGHT", RealUILootFrame, "TOPRIGHT", 1, -3)
     end
 end
 

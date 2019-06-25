@@ -1557,12 +1557,14 @@ function RealUI.AddOns.Grid2()
 end
 
 function RealUI.Profiles.Grid2()
+    if not _G.Grid2 then return end
+
     local db = _G.Grid2.profiles.char
     db.enabled = true
     for specIndex = 1, #RealUI.charInfo.specs do
-        local profile = "RealUI"
+        local profile = private.layoutToProfile[1]
         if RealUI.charInfo.specs[specIndex].role == "HEALER" then
-            profile = "RealUI-Healing"
+            profile = private.layoutToProfile[2]
         end
 
         db[specIndex] = profile

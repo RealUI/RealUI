@@ -26,17 +26,18 @@ local units = {
 function UnitFrames:RefreshUnits(event)
     for i = 1, #units do
         local unit = _G["RealUI" .. units[i] .. "Frame"]
-        if event == "ClassColorBars" then
-            unit.Health.colorClass = db.overlay.classColor
-        elseif event == "ReverseBars" then
-            unit.Health:SetReversePercent(not unit.Health:GetReversePercent())
-            if unit.Power then
-                unit.Power:UpdateReverse()
-            end
-            if unit.DruidMana then
-                unit.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
-            end
+        unit.Health.colorClass = db.overlay.classColor
+
+        unit.Health:SetReversePercent(ndb.settings.reverseUnitFrameBars)
+
+        if unit.Power then
+            unit.Power:UpdateReverse(ndb.settings.reverseUnitFrameBars)
         end
+
+        if unit.DruidMana then
+            unit.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+        end
+
         unit:UpdateAllElements(event)
     end
 end
@@ -57,6 +58,14 @@ UnitFrames.steppoints = {
 ----------------------------
 ------ Initialization ------
 ----------------------------
+function UnitFrames:RefreshMod()
+    db = self.db.profile
+    ndb = RealUI.db.profile
+    self.layoutSize = ndb.settings.hudSize
+
+    self:RefreshUnits("RefreshMod")
+end
+
 function UnitFrames:OnInitialize()
     ---[[
     self.db = RealUI.db:RegisterNamespace(MODNAME)
@@ -121,6 +130,7 @@ function UnitFrames:OnInitialize()
                 showPlayerAuras = true,
                 showNPCAuras = true,
             },
+            -- TODO: Convert to FramePoint
             positions = {
                 [1] = {
                     player =       { x = 0,   y = 0},   -- Anchored to Positioner
@@ -157,7 +167,7 @@ function UnitFrames:OnInitialize()
 
     self.layoutSize = ndb.settings.hudSize
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
-    CombatFader:RegisterModForFade(MODNAME, db.misc.combatfade)
+    CombatFader:RegisterModForFade(MODNAME, "profile", "misc", "combatfade")
 end
 
 function UnitFrames:OnEnable()

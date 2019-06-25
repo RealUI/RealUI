@@ -19,6 +19,8 @@ local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
+local Color = _G.Aurora.Color
+
 local testCell = _G.UIParent:CreateFontString()
 Scale.Point(testCell, "CENTER")
 Scale.Size(testCell, 500, 20)
@@ -319,7 +321,7 @@ local function SetupTextTable()
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
                 header.text:SetFontObject("SystemFont_Shadow_Med1")
-                header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
+                header.text:SetTextColor(Color.orange:GetRGB())
                 header.text:SetAllPoints()
 
                 local hR, hG, hB = RealUI.charInfo.class.color:GetRGB()
@@ -495,7 +497,6 @@ end
 
 
 function Infobar:CreateBlocks()
-    local db = Infobar.db.profile
     local dbc = Infobar.db.char
     local ndbc = RealUI.db.char
 
@@ -523,6 +524,12 @@ function Infobar:CreateBlocks()
             guildText = _G.LOOKINGFORGUILD
         end
 
+        local function ToggleUI(this, button, func, arg)
+            if _G.InCombatLockdown() then return end
+
+            _G[func](arg)
+        end
+
         local menuList = {
             {text = L["Start_Config"],
                 func = function() RealUI.LoadConfig("HuD") end,
@@ -539,16 +546,18 @@ function Infobar:CreateBlocks()
             },
             {isSpacer = true},
             {text = _G.CHARACTER_BUTTON,
-                func = function() _G.ToggleCharacter("PaperDollFrame") end,
+                func = ToggleUI,
+                args = {"ToggleCharacter", "PaperDollFrame"},
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
-                func = function()
+                func = ToggleUI,
                     -- ToggleSpellBook causes taint
-                    _G.ToggleFrame(_G.SpellBookFrame)
-                end,
+                args = {"ToggleFrame", _G.SpellBookFrame},
             },
             {text = _G.TALENTS_BUTTON,
                 func = function()
+                    if _G.InCombatLockdown() then return end
+
                     if not _G.PlayerTalentFrame then
                         _G.TalentFrame_LoadUI()
                     end
@@ -558,33 +567,42 @@ function Infobar:CreateBlocks()
                 disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
             },
             {text = _G.ACHIEVEMENT_BUTTON,
-                func = function() _G.ToggleAchievementFrame() end,
+                func = ToggleUI,
+                args = {"ToggleAchievementFrame"},
             },
             {text = _G.QUESTLOG_BUTTON,
-                func = function() _G.ToggleQuestLog() end,
+                func = ToggleUI,
+                args = {"ToggleQuestLog"},
             },
             {text = guildText,
-                func = _G.ToggleGuildFrame,
+                func = ToggleUI,
+                args = {"ToggleGuildFrame"},
                 disabled = _G.IsCommunitiesUIDisabledByTrialAccount(),
             },
             {text = _G.SOCIAL_BUTTON,
-                func = function() _G.ToggleFriendsFrame(1) end,
+                func = ToggleUI,
+                args = {"ToggleFriendsFrame", 1},
             },
             {text = _G.DUNGEONS_BUTTON,
-                func = function() _G.PVEFrame_ToggleFrame() end,
+                func = ToggleUI,
+                args = {"PVEFrame_ToggleFrame"},
                 disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
             },
             {text = _G.COLLECTIONS,
-                func = function() _G.ToggleCollectionsJournal() end,
+                func = ToggleUI,
+                args = {"ToggleCollectionsJournal"},
             },
             {text = _G.ADVENTURE_JOURNAL,
-                func = function() _G.ToggleEncounterJournal() end,
+                func = ToggleUI,
+                args = {"ToggleEncounterJournal"},
             },
             {text = _G.BLIZZARD_STORE,
-                func = function() _G.ToggleStoreUI() end,
+                func = ToggleUI,
+                args = {"ToggleStoreUI"},
             },
             {text = _G.HELP_BUTTON,
-                func = function() _G.ToggleHelpFrame() end,
+                func = ToggleUI,
+                args = {"ToggleHelpFrame"},
             },
             {isSpacer = true},
             {text = _G.CANCEL,
@@ -614,7 +632,7 @@ function Infobar:CreateBlocks()
                 Infobar:debug("add lines", #menuList)
                 menu:AddLines(unpack(menuList))
                 menu.dataObj.icon = fa["bug"]
-                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = 0.75, 0.15, 0.15
+                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = Color.red:GetRGB()
             end
 
             menu.dataObj.value = #errors
@@ -771,11 +789,11 @@ function Infobar:CreateBlocks()
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -980,7 +998,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
 
                 lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
-                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+                tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1241,7 +1259,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCell(lineNum, colNum, friendsData, TextTableCellProvider)
 
                 lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
-                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+                tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1291,6 +1309,20 @@ function Infobar:CreateBlocks()
             icon = fa["heartbeat"],
             iconFont = iconFont,
             text = 1,
+            OnEnable = function(block)
+                local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
+                _G.Aurora.Skin.MicroButtonAlertTemplate(alert)
+                alert.CloseButton:SetScript("OnClick", function(btn)
+                    alert:Hide()
+                    alert.isHidden = true
+                end)
+
+                Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
+                Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
+                Scale.Width(alert, 100)
+
+                block.alert= alert
+            end,
             OnClick = function(block, ...)
                 Infobar:debug("Durability: OnClick", block.side, ...)
                 if not _G.InCombatLockdown() then
@@ -1341,21 +1373,10 @@ function Infobar:CreateBlocks()
                     end
                 end
                 itemSlots.lowSlot = lowSlot
-                if not block.alert then
-                    block.alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                    _G.Aurora.Skin.MicroButtonAlertTemplate(block.alert)
-                end
+
                 local alert = block.alert
                 if lowDur < 0.1 and not alert.isHidden then
-                    Scale.Size(alert, 100, alert.Text:GetHeight() + 42)
-                    Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
-                    Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
-                    alert.CloseButton:SetScript("OnClick", function(btn)
-                        alert:Hide()
-                        alert.isHidden = true
-                    end)
                     alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
-                    Scale.Width(alert.Text, 145)
                     alert:Show()
                     alert.isHidden = false
                 else
@@ -1405,17 +1426,17 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
-                local xpStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
+                local xpStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
                 local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
-                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
                 if _G.IsXPUserDisabled() then
                     lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
-                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                    tooltip:SetCellTextColor(lineNum, 2, 0.3, 0.3, 0.3)
+                    tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                    tooltip:SetCellTextColor(lineNum, 2, Color.gray:GetRGB())
                 elseif restXP then
                     lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
-                    tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
+                    tooltip:SetLineTextColor(lineNum, Color.grayLight:GetRGB())
                 end
 
                 tooltip:AddLine(" ")
@@ -1486,17 +1507,17 @@ function Infobar:CreateBlocks()
                 local r, g, b = Rep:GetColor()
 
                 local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
-                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
-                local repStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
+                local repStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
-                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
 
                 if hasRewardPending then
                     lineNum = tooltip:AddLine(_G.BOUNTY_TUTORIAL_BOUNTY_FINISHED)
-                    tooltip:SetLineTextColor(lineNum, 0.7, 0.7, 0.7)
+                    tooltip:SetLineTextColor(lineNum, Color.gray:GetRGB())
                 end
 
                 tooltip:AddLine(" ")
@@ -1530,8 +1551,7 @@ function Infobar:CreateBlocks()
                     end
 
                     local xp, totalLevelXP, currentLevel
-                    --if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then -- isPatch
-                    if azeriteItemLocation.bagID and azeriteItemLocation.bagID >= _G.NUM_BAG_SLOTS then
+                    if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then
                         xp, totalLevelXP = 0, 1
                         currentLevel = -1
                     else
@@ -1539,14 +1559,18 @@ function Infobar:CreateBlocks()
                         currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
                     end
 
-                    return xp, totalLevelXP, azeriteItem:GetItemName(), currentLevel
+                    return xp, totalLevelXP, azeriteItem:GetItemName() or "", currentLevel
                 end
             end,
             GetColor = function(Art)
                 return _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                return C_AzeriteItem.HasActiveAzeriteItem()
+                if RealUI.isPatch then
+                    return C_AzeriteItem.HasActiveAzeriteItem() and not C_AzeriteItem.IsAzeriteItemAtMaxLevel()
+                else
+                    return C_AzeriteItem.HasActiveAzeriteItem()
+                end
             end,
             SetTooltip = function(Art, tooltip)
                 local xp, totalLevelXP, name, currentLevel = Art:GetStats()
@@ -1559,14 +1583,13 @@ function Infobar:CreateBlocks()
                     title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
                 end
 
-                testCell:SetFontObject("GameTooltipText")
-                testCell:SetText(title)
-                local maxWidth = _G.max(testCell:GetStringWidth(), 200)
-
                 local lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, title, nil, nil, 2, nil, nil, nil, maxWidth)
-                tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
-                tooltip:AddLine(_G.AZERITE_POWER_TOOLTIP_BODY:format(name))
+                tooltip:SetCell(lineNum, colNum, title, nil, nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.orange:GetRGB())
+
+                lineNum, colNum = tooltip:AddLine()
+                tooltip:SetCell(lineNum, colNum, _G.AZERITE_POWER_TOOLTIP_BODY:format(name), nil, nil, 2)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.grayLight:GetRGB())
 
                 tooltip:AddLine(" ")
             end,
@@ -1604,12 +1627,12 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
-                local honorStatus = ("%s/%s (%d%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
 
                 local level = _G.UnitHonorLevel("player")
                 local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
-                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
 
                 tooltip:AddLine(" ")
             end,
@@ -1619,7 +1642,7 @@ function Infobar:CreateBlocks()
         }
 
         function Infobar.frame.watch:UpdateColors()
-            local alpha = _G.Lerp(0.4, 0.5, (db.bgAlpha / 1))
+            local alpha = _G.Lerp(0.4, 0.5, (Infobar.db.profile.bgAlpha / 1))
 
             local main = self.main
             local r, g, b = watchStates[dbc.progressState]:GetColor()
@@ -1635,7 +1658,7 @@ function Infobar:CreateBlocks()
                     r, g, b = watchStates[nextState]:GetColor()
                     bar:SetStatusBarColor(r, g, b, alpha * 1.5)
 
-                    local bgColor = _G.Aurora.Color.frame
+                    local bgColor = Color.frame
                     bar.bg:SetColorTexture(bgColor.r, bgColor.g, bgColor.b, alpha)
                 end
                 nextState = watchStates[nextState]:GetNext()
@@ -1648,7 +1671,7 @@ function Infobar:CreateBlocks()
             block.dataObj.icon = fa["thermometer-"..round(value * 4)]
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
-            if db.showBars then
+            if Infobar.db.profile.showBars then
                 local watch = Infobar.frame.watch
                 Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
@@ -1755,7 +1778,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Progress_Cycle"], nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1891,12 +1914,8 @@ function Infobar:CreateBlocks()
         local C_EquipmentSet = _G.C_EquipmentSet
         local specInfo, specLines = RealUI.charInfo.specs, {}
         local equipmentSetIDs, equipmentSetInfos = {}, {}
-        local layout = {
-            L["Layout_DPSTank"],
-            L["Layout_Healing"]
-        }
-
         local equipmentNeedsUpdate = false
+
         local function Line_OnMouseUp(line, specIndex, button)
             local tooltip = line:GetParent():GetParent():GetParent()
             if button == "LeftButton" then
@@ -1916,7 +1935,7 @@ function Infobar:CreateBlocks()
                         end
                     end
                 end
-            elseif button == "RightButton" then
+            elseif button == "RightButton" and #equipmentSetIDs > 0 then
                 if _G.IsAltKeyDown() then
                     dbc.specgear[specIndex] = -1
                     tooltip:SetCell(specLines[specIndex], 2, "---")
@@ -1955,13 +1974,20 @@ function Infobar:CreateBlocks()
             block.dataObj.text = specInfo[specInfo.current.index].name
         end
 
-        local lootSpec, hintLine
+        local lootSpec, hintSpec, hintGear
         local function Spec_TooltipOnUpdate(tooltip)
-            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, 3)
+            local numColumns = tooltip:GetColumnCount()
+            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, numColumns)
+            tooltip:SetCell(hintGear, 1, nil, nil, numColumns)
+
             if tooltip:IsMouseOver() then
-                tooltip:SetCell(hintLine, 1, L["Spec_ChangeSpec"], nil, 3)
+                tooltip:SetCell(hintSpec, 1, L["Spec_ChangeSpec"], nil, numColumns)
+                if #equipmentSetIDs > 0 then
+                    tooltip:SetCell(hintGear, 1, L["Spec_ChangeGear"], nil, numColumns)
+                    tooltip:SetCellTextColor(hintGear, 1, Color.green:GetRGB())
+                end
             else
-                tooltip:SetCell(hintLine, 1, L["Spec_Open"], nil, 3)
+                tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, numColumns)
             end
         end
 
@@ -1980,7 +2006,7 @@ function Infobar:CreateBlocks()
                 if qTip:IsAcquired(block) then return end
                 --Infobar:debug("spec: OnEnter", block.side, ...)
 
-                local tooltip = qTip:Acquire(block, 3, "LEFT", "LEFT", "LEFT")
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "LEFT")
                 SetupTooltip(tooltip, block)
                 tooltip:SetScript("OnUpdate", Spec_TooltipOnUpdate)
                 local lineNum, colNum
@@ -1988,20 +2014,27 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddHeader()
                 tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
                 for specIndex = 1, #RealUI.charInfo.specs do
-                    local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
-                    lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", layout[ndbc.layout.spec[specIndex]])
+                    if #equipmentSetIDs > 0 then
+                        tooltip:AddColumn("LEFT")
+                        local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
+                        lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", RealUI.db:GetDualSpecProfile(specIndex))
+                    else
+                        lineNum = tooltip:AddLine(specInfo[specIndex].name, RealUI.db:GetDualSpecProfile(specIndex))
+                    end
+
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
                     specLines[specIndex] = lineNum
                     if specIndex == specInfo.current.index then
-                        tooltip:SetLineTextColor(lineNum, _G.unpack(RealUI.media.colors.orange))
+                        tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
                     end
                 end
 
                 tooltip:AddLine(" ")
                 lootSpec = tooltip:AddLine()
-                hintLine = tooltip:AddLine()
-                tooltip:SetCell(hintLine, 1, L["Spec_Open"], nil, 3)
-                tooltip:SetCellTextColor(hintLine, 1, 0, 1, 0)
+                hintSpec = tooltip:AddLine()
+                hintGear = tooltip:AddLine()
+                tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, tooltip:GetColumnCount())
+                tooltip:SetCellTextColor(hintSpec, 1, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2369,7 +2402,7 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(" ")
 
                 hintLine = tooltip:AddLine(L["Currency_Cycle"])
-                tooltip:SetLineTextColor(hintLine, 0, 1, 0)
+                tooltip:SetLineTextColor(hintLine, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2434,9 +2467,8 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.NETWORK_LABEL)
 
-                local color = RealUI.media.colors.orange
                 lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
-                tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
+                tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
                 tooltip:AddLine(lagFormat:format(_G.HOME, _G.MILLISECONDS_ABBR), round(home.cur), round(home.avg))
                 tooltip:AddLine(lagFormat:format(_G.WORLD, _G.MILLISECONDS_ABBR), round(world.cur), round(world.avg))
 
@@ -2444,7 +2476,7 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.SYSTEMOPTIONS_MENU)
                 lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
-                tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
+                tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
                 tooltip:AddLine(_G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
 
                 tooltip:Show()

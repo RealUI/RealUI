@@ -88,11 +88,6 @@ end
 
 
 -----------------------
-function ObjectivesAdv:RefreshMod()
-    if not RealUI:GetModuleEnabled(MODNAME) then return end
-    UpdatePosition()
-end
-
 function ObjectivesAdv:UI_SCALE_CHANGED()
     UpdatePosition()
 end
@@ -108,11 +103,17 @@ function ObjectivesAdv:ADDON_LOADED()
         self:UnregisterEvent("ADDON_LOADED")
 
         _G.hooksecurefunc(_G.ObjectiveTrackerFrame, "SetPoint", UpdatePosition)
-        CombatFader:RegisterModForFade(MODNAME, db.hidden.combatfade)
+        CombatFader:RegisterModForFade(MODNAME, "profile", "hidden", "combatfade")
         CombatFader:RegisterFrameForFade(MODNAME, _G.ObjectiveTrackerFrame)
 
         self:RefreshMod()
     end
+end
+
+function ObjectivesAdv:RefreshMod()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+    db = self.db.profile
+    UpdatePosition()
 end
 
 function ObjectivesAdv:OnInitialize()

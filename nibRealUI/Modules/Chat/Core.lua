@@ -5,6 +5,7 @@ local RealUI = private.RealUI
 
 local MODNAME = "Chat"
 local Chat = RealUI:NewModule(MODNAME, "AceEvent-3.0")
+-- TODO: consolidate this module
 
 function Chat:PLAYER_LOGIN()
     -- Hide IM selector if BCM is enabled

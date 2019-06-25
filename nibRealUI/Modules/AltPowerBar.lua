@@ -48,15 +48,6 @@ function AltPowerBar:UpdatePosition()
 end
 
 -- Refresh
-function AltPowerBar:RefreshMod()
-    if not RealUI:GetModuleEnabled(MODNAME) then return end
-
-    db = self.db.profile
-
-    self:UpdatePosition()
-    self:PowerUpdate()
-end
-
 function AltPowerBar:PLAYER_LOGIN()
     LoggedIn = true
     self:RefreshMod()
@@ -96,7 +87,15 @@ function AltPowerBar:CreateFrames()
     end)
 end
 
--- Initialize
+----------
+function AltPowerBar:RefreshMod()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+    db = self.db.profile
+
+    self:UpdatePosition()
+    self:PowerUpdate()
+end
+
 function AltPowerBar:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

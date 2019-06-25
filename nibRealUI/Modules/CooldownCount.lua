@@ -145,6 +145,10 @@ local function CreateTimer(cd)
 end
 
 ----------
+function CooldownCount:RefreshMod()
+    db = self.db.profile
+end
+
 function CooldownCount:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -162,10 +166,6 @@ function CooldownCount:OnInitialize()
         },
     })
     db = self.db.profile
-
-    if db.position then
-        db.position = nil
-    end
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end

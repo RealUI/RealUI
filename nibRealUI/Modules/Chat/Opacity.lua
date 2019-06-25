@@ -33,11 +33,14 @@ function Chat_Opacity:UpdateAlphas()
 	_G.GENERAL_CHAT_DOCK.overflowButton:SetAlpha(_G.CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA)
 end
 
-function Chat_Opacity:PLAYER_LOGIN()
-	self:UpdateAlphas()
+------------
+function Chat_Opacity:RefreshMod()
+    db = Chat.db.profile.modules.opacity
+    if db.enabled then
+        self:UpdateAlphas()
+    end
 end
 
-------------
 function Chat_Opacity:OnInitialize()
 	db = Chat.db.profile.modules.opacity
 
@@ -45,5 +48,5 @@ function Chat_Opacity:OnInitialize()
 end
 
 function Chat_Opacity:OnEnable()
-	self:RegisterEvent("PLAYER_LOGIN")
+	self:RegisterEvent("PLAYER_LOGIN", "UpdateAlphas")
 end

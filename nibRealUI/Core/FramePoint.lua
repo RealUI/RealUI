@@ -8,117 +8,118 @@ local LibWin = _G.LibStub("LibWindow-1.1")
 
 -- RealUI --
 local RealUI = private.RealUI
-local round = RealUI.Round
-local L = RealUI.L
 
 local MODNAME = "FramePoint"
 local FramePoint = RealUI:NewModule(MODNAME)
 
 local modules = {}
 
-local function Toggle(mod, isLocked)
+function FramePoint:LockMod(mod)
     local module = modules[mod]
-    if module.locked == isLocked then return end
 
     for frame, meta in next, module.frames do
-        frame:EnableMouse(not isLocked)
-        meta.dragBG:SetShown(not isLocked)
+        meta.dragFrame:Hide()
     end
 
-    if module.callback then module.callback(mod, isLocked) end
-    module.locked = isLocked
+    if mod.ToggleConfigMode then
+        mod:ToggleConfigMode(false)
+    end
+
+    module.isLocked = true
 end
 
-local function Restore(mod, isLocked)
+function FramePoint:UnlockMod(mod)
+    local module = modules[mod]
+
+    for frame, meta in next, module.frames do
+        meta.dragFrame:Show()
+    end
+
+    if mod.ToggleConfigMode then
+        mod:ToggleConfigMode(true)
+    end
+
+    module.isLocked = false
+end
+
+function FramePoint:IsModLocked(mod)
+    return modules[mod].isLocked
+end
+
+function FramePoint:ToggleMod(mod, setLocked)
+    if self:IsModLocked(mod) then
+        FramePoint:UnlockMod(mod)
+    else
+        FramePoint:LockMod(mod)
+    end
+end
+
+function FramePoint:ToggleAll(setLocked)
+    for mod, module in next, modules do
+        if setLocked then
+            FramePoint:LockMod(mod)
+        else
+            FramePoint:UnlockMod(mod)
+        end
+    end
+end
+
+function FramePoint:RestorePosition(mod)
     local module = modules[mod]
     for frame, meta in next, module.frames do
-        frame:RestorePosition()
+        LibWin.RestorePosition(meta.dragFrame)
     end
 end
 
-local function PositionFrame(mod, frame, position)
-    LibWin:Embed(frame)
-    frame:RegisterConfig(position)
-    frame:RestorePosition()
-    frame:SetMovable(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", function(...)
-        LibWin.OnDragStart(...)
-    end)
-    frame:SetScript("OnDragStop", function(...)
-        LibWin.OnDragStop(...)
-        _G.LibStub("AceConfigRegistry-3.0"):NotifyChange("HuD")
-    end)
+FramePoint.OnDragStart = LibWin.OnDragStart
+FramePoint.OnDragStop = LibWin.OnDragStop
+function FramePoint:PositionFrame(mod, frame, optionPath)
+    local dragFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
+    _G.Aurora.Base.SetBackdrop(dragFrame, _G.Aurora.Color.white, 0.2)
 
-    local dragBG = frame:CreateTexture()
-    dragBG:SetColorTexture(1, 1, 1, 0.5)
-    dragBG:SetAllPoints()
-    dragBG:Hide()
+    local module = modules[mod]
+    dragFrame:SetSize(frame:GetSize())
+    dragFrame:SetHitRectInsets(-5, -5, -5, -5)
+    dragFrame:SetMovable(true)
+    dragFrame:EnableMouse(true)
+    dragFrame:RegisterForDrag("LeftButton")
+    dragFrame:SetScript("OnDragStart", module.OnDragStart)
+    dragFrame:SetScript("OnDragStop", module.OnDragStop)
+    dragFrame:Hide()
+
+    local name = dragFrame:CreateFontString(nil, "BACKGROUND", "Game12Font")
+    name:SetText(frame:GetDebugName())
+    name:SetPoint("CENTER")
+
+    frame:SetPoint("CENTER", dragFrame)
+
+    LibWin.RegisterConfig(dragFrame, RealUI.GetOptions(mod.moduleName, optionPath))
+    LibWin.RestorePosition(dragFrame)
 
     modules[mod].frames[frame] = {
-        position = position,
-        dragBG = dragBG,
+        optionPath = optionPath,
+        dragFrame = dragFrame,
     }
 end
 
-local function AddPositionConfig(mod, configDB, position, startOrder)
-    configDB.args.headerPos = {
-        name = L["General_Position"],
-        type = "header",
-        order = startOrder,
-    }
-    configDB.args.position = {
-        name = "",
-        type = "group",
-        inline = true,
-        order = startOrder + 1,
-        args = {
-            lock = {
-                name = L["General_Lock"],
-                desc = L["General_LockDesc"],
-                type = "toggle",
-                get = function(info) return modules[mod].locked end,
-                set = function(info, value)
-                    Toggle(mod, value)
-                end,
-                order = 0,
-            },
-            x = {
-                name = L["General_XOffset"],
-                desc = L["General_XOffsetDesc"],
-                type = "input",
-                dialogControl = "NumberEditBox",
-                get = function(info)
-                    return _G.tostring(position.x)
-                end,
-                set = function(info, value)
-                    position.x = round(_G.tonumber(value))
-                    Restore(mod)
-                end,
-                order = 10,
-            },
-            y = {
-                name = L["General_YOffset"],
-                desc = L["General_YOffsetDesc"],
-                type = "input",
-                dialogControl = "NumberEditBox",
-                get = function(info) return _G.tostring(position.y) end,
-                set = function(info, value)
-                    position.y = round(_G.tonumber(value))
-                    Restore(mod)
-                end,
-                order = 20,
-            },
-        },
-    }
+function FramePoint:IsModLocked(mod)
+    return modules[mod].isLocked
 end
 
-function FramePoint:RegisterMod(mod, callback)
+function FramePoint:RefreshMod()
+    for mod, module in next, modules do
+        for frame, meta in next, module.frames do
+            LibWin.RegisterConfig(meta.dragFrame, RealUI.GetOptions(mod.moduleName, meta.optionPath))
+            LibWin.RestorePosition(meta.dragFrame)
+        end
+    end
+end
+
+function FramePoint:RegisterMod(mod, OnDragStart, OnDragStop)
     modules[mod] = {
         frames = {},
-        locked = true,
-        callback = callback,
+        isLocked = true,
+        OnDragStart = OnDragStart or LibWin.OnDragStart,
+        OnDragStop = OnDragStop or LibWin.OnDragStop,
     }
-    mod.PositionFrame = PositionFrame
-    mod.AddPositionConfig = AddPositionConfig
 end

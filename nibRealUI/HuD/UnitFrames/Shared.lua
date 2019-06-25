@@ -327,8 +327,8 @@ local function CreatePowerBar(parent, info)
     Power.frequentUpdates = true
 
     local powerType
-    function Power:UpdateReverse()
-        if ndb.settings.reverseUnitFrameBars then
+    function Power:UpdateReverse(setReverse)
+        if setReverse then
             Power:SetReversePercent(RealUI.ReversePowers[powerType])
         else
             Power:SetReversePercent(not RealUI.ReversePowers[powerType])

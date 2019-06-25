@@ -1,8 +1,8 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: RealUI Tooltips
 ## Notes: Useful tooltip mods
 ## Author: Gethe
-## Version: 2.0.11
+## Version: 2.0.12
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_TooltipsDB
 

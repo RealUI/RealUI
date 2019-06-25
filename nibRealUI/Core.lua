@@ -50,6 +50,15 @@ RealUI.defaultPositions = {
     },
 }
 
+private.profileToLayout = {
+    ["RealUI"] = 1,
+    ["RealUI-Healing"] = 2
+}
+private.layoutToProfile = {
+    "RealUI",
+    "RealUI-Healing"
+}
+
 -- Offset some UI Elements for Large/Small HuD size settings
 RealUI.hudSizeOffsets = {
     [1] = {
@@ -173,6 +182,7 @@ end
 
 -- Power Mode
 function RealUI:SetPowerMode(val)
+    -- TODO: remove cruft
     -- Core\SpiralBorder, HuD\UnitFrames, Modules\PlayerShields, Modules\RaidDebuffs, Modules\Pitch
     db.settings.powerMode = val
     for k, mod in self:IterateModules() do
@@ -193,35 +203,16 @@ end
 
 -- Layout Updates
 function RealUI:SetLayout()
+    -- TODO: convert layouts to profiles
     -- Set Current and Not-Current layout variables
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
-
-    -- Set AddOn profiles
-    self:SetProfileLayout()
-
-    -- Set Positioners
-    self:UpdatePositioners()
-
 
     if _G.RealUIGridConfiguring then
         self:ScheduleTimer(function()
             self:ToggleGridTestMode(false)
             self:ToggleGridTestMode(true)
         end, 0.5)
-    end
-
-    -- ActionBars
-    if self:GetModuleEnabled("ActionBars") then
-        local AB = self:GetModule("ActionBars", true)
-        AB:RefreshDoodads()
-        AB:ApplyABSettings()
-    end
-
-    -- FrameMover
-    if self:GetModuleEnabled("FrameMover") then
-        local FM = self:GetModule("FrameMover", true)
-        if FM then FM:MoveAddons() end
     end
 
     dbc.layout.needchanged = false
@@ -380,8 +371,44 @@ function RealUI.LoadConfig(app, section, ...)
     RealUI.ToggleConfig(app, section, ...)
 end
 
+function RealUI:OnProfileUpdate(event, database, profile)
+    db = database.profile
+    dbc = database.char
+    dbg = database.global
+
+    RealUI:LoadAddonProfiles()
+
+    for name, module in self:IterateModules() do
+       module:OnProfileUpdate(event, profile)
+    end
+
+    -- Update old stuff too for now
+    dbc.layout.current = private.profileToLayout[profile]
+    RealUI:SetLayout()
+
+    if event == "OnProfileReset" then
+        debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
+        RealUI.db.char.init = charInit
+        debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
+        RealUI:ReloadUIDialog()
+    end
+end
+
 function RealUI:OnInitialize()
-    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, "RealUI")
+    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, private.layoutToProfile[1])
+    _G.LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "RealUI")
+
+    self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
+    for specIndex = 1, #RealUI.charInfo.specs do
+        local spec = RealUI.charInfo.specs[specIndex]
+        if spec.role == "HEALER" then
+            self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
+        end
+    end
+
+    self.db:SetProfile(private.layoutToProfile[1]) -- set back to default
+
+
     debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
     db = self.db.profile
     dbc = self.db.char
@@ -408,14 +435,10 @@ function RealUI:OnInitialize()
 
     -- Profile change
     debug("Char", dbc.init.installStage)
-    self.db.RegisterCallback(self, "OnProfileChanged", "ReloadUIDialog")
-    self.db.RegisterCallback(self, "OnProfileCopied", "ReloadUIDialog")
-    self.db.RegisterCallback(self, "OnProfileReset", function()
-        debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
-        RealUI.db.char.init = charInit
-        debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
-        RealUI:ReloadUIDialog()
-    end)
+    self.db.RegisterCallback(self, "OnNewProfile", "OnProfileUpdate")
+    self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
+    self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
+    self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
 
     -- Register events
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
@@ -611,18 +634,23 @@ do
         debug = function(self, ...)
             return RealUI.Debug(self.moduleName, ...)
         end,
+        OnProfileUpdate = function(self, ...)
+            self:SetEnabledState(RealUI.db.profile.modules[self.moduleName])
+            if self.RefreshMod then
+                self:RefreshMod(...)
+            end
+        end,
     }
     RealUI:SetDefaultModulePrototype(prototype)
 end
 
 function RealUI:GetModuleEnabled(module)
-    return db.modules[module]
+    return self.db.profile.modules[module]
 end
 
 function RealUI:SetModuleEnabled(module, value)
-    local old = db.modules[module]
-    db.modules[module] = value
-    if old ~= value then
+    if self.db.profile.modules[module] ~= value then
+        self.db.profile.modules[module] = value
         if value then
             self:EnableModule(module)
         else

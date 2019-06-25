@@ -38,6 +38,7 @@ local defaults = {
     }
 }
 
+-- TODO: remove and convert to Aurora.Color
 RealUI.media = {
     colors = {
         red =       {0.85, 0.14, 0.14, 1},

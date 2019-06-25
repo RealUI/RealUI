@@ -1,4 +1,31 @@
-﻿## [2.0.11] - 2019-04-15 ##
+## [2.0.12] - 2019-06-25 ##
+### Modified AddOns ###
+
+  * FreebTip
+  * nibRealUI
+  * nibRealUI_Config
+
+### Added ###
+
+  * There is a new RealUI-Healing profile available in the core addon. This will be automatically switched to when using a healing spec.
+
+### Changed ###
+
+  * Castbars now have an improved click-drag positioning system
+  * The healing layout for castbars is now provided by the new RealUI-Healing profile instead
+  * Improve minimap POIs
+  * Updated Config Bar icons
+  * Spec and iLvl info on tooltips is now updated live
+
+### Fixed ###
+
+  * Error on first install if Grid2 is not enabled.
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.0.11] - 2019-04-15 ##
 ### Modified AddOns ###
 
   * cargBags_Nivaya
@@ -251,6 +278,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.0.12]: https://github.com/RealUI/RealUI/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/RealUI/RealUI/compare/2.0.10...2.0.11
 [2.0.10]: https://github.com/RealUI/RealUI/compare/2.0.9...2.0.10
 [2.0.9]: https://github.com/RealUI/RealUI/compare/2.0.8...2.0.9

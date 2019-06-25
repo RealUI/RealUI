@@ -143,14 +143,6 @@ function MirrorBar:UpdatePosition()
 end
 
 -- Refresh
-function MirrorBar:RefreshMod()
-    if not RealUI:GetModuleEnabled(MODNAME) then return end
-
-    db = self.db.profile
-
-    MirrorBar:UpdatePosition()
-end
-
 function MirrorBar:PLAYER_LOGIN()
     LoggedIn = true
     MirrorBar:RefreshMod()
@@ -194,7 +186,14 @@ function MirrorBar:UpdateGlobalColors()
     self.loopElapsed = 1
 end
 
--- Initialize
+----------
+function MirrorBar:RefreshMod()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+    db = self.db.profile
+
+    MirrorBar:UpdatePosition()
+end
+
 function MirrorBar:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

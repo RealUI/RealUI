@@ -290,18 +290,27 @@ function RealUI:GetAddonControlSettings(addon)
 end
 
 function RealUI:DoesAddonMove(addon)
-    return db.addonControl[addon] and (db.addonControl[addon].control.position and db.addonControl[addon].profiles.base.use)
+    local addonControl = AddonControl.db.profile.addonControl
+    return addonControl[addon] and (addonControl[addon].control.position and addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonLayout(addon)
-    return db.addonControl[addon] and (db.addonControl[addon].profiles.layout.use and db.addonControl[addon].profiles.base.use)
+    local addonControl = AddonControl.db.profile.addonControl
+    return addonControl[addon] and (addonControl[addon].profiles.layout.use and addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonStyle(addon)
-    return db.addonControl[addon] and (db.addonControl[addon].control.style and db.addonControl[addon].profiles.base.use)
+    local addonControl = AddonControl.db.profile.addonControl
+    return addonControl[addon] and (addonControl[addon].control.style and addonControl[addon].profiles.base.use)
 end
 
 -------------
+function AddonControl:RefreshMod()
+    db = self.db.profile
+
+    RealUI:SetProfileLayout()
+end
+
 function AddonControl:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({

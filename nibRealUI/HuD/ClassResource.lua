@@ -101,29 +101,9 @@ end
 
 function ClassResource:CreateClassPower(unitFrame, unit)
     self:debug("CreateClassPower", unit)
-    local ClassPower = _G.CreateFrame("Frame", nil, _G.UIParent)
-    CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
+    unitFrame.ClassPower = _G.CreateFrame("Frame", nil, unitFrame)
+    local ClassPower = unitFrame.ClassPower
     ClassPower:SetSize(16, 16)
-    if hasPoints then
-        self:PositionFrame(ClassPower, pointDB.position)
-    else
-        ClassPower:SetPoint("CENTER", -160, -40.5)
-    end
-
-    function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType)
-        self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
-        for i = 1, max or 0 do -- max is nil for classes without a secondary power
-            local icon, isUnused = element[i], i > cur
-            self:debug("Icon", i, isUnused)
-            if isUnused then
-                if not pointDB.hideempty or self.configMode then
-                    icon:Show()
-                else
-                    icon:Hide()
-                end
-            end
-        end
-    end
 
     local texture, size = powerTextures[powerToken] or powerTextures.circle, pointDB.size
     for index = 1, MAX_POINTS do
@@ -158,15 +138,37 @@ function ClassResource:CreateClassPower(unitFrame, unit)
         ClassPower[index] = icon
     end
 
+    CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
+    if hasPoints then
+        FramePoint:PositionFrame(self, ClassPower, {"class", "points", "position"})
+    else
+        ClassPower:SetPoint("CENTER", -160, -40.5)
+    end
+
+    function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType)
+        self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
+        for i = 1, max or 0 do -- max is nil for classes without a secondary power
+            local icon, isUnused = element[i], i > cur
+            self:debug("Icon", i, isUnused)
+            if isUnused then
+                if not pointDB.hideempty or self.configMode then
+                    icon:Show()
+                else
+                    icon:Hide()
+                end
+            end
+        end
+    end
+
     unitFrame.ClassPower = ClassPower
     return ClassPower
 end
 function ClassResource:CreateRunes(unitFrame, unit)
     self:debug("CreateRunes", unit)
-    local Runes = _G.CreateFrame("Frame", nil, _G.UIParent)
-    CombatFader:RegisterFrameForFade(MODNAME, Runes)
-    self:PositionFrame(Runes, pointDB.position)
+    unitFrame.Runes = _G.CreateFrame("Frame", nil, unitFrame)
+    local Runes = unitFrame.Runes
     Runes:SetSize(16, 16)
+    Runes.colorSpec = true
 
     local size = pointDB.size
     for index = 1, MAX_RUNES do
@@ -190,7 +192,9 @@ function ClassResource:CreateRunes(unitFrame, unit)
         Runes[index] = Rune
     end
 
-    Runes.colorSpec = true
+    CombatFader:RegisterFrameForFade(MODNAME, Runes)
+    FramePoint:PositionFrame(self, Runes, {"class", "points", "position"})
+
     function Runes.PostUpdate(element, runemap)
         local rune, runeReady, _
         for index, runeID in next, runemap do
@@ -204,16 +208,17 @@ function ClassResource:CreateRunes(unitFrame, unit)
         end
     end
 
-    unitFrame.Runes = Runes
     return Runes
 end
 function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
-    local size = barDB.size
-    local Stagger = unitFrame:CreateAngle("StatusBar", nil, _G.UIParent)
-    self:PositionFrame(Stagger, barDB.position)
-    Stagger:SetSize(size.width, size.height)
+    unitFrame.Stagger = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
+    local Stagger = unitFrame.Stagger
+
+    Stagger:SetSize(barDB.size.width, barDB.size.height)
     Stagger:SetAngleVertex(1, 3)
+
+    FramePoint:PositionFrame(self, Stagger, {"class", "bar", "position"})
 
     function Stagger.PostUpdate(element, cur, max)
         local r, g, b = element:GetStatusBarColor()
@@ -228,7 +233,6 @@ function ClassResource:CreateStagger(unitFrame, unit)
         element:SetStatusBarColor(RealUI:ColorDarken(0.5, r, g, b))
     end
 
-    unitFrame.Stagger = Stagger
     return Stagger
 end
 
@@ -260,18 +264,18 @@ function ClassResource:Setup(unitFrame, unit)
     end
 end
 
-function ClassResource:ToggleConfigMode(val)
-    if self.configMode == val then return end
-    self.configMode = val
+function ClassResource:ToggleConfigMode(isConfigMode)
+    if self.configMode == isConfigMode then return end
+    self.configMode = isConfigMode
 
-    if val then
+    if isConfigMode then
         if self.points then
             self.points:SetAlpha(1)
             if hasPoints then
                 for i = 1, 5 do
-                    self.points[i]:SetShown(val)
+                    self.points[i]:SetShown(isConfigMode)
                 end
-                self.points:PostUpdate(val and 3 or 0, val and 5 or 0, true, powerToken)
+                self.points:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, powerToken)
             else
                 for i = 1, MAX_RUNES do
                     self.points[i]:SetValue(i / MAX_RUNES)
@@ -380,11 +384,6 @@ end
 function ClassResource:OnEnable()
     self:debug("OnEnable")
 
-    CombatFader:RegisterModForFade(MODNAME, db.combatfade)
-    FramePoint:RegisterMod(self, function(this, isLocked)
-        if not RealUI.isInTestMode then
-            self:ToggleConfigMode(not isLocked)
-        end
-    end)
-    RealUI:RegisterConfigModeModule(self)
+    CombatFader:RegisterModForFade(MODNAME, "class", "combatfade")
+    FramePoint:RegisterMod(self)
 end

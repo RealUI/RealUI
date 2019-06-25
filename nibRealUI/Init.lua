@@ -32,7 +32,7 @@ private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "Ace
 local RealUI = private.RealUI
 
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
-RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 0 and _G.tonumber(minor) >= 1)
+RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 2 and _G.tonumber(minor) >= 0)
 
 local classLocale, classToken, classID = _G.UnitClass("player")
 RealUI.charInfo = {
@@ -71,6 +71,12 @@ RealUI.globals = {
         "TOPLEFT",    "TOP",    "TOPRIGHT",
         "LEFT",       "CENTER", "RIGHT",
         "BOTTOMLEFT", "BOTTOM", "BOTTOMRIGHT",
+    },
+    cornerPoints = {
+        "TOPLEFT",
+        "TOPRIGHT",
+        "BOTTOMLEFT",
+        "BOTTOMRIGHT",
     },
     stratas = {
         "BACKGROUND",
