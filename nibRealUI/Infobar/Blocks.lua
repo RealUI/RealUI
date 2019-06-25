@@ -19,6 +19,8 @@ local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
+local Color = _G.Aurora.Color
+
 local testCell = _G.UIParent:CreateFontString()
 Scale.Point(testCell, "CENTER")
 Scale.Size(testCell, 500, 20)
@@ -319,7 +321,7 @@ local function SetupTextTable()
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
                 header.text:SetFontObject("SystemFont_Shadow_Med1")
-                header.text:SetTextColor(_G.unpack(RealUI.media.colors.orange))
+                header.text:SetTextColor(Color.orange:GetRGB())
                 header.text:SetAllPoints()
 
                 local hR, hG, hB = RealUI.charInfo.class.color:GetRGB()
@@ -630,7 +632,7 @@ function Infobar:CreateBlocks()
                 Infobar:debug("add lines", #menuList)
                 menu:AddLines(unpack(menuList))
                 menu.dataObj.icon = fa["bug"]
-                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = 0.75, 0.15, 0.15
+                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = Color.red:GetRGB()
             end
 
             menu.dataObj.value = #errors
@@ -787,11 +789,11 @@ function Infobar:CreateBlocks()
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -996,7 +998,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
 
                 lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
-                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+                tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1257,7 +1259,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCell(lineNum, colNum, friendsData, TextTableCellProvider)
 
                 lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
-                tooltip:SetLineTextColor(lineNum, 0, 1, 0)
+                tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1426,15 +1428,15 @@ function Infobar:CreateBlocks()
                 local curXP, maxXP, restXP = XP:GetStats()
                 local xpStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
                 local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
-                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
                 if _G.IsXPUserDisabled() then
                     lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
-                    tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                    tooltip:SetCellTextColor(lineNum, 2, 0.3, 0.3, 0.3)
+                    tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                    tooltip:SetCellTextColor(lineNum, 2, Color.gray:GetRGB())
                 elseif restXP then
                     lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
-                    tooltip:SetLineTextColor(lineNum, 0.9, 0.9, 0.9)
+                    tooltip:SetLineTextColor(lineNum, Color.grayLight:GetRGB())
                 end
 
                 tooltip:AddLine(" ")
@@ -1505,17 +1507,17 @@ function Infobar:CreateBlocks()
                 local r, g, b = Rep:GetColor()
 
                 local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
-                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
                 local repStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
-                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
 
                 if hasRewardPending then
                     lineNum = tooltip:AddLine(_G.BOUNTY_TUTORIAL_BOUNTY_FINISHED)
-                    tooltip:SetLineTextColor(lineNum, 0.7, 0.7, 0.7)
+                    tooltip:SetLineTextColor(lineNum, Color.gray:GetRGB())
                 end
 
                 tooltip:AddLine(" ")
@@ -1557,7 +1559,7 @@ function Infobar:CreateBlocks()
                         currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
                     end
 
-                    return xp, totalLevelXP, azeriteItem:GetItemName(), currentLevel
+                    return xp, totalLevelXP, azeriteItem:GetItemName() or "", currentLevel
                 end
             end,
             GetColor = function(Art)
@@ -1583,7 +1585,7 @@ function Infobar:CreateBlocks()
 
                 local lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, title, nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, _G.unpack(RealUI.media.colors.orange))
+                tooltip:SetCellTextColor(lineNum, colNum, Color.orange:GetRGB())
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, _G.AZERITE_POWER_TOOLTIP_BODY:format(name), nil, nil, 2)
@@ -1629,8 +1631,8 @@ function Infobar:CreateBlocks()
 
                 local level = _G.UnitHonorLevel("player")
                 local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
-                tooltip:SetCellTextColor(lineNum, 1, _G.unpack(RealUI.media.colors.orange))
-                tooltip:SetCellTextColor(lineNum, 2, 0.9, 0.9, 0.9)
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
 
                 tooltip:AddLine(" ")
             end,
@@ -1656,7 +1658,7 @@ function Infobar:CreateBlocks()
                     r, g, b = watchStates[nextState]:GetColor()
                     bar:SetStatusBarColor(r, g, b, alpha * 1.5)
 
-                    local bgColor = _G.Aurora.Color.frame
+                    local bgColor = Color.frame
                     bar.bg:SetColorTexture(bgColor.r, bgColor.g, bgColor.b, alpha)
                 end
                 nextState = watchStates[nextState]:GetNext()
@@ -1776,7 +1778,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, L["Progress_Cycle"], nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
+                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2023,7 +2025,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
                     specLines[specIndex] = lineNum
                     if specIndex == specInfo.current.index then
-                        tooltip:SetLineTextColor(lineNum, _G.unpack(RealUI.media.colors.orange))
+                        tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
                     end
                 end
 
@@ -2032,7 +2034,7 @@ function Infobar:CreateBlocks()
                 hintSpec = tooltip:AddLine()
                 hintGear = tooltip:AddLine()
                 tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, tooltip:GetColumnCount())
-                tooltip:SetCellTextColor(hintLine, 1, 0, 1, 0)
+                tooltip:SetCellTextColor(hintSpec, 1, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2400,7 +2402,7 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(" ")
 
                 hintLine = tooltip:AddLine(L["Currency_Cycle"])
-                tooltip:SetLineTextColor(hintLine, 0, 1, 0)
+                tooltip:SetLineTextColor(hintLine, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2465,9 +2467,8 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.NETWORK_LABEL)
 
-                local color = RealUI.media.colors.orange
                 lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
-                tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
+                tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
                 tooltip:AddLine(lagFormat:format(_G.HOME, _G.MILLISECONDS_ABBR), round(home.cur), round(home.avg))
                 tooltip:AddLine(lagFormat:format(_G.WORLD, _G.MILLISECONDS_ABBR), round(world.cur), round(world.avg))
 
@@ -2475,7 +2476,7 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.SYSTEMOPTIONS_MENU)
                 lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
-                tooltip:SetLineTextColor(lineNum, color[1], color[2], color[3])
+                tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
                 tooltip:AddLine(_G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
 
                 tooltip:Show()
