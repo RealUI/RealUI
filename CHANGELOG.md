@@ -1,14 +1,21 @@
-## [2.0.12] - 2019-06-14 ##
+## [2.0.12] - 2019-06-25 ##
 ### Modified AddOns ###
 
+  * FreebTip
   * nibRealUI
   * nibRealUI_Config
 
+### Added ###
+
+  * There is a new RealUI-Healing profile available in the core addon. This will be automatically switched to when using a healing spec.
+
 ### Changed ###
 
-  * Converted spec layouts into profiles
+  * Castbars now have an improved click-drag positioning system
+  * The healing layout for castbars is now provided by the new RealUI-Healing profile instead
   * Improve minimap POIs
   * Updated Config Bar icons
+  * Spec and iLvl info on tooltips is now updated live
 
 ### Fixed ###
 
