@@ -435,6 +435,7 @@ function RealUI:OnInitialize()
 
     -- Profile change
     debug("Char", dbc.init.installStage)
+    self.db.RegisterCallback(self, "OnNewProfile", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
@@ -636,7 +637,7 @@ do
         OnProfileUpdate = function(self, ...)
             self:SetEnabledState(RealUI.db.profile.modules[self.moduleName])
             if self.RefreshMod then
-                self:RefreshMod()
+                self:RefreshMod(...)
             end
         end,
     }
