@@ -200,6 +200,8 @@ function ActionBars:ApplyABSettings(tag)
             }
 
             BTBar:SetButtons()
+        else
+            BarSizes[id] = 0
         end
     end
     if BT4ActionBars then BT4ActionBars:ApplyConfig() end
@@ -267,7 +269,7 @@ function ActionBars:ApplyABSettings(tag)
     ----
     -- Extra Action Bar
     ----
-    if barSettings.moveBars.eab and BarSizes[2] and BarSizes[3] then
+    if barSettings.moveBars.eab then
         local eabX, eabY
 
         -- Calculate X, Y
