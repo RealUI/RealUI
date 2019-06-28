@@ -1019,7 +1019,7 @@ function Infobar:CreateBlocks()
                     local now = _G.GetTime()
                     Infobar:debug("Guild: time", now - time)
                     if now - time > 10 then
-                        _G.GuildRoster()
+                        _G.C_GuildInfo.GuildRoster()
                         time = now
                     else
                         local _, online, onlineAndMobile = _G.GetNumGuildMembers()
