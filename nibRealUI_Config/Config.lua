@@ -388,9 +388,9 @@ function RealUI.ToggleConfig(app, section, ...)
             for i = 1, #tabs do
                 local tab = tabs[i]
                 if tab.slug == section then
-                    tab:GetScript("OnClick")(tab)
+                    tab.button:GetScript("OnClick")(tab.button)
                     hudConfig.highlight.hover = i
-                    hudConfig.highlight:SetAllPoints(tab)
+                    hudConfig.highlight:SetAllPoints(tab.button)
                     hudConfig.highlight:Show()
                 end
             end
