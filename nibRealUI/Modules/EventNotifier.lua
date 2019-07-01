@@ -23,7 +23,7 @@ local numInvites = 0 -- store amount of invites to compare later, and only show 
 
 local function GetGuildInvites()
     local numGuildInvites = 0
-    local date = _G.C_Calendar.GetDate()
+    local date = _G.C_DateAndTime.GetCurrentCalendarTime()
     for index = 1, _G.C_Calendar.GetNumGuildEvents() do
         local info = _G.C_Calendar.GetGuildEventInfo(index)
         local monthOffset = info.month - date.month
