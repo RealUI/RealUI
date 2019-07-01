@@ -1,3 +1,16 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Fixed ###
+
+  * Error when opening actionbar settings with /bt.
+  * SetPoint errors when a popup dialog is shown.
+
+
+
+
 ## [2.0.12] - 2019-06-25 ##
 ### Modified AddOns ###
 
