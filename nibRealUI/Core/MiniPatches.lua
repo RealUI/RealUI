@@ -49,6 +49,7 @@ RealUI.minipatches = {
                     positionerY = positionerY + (positions.HuDY or defaultPositions.HuDY)
                     castbarY = positionerY - (8 / 2)
 
+                    CastBarsDB.player.position = CastBarsDB.player.position or {}
                     CastBarsDB.player.position.x = castbarX
                     CastBarsDB.player.position.y = castbarY
                     CastBarsDB.player.position.point = "CENTER"
@@ -61,6 +62,7 @@ RealUI.minipatches = {
                     positionerY = positionerY + (positions.HuDY or defaultPositions.HuDY)
                     castbarY = positionerY - (8 / 2)
 
+                    CastBarsDB.target.position = CastBarsDB.target.position or {}
                     CastBarsDB.target.position.x = castbarX
                     CastBarsDB.target.position.y = castbarY
                     CastBarsDB.target.position.point = "CENTER"
