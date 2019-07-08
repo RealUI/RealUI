@@ -31,7 +31,7 @@ RealUI.minipatches = {
             if CastBarsDB then
                 local hudSize = profile.settings and profile.settings.hudSize or 2
                 CastBarsDB.player = CastBarsDB.player or {}
-                CastBarsDB.player = CastBarsDB.player or {}
+                CastBarsDB.target = CastBarsDB.target or {}
 
                 local layout = private.profileToLayout[profileName] or 1
                 local positions = profile.positions and profile.positions[layout]
