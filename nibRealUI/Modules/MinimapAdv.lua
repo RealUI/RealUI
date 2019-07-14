@@ -597,7 +597,6 @@ function MinimapPOIMixin:UpdateScale()
 end
 
 function MinimapPOIMixin:Add(xCoord, yCoord, instanceID)
-    self:debug("POI:Add", self.questInfo.x, self.questInfo.y, self.zoneInfo.mapID)
     HBDP:AddMinimapIconWorld(MinimapAdv, self, instanceID, xCoord, yCoord, true)
 end
 function MinimapPOIMixin:Remove()
