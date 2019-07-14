@@ -1,12 +1,13 @@
-﻿## [2.0.14] - 2019-07-13 ##
+## [2.0.14] - 2019-07-13 ##
 ### Modified AddOns ###
 
   * nibRealUI
 
 ### Fixed ###
 
-  * Error when opening actionbar settings with /bt.
-  * SetPoint errors when a popup dialog is shown.
+  * Addons that were missing have been restored.
+  * Error when visiting certain Islands or quest locations.
+  * Error when receiving a resurrection.
 
 
 

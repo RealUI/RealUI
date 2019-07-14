@@ -30,7 +30,7 @@ ForceWarning:SetScript("OnEvent", function(self, event)
     elseif event == "LFG_PROPOSAL_SHOW" then
         _G.PlaySound(_G.SOUNDKIT.READY_CHECK, "Master")
     elseif event == "RESURRECT_REQUEST" then
-        _G.PlaySoundFile([[Sound\Spells\Resurrection.wav]], "Master")
+        _G.PlaySound(568667, "Master") -- sound/spells/resurrection.ogg
     end
 end)
 
