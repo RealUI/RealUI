@@ -37,6 +37,9 @@ externals:
         tag: latest
     nibRealUI/Libs/LibDropDown:
         url: https://github.com/p3lim-wow/LibDropDown.git
+    nibRealUI/Libs/LibDualSpec-1.0:
+        url: https://repos.wowace.com/wow/libdualspec-1-0
+        tag: latest
     nibRealUI/Libs/LibIconFonts:
         url: https://github.com/Gethe/LibIconFonts.git
         tag: latest

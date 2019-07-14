@@ -31,7 +31,7 @@ RealUI.minipatches = {
             if CastBarsDB then
                 local hudSize = profile.settings and profile.settings.hudSize or 2
                 CastBarsDB.player = CastBarsDB.player or {}
-                CastBarsDB.player = CastBarsDB.player or {}
+                CastBarsDB.target = CastBarsDB.target or {}
 
                 local layout = private.profileToLayout[profileName] or 1
                 local positions = profile.positions and profile.positions[layout]
@@ -49,6 +49,7 @@ RealUI.minipatches = {
                     positionerY = positionerY + (positions.HuDY or defaultPositions.HuDY)
                     castbarY = positionerY - (8 / 2)
 
+                    CastBarsDB.player.position = CastBarsDB.player.position or {}
                     CastBarsDB.player.position.x = castbarX
                     CastBarsDB.player.position.y = castbarY
                     CastBarsDB.player.position.point = "CENTER"
@@ -61,6 +62,7 @@ RealUI.minipatches = {
                     positionerY = positionerY + (positions.HuDY or defaultPositions.HuDY)
                     castbarY = positionerY - (8 / 2)
 
+                    CastBarsDB.target.position = CastBarsDB.target.position or {}
                     CastBarsDB.target.position.x = castbarX
                     CastBarsDB.target.position.y = castbarY
                     CastBarsDB.target.position.point = "CENTER"
