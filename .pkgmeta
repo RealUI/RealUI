@@ -94,6 +94,10 @@ externals:
         url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
         tag: latest
 
+    #RealUI_Tooltips/Libs/LibObjectiveProgress-1.0:
+    #    url: https://repos.curseforge.com/wow/libobjectiveprogress-1-0
+    #    tag: latest
+
 manual-changelog:
     filename: CHANGELOG.md
     markup-type: markdown

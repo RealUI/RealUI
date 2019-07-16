@@ -1,13 +1,15 @@
 --local ADDON_NAME, private = ...
 
 -- Lua Globals --
--- luacheck: globals time next
+-- luacheck: globals time next select tonumber tostring
 
 local RealUI = _G.RealUI
 local round = RealUI.Round
 
 local Aurora = _G.Aurora
 local Color = Aurora.Color
+
+local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 
 local debug = RealUI.GetDebug("Tooltips")
 debug = debug
@@ -415,8 +417,9 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             self.factionIcon:SetPoint("CENTER", _G.GameTooltip, "LEFT", 0, 0)
         end
 
+        local faction =  _G.UnitFactionGroup(unit)
         if _G.UnitIsPVP(unit) then
-            local icon = factionIcon[_G.UnitFactionGroup(unit) or "Neutral"]
+            local icon = factionIcon[faction or "Neutral"]
             self.factionIcon:SetTexture(icon.texture)
             self.factionIcon:SetTexCoord(icon.coords[1], icon.coords[2], icon.coords[3], icon.coords[4])
             self.factionIcon:SetSize(32, 38)
@@ -485,6 +488,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             level = _G.UnitLevel(unit)
         end
 
+        local previousLine = 1
         local dead = _G.UnitIsDeadOrGhost(unit)
         if level then
             local unitType
@@ -523,14 +527,58 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             local classify = _G.UnitClassification(unit) or ""
             local textLevel = ("|cff%s%s%s|r"):format(RealUI.GetColorString(diff), level, classification[classify] or "")
 
-            for i = 2, self:NumLines() do
+            for i = previousLine + 1, self:NumLines() do
                 local tiptext = _G["GameTooltipTextLeft"..i]
                 local linetext = tiptext:GetText()
 
                 if linetext and linetext:find(_G.LEVEL) then
                     tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType or "unitType", (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
+                    previousLine = i
                     break
                 end
+            end
+        end
+
+        do -- Objective Progress
+            local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
+            local line, addedProgress
+
+            local challengeMapID = _G.C_ChallengeMode.GetActiveChallengeMapID()
+            if challengeMapID then
+                local isTeeming = false
+                local _, activeAffixIDs = _G.C_ChallengeMode.GetActiveKeystoneInfo()
+                for i = 1, #activeAffixIDs do
+                    if activeAffixIDs[i] == 5 then
+                        isTeeming = true
+                        break
+                    end
+                end
+
+                local _, _, _, _, _, _, _, instanceMapID = _G.GetInstanceInfo()
+                local isAlternate = challengeMapID == 234 -- Upper Karazhan
+                if instanceMapID == 1822 then -- Siege of Boralus
+                    isAlternate = faction == "Horde"
+                end
+
+                addedProgress = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
+            else
+                local weightsTable = LOP:GetNPCWeightByCurrentQuests(tonumber(npcID))
+                if weightsTable then
+                    for questID, npcWeight in next, weightsTable do
+                        local questTitle = _G.C_TaskQuest.GetQuestInfoByQuestID(questID)
+                        for i = previousLine + 1, self:NumLines() do
+                            line = _G["GameTooltipTextLeft" .. i]
+                            if line and line:GetText() == questTitle then
+                                addedProgress = npcWeight
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+
+            if line and addedProgress then
+                line:SetFormattedText(("%s | +%s%%"), line:GetText(), addedProgress)
             end
         end
 
