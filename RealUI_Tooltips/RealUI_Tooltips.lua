@@ -262,6 +262,7 @@ local AddDynamicInfo, ClearDynamicInfo do
         end
     end
 
+    --[[
     local AddTargetInfo, ClearTargetInfo do
         local targetLine
         local targetYou = ">".._G.YOU.."<"
@@ -275,22 +276,29 @@ local AddDynamicInfo, ClearDynamicInfo do
         end
 
         function AddTargetInfo(unit)
-            if not _G.UnitExists(unit) then return end
+            local leftText, rightText
+            if _G.UnitExists(unit) then
+                local tarRicon = (_G.GetRaidTargetIndex(unit))
+                debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
 
-            local tarRicon, text = (_G.GetRaidTargetIndex(unit))
-            debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
-
-            if tarRicon and _G.ICON_LIST[tarRicon] then
-                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", GetTarget(unit))
+                leftText = _G.TARGET
+                if tarRicon and _G.ICON_LIST[tarRicon] then
+                    rightText = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", GetTarget(unit))
+                else
+                    rightText = GetTarget(unit)
+                end
             else
-                text = GetTarget(unit)
+                leftText = "target"
+                rightText = ""
             end
 
-            if targetLine and text then
-                _G["GameTooltipTextLeft"..targetLine]:SetText(_G.TARGET)
-                _G["GameTooltipTextRight"..targetLine]:SetText(text)
+
+            if targetLine and leftText then
+                _G["GameTooltipTextLeft"..targetLine]:SetText(leftText)
+                _G["GameTooltipTextRight"..targetLine]:SetText(rightText)
+                _G["GameTooltipTextRight"..targetLine]:SetTextColor(GetUnitColor(unit))
             elseif not targetLine then
-                _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unit))
+                _G.GameTooltip:AddDoubleLine(leftText, rightText, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unit))
                 targetLine = _G.GameTooltip:NumLines()
             end
         end
@@ -298,6 +306,7 @@ local AddDynamicInfo, ClearDynamicInfo do
             targetLine = nil
         end
     end
+    ]]
 
     local AddSpecInfo, ClearSpecInfo do
         local specLine
@@ -363,7 +372,7 @@ local AddDynamicInfo, ClearDynamicInfo do
         local unit = GetUnit(_G.GameTooltip)
         local isPlayer = _G.UnitIsPlayer(unit)
 
-        AddTargetInfo(unit.."target")
+        --AddTargetInfo(unit.."target")
         AddSpecInfo(isPlayer, unit)
         AddItemLevelInfo(isPlayer, unit)
 
@@ -371,14 +380,14 @@ local AddDynamicInfo, ClearDynamicInfo do
     end)
 
     function AddDynamicInfo(unit, isPlayer)
-        AddTargetInfo(unit.."target")
+        --AddTargetInfo(unit.."target")
         AddSpecInfo(isPlayer, unit)
         AddItemLevelInfo(isPlayer, unit)
         frame:Show()
     end
 
     function ClearDynamicInfo(...)
-        ClearTargetInfo()
+        --ClearTargetInfo()
         ClearSpecInfo()
         ClearItemLevelInfo()
         frame:Hide()
@@ -580,6 +589,23 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             if line and addedProgress then
                 line:SetFormattedText(("%s | +%s%%"), line:GetText(), addedProgress)
             end
+        end
+
+        local unittarget = unit.."target"
+        if _G.UnitExists(unittarget) then
+            local text
+            if _G.UnitIsUnit(unittarget, "player") then
+                text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
+            else
+                text = _G.UnitName(unittarget)
+            end
+
+            local tarRicon = (_G.GetRaidTargetIndex(unittarget))
+            if tarRicon and _G.ICON_LIST[tarRicon] then
+                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", text)
+            end
+
+            _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unittarget))
         end
 
         AddDynamicInfo(unit, isPlayer)
