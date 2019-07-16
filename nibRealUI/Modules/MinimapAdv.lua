@@ -654,16 +654,14 @@ function MinimapAdv:POIUpdate(event, ...)
     local currentMapID, continentMapID = _G.C_Map.GetBestMapForUnit("player")
     if currentMapID then
         local mapInfo = _G.C_Map.GetMapInfo(currentMapID)
-        if mapInfo then
-            repeat
-                local exit = false
-                if mapInfo.mapType < _G.Enum.UIMapType.Continent then
-                    exit = true
-                else
-                    continentMapID = mapInfo.mapID
-                    mapInfo = _G.C_Map.GetMapInfo(mapInfo.parentMapID)
-                end
-            until exit
+        local exit = false
+        while mapInfo and not exit do
+            if mapInfo.mapType < _G.Enum.UIMapType.Continent then
+                exit = true
+            else
+                continentMapID = mapInfo.mapID
+                mapInfo = _G.C_Map.GetMapInfo(mapInfo.parentMapID)
+            end
         end
     end
 
