@@ -12,6 +12,7 @@ local round = RealUI.Round
 
 local Tooltips = RealUI:NewModule(ADDON_NAME)
 
+local FramePoint = RealUI:GetModule("FramePoint")
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
@@ -20,8 +21,8 @@ local defaults = {
         showTitles = true,
         showRealm = false,
         position = {
-            x = -25,
-            y = 200,
+            x = -100,
+            y = 130,
             point = "BOTTOMRIGHT"
         }
     }
@@ -629,6 +630,19 @@ end)
 
 
 
+local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
+tooltipAnchor:SetSize(50, 50)
+_G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+    tooltip:ClearAllPoints()
+    tooltip:SetPoint(Tooltips.db.global.position.point, tooltipAnchor)
+end)
+
+
+
+
 function Tooltips:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
+
+    FramePoint:RegisterMod(self)
+    FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
 end
