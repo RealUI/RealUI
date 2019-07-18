@@ -21,6 +21,7 @@ local defaults = {
         showTitles = true,
         showRealm = false,
         showIDs = false,
+        multiTip = true,
         position = {
             x = -100,
             y = 130,
@@ -650,5 +651,8 @@ function Tooltips:OnInitialize()
 
     if Tooltips.db.global.showIDs then
         private.SetupIDTips()
+    end
+    if Tooltips.db.global.multiTip then
+        private.SetupMultiTip()
     end
 end

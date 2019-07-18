@@ -10,3 +10,4 @@ Libs\Libs.xml
 
 RealUI_Tooltips.lua
 ObjectID.lua
+MultiTip.xml

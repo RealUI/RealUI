@@ -783,6 +783,11 @@ local tooltips do
     local Tooltips = RealUI:GetModule("Tooltips", true)
     if Tooltips then
         args = {
+            note = {
+                name = L.General_NoteReload,
+                type = "description",
+                order = -1,
+            },
             showTitles = {
                 name = L.Tooltips_ShowTitles,
                 type = "toggle",
@@ -809,6 +814,16 @@ local tooltips do
                     Tooltips.db.global.showIDs = value
                 end,
                 order = 3,
+            },
+            multiTip = {
+                name = L.Tooltips_MultiTip,
+                desc = L.Tooltips_MultiTipDesc,
+                type = "toggle",
+                get = function() return Tooltips.db.global.multiTip end,
+                set = function(info, value)
+                    Tooltips.db.global.multiTip = value
+                end,
+                order = 4,
             },
             position = {
                 name = L["General_Position"],
