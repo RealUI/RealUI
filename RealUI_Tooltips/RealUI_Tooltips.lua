@@ -1,4 +1,4 @@
-local ADDON_NAME = ...
+local ADDON_NAME, private = ...
 
 -- Lua Globals --
 -- luacheck: globals time next select tonumber tostring
@@ -20,6 +20,7 @@ local defaults = {
     global = {
         showTitles = true,
         showRealm = false,
+        showIDs = true,
         position = {
             x = -100,
             y = 130,
@@ -623,6 +624,7 @@ _G.GameTooltip:HookScript("OnTooltipCleared", function(self)
     end
 
     ClearDynamicInfo()
+    self._id = nil
 
     self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end)
@@ -645,4 +647,8 @@ function Tooltips:OnInitialize()
 
     FramePoint:RegisterMod(self)
     FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
+
+    if Tooltips.db.global.showIDs then
+        private.SetupIDTips()
+    end
 end
