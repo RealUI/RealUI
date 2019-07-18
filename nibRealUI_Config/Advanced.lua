@@ -52,6 +52,21 @@ local function CreateToggleOption(slug, name)
     }
 end
 
+local nameFormat = _G.ENABLE .. " %s"
+local function CreateDisabledAddon(name)
+    return {
+        enable = {
+            name = nameFormat:format(name),
+            type = "execute",
+            func = function(info, value)
+                _G.EnableAddOn(name)
+                _G.ReloadUI()
+            end,
+            order = 1,
+        },
+    }
+end
+
 local core do
     debug("Adv Core")
     local infobar do
@@ -763,11 +778,10 @@ local tooltips do
     debug("Adv Tooltips")
     order = order + 1
 
-    local Tooltips = RealUI:GetModule("Tooltips")
-    tooltips = {
-        name = L.Tooltips,
-        type = "group",
-        order = order,
+
+    local args
+    local Tooltips = RealUI:GetModule("Tooltips", true)
+    if Tooltips then
         args = {
             showTitles = {
                 name = L.Tooltips_ShowTitles,
@@ -861,6 +875,15 @@ local tooltips do
                 }
             }
         }
+    else
+        args = CreateDisabledAddon("RealUI_Tooltips")
+    end
+
+    tooltips = {
+        name = L.Tooltips,
+        type = "group",
+        order = order,
+        args = args
     }
 end
 local uiTweaks do
