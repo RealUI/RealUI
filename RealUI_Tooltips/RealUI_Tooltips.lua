@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals time next select tonumber tostring
@@ -10,7 +10,7 @@ local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 local RealUI = _G.RealUI
 local round = RealUI.Round
 
-local Tooltips = RealUI:NewModule(ADDON_NAME)
+local Tooltips = RealUI:NewModule("Tooltips")
 
 local FramePoint = RealUI:GetModule("FramePoint")
 local Aurora = _G.Aurora
@@ -20,7 +20,7 @@ local defaults = {
     global = {
         showTitles = true,
         showRealm = false,
-        showIDs = true,
+        showIDs = false,
         position = {
             x = -100,
             y = 130,
