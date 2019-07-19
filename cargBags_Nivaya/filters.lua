@@ -60,6 +60,7 @@ function cbNivaya:CheckTable(src,check)
 	end
 	return rtrn
 end
+
 function cbNivaya:ClassifyItem(item)
 	local bags, itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = _G.cB_CustomBags, GetItemInfo(item.id)
 	
@@ -80,6 +81,7 @@ function cbNivaya:ClassifyItem(item)
 			itemClass[item.id] = "Quest"
 		elseif (item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS) then
 			-- Better item filtering
+			-- Default to Trade Goods
 			itemClass[item.id] = "TradeGoods"
 			--Tradeskill specific
 			if     itemSubType == "Armor Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Armor Enchantment') then itemClass[item.id] = "Tradeskill: Armor Enchantment"
@@ -98,13 +100,96 @@ function cbNivaya:ClassifyItem(item)
 			elseif itemSubType == "Mining" and cbNivaya:CheckTable(bags,'Tradeskill: Mining') then itemClass[item.id] = "Tradeskill: Mining" 
 			elseif itemSubType == "Parts" and cbNivaya:CheckTable(bags,'Tradeskill: Parts') then itemClass[item.id] = "Tradeskill: Parts"
 			elseif itemSubType == "Weapon Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Weapon Enchantment') then itemClass[item.id] = "Tradeskill: Weapon Enchantment"
-			-- Default back to Trade Goods if we don't have a custom container for our predefined item sets
 			end			
 		elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
 			itemClass[item.id] = "Consumables"
 		elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
 			itemClass[item.id] = "BattlePet"
 		end
+		local itemIDs = { 
+			--Mechagon Tinkering
+			mechagon = {
+				168327, --Chain Ignitercoil
+				168832, --Galvanic Oscillator
+				166791, --Empty Energy Cell
+				166846, --Spare Parts
+				166970  --Energy Cell
+			},
+			--Travel/teleportation
+			travel = {
+				64488,  --The Innkeeper's Daughter
+				54452,  --Ethereal Portal
+				93672,  --Dark Portal
+				28585,  --Ruby Slippers
+				64457,  --The Last Relic of Argus
+				37118,  --Scroll of Recall
+				44314,  --Scroll of Recall II
+				44315,  --Scroll of Recall III
+				163045, --Headless Horseman's Hearthstone
+				162973, --Greatfater Winter's Hearthstone
+				165669, --Lunar Elder's Hearthstone
+				165670, --Peddlefeet's Lovely Hearthstone
+				128353, --Admiral's Compass
+				140192, --Dalaran Hearthstone
+				129929, --Ever-Shifting Mirror
+				139599, --Empowered Ring of the Kirin Tor
+				141605, --Flight Master's Whistle
+				152964, --Krokul Flute
+				140324, --Mobile Telemancy Beacon
+				140493, --Adept's Guide to Dimensional Rifting
+				129276, --Beginner's Guide to Dimensional Rifting
+				166560, --Captain's Signet of Command
+				166559, --Commander's Signet of Battle
+				43824,  --The Schools of Arcane Magic - Mastery
+				144392, --Pugilist's Powerful Punching Ring
+				65274,  --Cloak of Coordination
+				64360,  --Cloak of Coordination
+				63206,  --Wrap of Unity
+				63207,  --Wrap of Unity
+				63352,  --Shroud of Cooperation
+				63353,  --Shroud of Cooperation
+				18984,  --Dimensional Ripper - Everlook
+				18986,  --Ultrasafe Transporter: Gadgetzan
+				21711,  --Lunar Festival Invitation
+				63378,  --Hellscream's Reach Tabard
+				63379,  --Baradin's Wardens Tabard
+				37863,  --Direbrew's Remote
+				50287,  --Boots of the Bay
+				22589,  --Atiesh, Greatstaff of the Guardian
+				142469, --Violet Seal of the Grand Magus
+				52251,  --Jaina's Locket
+				44935,  --Ring of the Kirin Tor
+				46874,  --Argent Crusader's Tabard
+				48933,  --Wormhole Generator: Northrend
+				32757,  --Blessed Medallion of Karabor
+				30542,  --Dimensional Ripper - Area 52
+				30544,  --Ultrasafe Transporter: Toshley's Station
+				58487,  --Potion of Deepholm
+				95568,  --Sunreaver Beacon
+				95567,  --Kirin Tor Beacon
+				87548,  --Lorewalker's Lodestone
+				103678, --Time-Los Artifact
+				87215,  --Wormhole Generator: Pandaria
+				118662, --Bladespire Relic
+				118663, --Relic of Karabor
+				112059, --Wormhole Centrifuge
+				110560, --Garrison Hearthstone
+				128502, --Hunter's Seeking Crystal
+				128503  --Master Hunter's Seeking Crystal
+			}
+		}
+		for _,v in pairs(itemIDs.mechagon) do
+			if v == item.id and cbNivaya:CheckTable(bags,'Mechagon Tinkering') then 
+				itemClass[item.id] = "Mechagon Tinkering"
+				break
+			end
+		end
+		for _,v in pairs(itemIDs.travel) do
+			if v == item.id and cbNivaya:CheckTable(bags,'Travel & Teleportation') then 
+				itemClass[item.id] = "Travel & Teleportation"
+				break
+			end
+		end		
 	end
 
 	if not item.typeID or not item.rarity then
