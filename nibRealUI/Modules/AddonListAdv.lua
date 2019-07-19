@@ -211,7 +211,6 @@ end)
 
 local setsMenu = LDD:NewMenu(setsButton, "RealUIAddonListDropDown")
 setsMenu:SetAnchor("TOPLEFT", setsButton, "BOTTOMLEFT", 5, -5)
-setsMenu:SetStyle("REALUI")
 setsButton.menu = setsMenu
 
 local info = {}
@@ -388,6 +387,7 @@ function AddonListAdv:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     _G.UIDropDownMenu_SetSelectedValue(_G.AddonCharacterDropDown, RealUI.charInfo.name)
 
+    setsMenu:SetStyle("REALUI")
     if LoggedIn then self:RefreshMod() end
 end
 

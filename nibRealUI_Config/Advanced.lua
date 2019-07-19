@@ -544,7 +544,7 @@ local skins do
     debug("Adv Skins")
     order = order + 1
 
-    local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins")
+    local SkinsDB = RealUI.GetOptions("Skins")
     local function appGet(info)
         return SkinsDB.profile[info[#info]]
     end

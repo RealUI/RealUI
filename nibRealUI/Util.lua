@@ -5,16 +5,6 @@ local _, private = ...
 
 local RealUI = _G.RealUI
 
-local addonDB = {}
-function RealUI:RegisterAddOnDB(addon, db)
-    if not addonDB[addon] then
-        addonDB[addon] = db
-    end
-end
-function RealUI:GetAddOnDB(addon)
-    return addonDB[addon]
-end
-
 if not private.oUF then
     private.oUF = _G.oUF
 end
@@ -98,8 +88,10 @@ end
 
 function RealUI.GetOptions(modName, path)
     local options = RealUI:GetModule(modName).db
-    for i = 1, #path do
-        options = options[path[i]]
+    if path then
+        for i = 1, #path do
+            options = options[path[i]]
+        end
     end
     return options
 end

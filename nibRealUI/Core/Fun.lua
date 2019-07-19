@@ -111,7 +111,7 @@ function RealUI:GetResolutionVals(raw)
         return resWidth, resHeight
     end
 
-    if RealUI:GetAddOnDB("RealUI_Skins").profile.isHighRes then
+    if RealUI.GetOptions("Skins").profile.isHighRes then
         resHeight = resHeight / 2
         resWidth = resWidth / 2
     end
