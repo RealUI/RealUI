@@ -117,6 +117,7 @@ function cbNivaya:ClassifyItem(item)
 			},
 			--Travel/teleportation
 			travel = {
+				6948,   --Hearthstone
 				64488,  --The Innkeeper's Daughter
 				54452,  --Ethereal Portal
 				93672,  --Dark Portal
