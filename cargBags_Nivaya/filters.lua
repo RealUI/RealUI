@@ -45,39 +45,73 @@ filters.fItemClass = function(item, container)
         bag = (t ~= "NoClass" and ns.filterEnabled[t]) and t or "Bag"
     end
 
-    return bag == container
+	return bag == container
 end
 
+function cbNivaya:CheckTable(src,check)
+	for index, value in pairs(src) do
+		if type(value) == "table" then
+			cbNivaya:CheckTable(value,check)
+		else
+			if index == "name" and value == check then rtrn = true 
+			else rtrn = false end
+		end
+		if rtrn then break end
+	end
+	return rtrn
+end
 function cbNivaya:ClassifyItem(item)
-    if item.bagID == -2 then
-        -- keyring
-        itemClass[item.id] = "Keyring"
-    elseif _G.cBniv_CatInfo[item.id] then
-        -- user assigned containers
-        itemClass[item.id] = _G.cBniv_CatInfo[item.id]
-    elseif item.rarity == 0 then
-        -- junk
-        itemClass[item.id] = "Junk"
-    elseif item.typeID then
-        -- type based filters
-        if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON) or _G.IsArtifactRelicItem(item.link or item.id) then
-            itemClass[item.id] = "Armor"
-        elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
-            itemClass[item.id] = "Quest"
-        elseif (item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS) then
-            itemClass[item.id] = "TradeGoods"
-        elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
-            itemClass[item.id] = "Consumables"
-        elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
-            itemClass[item.id] = "BattlePet"
-        end
-    end
+	local bags, itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = _G.cB_CustomBags, GetItemInfo(item.id)
+	
+	if item.bagID == -2 then
+		-- keyring
+		itemClass[item.id] = "Keyring"
+	elseif _G.cBniv_CatInfo[item.id] then
+		-- user assigned containers
+		itemClass[item.id] = _G.cBniv_CatInfo[item.id]
+	elseif item.rarity == 0 and item.sellPrice >= 1 then
+		-- junk (only classify items as junk that are 0 rarity AND can be sold to a vendor)
+		itemClass[item.id] = "Junk"
+	elseif item.typeID then
+		-- type based filters
+		if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON) or _G.IsArtifactRelicItem(item.link or item.id) then
+			itemClass[item.id] = "Armor"
+		elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
+			itemClass[item.id] = "Quest"
+		elseif (item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS) then
+			-- Better item filtering
+			itemClass[item.id] = "TradeGoods"
+			--Tradeskill specific
+			if     itemSubType == "Armor Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Armor Enchantment') then itemClass[item.id] = "Tradeskill: Armor Enchantment"
+			elseif itemSubType == "Cloth" and cbNivaya:CheckTable(bags,'Tradeskill: Cloth') then itemClass[item.id] = "Tradeskill: Cloth" 
+			elseif itemSubType == "Cooking" and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then itemClass[item.id] = "Tradeskill: Cooking"
+			elseif itemSubType == "Devices" and cbNivaya:CheckTable(bags,'Tradeskill: Devices') then itemClass[item.id] = "Tradeskill: Devices"
+			elseif itemSubType == "Enchanting" and cbNivaya:CheckTable(bags,'Tradeskill: Enchanting') then itemClass[item.id] = "Tradeskill: Enchanting" 
+			elseif itemSubType == "Engineering" and cbNivaya:CheckTable(bags,'Tradeskill: Engineering') then itemClass[item.id] = "Tradeskill: Engineering" 
+			elseif itemSubType == "Gem" and cbNivaya:CheckTable(bags,'Tradeskill: Gem') then itemClass[item.id] = "Tradeskill: Gem" 
+			elseif itemSubType == "Herb" and cbNivaya:CheckTable(bags,'Tradeskill: Herb') then itemClass[item.id] = "Tradeskill: Herb" 
+			elseif itemSubType == "Inscription" and cbNivaya:CheckTable(bags,'Tradeskill: Inscription') then itemClass[item.id] = "Tradeskill: Inscription" 
+			elseif itemSubType == "Jewelcrafting" and cbNivaya:CheckTable(bags,'Tradeskill: Jewelcrafting') then itemClass[item.id] = "Tradeskill: Jewelcrafting"
+			elseif itemSubType == "Leatherworking" and cbNivaya:CheckTable(bags,'Tradeskill: Leatherworking') then itemClass[item.id] = "Tradeskill: Leatherworking"
+			elseif itemSubType == "Materials" and cbNivaya:CheckTable(bags,'Tradeskill: Materials') then itemClass[item.id] = "Tradeskill: Materials"
+			elseif itemSubType == "Metal & Stone" and cbNivaya:CheckTable(bags,'Tradeskill: Metal & Stone') then itemClass[item.id] = "Tradeskill: Metal & Stone"
+			elseif itemSubType == "Mining" and cbNivaya:CheckTable(bags,'Tradeskill: Mining') then itemClass[item.id] = "Tradeskill: Mining" 
+			elseif itemSubType == "Parts" and cbNivaya:CheckTable(bags,'Tradeskill: Parts') then itemClass[item.id] = "Tradeskill: Parts"
+			elseif itemSubType == "Weapon Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Weapon Enchantment') then itemClass[item.id] = "Tradeskill: Weapon Enchantment"
+			-- Default back to Trade Goods if we don't have a custom container for our predefined item sets
+			end			
+		elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
+			itemClass[item.id] = "Consumables"
+		elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
+			itemClass[item.id] = "BattlePet"
+		end
+	end
 
-    if not item.typeID or not item.rarity then
-        itemClass[item.id] = "ReClass"
-    elseif not itemClass[item.id] then
-        itemClass[item.id] = "NoClass"
-    end
+	if not item.typeID or not item.rarity then
+		itemClass[item.id] = "ReClass"
+	elseif not itemClass[item.id] then
+		itemClass[item.id] = "NoClass"
+	end
 end
 
 ------------------------------------------
