@@ -357,19 +357,19 @@ function cbNivaya:CreateAnchors()
     CreateAnchorInfo(bags.armor,         bags.battlepet,      "Top")
     CreateAnchorInfo(bags.battlepet,     bags.bagStuff,       "Top")
 
-    CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
     CreateAnchorInfo(bags.consumables,   bags.quest,          "Top")
-    CreateAnchorInfo(bags.main,          bags.bagNew,         "Top")
     
 	CreateAnchorInfo(bags.bagItemSets,   bags.bagJunk,        "Left")
     CreateAnchorInfo(bags.bagJunk,       bags.tradegoods,     "Top")
+    CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
+    CreateAnchorInfo(bags.consumables,   bags.bagNew,         "Top")
 
     -- Custom Container Anchors:
     ref[0], ref[1] = 0, 0
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
             local c = bag.col
-            if ref[c] == 0 then ref[c] = (c == 0) and bags.bagStuff or bags.bagNew end
+            if ref[c] == 0 then ref[c] = (c == 0) and bags.bagStuff or bags.main end
             CreateAnchorInfo(ref[c], bags[bag.name], "Top")
             ref[c] = bags[bag.name]
         end
