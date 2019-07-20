@@ -95,7 +95,7 @@ function AddonControl:CreateOptionsFrame()
     if self.options then return end
 
     local color = _G.Aurora.Color.highlight
-    self.options = RealUI:CreateWindow("RealUIAddonControlOptions", 330, 240, true, true)
+    self.options = RealUI:CreateWindow("RealUIAddonControlOptions", 290, 240, true, true)
     local acO = self.options
         acO:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
         acO:Hide()
@@ -127,16 +127,9 @@ function AddonControl:CreateOptionsFrame()
         lBase:SetWidth(40)
         lBase:SetTextColor(color:GetRGB())
 
-    -- Label Layout
-    local lLayout = RealUI:CreateFS(acO, "CENTER", "small")
-        lLayout:SetPoint("LEFT", lBase, "RIGHT", 0, 0)
-        lLayout:SetText("Layout")
-        lLayout:SetWidth(40)
-        lLayout:SetTextColor(color:GetRGB())
-
     -- Label Position
     local lPosition = RealUI:CreateFS(acO, "CENTER", "small")
-        lPosition:SetPoint("LEFT", lLayout, "RIGHT", 0, 0)
+        lPosition:SetPoint("LEFT", lBase, "RIGHT", 0, 0)
         lPosition:SetText("Pos")
         lPosition:SetWidth(40)
         lPosition:SetTextColor(color:GetRGB())
@@ -144,11 +137,7 @@ function AddonControl:CreateOptionsFrame()
     local acAddonSect = _G.CreateFrame("Frame", nil, acO)
     acAddonSect:SetPoint("TOPLEFT", acO, "TOPLEFT", 6, -42)
     acAddonSect:SetPoint("BOTTOMRIGHT", acO, "BOTTOMRIGHT", -6, 36)
-    _G.Aurora.Base.SetBackdrop(acAddonSect)
 
-    local LayoutAddOns = {
-        ["Bartender4"] = true,
-    }
     local PositionAddOns = {
         ["DBM"] = true,
         ["Bartender4"] = true,
@@ -158,8 +147,8 @@ function AddonControl:CreateOptionsFrame()
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
     }
-    local prevLabel, prevCBBase, prevCBLayout, prevCBPosition, prevReset
-    local cbBase, cbLayout, cbPosition, bReset = {}, {}, {}, {}
+    local prevLabel, prevCBBase, prevCBPosition, prevReset
+    local cbBase, cbPosition, bReset = {}, {}, {}
     local cnt = 0
     for k, addon in next, RealUIAddOnsOrder do
         if _G.IsAddOnLoaded(addon) or (altAddOnTable[addon] and _G.IsAddOnLoaded(altAddOnTable[addon])) then
@@ -181,44 +170,26 @@ function AddonControl:CreateOptionsFrame()
             cbBase[cnt].addon = addon
             cbBase[cnt].id = cnt
             if not prevCBBase then
-                cbBase[cnt]:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 143, -3)
+                cbBase[cnt]:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 143, 0)
             else
-                cbBase[cnt]:SetPoint("TOPLEFT", prevCBBase, "BOTTOMLEFT", 0, 2)
+                cbBase[cnt]:SetPoint("TOPLEFT", prevCBBase, "BOTTOMLEFT", 0, 5)
             end
             cbBase[cnt]:SetChecked(db.addonControl[addon].profiles.base.use)
             cbBase[cnt]:SetScript("OnClick", function(checkBtn)
                 db.addonControl[checkBtn.addon].profiles.base.use = checkBtn:GetChecked() and true or false
-                cbLayout[checkBtn.id]:SetShown(LayoutAddOns[checkBtn.addon] and checkBtn:GetChecked())
                 cbPosition[checkBtn.id]:SetShown(PositionAddOns[checkBtn.addon] and checkBtn:GetChecked())
             end)
             cbBase[cnt].tooltip = "Allow |cff0099ffRealUI|r to change |cffffffff"..addon.."'s|r profile."
             prevCBBase = cbBase[cnt]
-
-            -- Layout Checkboxes
-            cbLayout[cnt] = RealUI:CreateCheckbox("RealUIAddonControlLayout"..cnt, acAddonSect, "", "LEFT", 21)
-            cbLayout[cnt].addon = addon
-            cbLayout[cnt].id = cnt
-            if not prevCBLayout then
-                cbLayout[cnt]:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 183, -3)
-            else
-                cbLayout[cnt]:SetPoint("TOPLEFT", prevCBLayout, "BOTTOMLEFT", 0, 2)
-            end
-            if not(LayoutAddOns[addon]) or not(db.addonControl[addon].profiles.base.use) then cbLayout[cnt]:Hide() end
-            cbLayout[cnt]:SetChecked(db.addonControl[addon].profiles.layout.use)
-            cbLayout[cnt]:SetScript("OnClick", function(checkBtn)
-                db.addonControl[checkBtn.addon].profiles.layout.use = checkBtn:GetChecked() and true or false
-            end)
-            cbLayout[cnt].tooltip = "Allow |cff0099ffRealUI|r to change |cffffffff"..addon.."'s|r profile based on current |cff0099ffLayout|r |cff999999(DPS/Tank or Healing)|r."
-            prevCBLayout = cbLayout[cnt]
 
             -- Position Checkboxes
             cbPosition[cnt] = RealUI:CreateCheckbox("RealUIAddonControlPosition"..cnt, acAddonSect, "", "LEFT", 21)
             cbPosition[cnt].addon = addon
             cbPosition[cnt].id = cnt
             if not prevCBPosition then
-                cbPosition[cnt]:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 223, -3)
+                cbPosition[cnt]:SetPoint("TOPLEFT", acAddonSect, "TOPLEFT", 183, 0)
             else
-                cbPosition[cnt]:SetPoint("TOPLEFT", prevCBPosition, "BOTTOMLEFT", 0, 2)
+                cbPosition[cnt]:SetPoint("TOPLEFT", prevCBPosition, "BOTTOMLEFT", 0, 5)
             end
             if not(PositionAddOns[addon]) or not(db.addonControl[addon].profiles.base.use) then cbPosition[cnt]:Hide() end
             cbPosition[cnt]:SetChecked(db.addonControl[addon].control.position)
@@ -274,13 +245,6 @@ function RealUI:ToggleAddonPositionControl(addon, val)
     end
 end
 
-function RealUI:ToggleAddonLayoutControl(addon, val)
-    db.addonControl[addon].profiles.layout.use = val
-    if val then
-        db.addonControl[addon].profiles.base.use = val
-    end
-end
-
 function RealUI:GetAddonControlSettings(addon)
     return {
         position = db.addonControl[addon].control.position,
@@ -291,11 +255,6 @@ end
 function RealUI:DoesAddonMove(addon)
     local addonControl = AddonControl.db.profile.addonControl
     return addonControl[addon] and (addonControl[addon].control.position and addonControl[addon].profiles.base.use)
-end
-
-function RealUI:DoesAddonLayout(addon)
-    local addonControl = AddonControl.db.profile.addonControl
-    return addonControl[addon] and (addonControl[addon].profiles.layout.use and addonControl[addon].profiles.base.use)
 end
 
 function RealUI:DoesAddonStyle(addon)
