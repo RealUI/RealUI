@@ -16,7 +16,6 @@ local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 
 local RealUIAddOns = {
-    ["Bartender4"] =    {isAce = true, db = "Bartender4DB",     profKey = "profileKeys"},
     ["Masque"] =        {isAce = true, db = "MasqueDB",         profKey = "profileKeys"},
     ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
