@@ -6,7 +6,7 @@ local _, private = ...
 -- RealUI --
 local RealUI = private.RealUI
 
-RealUI.AddOns.Bartender4 = function()
+function RealUI.AddOns.Bartender4()
     local namespaces = _G.Bartender4DB.namespaces
     local ActionBars = namespaces.ActionBars.profiles
     ActionBars["RealUI"] = {
