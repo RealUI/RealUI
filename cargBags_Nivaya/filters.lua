@@ -168,6 +168,7 @@ function cbNivaya:ClassifyItem(item)
 				58487,  --Potion of Deepholm
 				95568,  --Sunreaver Beacon
 				95567,  --Kirin Tor Beacon
+				40585,  --Signet of the Kirin Tor
 				87548,  --Lorewalker's Lodestone
 				103678, --Time-Los Artifact
 				87215,  --Wormhole Generator: Pandaria

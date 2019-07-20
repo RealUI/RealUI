@@ -161,6 +161,8 @@ local optDefaults = {
 -- Those are internal settings, don't touch them at all:
 local defaults = {}
 
+
+
 function cbNivaya:ShowBags(...)
     local show = {...}
     for i = 1, #show do
@@ -355,11 +357,12 @@ function cbNivaya:CreateAnchors()
     CreateAnchorInfo(bags.armor,         bags.battlepet,      "Top")
     CreateAnchorInfo(bags.battlepet,     bags.bagStuff,       "Top")
 
-    CreateAnchorInfo(bags.main,          bags.tradegoods,     "Top")
     CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
     CreateAnchorInfo(bags.consumables,   bags.quest,          "Top")
-    CreateAnchorInfo(bags.quest,         bags.bagJunk,        "Top")
-    CreateAnchorInfo(bags.bagJunk,       bags.bagNew,         "Top")
+    CreateAnchorInfo(bags.main,          bags.bagNew,         "Top")
+    
+	CreateAnchorInfo(bags.bagItemSets,   bags.bagJunk,        "Left")
+    CreateAnchorInfo(bags.bagJunk,       bags.tradegoods,     "Top")
 
     -- Custom Container Anchors:
     ref[0], ref[1] = 0, 0
