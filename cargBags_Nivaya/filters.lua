@@ -183,6 +183,47 @@ function cbNivaya:ClassifyItem(item)
 				110560, --Garrison Hearthstone
 				128502, --Hunter's Seeking Crystal
 				128503  --Master Hunter's Seeking Crystal
+			},
+			archaeology = {
+				109586, --Brittle Cartography Journal
+				142113, --Crate of Arakkoa Fragments
+				164625, --Crate of Demon Fragments
+				87534,  --Crate of Draenei Fragments
+				142114, --Crate of Draenor Clans Fragments
+				87533,  --Crate of Dwarven Fragments
+				87535,  --Crate of Fossil Fragments
+				164626, --Crate of Highborne Fragments
+				164627, --Crate of Highmountain Tauren Fragments
+				117388, --Crate of Manti Fragments
+				117387, --Crate of Mogu Fragments
+				87537,  --Crate of Nerubian Fragments
+				87536,  --Crate of Night Elf Fragments
+				142115, --Crate of Ogre Fragments
+				87538,  --Crate of Orc Fragments
+				117386, --Crate of Pandaren Fragments
+				87539,  --Crate of Tol'vir Fragments
+				87540,  --Crate of Troll Fragments
+				87541,  --Crate of Vrykul Fragments
+				136419, --Excavator's Notebook
+				130903, --Acnient Suramar Scroll
+				109585, --Arakkoa Cipher
+				64394,  --Draenei Tome
+				108439, --Draenor Clan Orator Cane
+				52843,  --Dwarf Rune Stone
+				154990, --Etched Drust Bone
+				63127,  --Highborne Scroll
+				130904, --Highmountain Ritual-Stone
+				95373,  --Mantid Amber Sliver
+				130905, --Mark of the Deceiver
+				79869,  --Mogu Statue Piece
+				64396,  --Nerubian Obelisk
+				109584, --Ogre Missive
+				64392,  --Orc Blood Text
+				79868,  --Pandaren Pottery Shard
+				64397,  --Tol'vir Hieroglyphic
+				63128,  --Troll Tablet
+				64395,  --Vrykul Rune Stick
+				154989  --Zandalari Idol
 			}
 		}
 		for _,v in pairs(itemIDs.mechagon) do
@@ -196,7 +237,13 @@ function cbNivaya:ClassifyItem(item)
 				itemClass[item.id] = "Travel & Teleportation"
 				break
 			end
-		end		
+		end
+		for _,v in pairs(itemIDs.archaeology) do
+			if v == item.id and cbNivaya:CheckTable(bags,'Archaeology') then
+				itemClass[item.id] = "Archaeology"
+				break
+			end
+		end
 	end
 
 	if not item.typeID or not item.rarity then
