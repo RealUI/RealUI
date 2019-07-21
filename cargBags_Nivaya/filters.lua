@@ -87,6 +87,7 @@ function cbNivaya:ClassifyItem(item)
 			elseif itemSubType == "Cloth" and cbNivaya:CheckTable(bags,'Tradeskill: Cloth') then itemClass[item.id] = "Tradeskill: Cloth" 
 			elseif itemSubType == "Cooking" and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then itemClass[item.id] = "Tradeskill: Cooking"
 			elseif itemSubType == "Devices" and cbNivaya:CheckTable(bags,'Tradeskill: Devices') then itemClass[item.id] = "Tradeskill: Devices"
+			elseif itemSubType == "Elemental" and cbNivaya:CheckTable(bags,'Tradeskill: Elemental') then itemClass[item.id] = "Tradeskill: Elemental"
 			elseif itemSubType == "Enchanting" and cbNivaya:CheckTable(bags,'Tradeskill: Enchanting') then itemClass[item.id] = "Tradeskill: Enchanting" 
 			elseif itemSubType == "Engineering" and cbNivaya:CheckTable(bags,'Tradeskill: Engineering') then itemClass[item.id] = "Tradeskill: Engineering" 
 			elseif itemSubType == "Gem" and cbNivaya:CheckTable(bags,'Tradeskill: Gem') then itemClass[item.id] = "Tradeskill: Gem" 
@@ -104,8 +105,11 @@ function cbNivaya:ClassifyItem(item)
 			itemClass[item.id] = "Consumables"
 		elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
 			itemClass[item.id] = "BattlePet"
-		elseif item.typeID == 9 and cbNivaya:CheckTable(bags,'Recipes') then
+		elseif item.typeID == 9 then
 			itemClass[item.id] = "Recipes"
+		end
+		if itemEquipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,'Tabards') then 
+			itemClass[item.id] = "Tabards"			
 		end
 		local itemIDs = { 
 			--Mechagon Tinkering

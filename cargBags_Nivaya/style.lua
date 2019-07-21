@@ -544,18 +544,18 @@ function MyContainer:OnCreate(name, settings)
 
         local rightBtn = createMoverButton(self, Textures.Right, "Right")
         rightBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
-        rightBtn:SetScript("OnClick", function() moveLR("right") end)
+        rightBtn:SetScript("OnClick", function() moveLR("right") cbNivaya:ToggleBagPosButtons(self,'right') end)
 
         local leftBtn = createMoverButton(self, Textures.Left, "Left")
-        leftBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", -17, 0)
-        leftBtn:SetScript("OnClick", function() moveLR("left") end)
+        leftBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0)
+        leftBtn:SetScript("OnClick", function() moveLR("left") cbNivaya:ToggleBagPosButtons(self,'left') end)
 
         local downBtn = createMoverButton(self, Textures.Down, "Down")
-        downBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", -34, 0)
+        downBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", -17, 0)
         downBtn:SetScript("OnClick", function() moveUD("down") end)
 
         local upBtn = createMoverButton(self, Textures.Up, "Up")
-        upBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", -51, 0)
+        upBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", -34, 0)
         upBtn:SetScript("OnClick", function() moveUD("up") end)
 
         self.rightBtn = rightBtn

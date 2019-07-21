@@ -442,22 +442,28 @@ function cbNivaya:OnBankClosed()
     end
 end
 
-function cbNivaya:ToggleBagPosButtons()
+function cbNivaya:ToggleBagPosButtons(bagcalled,direction)
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
             local b = bags[bag.name]
-
-            if _G.cBniv.BagPos then
-                b.rightBtn:Hide()
-                b.leftBtn:Hide()
-                b.downBtn:Hide()
-                b.upBtn:Hide()
-            else
-                b.rightBtn:Show()
-                b.leftBtn:Show()
-                b.downBtn:Show()
-                b.upBtn:Show()
-            end
+			if bagcalled then local b = bag.bagcalled end
+			if direction then
+				if     direction == "right" then b.rightBtn:Hide() b.leftBtn:Show()
+				elseif direction == "left"  then b.leftBtn:Hide() b.rightBtn:Show()
+				end
+			else
+				if _G.cBniv.BagPos then
+					b.rightBtn:Hide()
+					b.leftBtn:Hide()
+					b.downBtn:Hide()
+					b.upBtn:Hide()
+				else
+					if bag.col == 0 then b.rightBtn:Show() end
+					if bag.col == 1 then b.leftBtn:Show()  end
+					b.downBtn:Show()
+					b.upBtn:Show()
+				end
+			end
         end
     end
     _G.cBniv.BagPos = not _G.cBniv.BagPos
