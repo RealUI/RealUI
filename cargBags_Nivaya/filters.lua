@@ -63,7 +63,6 @@ end
 
 function cbNivaya:ClassifyItem(item)
 	local bags, itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = _G.cB_CustomBags, GetItemInfo(item.id)
-	
 	if item.bagID == -2 then
 		-- keyring
 		itemClass[item.id] = "Keyring"
@@ -105,6 +104,8 @@ function cbNivaya:ClassifyItem(item)
 			itemClass[item.id] = "Consumables"
 		elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
 			itemClass[item.id] = "BattlePet"
+		elseif item.typeID == 9 and cbNivaya:CheckTable(bags,'Recipes') then
+			itemClass[item.id] = "Recipes"
 		end
 		local itemIDs = { 
 			--Mechagon Tinkering
