@@ -11,8 +11,10 @@ local next, tostring = _G.next, _G.tostring
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L
+local round = RealUI.Round
 
 local CombatFader = RealUI:GetModule("CombatFader")
+local FramePoint = RealUI:GetModule("FramePoint")
 local order = 0
 
 --[[
@@ -47,6 +49,21 @@ local function CreateToggleOption(slug, name)
                 modObj:RefreshMod()
             end
         end
+    }
+end
+
+local nameFormat = _G.ENABLE .. " %s"
+local function CreateDisabledAddon(name)
+    return {
+        enable = {
+            name = nameFormat:format(name),
+            type = "execute",
+            func = function(info, value)
+                _G.EnableAddOn(name)
+                _G.ReloadUI()
+            end,
+            order = 1,
+        },
     }
 end
 
@@ -527,7 +544,7 @@ local skins do
     debug("Adv Skins")
     order = order + 1
 
-    local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins")
+    local SkinsDB = RealUI.GetOptions("Skins")
     local function appGet(info)
         return SkinsDB.profile[info[#info]]
     end
@@ -755,6 +772,133 @@ local skins do
             addons = addons,
             profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
+    }
+end
+local tooltips do
+    debug("Adv Tooltips")
+    order = order + 1
+
+
+    local args
+    local Tooltips = RealUI:GetModule("Tooltips", true)
+    if Tooltips then
+        args = {
+            note = {
+                name = L.General_NoteReload,
+                type = "description",
+                order = -1,
+            },
+            showTitles = {
+                name = L.Tooltips_ShowTitles,
+                type = "toggle",
+                get = function() return Tooltips.db.global.showTitles end,
+                set = function(info, value)
+                    Tooltips.db.global.showTitles = value
+                end,
+                order = 1,
+            },
+            showRealm = {
+                name = L.Tooltips_ShowRealm,
+                type = "toggle",
+                get = function() return Tooltips.db.global.showRealm end,
+                set = function(info, value)
+                    Tooltips.db.global.showRealm = value
+                end,
+                order = 2,
+            },
+            showIDs = {
+                name = L.Tooltips_ShowIDs,
+                type = "toggle",
+                get = function() return Tooltips.db.global.showIDs end,
+                set = function(info, value)
+                    Tooltips.db.global.showIDs = value
+                end,
+                order = 3,
+            },
+            multiTip = {
+                name = L.Tooltips_MultiTip,
+                desc = L.Tooltips_MultiTipDesc,
+                type = "toggle",
+                get = function() return Tooltips.db.global.multiTip end,
+                set = function(info, value)
+                    Tooltips.db.global.multiTip = value
+                end,
+                order = 4,
+            },
+            position = {
+                name = L["General_Position"],
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                    lock = {
+                        name = L["General_Lock"],
+                        desc = L["General_LockDesc"],
+                        type = "toggle",
+                        width = "full",
+                        get = function(info) return FramePoint:IsModLocked(Tooltips) end,
+                        set = function(info, value)
+                            if value then
+                                FramePoint:LockMod(Tooltips)
+                            else
+                                FramePoint:UnlockMod(Tooltips)
+                            end
+                        end,
+                        order = 0,
+                    },
+                    point = {
+                        name = L["General_AnchorPoint"],
+                        type = "select",
+                        values = RealUI.globals.anchorPoints,
+                        get = function(info)
+                            for k,v in next, RealUI.globals.anchorPoints do
+                                if v == Tooltips.db.global.position.point then return k end
+                            end
+                        end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.point = RealUI.globals.anchorPoints[value]
+                            FramePoint:RestorePosition(Tooltips)
+                        end,
+                        order = 10,
+                    },
+                    x = {
+                        name = L["General_XOffset"],
+                        desc = L["General_XOffsetDesc"],
+                        type = "input",
+                        dialogControl = "NumberEditBox",
+                        get = function(info)
+                            return _G.tostring(Tooltips.db.global.position.x)
+                        end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.x = round(_G.tonumber(value), 1)
+                            FramePoint:RestorePosition(Tooltips)
+                        end,
+                        order = 11,
+                    },
+                    y = {
+                        name = L["General_YOffset"],
+                        desc = L["General_YOffsetDesc"],
+                        type = "input",
+                        dialogControl = "NumberEditBox",
+                        get = function(info) return _G.tostring(Tooltips.db.global.position.y) end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.y = round(_G.tonumber(value), 1)
+                            FramePoint:RestorePosition(Tooltips)
+                        end,
+                        order = 12,
+                    },
+                }
+            }
+        }
+    else
+        args = CreateDisabledAddon("RealUI_Tooltips")
+    end
+
+    tooltips = {
+        name = L.Tooltips,
+        type = "group",
+        order = order,
+        args = args
     }
 end
 local uiTweaks do
@@ -2873,6 +3017,7 @@ options.RealUI = {
     args = {
         core = core,
         skins = skins,
+        tooltips = tooltips,
         uiTweaks = uiTweaks,
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }

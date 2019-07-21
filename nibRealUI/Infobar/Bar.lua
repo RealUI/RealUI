@@ -997,7 +997,7 @@ function Infobar:OnEnable()
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
 
     blockFont = {
-        font = RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.chat.path,
+        font = RealUI.GetOptions("Skins").profile.fonts.chat.path,
         size = RealUI.Round(BAR_HEIGHT * 0.6),
         outline = self:GetFontOutline()
     }

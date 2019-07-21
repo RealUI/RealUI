@@ -446,7 +446,7 @@ function RealUI:OnInitialize()
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
     self:RegisterEvent("ADDON_LOADED", function()
         if RealUI.recheckFonts then
-            local SkinsDB = RealUI:GetAddOnDB("RealUI_Skins").profile
+            local SkinsDB = RealUI.GetOptions("Skins").profile
             local LSM = _G.LibStub("LibSharedMedia-3.0")
             for fontType in next, RealUI.recheckFonts do
                 local font = SkinsDB.fonts[fontType]
@@ -574,6 +574,20 @@ function RealUI:OnEnable()
         RealUI:UpdateLayout()
     end
 
+
+    local black = _G.Aurora.Color.black
+    local a = RealUI.GetOptions("Skins").profile.frameColor.a
+    local LDD = _G.LibStub("LibDropDown")
+    LDD:RegisterStyle("REALUI", {
+        padding = 10,
+        spacing = 1,
+        backdrop = {
+            bgFile = [[Interface\Buttons\WHITE8x8]],
+            edgeFile = [[Interface\Buttons\WHITE8x8]], edgeSize = 1,
+        },
+        backdropColor = _G.CreateColor(black.r, black.g, black.b, a),
+        backdropBorderColor = black,
+    })
 
     if dbc.init.installStage == -1 then
         if self:IsUsingLowResDisplay() and not dbg.tags.lowResOptimized then

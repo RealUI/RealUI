@@ -648,7 +648,7 @@ function Infobar:CreateBlocks()
                 menu:SetAnchor("BOTTOMLEFT", Infobar.frame, "TOPLEFT")
                 menu:SetStyle("REALUI")
                 menu:AddLines(unpack(menuList))
-                if RealUI:GetAddOnDB("RealUI_Skins").profile.isHighRes then
+                if RealUI.GetOptions("Skins").profile.isHighRes then
                     menu:SetScale(Scale.GetUIScale())
                 end
                 _G.BugGrabber.RegisterCallback(menu, "BugGrabber_BugGrabbed", ShowBugIcon, menu)

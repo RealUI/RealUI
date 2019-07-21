@@ -218,7 +218,7 @@ local function CreateInstallWindow()
     installText:SetText("[ "..L["Install"].." ]")
 
     if RealUI:IsUsingHighResDisplay() then
-        local skinsDB = RealUI:GetAddOnDB("RealUI_Skins").profile
+        local skinsDB = RealUI.GetOptions("Skins").profile
 
         local setHighRes = _G.CreateFrame("CheckButton", nil, installFrame, "OptionsBaseCheckButtonTemplate")
         setHighRes:SetPoint("TOPLEFT", installText, "BOTTOMLEFT", -10, -20)
