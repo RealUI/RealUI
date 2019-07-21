@@ -4,9 +4,11 @@
 ## Author: Gethe
 ## Version: 2.0.14
 ## RequiredDeps: nibRealUI
+## OptionalDeps: LibObjectiveProgress-1.0
 ## SavedVariables: RealUI_TooltipsDB
 
 Libs\Libs.xml
 
 RealUI_Tooltips.lua
 ObjectID.lua
+MultiTip.xml
