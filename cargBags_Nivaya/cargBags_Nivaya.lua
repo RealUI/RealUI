@@ -362,7 +362,7 @@ function cbNivaya:CreateAnchors()
 	CreateAnchorInfo(bags.bagItemSets,   bags.bagJunk,        "Left")
     CreateAnchorInfo(bags.bagJunk,       bags.tradegoods,     "Top")
     CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
-    CreateAnchorInfo(bags.consumables,   bags.bagNew,         "Top")
+    CreateAnchorInfo(bags.quest,         bags.bagNew,         "Top")
 
     -- Custom Container Anchors:
     ref[0], ref[1] = 0, 0
