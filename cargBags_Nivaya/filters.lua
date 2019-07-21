@@ -63,6 +63,7 @@ end
 
 function cbNivaya:ClassifyItem(item)
 	local bags, itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = _G.cB_CustomBags, GetItemInfo(item.id)
+	
 	if item.bagID == -2 then
 		-- keyring
 		itemClass[item.id] = "Keyring"
@@ -83,24 +84,60 @@ function cbNivaya:ClassifyItem(item)
 			-- Default to Trade Goods
 			itemClass[item.id] = "TradeGoods"
 			--Tradeskill specific
-			if     itemSubType == "Armor Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Armor Enchantment') then itemClass[item.id] = "Tradeskill: Armor Enchantment"
-			elseif itemSubType == "Cloth" and cbNivaya:CheckTable(bags,'Tradeskill: Cloth') then itemClass[item.id] = "Tradeskill: Cloth" 
-			elseif itemSubType == "Cooking" and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then itemClass[item.id] = "Tradeskill: Cooking"
-			elseif itemSubType == "Devices" and cbNivaya:CheckTable(bags,'Tradeskill: Devices') then itemClass[item.id] = "Tradeskill: Devices"
-			elseif itemSubType == "Elemental" and cbNivaya:CheckTable(bags,'Tradeskill: Elemental') then itemClass[item.id] = "Tradeskill: Elemental"
-			elseif itemSubType == "Enchanting" and cbNivaya:CheckTable(bags,'Tradeskill: Enchanting') then itemClass[item.id] = "Tradeskill: Enchanting" 
-			elseif itemSubType == "Engineering" and cbNivaya:CheckTable(bags,'Tradeskill: Engineering') then itemClass[item.id] = "Tradeskill: Engineering" 
-			elseif itemSubType == "Gem" and cbNivaya:CheckTable(bags,'Tradeskill: Gem') then itemClass[item.id] = "Tradeskill: Gem" 
-			elseif itemSubType == "Herb" and cbNivaya:CheckTable(bags,'Tradeskill: Herb') then itemClass[item.id] = "Tradeskill: Herb" 
-			elseif itemSubType == "Inscription" and cbNivaya:CheckTable(bags,'Tradeskill: Inscription') then itemClass[item.id] = "Tradeskill: Inscription" 
-			elseif itemSubType == "Jewelcrafting" and cbNivaya:CheckTable(bags,'Tradeskill: Jewelcrafting') then itemClass[item.id] = "Tradeskill: Jewelcrafting"
-			elseif itemSubType == "Leatherworking" and cbNivaya:CheckTable(bags,'Tradeskill: Leatherworking') then itemClass[item.id] = "Tradeskill: Leatherworking"
-			elseif itemSubType == "Materials" and cbNivaya:CheckTable(bags,'Tradeskill: Materials') then itemClass[item.id] = "Tradeskill: Materials"
-			elseif itemSubType == "Metal & Stone" and cbNivaya:CheckTable(bags,'Tradeskill: Metal & Stone') then itemClass[item.id] = "Tradeskill: Metal & Stone"
-			elseif itemSubType == "Mining" and cbNivaya:CheckTable(bags,'Tradeskill: Mining') then itemClass[item.id] = "Tradeskill: Mining" 
-			elseif itemSubType == "Parts" and cbNivaya:CheckTable(bags,'Tradeskill: Parts') then itemClass[item.id] = "Tradeskill: Parts"
-			elseif itemSubType == "Weapon Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Weapon Enchantment') then itemClass[item.id] = "Tradeskill: Weapon Enchantment"
-			end			
+			if itemSubType == "Cloth" and cbNivaya:CheckTable(bags,'Tradeskill: Cloth') then 
+				--Tailoring
+				itemClass[item.id] = "Tradeskill: Cloth" 
+			elseif itemSubType == "Cooking" and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then 
+				--Cooking
+				itemClass[item.id] = "Tradeskill: Cooking"
+			elseif itemSubType == "Elemental" and cbNivaya:CheckTable(bags,'Tradeskill: Elemental') then 
+				--Elemental items
+				itemClass[item.id] = "Tradeskill: Elemental"
+			elseif itemSubType == "Enchanting" and cbNivaya:CheckTable(bags,'Tradeskill: Enchanting') then 
+				--Enchanting
+				itemClass[item.id] = "Tradeskill: Enchanting" 
+			elseif itemSubType == "Engineering" and cbNivaya:CheckTable(bags,'Tradeskill: Engineering') then 
+				--Engineering
+				itemClass[item.id] = "Tradeskill: Engineering" 
+			elseif itemSubType == "Gem" and cbNivaya:CheckTable(bags,'Tradeskill: Gem') then 
+				--Gemstones
+				itemClass[item.id] = "Tradeskill: Gem" 
+			elseif itemSubType == "Herb" and cbNivaya:CheckTable(bags,'Tradeskill: Herb') then 
+				--Herbalism
+				itemClass[item.id] = "Tradeskill: Herb" 
+			elseif itemSubType == "Inscription" and cbNivaya:CheckTable(bags,'Tradeskill: Inscription') then 
+				--Inscription
+				itemClass[item.id] = "Tradeskill: Inscription" 
+			elseif itemSubType == "Jewelcrafting" and cbNivaya:CheckTable(bags,'Tradeskill: Jewelcrafting') then 
+				--Jewelcrafting
+				itemClass[item.id] = "Tradeskill: Jewelcrafting"
+			elseif itemSubType == "Leatherworking" and cbNivaya:CheckTable(bags,'Tradeskill: Leatherworking') then 
+				--Leatherworking
+				itemClass[item.id] = "Tradeskill: Leatherworking"
+			elseif itemSubType == "Metal & Stone" and cbNivaya:CheckTable(bags,'Tradeskill: Metal & Stone') then 
+				--Mined (not necessarily mining related as these items can be used by multiple professions)
+				itemClass[item.id] = "Tradeskill: Metal & Stone"
+			elseif itemSubType == "Mining" and cbNivaya:CheckTable(bags,'Tradeskill: Mining') then 
+				--Mining
+				itemClass[item.id] = "Tradeskill: Mining" 
+			elseif itemSubType == "Parts" and cbNivaya:CheckTable(bags,'Tradeskill: Parts') then 
+				--Parts can mean ... a wide variety of things, including items that may or may not be specific to a certain profession
+				itemClass[item.id] = "Tradeskill: Parts"
+			
+			--Obsolete
+			--elseif itemSubType == "Materials" and cbNivaya:CheckTable(bags,'Tradeskill: Materials') then 
+			--	Materials
+			--	itemClass[item.id] = "Tradeskill: Materials"
+			--elseif itemSubType == "Devices" and cbNivaya:CheckTable(bags,'Tradeskill: Devices') then 
+			--	Devices
+			--	itemClass[item.id] = "Tradeskill: Devices"
+			--elseif itemSubType == "Weapon Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Weapon Enchantment') then 
+			--	itemClass[item.id] = "Tradeskill: Weapon Enchantment"
+			--elseif itemSubType == "Armor Enchantment" and cbNivaya:CheckTable(bags,'Tradeskill: Armor Enchantment') then 
+			--	Armr enchantment
+			--	itemClass[item.id] = "Tradeskill: Armor Enchantment"				
+
+			end
 		elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
 			itemClass[item.id] = "Consumables"
 		elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
@@ -111,7 +148,10 @@ function cbNivaya:ClassifyItem(item)
 		if itemEquipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,'Tabards') then 
 			itemClass[item.id] = "Tabards"			
 		end
+		
+		--Item IDs for classification purposes
 		local itemIDs = { 
+			
 			--Mechagon Tinkering
 			mechagon = {
 				168327, --Chain Ignitercoil
@@ -120,6 +160,7 @@ function cbNivaya:ClassifyItem(item)
 				166846, --Spare Parts
 				166970  --Energy Cell
 			},
+			
 			--Travel/teleportation
 			travel = {
 				6948,   --Hearthstone
@@ -184,6 +225,7 @@ function cbNivaya:ClassifyItem(item)
 				128502, --Hunter's Seeking Crystal
 				128503  --Master Hunter's Seeking Crystal
 			},
+			
 			archaeology = {
 				109586, --Brittle Cartography Journal
 				142113, --Crate of Arakkoa Fragments
@@ -226,18 +268,24 @@ function cbNivaya:ClassifyItem(item)
 				154989  --Zandalari Idol
 			}
 		}
+		
+		--Mechagon Tinkering
 		for _,v in pairs(itemIDs.mechagon) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Mechagon Tinkering') then 
 				itemClass[item.id] = "Mechagon Tinkering"
 				break
 			end
 		end
+		
+		-- Travel & Teleportation
 		for _,v in pairs(itemIDs.travel) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Travel & Teleportation') then 
 				itemClass[item.id] = "Travel & Teleportation"
 				break
 			end
 		end
+		
+		--Arcaheology
 		for _,v in pairs(itemIDs.archaeology) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Archaeology') then
 				itemClass[item.id] = "Archaeology"
