@@ -163,9 +163,11 @@ function cbNivaya:ClassifyItem(item)
 			-- Mechagon Tinkering
 			mechagon = {
 				168327, -- Chain Ignitercoil
-				166791, -- Empty Energy Cell
+				166971, -- Empty Energy Cell
 				166970, -- Energy Cell
 				168832, -- Galvanic Oscillator
+				167562, -- Ionized Minnow
+				169610, -- S.P.A.R.E. Crate
 				166846  -- Spare Parts
 			},
 			
