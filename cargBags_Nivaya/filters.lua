@@ -48,6 +48,12 @@ filters.fItemClass = function(item, container)
 	return bag == container
 end
 
+-- Checks the supplied table(s) for the existence
+-- of an item with a particular name
+-- If/Once found, returns true, otherwise, returns false
+-- 
+-- src   :: table(s) to check
+-- check :: name to check for
 function cbNivaya:CheckTable(src,check)
 	for index, value in pairs(src) do
 		if type(value) == "table" then
@@ -62,7 +68,9 @@ function cbNivaya:CheckTable(src,check)
 end
 
 function cbNivaya:ClassifyItem(item)
-	local bags, itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = _G.cB_CustomBags, GetItemInfo(item.id)
+	local bags = _G.cB_CustomBags
+	-- Gives us access to more information about the item
+	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(item.id)
 	
 	if item.bagID == -2 then
 		-- keyring
@@ -83,49 +91,49 @@ function cbNivaya:ClassifyItem(item)
 			-- Better item filtering
 			-- Default to Trade Goods
 			itemClass[item.id] = "TradeGoods"
-			--Tradeskill specific
+			-- Tradeskill specific
 			if itemSubType == "Cloth" and cbNivaya:CheckTable(bags,'Tradeskill: Cloth') then 
-				--Tailoring
+				-- Tailoring
 				itemClass[item.id] = "Tradeskill: Cloth" 
 			elseif itemSubType == "Cooking" and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then 
-				--Cooking
+				-- Cooking
 				itemClass[item.id] = "Tradeskill: Cooking"
 			elseif itemSubType == "Elemental" and cbNivaya:CheckTable(bags,'Tradeskill: Elemental') then 
-				--Elemental items
+				-- Elemental items
 				itemClass[item.id] = "Tradeskill: Elemental"
 			elseif itemSubType == "Enchanting" and cbNivaya:CheckTable(bags,'Tradeskill: Enchanting') then 
-				--Enchanting
+				-- Enchanting
 				itemClass[item.id] = "Tradeskill: Enchanting" 
 			elseif itemSubType == "Engineering" and cbNivaya:CheckTable(bags,'Tradeskill: Engineering') then 
-				--Engineering
+				-- Engineering
 				itemClass[item.id] = "Tradeskill: Engineering" 
 			elseif itemSubType == "Gem" and cbNivaya:CheckTable(bags,'Tradeskill: Gem') then 
-				--Gemstones
+				-- Gemstones
 				itemClass[item.id] = "Tradeskill: Gem" 
 			elseif itemSubType == "Herb" and cbNivaya:CheckTable(bags,'Tradeskill: Herb') then 
-				--Herbalism
+				-- Herbalism
 				itemClass[item.id] = "Tradeskill: Herb" 
 			elseif itemSubType == "Inscription" and cbNivaya:CheckTable(bags,'Tradeskill: Inscription') then 
-				--Inscription
+				-- Inscription
 				itemClass[item.id] = "Tradeskill: Inscription" 
 			elseif itemSubType == "Jewelcrafting" and cbNivaya:CheckTable(bags,'Tradeskill: Jewelcrafting') then 
-				--Jewelcrafting
+				-- Jewelcrafting
 				itemClass[item.id] = "Tradeskill: Jewelcrafting"
 			elseif itemSubType == "Leatherworking" and cbNivaya:CheckTable(bags,'Tradeskill: Leatherworking') then 
-				--Leatherworking
+				-- Leatherworking
 				itemClass[item.id] = "Tradeskill: Leatherworking"
 			elseif itemSubType == "Metal & Stone" and cbNivaya:CheckTable(bags,'Tradeskill: Metal & Stone') then 
-				--Mined (not necessarily mining related as these items can be used by multiple professions)
+				-- Mined (not necessarily mining related as these items can be used by multiple professions)
 				itemClass[item.id] = "Tradeskill: Metal & Stone"
 			elseif itemSubType == "Mining" and cbNivaya:CheckTable(bags,'Tradeskill: Mining') then 
-				--Mining
+				-- Mining
 				itemClass[item.id] = "Tradeskill: Mining" 
 			elseif itemSubType == "Parts" and cbNivaya:CheckTable(bags,'Tradeskill: Parts') then 
-				--Parts can mean ... a wide variety of things, including items that may or may not be specific to a certain profession
+				-- Parts can mean ... a wide variety of things, including items that may or may not be specific to a certain profession
 				itemClass[item.id] = "Tradeskill: Parts"
 			
-			--Obsolete
-			--elseif itemSubType == "Materials" and cbNivaya:CheckTable(bags,'Tradeskill: Materials') then 
+			-- Obsolete
+			-- elseif itemSubType == "Materials" and cbNivaya:CheckTable(bags,'Tradeskill: Materials') then 
 			--	Materials
 			--	itemClass[item.id] = "Tradeskill: Materials"
 			--elseif itemSubType == "Devices" and cbNivaya:CheckTable(bags,'Tradeskill: Devices') then 
@@ -149,127 +157,128 @@ function cbNivaya:ClassifyItem(item)
 			itemClass[item.id] = "Tabards"			
 		end
 		
-		--Item IDs for classification purposes
+		-- Item IDs for classification purposes
 		local itemIDs = { 
 			
-			--Mechagon Tinkering
+			-- Mechagon Tinkering
 			mechagon = {
-				168327, --Chain Ignitercoil
-				168832, --Galvanic Oscillator
-				166791, --Empty Energy Cell
-				166846, --Spare Parts
-				166970  --Energy Cell
+				168327, -- Chain Ignitercoil
+				166791, -- Empty Energy Cell
+				166970, -- Energy Cell
+				168832, -- Galvanic Oscillator
+				166846  -- Spare Parts
 			},
 			
-			--Travel/teleportation
+			-- Travel/teleportation
 			travel = {
-				6948,   --Hearthstone
-				64488,  --The Innkeeper's Daughter
-				54452,  --Ethereal Portal
-				93672,  --Dark Portal
-				28585,  --Ruby Slippers
-				64457,  --The Last Relic of Argus
-				37118,  --Scroll of Recall
-				44314,  --Scroll of Recall II
-				44315,  --Scroll of Recall III
-				163045, --Headless Horseman's Hearthstone
-				162973, --Greatfater Winter's Hearthstone
-				165669, --Lunar Elder's Hearthstone
-				165670, --Peddlefeet's Lovely Hearthstone
-				128353, --Admiral's Compass
-				140192, --Dalaran Hearthstone
-				129929, --Ever-Shifting Mirror
-				139599, --Empowered Ring of the Kirin Tor
-				141605, --Flight Master's Whistle
-				152964, --Krokul Flute
-				140324, --Mobile Telemancy Beacon
-				140493, --Adept's Guide to Dimensional Rifting
-				129276, --Beginner's Guide to Dimensional Rifting
-				166560, --Captain's Signet of Command
-				166559, --Commander's Signet of Battle
-				43824,  --The Schools of Arcane Magic - Mastery
-				144392, --Pugilist's Powerful Punching Ring
-				65274,  --Cloak of Coordination
-				64360,  --Cloak of Coordination
-				63206,  --Wrap of Unity
-				63207,  --Wrap of Unity
-				63352,  --Shroud of Cooperation
-				63353,  --Shroud of Cooperation
-				18984,  --Dimensional Ripper - Everlook
-				18986,  --Ultrasafe Transporter: Gadgetzan
-				21711,  --Lunar Festival Invitation
-				63378,  --Hellscream's Reach Tabard
-				63379,  --Baradin's Wardens Tabard
-				37863,  --Direbrew's Remote
-				50287,  --Boots of the Bay
-				22589,  --Atiesh, Greatstaff of the Guardian
-				142469, --Violet Seal of the Grand Magus
-				52251,  --Jaina's Locket
-				44935,  --Ring of the Kirin Tor
-				46874,  --Argent Crusader's Tabard
-				48933,  --Wormhole Generator: Northrend
-				32757,  --Blessed Medallion of Karabor
-				30542,  --Dimensional Ripper - Area 52
-				30544,  --Ultrasafe Transporter: Toshley's Station
-				58487,  --Potion of Deepholm
-				95568,  --Sunreaver Beacon
-				95567,  --Kirin Tor Beacon
-				40585,  --Signet of the Kirin Tor
-				87548,  --Lorewalker's Lodestone
-				103678, --Time-Los Artifact
-				87215,  --Wormhole Generator: Pandaria
-				118662, --Bladespire Relic
-				118663, --Relic of Karabor
-				112059, --Wormhole Centrifuge
-				110560, --Garrison Hearthstone
-				128502, --Hunter's Seeking Crystal
-				128503  --Master Hunter's Seeking Crystal
+				140493, -- Adept's Guide to Dimensional Rifting
+				128353, -- Admiral's Compass
+				46874,  -- Argent Crusader's Tabard
+				22589,  -- Atiesh, Greatstaff of the Guardian
+				63379,  -- Baradin's Wardens Tabard
+				129276, -- Beginner's Guide to Dimensional Rifting
+				118662, -- Bladespire Relic
+				32757,  -- Blessed Medallion of Karabor
+				50287,  -- Boots of the Bay
+				166560, -- Captain's Signet of Command
+				65274,  -- Cloak of Coordination
+				64360,  -- Cloak of Coordination
+				166559, -- Commander's Signet of Battle
+				140192, -- Dalaran Hearthstone
+				93672,  -- Dark Portal
+				30542,  -- Dimensional Ripper - Area 52
+				18984,  -- Dimensional Ripper - Everlook
+				37863,  -- Direbrew's Remote
+				139599, -- Empowered Ring of the Kirin Tor
+				54452,  -- Ethereal Portal
+				129929, -- Ever-Shifting Mirror
+				141605, -- Flight Master's Whistle
+				110560, -- Garrison Hearthstone
+				162973, -- Greatfater Winter's Hearthstone
+				163045, -- Headless Horseman's Hearthstone
+				6948,   -- Hearthstone
+				63378,  -- Hellscream's Reach Tabard
+				128502, -- Hunter's Seeking Crystal
+				64488,  -- The Innkeeper's Daughter
+				52251,  -- Jaina's Locket
+				152964, -- Krokul Flute
+				95567,  -- Kirin Tor Beacon
+				64457,  -- The Last Relic of Argus
+				87548,  -- Lorewalker's Lodestone
+				165669, -- Lunar Elder's Hearthstone
+				21711,  -- Lunar Festival Invitation
+				128503, -- Master Hunter's Seeking Crystal
+				140324, -- Mobile Telemancy Beacon
+				165670, -- Peddlefeet's Lovely Hearthstone
+				58487,  -- Potion of Deepholm
+				144392, -- Pugilist's Powerful Punching Ring
+				118663, -- Relic of Karabor
+				44935,  -- Ring of the Kirin Tor
+				28585,  -- Ruby Slippers
+				37118,  -- Scroll of Recall
+				44314,  -- Scroll of Recall II
+				44315,  -- Scroll of Recall III
+				43824,  -- The Schools of Arcane Magic - Mastery
+				63352,  -- Shroud of Cooperation
+				63353,  -- Shroud of Cooperation
+				40585,  -- Signet of the Kirin Tor
+				95568,  -- Sunreaver Beacon
+				103678, -- Time-Los Artifact
+				18986,  -- Ultrasafe Transporter: Gadgetzan
+				30544,  -- Ultrasafe Transporter: Toshley's Station
+				142469, -- Violet Seal of the Grand Magus
+				112059, -- Wormhole Centrifuge
+				48933,  -- Wormhole Generator: Northrend
+				87215,  -- Wormhole Generator: Pandaria
+				63206,  -- Wrap of Unity
+				63207   -- Wrap of Unity
 			},
 			
+			-- Archaeology
 			archaeology = {
-				109586, --Brittle Cartography Journal
-				142113, --Crate of Arakkoa Fragments
-				164625, --Crate of Demon Fragments
-				87534,  --Crate of Draenei Fragments
-				142114, --Crate of Draenor Clans Fragments
-				87533,  --Crate of Dwarven Fragments
-				87535,  --Crate of Fossil Fragments
-				164626, --Crate of Highborne Fragments
-				164627, --Crate of Highmountain Tauren Fragments
-				117388, --Crate of Manti Fragments
-				117387, --Crate of Mogu Fragments
-				87537,  --Crate of Nerubian Fragments
-				87536,  --Crate of Night Elf Fragments
-				142115, --Crate of Ogre Fragments
-				87538,  --Crate of Orc Fragments
-				117386, --Crate of Pandaren Fragments
-				87539,  --Crate of Tol'vir Fragments
-				87540,  --Crate of Troll Fragments
-				87541,  --Crate of Vrykul Fragments
-				136419, --Excavator's Notebook
-				130903, --Acnient Suramar Scroll
-				109585, --Arakkoa Cipher
-				64394,  --Draenei Tome
-				108439, --Draenor Clan Orator Cane
-				52843,  --Dwarf Rune Stone
-				154990, --Etched Drust Bone
-				63127,  --Highborne Scroll
-				130904, --Highmountain Ritual-Stone
-				95373,  --Mantid Amber Sliver
-				130905, --Mark of the Deceiver
-				79869,  --Mogu Statue Piece
-				64396,  --Nerubian Obelisk
-				109584, --Ogre Missive
-				64392,  --Orc Blood Text
-				79868,  --Pandaren Pottery Shard
-				64397,  --Tol'vir Hieroglyphic
-				63128,  --Troll Tablet
-				64395,  --Vrykul Rune Stick
-				154989  --Zandalari Idol
+				109586, -- Brittle Cartography Journal
+				142113, -- Crate of Arakkoa Fragments
+				164625, -- Crate of Demon Fragments
+				87534,  -- Crate of Draenei Fragments
+				142114, -- Crate of Draenor Clans Fragments
+				87533,  -- Crate of Dwarven Fragments
+				87535,  -- Crate of Fossil Fragments
+				164626, -- Crate of Highborne Fragments
+				164627, -- Crate of Highmountain Tauren Fragments
+				117388, -- Crate of Manti Fragments
+				117387, -- Crate of Mogu Fragments
+				87537,  -- Crate of Nerubian Fragments
+				87536,  -- Crate of Night Elf Fragments
+				142115, -- Crate of Ogre Fragments
+				87538,  -- Crate of Orc Fragments
+				117386, -- Crate of Pandaren Fragments
+				87539,  -- Crate of Tol'vir Fragments
+				87540,  -- Crate of Troll Fragments
+				87541,  -- Crate of Vrykul Fragments
+				136419, -- Excavator's Notebook
+				130903, -- Acnient Suramar Scroll
+				109585, -- Arakkoa Cipher
+				64394,  -- Draenei Tome
+				108439, -- Draenor Clan Orator Cane
+				52843,  -- Dwarf Rune Stone
+				154990, -- Etched Drust Bone
+				63127,  -- Highborne Scroll
+				130904, -- Highmountain Ritual-Stone
+				95373,  -- Mantid Amber Sliver
+				130905, -- Mark of the Deceiver
+				79869,  -- Mogu Statue Piece
+				64396,  -- Nerubian Obelisk
+				109584, -- Ogre Missive
+				64392,  -- Orc Blood Text
+				79868,  -- Pandaren Pottery Shard
+				64397,  -- Tol'vir Hieroglyphic
+				63128,  -- Troll Tablet
+				64395,  -- Vrykul Rune Stick
+				154989  -- Zandalari Idol
 			}
 		}
 		
-		--Mechagon Tinkering
+		-- Mechagon Tinkering
 		for _,v in pairs(itemIDs.mechagon) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Mechagon Tinkering') then 
 				itemClass[item.id] = "Mechagon Tinkering"
@@ -285,7 +294,7 @@ function cbNivaya:ClassifyItem(item)
 			end
 		end
 		
-		--Arcaheology
+		-- Archaeology
 		for _,v in pairs(itemIDs.archaeology) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Archaeology') then
 				itemClass[item.id] = "Archaeology"
