@@ -365,12 +365,15 @@ function cbNivaya:CreateAnchors()
     CreateAnchorInfo(bags.quest,         bags.bagNew,         "Top")
 
     -- Custom Container Anchors:
-    ref[0], ref[1] = 0, 0
+    ref[0], ref[1], ref[2] = 0, 0, 0
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
-            local c = bag.col
-            if ref[c] == 0 then ref[c] = (c == 0) and bags.bagStuff or bags.main end
-            CreateAnchorInfo(ref[c], bags[bag.name], "Top")
+            local c = bag.col if ref[c] == 0 then ref[c] = (c == 0) and bags.main 
+            or (c == 1) and bags.bagStuff 
+            or (c == 2) and bags.bagNew or bags.quest or bags.consumables or bags.tradegoods end
+			
+
+			CreateAnchorInfo(ref[c], bags[bag.name], "Top")
             ref[c] = bags[bag.name]
         end
     end
