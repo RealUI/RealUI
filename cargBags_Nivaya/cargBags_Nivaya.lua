@@ -694,6 +694,12 @@ local function HandleSlash(msg)
         _G.cBnivCfg.BankCustomBags = not _G.cBnivCfg.BankCustomBags
         StatusMsg("Display of custom containers in the bank is now ", ". Reload your UI for this change to take effect!", _G.cBnivCfg.BankCustomBags, true, false)
 
+    -- /cbniv ? Item Name OR item number
+	-- Returns detailed information about the item in question
+	elseif str == "?" and str2 then
+		local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
+		print("Item Name:",itemName,"(",itemLink,") level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice)
+
     else
         _G.ChatFrame1:AddMessage("|cFFFFFF00cargBags_Nivaya:|r")
         StatusMsg("(", ") |cFFFFFF00unlock|r - Toggle unlocked status.", _G.cBnivCfg.Unlocked, false, true)

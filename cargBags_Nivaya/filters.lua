@@ -277,6 +277,19 @@ function cbNivaya:ClassifyItem(item)
 				63128,  -- Troll Tablet
 				64395,  -- Vrykul Rune Stick
 				154989  -- Zandalari Idol
+			},
+			
+			-- Cooking
+			cooking = {
+				44835,  -- Autumnal Herbs
+				62786,  -- Cocoa Beans
+				5051,   -- Dig Rat
+				44853,  -- Honey
+				13757,  -- Lightning Eel
+				162515, -- Midnight Salmon
+				2678,   -- Mild Spices
+				43007,  -- Northern Spices
+				30817   -- Simple Flour
 			}
 		}
 		
@@ -287,7 +300,6 @@ function cbNivaya:ClassifyItem(item)
 				break
 			end
 		end
-		
 		-- Travel & Teleportation
 		for _,v in pairs(itemIDs.travel) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Travel & Teleportation') then 
@@ -295,7 +307,6 @@ function cbNivaya:ClassifyItem(item)
 				break
 			end
 		end
-		
 		-- Archaeology
 		for _,v in pairs(itemIDs.archaeology) do
 			if v == item.id and cbNivaya:CheckTable(bags,'Archaeology') then
@@ -303,6 +314,13 @@ function cbNivaya:ClassifyItem(item)
 				break
 			end
 		end
+		-- Cooking
+		for _,v in pairs(itemIDs.cooking) do
+			if v == item.id and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then
+				itemClass[item.id] = "Tradeskill: Cooking"
+				break
+			end
+		end		
 	end
 
 	if not item.typeID or not item.rarity then
