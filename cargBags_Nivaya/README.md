@@ -31,3 +31,8 @@ Additional sortable columns
 -----------------------
 A third sortable column has been added to reduce the amount of space previously 
 taken up by the standard two-column design that ships with RealUI.
+
+Debugging
+-----------------------
+**/cbniv ? item** can be used to output detailed information about an item in 
+your bags (useful for debugging purposes).
