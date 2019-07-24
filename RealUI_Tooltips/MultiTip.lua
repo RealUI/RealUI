@@ -40,12 +40,12 @@ function private.SetupMultiTip()
         local linkType = link:match('(.-):(.*)')
 
         if types[linkType] and not _G.IsModifiedClick() then
-            local tooltip = tooltipPool:Acquire()
-
             if shownLinks[link] then
                 tooltipPool:Release(shownLinks[link])
                 shownLinks[link] = nil
             else
+                local tooltip = tooltipPool:Acquire()
+
                 tooltip:Show()
                 if not tooltip:IsShown() then
                     tooltip:SetOwner(_G.UIParent, "ANCHOR_PRESERVE")
