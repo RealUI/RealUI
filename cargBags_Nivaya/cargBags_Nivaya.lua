@@ -358,8 +358,8 @@ function cbNivaya:CreateAnchors()
     CreateAnchorInfo(bags.battlepet,     bags.bagStuff,       "Top")
 
     CreateAnchorInfo(bags.consumables,   bags.quest,          "Top")
-    
-	CreateAnchorInfo(bags.bagItemSets,   bags.bagJunk,        "Left")
+
+    CreateAnchorInfo(bags.bagItemSets,   bags.bagJunk,        "Left")
     CreateAnchorInfo(bags.bagJunk,       bags.tradegoods,     "Top")
     CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
     CreateAnchorInfo(bags.quest,         bags.bagNew,         "Top")
@@ -368,12 +368,12 @@ function cbNivaya:CreateAnchors()
     ref[0], ref[1], ref[2] = 0, 0, 0
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
-            local c = bag.col if ref[c] == 0 then ref[c] = (c == 0) and bags.main 
-            or (c == 1) and bags.bagStuff 
+            local c = bag.col if ref[c] == 0 then ref[c] = (c == 0) and bags.main
+            or (c == 1) and bags.bagStuff
             or (c == 2) and bags.bagNew or bags.quest or bags.consumables or bags.tradegoods end
-			
 
-			CreateAnchorInfo(ref[c], bags[bag.name], "Top")
+
+            CreateAnchorInfo(ref[c], bags[bag.name], "Top")
             ref[c] = bags[bag.name]
         end
     end
@@ -449,17 +449,17 @@ function cbNivaya:ToggleBagPosButtons()
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
             local b = bags[bag.name]
-			if _G.cBniv.BagPos then
-				b.rightBtn:Hide()
-				b.leftBtn:Hide()
-				b.downBtn:Hide()
-				b.upBtn:Hide()
-			else
-				b.rightBtn:Show()
-				b.leftBtn:Show()
-				b.downBtn:Show()
-				b.upBtn:Show()
-			end
+            if _G.cBniv.BagPos then
+                b.rightBtn:Hide()
+                b.leftBtn:Hide()
+                b.downBtn:Hide()
+                b.upBtn:Hide()
+            else
+                b.rightBtn:Show()
+                b.leftBtn:Show()
+                b.downBtn:Show()
+                b.upBtn:Show()
+            end
         end
     end
     _G.cBniv.BagPos = not _G.cBniv.BagPos
@@ -695,10 +695,10 @@ local function HandleSlash(msg)
         StatusMsg("Display of custom containers in the bank is now ", ". Reload your UI for this change to take effect!", _G.cBnivCfg.BankCustomBags, true, false)
 
     -- /cbniv ? Item Name OR item number
-	-- Returns detailed information about the item in question
-	elseif str == "?" and str2 then
-		local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
-		print("Item Name:",itemName,"(",itemLink,") level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice)
+    -- Returns detailed information about the item in question
+    elseif str == "?" and str2 then
+        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
+        print("Item Name:",itemName,"(",itemLink,") level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice)
 
     else
         _G.ChatFrame1:AddMessage("|cFFFFFF00cargBags_Nivaya:|r")

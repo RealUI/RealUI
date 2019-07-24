@@ -50,7 +50,7 @@ function layouts.grid(self, columns, spacing, xOffset, yOffset)
 
         local xPos = (col - 1) * (width + spacing)
         local yPos = -1 * (row - 1) * (height + spacing)
-		
+
 		button:ClearAllPoints()
         button:SetPoint("TOPLEFT", self, "TOPLEFT", xPos + xOffset, yPos + yOffset)
     end

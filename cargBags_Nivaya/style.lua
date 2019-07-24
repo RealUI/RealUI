@@ -519,7 +519,7 @@ function MyContainer:OnCreate(name, settings)
 
             local tcol = (_G.cB_CustomBags[idx].col + ((dir == "left") and 1 or -1) or (dir == "right" and -1 or 1))
             if tcol >= 0 and tcol < 3 then tcol = tcol else tcol = 0 end
-			_G.cB_CustomBags[idx].col = tcol
+            _G.cB_CustomBags[idx].col = tcol
             cbNivaya:CreateAnchors()
         end
 
