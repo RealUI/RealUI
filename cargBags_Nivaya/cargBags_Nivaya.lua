@@ -698,7 +698,7 @@ local function HandleSlash(msg)
     -- Returns detailed information about the item in question
     elseif str == "?" and str2 then
         local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
-        print("Item Name:",itemName,"(",itemLink,") level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice)
+        do print("Item Name:",itemName,"(",itemLink,") (Rarity: (",itemRarity,")) level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice," Item texture:",itemTexture) end
 
     else
         _G.ChatFrame1:AddMessage("|cFFFFFF00cargBags_Nivaya:|r")

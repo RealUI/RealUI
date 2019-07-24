@@ -55,12 +55,12 @@ end
 -- src   :: table(s) to check
 -- check :: name to check for
 function cbNivaya:CheckTable(src,check)
+	local rtrn = 0
     for index, value in pairs(src) do
         if type(value) == "table" then
             cbNivaya:CheckTable(value,check)
         else
-            if index == "name" and value == check then rtrn = true
-            else rtrn = false end
+            if index == "name" and value == check then rtrn = true end
         end
         if rtrn then break end
     end
