@@ -54,9 +54,11 @@ end
 --
 -- src   :: table(s) to check
 -- check :: name to check for
+--
+-- luacheck:ignore type
 function cbNivaya:CheckTable(src,check)
 	local rtrn = 0
-    for index, value in pairs(src) do
+    for index, value in ipairs(src) do
         if type(value) == "table" then
             cbNivaya:CheckTable(value,check)
         else
@@ -67,6 +69,7 @@ function cbNivaya:CheckTable(src,check)
     return rtrn
 end
 
+-- luacheck globals GetItemInfo, ignore itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemStackCount, itemTexture, itemSellPrice
 function cbNivaya:ClassifyItem(item)
     local bags = _G.cB_CustomBags
     -- Gives us access to more information about the item
@@ -294,28 +297,28 @@ function cbNivaya:ClassifyItem(item)
         }
 
         -- Mechagon Tinkering
-        for _,v in pairs(itemIDs.mechagon) do
+        for _,v in ipairs(itemIDs.mechagon) do
             if v == item.id and cbNivaya:CheckTable(bags,'Mechagon Tinkering') then
                 itemClass[item.id] = "Mechagon Tinkering"
                 break
             end
         end
         -- Travel & Teleportation
-        for _,v in pairs(itemIDs.travel) do
+        for _,v in ipairs(itemIDs.travel) do
             if v == item.id and cbNivaya:CheckTable(bags,'Travel & Teleportation') then
                 itemClass[item.id] = "Travel & Teleportation"
                 break
             end
         end
         -- Archaeology
-        for _,v in pairs(itemIDs.archaeology) do
+        for _,v in ipairs(itemIDs.archaeology) do
             if v == item.id and cbNivaya:CheckTable(bags,'Archaeology') then
                 itemClass[item.id] = "Archaeology"
                 break
             end
         end
         -- Cooking
-        for _,v in pairs(itemIDs.cooking) do
+        for _,v in ipairs(itemIDs.cooking) do
             if v == item.id and cbNivaya:CheckTable(bags,'Tradeskill: Cooking') then
                 itemClass[item.id] = "Tradeskill: Cooking"
                 break
