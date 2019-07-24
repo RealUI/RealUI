@@ -696,7 +696,7 @@ local function HandleSlash(msg)
 
     -- /cbniv ? Item Name OR item number
     -- Returns detailed information about the item in question
-	-- luacheck: globals GetItemInfo, ignore print
+    -- luacheck: globals GetItemInfo, ignore print
     elseif str == "?" and str2 then
         local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
         do print("Item Name:",itemName,"(",itemLink,") (Rarity: (",itemRarity,")) level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice," Item texture:",itemTexture) end

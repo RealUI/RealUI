@@ -15,137 +15,137 @@ ns.filterEnabled = { Armor = true, Quest = true, TradeGoods = true, Consumables 
 -- Item IDs for classification purposes
 local itemIDs = {
 
-	-- Mechagon Tinkering
-	mechagon = {
-		168327, -- Chain Ignitercoil
-		166971, -- Empty Energy Cell
-		166970, -- Energy Cell
-		168832, -- Galvanic Oscillator
-		167562, -- Ionized Minnow
-		169610, -- S.P.A.R.E. Crate
-		166846  -- Spare Parts
-	},
+    -- Mechagon Tinkering
+    mechagon = {
+        168327, -- Chain Ignitercoil
+        166971, -- Empty Energy Cell
+        166970, -- Energy Cell
+        168832, -- Galvanic Oscillator
+        167562, -- Ionized Minnow
+        169610, -- S.P.A.R.E. Crate
+        166846  -- Spare Parts
+    },
 
-	-- Travel/teleportation
-	travel = {
-		140493, -- Adept's Guide to Dimensional Rifting
-		128353, -- Admiral's Compass
-		46874,  -- Argent Crusader's Tabard
-		22589,  -- Atiesh, Greatstaff of the Guardian
-		63379,  -- Baradin's Wardens Tabard
-		129276, -- Beginner's Guide to Dimensional Rifting
-		118662, -- Bladespire Relic
-		32757,  -- Blessed Medallion of Karabor
-		50287,  -- Boots of the Bay
-		166560, -- Captain's Signet of Command
-		65274,  -- Cloak of Coordination
-		64360,  -- Cloak of Coordination
-		166559, -- Commander's Signet of Battle
-		140192, -- Dalaran Hearthstone
-		93672,  -- Dark Portal
-		30542,  -- Dimensional Ripper - Area 52
-		18984,  -- Dimensional Ripper - Everlook
-		37863,  -- Direbrew's Remote
-		139599, -- Empowered Ring of the Kirin Tor
-		54452,  -- Ethereal Portal
-		129929, -- Ever-Shifting Mirror
-		141605, -- Flight Master's Whistle
-		110560, -- Garrison Hearthstone
-		162973, -- Greatfater Winter's Hearthstone
-		163045, -- Headless Horseman's Hearthstone
-		6948,   -- Hearthstone
-		63378,  -- Hellscream's Reach Tabard
-		128502, -- Hunter's Seeking Crystal
-		64488,  -- The Innkeeper's Daughter
-		52251,  -- Jaina's Locket
-		152964, -- Krokul Flute
-		95567,  -- Kirin Tor Beacon
-		64457,  -- The Last Relic of Argus
-		87548,  -- Lorewalker's Lodestone
-		165669, -- Lunar Elder's Hearthstone
-		21711,  -- Lunar Festival Invitation
-		128503, -- Master Hunter's Seeking Crystal
-		140324, -- Mobile Telemancy Beacon
-		165670, -- Peddlefeet's Lovely Hearthstone
-		58487,  -- Potion of Deepholm
-		144392, -- Pugilist's Powerful Punching Ring
-		118663, -- Relic of Karabor
-		44935,  -- Ring of the Kirin Tor
-		28585,  -- Ruby Slippers
-		37118,  -- Scroll of Recall
-		44314,  -- Scroll of Recall II
-		44315,  -- Scroll of Recall III
-		43824,  -- The Schools of Arcane Magic - Mastery
-		63352,  -- Shroud of Cooperation
-		63353,  -- Shroud of Cooperation
-		40585,  -- Signet of the Kirin Tor
-		95568,  -- Sunreaver Beacon
-		103678, -- Time-Los Artifact
-		18986,  -- Ultrasafe Transporter: Gadgetzan
-		30544,  -- Ultrasafe Transporter: Toshley's Station
-		142469, -- Violet Seal of the Grand Magus
-		112059, -- Wormhole Centrifuge
-		48933,  -- Wormhole Generator: Northrend
-		87215,  -- Wormhole Generator: Pandaria
-		63206,  -- Wrap of Unity
-		63207   -- Wrap of Unity
-	},
+    -- Travel/teleportation
+    travel = {
+        140493, -- Adept's Guide to Dimensional Rifting
+        128353, -- Admiral's Compass
+        46874,  -- Argent Crusader's Tabard
+        22589,  -- Atiesh, Greatstaff of the Guardian
+        63379,  -- Baradin's Wardens Tabard
+        129276, -- Beginner's Guide to Dimensional Rifting
+        118662, -- Bladespire Relic
+        32757,  -- Blessed Medallion of Karabor
+        50287,  -- Boots of the Bay
+        166560, -- Captain's Signet of Command
+        65274,  -- Cloak of Coordination
+        64360,  -- Cloak of Coordination
+        166559, -- Commander's Signet of Battle
+        140192, -- Dalaran Hearthstone
+        93672,  -- Dark Portal
+        30542,  -- Dimensional Ripper - Area 52
+        18984,  -- Dimensional Ripper - Everlook
+        37863,  -- Direbrew's Remote
+        139599, -- Empowered Ring of the Kirin Tor
+        54452,  -- Ethereal Portal
+        129929, -- Ever-Shifting Mirror
+        141605, -- Flight Master's Whistle
+        110560, -- Garrison Hearthstone
+        162973, -- Greatfater Winter's Hearthstone
+        163045, -- Headless Horseman's Hearthstone
+        6948,   -- Hearthstone
+        63378,  -- Hellscream's Reach Tabard
+        128502, -- Hunter's Seeking Crystal
+        64488,  -- The Innkeeper's Daughter
+        52251,  -- Jaina's Locket
+        152964, -- Krokul Flute
+        95567,  -- Kirin Tor Beacon
+        64457,  -- The Last Relic of Argus
+        87548,  -- Lorewalker's Lodestone
+        165669, -- Lunar Elder's Hearthstone
+        21711,  -- Lunar Festival Invitation
+        128503, -- Master Hunter's Seeking Crystal
+        140324, -- Mobile Telemancy Beacon
+        165670, -- Peddlefeet's Lovely Hearthstone
+        58487,  -- Potion of Deepholm
+        144392, -- Pugilist's Powerful Punching Ring
+        118663, -- Relic of Karabor
+        44935,  -- Ring of the Kirin Tor
+        28585,  -- Ruby Slippers
+        37118,  -- Scroll of Recall
+        44314,  -- Scroll of Recall II
+        44315,  -- Scroll of Recall III
+        43824,  -- The Schools of Arcane Magic - Mastery
+        63352,  -- Shroud of Cooperation
+        63353,  -- Shroud of Cooperation
+        40585,  -- Signet of the Kirin Tor
+        95568,  -- Sunreaver Beacon
+        103678, -- Time-Los Artifact
+        18986,  -- Ultrasafe Transporter: Gadgetzan
+        30544,  -- Ultrasafe Transporter: Toshley's Station
+        142469, -- Violet Seal of the Grand Magus
+        112059, -- Wormhole Centrifuge
+        48933,  -- Wormhole Generator: Northrend
+        87215,  -- Wormhole Generator: Pandaria
+        63206,  -- Wrap of Unity
+        63207   -- Wrap of Unity
+    },
 
-	-- Archaeology
-	archaeology = {
-		109586, -- Brittle Cartography Journal
-		142113, -- Crate of Arakkoa Fragments
-		164625, -- Crate of Demon Fragments
-		87534,  -- Crate of Draenei Fragments
-		142114, -- Crate of Draenor Clans Fragments
-		87533,  -- Crate of Dwarven Fragments
-		87535,  -- Crate of Fossil Fragments
-		164626, -- Crate of Highborne Fragments
-		164627, -- Crate of Highmountain Tauren Fragments
-		117388, -- Crate of Manti Fragments
-		117387, -- Crate of Mogu Fragments
-		87537,  -- Crate of Nerubian Fragments
-		87536,  -- Crate of Night Elf Fragments
-		142115, -- Crate of Ogre Fragments
-		87538,  -- Crate of Orc Fragments
-		117386, -- Crate of Pandaren Fragments
-		87539,  -- Crate of Tol'vir Fragments
-		87540,  -- Crate of Troll Fragments
-		87541,  -- Crate of Vrykul Fragments
-		136419, -- Excavator's Notebook
-		130903, -- Acnient Suramar Scroll
-		109585, -- Arakkoa Cipher
-		64394,  -- Draenei Tome
-		108439, -- Draenor Clan Orator Cane
-		52843,  -- Dwarf Rune Stone
-		154990, -- Etched Drust Bone
-		63127,  -- Highborne Scroll
-		130904, -- Highmountain Ritual-Stone
-		95373,  -- Mantid Amber Sliver
-		130905, -- Mark of the Deceiver
-		79869,  -- Mogu Statue Piece
-		64396,  -- Nerubian Obelisk
-		109584, -- Ogre Missive
-		64392,  -- Orc Blood Text
-		79868,  -- Pandaren Pottery Shard
-		64397,  -- Tol'vir Hieroglyphic
-		63128,  -- Troll Tablet
-		64395,  -- Vrykul Rune Stick
-		154989  -- Zandalari Idol
-	},
+    -- Archaeology
+    archaeology = {
+        109586, -- Brittle Cartography Journal
+        142113, -- Crate of Arakkoa Fragments
+        164625, -- Crate of Demon Fragments
+        87534,  -- Crate of Draenei Fragments
+        142114, -- Crate of Draenor Clans Fragments
+        87533,  -- Crate of Dwarven Fragments
+        87535,  -- Crate of Fossil Fragments
+        164626, -- Crate of Highborne Fragments
+        164627, -- Crate of Highmountain Tauren Fragments
+        117388, -- Crate of Manti Fragments
+        117387, -- Crate of Mogu Fragments
+        87537,  -- Crate of Nerubian Fragments
+        87536,  -- Crate of Night Elf Fragments
+        142115, -- Crate of Ogre Fragments
+        87538,  -- Crate of Orc Fragments
+        117386, -- Crate of Pandaren Fragments
+        87539,  -- Crate of Tol'vir Fragments
+        87540,  -- Crate of Troll Fragments
+        87541,  -- Crate of Vrykul Fragments
+        136419, -- Excavator's Notebook
+        130903, -- Acnient Suramar Scroll
+        109585, -- Arakkoa Cipher
+        64394,  -- Draenei Tome
+        108439, -- Draenor Clan Orator Cane
+        52843,  -- Dwarf Rune Stone
+        154990, -- Etched Drust Bone
+        63127,  -- Highborne Scroll
+        130904, -- Highmountain Ritual-Stone
+        95373,  -- Mantid Amber Sliver
+        130905, -- Mark of the Deceiver
+        79869,  -- Mogu Statue Piece
+        64396,  -- Nerubian Obelisk
+        109584, -- Ogre Missive
+        64392,  -- Orc Blood Text
+        79868,  -- Pandaren Pottery Shard
+        64397,  -- Tol'vir Hieroglyphic
+        63128,  -- Troll Tablet
+        64395,  -- Vrykul Rune Stick
+        154989  -- Zandalari Idol
+    },
 
-	-- Cooking
-	cooking = {
-		44835,  -- Autumnal Herbs
-		62786,  -- Cocoa Beans
-		5051,   -- Dig Rat
-		44853,  -- Honey
-		13757,  -- Lightning Eel
-		162515, -- Midnight Salmon
-		2678,   -- Mild Spices
-		43007,  -- Northern Spices
-		30817   -- Simple Flour
-	}
+    -- Cooking
+    cooking = {
+        44835,  -- Autumnal Herbs
+        62786,  -- Cocoa Beans
+        5051,   -- Dig Rat
+        44853,  -- Honey
+        13757,  -- Lightning Eel
+        162515, -- Midnight Salmon
+        2678,   -- Mild Spices
+        43007,  -- Northern Spices
+        30817   -- Simple Flour
+    }
 }
 
 local bagNames = {}
@@ -154,12 +154,12 @@ if gl == "deDE" then
     bagNames.bagParts                  = "Handwerk: Teile"
     bagNames.bagJewelcrafting          = "Handwerk: Juwelenschleifen"
     bagNames.bagCloth                  = "Handwerk: Stoff"
-    bagNames.bagLeatherworking         = "Handwerk: Lederverarbeitung"
-    bagNames.bagMetalStone             = "Handwerkskunst: Metall & Stein"
-    bagNames.bagCooking                = "Handwerkskunst: Kochen"
+    bagNames.bagLeatherworking         = "Handwerk: Kräuter"
+    bagNames.bagMetalStone             = "Handwerk: Metall & Stein"
+    bagNames.bagCooking                = "Handwerk: Kochen"
     bagNames.bagHerb                   = "Handelsfertigkeit: Herb"
-    bagNames.bagElemental              = "Handelsfertigkeit: Elementar"
-    bagNames.bagEnchanting             = "Handwerkskunst: Bezaubernd"
+    bagNames.bagElemental              = "Handwerk: Elementar"
+    bagNames.bagEnchanting             = "Handwerk: Verzauberkunst"
     bagNames.bagInscription            = "Handwerk: Inschrift"
     bagNames.bagMechagonTinkering      = "Mechagon-Basteln"
     bagNames.bagTravelTeleportation    = "Reise & Teleportation"
