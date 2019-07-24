@@ -69,7 +69,7 @@ function cbNivaya:CheckTable(src,check)
     return rtrn
 end
 
--- luacheck ignore GetItemInfo
+-- luacheck: globals GetItemInfo
 function cbNivaya:ClassifyItem(item)
     local bags = _G.cB_CustomBags
     -- Gives us access to more information about the item
