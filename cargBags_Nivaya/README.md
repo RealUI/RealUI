@@ -8,7 +8,7 @@ Additional Automatic Loot Filters
 -----------------------
 Custom bags should be created for each type to automatically sort the 
 appropriate items into them using the /cbniv addbag **NAME** command. 
-Names are case-sensitive.
+Names are case-sensitive and localized.
 
   - **Tradeskill: Parts** (various parts used for various profs)
   - **Tradeskill: Jewelcrafting** (Jewelcrafting supplies)
@@ -23,6 +23,7 @@ Names are case-sensitive.
   - **Mechagon Tinkering** (reagents used in tinkering)
   - **Travel & Teleportation** (items used for travel or that teleport the player)
   - **Archaeology** (items used in Archaeology)
+  - **Tabards** (tabards)
 
 Additional sortable columns
 -----------------------
