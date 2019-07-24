@@ -228,7 +228,7 @@ function cbNivaya:ClassifyItem(item)
             -- Better item filtering
             -- Default to Trade Goods
             itemClass[item.id] = "TradeGoods"
-            -- Tradeskill specific            
+            -- Tradeskill specific
             if item.subTypeID == 1 and cbNivaya:CheckTable(bags,"Tradeskill: Parts") then
                 itemClass[item.id] = "Tradeskill: Parts"
             elseif item.subTypeID == 4 and cbNivaya:CheckTable(bags,"Tradeskill: Jewelcrafting") then
@@ -257,7 +257,7 @@ function cbNivaya:ClassifyItem(item)
         elseif item.typeID == 9 then
             itemClass[item.id] = "Recipes"
         end
-        if itemEquipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,'Tabards') then
+        if item.equipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,'Tabards') then
             itemClass[item.id] = "Tabards"
         end
 
