@@ -69,11 +69,11 @@ function cbNivaya:CheckTable(src,check)
     return rtrn
 end
 
--- luacheck globals GetItemInfo, ignore itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemStackCount, itemTexture, itemSellPrice
+-- luacheck ignore GetItemInfo
 function cbNivaya:ClassifyItem(item)
     local bags = _G.cB_CustomBags
     -- Gives us access to more information about the item
-    local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(item.id)
+    local _, _, _, _, _, _, itemSubType, _, itemEquipLoc, _, _ = GetItemInfo(item.id)
 
     if item.bagID == -2 then
         -- keyring
