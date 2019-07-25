@@ -4,7 +4,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="AddonData\AddonData.lua"/>
     <Script file="AddonData\Bartender4.lua"/>
     <Script file="AddonData\DBM.lua"/>
-    <Script file="AddonData\FreebTip.lua"/>
     <Script file="AddonData\Grid2.lua"/>
     <Script file="AddonData\Kui_Nameplates.lua"/>
     <Script file="AddonData\Masque.lua"/>

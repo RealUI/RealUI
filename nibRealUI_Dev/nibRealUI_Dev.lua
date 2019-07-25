@@ -207,12 +207,12 @@ local auroraAddons = {
 local realuiAddons = {
     "cargBags_Nivaya",
     "EasyMail",
-    "FreebTip",
     "nibRealUI",
     "nibRealUI_Dev",
     "nibRealUI_Config",
     "RealUI_Bugs",
     "RealUI_Skins",
+    "RealUI_Tooltips",
 }
 
 local function AddOptDeps(list, optDeps)

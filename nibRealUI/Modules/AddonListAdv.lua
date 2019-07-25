@@ -56,7 +56,6 @@ local RealUISet = {
     "BadBoy_Guilded",
     "Bartender4",
     "cargBags_Nivaya",
-    "FreebTip",
     "Grid2",
     "Grid2Options",
     "Grid2RaidDebuffs",
@@ -72,6 +71,7 @@ local RealUISet = {
     "Raven_Options",
     "RealUI_Bugs",
     "RealUI_Skins",
+    "RealUI_Tooltips",
     "Skada",
 }
 
@@ -372,11 +372,11 @@ function AddonListAdv:OnInitialize()
             end
         end
 
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Bugs")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Skins")})
         AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI")})
         AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI_Config")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("FreebTip")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Bugs")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Skins")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Tooltips")})
     end
 
     self:SetEnabledState(true)
