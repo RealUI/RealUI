@@ -15,7 +15,7 @@ local filters = ns.filters
 local itemClass = ns.itemClass
 local filterEnabled = ns.filterEnabled
 ns.columns = {
-    [0] = "right",
+    "right",
     "middle",
     "left"
 }
@@ -723,7 +723,7 @@ local function HandleSlash(msg)
         else
             StatusMsgVal("There are ", " custom containers:", numBags, true, false)
             for i, v in ipairs(_G.cB_CustomBags) do
-                StatusMsg(i..". "..v.name.." (|cFF00FF00"..ns.columns[v.col].."|r column, |cFF00FF00"..((v.prio == 1) and "high" or "low").."|r priority)", "", nil, true, false)
+                StatusMsg(i..". "..v.name.." (|cFF00FF00"..ns.columns[v.col+1].."|r column, |cFF00FF00"..((v.prio == 1) and "high" or "low").."|r priority)", "", nil, true, false)
             end
         end
 
