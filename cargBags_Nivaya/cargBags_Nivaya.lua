@@ -2,7 +2,7 @@ local ADDON_NAME, ns = ...
 local cargBags = ns.cargBags
 
 -- Lua Globals --
-local next, ipairs = _G.next, _G.ipairs
+-- luacheck: globals next ipairs
 
 local Aurora = _G.Aurora
 local Base, Skin = Aurora.Base, Aurora.Skin
@@ -696,10 +696,9 @@ local function HandleSlash(msg)
 
     -- /cbniv ? Item Name OR item number
     -- Returns detailed information about the item in question
-    -- luacheck: globals GetItemInfo, ignore print
     elseif str == "?" and str2 then
-        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
-        do print("Item Name:",itemName,"(",itemLink,") (Rarity: (",itemRarity,")) level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice," Item texture:",itemTexture) end
+        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = _G.GetItemInfo(str2)
+        _G.print("Item Name:",itemName,"(",itemLink,") (Rarity: (",itemRarity,")) level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice," Item texture:",itemTexture)
 
     else
         _G.ChatFrame1:AddMessage("|cFFFFFF00cargBags_Nivaya:|r")

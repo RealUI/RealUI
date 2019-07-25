@@ -1,9 +1,11 @@
-﻿local _, ns = ...
+local _, ns = ...
 local cargBags = ns.cargBags
 local gl = _G.GetLocale()
 
 -- Lua Globals --
-local next, ipairs = _G.next, _G.ipairs
+-- luacheck: globals type ipairs next
+
+
 local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
 local filters = ns.filters
@@ -321,7 +323,6 @@ end
 -- src   :: table(s) to check
 -- check :: name to check for
 --
--- luacheck:ignore type
 function cbNivaya:CheckTable(src,check)
     local rtrn = 0
     for index, value in ipairs(src) do
