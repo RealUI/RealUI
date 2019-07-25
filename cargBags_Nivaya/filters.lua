@@ -1,6 +1,5 @@
 local _, ns = ...
 local cargBags = ns.cargBags
-local gl = _G.GetLocale()
 
 -- Lua Globals --
 -- luacheck: globals type ipairs next
@@ -10,6 +9,7 @@ local cbNivaya = cargBags:NewImplementation("Nivaya")
 cbNivaya:RegisterBlizzard()
 local filters = ns.filters
 local itemClass = ns.itemClass
+local L = ns.L
 
 ns.existsBankBag = { Armor = true, Quest = true, TradeGoods = true, Consumables = true, BattlePet = true }
 ns.filterEnabled = { Armor = true, Quest = true, TradeGoods = true, Consumables = true, Junk = true, Stuff = true, ItemSets = true, BattlePet = true }
@@ -150,136 +150,6 @@ local itemIDs = {
     }
 }
 
-local bagNames = {}
-if gl == "deDE" then
--- German
-    bagNames.bagParts                  = "Handwerk: Teile"
-    bagNames.bagJewelcrafting          = "Handwerk: Juwelenschleifen"
-    bagNames.bagCloth                  = "Handwerk: Stoff"
-    bagNames.bagLeatherworking         = "Handwerk: Lederverarbeitung"
-    bagNames.bagMetalStone             = "Handwerk: Metall & Stein"
-    bagNames.bagCooking                = "Handwerk: Kochen"
-    bagNames.bagHerb                   = "Handwerk: Kräuter"
-    bagNames.bagElemental              = "Handwerk: Elementar"
-    bagNames.bagEnchanting             = "Handwerk: Verzauberkunst"
-    bagNames.bagInscription            = "Handwerk: Inschrift"
-    bagNames.bagMechagonTinkering      = "Mechagon-Basteln"
-    bagNames.bagTravelTeleportation    = "Reise & Teleportation"
-    bagNames.bagArchaeology            = "Archäologie"
-    bagNames.bagTabards                = "Wappenröcke"
-elseif gl == "ruRU" then
--- Russian
-    bagNames.bagParts                  = "Tradeskill: запчасти"
-    bagNames.bagJewelcrafting          = "Tradeskill: ювелирное дело"
-    bagNames.bagCloth                  = "Tradeskill: Ткань"
-    bagNames.bagLeatherworking         = "Профессия: кожевничество"
-    bagNames.bagMetalStone             = "Tradeskill: металл и камень"
-    bagNames.bagCooking                = "Tradeskill: Кулинария"
-    bagNames.bagHerb                   = "Традескилл: трава"
-    bagNames.bagElemental              = "Традескилл: Элементаль"
-    bagNames.bagEnchanting             = "Tradeskill: Enchanting"
-    bagNames.bagInscription            = "Tradeskill: надпись"
-    bagNames.bagMechagonTinkering      = "Mechagon Tinkering"
-    bagNames.bagTravelTeleportation    = "Путешествия и телепортация"
-    bagNames.bagArchaeology            = "археология"
-    bagNames.bagTabards                = "накидки"
-elseif gl == "zhTW" then
--- Chinese (Taiwan)
-    bagNames.bagParts                  = "Tradeskill：零件"
-    bagNames.bagJewelcrafting          = "Tradeskill：珠宝加工"
-    bagNames.bagCloth                  = "Tradeskill：布料"
-    bagNames.bagLeatherworking         = "Tradeskill：制皮"
-    bagNames.bagMetalStone             = "Tradeskill：金属和石头"
-    bagNames.bagCooking                = "Tradeskill：烹饪"
-    bagNames.bagHerb                   = "Tradeskill：草药"
-    bagNames.bagElemental              = "Tradeskill：元素"
-    bagNames.bagEnchanting             = "Tradeskill：附魔"
-    bagNames.bagInscription            = "Tradeskill：铭文"
-    bagNames.bagMechagonTinkering      = "Mechagon Tinkering"
-    bagNames.bagTravelTeleportation    = "旅行和传送"
-    bagNames.bagArchaeology            = "考古学"
-    bagNames.bagTabards                = "战袍"
-elseif gl == "zhCN" then
--- Chinese (China)
-    bagNames.bagParts                  = "Tradeskill：零件"
-    bagNames.bagJewelcrafting          = "Tradeskill：珠宝加工"
-    bagNames.bagCloth                  = "Tradeskill：布料"
-    bagNames.bagLeatherworking         = "Tradeskill：制皮"
-    bagNames.bagMetalStone             = "Tradeskill：金属和石头"
-    bagNames.bagCooking                = "Tradeskill：烹饪"
-    bagNames.bagHerb                   = "Tradeskill：草药"
-    bagNames.bagElemental              = "Tradeskill：元素"
-    bagNames.bagEnchanting             = "Tradeskill：附魔"
-    bagNames.bagInscription            = "Tradeskill：铭文"
-    bagNames.bagMechagonTinkering      = "Mechagon Tinkering"
-    bagNames.bagTravelTeleportation    = "旅行和传送"
-    bagNames.bagArchaeology            = "考古学"
-    bagNames.bagTabards                = "战袍"
-elseif gl == "koKR" then
--- Korean
-    bagNames.bagParts                  = "Tradeskill : 부품"
-    bagNames.bagJewelcrafting          = "Tradeskill : 보석 세공"
-    bagNames.bagCloth                  = "Tradeskill : 천"
-    bagNames.bagLeatherworking         = "상인 : 가죽 세공"
-    bagNames.bagMetalStone             = "Tradeskill : 금속 및 석재"
-    bagNames.bagCooking                = "Tradeskill : 요리"
-    bagNames.bagHerb                   = "Tradeskill : 허브"
-    bagNames.bagElemental              = "트레이드 스킬 : 정령"
-    bagNames.bagEnchanting             = "트레이드 스킬 : 마법 부여"
-    bagNames.bagInscription            = "Tradeskill : 비문"
-    bagNames.bagMechagonTinkering      = "메카 곤 땜질"
-    bagNames.bagTravelTeleportation    = "여행 및 순간 이동"
-    bagNames.bagArchaeology            = "고고학"
-    bagNames.bagTabards                = "휘장"
-elseif gl == "frFR" then
--- French
-    bagNames.bagParts                  = "Artisanat: Pièces"
-    bagNames.bagJewelcrafting          = "Artisanat: joaillerie"
-    bagNames.bagCloth                  = "Artisanat: Tissu"
-    bagNames.bagLeatherworking         = "Artisanat: travail du cuir"
-    bagNames.bagMetalStone             = "Artisanat: métal et pierre"
-    bagNames.bagCooking                = "Artisanat: Cuisine"
-    bagNames.bagHerb                   = "Artisanat: herbe"
-    bagNames.bagElemental              = "Artisanat: élémentaire"
-    bagNames.bagEnchanting             = "Artisanat: Enchantement"
-    bagNames.bagInscription            = "Artisanat: Inscription"
-    bagNames.bagMechagonTinkering      = "Bricolage Mechagon"
-    bagNames.bagTravelTeleportation    = "Voyage et téléportation"
-    bagNames.bagArchaeology            = "Archéologie"
-    bagNames.bagTabards                = "Tabards"
-elseif gl == "itIT" then
--- Italian
-    bagNames.bagParts                  = "Tradeskill: Parti"
-    bagNames.bagJewelcrafting          = "Tradeskill: creazione di gioielli"
-    bagNames.bagCloth                  = "Tradeskill: Cloth"
-    bagNames.bagLeatherworking         = "Tradeskill: pelletteria"
-    bagNames.bagMetalStone             = "Tradeskill: metallo e pietra"
-    bagNames.bagCooking                = "Tradeskill: Cooking"
-    bagNames.bagHerb                   = "Tradeskill: Herb"
-    bagNames.bagElemental              = "Tradeskill: Elemental"
-    bagNames.bagEnchanting             = "Tradeskill: Incantevole"
-    bagNames.bagInscription            = "Tradeskill: iscrizione"
-    bagNames.bagMechagonTinkering      = "Mechagon Tinkering"
-    bagNames.bagTravelTeleportation    = "Viaggi e teletrasporto"
-    bagNames.bagArchaeology            = "Archeologia"
-    bagNames.bagTabards                = "tabards"
-else
-    bagNames.bagParts                  = "Tradeskill: Parts"
-    bagNames.bagJewelcrafting          = "Tradeskill: Jewelcrafting"
-    bagNames.bagCloth                  = "Tradeskill: Cloth"
-    bagNames.bagLeatherworking         = "Tradeskill: Leatherworking"
-    bagNames.bagMetalStone             = "Tradeskill: Metal & Stone"
-    bagNames.bagCooking                = "Tradeskill: Cooking"
-    bagNames.bagHerb                   = "Tradeskill: Herb"
-    bagNames.bagElemental              = "Tradeskill: Elemental"
-    bagNames.bagEnchanting             = "Tradeskill: Enchanting"
-    bagNames.bagInscription            = "Tradeskill: Inscription"
-    bagNames.bagMechagonTinkering      = "Mechagon Tinkering"
-    bagNames.bagTravelTeleportation    = "Travel & Teleportation"
-    bagNames.bagArchaeology            = "Archaeology"
-    bagNames.bagTabards                = "Tabards"
-end
-
 --------------------
 --Basic filters
 --------------------
@@ -360,26 +230,26 @@ function cbNivaya:ClassifyItem(item)
             -- Default to Trade Goods
             itemClass[item.id] = "TradeGoods"
             -- Tradeskill specific
-            if item.subTypeID == 1 and cbNivaya:CheckTable(bags,bagNames.bagParts) then
-                itemClass[item.id] = bagNames.bagParts
-            elseif item.subTypeID == 4 and cbNivaya:CheckTable(bags,bagNames.bagJewelcrafting) then
-                itemClass[item.id] = bagNames.bagJewelcrafting
-            elseif item.subTypeID == 5 and cbNivaya:CheckTable(bags,bagNames.bagCloth) then
-                itemClass[item.id] = bagNames.bagCloth
-            elseif item.subTypeID == 6 and cbNivaya:CheckTable(bags,bagNames.bagLeatherworking) then
-                itemClass[item.id] = bagNames.bagLeatherworking
-            elseif item.subTypeID == 7 and cbNivaya:CheckTable(bags,bagNames.bagMetalStone) then
-                itemClass[item.id] = bagNames.bagMetalStone
-            elseif item.subTypeID == 8 and cbNivaya:CheckTable(bags,bagNames.bagCooking) then
-                itemClass[item.id] = bagNames.bagCooking
-            elseif item.subTypeID == 9 and cbNivaya:CheckTable(bags,bagNames.bagHerb) then
-                itemClass[item.id] = bagNames.bagHerb
-            elseif item.subTypeID == 10 and cbNivaya:CheckTable(bags,bagNames.bagElemental) then
-                itemClass[item.id] = bagNames.bagElemental
-            elseif item.subTypeID == 12 and cbNivaya:CheckTable(bags,bagNames.bagEnchanting) then
-                itemClass[item.id] = bagNames.bagEnchanting
-            elseif item.subTypeID == 16 and cbNivaya:CheckTable(bags,bagNames.bagInscription) then
-                itemClass[item.id] = bagNames.bagInscription
+            if item.subTypeID == 1 and cbNivaya:CheckTable(bags,L.bagParts) then
+                itemClass[item.id] = L.bagParts
+            elseif item.subTypeID == 4 and cbNivaya:CheckTable(bags,L.bagJewelcrafting) then
+                itemClass[item.id] = L.bagJewelcrafting
+            elseif item.subTypeID == 5 and cbNivaya:CheckTable(bags,L.bagCloth) then
+                itemClass[item.id] = L.bagCloth
+            elseif item.subTypeID == 6 and cbNivaya:CheckTable(bags,L.bagLeatherworking) then
+                itemClass[item.id] = L.bagLeatherworking
+            elseif item.subTypeID == 7 and cbNivaya:CheckTable(bags,L.bagMetalStone) then
+                itemClass[item.id] = L.bagMetalStone
+            elseif item.subTypeID == 8 and cbNivaya:CheckTable(bags,L.bagCooking) then
+                itemClass[item.id] = L.bagCooking
+            elseif item.subTypeID == 9 and cbNivaya:CheckTable(bags,L.bagHerb) then
+                itemClass[item.id] = L.bagHerb
+            elseif item.subTypeID == 10 and cbNivaya:CheckTable(bags,L.bagElemental) then
+                itemClass[item.id] = L.bagElemental
+            elseif item.subTypeID == 12 and cbNivaya:CheckTable(bags,L.bagEnchanting) then
+                itemClass[item.id] = L.bagEnchanting
+            elseif item.subTypeID == 16 and cbNivaya:CheckTable(bags,L.bagInscription) then
+                itemClass[item.id] = L.bagInscription
             end
         elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
             itemClass[item.id] = "Consumables"
@@ -388,35 +258,35 @@ function cbNivaya:ClassifyItem(item)
         elseif item.typeID == 9 then
             itemClass[item.id] = "Recipes"
         end
-        if item.equipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,bagNames.bagTabards) then
-            itemClass[item.id] = bagNames.bagTabards
+        if item.equipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,L.bagTabards) then
+            itemClass[item.id] = L.bagTabards
         end
 
         -- Mechagon Tinkering
         for _,v in ipairs(itemIDs.mechagon) do
-            if v == item.id and cbNivaya:CheckTable(bags,bagNames.bagMechagonTinkering) then
-                itemClass[item.id] = bagNames.bagMechagonTinkering
+            if v == item.id and cbNivaya:CheckTable(bags,L.bagMechagonTinkering) then
+                itemClass[item.id] = L.bagMechagonTinkering
                 break
             end
         end
         -- Travel & Teleportation
         for _,v in ipairs(itemIDs.travel) do
-            if v == item.id and cbNivaya:CheckTable(bags,bagNames.bagTravelTeleportation) then
-                itemClass[item.id] = bagNames.bagTravelTeleportation
+            if v == item.id and cbNivaya:CheckTable(bags,L.bagTravelTeleportation) then
+                itemClass[item.id] = L.bagTravelTeleportation
                 break
             end
         end
         -- Archaeology
         for _,v in ipairs(itemIDs.archaeology) do
-            if v == item.id and cbNivaya:CheckTable(bags,bagNames.bagArchaeology) then
-                itemClass[item.id] = bagNames.bagArchaeology
+            if v == item.id and cbNivaya:CheckTable(bags,L.bagArchaeology) then
+                itemClass[item.id] = L.bagArchaeology
                 break
             end
         end
         -- Cooking
         for _,v in ipairs(itemIDs.cooking) do
-            if v == item.id and cbNivaya:CheckTable(bags,bagNames.bagCooking) then
-                itemClass[item.id] = bagNames.bagCooking
+            if v == item.id and cbNivaya:CheckTable(bags,L.bagCooking) then
+                itemClass[item.id] = L.bagCooking
                 break
             end
         end
