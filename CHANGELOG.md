@@ -1,3 +1,25 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * FreebTip has been replaced with RealUI_Tooltips.
+  * cargBags_Nivaya
+  * nibRealUI
+
+### Added ###
+
+  * New "Tooltips" section in the Advanced options.
+  * New option to show object IDs in tooltips
+  * When doing world quests or bonus objectives, the progress contribution of an object is now shown on the tooltip.
+  * There are new default bag catagories for Travel, Archaeology, Tabards, and Mechagon items. Thanks to ItsMattTrevino on github for this feature.
+  * Use `/cbniv addtrade` to add bags for Trade Good sub categories like Cloth and Herbs. Thanks to ItsMattTrevino on github for this feature.
+
+### Fixed ###
+
+  * Error when on an Island Expedition.
+
+
+
+
 ## [2.0.14] - 2019-07-13 ##
 ### Modified AddOns ###
 
