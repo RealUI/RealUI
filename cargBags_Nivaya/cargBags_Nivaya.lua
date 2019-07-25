@@ -14,6 +14,11 @@ cargBags_Nivaya:RegisterEvent("ADDON_LOADED")
 local filters = ns.filters
 local itemClass = ns.itemClass
 local filterEnabled = ns.filterEnabled
+ns.columns = {
+    [0] = "right",
+    "middle",
+    "left"
+}
 
 local cbNivaya = cargBags:GetImplementation("Nivaya")
 
@@ -718,7 +723,7 @@ local function HandleSlash(msg)
         else
             StatusMsgVal("There are ", " custom containers:", numBags, true, false)
             for i, v in ipairs(_G.cB_CustomBags) do
-                StatusMsg(i..". "..v.name.." (|cFF00FF00"..((v.col == 0) and "right" or "left").."|r column, |cFF00FF00"..((v.prio == 1) and "high" or "low").."|r priority)", "", nil, true, false)
+                StatusMsg(i..". "..v.name.." (|cFF00FF00"..ns.columns[v.col].."|r column, |cFF00FF00"..((v.prio == 1) and "high" or "low").."|r priority)", "", nil, true, false)
             end
         end
 
@@ -757,9 +762,9 @@ local function HandleSlash(msg)
         StatusMsg("(", ") |cFFFFFF00sortbags|r - Toggle auto sorting the bags.", _G.cBnivCfg.SortBags, false, true)
         StatusMsg("(", ") |cFFFFFF00sortbank|r - Toggle auto sorting the bank.", _G.cBnivCfg.SortBank, false, true)
         StatusMsgVal("(", ") |cFFFFFF00scale|r [number] - Set the overall scale.", _G.cBnivCfg.scale, false)
-        StatusMsg("", " |cFFFFFF00addtrade|r [name] - Add bags for specific Trade Good sub categories.")
+        StatusMsg("", " |cFFFFFF00addtrade|r - Add bags for specific Trade Good sub categories.")
         StatusMsg("", " |cFFFFFF00addbag|r [name] - Add a custom container.")
-        StatusMsg("", " |cFFFFFF00delall|r [name] - Remove all custom containers.")
+        StatusMsg("", " |cFFFFFF00delall|r - Remove all custom containers.")
         StatusMsg("", " |cFFFFFF00delbag|r [name] - Remove a custom container.")
         StatusMsg("", " |cFFFFFF00listbags|r - List all custom containers.")
         StatusMsg("", " |cFFFFFF00bagpos|r - Toggle buttons to move custom containers (up, down, left, right).")
