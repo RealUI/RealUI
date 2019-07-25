@@ -161,6 +161,8 @@ local optDefaults = {
 -- Those are internal settings, don't touch them at all:
 local defaults = {}
 
+
+
 function cbNivaya:ShowBags(...)
     local show = {...}
     for i = 1, #show do
@@ -355,18 +357,22 @@ function cbNivaya:CreateAnchors()
     CreateAnchorInfo(bags.armor,         bags.battlepet,      "Top")
     CreateAnchorInfo(bags.battlepet,     bags.bagStuff,       "Top")
 
-    CreateAnchorInfo(bags.main,          bags.tradegoods,     "Top")
-    CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
     CreateAnchorInfo(bags.consumables,   bags.quest,          "Top")
-    CreateAnchorInfo(bags.quest,         bags.bagJunk,        "Top")
-    CreateAnchorInfo(bags.bagJunk,       bags.bagNew,         "Top")
+
+    CreateAnchorInfo(bags.bagItemSets,   bags.bagJunk,        "Left")
+    CreateAnchorInfo(bags.bagJunk,       bags.tradegoods,     "Top")
+    CreateAnchorInfo(bags.tradegoods,    bags.consumables,    "Top")
+    CreateAnchorInfo(bags.quest,         bags.bagNew,         "Top")
 
     -- Custom Container Anchors:
-    ref[0], ref[1] = 0, 0
+    ref[0], ref[1], ref[2] = 0, 0, 0
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
-            local c = bag.col
-            if ref[c] == 0 then ref[c] = (c == 0) and bags.bagStuff or bags.bagNew end
+            local c = bag.col if ref[c] == 0 then ref[c] = (c == 0) and bags.main
+            or (c == 1) and bags.bagStuff
+            or (c == 2) and bags.bagNew or bags.quest or bags.consumables or bags.tradegoods end
+
+
             CreateAnchorInfo(ref[c], bags[bag.name], "Top")
             ref[c] = bags[bag.name]
         end
@@ -443,7 +449,6 @@ function cbNivaya:ToggleBagPosButtons()
     for _, bag in ipairs(_G.cB_CustomBags) do
         if bag.active then
             local b = bags[bag.name]
-
             if _G.cBniv.BagPos then
                 b.rightBtn:Hide()
                 b.leftBtn:Hide()
@@ -688,6 +693,13 @@ local function HandleSlash(msg)
     elseif str == "bankbags" then
         _G.cBnivCfg.BankCustomBags = not _G.cBnivCfg.BankCustomBags
         StatusMsg("Display of custom containers in the bank is now ", ". Reload your UI for this change to take effect!", _G.cBnivCfg.BankCustomBags, true, false)
+
+    -- /cbniv ? Item Name OR item number
+    -- Returns detailed information about the item in question
+    -- luacheck: globals GetItemInfo, ignore print
+    elseif str == "?" and str2 then
+        local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(str2)
+        do print("Item Name:",itemName,"(",itemLink,") (Rarity: (",itemRarity,")) level:",itemLevel," minimum level:",itemMinLevel," type:",itemType,":",itemSubType," count:",itemStackCount," equipped:",itemEquipLoc," sell price:",itemSellPrice," Item texture:",itemTexture) end
 
     else
         _G.ChatFrame1:AddMessage("|cFFFFFF00cargBags_Nivaya:|r")

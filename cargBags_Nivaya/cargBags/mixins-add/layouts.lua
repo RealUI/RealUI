@@ -37,6 +37,7 @@ function layouts.grid(self, columns, spacing, xOffset, yOffset)
 
     local width, height = 0, 0
     local col, row
+
     for i, button in ipairs(self.buttons) do
 
         if i == 1 then -- Hackish, I know
