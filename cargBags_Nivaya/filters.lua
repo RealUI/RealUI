@@ -221,71 +221,71 @@ function cbNivaya:ClassifyItem(item)
         itemClass[item.id] = "Junk"
     elseif item.typeID then
         -- type based filters
-        if (item.typeID == _G.LE_ITEM_CLASS_ARMOR) or (item.typeID == _G.LE_ITEM_CLASS_WEAPON) or _G.IsArtifactRelicItem(item.link or item.id) then
+        if (item.typeID == _G.LE_ITEM_CLASS_ARMOR or item.typeID == _G.LE_ITEM_CLASS_WEAPON) or _G.IsArtifactRelicItem(item.link or item.id) then
             itemClass[item.id] = "Armor"
-        elseif (item.typeID == _G.LE_ITEM_CLASS_QUESTITEM) then
+        elseif item.typeID == _G.LE_ITEM_CLASS_QUESTITEM then
             itemClass[item.id] = "Quest"
-        elseif (item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS) then
+        elseif item.typeID == _G.LE_ITEM_CLASS_TRADEGOODS then
             -- Better item filtering
             -- Default to Trade Goods
             itemClass[item.id] = "TradeGoods"
             -- Tradeskill specific
-            if item.subTypeID == 1 and cbNivaya:CheckTable(bags,L.bagParts) then
+            if item.subTypeID == 1 and cbNivaya:CheckTable(bags, L.bagParts) then
                 itemClass[item.id] = L.bagParts
-            elseif item.subTypeID == 4 and cbNivaya:CheckTable(bags,L.bagJewelcrafting) then
+            elseif item.subTypeID == 4 and cbNivaya:CheckTable(bags, L.bagJewelcrafting) then
                 itemClass[item.id] = L.bagJewelcrafting
-            elseif item.subTypeID == 5 and cbNivaya:CheckTable(bags,L.bagCloth) then
+            elseif item.subTypeID == 5 and cbNivaya:CheckTable(bags, L.bagCloth) then
                 itemClass[item.id] = L.bagCloth
-            elseif item.subTypeID == 6 and cbNivaya:CheckTable(bags,L.bagLeatherworking) then
+            elseif item.subTypeID == 6 and cbNivaya:CheckTable(bags, L.bagLeatherworking) then
                 itemClass[item.id] = L.bagLeatherworking
-            elseif item.subTypeID == 7 and cbNivaya:CheckTable(bags,L.bagMetalStone) then
+            elseif item.subTypeID == 7 and cbNivaya:CheckTable(bags, L.bagMetalStone) then
                 itemClass[item.id] = L.bagMetalStone
-            elseif item.subTypeID == 8 and cbNivaya:CheckTable(bags,L.bagCooking) then
+            elseif item.subTypeID == 8 and cbNivaya:CheckTable(bags, L.bagCooking) then
                 itemClass[item.id] = L.bagCooking
-            elseif item.subTypeID == 9 and cbNivaya:CheckTable(bags,L.bagHerb) then
+            elseif item.subTypeID == 9 and cbNivaya:CheckTable(bags, L.bagHerb) then
                 itemClass[item.id] = L.bagHerb
-            elseif item.subTypeID == 10 and cbNivaya:CheckTable(bags,L.bagElemental) then
+            elseif item.subTypeID == 10 and cbNivaya:CheckTable(bags, L.bagElemental) then
                 itemClass[item.id] = L.bagElemental
-            elseif item.subTypeID == 12 and cbNivaya:CheckTable(bags,L.bagEnchanting) then
+            elseif item.subTypeID == 12 and cbNivaya:CheckTable(bags, L.bagEnchanting) then
                 itemClass[item.id] = L.bagEnchanting
-            elseif item.subTypeID == 16 and cbNivaya:CheckTable(bags,L.bagInscription) then
+            elseif item.subTypeID == 16 and cbNivaya:CheckTable(bags, L.bagInscription) then
                 itemClass[item.id] = L.bagInscription
             end
-        elseif (item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE) then
+        elseif item.typeID == _G.LE_ITEM_CLASS_CONSUMABLE then
             itemClass[item.id] = "Consumables"
-        elseif(item.typeID == _G.LE_ITEM_CLASS_BATTLEPET) then
+        elseif item.typeID == _G.LE_ITEM_CLASS_BATTLEPET then
             itemClass[item.id] = "BattlePet"
         elseif item.typeID == 9 then
             itemClass[item.id] = "Recipes"
         end
-        if item.equipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags,L.bagTabards) then
+        if item.equipLoc == "INVTYPE_TABARD" and cbNivaya:CheckTable(bags, L.bagTabards) then
             itemClass[item.id] = L.bagTabards
         end
 
         -- Mechagon Tinkering
-        for _,v in ipairs(itemIDs.mechagon) do
-            if v == item.id and cbNivaya:CheckTable(bags,L.bagMechagonTinkering) then
+        for _, v in ipairs(itemIDs.mechagon) do
+            if v == item.id and cbNivaya:CheckTable(bags, L.bagMechagonTinkering) then
                 itemClass[item.id] = L.bagMechagonTinkering
                 break
             end
         end
         -- Travel & Teleportation
-        for _,v in ipairs(itemIDs.travel) do
-            if v == item.id and cbNivaya:CheckTable(bags,L.bagTravelTeleportation) then
+        for _, v in ipairs(itemIDs.travel) do
+            if v == item.id and cbNivaya:CheckTable(bags, L.bagTravelTeleportation) then
                 itemClass[item.id] = L.bagTravelTeleportation
                 break
             end
         end
         -- Archaeology
-        for _,v in ipairs(itemIDs.archaeology) do
-            if v == item.id and cbNivaya:CheckTable(bags,L.bagArchaeology) then
+        for _, v in ipairs(itemIDs.archaeology) do
+            if v == item.id and cbNivaya:CheckTable(bags, L.bagArchaeology) then
                 itemClass[item.id] = L.bagArchaeology
                 break
             end
         end
         -- Cooking
-        for _,v in ipairs(itemIDs.cooking) do
-            if v == item.id and cbNivaya:CheckTable(bags,L.bagCooking) then
+        for _, v in ipairs(itemIDs.cooking) do
+            if v == item.id and cbNivaya:CheckTable(bags, L.bagCooking) then
                 itemClass[item.id] = L.bagCooking
                 break
             end
