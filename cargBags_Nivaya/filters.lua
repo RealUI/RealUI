@@ -264,15 +264,15 @@ function cbNivaya:ClassifyItem(item)
 
         -- Mechagon Tinkering
         for _, v in ipairs(itemIDs.mechagon) do
-            if v == item.id and cbNivaya:CheckTable(bags, L.bagMechagonTinkering) then
-                itemClass[item.id] = L.bagMechagonTinkering
+            if v == item.id and cbNivaya:CheckTable(bags, L.bagMechagon) then
+                itemClass[item.id] = L.bagMechagon
                 break
             end
         end
         -- Travel & Teleportation
         for _, v in ipairs(itemIDs.travel) do
-            if v == item.id and cbNivaya:CheckTable(bags, L.bagTravelTeleportation) then
-                itemClass[item.id] = L.bagTravelTeleportation
+            if v == item.id and cbNivaya:CheckTable(bags, L.bagTravel) then
+                itemClass[item.id] = L.bagTravel
                 break
             end
         end

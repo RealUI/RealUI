@@ -47,55 +47,41 @@ L.bagInscription = tradegoodsFormat:format(tradeTypeNames[16])
 
 L.bagArchaeology = _G.PROFESSIONS_ARCHAEOLOGY
 L.bagTabards = _G.INVTYPE_TABARD
+L.bagTravel = _G.TUTORIAL_TITLE35
+L.bagMechagon = _G.SPLASH_BATTLEFORAZEROTH_8_2_0_FEATURE1_TITLE
 
 if gl == "deDE" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Cooles Zeugs"
     L.bagCaptions.cBniv_NewItems = "Neue Items"
-    L.bagMechagonTinkering = "Mechagon-Basteln"
-    L.bagTravelTeleportation = "Reise & Teleportation"
 elseif gl == "ruRU" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Разное"
     L.bagCaptions.cBniv_NewItems = "Новые предметы"
-    L.bagMechagonTinkering = "Mechagon Tinkering"
-    L.bagTravelTeleportation = "Путешествия и телепортация"
 elseif gl == "zhTW" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "施法材料"
     L.bagCaptions.cBniv_NewItems = "新增"
-    L.bagMechagonTinkering = "Mechagon Tinkering"
-    L.bagTravelTeleportation = "旅行和传送"
 elseif gl == "zhCN" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "施法材料"
     L.bagCaptions.cBniv_NewItems = "新增"
-    L.bagMechagonTinkering = "Mechagon Tinkering"
-    L.bagTravelTeleportation = "旅行和传送"
 elseif gl == "koKR" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "지정"
     L.bagCaptions.cBniv_NewItems = "신규"
-    L.bagMechagonTinkering = "메카 곤 땜질"
-    L.bagTravelTeleportation = "여행 및 순간 이동"
 elseif gl == "frFR" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Divers"
     L.bagCaptions.cBniv_NewItems = "Nouveaux Objets"
-    L.bagMechagonTinkering = "Bricolage Mechagon"
-    L.bagTravelTeleportation = "Voyage et téléportation"
 elseif gl == "itIT" then
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Cose Interessanti"
     L.bagCaptions.cBniv_NewItems = "Oggetti Nuovi"
-    L.bagMechagonTinkering = "Mechagon Tinkering"
-    L.bagTravelTeleportation = "Viaggi e teletrasporto"
 else
     L.ResetCategory = "Reset Category"
     L.bagCaptions.cBniv_Stuff = "Cool Stuff"
     L.bagCaptions.cBniv_NewItems = "New Items"
-    L.bagMechagonTinkering = "Mechagon Tinkering"
-    L.bagTravelTeleportation = "Travel & Teleportation"
 end
 
 ns.L = L
