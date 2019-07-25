@@ -77,6 +77,9 @@ local itemIDs = {
         37118,  -- Scroll of Recall
         44314,  -- Scroll of Recall II
         44315,  -- Scroll of Recall III
+        141016, -- Scroll of Town Portal: Faronaar
+        141015, -- Scroll of Town Portal: Kal'delar
+        141017, -- Scroll of Town Portal: Lian'tril
         43824,  -- The Schools of Arcane Magic - Mastery
         63352,  -- Shroud of Cooperation
         63353,  -- Shroud of Cooperation
@@ -146,7 +149,9 @@ local itemIDs = {
         162515, -- Midnight Salmon
         2678,   -- Mild Spices
         43007,  -- Northern Spices
-        30817   -- Simple Flour
+        30817,  -- Simple Flour
+        151133, -- Nomi Snacks
+        151653, -- Broken Isles Recipe Scrap
     }
 }
 
@@ -192,7 +197,6 @@ end
 --
 -- src   :: table(s) to check
 -- check :: name to check for
---
 function cbNivaya:CheckTable(src,check)
     local rtrn = 0
     for index, value in ipairs(src) do
@@ -209,7 +213,6 @@ end
 function cbNivaya:ClassifyItem(item)
     local bags = _G.cB_CustomBags
 
-    -- Gives us access to more information about the item
     if item.bagID == -2 then
         -- keyring
         itemClass[item.id] = "Keyring"
