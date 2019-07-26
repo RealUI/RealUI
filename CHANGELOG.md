@@ -8,7 +8,8 @@
 ### Added ###
 
   * New "Tooltips" section in the Advanced options.
-  * New option to show object IDs in tooltips
+  * New option to show object IDs in tooltips.
+  * New option to show if you've collected an item's appearance.
   * When doing world quests or bonus objectives, the progress contribution of an object is now shown on the tooltip.
   * There are new default bag catagories for Travel, Archaeology, Tabards, and Mechagon items. Thanks to ItsMattTrevino on github for this feature.
   * Use `/cbniv addtrade` to add bags for Trade Good sub categories like Cloth and Herbs. Thanks to ItsMattTrevino on github for this feature.

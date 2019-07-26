@@ -781,6 +781,13 @@ local tooltips do
 
     local args
     local Tooltips = RealUI:GetModule("Tooltips", true)
+    local function appGet(info)
+        return Tooltips.db.global[info[#info]]
+    end
+    local function appSet(info, value)
+        Tooltips.db.global[info[#info]] = value
+    end
+
     if Tooltips then
         args = {
             note = {
@@ -791,39 +798,38 @@ local tooltips do
             showTitles = {
                 name = L.Tooltips_ShowTitles,
                 type = "toggle",
-                get = function() return Tooltips.db.global.showTitles end,
-                set = function(info, value)
-                    Tooltips.db.global.showTitles = value
-                end,
+                get = appGet,
+                set = appSet,
                 order = 1,
             },
             showRealm = {
                 name = L.Tooltips_ShowRealm,
                 type = "toggle",
-                get = function() return Tooltips.db.global.showRealm end,
-                set = function(info, value)
-                    Tooltips.db.global.showRealm = value
-                end,
+                get = appGet,
+                set = appSet,
                 order = 2,
             },
             showIDs = {
                 name = L.Tooltips_ShowIDs,
                 type = "toggle",
-                get = function() return Tooltips.db.global.showIDs end,
-                set = function(info, value)
-                    Tooltips.db.global.showIDs = value
-                end,
+                get = appGet,
+                set = appSet,
                 order = 3,
+            },
+            showTransmog = {
+                name = L.Tooltips_ShowTransmog,
+                type = "toggle",
+                get = appGet,
+                set = appSet,
+                order = 4,
             },
             multiTip = {
                 name = L.Tooltips_MultiTip,
                 desc = L.Tooltips_MultiTipDesc,
                 type = "toggle",
-                get = function() return Tooltips.db.global.multiTip end,
-                set = function(info, value)
-                    Tooltips.db.global.multiTip = value
-                end,
-                order = 4,
+                get = appGet,
+                set = appSet,
+                order = 5,
             },
             position = {
                 name = L["General_Position"],

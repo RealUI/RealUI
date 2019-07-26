@@ -21,6 +21,7 @@ local defaults = {
         showTitles = true,
         showRealm = false,
         showIDs = false,
+        showTransmog = true,
         multiTip = true,
         position = {
             x = -100,
@@ -616,6 +617,36 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
     end
 
     --SetStatusBar(self, unit)
+end)
+
+_G.GameTooltip:HookScript("OnTooltipSetItem", function(self)
+    local _, link = self:GetItem()
+    if Tooltips.db.global.showTransmog and link then
+        local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
+        if appearanceID and sourceID then
+            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)
+            if isInfoReady then
+                if canCollect then
+                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(sourceID)
+                    if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
+                        self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                    else
+                        local sources = _G.C_TransmogCollection.GetAppearanceSources(appearanceID)
+                        if sources then
+                            for i, source in next, sources do
+                                if source.isCollected then
+                                    self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                                    break
+                                end
+                            end
+                        end
+                    end
+                else
+                    self:AddLine(_G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                end
+            end
+        end
+    end
 end)
 
 local frameColor = Aurora.Color.frame
