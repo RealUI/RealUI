@@ -66,6 +66,12 @@ for specIndex = 1, _G.GetNumSpecializationsForClassID(classID) do
     end
 end
 
+-- Disable FreebTip
+local enabled = _G.GetAddOnEnableState(RealUI.charInfo.name, "RealUI_Tooltips")
+if enabled > 0 then
+    _G.DisableAddOn("FreebTip", true)
+end
+
 RealUI.globals = {
     anchorPoints = {
         "TOPLEFT",    "TOP",    "TOPRIGHT",
