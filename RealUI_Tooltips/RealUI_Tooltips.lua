@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals time next select tonumber tostring
+-- luacheck: globals time next select tonumber tostring tinsert
 
 -- Libs --
 local LOP = _G.LibStub("LibObjectiveProgress-1.0")
@@ -69,6 +69,22 @@ local function GetUnitColor(unit)
 
     --print("unit color", r, g, b)
     return r, g, b
+end
+
+private.Hooks = {
+    OnTooltipSetUnit = {},
+    OnTooltipSetItem = {},
+    OnTooltipSetSpell = {},
+    OnTooltipCleared = {},
+}
+function private.HookTooltip(tooltip)
+    for hookName, hooks in next, private.Hooks do
+        tooltip:HookScript(hookName, function(...)
+            for i = 1, #private.Hooks[hookName] do
+                private.Hooks[hookName][i](tooltip)
+            end
+        end)
+    end
 end
 
 local AddDynamicInfo, ClearDynamicInfo do
@@ -418,7 +434,8 @@ local factionIcon = {
         coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
     },
 }
-_G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
+
+local function OnTooltipSetUnit(self)
     Tooltips:debug("--- OnTooltipSetUnit ---")
 
     local unit = GetUnit(self)
@@ -615,11 +632,10 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             _G.GameTooltipStatusBar:Hide()
         end
     end
+end
+tinsert(private.Hooks.OnTooltipSetUnit, OnTooltipSetUnit)
 
-    --SetStatusBar(self, unit)
-end)
-
-_G.GameTooltip:HookScript("OnTooltipSetItem", function(self)
+local function OnTooltipSetItem(self)
     local _, link = self:GetItem()
     if Tooltips.db.global.showTransmog and link then
         local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
@@ -647,10 +663,11 @@ _G.GameTooltip:HookScript("OnTooltipSetItem", function(self)
             end
         end
     end
-end)
+end
+tinsert(private.Hooks.OnTooltipSetItem, OnTooltipSetItem)
 
 local frameColor = Aurora.Color.frame
-_G.GameTooltip:HookScript("OnTooltipCleared", function(self)
+local function OnTooltipCleared(self)
     if self.factionIcon then
         self.factionIcon:Hide()
     end
@@ -659,9 +676,8 @@ _G.GameTooltip:HookScript("OnTooltipCleared", function(self)
     self._id = nil
 
     self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
-end)
-
-
+end
+tinsert(private.Hooks.OnTooltipCleared, OnTooltipCleared)
 
 
 local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
@@ -685,5 +701,9 @@ function Tooltips:OnInitialize()
     end
     if Tooltips.db.global.multiTip then
         private.SetupMultiTip()
+    end
+
+    for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
+        private.HookTooltip(tooltip)
     end
 end

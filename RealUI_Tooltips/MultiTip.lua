@@ -29,6 +29,7 @@ end
 local function TooltipFactory(framePool)
     local numActive = framePool:GetNumActive()
     local tooltip = _G.CreateFrame("GameTooltip", "MultiTip"..numActive, _G.UIParent, framePool.frameTemplate)
+    private.HookTooltip(tooltip)
     tooltip.Release = Release
     return tooltip
 end

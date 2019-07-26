@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals select tonumber ipairs
+-- luacheck: globals select tonumber ipairs tinsert
 
 local Aurora = _G.Aurora
 local Color = Aurora.Color
@@ -40,14 +40,7 @@ local function SetupSpellTooltips()
     _G.hooksecurefunc(_G.GameTooltip, "SetUnitBuff", function(self, unit, slotNumber) setAuraTooltipFunction(self, unit, slotNumber, "HELPFUL") end)
     _G.hooksecurefunc(_G.GameTooltip, "SetUnitDebuff", function(self, unit, slotNumber) setAuraTooltipFunction(self, unit, slotNumber, "HARMFUL") end)
 
-    _G.hooksecurefunc("SetItemRef", function(link, ...)
-        local id = tonumber(link:match("spell:(%d+)"))
-        if id then
-            AddToTooltip(_G.ItemRefTooltip, TooltipTypes.spell, id)
-        end
-    end)
-
-    _G.GameTooltip:HookScript("OnTooltipSetSpell", function(self)
+    tinsert(private.Hooks.OnTooltipSetSpell, function(self)
         local _, id = self:GetSpell()
         if id then
             AddToTooltip(self, TooltipTypes.spell, id)
@@ -56,7 +49,7 @@ local function SetupSpellTooltips()
 end
 
 local function SetupItemTooltips()
-    local function attachItemTooltip(self)
+    tinsert(private.Hooks.OnTooltipSetItem, function(self)
         local _, link = self:GetItem()
         if link then
             local id = link:match("item:(%d*)")
@@ -73,14 +66,11 @@ local function SetupItemTooltips()
                 AddToTooltip(self, TooltipTypes.item, id)
             end
         end
-    end
-
-    _G.GameTooltip:HookScript("OnTooltipSetItem", attachItemTooltip)
-    _G.ItemRefTooltip:HookScript("OnTooltipSetItem", attachItemTooltip)
+    end)
 end
 
 local function SetupUnitTooltips()
-    _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
+    tinsert(private.Hooks.OnTooltipSetUnit, function(self)
         if _G.C_PetBattles.IsInBattle() then
             return
         end
