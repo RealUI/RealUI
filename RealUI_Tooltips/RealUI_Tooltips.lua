@@ -71,17 +71,34 @@ local function GetUnitColor(unit)
     return r, g, b
 end
 
-private.Hooks = {
-    OnTooltipSetUnit = {},
-    OnTooltipSetItem = {},
-    OnTooltipSetSpell = {},
-    OnTooltipCleared = {},
-}
+local Hooks = {}
+local Scripts = {}
+function private.AddHook(name, func, isScript)
+    if isScript then
+        if not Scripts[name] then
+            Scripts[name] = {}
+        end
+        tinsert(Scripts[name], func)
+    else
+        if not Hooks[name] then
+            Hooks[name] = {}
+        end
+        tinsert(Hooks[name], func)
+    end
+end
 function private.HookTooltip(tooltip)
-    for hookName, hooks in next, private.Hooks do
-        tooltip:HookScript(hookName, function(...)
-            for i = 1, #private.Hooks[hookName] do
-                private.Hooks[hookName][i](tooltip)
+    for scriptName, funcs in next, Scripts do
+        tooltip:HookScript(scriptName, function(...)
+            for i = 1, #funcs do
+                funcs[i](tooltip)
+            end
+        end)
+    end
+
+    for hookName, funcs in next, Hooks do
+        _G.hooksecurefunc(tooltip, hookName, function(...)
+            for i = 1, #funcs do
+                funcs[i](...)
             end
         end)
     end
@@ -435,7 +452,7 @@ local factionIcon = {
     },
 }
 
-local function OnTooltipSetUnit(self)
+private.AddHook("OnTooltipSetUnit", function(self)
     Tooltips:debug("--- OnTooltipSetUnit ---")
 
     local unit = GetUnit(self)
@@ -632,10 +649,9 @@ local function OnTooltipSetUnit(self)
             _G.GameTooltipStatusBar:Hide()
         end
     end
-end
-tinsert(private.Hooks.OnTooltipSetUnit, OnTooltipSetUnit)
+end, true)
 
-local function OnTooltipSetItem(self)
+private.AddHook("OnTooltipSetItem", function(self)
     local _, link = self:GetItem()
     if Tooltips.db.global.showTransmog and link then
         local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
@@ -663,11 +679,10 @@ local function OnTooltipSetItem(self)
             end
         end
     end
-end
-tinsert(private.Hooks.OnTooltipSetItem, OnTooltipSetItem)
+end, true)
 
 local frameColor = Aurora.Color.frame
-local function OnTooltipCleared(self)
+private.AddHook("OnTooltipCleared", function(self)
     if self.factionIcon then
         self.factionIcon:Hide()
     end
@@ -676,8 +691,7 @@ local function OnTooltipCleared(self)
     self._id = nil
 
     self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
-end
-tinsert(private.Hooks.OnTooltipCleared, OnTooltipCleared)
+end, true)
 
 
 local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)

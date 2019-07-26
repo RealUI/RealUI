@@ -40,16 +40,16 @@ local function SetupSpellTooltips()
     _G.hooksecurefunc(_G.GameTooltip, "SetUnitBuff", function(self, unit, slotNumber) setAuraTooltipFunction(self, unit, slotNumber, "HELPFUL") end)
     _G.hooksecurefunc(_G.GameTooltip, "SetUnitDebuff", function(self, unit, slotNumber) setAuraTooltipFunction(self, unit, slotNumber, "HARMFUL") end)
 
-    tinsert(private.Hooks.OnTooltipSetSpell, function(self)
+    private.AddHook("OnTooltipSetSpell", function(self)
         local _, id = self:GetSpell()
         if id then
             AddToTooltip(self, TooltipTypes.spell, id)
         end
-    end)
+    end, true)
 end
 
 local function SetupItemTooltips()
-    tinsert(private.Hooks.OnTooltipSetItem, function(self)
+    private.AddHook("OnTooltipSetItem", function(self)
         local _, link = self:GetItem()
         if link then
             local id = link:match("item:(%d*)")
@@ -66,11 +66,11 @@ local function SetupItemTooltips()
                 AddToTooltip(self, TooltipTypes.item, id)
             end
         end
-    end)
+    end, true)
 end
 
 local function SetupUnitTooltips()
-    tinsert(private.Hooks.OnTooltipSetUnit, function(self)
+    private.AddHook("OnTooltipSetUnit", function(self)
         if _G.C_PetBattles.IsInBattle() then
             return
         end
@@ -82,7 +82,7 @@ local function SetupUnitTooltips()
                 AddToTooltip(self, TooltipTypes.unit, id)
             end
         end
-    end)
+    end, true)
 end
 
 local function SetupQuestTooltips()
@@ -117,7 +117,7 @@ local function SetupAchievementTooltips()
 end
 
 local function SetupCurrencyTooltips()
-    _G.hooksecurefunc(_G.GameTooltip, "SetCurrencyToken", function(self, index)
+    private.AddHook("SetCurrencyToken", function(self, index)
         local id = tonumber(_G.GetCurrencyListLink(index):match("currency:(%d+)"))
         if id then
             AddToTooltip(self, TooltipTypes.currency, id)
@@ -126,7 +126,7 @@ local function SetupCurrencyTooltips()
 end
 
 local function SetupAzeriteTooltips()
-    _G.hooksecurefunc(_G.GameTooltip, "SetAzeriteEssence", function(self, azeriteID, rank)
+    private.AddHook("SetAzeriteEssence", function(self, azeriteID, rank)
         if azeriteID then
             AddToTooltip(self, TooltipTypes.azerite, azeriteID)
         end
