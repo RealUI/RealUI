@@ -79,7 +79,7 @@ local function SetupUnitTooltips()
             local guid = _G.UnitGUID(unit) or ""
             local id = tonumber(guid:match("-(%d+)-%x+$"), 10)
             if id and (guid:match("%a+") ~= "Player") then
-                AddToTooltip(_G.GameTooltip, TooltipTypes.unit, id)
+                AddToTooltip(self, TooltipTypes.unit, id)
             end
         end
     end)
@@ -87,9 +87,8 @@ end
 
 local function SetupQuestTooltips()
     _G.hooksecurefunc("QuestMapLogTitleButton_OnEnter", function(self)
-        local questID = select(8, _G.GetQuestLogTitle(self.questLogIndex))
-        if questID then
-            AddToTooltip(_G.GameTooltip, TooltipTypes.quest, questID)
+        if self.questID then
+            AddToTooltip(_G.GameTooltip, TooltipTypes.quest, self.questID)
         end
     end)
 end
@@ -103,9 +102,8 @@ local function SetupAchievementTooltips()
                 button:HookScript("OnEnter", function()
                     _G.GameTooltip:SetOwner(button, "ANCHOR_NONE")
                     _G.GameTooltip:SetPoint("TOPLEFT", button, "TOPRIGHT", 0, 0)
-                    local id = button.id
-                    if id then
-                        AddToTooltip(_G.GameTooltip, TooltipTypes.achievement,id)
+                    if button.id then
+                        AddToTooltip(_G.GameTooltip, TooltipTypes.achievement, button.id)
                         _G.GameTooltip:Show()
                     end
                 end)
