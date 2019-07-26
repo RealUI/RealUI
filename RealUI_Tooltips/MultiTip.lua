@@ -21,17 +21,24 @@ function Skin.RealUIMultiTipTemplate(GameTooltip)
     Skin.UIPanelCloseButton(GameTooltip.Close)
 end
 
+local shownLinks, tooltipPool = {}
+local function Release(self)
+    shownLinks[self._link] = nil
+    tooltipPool:Release(self)
+end
 local function TooltipFactory(framePool)
     local numActive = framePool:GetNumActive()
-    return _G.CreateFrame("GameTooltip", "MultiTip"..numActive, _G.UIParent, framePool.frameTemplate)
+    local tooltip = _G.CreateFrame("GameTooltip", "MultiTip"..numActive, _G.UIParent, framePool.frameTemplate)
+    tooltip.Release = Release
+    return tooltip
 end
 local function TooltipReset(framePool, tooltip)
     tooltip:Hide()
+    tooltip._link = nil
 end
 
-local shownLinks = {}
 function private.SetupMultiTip()
-    local tooltipPool = _G.CreateObjectPool(TooltipFactory, TooltipReset)
+    tooltipPool = _G.CreateObjectPool(TooltipFactory, TooltipReset)
     tooltipPool.frameTemplate = "RealUIMultiTipTemplate"
     _G.hooksecurefunc(tooltipPool, "Acquire", Hook.ObjectPoolMixin_Acquire)
 
@@ -41,12 +48,12 @@ function private.SetupMultiTip()
 
         if types[linkType] and not _G.IsModifiedClick() then
             if shownLinks[link] then
-                tooltipPool:Release(shownLinks[link])
-                shownLinks[link] = nil
+                shownLinks[link]:Release()
             else
                 local tooltip = tooltipPool:Acquire()
 
                 tooltip:Show()
+                tooltip._link = link
                 if not tooltip:IsShown() then
                     tooltip:SetOwner(_G.UIParent, "ANCHOR_PRESERVE")
                 end
