@@ -236,7 +236,7 @@ local AddDynamicInfo, ClearDynamicInfo do
                         totalILvl = totalILvl + artifactILvl
                     end
 
-                    if artifactILvl <= 750 then
+                    if artifactILvl < 152 then
                         totalILvl = nil
                     end
                 end
