@@ -10,5 +10,6 @@
 Libs\Libs.xml
 
 RealUI_Tooltips.lua
+Currency.lua
 ObjectID.lua
 MultiTip.xml

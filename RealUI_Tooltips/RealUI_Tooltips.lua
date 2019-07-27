@@ -5,16 +5,16 @@ local _, private = ...
 
 -- Libs --
 local LOP = _G.LibStub("LibObjectiveProgress-1.0")
+local Aurora = _G.Aurora
+local Color = Aurora.Color
 
 -- RealUI --
 local RealUI = _G.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
 local round = RealUI.Round
 
 local Tooltips = RealUI:NewModule("Tooltips")
-
-local FramePoint = RealUI:GetModule("FramePoint")
-local Aurora = _G.Aurora
-local Color = Aurora.Color
+private.Tooltips = Tooltips
 
 local defaults = {
     global = {
@@ -23,6 +23,7 @@ local defaults = {
         showIDs = false,
         showTransmog = true,
         multiTip = true,
+        currency = {},
         position = {
             x = -100,
             y = 130,
@@ -709,6 +710,8 @@ function Tooltips:OnInitialize()
 
     FramePoint:RegisterMod(self)
     FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
+
+    private.SetupCurrency()
 
     if Tooltips.db.global.showIDs then
         private.SetupIDTips()
