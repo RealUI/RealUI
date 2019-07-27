@@ -25,11 +25,12 @@ local function AddToTooltip(tooltip, tooltipType, tooltipID)
         local tooltipText = formatString:format(tooltipType, tooltipID)
         tooltip:AddLine(tooltipText, Color.gray.r, Color.gray.g, Color.gray.b)
         tooltip._id = tooltipID
+        tooltip:Show()
     end
 end
 
 local function SetupSpellTooltips()
-    local setAuraTooltipFunction = function(self, unit, slotNumber, auraType)
+    local function setAuraTooltipFunction(self, unit, slotNumber, auraType)
         local id = select(10, _G.UnitAura(unit, slotNumber, auraType))
         if id then
             AddToTooltip(self, TooltipTypes.spell, id)
@@ -117,11 +118,16 @@ local function SetupAchievementTooltips()
 end
 
 local function SetupCurrencyTooltips()
-    private.AddHook("SetCurrencyToken", function(self, index)
-        local id = tonumber(_G.GetCurrencyListLink(index):match("currency:(%d+)"))
-        if id then
-            AddToTooltip(self, TooltipTypes.currency, id)
+    local function setCurrencyTooltipFunction(self, link)
+        local currencyID = link:match("currency:(%d+)")
+        if currencyID then
+            AddToTooltip(self, TooltipTypes.currency, currencyID)
         end
+    end
+
+    private.AddHook("SetHyperlink", setCurrencyTooltipFunction)
+    private.AddHook("SetCurrencyToken", function(self, index)
+        setCurrencyTooltipFunction(self, _G.GetCurrencyListLink(index))
     end)
 end
 
