@@ -61,17 +61,20 @@ local function UpdateCharacterList(currencyID, includePlayer)
     if playerInfo then
         tinsert(characterList, 1, playerInfo)
     end
+
+    return #characterList > 0
 end
 local function AddTooltipInfo(tooltip, currencyID, includePlayer)
-    UpdateCharacterList(currencyID, includePlayer)
-    tooltip:AddLine(" ")
-    for i = 1, #characterList do
-        local charInfo = characterList[i]
-        local r, g, b = _G.CUSTOM_CLASS_COLORS[charInfo.class]:GetRGB()
-        local charName = characterName:format(charInfo.faction, charInfo.name, charInfo.realm)
-        tooltip:AddDoubleLine(charName, charInfo.quantity, r, g, b, r, g, b)
+    if currencyID and UpdateCharacterList(currencyID, includePlayer) then
+        tooltip:AddLine(" ")
+        for i = 1, #characterList do
+            local charInfo = characterList[i]
+            local r, g, b = _G.CUSTOM_CLASS_COLORS[charInfo.class]:GetRGB()
+            local charName = characterName:format(charInfo.faction, charInfo.name, charInfo.realm)
+            tooltip:AddDoubleLine(charName, charInfo.quantity, r, g, b, r, g, b)
+        end
+        tooltip:Show()
     end
-    tooltip:Show()
 end
 
 local currencyNameToID = {}
