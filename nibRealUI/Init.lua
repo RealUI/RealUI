@@ -34,10 +34,40 @@ local RealUI = private.RealUI
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
 RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 2 and _G.tonumber(minor) >= 0)
 
+RealUI.realmInfo = {
+    realm = _G.GetRealmName(),
+    connectedRealms = _G.GetAutoCompleteRealms(),
+}
+
+if RealUI.realmInfo.connectedRealms[1] then
+    RealUI.realmInfo.isConnected = true
+end
+
+local function CheckforRealm()
+    RealUI.realmInfo.realmNormalized = _G.GetNormalizedRealmName()
+    if RealUI.realmInfo.realmNormalized then
+        if not RealUI.realmInfo.isConnected then
+            RealUI.realmInfo.connectedRealms[1] = RealUI.realmInfo.realmNormalized
+        end
+
+        RealUI:SendMessage("NormalizedRealmReceived")
+        return true
+    end
+
+    return false
+end
+
+if not CheckforRealm() then
+    local frame = _G.CreateFrame("Frame")
+    frame:SetScript("OnUpdate", function(self)
+        self:SetShown(not CheckforRealm())
+    end)
+end
+
 local classLocale, classToken, classID = _G.UnitClass("player")
 RealUI.charInfo = {
     name = _G.UnitName("player"),
-    realm = _G.GetRealmName(),
+    realm = RealUI.realmInfo.realm,
     faction = _G.UnitFactionGroup("player"),
     class = {
         locale = classLocale,

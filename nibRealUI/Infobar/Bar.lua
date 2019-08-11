@@ -898,7 +898,7 @@ function Infobar:OnInitialize()
     self.db:RegisterDefaults({
         char = {
             progressState = "xp",
-            currencyState = "gold",
+            currencyState = "money",
             specgear = specgear,
         },
         profile = {

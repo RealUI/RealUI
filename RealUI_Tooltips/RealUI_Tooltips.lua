@@ -13,7 +13,7 @@ local RealUI = _G.RealUI
 local FramePoint = RealUI:GetModule("FramePoint")
 local round = RealUI.Round
 
-local Tooltips = RealUI:NewModule("Tooltips")
+local Tooltips = RealUI:NewModule("Tooltips", "AceEvent-3.0")
 private.Tooltips = Tooltips
 
 local defaults = {
@@ -711,7 +711,11 @@ function Tooltips:OnInitialize()
     FramePoint:RegisterMod(self)
     FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
 
-    private.SetupCurrency()
+    if RealUI.realmInfo.realmNormalized then
+        private.SetupCurrency()
+    else
+        self:RegisterMessage("NormalizedRealmReceived", private.SetupCurrency)
+    end
 
     if Tooltips.db.global.showIDs then
         private.SetupIDTips()

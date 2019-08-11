@@ -6,7 +6,6 @@ local _, private = ...
 -- RealUI --
 local RealUI = _G.RealUI
 local characterInfo = RealUI.charInfo
-local connectedRealms
 
 local Tooltips = private.Tooltips
 local currencyDB
@@ -28,7 +27,7 @@ local characterList, characterName = {}, "%s %s %s"
 local function UpdateCharacterList(currencyID, includePlayer)
     wipe(characterList)
     local playerInfo
-    for index, realm in next, connectedRealms do
+    for index, realm in next, RealUI.realmInfo.connectedRealms do
         local realmDB = currencyDB[realm]
         if realmDB then
             for faction, factionDB in next, realmDB do
@@ -81,8 +80,11 @@ local currencyNameToID = {}
 local collapsed, scanning = {}
 local function UpdateCurrency()
     if scanning then return end
-    local charDB = currencyDB[characterInfo.realmNormalized][characterInfo.faction][characterInfo.name]
+    if not RealUI.realmInfo.realmNormalized then return end
+
     scanning = true
+    local charDB = currencyDB[RealUI.realmInfo.realmNormalized][characterInfo.faction][characterInfo.name]
+
     local i, limit = 1, _G.GetCurrencyListSize()
     while i <= limit do
         local name, isHeader, isExpanded, _, _, count = _G.GetCurrencyListInfo(i)
@@ -104,6 +106,7 @@ local function UpdateCurrency()
         end
         i = i + 1
     end
+
     while i > 0 do
         local name, isHeader, isExpanded = _G.GetCurrencyListInfo(i)
         if isHeader and isExpanded and collapsed[name] then
@@ -111,12 +114,15 @@ local function UpdateCurrency()
         end
         i = i - 1
     end
+
     wipe(collapsed)
     scanning = nil
 end
 
 local function UpdateMoney()
-    currencyDB[characterInfo.realmNormalized][characterInfo.faction][characterInfo.name].money = _G.GetMoney() or 0
+    if RealUI.realmInfo.realmNormalized then
+        currencyDB[RealUI.realmInfo.realmNormalized][characterInfo.faction][characterInfo.name].money = _G.GetMoney() or 0
+    end
 end
 
 local function SetUpHooks()
@@ -151,37 +157,31 @@ local function SetUpHooks()
             AddTooltipInfo(self, tonumber(id), true)
         end
     end)
-end
 
-local frame = _G.CreateFrame("Frame")
-frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
-frame:RegisterEvent("PLAYER_MONEY")
-frame:SetScript("OnEvent", function(self, event, ...)
-    Tooltips:debug("Currency:OnEvent", event, ...)
-    if event == "NEUTRAL_FACTION_SELECT_RESULT" then
-        local charInfo  = RealUI.charInfo
-        charInfo.faction = _G.UnitFactionGroup("player")
-        currencyDB[charInfo.realmNormalized][charInfo.faction][charInfo.name] = currencyDB[charInfo.realmNormalized]["Neutral"][charInfo.name]
-        currencyDB[charInfo.realmNormalized]["Neutral"][charInfo.name] = nil
-        UpdateCurrency()
-    elseif event == "CURRENCY_DISPLAY_UPDATE" then
-        UpdateCurrency()
-    elseif event == "PLAYER_MONEY" then
-        UpdateMoney()
-    end
-end)
-
-function private.SetupCurrency()
-    RealUI:InitCurrencyDB()
-    connectedRealms = _G.GetAutoCompleteRealms()
-    if not connectedRealms[1] then
-        -- if there are no connected realms, the return is just an empty table.
-        connectedRealms[1] = characterInfo.realmNormalized
-    end
-
+    local frame = _G.CreateFrame("Frame")
+    frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+    frame:RegisterEvent("PLAYER_MONEY")
     if characterInfo.faction == "Neutral" then
         frame:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
     end
+    frame:SetScript("OnEvent", function(self, event, ...)
+        Tooltips:debug("Currency:OnEvent", event, ...)
+        if event == "NEUTRAL_FACTION_SELECT_RESULT" then
+            local charInfo  = RealUI.charInfo
+            charInfo.faction = _G.UnitFactionGroup("player")
+            currencyDB[RealUI.realmInfo.realmNormalized][charInfo.faction][charInfo.name] = currencyDB[RealUI.realmInfo.realmNormalized]["Neutral"][charInfo.name]
+            currencyDB[RealUI.realmInfo.realmNormalized]["Neutral"][charInfo.name] = nil
+            UpdateCurrency()
+        elseif event == "CURRENCY_DISPLAY_UPDATE" then
+            UpdateCurrency()
+        elseif event == "PLAYER_MONEY" then
+            UpdateMoney()
+        end
+    end)
+end
+
+
+function private.SetupCurrency()
     currencyDB = RealUI.db.global.currency
 
     SetUpHooks()

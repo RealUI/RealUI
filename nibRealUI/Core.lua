@@ -263,46 +263,46 @@ function RealUI:RegisterLockdownUpdate(id, fun, ...)
 end
 
 local THIRTY_DAYS = 60 * 60 * 24 * 30
-function RealUI:InitCurrencyDB()
-    if not RealUI.charInfo.realmNormalized then
-        local DB = RealUI.db.global.currency
+local function InitCurrencyDB()
+    local currencyDB = RealUI.db.global.currency
+    local realmInfo = RealUI.realmInfo
 
-        local charInfo = RealUI.charInfo
-        charInfo.realmNormalized = _G.GetNormalizedRealmName()
-
-        local realm   = charInfo.realmNormalized
-        local faction = charInfo.faction
-        local player  = charInfo.name
-
-        if not DB[realm] then
-            DB[realm] = {}
-        end
-
-        if faction then
-            if not DB[realm][faction] then
-                DB[realm][faction] = {}
-            end
-            if not DB[realm][faction][player] then
-                DB[realm][faction][player] = {}
-            end
-
-            local now = _G.time()
-            local realmDB = DB[realm][faction]
-            local cutoff = now - THIRTY_DAYS
-            for name, data in next, realmDB do
-                if data.lastSeen and data.lastSeen < cutoff then
-                    realmDB[name] = nil
+    -- clear out old data
+    local now = _G.time()
+    for index, realm in next, realmInfo.connectedRealms do
+        local realmDB = currencyDB[realm]
+        if realmDB then
+            for faction, factionDB in next, realmDB do
+                for name, data in next, factionDB do
+                    if not data.lastSeen or not data.class or not data.money then
+                        currencyDB[realm][faction][name] = nil
+                    elseif (now - data.lastSeen) >= THIRTY_DAYS then
+                        currencyDB[realm][faction][name] = nil
+                    end
                 end
             end
-
-            if not realmDB[player] then
-                realmDB[player] = {}
-            end
-            local charDB = realmDB[player]
-            charDB.class = charInfo.class.token
-            charDB.lastSeen = now
         end
     end
+
+    -- init current player
+    local charInfo = RealUI.charInfo
+    local realm   = realmInfo.realmNormalized
+    local faction = charInfo.faction
+    local player  = charInfo.name
+
+    if not currencyDB[realm] then
+        currencyDB[realm] = {}
+    end
+    if not currencyDB[realm][faction] then
+        currencyDB[realm][faction] = {}
+    end
+    if not currencyDB[realm][faction][player] then
+        currencyDB[realm][faction][player] = {
+            class = charInfo.class.token
+        }
+    end
+
+    currencyDB[realm][faction][player].lastSeen = now
 end
 
 local function UpdateSpec()
@@ -564,7 +564,11 @@ local onLoadMessages = {
 }
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
-    RealUI:InitCurrencyDB()
+    if RealUI.realmInfo.realmNormalized then
+        InitCurrencyDB()
+    else
+        self:RegisterMessage("NormalizedRealmReceived", InitCurrencyDB)
+    end
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
