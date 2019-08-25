@@ -432,84 +432,85 @@ end
 ---------------------
 -- MINIMAP BUTTONS --
 ---------------------
-local BlackList = {
-    QueueStatusMinimapButton = true,
-    GarrisonLandingPageMinimapButton = true,
-    MiniMapTracking = true,
-    MiniMapMailFrame = true,
-    HelpOpenTicketButton = true,
-    GameTimeFrame = true,
-    TimeManagerClockButton = true,
-}
-local OddList = {
-    BagSync_MinimapButton = true,
-    OutfitterMinimapButton = true,
-}
+do -- ButtonCollectFrame
+    local BlackList = {
+        QueueStatusMinimapButton = true,
+        GarrisonLandingPageMinimapButton = true,
+        MiniMapTracking = true,
+        MiniMapMailFrame = true,
+        HelpOpenTicketButton = true,
+        GameTimeFrame = true,
+        TimeManagerClockButton = true,
+    }
+    local OddList = {
+        BagSync_MinimapButton = true,
+        OutfitterMinimapButton = true,
+    }
 
-local buttonSize, buttonsPerRow = 32, 4
-local buttonFrame = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.Minimap)
-_G.Aurora.Base.SetBackdrop(buttonFrame, _G.Aurora.Color.frame)
-buttonFrame:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
-buttonFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
-buttonFrame:SetHeight(buttonSize)
-buttonFrame:SetAlpha(0)
-buttonFrame:EnableMouse(true)
-buttonFrame:HookScript("OnEnter", fadeIn)
-buttonFrame:HookScript("OnLeave", fadeOut)
+    local buttonFrame = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
+    _G.Aurora.Base.SetBackdrop(buttonFrame, _G.Aurora.frameColor:GetRGBA())
+    buttonFrame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
+    buttonFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
+    buttonFrame:SetHeight(32)
+    buttonFrame:SetFrameStrata("LOW")
+    buttonFrame:SetFrameLevel(10)
+    buttonFrame:EnableMouse(true)
+    buttonFrame:SetAlpha(0)
+    buttonFrame:Show()
+    buttonFrame:HookScript("OnEnter", fadeIn)
+    buttonFrame:HookScript("OnLeave", fadeOut)
 
-local buttonGap = buttonFrame:GetWidth() / buttonsPerRow - buttonSize
-local function MoveMMButton(button)
-    if not button then return end
+    local function setupButton(button)
+        if not button then return end
+        if button._isSkinned then return end
 
-    MinimapAdv:debug("MoveMMButton", button:GetName(), button.styled)
-    if button.styled then return end
-
-    button:SetParent(buttonFrame)
-    _G.tinsert(buttonFrame, button)
-
-    local index = #buttonFrame
-    button:ClearAllPoints()
-    if index == 1 then
-        button:SetPoint("TOPLEFT", buttonFrame, "TOPLEFT", buttonGap, -buttonGap)
-    else
-        if (index % buttonsPerRow) == 1 then
-            button:SetPoint("TOPLEFT", buttonFrame[index - buttonsPerRow], "BOTTOMLEFT", 0, -buttonGap)
-        else
-            button:SetPoint("TOPLEFT", buttonFrame[index - 1], "TOPRIGHT", buttonGap, 0)
-        end
+        button:SetParent(buttonFrame)
+        button.ClearAllPoints = function() return end
+        button.SetPoint = function() return end
+        button:HookScript("OnEnter", function() fadeIn(buttonFrame) end)
+        button:HookScript("OnLeave", function() fadeOut(buttonFrame) end)
+        _G.tinsert(buttonFrame, button)
+        button._isSkinned = true
     end
-    button.ClearAllPoints = function() return end
-    button.SetPoint = function() return end
-    button:HookScript("OnEnter", function() fadeIn(buttonFrame) end)
-    button:HookScript("OnLeave", function() fadeOut(buttonFrame) end)
-    button.styled = true
-end
 
-local function UpdateMMButtonsTable()
-    for i, child in next, {_G.Minimap:GetChildren()} do
-        if not BlackList[child:GetName()] and not child.questID then
-            if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
-                MoveMMButton(child)
+    local ClearAllPoints, SetPoint = buttonFrame.ClearAllPoints, buttonFrame.SetPoint
+    local function positionButtons()
+        local line, row = _G.floor(buttonFrame:GetWidth() / 32), 0
+        for i = 1, #buttonFrame do
+            local button = buttonFrame[i]
+            ClearAllPoints(button)
+            --print("Eval", i, i + line - 1, _G.floor(row+1) * line, row)
+            if i + line - 1 == _G.floor(row + 1) * line then
+                --print("Row start", i)
+                SetPoint(button, "TOPLEFT", buttonFrame, "TOPLEFT", 0, -(row * 32))
+            else
+                --print("Row cont.", i)
+                SetPoint(button, "TOPLEFT", buttonFrame[i - 1], "TOPRIGHT", 2, 0)
+            end
+            row = i / line
+        end
+        buttonFrame:SetHeight(_G.ceil(row) * 32)
+    end
+
+    function MinimapAdv:UpdateButtonCollection()
+        if not db.information.minimapbuttons then return end
+        for i, child in next, {_G.Minimap:GetChildren()} do
+            if not(BlackList[child:GetName()]) and not child.questID then
+                if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
+                    setupButton(child)
+                end
             end
         end
-    end
-    for f, _ in next, OddList do
-        MoveMMButton(_G[f])
-    end
+        for f, _ in next, OddList do
+            setupButton(_G[f])
+        end
 
-
-    if #buttonFrame > 0 then
-        local numRows = _G.ceil(#buttonFrame / buttonsPerRow)
-        buttonFrame:SetHeight(numRows * buttonSize + numRows * buttonGap)
-        buttonFrame:Show()
-    else
-        buttonFrame:Hide()
-    end
-end
-
-local function RefreshMinimapButtons(...)
-    if db.information.minimapbuttons then
-        UpdateMMButtonsTable()
+        if #buttonFrame == 0 then
+            buttonFrame:Hide()
+        else
+            positionButtons()
+            buttonFrame:Show()
+        end
     end
 end
 
@@ -951,6 +952,7 @@ function MinimapAdv:Update()
     self:ZoneChange()
     self:DungeonDifficultyUpdate()
     self:UpdateButtonsPosition()
+    self:UpdateButtonCollection()
     UpdateProcessing = false
 end
 
@@ -1162,18 +1164,17 @@ local function Farm_OnMouseDown()
         isInFarmMode = false
         MMFrames.farm.icon:SetTexture(Textures.Expand)
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_CLOSE)
-        buttonFrame:Show()
     else
         isInFarmMode = true
         MMFrames.farm.icon:SetTexture(Textures.Collapse)
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
-        buttonFrame:Hide()
     end
     LDD:CloseAll()
 
     MinimapAdv:ToggleGatherer()
     MinimapAdv:UpdateMinimapPosition()
     MinimapAdv:UpdateFarmModePOI()
+    MinimapAdv:UpdateButtonCollection()
 end
 
 function MinimapAdv:FarmBind()
@@ -1385,9 +1386,9 @@ function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     _G.TimeManagerClockButton.Show = function() end
 
     -- Update Minimap position and visible state
-    RefreshMinimapButtons(event, ...)
     self:UpdateShownState() -- Will also call MinimapAdv:Update
     self:UpdateMinimapPosition()
+    self:UpdateButtonCollection()
 end
 
 -- Hide default Clock Button
@@ -1405,7 +1406,7 @@ function MinimapAdv:ADDON_LOADED(event, ...)
         _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     end
 
-    RefreshMinimapButtons(event, ...)
+    self:UpdateButtonCollection()
 end
 
 function MinimapAdv:PLAYER_LOGIN(event, ...)
