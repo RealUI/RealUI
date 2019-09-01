@@ -110,14 +110,15 @@ end
 
 function BlockMixin:OnDragStart(button)
     Infobar:debug("OnDragStart", self.name, button)
-    local dock = Infobar.frame[self.side]
-    dock:RemoveBlock(self)
+    local dock = self:GetNearestDock()
+    dock:DetatchBlock(self)
 
     local x, y = self:GetCenter()
     x = x - (self:GetWidth()/Scale.Value(2))
     y = y - (self:GetHeight()/Scale.Value(2))
     self:ClearAllPoints()
     Scale.RawSetPoint(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y)
+    self:SetMovable(true)
     self:StartMoving()
     MOVING_BLOCK = self
 end
@@ -126,20 +127,8 @@ function BlockMixin:OnDragStop(button)
     Infobar:debug("OnDragStop", self.name, button)
     self:StopMovingOrSizing()
 
-    local dock = Infobar.frame[self.side]
-    dock:HideInsertHighlight()
-
-    if ( dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) ) then
-        local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition()
-        mouseX, mouseY = mouseX / scale, mouseY / scale
-
-        -- DockFrame
-        dock:AddBlock(self, dock:GetInsertIndex(mouseX, mouseY))
-        dock:UpdateBlocks(true)
-    else
-        self:RestorePosition()
-    end
-
+    local dock = self:GetNearestDock()
+    dock:AtatchBlock(self)
     self:SavePosition()
 
     MOVING_BLOCK = nil
@@ -172,15 +161,13 @@ function BlockMixin:OnUpdate(elapsed)
     end
 
     if self == MOVING_BLOCK then
-        local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition()
-        cursorX, cursorY = cursorX / scale, cursorY / scale
-        local dock = Infobar.frame[self.side]
-        if dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) then
-            dock:PlaceInsertHighlight(cursorX, cursorY)
-        else
-            dock:HideInsertHighlight()
+        local dock = self:GetNearestDock()
+        if dock:IsMouseOver(BAR_HEIGHT * 2, 0, 0, 0) then
+            local insert = dock:GetInsertIndex()
+            if self.index ~= insert then
+                dock:MoveBlock(self, insert)
+            end
         end
-        self:UpdateButtonSide()
 
         if not _G.IsMouseButtonDown(self.dragButton) then
             self:OnDragStop(self.dragButton)
@@ -190,25 +177,36 @@ function BlockMixin:OnUpdate(elapsed)
     end
 end
 
-function BlockMixin:UpdateButtonSide()
-    local xOfs =  self:GetCenter()
-    local uiCenter = Infobar.frame:GetWidth() / 2
-    local changed = nil
-    if xOfs < uiCenter then
-        if self.side ~= "left" then
-            self.side = "left"
-            changed = 1
-        end
-    else
-        if self.side ~= "right" then
-            self.side = "right"
-            changed = 1
-        end
+function BlockMixin:GetScreenLocation()
+    local left, right = self:GetLeft(), self:GetRight()
+
+    local center = self:GetCenter()
+    if self == MOVING_BLOCK then
+        center = _G.GetScaledCursorPosition()
     end
-    return changed
+
+    return left, right, center
+end
+
+function BlockMixin:GetNearestDock()
+    local _, _, xOfs =  self:GetScreenLocation()
+    local uiCenter = Infobar.frame:GetWidth() / 2
+
+    local oldSide, newSide = self.side, "left"
+    if xOfs > uiCenter then
+        newSide = "right"
+    end
+
+    if oldSide ~= newSide then
+        Infobar.frame[oldSide]:RemoveBlock(self)
+        Infobar.frame[newSide]:AddBlock(self)
+    end
+
+    return Infobar.frame[newSide]
 end
 
 function BlockMixin:SavePosition()
+    if not self.dataObj then return end
     local blockInfo = Infobar:GetBlockInfo(self.name, self.dataObj)
 
     blockInfo.side = self.side
@@ -218,7 +216,7 @@ end
 function BlockMixin:RestorePosition()
     local blockInfo = Infobar:GetBlockInfo(self.name, self.dataObj)
 
-    local dock = Infobar.frame[blockInfo.side]
+    local dock = self:GetNearestDock()
     dock:AddBlock(self, blockInfo.index)
 end
 
@@ -280,7 +278,6 @@ end
 local function CreateNewBlock(name, dataObj, blockInfo)
     Infobar:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
-    block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
@@ -343,31 +340,33 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     block:SetHighlightTexture(highlight)
     block.highlight = highlight
 
-    local pulse = block:CreateTexture(nil, "ARTWORK")
-    pulse:SetTexture([[Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight-yellow]])
-    pulse:SetBlendMode("ADD")
-    pulse:SetAlpha(0)
-    Scale.Point(pulse, "TOPLEFT")
-    Scale.Point(pulse, "BOTTOMRIGHT")
+    do -- pulseAnim
+        local pulse = block:CreateTexture(nil, "ARTWORK")
+        pulse:SetTexture([[Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight-yellow]])
+        pulse:SetBlendMode("ADD")
+        pulse:SetAlpha(0)
+        Scale.Point(pulse, "TOPLEFT")
+        Scale.Point(pulse, "BOTTOMRIGHT")
 
-    local AnimationGroup = block:CreateAnimationGroup()
-    AnimationGroup:SetToFinalAlpha(true)
-    AnimationGroup:SetLooping("REPEAT")
-    block.pulseAnim = AnimationGroup
+        local pulseAnim = block:CreateAnimationGroup()
+        pulseAnim:SetToFinalAlpha(true)
+        pulseAnim:SetLooping("REPEAT")
+        block.pulseAnim = pulseAnim
 
-    local fadeIn = AnimationGroup:CreateAnimation('Alpha')
-    fadeIn:SetTarget(pulse)
-    fadeIn:SetFromAlpha(0)
-    fadeIn:SetToAlpha(1)
-    fadeIn:SetDuration(1)
-    fadeIn:SetOrder(1)
+        local fadeIn = pulseAnim:CreateAnimation("Alpha")
+        fadeIn:SetTarget(pulse)
+        fadeIn:SetFromAlpha(0)
+        fadeIn:SetToAlpha(1)
+        fadeIn:SetDuration(1)
+        fadeIn:SetOrder(1)
 
-    local fadeOut = AnimationGroup:CreateAnimation('Alpha')
-    fadeOut:SetTarget(pulse)
-    fadeOut:SetFromAlpha(1)
-    fadeOut:SetToAlpha(0)
-    fadeOut:SetDuration(1)
-    fadeOut:SetOrder(2)
+        local fadeOut = pulseAnim:CreateAnimation("Alpha")
+        fadeOut:SetTarget(pulse)
+        fadeOut:SetFromAlpha(1)
+        fadeOut:SetToAlpha(0)
+        fadeOut:SetDuration(1)
+        fadeOut:SetOrder(2)
+    end
 
     block:SetScript("OnEnter", block.OnEnter)
     block:SetScript("OnLeave", block.OnLeave)
@@ -379,6 +378,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     block:SetScript("OnUpdate", block.OnUpdate)
     block:AdjustElements(blockInfo)
     block:SetClampedToScreen(true)
+    block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
     return block
 end
 
@@ -543,6 +543,10 @@ function DockMixin:OnLoad()
     Scale.Size(self.insertHighlight, 1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
+    self.spacerBlock = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
+    self.spacerBlock.name = "spacer"
+    Scale.Height(self.spacerBlock, BAR_HEIGHT)
+
     self.DOCKED_BLOCKS = {}
     self.ADJUSTED_BLOCKS = {} -- blocks that are not in thier saved position
     self.isDirty = true    --You dirty, dirty frame
@@ -564,7 +568,9 @@ function DockMixin:AddBlock(block, position)
 
     self.isDirty = true
     block.isDocked = true
+    block.side = self.side
 
+    position = position or (#self.DOCKED_BLOCKS + 1)
     local adjustedPosition = position
     for i = 1, #self.ADJUSTED_BLOCKS do
         if adjustedPosition < self.ADJUSTED_BLOCKS[i].position then
@@ -596,8 +602,6 @@ function DockMixin:AddBlock(block, position)
         })
     end
 
-    self:HideInsertHighlight()
-
     if ( self.primary ~= block ) then
         block:ClearAllPoints()
         block:SetMovable(false)
@@ -608,11 +612,11 @@ function DockMixin:AddBlock(block, position)
 end
 
 function DockMixin:RemoveBlock(block)
-    _G.assert(block ~= self.primary or #self.DOCKED_BLOCKS == 1)
+    if block == self.primary or #self.DOCKED_BLOCKS == 1 then return end
+
     self.isDirty = true
     _G.tDeleteItem(self.DOCKED_BLOCKS, block)
     block.isDocked = false
-    block:SetMovable(true)
 
     block:Show()
     self:UpdateBlocks()
@@ -620,6 +624,32 @@ end
 
 function DockMixin:HasDockedBlock(block)
     return _G.tContains(self.DOCKED_BLOCKS, block)
+end
+
+function DockMixin:GetBlockAtIndex(index)
+    local block = self.DOCKED_BLOCKS[index]
+    if block.isDetatched then
+        return self.spacerBlock, true
+    else
+        return block
+    end
+end
+
+function DockMixin:DetatchBlock(block)
+    block.isDetatched = true
+    self.spacerBlock:Show()
+    self:UpdateBlocks(true)
+end
+
+function DockMixin:AtatchBlock(block)
+    block.isDetatched = nil
+    self.spacerBlock:Hide()
+    self:UpdateBlocks(true)
+end
+
+function DockMixin:MoveBlock(block, newIndex)
+    self:RemoveBlock(block)
+    self:AddBlock(block, newIndex)
 end
 
 local toBeRemoved = {}
@@ -659,7 +689,13 @@ function DockMixin:UpdateBlocks(forceUpdate)
         block:SavePosition()
         block:Show()
 
-        if ( lastBlock ) then
+        if block.isDetatched then
+            self.spacerBlock:SetWidth(block:GetWidth())
+            block = self.spacerBlock
+        end
+
+        block:ClearAllPoints()
+        if lastBlock then
             local xOfs = self.side == "left" and db.blockGap or -db.blockGap
             Scale.Point(block, self.anchor, lastBlock, self.anchorAlt, xOfs, 0)
         else
@@ -673,44 +709,24 @@ function DockMixin:UpdateBlocks(forceUpdate)
     return true
 end
 
-function DockMixin:GetInsertIndex(mouseX, mouseY)
-    local maxPosition = 0
-    for index, block in ipairs(self.DOCKED_BLOCKS) do
-        if self.side == "left" then
-            if mouseX < (block:GetLeft() + block:GetRight()) / 2 and  --Find the first block we're on the left of. (Being on top of the block, but left of the center counts)
-                block ~= self.primary then   --We never count as being to the left of the primary block.
-                return index
-            end
-        elseif self.side == "right" then
-            if mouseX > (block:GetLeft() + block:GetRight()) / 2 and
-                block ~= self.primary then
-                return index
-            end
+function DockMixin:GetInsertIndex()
+    local _, _, moveX = MOVING_BLOCK:GetScreenLocation()
+    local insertIndex, detachedIndex
+    for index = 2, #self.DOCKED_BLOCKS do
+        local block, isDetatched = self:GetBlockAtIndex(index)
+        local left, right = block:GetScreenLocation()
+        if isDetatched then
+            detachedIndex = index
         end
-        maxPosition = index
+
+        if moveX > left and moveX < right then
+            insertIndex = index
+        end
     end
+    insertIndex = (insertIndex or detachedIndex) or #self.DOCKED_BLOCKS
+
     --We aren't to the left of anything, so we're going into the far-right position.
-    return maxPosition + 1
-end
-
-function DockMixin:PlaceInsertHighlight(mouseX, mouseY)
-    local insert = self:GetInsertIndex(mouseX, mouseY)
-
-    local attachFrame = self.primary
-
-    for index, block in ipairs(self.DOCKED_BLOCKS) do
-        if ( index < insert ) then
-            attachFrame = block
-        end
-    end
-
-    self.insertHighlight:ClearAllPoints()
-    Scale.Point(self.insertHighlight, self.anchor, attachFrame, self.anchorAlt, 0, 0)
-    self.insertHighlight:Show()
-end
-
-function DockMixin:HideInsertHighlight()
-    self.insertHighlight:Hide()
+    return insertIndex, insertIndex == self.DOCKED_BLOCKS
 end
 
 --------------------
