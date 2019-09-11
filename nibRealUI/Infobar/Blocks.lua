@@ -1,7 +1,9 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next unpack tinsert
+-- luacheck: globals min max tonumber floor
+-- luacheck: globals sort tinsert unpack wipe
+-- luacheck: globals next date strsplit type
 
 -- Libs --
 local LDD = _G.LibStub("LibDropDown")
@@ -112,7 +114,7 @@ local function SetupTextTable()
         end
 
         self:Show()
-        local numToDisplay = _G.min(MAX_ROWS, #data)
+        local numToDisplay = min(MAX_ROWS, #data)
         local scrollFrameHeight = (#data - numToDisplay) * ROW_HEIGHT
         if ( scrollFrameHeight < 0 ) then
             scrollFrameHeight = 0
@@ -196,7 +198,7 @@ local function SetupTextTable()
                     sortHandler = SortSimple
                 end
 
-                _G.sort(data, Compare)
+                sort(data, Compare)
                 UpdateScroll(self.scrollArea)
             end
         end
@@ -372,12 +374,12 @@ local function SetupTextTable()
             Infobar:debug("Width", col, remainingWidth)
         end
         for header, size in next, flex do
-            local headerWidth = _G.max(width * size, header.text:GetStringWidth())
+            local headerWidth = max(width * size, header.text:GetStringWidth())
             remainingWidth = remainingWidth - headerWidth
             header:SetWidth(headerWidth)
             Infobar:debug("Width", headerWidth, remainingWidth)
         end
-        filler:SetWidth(_G.max(remainingWidth, filler:GetWidth()))
+        filler:SetWidth(max(remainingWidth, filler:GetWidth()))
 
         Infobar:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
         if extData[data].sortColumn then
@@ -586,7 +588,7 @@ function Infobar:CreateBlocks()
             {text = _G.DUNGEONS_BUTTON,
                 func = ToggleUI,
                 args = {"PVEFrame_ToggleFrame"},
-                disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
+                disabled = _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
             },
             {text = _G.COLLECTIONS,
                 func = ToggleUI,
@@ -672,7 +674,7 @@ function Infobar:CreateBlocks()
         local function RetrieveTime(isMilitary, isLocal)
             local timeFormat, hour, min, suffix
             if isLocal then
-                hour, min = _G.tonumber(_G.date("%H")), _G.tonumber(_G.date("%M"))
+                hour, min = tonumber(date("%H")), tonumber(date("%M"))
             else
                 hour, min = _G.GetGameTime()
             end
@@ -765,7 +767,7 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Date
-                tooltip:AddLine(L["Clock_Date"], _G.date("%b %d (%a)"))
+                tooltip:AddLine(L["Clock_Date"], date("%b %d (%a)"))
 
                 -- Invites
                 if block.invites and block.invites > 0 then
@@ -829,7 +831,7 @@ function Infobar:CreateBlocks()
 
         local NameSort do
             function NameSort(val1, val2, row1, row2)
-                Infobar:debug("NameSort", _G.strsplit("|", val1))
+                Infobar:debug("NameSort", strsplit("|", val1))
                 val1 = val1:match(nameMatch)
                 val2 = val2:match(nameMatch)
                 Infobar:debug("Player1", val1)
@@ -953,7 +955,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, tableWidth)
                 end
 
-                _G.table.wipe(guildData)
+                wipe(guildData)
                 guildData.width = tableWidth
                 guildData.header = headerData
                 guildData.defaultSort = 4
@@ -982,7 +984,7 @@ function Infobar:CreateBlocks()
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
 
-                        _G.tinsert(guildData, {
+                        tinsert(guildData, {
                             id = i,
                             info = {
                                 name, lvl, zone, rank, note, offnote
@@ -1150,7 +1152,7 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.FRIENDS)
 
-                _G.table.wipe(friendsData)
+                wipe(friendsData)
                 friendsData.width = tableWidth
                 friendsData.header = headerData
                 friendsData.defaultSort = 1
@@ -1191,7 +1193,7 @@ function Infobar:CreateBlocks()
                         name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
 
                         -- Difficulty color levels
-                        local lvl = _G.tonumber(level)
+                        local lvl = tonumber(level)
                         if lvl then
                             local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
                             level = ("%s%d|r"):format(color, level)
@@ -1211,7 +1213,7 @@ function Infobar:CreateBlocks()
                         if noteText == "" then noteText = nil end
 
 
-                        _G.tinsert(friendsData, {
+                        tinsert(friendsData, {
                             id = i,
                             info = {
                                 name, level, status, noteText
@@ -1237,13 +1239,13 @@ function Infobar:CreateBlocks()
                         end
 
                         -- Difficulty color levels
-                        local lvl = _G.tonumber(level)
+                        local lvl = tonumber(level)
                         if lvl then
                             level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
                         end
 
                         -- Add Friend to list
-                        _G.tinsert(friendsData, {
+                        tinsert(friendsData, {
                             id = #friendsData + i,
                             info = {
                                 cName, level, area, noteText
@@ -1676,8 +1678,8 @@ function Infobar:CreateBlocks()
                 main:SetValue(curValue)
                 main:Show()
 
-                if _G.type(otherValue) == "number" then
-                    local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
+                if type(otherValue) == "number" then
+                    local restedOfs = max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
                     Scale.Point(main.rested, "BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
                 end
@@ -1950,7 +1952,7 @@ function Infobar:CreateBlocks()
 
         local function UpdateGearSets()
             equipmentSetIDs = C_EquipmentSet.GetEquipmentSetIDs()
-            _G.wipe(equipmentSetInfos)
+            wipe(equipmentSetInfos)
             for index = 1, #equipmentSetIDs do
                 local equipName = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetIDs[index])
                 equipmentSetInfos[equipmentSetIDs[index]] = {
@@ -2082,8 +2084,8 @@ function Infobar:CreateBlocks()
         end
         local function SplitMoney(money)
             if not money then return 0,0,0 end
-            local gold = _G.floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
-            local silver = _G.floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
+            local gold = floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
+            local silver = floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
             local copper = money % _G.COPPER_PER_SILVER
             return gold, silver, copper
         end
@@ -2241,7 +2243,7 @@ function Infobar:CreateBlocks()
         local function Currency_OnClick(row, ...)
             local name = row[1]:GetText():match(nameMatch)
             if not name then return end
-            local realm, faction = _G.strsplit("-", row.meta[1])
+            local realm, faction = strsplit("-", row.meta[1])
 
             if _G.IsAltKeyDown() then
                 currencyDB[realm][faction][name] = nil
@@ -2344,7 +2346,7 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.CURRENCY)
 
-                _G.table.wipe(currencyData)
+                wipe(currencyData)
                 currencyData.width = tableWidth
                 currencyData.header = headerData
                 currencyData.defaultSort = 1
@@ -2363,7 +2365,7 @@ function Infobar:CreateBlocks()
                                 local money = GetMoneyString(data.money, true)
                                 realmMoneyTotal = realmMoneyTotal + data.money
 
-                                _G.table.wipe(tokens)
+                                wipe(tokens)
                                 for i = 1, _G.MAX_WATCHED_TOKENS do
                                     if data["token"..i] then
                                         local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
@@ -2375,10 +2377,10 @@ function Infobar:CreateBlocks()
                                     end
                                 end
 
-                                _G.tinsert(currencyData, {
+                                tinsert(currencyData, {
                                     id = #currencyData + 1,
                                     info = {
-                                        name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
+                                        name, money, tokens[1], tokens[2], tokens[3], date("%b %d", data.lastSeen)
                                     },
                                     meta = {
                                         realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""

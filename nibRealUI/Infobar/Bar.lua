@@ -1,7 +1,8 @@
 local _, private = ...
 
 -- Lua Globals --
-local next, ipairs = _G.next, _G.ipairs
+-- luacheck: globals next ipairs error assert min type
+-- luacheck: globals tinsert tremove wipe sort unpack
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -270,8 +271,8 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
-    _G.tinsert(orderedBlocks, block)
-    _G.sort(orderedBlocks, SortBlocks)
+    tinsert(orderedBlocks, block)
+    sort(orderedBlocks, SortBlocks)
 
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.25)
@@ -308,7 +309,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
                 icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
             end
             if dataObj.iconCoords then
-                icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+                icon:SetTexCoord(unpack(dataObj.iconCoords))
             end
         end
         block.icon = icon
@@ -447,7 +448,7 @@ function Infobar:HideBlock(name, dataObj, blockInfo)
             end
             i = i + 1
         end
-        _G.tinsert(dock.ADJUSTED_BLOCKS, i, {
+        tinsert(dock.ADJUSTED_BLOCKS, i, {
             position = position, -- where the block should be
             index = #dock.DOCKED_BLOCKS, -- where the block is
             isHidden = true,
@@ -469,8 +470,8 @@ function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
                 isFake = true
             }
             blocksByData[dataObj] = block
-            _G.tinsert(orderedBlocks, block)
-            _G.sort(orderedBlocks, SortBlocks)
+            tinsert(orderedBlocks, block)
+            sort(orderedBlocks, SortBlocks)
         end
     end
 end
@@ -505,7 +506,7 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
                     block.icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
                 end
                 if dataObj.iconCoords then
-                    block.icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+                    block.icon:SetTexCoord(unpack(dataObj.iconCoords))
                 end
             end
         end
@@ -554,7 +555,7 @@ end
 
 function DockMixin:AddBlock(block, position)
     if ( not self.primary ) then
-        _G.error("Need a primary block before another can be added.")
+        error("Need a primary block before another can be added.")
     end
 
     if ( self:HasDockedBlock(block) ) then
@@ -575,10 +576,10 @@ function DockMixin:AddBlock(block, position)
     end
 
     if ( adjustedPosition and adjustedPosition <= #self.DOCKED_BLOCKS + 1 ) then
-        _G.assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition)
-        _G.tinsert(self.DOCKED_BLOCKS, adjustedPosition, block)
+        assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition)
+        tinsert(self.DOCKED_BLOCKS, adjustedPosition, block)
     else
-        _G.tinsert(self.DOCKED_BLOCKS, block)
+        tinsert(self.DOCKED_BLOCKS, block)
     end
 
     if position > #self.DOCKED_BLOCKS or adjustedPosition ~= position then
@@ -590,7 +591,7 @@ function DockMixin:AddBlock(block, position)
             end
             i = i + 1
         end
-        _G.tinsert(self.ADJUSTED_BLOCKS, i, {
+        tinsert(self.ADJUSTED_BLOCKS, i, {
             position = position, -- where the block should be
             index = #self.DOCKED_BLOCKS, -- where the block is
             block = block
@@ -668,7 +669,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
             block:AdjustElements(Infobar:GetBlockInfo(block.name, block.dataObj))
         end
 
-        _G.wipe(toBeRemoved)
+        wipe(toBeRemoved)
         local indexAdjust = 0
         for i = 1, #self.ADJUSTED_BLOCKS do
             if self.ADJUSTED_BLOCKS[i].isHidden and index >= self.ADJUSTED_BLOCKS[i].position then
@@ -678,7 +679,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
             if block == self.ADJUSTED_BLOCKS[i].block then
                 if index == self.ADJUSTED_BLOCKS[i].position then
                     -- the block is now where is should be, remove it
-                    _G.tinsert(toBeRemoved, i)
+                    tinsert(toBeRemoved, i)
                 else
                     -- the block is *still* not where is should be, update it's index
                     self.ADJUSTED_BLOCKS[i].index = index
@@ -686,7 +687,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
             end
         end
         for i = 1, #toBeRemoved do
-            _G.tremove(self.ADJUSTED_BLOCKS, toBeRemoved[i])
+            tremove(self.ADJUSTED_BLOCKS, toBeRemoved[i])
         end
         block.index = index + indexAdjust
         block:SavePosition()
@@ -877,18 +878,18 @@ function Infobar:SettingsUpdate(setting, block)
 end
 
 function Infobar:GetBlockInfo(dataobjectname)
-    local objType = _G.type(dataobjectname)
-    _G.assert(objType == "string" or objType == "table", "\"dataobjectname\" must be a string or a table, got "..objType)
+    local objType = type(dataobjectname)
+    assert(objType == "string" or objType == "table", "\"dataobjectname\" must be a string or a table, got "..objType)
 
     local name, dataObj
     if objType == "table" then
         dataObj = dataobjectname
         name = LDB:GetNameByDataObject(dataObj)
-        _G.assert(dataObj.type and name, "table must be an LDB data object.")
+        assert(dataObj.type and name, "table must be an LDB data object.")
     elseif objType == "string" then
         name = dataobjectname
         dataObj = LDB:GetDataObjectByName(name)
-        _G.assert(dataObj and dataObj.type, "string must be the name of an LDB data object.")
+        assert(dataObj and dataObj.type, "string must be the name of an LDB data object.")
     end
 
     if dataObj.type == "RealUI" then
