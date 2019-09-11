@@ -162,7 +162,7 @@ function BlockMixin:OnUpdate(elapsed)
 
     if self == MOVING_BLOCK then
         local dock = self:GetNearestDock()
-        if dock:IsMouseOver(BAR_HEIGHT * 2, 0, 0, 0) then
+        if dock:IsMouseOver(BAR_HEIGHT * 4, 0, 0, 0) then
             local insert = dock:GetInsertIndex()
             if self.index ~= insert then
                 dock:MoveBlock(self, insert)
@@ -177,19 +177,8 @@ function BlockMixin:OnUpdate(elapsed)
     end
 end
 
-function BlockMixin:GetScreenLocation()
-    local left, right = self:GetLeft(), self:GetRight()
-
-    local center = self:GetCenter()
-    if self == MOVING_BLOCK then
-        center = _G.GetScaledCursorPosition()
-    end
-
-    return left, right, center
-end
-
 function BlockMixin:GetNearestDock()
-    local _, _, xOfs =  self:GetScreenLocation()
+    local xOfs =  self:GetCenter()
     local uiCenter = Infobar.frame:GetWidth() / 2
 
     local oldSide, newSide = self.side, "left"
@@ -543,9 +532,15 @@ function DockMixin:OnLoad()
     Scale.Size(self.insertHighlight, 1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
-    self.spacerBlock = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
-    self.spacerBlock.name = "spacer"
-    Scale.Height(self.spacerBlock, BAR_HEIGHT)
+    local spacerBlock = _G.Mixin(_G.CreateFrame("Button", nil, self), BlockMixin)
+    spacerBlock.name = "spacer"
+    Scale.Height(spacerBlock, BAR_HEIGHT)
+    self.spacerBlock = spacerBlock
+
+    local bg = spacerBlock:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(1, 1, 0, 0.5)
+    bg:SetAllPoints()
+    spacerBlock.bg = bg
 
     self.DOCKED_BLOCKS = {}
     self.ADJUSTED_BLOCKS = {} -- blocks that are not in thier saved position
@@ -608,6 +603,10 @@ function DockMixin:AddBlock(block, position)
         block:SetResizable(false)
     end
 
+    if block == MOVING_BLOCK then
+        self.spacerBlock:Show()
+    end
+
     self:UpdateBlocks()
 end
 
@@ -617,6 +616,10 @@ function DockMixin:RemoveBlock(block)
     self.isDirty = true
     _G.tDeleteItem(self.DOCKED_BLOCKS, block)
     block.isDocked = false
+
+    if block == MOVING_BLOCK then
+        self.spacerBlock:Hide()
+    end
 
     block:Show()
     self:UpdateBlocks()
@@ -710,15 +713,17 @@ function DockMixin:UpdateBlocks(forceUpdate)
 end
 
 function DockMixin:GetInsertIndex()
-    local _, _, moveX = MOVING_BLOCK:GetScreenLocation()
+    local moveX = MOVING_BLOCK:GetCenter()
     local insertIndex, detachedIndex
     for index = 2, #self.DOCKED_BLOCKS do
         local block, isDetatched = self:GetBlockAtIndex(index)
-        local left, right = block:GetScreenLocation()
+        local center = block:GetCenter()
         if isDetatched then
             detachedIndex = index
         end
 
+        local width = min(block:GetWidth(), MOVING_BLOCK:GetWidth()) / 2
+        local left, right = center - width, center + width
         if moveX > left and moveX < right then
             insertIndex = index
         end
