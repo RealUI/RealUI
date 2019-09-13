@@ -1,3 +1,4 @@
+local compatRelease = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 ----------------------------------------------------------------------------------------
 --  Force readycheck warning
 ----------------------------------------------------------------------------------------
@@ -13,8 +14,10 @@ _G.hooksecurefunc("ShowReadyCheck", ShowReadyCheckHook)
 ----------------------------------------------------------------------------------------
 local ForceWarning = _G.CreateFrame("Frame")
 ForceWarning:RegisterEvent("UPDATE_BATTLEFIELD_STATUS")
-ForceWarning:RegisterEvent("PET_BATTLE_QUEUE_PROPOSE_MATCH")
-ForceWarning:RegisterEvent("LFG_PROPOSAL_SHOW")
+if compatRelease then
+    ForceWarning:RegisterEvent("PET_BATTLE_QUEUE_PROPOSE_MATCH")
+    ForceWarning:RegisterEvent("LFG_PROPOSAL_SHOW")
+end
 ForceWarning:RegisterEvent("RESURRECT_REQUEST")
 ForceWarning:SetScript("OnEvent", function(self, event)
     if event == "UPDATE_BATTLEFIELD_STATUS" then
@@ -44,26 +47,28 @@ _G.StaticPopupDialogs.CONFIRM_SUMMON.hideOnEscape = nil
 _G.StaticPopupDialogs.ADDON_ACTION_FORBIDDEN.button1 = nil
 _G.StaticPopupDialogs.TOO_MANY_LUA_ERRORS.button1 = nil
 _G.PetBattleQueueReadyFrame.hideOnEscape = nil
-_G.PVPReadyDialog.leaveButton:Hide()
-_G.PVPReadyDialog.enterButton:ClearAllPoints()
-_G.PVPReadyDialog.enterButton:SetPoint("BOTTOM", _G.PVPReadyDialog, "BOTTOM", 0, 25)
+if compatRelease then
+    _G.PVPReadyDialog.leaveButton:Hide()
+    _G.PVPReadyDialog.enterButton:ClearAllPoints()
+    _G.PVPReadyDialog.enterButton:SetPoint("BOTTOM", _G.PVPReadyDialog, "BOTTOM", 0, 25)
 
-----------------------------------------------------------------------------------------
---  Auto select current event boss from LFD tool(EventBossAutoSelect by Nathanyel)
-----------------------------------------------------------------------------------------
-local firstLFD
-_G.LFDParentFrame:HookScript("OnShow", function()
-    if not firstLFD then
-        firstLFD = 1
-        for i = 1, _G.GetNumRandomDungeons() do
-            local id = _G.GetLFGRandomDungeonInfo(i)
-            local isHoliday = _G.select(15, _G.GetLFGDungeonInfo(id))
-            if isHoliday and not _G.GetLFGDungeonRewards(id) then
-                _G.LFDQueueFrame_SetType(id)
+    ----------------------------------------------------------------------------------------
+    --  Auto select current event boss from LFD tool(EventBossAutoSelect by Nathanyel)
+    ----------------------------------------------------------------------------------------
+    local firstLFD
+    _G.LFDParentFrame:HookScript("OnShow", function()
+        if not firstLFD then
+            firstLFD = 1
+            for i = 1, _G.GetNumRandomDungeons() do
+                local id = _G.GetLFGRandomDungeonInfo(i)
+                local isHoliday = _G.select(15, _G.GetLFGDungeonInfo(id))
+                if isHoliday and not _G.GetLFGDungeonRewards(id) then
+                    _G.LFDQueueFrame_SetType(id)
+                end
             end
         end
-    end
-end)
+    end)
+end
 
 ----------------------------------------------------------------------------------------
 --  Remove Boss Emote spam during BG(ArathiBasin SpamFix by Partha)

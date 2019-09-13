@@ -55,7 +55,13 @@ function BagButton:Create(bagID)
     buttonNum = buttonNum + 1
     local name = addon .. "BagButton" .. buttonNum
 
-    local button = _G.setmetatable(_G.CreateFrame("ItemButton", name, nil), self.__index)
+    local buttonFrame
+    if cargBags.compatRelease then
+        buttonFrame = _G.CreateFrame("ItemButton", name, nil)
+    else
+        buttonFrame = _G.CreateFrame("Button", name, nil, "ItemButtonTemplate")
+    end
+    local button = _G.setmetatable(buttonFrame, self.__index)
 
     local invID = _G.ContainerIDToInventoryID(bagID)
     button.invID = invID
@@ -228,6 +234,9 @@ local disabled = {
     [-1] = true,
     [0] = true,
 }
+if not cargBags.compatRelease then
+    disabled[11] = true
+end
 
 -- Register the plugin
 cargBags:RegisterPlugin("BagBar", function(self, bags)

@@ -8,8 +8,9 @@ local InspectPaperDollFrame_OnShow = nil
 local InspectGuildFrame_Update = nil
 local loaded = false
 local debugging = false
-local allowDetarget = false   	-- allow window to remain open when target is not inspectable (experimental)
-local serverTimeout = 1		-- timeout for INSPECT_READY response to assume server dropped it 
+local allowDetarget = false     -- allow window to remain open when target is not inspectable (experimental)
+local serverTimeout = 1         -- timeout for INSPECT_READY response to assume server dropped it
+local compatRelease = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local function debug(msg)
   if debugging then
@@ -23,7 +24,7 @@ local function inspectable(unit)
   return unit and UnitExists(unit) and UnitIsConnected(unit) and CanInspect(unit)
 end
 
-local function inspectfilter(self, event, ...) 
+local function inspectfilter(self, event, ...)
   --myprint(event,...)
   if loaded then
     local unit = InspectFrame.unit
@@ -32,14 +33,14 @@ local function inspectfilter(self, event, ...)
        return true
     elseif event == nil and not inspectable then
        return false
-    elseif event == "PLAYER_TARGET_CHANGED" then -- suppress close on change 
-       if inspectable and InspectFix.UserInspecting() then
+    elseif event == "PLAYER_TARGET_CHANGED" then -- suppress close on change
+       if compatRelease and inspectable and InspectFix.UserInspecting() then
           InspectFrame_UnitChanged(InspectFrame);
        end
        return false
     end
-    if inspectable and lastUINITime and not lastUIIRTime and 
-       InspectFix.UserInspecting() and 
+    if compatRelease and inspectable and lastUINITime and not lastUIIRTime and
+       InspectFix.UserInspecting() and
        (lastUINITime + serverTimeout) < GetTime() then
        debug("Re-issuing dropped notify")
        InspectFrame_UnitChanged(InspectFrame);
@@ -73,7 +74,7 @@ local inspect_item = {}
 local inspect_unit = nil
 local inspect_guid = nil
 local buttonhooked = {}
-local function pdfclick(self)  
+local function pdfclick(self)
    -- fix modified click on item buttons
    local id = self and self:GetID()
    local unit = InspectFrame.unit
@@ -128,10 +129,10 @@ local function pdfonenter(self)
         GameTooltip:SetHyperlink(inspect_item[id])
       else
         local name,link = GameTooltip:GetItem()
-	if link and link ~= inspect_item[id] then
-	  debug("Updating "..(inspect_item[id] or "nil").." to "..link)
+        if link and link ~= inspect_item[id] then
+          debug("Updating "..(inspect_item[id] or "nil").." to "..link)
           inspect_item[id] = link
-	end
+        end
       end
       --if debugging then printlink(id.." "..inspect_item[id]) end
     end
@@ -140,7 +141,7 @@ end
 
 function InspectFix:GetID() return self.val end
 InspectFix.val = INVSLOT_FIRST_EQUIPPED
-function InspectFix:Update() 
+function InspectFix:Update()
  for slot = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
    InspectFix.val = slot
    pdfupdate(InspectFix)
@@ -181,7 +182,7 @@ local function NIhook(unit)
       blockmsg[addon].count = count
       if not blockmsg[addon].lastwarn or (now - blockmsg[addon].lastwarn > 30) then -- throttle warnings
         print("InspectFix blocked a conflicting inspect request from "..addon.." ("..count.." occurences)")
-	debug(str)
+        debug(str)
         blockmsg[addon].lastwarn = now
       end
       return
@@ -227,11 +228,11 @@ local function inspectunit(unit)
   if not inspectable(unit) then return end
   -- NotifyInspect blocking in this addon and others is controlled by visibility of InspectFrame
   -- When the user requests an inspect we need to immediately show that frame to start that blocking
-  -- and ensure the Notify issued by InspectFrame isn't squashed by a subsequent stealth inspect, 
+  -- and ensure the Notify issued by InspectFrame isn't squashed by a subsequent stealth inspect,
   -- which would effectively cancel the user's manual inspect, causing the frame to never be shown
   ShowUIPanel(InspectFrame)
   -- issue a (duplicate) NotifyInspect with the frame open, to engage our retry and be extra-sure
-  InspectFrame_UnitChanged(InspectFrame)
+  if compatRelease then InspectFrame_UnitChanged(InspectFrame) end
 end
 
 
@@ -367,7 +368,7 @@ InspectFix:RegisterEvent("INSPECT_READY")
 function InspectFix:Load()
   InspectFix:tryhook()
   loaded = true
-  local revstr 
+  local revstr
   revstr = GetAddOnMetadata("InspectFix", "X-Curse-Packaged-Version")
   if not revstr then
   revstr = GetAddOnMetadata("InspectFix", "Version")
@@ -395,7 +396,7 @@ SlashCmdList["INSPECTFIX"] = function(msg)
           InspectFix:Unload()
         elseif cmd == "debug" then
           debugging = not debugging
-	  print("InspectFix debugging "..(debugging and "enabled" or "disabled"))
+          print("InspectFix debugging "..(debugging and "enabled" or "disabled"))
         else
           print("/inspectfix [ on | off | debug ]")
         end

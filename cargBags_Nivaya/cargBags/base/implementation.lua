@@ -257,7 +257,9 @@ function Implementation:Init()
     self:RegisterEvent("ITEM_LOCK_CHANGED", self, self.ITEM_LOCK_CHANGED)
     self:RegisterEvent("GET_ITEM_INFO_RECEIVED", self, self.GET_ITEM_INFO_RECEIVED)
     self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", self, self.PLAYERBANKSLOTS_CHANGED)
-    self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
+    if cargBags.compatRelease then
+        self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
+    end
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", self, self.UNIT_QUEST_LOG_CHANGED)
     self:RegisterEvent("BAG_CLOSED", self, self.BAG_CLOSED)
 end
@@ -403,7 +405,7 @@ function Implementation:GetItemInfo(bagID, slotID)
                 mustGather = true
             end
 
-            if typeID == _G.LE_ITEM_CLASS_QUESTITEM then
+            if cargBags.compatRelease and typeID == _G.LE_ITEM_CLASS_QUESTITEM then
                 item.isQuestItem, item.questID, item.questActive = _G.GetContainerItemQuestInfo(bagID, slotID)
             end
             if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
@@ -414,7 +416,9 @@ function Implementation:GetItemInfo(bagID, slotID)
             texture = texture or itemTexture
 
             item.equipLoc = equipLoc
-            item.isInSet, item.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
+            if cargBags.compatRelease then
+                item.isInSet, item.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
+            end
         end
     end
 

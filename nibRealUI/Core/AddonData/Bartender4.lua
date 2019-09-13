@@ -178,25 +178,27 @@ function RealUI.AddOns.Bartender4()
         },
     }
 
-    local ExtraActionBar = namespaces.ExtraActionBar.profiles
-    ExtraActionBar["RealUI"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = 157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
-    ExtraActionBar["RealUI-Healing"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = 157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
+    if namespaces.ExtraActionBar then
+        local ExtraActionBar = namespaces.ExtraActionBar.profiles
+        ExtraActionBar["RealUI"] = {
+            ["version"] = 3,
+            ["position"] = {
+                ["point"] = "BOTTOM",
+                ["x"] = 157.5,
+                ["y"] = 86,
+                ["scale"] = 0.985,
+            },
+        }
+        ExtraActionBar["RealUI-Healing"] = {
+            ["version"] = 3,
+            ["position"] = {
+                ["point"] = "BOTTOM",
+                ["x"] = 157.5,
+                ["y"] = 86,
+                ["scale"] = 0.985,
+            },
+        }
+    end
 
     local MicroMenu = namespaces.MicroMenu.profiles
     MicroMenu["RealUI"] = {
@@ -206,25 +208,27 @@ function RealUI.AddOns.Bartender4()
         ["enabled"] = false,
     }
 
-    local ZoneAbilityBar = namespaces.ZoneAbilityBar.profiles
-    ZoneAbilityBar["RealUI"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = -157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
-    ZoneAbilityBar["RealUI-Healing"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = -157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
+    if namespaces.ZoneAbilityBar then
+        local ZoneAbilityBar = namespaces.ZoneAbilityBar.profiles
+        ZoneAbilityBar["RealUI"] = {
+            ["version"] = 3,
+            ["position"] = {
+                ["point"] = "BOTTOM",
+                ["x"] = -157.5,
+                ["y"] = 86,
+                ["scale"] = 0.985,
+            },
+        }
+        ZoneAbilityBar["RealUI-Healing"] = {
+            ["version"] = 3,
+            ["position"] = {
+                ["point"] = "BOTTOM",
+                ["x"] = -157.5,
+                ["y"] = 86,
+                ["scale"] = 0.985,
+            },
+        }
+    end
 
     local BagBar = namespaces.BagBar.profiles
     BagBar["RealUI"] = {
@@ -268,25 +272,27 @@ function RealUI.AddOns.Bartender4()
         },
     }
 
-    local Vehicle = namespaces.Vehicle.profiles
-    Vehicle["RealUI"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "TOPRIGHT",
-            ["x"] = -36,
-            ["y"] = -59.5,
-            ["scale"] = 0.84,
-        },
-    }
-    Vehicle["RealUI-Healing"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "TOPRIGHT",
-            ["x"] = -36,
-            ["y"] = -59.5,
-            ["scale"] = 0.84,
-        },
-    }
+    if namespaces.Vehicle then
+        local Vehicle = namespaces.Vehicle.profiles
+        Vehicle["RealUI"] = {
+            ["version"] = 3,
+            ["position"] = {
+                ["point"] = "TOPRIGHT",
+                ["x"] = -36,
+                ["y"] = -59.5,
+                ["scale"] = 0.84,
+            },
+        }
+        Vehicle["RealUI-Healing"] = {
+            ["version"] = 3,
+            ["position"] = {
+                ["point"] = "TOPRIGHT",
+                ["x"] = -36,
+                ["y"] = -59.5,
+                ["scale"] = 0.84,
+            },
+        }
+    end
 
     local PetBar = namespaces.PetBar.profiles
     PetBar["RealUI"] = {
@@ -338,17 +344,21 @@ function RealUI.Profiles.Bartender4()
     if not _G.Bartender4 then return end
 
     local db = _G.Bartender4.db
-    db:SetDualSpecEnabled(true)
+    if RealUI.compatRelease then
+        db:SetDualSpecEnabled(true)
+    end
     for specIndex = 1, #RealUI.charInfo.specs do
         local profile = private.layoutToProfile[1]
         if RealUI.charInfo.specs[specIndex].role == "HEALER" then
             profile = private.layoutToProfile[2]
         end
 
-        db:SetDualSpecProfile(profile, specIndex)
+        if RealUI.compatRelease then
+            db:SetDualSpecProfile(profile, specIndex)
+        end
     end
 
-    local pro = db[_G.GetSpecialization() or 0] or db
+    local pro = RealUI.compatRelease and (db[_G.GetSpecialization() or 0] or db) or (private.layoutToProfile[RealUI.db.char.layout.current])
     if type(pro) == "string" and pro ~= _G.Bartender4.db:GetCurrentProfile() then
         _G.Bartender4.db:SetProfile(pro)
     end

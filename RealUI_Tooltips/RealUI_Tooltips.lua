@@ -21,7 +21,7 @@ local defaults = {
         showTitles = true,
         showRealm = false,
         showIDs = false,
-        showTransmog = true,
+        showTransmog = RealUI.compatRelease,
         multiTip = true,
         currency = {},
         position = {
@@ -169,6 +169,7 @@ local AddDynamicInfo, ClearDynamicInfo do
 
         if not _G.CanInspect(unit) then return end
         cache[guid].time = time()
+        if not RealUI.compatRelease then return end
         local isMissingInfo
 
         do -- spec
@@ -352,7 +353,7 @@ local AddDynamicInfo, ClearDynamicInfo do
         end
 
         function AddSpecInfo(isPlayer, unit)
-            if not isPlayer then return end
+            if not RealUI.compatRelease or not isPlayer then return end
 
             local spec = GetSpec(unit)
             if specLine and spec then
@@ -381,7 +382,7 @@ local AddDynamicInfo, ClearDynamicInfo do
         end
 
         function AddItemLevelInfo(isPlayer, unit)
-            if not isPlayer then return end
+            if not RealUI.compatRelease or not isPlayer then return end
 
             local iLvl = GetItemLevel(unit)
             if iLvl and iLvl <= 0 then
@@ -397,6 +398,7 @@ local AddDynamicInfo, ClearDynamicInfo do
             end
         end
         function ClearItemLevelInfo()
+            if not RealUI.compatRelease then return end
             iLvlLine = nil
         end
     end
@@ -526,7 +528,7 @@ private.AddHook("OnTooltipSetUnit", function(self)
         end
 
         local level
-        local IsBattlePet = _G.UnitIsBattlePet(unit)
+        local IsBattlePet = RealUI.compatRelease and _G.UnitIsBattlePet(unit)
         if IsBattlePet then
             level = _G.UnitBattlePetLevel(unit)
         else
@@ -588,7 +590,7 @@ private.AddHook("OnTooltipSetUnit", function(self)
             local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
             local line, addedProgress
 
-            local challengeMapID = _G.C_ChallengeMode.GetActiveChallengeMapID()
+            local challengeMapID = RealUI.compatRelease and _G.C_ChallengeMode.GetActiveChallengeMapID()
             if challengeMapID then
                 local isTeeming = false
                 local _, activeAffixIDs = _G.C_ChallengeMode.GetActiveKeystoneInfo()
@@ -654,7 +656,7 @@ end, true)
 
 private.AddHook("OnTooltipSetItem", function(self)
     local _, link = self:GetItem()
-    if Tooltips.db.global.showTransmog and link then
+    if RealUI.compatRelease and Tooltips.db.global.showTransmog and link then
         local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
         if appearanceID and sourceID then
             local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)

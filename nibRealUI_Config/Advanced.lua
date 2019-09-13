@@ -911,150 +911,152 @@ local uiTweaks do
     debug("Adv UITweaks")
     order = order + 1
     local altPowerBar do
-        local MODNAME = "AltPowerBar"
-        local AltPowerBar = RealUI:GetModule(MODNAME)
-        altPowerBar = {
-            name = "Alt Power Bar",
-            type = "group",
-            childGroups = "tab",
-            args = {
-                header = {
-                    name = "Alt Power Bar",
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = "Replacement of the default Alternate Power Bar.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Alt Power Bar module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    end,
-                    order = 30,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-                size = {
-                    name = "Size",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 50,
-                    args = {
-                        width = {
-                            name = "Width",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return tostring(AltPowerBar.db.profile.size.width) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                AltPowerBar.db.profile.size.width = value
-                                altPowerBar:UpdatePosition()
-                            end,
-                            order = 10,
-                        },
-                        height = {
-                            name = "Height",
-                            type = "input",
-                            width = "half",
-                            get = function(info) return tostring(AltPowerBar.db.profile.size.height) end,
-                            set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
-                                AltPowerBar.db.profile.size.height = value
-                                altPowerBar:UpdatePosition()
-                            end,
-                            order = 20,
+        if RealUI.compatRelease then
+            local MODNAME = "AltPowerBar"
+            local AltPowerBar = RealUI:GetModule(MODNAME)
+            altPowerBar = {
+                name = "Alt Power Bar",
+                type = "group",
+                childGroups = "tab",
+                args = {
+                    header = {
+                        name = "Alt Power Bar",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Replacement of the default Alternate Power Bar.",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Alt Power Bar module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value)
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                        end,
+                        order = 30,
+                    },
+                    gap1 = {
+                        name = " ",
+                        type = "description",
+                        order = 31,
+                    },
+                    size = {
+                        name = "Size",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                        order = 50,
+                        args = {
+                            width = {
+                                name = "Width",
+                                type = "input",
+                                width = "half",
+                                get = function(info) return tostring(AltPowerBar.db.profile.size.width) end,
+                                set = function(info, value)
+                                    value = RealUI:ValidateOffset(value)
+                                    AltPowerBar.db.profile.size.width = value
+                                    altPowerBar:UpdatePosition()
+                                end,
+                                order = 10,
+                            },
+                            height = {
+                                name = "Height",
+                                type = "input",
+                                width = "half",
+                                get = function(info) return tostring(AltPowerBar.db.profile.size.height) end,
+                                set = function(info, value)
+                                    value = RealUI:ValidateOffset(value)
+                                    AltPowerBar.db.profile.size.height = value
+                                    altPowerBar:UpdatePosition()
+                                end,
+                                order = 20,
+                            },
                         },
                     },
-                },
-                gap2 = {
-                    name = " ",
-                    type = "description",
-                    order = 51,
-                },
-                position = {
-                    name = "Position",
-                    type = "group",
-                    inline = true,
-                    disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                    order = 60,
-                    args = {
-                        position = {
-                            name = "Position",
-                            type = "group",
-                            inline = true,
-                            order = 10,
-                            args = {
-                                xoffset = {
-                                    name = "X Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(AltPowerBar.db.profile.position.x) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        AltPowerBar.db.profile.position.x = value
-                                        altPowerBar:UpdatePosition()
-                                    end,
-                                    order = 10,
-                                },
-                                yoffset = {
-                                    name = "Y Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(AltPowerBar.db.profile.position.y) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        AltPowerBar.db.profile.position.y = value
-                                        altPowerBar:UpdatePosition()
-                                    end,
-                                    order = 20,
-                                },
-                                anchorto = {
-                                    name = "Anchor To",
-                                    type = "select",
-                                    values = RealUI.globals.anchorPoints,
-                                    get = function(info)
-                                        for k,v in next, RealUI.globals.anchorPoints do
-                                            if v == AltPowerBar.db.profile.position.anchorto then return k end
-                                        end
-                                    end,
-                                    set = function(info, value)
-                                        AltPowerBar.db.profile.position.anchorto = RealUI.globals.anchorPoints[value]
-                                        altPowerBar:UpdatePosition()
-                                    end,
-                                    order = 30,
-                                },
-                                anchorfrom = {
-                                    name = "Anchor From",
-                                    type = "select",
-                                    values = RealUI.globals.anchorPoints,
-                                    get = function(info)
-                                        for k,v in next, RealUI.globals.anchorPoints do
-                                            if v == AltPowerBar.db.profile.position.anchorfrom then return k end
-                                        end
-                                    end,
-                                    set = function(info, value)
-                                        AltPowerBar.db.profile.position.anchorfrom = RealUI.globals.anchorPoints[value]
-                                        altPowerBar:UpdatePosition()
-                                    end,
-                                    order = 40,
+                    gap2 = {
+                        name = " ",
+                        type = "description",
+                        order = 51,
+                    },
+                    position = {
+                        name = "Position",
+                        type = "group",
+                        inline = true,
+                        disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
+                        order = 60,
+                        args = {
+                            position = {
+                                name = "Position",
+                                type = "group",
+                                inline = true,
+                                order = 10,
+                                args = {
+                                    xoffset = {
+                                        name = "X Offset",
+                                        type = "input",
+                                        width = "half",
+                                        get = function(info) return tostring(AltPowerBar.db.profile.position.x) end,
+                                        set = function(info, value)
+                                            value = RealUI:ValidateOffset(value)
+                                            AltPowerBar.db.profile.position.x = value
+                                            altPowerBar:UpdatePosition()
+                                        end,
+                                        order = 10,
+                                    },
+                                    yoffset = {
+                                        name = "Y Offset",
+                                        type = "input",
+                                        width = "half",
+                                        get = function(info) return tostring(AltPowerBar.db.profile.position.y) end,
+                                        set = function(info, value)
+                                            value = RealUI:ValidateOffset(value)
+                                            AltPowerBar.db.profile.position.y = value
+                                            altPowerBar:UpdatePosition()
+                                        end,
+                                        order = 20,
+                                    },
+                                    anchorto = {
+                                        name = "Anchor To",
+                                        type = "select",
+                                        values = RealUI.globals.anchorPoints,
+                                        get = function(info)
+                                            for k,v in next, RealUI.globals.anchorPoints do
+                                                if v == AltPowerBar.db.profile.position.anchorto then return k end
+                                            end
+                                        end,
+                                        set = function(info, value)
+                                            AltPowerBar.db.profile.position.anchorto = RealUI.globals.anchorPoints[value]
+                                            altPowerBar:UpdatePosition()
+                                        end,
+                                        order = 30,
+                                    },
+                                    anchorfrom = {
+                                        name = "Anchor From",
+                                        type = "select",
+                                        values = RealUI.globals.anchorPoints,
+                                        get = function(info)
+                                            for k,v in next, RealUI.globals.anchorPoints do
+                                                if v == AltPowerBar.db.profile.position.anchorfrom then return k end
+                                            end
+                                        end,
+                                        set = function(info, value)
+                                            AltPowerBar.db.profile.position.anchorfrom = RealUI.globals.anchorPoints[value]
+                                            altPowerBar:UpdatePosition()
+                                        end,
+                                        order = 40,
+                                    },
                                 },
                             },
                         },
                     },
                 },
-            },
-        }
+            }
+        end
     end
     local chat do
         local MODNAME = "Chat"
@@ -1288,73 +1290,75 @@ local uiTweaks do
         }
     end
     local eventNotify do
-        local MODNAME = "EventNotifier"
-        local EventNotifier = RealUI:GetModule(MODNAME)
-        eventNotify = {
-            name = "Event Notifier",
-            desc = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
-            type = "group",
-            childGroups = "tab",
-            args = {
-                header = {
-                    name = "Event Notifier",
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Event Notifier module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                        RealUI:ReloadUIDialog()
-                    end,
-                    order = 30,
-                },
-                events = {
-                    name = "Events",
-                    type = "group",
-                    inline = true,
-                    order = 40,
-                    args = {
-                        checkEvents = {
-                            name = "Calender Invites",
-                            type = "toggle",
-                            get = function() return EventNotifier.db.profile.checkEvents end,
-                            set = function(info, value)
-                                EventNotifier.db.profile.checkEvents = value
-                            end,
-                            order = 10,
-                        },
-                        checkGuildEvents = {
-                            name = "Guild Events",
-                            type = "toggle",
-                            get = function() return EventNotifier.db.profile.checkGuildEvents end,
-                            set = function(info, value)
-                                EventNotifier.db.profile.checkGuildEvents = value
-                            end,
-                            order = 20,
-                        },
-                        checkMinimapRares = {
-                            name = _G.MINIMAP_LABEL.." ".._G.ITEM_QUALITY3_DESC,
-                            type = "toggle",
-                            get = function() return EventNotifier.db.profile.checkMinimapRares end,
-                            set = function(info, value)
-                                EventNotifier.db.profile.checkMinimapRares = value
-                            end,
-                            order = 30,
+        if RealUI.compatRelease then
+            local MODNAME = "EventNotifier"
+            local EventNotifier = RealUI:GetModule(MODNAME)
+            eventNotify = {
+                name = "Event Notifier",
+                desc = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
+                type = "group",
+                childGroups = "tab",
+                args = {
+                    header = {
+                        name = "Event Notifier",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Displays notifications of events (pending calendar events, rare mob spawns, etc)",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Event Notifier module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value)
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                            RealUI:ReloadUIDialog()
+                        end,
+                        order = 30,
+                    },
+                    events = {
+                        name = "Events",
+                        type = "group",
+                        inline = true,
+                        order = 40,
+                        args = {
+                            checkEvents = {
+                                name = "Calender Invites",
+                                type = "toggle",
+                                get = function() return EventNotifier.db.profile.checkEvents end,
+                                set = function(info, value)
+                                    EventNotifier.db.profile.checkEvents = value
+                                end,
+                                order = 10,
+                            },
+                            checkGuildEvents = {
+                                name = "Guild Events",
+                                type = "toggle",
+                                get = function() return EventNotifier.db.profile.checkGuildEvents end,
+                                set = function(info, value)
+                                    EventNotifier.db.profile.checkGuildEvents = value
+                                end,
+                                order = 20,
+                            },
+                            checkMinimapRares = {
+                                name = _G.MINIMAP_LABEL.." ".._G.ITEM_QUALITY3_DESC,
+                                type = "toggle",
+                                get = function() return EventNotifier.db.profile.checkMinimapRares end,
+                                set = function(info, value)
+                                    EventNotifier.db.profile.checkMinimapRares = value
+                                end,
+                                order = 30,
+                            },
                         },
                     },
                 },
-            },
-        }
+            }
+        end
     end
     local frameMover do
         local MODNAME = "FrameMover"
@@ -2665,316 +2669,318 @@ local uiTweaks do
         }
     end
     local objectives do
-        local MODNAME = "Objectives Adv."
-        local ObjectivesAdv = RealUI:GetModule(MODNAME)
-        objectives = {
-            name = "Objectives Adv.",
-            desc = "Reposition the Objective Tracker.",
-            type = "group",
-            childGroups = "tab",
-            args = {
-                header = {
-                    name = "Objectives Adv.",
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = "Reposition the Objective Tracker.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the Objectives Adv. module.",
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                        ObjectivesAdv:RefreshMod()
-                    end,
-                    order = 30,
-                },
-                sizeposition = {
-                    name = "Size/Position",
-                    type = "group",
-                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 40,
-                    args = {
-                        header = {
-                            name = "Adjust size and position.",
-                            type = "description",
-                            order = 10,
-                        },
-                        enabled = {
-                            name = "Enabled",
-                            type = "toggle",
-                            get = function(info) return ObjectivesAdv.db.profile.position.enabled end,
-                            set = function(info, value)
-                                ObjectivesAdv.db.profile.position.enabled = value
-                                ObjectivesAdv:RefreshMod()
-                                RealUI:ReloadUIDialog()
-                            end,
-                            order = 20,
-                        },
-                        note1 = {
-                            name = "Note: Enabling/disabling the size/position adjustments will require a UI Reload to take full effect.",
-                            type = "description",
-                            order = 30,
-                        },
-                        gap1 = {
-                            name = " ",
-                            type = "description",
-                            order = 31,
-                        },
-                        offsets = {
-                            name = "Offsets",
-                            type = "group",
-                            inline = true,
-                            disabled = function() return not(ObjectivesAdv.db.profile.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
-                            order = 40,
-                            args = {
-                                xoffset = {
-                                    name = "X Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.x) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        ObjectivesAdv.db.profile.position.x = value
-                                        ObjectivesAdv:RefreshMod()
-                                    end,
-                                    order = 10,
+        if RealUI.compatRelease then
+            local MODNAME = "Objectives Adv."
+            local ObjectivesAdv = RealUI:GetModule(MODNAME)
+            objectives = {
+                name = "Objectives Adv.",
+                desc = "Reposition the Objective Tracker.",
+                type = "group",
+                childGroups = "tab",
+                args = {
+                    header = {
+                        name = "Objectives Adv.",
+                        type = "header",
+                        order = 10,
+                    },
+                    desc = {
+                        name = "Reposition the Objective Tracker.",
+                        type = "description",
+                        fontSize = "medium",
+                        order = 20,
+                    },
+                    enabled = {
+                        name = "Enabled",
+                        desc = "Enable/Disable the Objectives Adv. module.",
+                        type = "toggle",
+                        get = function() return RealUI:GetModuleEnabled(MODNAME) end,
+                        set = function(info, value)
+                            RealUI:SetModuleEnabled(MODNAME, value)
+                            ObjectivesAdv:RefreshMod()
+                        end,
+                        order = 30,
+                    },
+                    sizeposition = {
+                        name = "Size/Position",
+                        type = "group",
+                        disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                        order = 40,
+                        args = {
+                            header = {
+                                name = "Adjust size and position.",
+                                type = "description",
+                                order = 10,
+                            },
+                            enabled = {
+                                name = "Enabled",
+                                type = "toggle",
+                                get = function(info) return ObjectivesAdv.db.profile.position.enabled end,
+                                set = function(info, value)
+                                    ObjectivesAdv.db.profile.position.enabled = value
+                                    ObjectivesAdv:RefreshMod()
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 20,
+                            },
+                            note1 = {
+                                name = "Note: Enabling/disabling the size/position adjustments will require a UI Reload to take full effect.",
+                                type = "description",
+                                order = 30,
+                            },
+                            gap1 = {
+                                name = " ",
+                                type = "description",
+                                order = 31,
+                            },
+                            offsets = {
+                                name = "Offsets",
+                                type = "group",
+                                inline = true,
+                                disabled = function() return not(ObjectivesAdv.db.profile.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
+                                order = 40,
+                                args = {
+                                    xoffset = {
+                                        name = "X Offset",
+                                        type = "input",
+                                        width = "half",
+                                        get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.x) end,
+                                        set = function(info, value)
+                                            value = RealUI:ValidateOffset(value)
+                                            ObjectivesAdv.db.profile.position.x = value
+                                            ObjectivesAdv:RefreshMod()
+                                        end,
+                                        order = 10,
+                                    },
+                                    yoffset = {
+                                        name = "Y Offset",
+                                        type = "input",
+                                        width = "half",
+                                        get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.y) end,
+                                        set = function(info, value)
+                                            value = RealUI:ValidateOffset(value)
+                                            ObjectivesAdv.db.profile.position.y = value
+                                            ObjectivesAdv:RefreshMod()
+                                        end,
+                                        order = 20,
+                                    },
+                                    negheightoffset = {
+                                        name = "Height Offset",
+                                        desc = "How much shorter than screen height to make the Quest Watch Frame.",
+                                        type = "input",
+                                        width = "half",
+                                        get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.negheightofs) end,
+                                        set = function(info, value)
+                                            value = RealUI:ValidateOffset(value)
+                                            ObjectivesAdv.db.profile.position.negheightofs = value
+                                            ObjectivesAdv:RefreshMod()
+                                        end,
+                                        order = 30,
+                                    },
                                 },
-                                yoffset = {
-                                    name = "Y Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.y) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        ObjectivesAdv.db.profile.position.y = value
-                                        ObjectivesAdv:RefreshMod()
-                                    end,
-                                    order = 20,
-                                },
-                                negheightoffset = {
-                                    name = "Height Offset",
-                                    desc = "How much shorter than screen height to make the Quest Watch Frame.",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.negheightofs) end,
-                                    set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
-                                        ObjectivesAdv.db.profile.position.negheightofs = value
-                                        ObjectivesAdv:RefreshMod()
-                                    end,
-                                    order = 30,
+                            },
+                            gap2 = {
+                                name = " ",
+                                type = "description",
+                                order = 41,
+                            },
+                            anchor = {
+                                name = "Position",
+                                type = "group",
+                                inline = true,
+                                disabled = function() return not(ObjectivesAdv.db.profile.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
+                                order = 50,
+                                args = {
+                                    anchorto = {
+                                        name = "Anchor To",
+                                        type = "select",
+                                        style = "dropdown",
+                                        values = RealUI.globals.anchorPoints,
+                                        get = function(info)
+                                            for k,v in next, RealUI.globals.anchorPoints do
+                                                if v == ObjectivesAdv.db.profile.position.anchorto then return k end
+                                            end
+                                        end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.position.anchorto = RealUI.globals.anchorPoints[value]
+                                            ObjectivesAdv:RefreshMod()
+                                        end,
+                                        order = 10,
+                                    },
+                                    anchorfrom = {
+                                        name = "Anchor From",
+                                        type = "select",
+                                        style = "dropdown",
+                                        values = RealUI.globals.anchorPoints,
+                                        get = function(info)
+                                            for k,v in next, RealUI.globals.anchorPoints do
+                                                if v == ObjectivesAdv.db.profile.position.anchorfrom then return k end
+                                            end
+                                        end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.position.anchorfrom = RealUI.globals.anchorPoints[value]
+                                            ObjectivesAdv:RefreshMod()
+                                        end,
+                                        order = 20,
+                                    },
                                 },
                             },
                         },
-                        gap2 = {
-                            name = " ",
-                            type = "description",
-                            order = 41,
-                        },
-                        anchor = {
-                            name = "Position",
-                            type = "group",
-                            inline = true,
-                            disabled = function() return not(ObjectivesAdv.db.profile.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
-                            order = 50,
-                            args = {
-                                anchorto = {
-                                    name = "Anchor To",
-                                    type = "select",
-                                    style = "dropdown",
-                                    values = RealUI.globals.anchorPoints,
-                                    get = function(info)
-                                        for k,v in next, RealUI.globals.anchorPoints do
-                                            if v == ObjectivesAdv.db.profile.position.anchorto then return k end
-                                        end
-                                    end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.position.anchorto = RealUI.globals.anchorPoints[value]
-                                        ObjectivesAdv:RefreshMod()
-                                    end,
-                                    order = 10,
+                    },
+                    hidden = {
+                        name = "Automatic Collapse/Hide",
+                        type = "group",
+                        disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
+                        order = 60,
+                        args = {
+                            header = {
+                                name = "Automatically collapse the Quest Watch Frame in certain zones.",
+                                type = "description",
+                                order = 10,
+                            },
+                            enabled = {
+                                name = "Enabled",
+                                type = "toggle",
+                                get = function(info) return ObjectivesAdv.db.profile.hidden.enabled end,
+                                set = function(info, value)
+                                    ObjectivesAdv.db.profile.hidden.enabled = value
+                                    ObjectivesAdv:UpdateCollapseState()
+                                end,
+                                order = 20,
+                            },
+                            gap1 = {
+                                name = " ",
+                                type = "description",
+                                order = 21,
+                            },
+                            collapse = {
+                                name = "Collapse the Quest Watch Frame in..",
+                                type = "group",
+                                inline = true,
+                                disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and ObjectivesAdv.db.profile.hidden.enabled) end,
+                                order = 30,
+                                args = {
+                                    arena = {
+                                        name = _G.ARENA_BATTLES,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.arena end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.collapse.arena = value
+                                            ObjectivesAdv:UpdateCollapseState()
+                                        end,
+                                        order = 10,
+                                    },
+                                    pvp = {
+                                        name = _G.BATTLEGROUNDS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.pvp end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.collapse.pvp = value
+                                            ObjectivesAdv:UpdateCollapseState()
+                                        end,
+                                        order = 20,
+                                    },
+                                    party = {
+                                        name = _G.DUNGEONS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.party end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.collapse.party = value
+                                            ObjectivesAdv:UpdateCollapseState()
+                                        end,
+                                        order = 30,
+                                    },
+                                    scenario = {
+                                        name = _G.SCENARIOS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.party end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.collapse.party = value
+                                            ObjectivesAdv:UpdateCollapseState()
+                                        end,
+                                        order = 40,
+                                    },
+                                    raid = {
+                                        name = _G.RAIDS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.raid end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.collapse.raid = value
+                                            ObjectivesAdv:UpdateCollapseState()
+                                        end,
+                                        order = 50,
+                                    },
                                 },
-                                anchorfrom = {
-                                    name = "Anchor From",
-                                    type = "select",
-                                    style = "dropdown",
-                                    values = RealUI.globals.anchorPoints,
-                                    get = function(info)
-                                        for k,v in next, RealUI.globals.anchorPoints do
-                                            if v == ObjectivesAdv.db.profile.position.anchorfrom then return k end
-                                        end
-                                    end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.position.anchorfrom = RealUI.globals.anchorPoints[value]
-                                        ObjectivesAdv:RefreshMod()
-                                    end,
-                                    order = 20,
+                            },
+                            gap2 = {
+                                name = " ",
+                                type = "description",
+                                order = 31,
+                            },
+                            hide = {
+                                name = "Hide the Quest Watch Frame completely in..",
+                                type = "group",
+                                inline = true,
+                                disabled = function() return not(ObjectivesAdv.db.profile.hidden.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
+                                order = 40,
+                                args = {
+                                    arena = {
+                                        name = _G.ARENA_BATTLES,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.hide.arena end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.hide.arena = value
+                                            ObjectivesAdv:UpdateHideState()
+                                        end,
+                                        order = 10,
+                                    },
+                                    pvp = {
+                                        name = _G.BATTLEGROUNDS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.hide.pvp end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.hide.pvp = value
+                                            ObjectivesAdv:UpdateHideState()
+                                        end,
+                                        order = 20,
+                                    },
+                                    party = {
+                                        name = _G.DUNGEONS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.hide.party end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.hide.party = value
+                                            ObjectivesAdv:UpdateHideState()
+                                        end,
+                                        order = 30,
+                                    },
+                                    scenario = {
+                                        name = _G.SCENARIOS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.hide.party end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.hide.party = value
+                                            ObjectivesAdv:UpdateHideState()
+                                        end,
+                                        order = 40,
+                                    },
+                                    raid = {
+                                        name = _G.RAIDS,
+                                        type = "toggle",
+                                        get = function(info) return ObjectivesAdv.db.profile.hidden.hide.raid end,
+                                        set = function(info, value)
+                                            ObjectivesAdv.db.profile.hidden.hide.raid = value
+                                            ObjectivesAdv:UpdateHideState()
+                                        end,
+                                        order = 50,
+                                    },
                                 },
                             },
                         },
                     },
                 },
-                hidden = {
-                    name = "Automatic Collapse/Hide",
-                    type = "group",
-                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 60,
-                    args = {
-                        header = {
-                            name = "Automatically collapse the Quest Watch Frame in certain zones.",
-                            type = "description",
-                            order = 10,
-                        },
-                        enabled = {
-                            name = "Enabled",
-                            type = "toggle",
-                            get = function(info) return ObjectivesAdv.db.profile.hidden.enabled end,
-                            set = function(info, value)
-                                ObjectivesAdv.db.profile.hidden.enabled = value
-                                ObjectivesAdv:UpdateCollapseState()
-                            end,
-                            order = 20,
-                        },
-                        gap1 = {
-                            name = " ",
-                            type = "description",
-                            order = 21,
-                        },
-                        collapse = {
-                            name = "Collapse the Quest Watch Frame in..",
-                            type = "group",
-                            inline = true,
-                            disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and ObjectivesAdv.db.profile.hidden.enabled) end,
-                            order = 30,
-                            args = {
-                                arena = {
-                                    name = _G.ARENA_BATTLES,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.arena end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.arena = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
-                                    order = 10,
-                                },
-                                pvp = {
-                                    name = _G.BATTLEGROUNDS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.pvp end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.pvp = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
-                                    order = 20,
-                                },
-                                party = {
-                                    name = _G.DUNGEONS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.party = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
-                                    order = 30,
-                                },
-                                scenario = {
-                                    name = _G.SCENARIOS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.party = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
-                                    order = 40,
-                                },
-                                raid = {
-                                    name = _G.RAIDS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.raid end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.raid = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
-                                    order = 50,
-                                },
-                            },
-                        },
-                        gap2 = {
-                            name = " ",
-                            type = "description",
-                            order = 31,
-                        },
-                        hide = {
-                            name = "Hide the Quest Watch Frame completely in..",
-                            type = "group",
-                            inline = true,
-                            disabled = function() return not(ObjectivesAdv.db.profile.hidden.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
-                            order = 40,
-                            args = {
-                                arena = {
-                                    name = _G.ARENA_BATTLES,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.arena end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.arena = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
-                                    order = 10,
-                                },
-                                pvp = {
-                                    name = _G.BATTLEGROUNDS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.pvp end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.pvp = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
-                                    order = 20,
-                                },
-                                party = {
-                                    name = _G.DUNGEONS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.party = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
-                                    order = 30,
-                                },
-                                scenario = {
-                                    name = _G.SCENARIOS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.party = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
-                                    order = 40,
-                                },
-                                raid = {
-                                    name = _G.RAIDS,
-                                    type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.raid end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.raid = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
-                                    order = 50,
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        }
-        CombatFader:AddFadeConfig(MODNAME, objectives, 50)
+            }
+            CombatFader:AddFadeConfig(MODNAME, objectives, 50)
+        end
     end
 
     uiTweaks = {
@@ -2989,17 +2995,19 @@ local uiTweaks do
                 order = 0,
             },
             screenshot = CreateToggleOption("AchievementScreenshots", "Achievement Screenshots"),
-            altPowerBar = altPowerBar,
             chat = chat,
             cooldown = cooldown,
-            eventNotify = eventNotify,
             frameMover = frameMover,
             loot = loot,
             minimap = minimap,
             mirrorBar = mirrorBar,
-            objectives = objectives,
         }
     }
+    if RealUI.compatRelease then
+        uiTweaks["args"]["altPowerBar"] = altPowerBar
+        uiTweaks["args"]["eventNotify"] = eventNotify
+        uiTweaks["args"]["objectives"] = objectives
+    end
 end
 
 --[[
@@ -3028,4 +3036,6 @@ options.RealUI = {
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }
 }
-_G.LibStub("LibDualSpec-1.0"):EnhanceOptions(options.RealUI.args.profiles, RealUI.db)
+if RealUI.compatRelease then
+    _G.LibStub("LibDualSpec-1.0"):EnhanceOptions(options.RealUI.args.profiles, RealUI.db)
+end

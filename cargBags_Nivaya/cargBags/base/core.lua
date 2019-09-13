@@ -40,6 +40,8 @@ end
 cargBags.classes = {} --- <table> Holds all classes by their name
 cargBags.itemKeys = {} --- <table> Holds all ItemKeys by their name
 
+cargBags.compatRelease = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+
 local widgets = _G.setmetatable({}, {
     __index = function(self, widget)
         self[widget] = _G.getmetatable(_G.CreateFrame(widget))

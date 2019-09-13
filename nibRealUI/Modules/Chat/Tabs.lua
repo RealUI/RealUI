@@ -161,5 +161,7 @@ end
 
 function Chat_Tabs:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
-    self:RegisterEvent("PET_BATTLE_OPENING_START")
+    if RealUI.compatRelease then
+        self:RegisterEvent("PET_BATTLE_OPENING_START")
+    end
 end

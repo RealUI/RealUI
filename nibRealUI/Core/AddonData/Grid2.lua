@@ -1570,11 +1570,11 @@ function RealUI.Profiles.Grid2()
         db[specIndex] = profile
     end
 
-    if _G.Grid2.ReloadProfile then
+    if RealUI.compatRelease and _G.Grid2.ReloadProfile then
         _G.Grid2:ReloadProfile()
     else
         -- print("do hack")
-        local pro = db[_G.GetSpecialization() or 0] or db
+        local pro = RealUI.compatRelease and (db[_G.GetSpecialization() or 0] or db) or (private.layoutToProfile[RealUI.db.char.layout.current])
         if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
             _G.Grid2.db:SetProfile(pro)
         end

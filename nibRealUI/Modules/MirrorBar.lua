@@ -40,7 +40,7 @@ end
 -- Update Visibility
 function MirrorBar:UpdateShown()
     local show = false
-    if not(_G.UnitIsDead("player") or _G.UnitIsGhost("player") or _G.UnitInVehicle("player")) then
+    if not(_G.UnitIsDead("player") or _G.UnitIsGhost("player") or (RealUI.compatRelease and _G.UnitInVehicle("player"))) then
         for k,v in next, self.timers do
             if self.timers[k].active then
                 show = true

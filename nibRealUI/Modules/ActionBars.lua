@@ -211,20 +211,22 @@ function ActionBars:ApplyABSettings(tag)
     ----
     local vbX, vbY = -36, -59.5
 
-    -- Set Position
-    local profileVehicle = BT4DB["namespaces"]["Vehicle"]["profiles"][prof]
-    if profileVehicle then
-        profileVehicle["position"] = {
-            ["x"] = vbX,
-            ["y"] = vbY,
-            ["point"] = "TOPRIGHT",
-            ["scale"] = 0.84,
-            ["growHorizontal"] = "RIGHT",
-            ["growVertical"] = "DOWN",
-        }
+    if RealUI.compatRelease then
+        -- Set Position
+        local profileVehicle = BT4DB["namespaces"]["Vehicle"]["profiles"][prof]
+        if profileVehicle then
+            profileVehicle["position"] = {
+                ["x"] = vbX,
+                ["y"] = vbY,
+                ["point"] = "TOPRIGHT",
+                ["scale"] = 0.84,
+                ["growHorizontal"] = "RIGHT",
+                ["growVertical"] = "DOWN",
+            }
+        end
+        local BT4Vehicle = BT4:GetModule("Vehicle", true)
+        if BT4Vehicle then BT4Vehicle:ApplyConfig() end
     end
-    local BT4Vehicle = BT4:GetModule("Vehicle", true)
-    if BT4Vehicle then BT4Vehicle:ApplyConfig() end
 
     ----
     -- Pet Bar
@@ -269,7 +271,7 @@ function ActionBars:ApplyABSettings(tag)
     ----
     -- Extra Action Bar
     ----
-    if barSettings.moveBars.eab then
+    if RealUI.compatRelease and barSettings.moveBars.eab then
         local eabX, eabY
 
         -- Calculate X, Y

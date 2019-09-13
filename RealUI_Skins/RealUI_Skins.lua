@@ -338,9 +338,11 @@ function private.OnLoad()
         end
     end
 
-    _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
-        skinnedFrames[Frame.BorderFrame.NineSlice].stripes:SetParent(Frame)
-    end)
+    if RealUI.compatRelease then
+        _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
+            skinnedFrames[Frame.BorderFrame.NineSlice].stripes:SetParent(Frame)
+        end)
+    end
     _G.hooksecurefunc(Base, "SetBackdrop", function(Frame, color, alpha)
         if not color and not alpha then
             local r, g, b, a = Frame:GetBackdropColor()
@@ -387,8 +389,10 @@ function private.OnLoad()
     end)
 
     function private.AddOns.nibRealUI()
-        local Skins = RealUI:NewModule("Skins")
-        Skins.db = skinsDB
+        if RealUI.NewModule then
+            local Skins = RealUI:NewModule("Skins")
+            Skins.db = skinsDB
+        end
 
         Skin.UIPanelButtonTemplate(scaleBtn)
 
@@ -396,9 +400,11 @@ function private.OnLoad()
             private.AddOns.Ace3()
         end
 
-        -- Since we load Blizzard_WorldMap before RealUI_Skins, this frame is created before we
-        -- get to hook the creation functions. As such, we need to run this to finish it's skin.
-        Skin.NavBarTemplate(_G.WorldMapFrame.NavBar)
+        if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then
+            -- Since we load Blizzard_WorldMap before RealUI_Skins, this frame is created before we
+            -- get to hook the creation functions. As such, we need to run this to finish it's skin.
+            Skin.NavBarTemplate(_G.WorldMapFrame.NavBar)
+        end
 
         --f.f = "f" -- error for testing RealUI_Bugs
     end

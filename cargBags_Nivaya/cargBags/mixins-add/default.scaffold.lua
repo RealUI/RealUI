@@ -152,7 +152,7 @@ local function ItemButton_Update(self, item)
             item.level = _G.RealUI.GetItemLevel(item.link)
         end
 
-        if _G.IsArtifactRelicItem(item.link) then
+        if cargBags.compatRelease and _G.IsArtifactRelicItem(item.link) then
             self.BottomString:SetFormattedText("+%d", GetItemLevelBonusFromRelic(item.link))
         elseif (item.equipLoc ~= "") and (item.level and item.level > 0) then
             self.BottomString:SetText(item.level)

@@ -3,11 +3,12 @@ local _, private = ...
 -- [[ Lua Globals ]]
 -- luacheck: globals
 
+if not _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then return end
+
 -- [[ Core ]]
 local Aurora = private.Aurora
 local Skin = Aurora.Skin
 local Color = Aurora.Color
-
 -- do --[[ FrameXML\LFGFrame.lua ]]
 -- end
 

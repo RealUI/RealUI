@@ -31,11 +31,13 @@ local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
 local RavenTimer
-_G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
-    if self._show then
-        self:Show()
-    end
-end)
+if RealUI.compatRelease then
+    _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
+        if self._show then
+            self:Show()
+        end
+    end)
+end
 function RealUI:HuDTestMode(isConfigMode)
     FramePoint:ToggleAll(not isConfigMode)
 
@@ -68,7 +70,7 @@ function RealUI:HuDTestMode(isConfigMode)
         end
     end
 
-    if not _G.ObjectiveTrackerFrame.collapsed then
+    if RealUI.compatRelease and not _G.ObjectiveTrackerFrame.collapsed then
         _G.ObjectiveTrackerFrame:SetShown(not isConfigMode)
     end
 

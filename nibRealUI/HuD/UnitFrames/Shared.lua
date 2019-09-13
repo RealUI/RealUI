@@ -191,10 +191,10 @@ local CreateHealthPredictBar do
         local hp = self.HealthPrediction
         local healthBar = self.Health
 
-        local myIncomingHeal = _G.UnitGetIncomingHeals(unit, 'player') or 0
-        local allIncomingHeal = _G.UnitGetIncomingHeals(unit) or 0
-        local totalAbsorb = _G.UnitGetTotalAbsorbs(unit) or 0
-        local myCurrentHealAbsorb = _G.UnitGetTotalHealAbsorbs(unit) or 0
+        local myIncomingHeal = RealUI.compatRelease and _G.UnitGetIncomingHeals(unit, 'player') or 0
+        local allIncomingHeal = RealUI.compatRelease and _G.UnitGetIncomingHeals(unit) or 0
+        local totalAbsorb = RealUI.compatRelease and _G.UnitGetTotalAbsorbs(unit) or 0
+        local myCurrentHealAbsorb = RealUI.compatRelease and _G.UnitGetTotalHealAbsorbs(unit) or 0
         local health, maxHealth = _G.UnitHealth(unit), _G.UnitHealthMax(unit)
 
         --local overHealAbsorb = false

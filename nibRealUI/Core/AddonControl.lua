@@ -23,6 +23,9 @@ local RealUIAddOns = {
     ["Kui_Nameplates_Core"] =    {isAce = false, db = "KuiNameplatesCoreCharacterSaved", profKey = "profile"},
     ["mikScrollingBattleText"] = {isAce = false, db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
+if not RealUI.compatRelease then
+    RealUIAddOns["Bartender4"] = {isAce = true, db = "Bartender4",     profKey = "profileKeys"}
+end
 local RealUIAddOnsOrder = {
     "DBM",
     "Masque",
