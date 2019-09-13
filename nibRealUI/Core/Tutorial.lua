@@ -381,7 +381,11 @@ local macroClose = [[
 
 function RealUI:InitTutorial()
     -- MainHelpPlateButton
-    rTB = _G.CreateFrame("Button", "RealUITutorialButton", _G.UIParent, "MainHelpPlateButton")
+    if RealUI.compatRelease then
+        rTB = _G.CreateFrame("Button", "RealUITutorialButton", _G.UIParent, "MainHelpPlateButton")
+    else
+        rTB = _G.CreateFrame("Button", "RealUITutorialButton", _G.UIParent, "GlowBoxTemplate")
+    end
     rTB:SetPoint("CENTER", _G.UIParent, "CENTER", 0, -38)
     rTB:Hide()
 

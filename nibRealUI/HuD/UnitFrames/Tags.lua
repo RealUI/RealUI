@@ -42,7 +42,7 @@ tags.Methods["realui:level"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return end
 
     local level, levelColor
-    if (_G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit)) then
+    if RealUI.compatRelease and (_G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit)) then
         level = _G.UnitBattlePetLevel(unit)
     else
         level = _G.UnitLevel(unit)
@@ -162,7 +162,9 @@ tags.Methods["realui:threat"] = function(unit)
         end
     end
 end
-tags.Events["realui:threat"] = "UNIT_THREAT_SITUATION_UPDATE UNIT_THREAT_LIST_UPDATE"
+if RealUI.compatRelease then
+    tags.Events["realui:threat"] = "UNIT_THREAT_SITUATION_UPDATE UNIT_THREAT_LIST_UPDATE"
+end
 
 -- Range
 local rangeColors = {

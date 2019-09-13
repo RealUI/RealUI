@@ -16,6 +16,8 @@ for i = 1, 3 do
 end
 RealUI.verinfo.string = version
 
+RealUI.compatRelease = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+
 RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
 
@@ -208,6 +210,17 @@ function RealUI:SetLayout()
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 
+    if not RealUI.compatRelease then
+        RealUI:SetProfileLayout()
+        if _G.Grid2 then
+            local aceAddon = _G.LibStub("AceAddon-3.0"):GetAddon("Grid2", true)
+            local pro = private.layoutToProfile[self.cLayout]
+            if aceAddon and type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
+                aceAddon.db:SetProfile(pro)
+            end
+        end
+    end
+
     if _G.RealUIGridConfiguring then
         self:ScheduleTimer(function()
             self:ToggleGridTestMode(false)
@@ -307,7 +320,7 @@ end
 
 local function UpdateSpec()
     local old = RealUI.charInfo.specs.current.index
-    local new = _G.GetSpecialization()
+    local new = RealUI.GetSpecialization()
     if old ~= new then
         RealUI.charInfo.specs.current = RealUI.charInfo.specs[new]
     end
@@ -396,13 +409,17 @@ end
 
 function RealUI:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, private.layoutToProfile[1])
-    _G.LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "RealUI")
+    if self.compatRelease then
+        _G.LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "RealUI")
+    end
 
     self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
-    for specIndex = 1, #RealUI.charInfo.specs do
-        local spec = RealUI.charInfo.specs[specIndex]
-        if spec.role == "HEALER" then
-            self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
+    if self.compatRelease then
+        for specIndex = 1, #RealUI.charInfo.specs do
+            local spec = RealUI.charInfo.specs[specIndex]
+            if spec.role == "HEALER" then
+                self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
+            end
         end
     end
 
@@ -441,7 +458,9 @@ function RealUI:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
 
     -- Register events
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
+    if self.compatRelease then
+        self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
+    end
     self:RegisterEvent("PLAYER_ENTERING_WORLD", "LockdownUpdates")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
     self:RegisterEvent("ADDON_LOADED", function()
@@ -514,10 +533,15 @@ function RealUI:OnInitialize()
     _G.GameMenuButtonKeybindings:SetPoint("TOP", configBtn, "BOTTOM", 0, -1)
     _G.hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function(menuFrame)
         debug("GameMenuFrame_UpdateVisibleButtons")
-        local height = 332
+        local height
+        if RealUI.compatRelease then
+            height = 332
 
-        if not _G.SplashFrameCanBeShown() then
-            height = height - 20
+            if not _G.SplashFrameCanBeShown() then
+                height = height - 20
+            end
+        else
+            height = 312
         end
 
         menuFrame:SetHeight(height)

@@ -785,7 +785,13 @@ local Event =  _G.CreateFrame('Frame', nil)
 Event:RegisterEvent("PLAYER_ENTERING_WORLD")
 Event:SetScript('OnEvent', function(self, event, ...)
     if event == "PLAYER_ENTERING_WORLD" then
-        for bagID = _G.REAGENTBANK_CONTAINER, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
+        local startSlot
+        if cargBags.compatRelease then
+            startSlot = _G.REAGENTBANK_CONTAINER
+        else
+            startSlot = _G.KEYRING_CONTAINER
+        end
+        for bagID = startSlot, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
             local slots = _G.GetContainerNumSlots(bagID)
             for slotID = 1, slots do
                 local button = cbNivaya.buttonClass:New(bagID, slotID)
@@ -801,35 +807,37 @@ Event:SetScript('OnEvent', function(self, event, ...)
         end
         cbNivaya:UpdateAll()
 
-        if _G.IsReagentBankUnlocked() then
+        if cargBags.compatRelease and _G.IsReagentBankUnlocked() then
             bags.bank.reagentBtn:Show()
         else
             bags.bank.reagentBtn:Hide()
-            local buyReagent = _G.CreateFrame("Button", nil, bags.bankReagent, "UIPanelButtonTemplate")
-            buyReagent:SetText(_G.BANKSLOTPURCHASE)
-            buyReagent:SetWidth(buyReagent:GetTextWidth() + 20)
-            buyReagent:SetPoint("CENTER", bags.bankReagent, 0, 0)
-            buyReagent:SetScript("OnEnter", function(btn)
-                _G.GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-                _G.GameTooltip:AddLine(_G.REAGENT_BANK_HELP, 1, 1, 1, true)
-                _G.GameTooltip:Show()
-            end)
-            buyReagent:SetScript("OnLeave", function()
-                _G.GameTooltip:Hide()
-            end)
-            buyReagent:SetScript("OnClick", function()
-                --print("Reagent Bank!!!")
-                _G.StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
-            end)
-            buyReagent:SetScript("OnEvent", function(...)
-                --print("OnReagentPurchase", ...)
-                buyReagent:UnregisterEvent("REAGENTBANK_PURCHASED")
-                bags.bank.reagentBtn:Show()
-                buyReagent:Hide()
-            end)
-            buyReagent:RegisterEvent("REAGENTBANK_PURCHASED")
+            if cargBags.compatRelease then
+                local buyReagent = _G.CreateFrame("Button", nil, bags.bankReagent, "UIPanelButtonTemplate")
+                buyReagent:SetText(_G.BANKSLOTPURCHASE)
+                buyReagent:SetWidth(buyReagent:GetTextWidth() + 20)
+                buyReagent:SetPoint("CENTER", bags.bankReagent, 0, 0)
+                buyReagent:SetScript("OnEnter", function(btn)
+                    _G.GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+                    _G.GameTooltip:AddLine(_G.REAGENT_BANK_HELP, 1, 1, 1, true)
+                    _G.GameTooltip:Show()
+                end)
+                buyReagent:SetScript("OnLeave", function()
+                    _G.GameTooltip:Hide()
+                end)
+                buyReagent:SetScript("OnClick", function()
+                    --print("Reagent Bank!!!")
+                    _G.StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
+                end)
+                buyReagent:SetScript("OnEvent", function(...)
+                    --print("OnReagentPurchase", ...)
+                    buyReagent:UnregisterEvent("REAGENTBANK_PURCHASED")
+                    bags.bank.reagentBtn:Show()
+                    buyReagent:Hide()
+                end)
+                buyReagent:RegisterEvent("REAGENTBANK_PURCHASED")
 
-            Skin.UIPanelButtonTemplate(buyReagent)
+                Skin.UIPanelButtonTemplate(buyReagent)
+            end
         end
 
         self:UnregisterEvent("PLAYER_ENTERING_WORLD")

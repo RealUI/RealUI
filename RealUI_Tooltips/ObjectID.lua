@@ -6,6 +6,8 @@ local _, private = ...
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
+local compatRelease = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+
 -- Shamelessly copied from PTRFeedback_Tooltips
 local TooltipTypes = {
     spell = "Spell",
@@ -72,7 +74,7 @@ end
 
 local function SetupUnitTooltips()
     private.AddHook("OnTooltipSetUnit", function(self)
-        if _G.C_PetBattles.IsInBattle() then
+        if compatRelease and _G.C_PetBattles.IsInBattle() then
             return
         end
         local _, unit = self:GetUnit()
@@ -87,6 +89,7 @@ local function SetupUnitTooltips()
 end
 
 local function SetupQuestTooltips()
+    if not compatRelease then return end
     _G.hooksecurefunc("QuestMapLogTitleButton_OnEnter", function(self)
         if self.questID then
             AddToTooltip(_G.GameTooltip, TooltipTypes.quest, self.questID)
@@ -132,11 +135,13 @@ local function SetupCurrencyTooltips()
 end
 
 local function SetupAzeriteTooltips()
-    private.AddHook("SetAzeriteEssence", function(self, azeriteID, rank)
-        if azeriteID then
-            AddToTooltip(self, TooltipTypes.azerite, azeriteID)
-        end
-    end)
+    if compatRelease then
+        private.AddHook("SetAzeriteEssence", function(self, azeriteID, rank)
+            if azeriteID then
+                AddToTooltip(self, TooltipTypes.azerite, azeriteID)
+            end
+        end)
+    end
 end
 
 function private.SetupIDTips()

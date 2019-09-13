@@ -695,7 +695,11 @@ function MyContainer:OnCreate(name, settings)
 
     -- Item drop target
     if (tBag or tBank or tReagent) then
-        self.DropTarget = _G.CreateFrame("ItemButton", self.name.."DropTarget", self)
+        if cargBags.compatRelease then
+            self.DropTarget = _G.CreateFrame("ItemButton", self.name.."DropTarget", self)
+        else
+            self.DropTarget = _G.CreateFrame("Button", self.name.."DropTarget", self, "ItemButtonTemplate")
+        end
         local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
         if dtNT then dtNT:SetTexture(nil) end
 

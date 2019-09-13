@@ -24,9 +24,6 @@ local accountCVars = {
     -- Controls
     ["deselectOnClick"] = 1,                   -- Turn off Sticky Targeting (inverted)
 
-    -- Combat
-    ["spellActivationOverlayOpacity"] = 0.75,  -- Spell Alert Opacity
-
     -- Social
     ["chatBubbles"] = 0,                       -- Turn off Chat Bubbles
     ["chatBubblesParty"] = 0,                  -- Turn off Party Chat Bubbles
@@ -52,14 +49,11 @@ local accountCVars = {
     ["guildShowOffline"] = 0,                  -- Hide Offline Guild Members
     ["profanityFilter"] = 0,                   -- Turn off Profanity Filter
 }
+
 local characterCVars = {
     -- Nameplates
     ["nameplateMotion"] = 1,          -- Stacking Nameplates
     ["nameplateShowAll"] = 1,         -- Always show nameplates
-    ["nameplateShowSelf"] = 0,        -- Hide Personal Resource Display
-
-    -- Combat
-    ["displaySpellActivationOverlays"] = 1,    -- Turn on Spell Alerts
 
     -- Raid/Party
     ["useCompactPartyFrames"] = 1,    -- Raid-style party frames
@@ -67,6 +61,13 @@ local characterCVars = {
     -- Quality of Life
     ["autoLootDefault"] = 1,                   -- Turn on Auto Loot
 }
+
+if RealUI.compatRelease then
+    accountCVars["spellActivationOverlayOpacity"] = 0.75  -- Spell Alert Opacity
+    characterCVars["nameplateShowSelf"] = 0               -- Hide Personal Resource Display
+    -- Combat
+    characterCVars["displaySpellActivationOverlays"] = 1  -- Turn on Spell Alerts
+end
 
 -- CVars
 local function SetDefaultCVars()
@@ -145,7 +146,7 @@ local function CreateInstallWindow()
     installFrame:RegisterForClicks("LeftButtonUp")
     installFrame:SetScript("OnClick", function()
         RunStage1()
-        _G.ReloadUI()
+        --_G.ReloadUI()
     end)
     installFrame:Hide()
 

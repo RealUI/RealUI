@@ -90,7 +90,7 @@ local lodFrames = {
     Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
     --Blizzard_GuildControlUI
     Blizzard_GuildUI = { ["GuildFrame"] = false, ["GuildRosterFrame"] = true, ["GuildFrame.TitleMouseover"] = true },
-    Blizzard_InspectUI = { ["InspectFrame"] = false, ["InspectPVPFrame"] = true, ["InspectTalentFrame"] = true },
+    Blizzard_InspectUI = { ["InspectFrame"] = false, ["InspectPVPFrame"] = true, ["InspectTalentFrame"] = true, ["InspectHonorFrame"] = true },
     Blizzard_ItemAlterationUI = { ["TransmogrifyFrame"] = false },
     Blizzard_ItemSocketingUI = { ["ItemSocketingFrame"] = false },
     Blizzard_ItemUpgradeUI = { ["ItemUpgradeFrame"] = false, },

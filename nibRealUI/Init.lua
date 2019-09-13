@@ -81,8 +81,8 @@ RealUI.charInfo = {
     }
 }
 
-for specIndex = 1, _G.GetNumSpecializationsForClassID(classID) do
-    local id, name, _, iconID, role, isRecommended = _G.GetSpecializationInfoForClassID(classID, specIndex)
+for specIndex = 1, RealUI.GetNumSpecializationsForClassID(classID) do
+    local id, name, _, iconID, role, isRecommended = RealUI.GetSpecializationInfoForClassID(classID, specIndex)
     RealUI.charInfo.specs[specIndex] = {
         index = specIndex,
         id = id,

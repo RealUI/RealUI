@@ -140,27 +140,27 @@ end
 
 -- Loot Spec
 function RealUI:GetCurrentLootSpecName()
-    local lsID = _G.GetLootSpecialization()
+    local lsID = RealUI.GetLootSpecialization()
     debug("GetCurrentLootSpecName", lsID)
 
     if (lsID == 0) then
-        local specIndex = _G.GetSpecialization()
-        local _, specName = _G.GetSpecializationInfo(specIndex)
+        local specIndex = RealUI.GetSpecialization()
+        local _, specName = RealUI.GetSpecializationInfo(specIndex)
         debug("GetSpecializationInfo", _, specName, specIndex)
         if RealUI.isDev and not specName then
             print("GetCurrentLootSpecName failed")
         end
         return specName or _G.UNKNOWN
     else
-        local _, specName = _G.GetSpecializationInfoByID(lsID)
+        local _, specName = RealUI.GetSpecializationInfoByID(lsID)
         debug("GetSpecializationInfoByID", _, specName)
         return specName
     end
 end
 
 function RealUI:GetLootSpecData(LootSpecIDs)
-    for i = 1, _G.GetNumSpecializations() do
-        LootSpecIDs[i] = _G.GetSpecializationInfo(i)
+    for i = 1, RealUI.GetNumSpecializations() do
+        LootSpecIDs[i] = RealUI.GetSpecializationInfo(i)
     end
     return LootSpecIDs
 end

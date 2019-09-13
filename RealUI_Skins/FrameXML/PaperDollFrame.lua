@@ -3,6 +3,8 @@ local _, private = ...
 -- [[ Lua Globals ]]
 -- luacheck: globals next tonumber max type
 
+if not _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then return end
+
 -- [[ Core ]]
 local Aurora = private.Aurora
 local Base = Aurora.Base

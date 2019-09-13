@@ -193,7 +193,9 @@ function FrameMover:PLAYER_ENTERING_WORLD()
 
     if not EnteredWorld then
         Hook_Raven()
-        Hook_VSI()
+        if RealUI.compatRelease then
+            Hook_VSI()
+        end
 
         self:MoveUIFrames()
         self:MoveAddons()

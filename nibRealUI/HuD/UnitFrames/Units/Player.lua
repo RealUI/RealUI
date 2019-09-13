@@ -43,7 +43,9 @@ end
 
 UnitFrames.player = {
     create = function(self)
-        CreateTotems(self)
+        if RealUI.compatRealease then
+            CreateTotems(self)
+        end
 
         --[[ Additional Power ]]--
         local AdditionalPower = _G.CreateFrame("StatusBar", nil, self.Power)

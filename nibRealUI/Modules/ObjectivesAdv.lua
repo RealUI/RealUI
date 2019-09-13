@@ -1,5 +1,7 @@
 local _, private = ...
 
+if not _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then return end
+
 -- RealUI --
 local RealUI = private.RealUI
 local db

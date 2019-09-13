@@ -126,25 +126,27 @@ local function UpdateMoney()
 end
 
 local function SetUpHooks()
-    private.AddHook("SetCurrencyByID", function(self, currencyID, quantity)
-        AddTooltipInfo(self, currencyID, not _G.MerchantMoneyInset:IsMouseOver())
-    end)
-    private.AddHook("SetCurrencyToken", function(self, index)
-        local name = _G.GetCurrencyListInfo(index)
-        AddTooltipInfo(self, currencyNameToID[name], not _G.TokenFrame:IsMouseOver())
-    end)
-    private.AddHook("SetCurrencyTokenByID", function(self, currencyID)
-        AddTooltipInfo(self, currencyID, not _G.TokenFrame:IsMouseOver())
-    end)
+    if RealUI.compatRelease then
+        private.AddHook("SetCurrencyByID", function(self, currencyID, quantity)
+            AddTooltipInfo(self, currencyID, not _G.MerchantMoneyInset:IsMouseOver())
+        end)
+        private.AddHook("SetCurrencyToken", function(self, index)
+            local name = _G.GetCurrencyListInfo(index)
+            AddTooltipInfo(self, currencyNameToID[name], not _G.TokenFrame:IsMouseOver())
+        end)
+        private.AddHook("SetCurrencyTokenByID", function(self, currencyID)
+            AddTooltipInfo(self, currencyID, not _G.TokenFrame:IsMouseOver())
+        end)
 
-    private.AddHook("SetLFGDungeonReward", function(self, dungeonID, rewardIndex)
-        local name = _G.GetLFGDungeonRewardInfo(dungeonID, rewardIndex)
-        AddTooltipInfo(self, currencyNameToID[name], true)
-    end)
-    private.AddHook("SetLFGDungeonShortageReward", function(self, dungeonID, shortageIndex, rewardIndex)
-        local name = _G.GetLFGDungeonShortageRewardInfo(dungeonID, shortageIndex, rewardIndex)
-        AddTooltipInfo(self, currencyNameToID[name], true)
-    end)
+        private.AddHook("SetLFGDungeonReward", function(self, dungeonID, rewardIndex)
+            local name = _G.GetLFGDungeonRewardInfo(dungeonID, rewardIndex)
+            AddTooltipInfo(self, currencyNameToID[name], true)
+        end)
+        private.AddHook("SetLFGDungeonShortageReward", function(self, dungeonID, shortageIndex, rewardIndex)
+            local name = _G.GetLFGDungeonShortageRewardInfo(dungeonID, shortageIndex, rewardIndex)
+            AddTooltipInfo(self, currencyNameToID[name], true)
+        end)
+    end
 
     private.AddHook("SetMerchantCostItem", function(self, slotIndex, itemIndex)
         local _, _, _, name = _G.GetMerchantItemCostItem(slotIndex, itemIndex)
@@ -159,23 +161,28 @@ local function SetUpHooks()
     end)
 
     local frame = _G.CreateFrame("Frame")
-    frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+    if RealUI.compatRelease then
+        frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+    end
+
     frame:RegisterEvent("PLAYER_MONEY")
     if characterInfo.faction == "Neutral" then
         frame:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
     end
     frame:SetScript("OnEvent", function(self, event, ...)
         Tooltips:debug("Currency:OnEvent", event, ...)
-        if event == "NEUTRAL_FACTION_SELECT_RESULT" then
-            local charInfo  = RealUI.charInfo
-            charInfo.faction = _G.UnitFactionGroup("player")
-            currencyDB[RealUI.realmInfo.realmNormalized][charInfo.faction][charInfo.name] = currencyDB[RealUI.realmInfo.realmNormalized]["Neutral"][charInfo.name]
-            currencyDB[RealUI.realmInfo.realmNormalized]["Neutral"][charInfo.name] = nil
-            UpdateCurrency()
-        elseif event == "CURRENCY_DISPLAY_UPDATE" then
-            UpdateCurrency()
-        elseif event == "PLAYER_MONEY" then
+        if event == "PLAYER_MONEY" then
             UpdateMoney()
+        elseif RealUI.compatRelease then
+            if event == "NEUTRAL_FACTION_SELECT_RESULT" then
+                local charInfo  = RealUI.charInfo
+                charInfo.faction = _G.UnitFactionGroup("player")
+                currencyDB[charInfo.realmNormalized][charInfo.faction][charInfo.name] = currencyDB[charInfo.realmNormalized]["Neutral"][charInfo.name]
+                currencyDB[charInfo.realmNormalized]["Neutral"][charInfo.name] = nil
+                UpdateCurrency()
+            elseif event == "CURRENCY_DISPLAY_UPDATE" then
+                UpdateCurrency()
+            end
         end
     end)
 end
@@ -185,6 +192,8 @@ function private.SetupCurrency()
     currencyDB = RealUI.db.global.currency
 
     SetUpHooks()
-    UpdateCurrency()
+    if RealUI.compatRelease then
+        UpdateCurrency()
+    end
     UpdateMoney()
 end

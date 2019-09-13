@@ -1,5 +1,7 @@
 local _, private = ...
 
+if not _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then return end
+
 -- Lua Globals --
 local floor = _G.math.floor
 
@@ -188,7 +190,9 @@ local function CreateArena(self)
 
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
-    self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
+    if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then
+        self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
+    end
 end
 
 UnitFrames.arena = {
