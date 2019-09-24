@@ -3,85 +3,49 @@ local _, private = ...
 function private.AddOns.Masque()
     local MSQ = _G.LibStub("Masque")
     MSQ:AddSkin("RealUI", {
-        Author = "Nibelheim",
-        Version = "8.1 r20",
+        Template = "Default",
         Shape = "Square",
-        Masque_Version = 70200,
+        Masque_Version = 80200,
+
+        Author = "Gethe",
+        Version = 2,
+
         Backdrop = {
-            Width = 32,
-            Height = 32,
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Backdrop]],
+            Texture = [[Interface\PaperDoll\UI-Backpack-EmptySlot]],
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
         },
         Icon = {
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
             Width = 26,
             Height = 26,
+        },
+        Shadow = MSQ.__Hidden,
+        Normal = {
+            Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
+            Color = {0, 0, 0, 1},
+            Width = 32,
+            Height = 32,
+        },
+        Disabled = MSQ.__Hidden,
+        Pushed = {
+            Texture = [[Interface\Buttons\UI-Quickslot-Depress]],
             TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
         },
         Flash = {
-            Width = 32,
-            Height = 32,
             Color = {1, 0, 0, 0.3},
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Overlay]],
-        },
-        Cooldown = {
-            Width = 26,
-            Height = 26,
-        },
-        ChargeCooldown = {
-            Width = 26,
-            Height = 26,
-        },
-        Pushed = {
             Width = 32,
             Height = 32,
-            Color = {0, 0, 0, 0.5},
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Overlay]],
+            UseColor = true
         },
-        Normal = {
-            Width = 32,
-            Height = 32,
-            Color = {0, 0, 0, 1},
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Normal]],
-        },
-        Disabled = {
-            Hide = true,
-        },
-        Checked = {
-            Width = 32,
-            Height = 32,
-            BlendMode = "ADD",
-            Color = {0, 0.8, 1, 0.5},
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
-        },
-        Border = {
-            Width = 32,
-            Height = 32,
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
-        },
-        Gloss = {
-            Width = 32,
-            Height = 32,
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Gloss]],
-        },
-        AutoCastable = {
-            Width = 48,
-            Height = 48,
-            OffsetX = 0.5,
-            OffsetY = -0.5,
-            Texture = [[Interface\Buttons\UI-AutoCastableOverlay]],
-        },
-        Highlight = {
-            Width = 32,
-            Height = 32,
-            BlendMode = "ADD",
-            Color = {1, 1, 1, 0.75},
-            Texture = [[Interface\AddOns\RealUI_Skins\Media\Highlight]],
-        },
-        Name = {
+        HotKey = {
             Width = 26,
             Height = 10,
-            OffsetX = 1,
-            OffsetY = 5,
+            OffsetX = 6,
+            OffsetY = -6,
             JustifyH = "LEFT",
         },
         Count = {
@@ -91,23 +55,93 @@ function private.AddOns.Masque()
             OffsetY = 5,
             JustifyH = "RIGHT",
         },
-        HotKey = {
-            Width = 26,
-            Height = 10,
-            OffsetX = 6,
-            OffsetY = -6,
-            JustifyH = "LEFT",
-        },
         Duration = {
             Width = 26,
             Height = 10,
             OffsetY = -2,
         },
-        Shine = {
+        Checked = {
+            Texture = [[Interface\Buttons\CheckButtonHilight]],
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
+        },
+        Border = {
+            Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
+            Width = 32,
+            Height = 32,
+        },
+        IconBorder = {
+            Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
+            Width = 32,
+            Height = 32,
+        },
+        SlotHighlight = {
+            Texture = [[Interface\Buttons\CheckButtonHilight]],
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
+        },
+        Gloss = MSQ.__Hidden,
+        IconOverlay = MSQ.__Hidden,
+        NewAction = {
+            Atlas = "bags-newitem",
+            TexCoords = {0.15, 0.85, 0.15, 0.85},
+            Width = 26,
+            Height = 26,
+        },
+        SpellHighlight = {
+            Atlas = "bags-newitem",
+            TexCoords = {0.15, 0.85, 0.15, 0.85},
+            Width = 26,
+            Height = 26,
+        },
+        AutoCastable = {
+            Texture = [[Interface\Buttons\UI-AutoCastableOverlay]],
+            TexCoords = {0.21875, 0.765625, 0.21875, 0.765625},
+            Width = 26,
+            Height = 26,
+        },
+        NewItem = {
+            Atlas = "bags-glow-white",
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
+        },
+        SearchOverlay = {
+            Width = 26,
+            Height = 26,
+        },
+        ContextOverlay = {
+            Width = 26,
+            Height = 26,
+        },
+        Name = {
+            JustifyH = "LEFT",
+            Width = 26,
+            Height = 10,
+            OffsetX = 1,
+            OffsetY = 5,
+        },
+        Highlight = {
+            Texture = [[Interface\Buttons\ButtonHilight-Square]],
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
+        },
+        AutoCastShine = {
             Width = 26,
             Height = 26,
             OffsetX = 1,
             OffsetY = -1,
+        },
+        Cooldown = {
+            Width = 26,
+            Height = 26,
+        },
+        ChargeCooldown = {
+            Width = 26,
+            Height = 26,
         },
     }, true)
 end
