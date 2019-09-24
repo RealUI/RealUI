@@ -1,4 +1,4 @@
-## [Unreleased] ##
+## [2.1.0] - 2019-09-24 ##
 ### Modified AddOns ###
 
   * FreebTip has been replaced with RealUI_Tooltips.
@@ -23,6 +23,7 @@
   * Error when on an Island Expedition.
   * Reverse health bars would not set correctly on login.
   * The minimap button collection should now be more reliable
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
 
@@ -334,6 +335,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.0]: https://github.com/RealUI/RealUI/compare/2.0.14...2.1.0
 [2.0.14]: https://github.com/RealUI/RealUI/compare/2.0.13...2.0.14
 [2.0.13]: https://github.com/RealUI/RealUI/compare/2.0.12...2.0.13
 [2.0.12]: https://github.com/RealUI/RealUI/compare/2.0.11...2.0.12
