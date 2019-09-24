@@ -1,12 +1,43 @@
-﻿## [2.0.14] - 2019-07-13 ##
+## [2.1.0] - 2019-09-24 ##
+### Modified AddOns ###
+
+  * FreebTip has been replaced with RealUI_Tooltips.
+  * cargBags_Nivaya
+  * nibRealUI
+
+### Changed ###
+
+  * There is a new insertion indicator while moving infobar blocks.
+
+### Added ###
+
+  * New "Tooltips" section in the Advanced options.
+  * New option to show object IDs in tooltips.
+  * New option to show if you've collected an item's appearance.
+  * When doing world quests or bonus objectives, the progress contribution of an object is now shown on the tooltip.
+  * There are new default bag categories for Travel, Archaeology, Tabards, and Mechagon items. Thanks to ItsMattTrevino on Github for this feature.
+  * Use `/cbniv addtrade` to add bags for Trade Good sub categories like Cloth and Herbs. Thanks to ItsMattTrevino on Github for this feature.
+
+### Fixed ###
+
+  * Error when on an Island Expedition.
+  * Reverse health bars would not set correctly on login.
+  * The minimap button collection should now be more reliable
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.0.14] - 2019-07-13 ##
 ### Modified AddOns ###
 
   * nibRealUI
 
 ### Fixed ###
 
-  * Error when opening actionbar settings with /bt.
-  * SetPoint errors when a popup dialog is shown.
+  * Addons that were missing have been restored.
+  * Error when visiting certain Islands or quest locations.
+  * Error when receiving a resurrection.
 
 
 
@@ -304,6 +335,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.0]: https://github.com/RealUI/RealUI/compare/2.0.14...2.1.0
 [2.0.14]: https://github.com/RealUI/RealUI/compare/2.0.13...2.0.14
 [2.0.13]: https://github.com/RealUI/RealUI/compare/2.0.12...2.0.13
 [2.0.12]: https://github.com/RealUI/RealUI/compare/2.0.11...2.0.12

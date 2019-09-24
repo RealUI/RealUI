@@ -1,4 +1,4 @@
-﻿local _, ns = ...
+local _, ns = ...
 
 local L = {}
 local gl = _G.GetLocale()
@@ -30,6 +30,25 @@ L.bagCaptions = {
     ["cBniv_Bag"]           = _G.INVENTORY_TOOLTIP,
     ["cBniv_Keyring"]       = _G.KEYRING,
 }
+
+-- example = Trade Goods: Herb
+local tradegoodsFormat = _G.BAG_FILTER_TRADE_GOODS .. ": %s"
+local tradeTypeNames = ns.cargBags:GetLocalizedTypes()[_G.LE_ITEM_CLASS_TRADEGOODS].subClasses
+L.bagParts = tradegoodsFormat:format(tradeTypeNames[1])
+L.bagJewelcrafting = tradegoodsFormat:format(tradeTypeNames[4])
+L.bagCloth = tradegoodsFormat:format(tradeTypeNames[5])
+L.bagLeatherworking = tradegoodsFormat:format(tradeTypeNames[6])
+L.bagMetalStone = tradegoodsFormat:format(tradeTypeNames[7])
+L.bagCooking = tradegoodsFormat:format(tradeTypeNames[8])
+L.bagHerb = tradegoodsFormat:format(tradeTypeNames[9])
+L.bagElemental = tradegoodsFormat:format(tradeTypeNames[10])
+L.bagEnchanting = tradegoodsFormat:format(tradeTypeNames[12])
+L.bagInscription = tradegoodsFormat:format(tradeTypeNames[16])
+
+L.bagArchaeology = _G.PROFESSIONS_ARCHAEOLOGY
+L.bagTabards = _G.INVTYPE_TABARD
+L.bagTravel = _G.TUTORIAL_TITLE35
+L.bagMechagon = _G.SPLASH_BATTLEFORAZEROTH_8_2_0_FEATURE1_TITLE
 
 if gl == "deDE" then
     L.ResetCategory = "Reset Category"

@@ -1,7 +1,8 @@
 local _, private = ...
 
 -- Lua Globals --
-local next, ipairs = _G.next, _G.ipairs
+-- luacheck: globals next ipairs error assert min type
+-- luacheck: globals tinsert tremove wipe sort unpack
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
@@ -110,14 +111,15 @@ end
 
 function BlockMixin:OnDragStart(button)
     Infobar:debug("OnDragStart", self.name, button)
-    local dock = Infobar.frame[self.side]
-    dock:RemoveBlock(self)
+    local dock = self:GetNearestDock()
+    dock:DetatchBlock(self)
 
     local x, y = self:GetCenter()
     x = x - (self:GetWidth()/Scale.Value(2))
     y = y - (self:GetHeight()/Scale.Value(2))
     self:ClearAllPoints()
     Scale.RawSetPoint(self, "TOPLEFT", "UIParent", "BOTTOMLEFT", x, y)
+    self:SetMovable(true)
     self:StartMoving()
     MOVING_BLOCK = self
 end
@@ -126,20 +128,8 @@ function BlockMixin:OnDragStop(button)
     Infobar:debug("OnDragStop", self.name, button)
     self:StopMovingOrSizing()
 
-    local dock = Infobar.frame[self.side]
-    dock:HideInsertHighlight()
-
-    if ( dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) ) then
-        local scale, mouseX, mouseY = _G.UIParent:GetScale(), _G.GetCursorPosition()
-        mouseX, mouseY = mouseX / scale, mouseY / scale
-
-        -- DockFrame
-        dock:AddBlock(self, dock:GetInsertIndex(mouseX, mouseY))
-        dock:UpdateBlocks(true)
-    else
-        self:RestorePosition()
-    end
-
+    local dock = self:GetNearestDock()
+    dock:AtatchBlock(self)
     self:SavePosition()
 
     MOVING_BLOCK = nil
@@ -172,15 +162,13 @@ function BlockMixin:OnUpdate(elapsed)
     end
 
     if self == MOVING_BLOCK then
-        local scale, cursorX, cursorY = _G.UIParent:GetScale(), _G.GetCursorPosition()
-        cursorX, cursorY = cursorX / scale, cursorY / scale
-        local dock = Infobar.frame[self.side]
-        if dock:IsMouseOver(BAR_HEIGHT, 0, 0, 0) then
-            dock:PlaceInsertHighlight(cursorX, cursorY)
-        else
-            dock:HideInsertHighlight()
+        local dock = self:GetNearestDock()
+        if dock:IsMouseOver(BAR_HEIGHT * 4, 0, 0, 0) then
+            local insert = dock:GetInsertIndex()
+            if self.index ~= insert then
+                dock:MoveBlock(self, insert)
+            end
         end
-        self:UpdateButtonSide()
 
         if not _G.IsMouseButtonDown(self.dragButton) then
             self:OnDragStop(self.dragButton)
@@ -190,25 +178,25 @@ function BlockMixin:OnUpdate(elapsed)
     end
 end
 
-function BlockMixin:UpdateButtonSide()
+function BlockMixin:GetNearestDock()
     local xOfs =  self:GetCenter()
     local uiCenter = Infobar.frame:GetWidth() / 2
-    local changed = nil
-    if xOfs < uiCenter then
-        if self.side ~= "left" then
-            self.side = "left"
-            changed = 1
-        end
-    else
-        if self.side ~= "right" then
-            self.side = "right"
-            changed = 1
-        end
+
+    local oldSide, newSide = self.side, "left"
+    if xOfs > uiCenter then
+        newSide = "right"
     end
-    return changed
+
+    if oldSide ~= newSide then
+        Infobar.frame[oldSide]:RemoveBlock(self)
+        Infobar.frame[newSide]:AddBlock(self)
+    end
+
+    return Infobar.frame[newSide]
 end
 
 function BlockMixin:SavePosition()
+    if not self.dataObj then return end
     local blockInfo = Infobar:GetBlockInfo(self.name, self.dataObj)
 
     blockInfo.side = self.side
@@ -218,7 +206,7 @@ end
 function BlockMixin:RestorePosition()
     local blockInfo = Infobar:GetBlockInfo(self.name, self.dataObj)
 
-    local dock = Infobar.frame[blockInfo.side]
+    local dock = self:GetNearestDock()
     dock:AddBlock(self, blockInfo.index)
 end
 
@@ -280,12 +268,11 @@ end
 local function CreateNewBlock(name, dataObj, blockInfo)
     Infobar:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
-    block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name
-    _G.tinsert(orderedBlocks, block)
-    _G.sort(orderedBlocks, SortBlocks)
+    tinsert(orderedBlocks, block)
+    sort(orderedBlocks, SortBlocks)
 
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.25)
@@ -322,7 +309,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
                 icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
             end
             if dataObj.iconCoords then
-                icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+                icon:SetTexCoord(unpack(dataObj.iconCoords))
             end
         end
         block.icon = icon
@@ -343,31 +330,33 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     block:SetHighlightTexture(highlight)
     block.highlight = highlight
 
-    local pulse = block:CreateTexture(nil, "ARTWORK")
-    pulse:SetTexture([[Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight-yellow]])
-    pulse:SetBlendMode("ADD")
-    pulse:SetAlpha(0)
-    Scale.Point(pulse, "TOPLEFT")
-    Scale.Point(pulse, "BOTTOMRIGHT")
+    do -- pulseAnim
+        local pulse = block:CreateTexture(nil, "ARTWORK")
+        pulse:SetTexture([[Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight-yellow]])
+        pulse:SetBlendMode("ADD")
+        pulse:SetAlpha(0)
+        Scale.Point(pulse, "TOPLEFT")
+        Scale.Point(pulse, "BOTTOMRIGHT")
 
-    local AnimationGroup = block:CreateAnimationGroup()
-    AnimationGroup:SetToFinalAlpha(true)
-    AnimationGroup:SetLooping("REPEAT")
-    block.pulseAnim = AnimationGroup
+        local pulseAnim = block:CreateAnimationGroup()
+        pulseAnim:SetToFinalAlpha(true)
+        pulseAnim:SetLooping("REPEAT")
+        block.pulseAnim = pulseAnim
 
-    local fadeIn = AnimationGroup:CreateAnimation('Alpha')
-    fadeIn:SetTarget(pulse)
-    fadeIn:SetFromAlpha(0)
-    fadeIn:SetToAlpha(1)
-    fadeIn:SetDuration(1)
-    fadeIn:SetOrder(1)
+        local fadeIn = pulseAnim:CreateAnimation("Alpha")
+        fadeIn:SetTarget(pulse)
+        fadeIn:SetFromAlpha(0)
+        fadeIn:SetToAlpha(1)
+        fadeIn:SetDuration(1)
+        fadeIn:SetOrder(1)
 
-    local fadeOut = AnimationGroup:CreateAnimation('Alpha')
-    fadeOut:SetTarget(pulse)
-    fadeOut:SetFromAlpha(1)
-    fadeOut:SetToAlpha(0)
-    fadeOut:SetDuration(1)
-    fadeOut:SetOrder(2)
+        local fadeOut = pulseAnim:CreateAnimation("Alpha")
+        fadeOut:SetTarget(pulse)
+        fadeOut:SetFromAlpha(1)
+        fadeOut:SetToAlpha(0)
+        fadeOut:SetDuration(1)
+        fadeOut:SetOrder(2)
+    end
 
     block:SetScript("OnEnter", block.OnEnter)
     block:SetScript("OnLeave", block.OnLeave)
@@ -379,6 +368,7 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     block:SetScript("OnUpdate", block.OnUpdate)
     block:AdjustElements(blockInfo)
     block:SetClampedToScreen(true)
+    block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
     return block
 end
 
@@ -458,7 +448,7 @@ function Infobar:HideBlock(name, dataObj, blockInfo)
             end
             i = i + 1
         end
-        _G.tinsert(dock.ADJUSTED_BLOCKS, i, {
+        tinsert(dock.ADJUSTED_BLOCKS, i, {
             position = position, -- where the block should be
             index = #dock.DOCKED_BLOCKS, -- where the block is
             isHidden = true,
@@ -480,8 +470,8 @@ function Infobar:LibDataBroker_DataObjectCreated(event, name, dataObj, noupdate)
                 isFake = true
             }
             blocksByData[dataObj] = block
-            _G.tinsert(orderedBlocks, block)
-            _G.sort(orderedBlocks, SortBlocks)
+            tinsert(orderedBlocks, block)
+            sort(orderedBlocks, SortBlocks)
         end
     end
 end
@@ -516,7 +506,7 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
                     block.icon:SetVertexColor(dataObj.iconR, dataObj.iconG, dataObj.iconB)
                 end
                 if dataObj.iconCoords then
-                    block.icon:SetTexCoord(_G.unpack(dataObj.iconCoords))
+                    block.icon:SetTexCoord(unpack(dataObj.iconCoords))
                 end
             end
         end
@@ -543,6 +533,16 @@ function DockMixin:OnLoad()
     Scale.Size(self.insertHighlight, 1, BAR_HEIGHT)
     self.insertHighlight:SetColorTexture(1, 1, 1)
 
+    local spacerBlock = _G.Mixin(_G.CreateFrame("Button", nil, self), BlockMixin)
+    spacerBlock.name = "spacer"
+    Scale.Height(spacerBlock, BAR_HEIGHT)
+    self.spacerBlock = spacerBlock
+
+    local bg = spacerBlock:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(1, 1, 0, 0.5)
+    bg:SetAllPoints()
+    spacerBlock.bg = bg
+
     self.DOCKED_BLOCKS = {}
     self.ADJUSTED_BLOCKS = {} -- blocks that are not in thier saved position
     self.isDirty = true    --You dirty, dirty frame
@@ -555,7 +555,7 @@ end
 
 function DockMixin:AddBlock(block, position)
     if ( not self.primary ) then
-        _G.error("Need a primary block before another can be added.")
+        error("Need a primary block before another can be added.")
     end
 
     if ( self:HasDockedBlock(block) ) then
@@ -564,7 +564,9 @@ function DockMixin:AddBlock(block, position)
 
     self.isDirty = true
     block.isDocked = true
+    block.side = self.side
 
+    position = position or (#self.DOCKED_BLOCKS + 1)
     local adjustedPosition = position
     for i = 1, #self.ADJUSTED_BLOCKS do
         if adjustedPosition < self.ADJUSTED_BLOCKS[i].position then
@@ -574,10 +576,10 @@ function DockMixin:AddBlock(block, position)
     end
 
     if ( adjustedPosition and adjustedPosition <= #self.DOCKED_BLOCKS + 1 ) then
-        _G.assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition)
-        _G.tinsert(self.DOCKED_BLOCKS, adjustedPosition, block)
+        assert(adjustedPosition ~= 1 or block == self.primary, adjustedPosition)
+        tinsert(self.DOCKED_BLOCKS, adjustedPosition, block)
     else
-        _G.tinsert(self.DOCKED_BLOCKS, block)
+        tinsert(self.DOCKED_BLOCKS, block)
     end
 
     if position > #self.DOCKED_BLOCKS or adjustedPosition ~= position then
@@ -589,14 +591,12 @@ function DockMixin:AddBlock(block, position)
             end
             i = i + 1
         end
-        _G.tinsert(self.ADJUSTED_BLOCKS, i, {
+        tinsert(self.ADJUSTED_BLOCKS, i, {
             position = position, -- where the block should be
             index = #self.DOCKED_BLOCKS, -- where the block is
             block = block
         })
     end
-
-    self:HideInsertHighlight()
 
     if ( self.primary ~= block ) then
         block:ClearAllPoints()
@@ -604,15 +604,23 @@ function DockMixin:AddBlock(block, position)
         block:SetResizable(false)
     end
 
+    if block == MOVING_BLOCK then
+        self.spacerBlock:Show()
+    end
+
     self:UpdateBlocks()
 end
 
 function DockMixin:RemoveBlock(block)
-    _G.assert(block ~= self.primary or #self.DOCKED_BLOCKS == 1)
+    if block == self.primary or #self.DOCKED_BLOCKS == 1 then return end
+
     self.isDirty = true
     _G.tDeleteItem(self.DOCKED_BLOCKS, block)
     block.isDocked = false
-    block:SetMovable(true)
+
+    if block == MOVING_BLOCK then
+        self.spacerBlock:Hide()
+    end
 
     block:Show()
     self:UpdateBlocks()
@@ -620,6 +628,32 @@ end
 
 function DockMixin:HasDockedBlock(block)
     return _G.tContains(self.DOCKED_BLOCKS, block)
+end
+
+function DockMixin:GetBlockAtIndex(index)
+    local block = self.DOCKED_BLOCKS[index]
+    if block.isDetatched then
+        return self.spacerBlock, true
+    else
+        return block
+    end
+end
+
+function DockMixin:DetatchBlock(block)
+    block.isDetatched = true
+    self.spacerBlock:Show()
+    self:UpdateBlocks(true)
+end
+
+function DockMixin:AtatchBlock(block)
+    block.isDetatched = nil
+    self.spacerBlock:Hide()
+    self:UpdateBlocks(true)
+end
+
+function DockMixin:MoveBlock(block, newIndex)
+    self:RemoveBlock(block)
+    self:AddBlock(block, newIndex)
 end
 
 local toBeRemoved = {}
@@ -635,7 +669,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
             block:AdjustElements(Infobar:GetBlockInfo(block.name, block.dataObj))
         end
 
-        _G.wipe(toBeRemoved)
+        wipe(toBeRemoved)
         local indexAdjust = 0
         for i = 1, #self.ADJUSTED_BLOCKS do
             if self.ADJUSTED_BLOCKS[i].isHidden and index >= self.ADJUSTED_BLOCKS[i].position then
@@ -645,7 +679,7 @@ function DockMixin:UpdateBlocks(forceUpdate)
             if block == self.ADJUSTED_BLOCKS[i].block then
                 if index == self.ADJUSTED_BLOCKS[i].position then
                     -- the block is now where is should be, remove it
-                    _G.tinsert(toBeRemoved, i)
+                    tinsert(toBeRemoved, i)
                 else
                     -- the block is *still* not where is should be, update it's index
                     self.ADJUSTED_BLOCKS[i].index = index
@@ -653,13 +687,19 @@ function DockMixin:UpdateBlocks(forceUpdate)
             end
         end
         for i = 1, #toBeRemoved do
-            _G.tremove(self.ADJUSTED_BLOCKS, toBeRemoved[i])
+            tremove(self.ADJUSTED_BLOCKS, toBeRemoved[i])
         end
         block.index = index + indexAdjust
         block:SavePosition()
         block:Show()
 
-        if ( lastBlock ) then
+        if block.isDetatched then
+            self.spacerBlock:SetWidth(block:GetWidth())
+            block = self.spacerBlock
+        end
+
+        block:ClearAllPoints()
+        if lastBlock then
             local xOfs = self.side == "left" and db.blockGap or -db.blockGap
             Scale.Point(block, self.anchor, lastBlock, self.anchorAlt, xOfs, 0)
         else
@@ -673,44 +713,26 @@ function DockMixin:UpdateBlocks(forceUpdate)
     return true
 end
 
-function DockMixin:GetInsertIndex(mouseX, mouseY)
-    local maxPosition = 0
-    for index, block in ipairs(self.DOCKED_BLOCKS) do
-        if self.side == "left" then
-            if mouseX < (block:GetLeft() + block:GetRight()) / 2 and  --Find the first block we're on the left of. (Being on top of the block, but left of the center counts)
-                block ~= self.primary then   --We never count as being to the left of the primary block.
-                return index
-            end
-        elseif self.side == "right" then
-            if mouseX > (block:GetLeft() + block:GetRight()) / 2 and
-                block ~= self.primary then
-                return index
-            end
+function DockMixin:GetInsertIndex()
+    local moveX = MOVING_BLOCK:GetCenter()
+    local insertIndex, detachedIndex
+    for index = 2, #self.DOCKED_BLOCKS do
+        local block, isDetatched = self:GetBlockAtIndex(index)
+        local center = block:GetCenter()
+        if isDetatched then
+            detachedIndex = index
         end
-        maxPosition = index
+
+        local width = min(block:GetWidth(), MOVING_BLOCK:GetWidth()) / 2
+        local left, right = center - width, center + width
+        if moveX > left and moveX < right then
+            insertIndex = index
+        end
     end
+    insertIndex = (insertIndex or detachedIndex) or #self.DOCKED_BLOCKS
+
     --We aren't to the left of anything, so we're going into the far-right position.
-    return maxPosition + 1
-end
-
-function DockMixin:PlaceInsertHighlight(mouseX, mouseY)
-    local insert = self:GetInsertIndex(mouseX, mouseY)
-
-    local attachFrame = self.primary
-
-    for index, block in ipairs(self.DOCKED_BLOCKS) do
-        if ( index < insert ) then
-            attachFrame = block
-        end
-    end
-
-    self.insertHighlight:ClearAllPoints()
-    Scale.Point(self.insertHighlight, self.anchor, attachFrame, self.anchorAlt, 0, 0)
-    self.insertHighlight:Show()
-end
-
-function DockMixin:HideInsertHighlight()
-    self.insertHighlight:Hide()
+    return insertIndex, insertIndex == self.DOCKED_BLOCKS
 end
 
 --------------------
@@ -856,18 +878,18 @@ function Infobar:SettingsUpdate(setting, block)
 end
 
 function Infobar:GetBlockInfo(dataobjectname)
-    local objType = _G.type(dataobjectname)
-    _G.assert(objType == "string" or objType == "table", "\"dataobjectname\" must be a string or a table, got "..objType)
+    local objType = type(dataobjectname)
+    assert(objType == "string" or objType == "table", "\"dataobjectname\" must be a string or a table, got "..objType)
 
     local name, dataObj
     if objType == "table" then
         dataObj = dataobjectname
         name = LDB:GetNameByDataObject(dataObj)
-        _G.assert(dataObj.type and name, "table must be an LDB data object.")
+        assert(dataObj.type and name, "table must be an LDB data object.")
     elseif objType == "string" then
         name = dataobjectname
         dataObj = LDB:GetDataObjectByName(name)
-        _G.assert(dataObj and dataObj.type, "string must be the name of an LDB data object.")
+        assert(dataObj and dataObj.type, "string must be the name of an LDB data object.")
     end
 
     if dataObj.type == "RealUI" then
@@ -898,7 +920,7 @@ function Infobar:OnInitialize()
     self.db:RegisterDefaults({
         char = {
             progressState = "xp",
-            currencyState = "gold",
+            currencyState = "money",
             specgear = specgear,
         },
         profile = {
@@ -997,7 +1019,7 @@ function Infobar:OnEnable()
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
 
     blockFont = {
-        font = RealUI:GetAddOnDB("RealUI_Skins").profile.fonts.chat.path,
+        font = RealUI.GetOptions("Skins").profile.fonts.chat.path,
         size = RealUI.Round(BAR_HEIGHT * 0.6),
         outline = self:GetFontOutline()
     }

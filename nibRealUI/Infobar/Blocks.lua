@@ -1,7 +1,9 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next unpack tinsert
+-- luacheck: globals min max tonumber floor
+-- luacheck: globals sort tinsert unpack wipe
+-- luacheck: globals next date strsplit type
 
 -- Libs --
 local LDD = _G.LibStub("LibDropDown")
@@ -112,7 +114,7 @@ local function SetupTextTable()
         end
 
         self:Show()
-        local numToDisplay = _G.min(MAX_ROWS, #data)
+        local numToDisplay = min(MAX_ROWS, #data)
         local scrollFrameHeight = (#data - numToDisplay) * ROW_HEIGHT
         if ( scrollFrameHeight < 0 ) then
             scrollFrameHeight = 0
@@ -196,7 +198,7 @@ local function SetupTextTable()
                     sortHandler = SortSimple
                 end
 
-                _G.sort(data, Compare)
+                sort(data, Compare)
                 UpdateScroll(self.scrollArea)
             end
         end
@@ -372,12 +374,12 @@ local function SetupTextTable()
             Infobar:debug("Width", col, remainingWidth)
         end
         for header, size in next, flex do
-            local headerWidth = _G.max(width * size, header.text:GetStringWidth())
+            local headerWidth = max(width * size, header.text:GetStringWidth())
             remainingWidth = remainingWidth - headerWidth
             header:SetWidth(headerWidth)
             Infobar:debug("Width", headerWidth, remainingWidth)
         end
-        filler:SetWidth(_G.max(remainingWidth, filler:GetWidth()))
+        filler:SetWidth(max(remainingWidth, filler:GetWidth()))
 
         Infobar:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
         if extData[data].sortColumn then
@@ -586,7 +588,7 @@ function Infobar:CreateBlocks()
             {text = _G.DUNGEONS_BUTTON,
                 func = ToggleUI,
                 args = {"PVEFrame_ToggleFrame"},
-                disabled = _G.UnitLevel("player") < _G.min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
+                disabled = _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
             },
             {text = _G.COLLECTIONS,
                 func = ToggleUI,
@@ -648,7 +650,7 @@ function Infobar:CreateBlocks()
                 menu:SetAnchor("BOTTOMLEFT", Infobar.frame, "TOPLEFT")
                 menu:SetStyle("REALUI")
                 menu:AddLines(unpack(menuList))
-                if RealUI:GetAddOnDB("RealUI_Skins").profile.isHighRes then
+                if RealUI.GetOptions("Skins").profile.isHighRes then
                     menu:SetScale(Scale.GetUIScale())
                 end
                 _G.BugGrabber.RegisterCallback(menu, "BugGrabber_BugGrabbed", ShowBugIcon, menu)
@@ -672,7 +674,7 @@ function Infobar:CreateBlocks()
         local function RetrieveTime(isMilitary, isLocal)
             local timeFormat, hour, min, suffix
             if isLocal then
-                hour, min = _G.tonumber(_G.date("%H")), _G.tonumber(_G.date("%M"))
+                hour, min = tonumber(date("%H")), tonumber(date("%M"))
             else
                 hour, min = _G.GetGameTime()
             end
@@ -765,7 +767,7 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Date
-                tooltip:AddLine(L["Clock_Date"], _G.date("%b %d (%a)"))
+                tooltip:AddLine(L["Clock_Date"], date("%b %d (%a)"))
 
                 -- Invites
                 if block.invites and block.invites > 0 then
@@ -829,7 +831,7 @@ function Infobar:CreateBlocks()
 
         local NameSort do
             function NameSort(val1, val2, row1, row2)
-                Infobar:debug("NameSort", _G.strsplit("|", val1))
+                Infobar:debug("NameSort", strsplit("|", val1))
                 val1 = val1:match(nameMatch)
                 val2 = val2:match(nameMatch)
                 Infobar:debug("Player1", val1)
@@ -953,7 +955,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, tableWidth)
                 end
 
-                _G.table.wipe(guildData)
+                wipe(guildData)
                 guildData.width = tableWidth
                 guildData.header = headerData
                 guildData.defaultSort = 4
@@ -982,7 +984,7 @@ function Infobar:CreateBlocks()
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
 
-                        _G.tinsert(guildData, {
+                        tinsert(guildData, {
                             id = i,
                             info = {
                                 name, lvl, zone, rank, note, offnote
@@ -1150,7 +1152,7 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.FRIENDS)
 
-                _G.table.wipe(friendsData)
+                wipe(friendsData)
                 friendsData.width = tableWidth
                 friendsData.header = headerData
                 friendsData.defaultSort = 1
@@ -1191,7 +1193,7 @@ function Infobar:CreateBlocks()
                         name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
 
                         -- Difficulty color levels
-                        local lvl = _G.tonumber(level)
+                        local lvl = tonumber(level)
                         if lvl then
                             local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
                             level = ("%s%d|r"):format(color, level)
@@ -1211,7 +1213,7 @@ function Infobar:CreateBlocks()
                         if noteText == "" then noteText = nil end
 
 
-                        _G.tinsert(friendsData, {
+                        tinsert(friendsData, {
                             id = i,
                             info = {
                                 name, level, status, noteText
@@ -1237,13 +1239,13 @@ function Infobar:CreateBlocks()
                         end
 
                         -- Difficulty color levels
-                        local lvl = _G.tonumber(level)
+                        local lvl = tonumber(level)
                         if lvl then
                             level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
                         end
 
                         -- Add Friend to list
-                        _G.tinsert(friendsData, {
+                        tinsert(friendsData, {
                             id = #friendsData + i,
                             info = {
                                 cName, level, area, noteText
@@ -1566,11 +1568,7 @@ function Infobar:CreateBlocks()
                 return _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                if RealUI.isPatch then
-                    return C_AzeriteItem.HasActiveAzeriteItem() and not C_AzeriteItem.IsAzeriteItemAtMaxLevel()
-                else
-                    return C_AzeriteItem.HasActiveAzeriteItem()
-                end
+                return C_AzeriteItem.HasActiveAzeriteItem() and not C_AzeriteItem.IsAzeriteItemAtMaxLevel()
             end,
             SetTooltip = function(Art, tooltip)
                 local xp, totalLevelXP, name, currentLevel = Art:GetStats()
@@ -1680,8 +1678,8 @@ function Infobar:CreateBlocks()
                 main:SetValue(curValue)
                 main:Show()
 
-                if _G.type(otherValue) == "number" then
-                    local restedOfs = _G.max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
+                if type(otherValue) == "number" then
+                    local restedOfs = max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
                     Scale.Point(main.rested, "BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
                 end
@@ -1954,7 +1952,7 @@ function Infobar:CreateBlocks()
 
         local function UpdateGearSets()
             equipmentSetIDs = C_EquipmentSet.GetEquipmentSetIDs()
-            _G.wipe(equipmentSetInfos)
+            wipe(equipmentSetInfos)
             for index = 1, #equipmentSetIDs do
                 local equipName = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetIDs[index])
                 equipmentSetInfos[equipmentSetIDs[index]] = {
@@ -2075,7 +2073,7 @@ function Infobar:CreateBlocks()
         local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
         local charName = "%s |c%s%s|r"
 
-        local currencyDB, charDB
+        local currencyDB
         local ignore = _G.LOCALE_koKR or _G.LOCALE_zhCN or _G.LOCALE_zhTW
         local function ShortenCurrencyName(name)
             if ignore then
@@ -2086,8 +2084,8 @@ function Infobar:CreateBlocks()
         end
         local function SplitMoney(money)
             if not money then return 0,0,0 end
-            local gold = _G.floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
-            local silver = _G.floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
+            local gold = floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
+            local silver = floor((money - (gold * _G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD)) / _G.COPPER_PER_SILVER)
             local copper = money % _G.COPPER_PER_SILVER
             return gold, silver, copper
         end
@@ -2149,16 +2147,24 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetText = function(Money)
-                return GetMoneyString(charDB.money)
+                if RealUI.realmInfo.realmNormalized then
+                    return GetMoneyString(currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name].money)
+                else
+                    return _G.SEARCH_LOADING_TEXT
+                end
             end,
             GetIcon = function(Money)
-                local gold, silver = SplitMoney(charDB.money)
-                if gold > 0 then
-                    return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
-                elseif silver > 0 then
-                    return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
+                if RealUI.realmInfo.realmNormalized then
+                    local gold, silver = SplitMoney(currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name].money)
+                    if gold > 0 then
+                        return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
+                    elseif silver > 0 then
+                        return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
+                    else
+                        return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
+                    end
                 else
-                    return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
+                    return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
                 end
             end,
             IsValid = function(Money)
@@ -2182,8 +2188,8 @@ function Infobar:CreateBlocks()
                     end
                 end,
                 GetText = function(token)
-                    if token.id then
-                        return charDB[token.id] or 0
+                    if token.id and RealUI.realmInfo.realmNormalized then
+                        return currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name][token.id] or 0
                     else
                         return false
                     end
@@ -2200,6 +2206,7 @@ function Infobar:CreateBlocks()
         end
 
         local function UpdateTrackedCurrency(block)
+            if not RealUI.realmInfo.realmNormalized then return end
             local changeIndex
             for i = 1, _G.MAX_WATCHED_TOKENS do
                 local token = currencyStates["token"..i]
@@ -2211,7 +2218,7 @@ function Infobar:CreateBlocks()
                 token.name = name
                 token.icon = icon
                 token.id = currencyID
-                charDB["token"..i] = currencyID
+                currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyID
             end
             return changeIndex
         end
@@ -2236,7 +2243,7 @@ function Infobar:CreateBlocks()
         local function Currency_OnClick(row, ...)
             local name = row[1]:GetText():match(nameMatch)
             if not name then return end
-            local realm, faction = _G.strsplit("-", row.meta[1])
+            local realm, faction = strsplit("-", row.meta[1])
 
             if _G.IsAltKeyDown() then
                 currencyDB[realm][faction][name] = nil
@@ -2260,11 +2267,6 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local connectedRealms = _G.GetAutoCompleteRealms()
-        if not connectedRealms[1] then
-            -- if there are no connected realms, the return is just an empty table.
-            connectedRealms[1] = RealUI.charInfo.realmNormalized
-        end
         local tokens, tableWidth = {}, 250
         local currencyData = {}
         local headerData = {
@@ -2287,43 +2289,40 @@ function Infobar:CreateBlocks()
             text = "Currency",
             OnEnable = function(block)
                 Infobar:debug("currency: OnEnable", block.side)
-                currencyDB = RealUI.db.global.currency
-                charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
-                if not currencyStates[dbc.currencyState] then
-                    dbc.currencyState = "money"
-                end
-
-                if RealUI.charInfo.faction == "Neutral" then
-                    block:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
-                end
-
-                _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
-                    local trackedIndex, trackedName = currencyStates[dbc.currencyState].index, currencyStates[dbc.currencyState].name
-                    local changeIndex = UpdateTrackedCurrency(block)
-                    if changeIndex and trackedIndex then
-                        if changeIndex < trackedIndex then
-                            if flag == 0 and trackedName == currencyStates["token"..trackedIndex-1].name then
-                                dbc.currencyState = "token"..trackedIndex-1
+                if RealUI.realmInfo.realmNormalized then
+                    currencyDB = RealUI.db.global.currency
+                    _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
+                        local trackedIndex, trackedName = currencyStates[dbc.currencyState].index, currencyStates[dbc.currencyState].name
+                        local changeIndex = UpdateTrackedCurrency(block)
+                        if changeIndex and trackedIndex then
+                            if changeIndex < trackedIndex then
+                                if flag == 0 and trackedName == currencyStates["token"..trackedIndex-1].name then
+                                    dbc.currencyState = "token"..trackedIndex-1
+                                end
+                            elseif changeIndex == trackedIndex then
+                                if flag == 1 and trackedName == currencyStates["token"..trackedIndex+1].name then
+                                    dbc.currencyState = "token"..trackedIndex+1
+                                end
                             end
-                        elseif changeIndex == trackedIndex then
-                            if flag == 1 and trackedName == currencyStates["token"..trackedIndex+1].name then
-                                dbc.currencyState = "token"..trackedIndex+1
-                            end
-                        end
 
-                        if currencyStates[dbc.currencyState].index >= changeIndex then
-                            UpdateBlock(block)
+                            if currencyStates[dbc.currencyState].index >= changeIndex then
+                                UpdateBlock(block)
 
-                            if not currencyStates[dbc.currencyState]:IsValid() then
-                                UpdateState(block)
+                                if not currencyStates[dbc.currencyState]:IsValid() then
+                                    UpdateState(block)
+                                end
                             end
                         end
+                    end)
+
+                    if not currencyStates[dbc.currencyState]:IsValid() then
+                        UpdateState(block)
+                    else
+                        UpdateTrackedCurrency(block)
+                        UpdateBlock(block)
                     end
-                end)
-
-                UpdateTrackedCurrency(block)
-                if not currencyStates[dbc.currencyState]:IsValid() then
-                    UpdateState(block)
+                else
+                    self:RegisterMessage("NormalizedRealmReceived", block.dataObj.OnEnable, block)
                 end
             end,
             OnClick = function(block, ...)
@@ -2347,7 +2346,7 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddHeader(_G.CURRENCY)
 
-                _G.table.wipe(currencyData)
+                wipe(currencyData)
                 currencyData.width = tableWidth
                 currencyData.header = headerData
                 currencyData.defaultSort = 1
@@ -2355,41 +2354,38 @@ function Infobar:CreateBlocks()
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
                 local realmMoneyTotal = 0
-                for index = 1, #connectedRealms do
-                    local realm = connectedRealms[index]
-                    if currencyDB[realm] then
-                        local realmDB = currencyDB[realm]
+                for index, realm in next, RealUI.realmInfo.connectedRealms do
+                    local realmDB = currencyDB[realm]
+                    if realmDB then
                         for faction, factionDB in next, realmDB do
-                            if factionDB then
-                                local realm_faction = realm.."-"..faction
-                                local factionIcon = GetInlineFactionIcon(faction)
-                                for name, data in next, factionDB do
-                                    name = charName:format(factionIcon, _G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
-                                    local money = GetMoneyString(data.money, true)
-                                    realmMoneyTotal = realmMoneyTotal + data.money
+                            local realm_faction = realm.."-"..faction
+                            local factionIcon = GetInlineFactionIcon(faction)
+                            for name, data in next, factionDB do
+                                name = charName:format(factionIcon, _G.CUSTOM_CLASS_COLORS[data.class].colorStr, name)
+                                local money = GetMoneyString(data.money, true)
+                                realmMoneyTotal = realmMoneyTotal + data.money
 
-                                    _G.table.wipe(tokens)
-                                    for i = 1, _G.MAX_WATCHED_TOKENS do
-                                        if data["token"..i] then
-                                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                            local amount = data[data["token"..i]] or 0
-                                            tokens[i] = TOKEN_STRING:format(texture, amount)
-                                            tokens[i+3] = tokenName
-                                        else
-                                            tokens[i] = "---"
-                                        end
+                                wipe(tokens)
+                                for i = 1, _G.MAX_WATCHED_TOKENS do
+                                    if data["token"..i] then
+                                        local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                        local amount = data[data["token"..i]] or 0
+                                        tokens[i] = TOKEN_STRING:format(texture, amount)
+                                        tokens[i+3] = tokenName
+                                    else
+                                        tokens[i] = "---"
                                     end
-
-                                    _G.tinsert(currencyData, {
-                                        id = #currencyData + 1,
-                                        info = {
-                                            name, money, tokens[1], tokens[2], tokens[3], _G.date("%b %d", data.lastSeen)
-                                        },
-                                        meta = {
-                                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                        }
-                                    })
                                 end
+
+                                tinsert(currencyData, {
+                                    id = #currencyData + 1,
+                                    info = {
+                                        name, money, tokens[1], tokens[2], tokens[3], date("%b %d", data.lastSeen)
+                                    },
+                                    meta = {
+                                        realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
+                                    }
+                                })
                             end
                         end
                     end
@@ -2408,9 +2404,6 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("currency: OnEvent", block.side, event, ...)
-                if event == "NEUTRAL_FACTION_SELECT_RESULT" then
-                    charDB = currencyDB[RealUI.charInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]
-                end
                 UpdateBlock(block)
             end,
             events = {

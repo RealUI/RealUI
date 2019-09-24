@@ -10,6 +10,8 @@ _G.RealUI.isDev = true
 ns.debug = debug
 ns.commands = {}
 
+local isClassic = (_G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC)
+
 --_G.GAME_LOCALE ="deDE"
 local BlizzAddons = {
     -- Not LoD, listed in order of load
@@ -100,10 +102,54 @@ local BlizzAddons = {
     "Blizzard_WarfrontsPartyPoseUI",
 }
 
-for i = 1, #BlizzAddons do
-    local loaded = _G.IsAddOnLoaded(BlizzAddons[i])
+local ClassicAddons = {
+    -- Not LoD, listed in order of load
+    "Blizzard_CompactRaidFrames",
+    "Blizzard_ClientSavedVariables",
+    "Blizzard_CUFProfiles",
+    "Blizzard_StoreUI", -- can be loaded in GlueXML
+    "Blizzard_AuthChallengeUI", -- can be loaded in GlueXML
+    "Blizzard_WowTokenUI",
+    "Blizzard_NamePlates",
+    "Blizzard_SecureTransferUI",
+    "Blizzard_Console",
+    "Blizzard_Channels",
+    "Blizzard_UIWidgets",
+    "Blizzard_PTRFeedback", -- Only loaded on PTR/Beta
+    "Blizzard_WorldMap",
+
+    -- LoD
+    "Blizzard_APIDocumentation",
+    "Blizzard_AuctionUI",
+    "Blizzard_BattlefieldMap",
+    "Blizzard_BindingUI",
+    "Blizzard_CombatLog",
+    "Blizzard_CombatText",
+    "Blizzard_Commentator",
+    "Blizzard_Communities",
+    "Blizzard_CraftUI",
+    "Blizzard_DebugTools",
+    "Blizzard_FlightMap",
+    "Blizzard_GMChatUI",
+    "Blizzard_GMSurveyUI",
+    "Blizzard_InspectUI",
+    "Blizzard_MacroUI",
+    "Blizzard_MapCanvas",
+    "Blizzard_MovePad",
+    "Blizzard_RaidUI",
+    "Blizzard_SharedMapDataProviders",
+    "Blizzard_SocialUI",
+    "Blizzard_TalentUI",
+    "Blizzard_TimeManager",
+    "Blizzard_TradeSkillUI",
+    "Blizzard_TrainerUI",
+}
+
+local addonList = isClassic and ClassicAddons or BlizzAddons
+for i = 1, #addonList do
+    local loaded = _G.IsAddOnLoaded(addonList[i])
     if loaded then
-        debug("Pre-loaded:", BlizzAddons[i])
+        debug("Pre-loaded:", addonList[i])
     end
 end
 
@@ -207,12 +253,12 @@ local auroraAddons = {
 local realuiAddons = {
     "cargBags_Nivaya",
     "EasyMail",
-    "FreebTip",
     "nibRealUI",
     "nibRealUI_Dev",
     "nibRealUI_Config",
     "RealUI_Bugs",
     "RealUI_Skins",
+    "RealUI_Tooltips",
 }
 
 local function AddOptDeps(list, optDeps)

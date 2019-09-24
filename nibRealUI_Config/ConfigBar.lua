@@ -175,17 +175,6 @@ local other do
                         end,
                         order = 20,
                     },
-                    controlLayout = {
-                        name = L["Control_Layout"],
-                        desc = L["Control_LayoutDesc"]:format("Bartender4"),
-                        type = "toggle",
-                        get = function() return RealUI:DoesAddonLayout("Bartender4") end,
-                        set = function(info, value)
-                            RealUI:ToggleAddonLayoutControl("Bartender4", value)
-                            ActionBars:SetEnabledState(RealUI:GetModuleEnabled("ActionBars") and RealUI:DoesAddonLayout("Bartender4"))
-                        end,
-                        order = 30,
-                    },
                     header = {
                         name = L["General_Position"],
                         type = "header",

@@ -56,7 +56,6 @@ local RealUISet = {
     "BadBoy_Guilded",
     "Bartender4",
     "cargBags_Nivaya",
-    "FreebTip",
     "Grid2",
     "Grid2Options",
     "Grid2RaidDebuffs",
@@ -72,6 +71,7 @@ local RealUISet = {
     "Raven_Options",
     "RealUI_Bugs",
     "RealUI_Skins",
+    "RealUI_Tooltips",
     "Skada",
 }
 
@@ -211,7 +211,6 @@ end)
 
 local setsMenu = LDD:NewMenu(setsButton, "RealUIAddonListDropDown")
 setsMenu:SetAnchor("TOPLEFT", setsButton, "BOTTOMLEFT", 5, -5)
-setsMenu:SetStyle("REALUI")
 setsButton.menu = setsMenu
 
 local info = {}
@@ -373,11 +372,11 @@ function AddonListAdv:OnInitialize()
             end
         end
 
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Bugs")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Skins")})
         AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI")})
         AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI_Config")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("FreebTip")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Bugs")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Skins")})
+        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Tooltips")})
     end
 
     self:SetEnabledState(true)
@@ -388,6 +387,7 @@ function AddonListAdv:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     _G.UIDropDownMenu_SetSelectedValue(_G.AddonCharacterDropDown, RealUI.charInfo.name)
 
+    setsMenu:SetStyle("REALUI")
     if LoggedIn then self:RefreshMod() end
 end
 

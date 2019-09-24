@@ -8,13 +8,41 @@ local Aurora = private.Aurora
 local Base, Skin = Aurora.Base, Aurora.Skin
 local Color = Aurora.Color
 
-function private.AddOns.Ace3()
+-- LibStub("AceConfigDialog-3.0").popup:Show()
+local function SkinAceConfig()
+    local AceCD = _G.LibStub("AceConfigDialog-3.0", true)
+    if not AceCD then return end
+
+    if AceCD.tooltip then
+        Skin.GameTooltipTemplate(AceCD.tooltip)
+    end
+    if AceCD.popup then
+        local popup = AceCD.popup
+        Skin.DialogBorderDarkTemplate(popup:GetChildren())
+
+        popup.accept:SetNormalTexture("")
+        popup.accept:SetPushedTexture("")
+        popup.accept:SetHighlightTexture("")
+        Base.SetBackdrop(popup.accept, Color.button)
+        Base.SetHighlight(popup.accept, "backdrop")
+
+        popup.cancel:SetNormalTexture("")
+        popup.cancel:SetPushedTexture("")
+        popup.cancel:SetHighlightTexture("")
+        Base.SetBackdrop(popup.cancel, Color.button)
+        Base.SetHighlight(popup.cancel, "backdrop")
+    end
+end
+local function SkinAceGUI()
     local AceGUI = _G.LibStub("AceGUI-3.0", true)
     if not AceGUI then return end
 
     local frameColor = Color.frame
     local highlightColor = Color.highlight
 
+    if AceGUI.tooltip then
+        Skin.GameTooltipTemplate(AceGUI.tooltip)
+    end
 
     local containters = {
         BlizOptionsGroup = function(widget)
@@ -464,4 +492,9 @@ function private.AddOns.Ace3()
         end
         return oldRegisterAsWidget(gui, widget)
     end
+end
+
+function private.AddOns.Ace3()
+    SkinAceConfig()
+    SkinAceGUI()
 end

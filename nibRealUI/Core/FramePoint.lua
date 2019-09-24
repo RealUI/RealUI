@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next
 
 -- Libs --
 local LibWin = _G.LibStub("LibWindow-1.1")
@@ -80,6 +80,7 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
     local module = modules[mod]
     dragFrame:SetSize(frame:GetSize())
     dragFrame:SetHitRectInsets(-5, -5, -5, -5)
+    dragFrame:SetClampedToScreen(true)
     dragFrame:SetMovable(true)
     dragFrame:EnableMouse(true)
     dragFrame:RegisterForDrag("LeftButton")

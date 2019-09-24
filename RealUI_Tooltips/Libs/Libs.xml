@@ -2,6 +2,6 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!--@non-debug@
-    <Include file="LibContainer\embed.xml"/>
+    <Include file="LibObjectiveProgress-1.0\embed.xml"/>
     @end-non-debug@-->
 </Ui>

@@ -492,7 +492,7 @@ function ActionBars:RefreshMod()
 end
 
 function ActionBars:OnProfileUpdate(...)
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and (RealUI:DoesAddonMove("Bartender4") or RealUI:DoesAddonLayout("Bartender4")))
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI:DoesAddonMove("Bartender4"))
     self:RefreshMod()
 end
 
@@ -526,7 +526,7 @@ function ActionBars:OnInitialize()
     ndb = RealUI.db.profile
     ndbc = RealUI.db.char
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and (RealUI:DoesAddonMove("Bartender4") or RealUI:DoesAddonLayout("Bartender4")))
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI:DoesAddonMove("Bartender4"))
 end
 
 function ActionBars:OnEnable()

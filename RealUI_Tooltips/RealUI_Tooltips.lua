@@ -1,33 +1,40 @@
---local ADDON_NAME, private = ...
+local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals time next
+-- luacheck: globals time next select tonumber tostring tinsert
 
-local RealUI = _G.RealUI
-local round = RealUI.Round
-
+-- Libs --
+local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
-local debug = RealUI.GetDebug("Tooltips")
-debug = debug
+-- RealUI --
+local RealUI = _G.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
+local round = RealUI.Round
 
-local normalFont = _G.NORMAL_FONT_COLOR
+local Tooltips = RealUI:NewModule("Tooltips", "AceEvent-3.0")
+private.Tooltips = Tooltips
 
 local defaults = {
     global = {
-        showTitles = false,
+        showTitles = true,
         showRealm = false,
+        showIDs = false,
+        showTransmog = true,
+        multiTip = true,
+        currency = {},
         position = {
-            x = -25,
-            y = 200,
+            x = -100,
+            y = 130,
             point = "BOTTOMRIGHT"
         }
     }
 }
 
+local normalFont = _G.NORMAL_FONT_COLOR
 local function GetUnit(self)
-    debug("GetUnit", self and self:GetName())
+    Tooltips:debug("GetUnit", self and self:GetName())
     local _, unit = _G.GameTooltip:GetUnit()
 
     if not unit then
@@ -65,6 +72,38 @@ local function GetUnitColor(unit)
     return r, g, b
 end
 
+local Hooks = {}
+local Scripts = {}
+function private.AddHook(name, func, isScript)
+    if isScript then
+        if not Scripts[name] then
+            Scripts[name] = {}
+        end
+        tinsert(Scripts[name], func)
+    else
+        if not Hooks[name] then
+            Hooks[name] = {}
+        end
+        tinsert(Hooks[name], func)
+    end
+end
+function private.HookTooltip(tooltip)
+    for scriptName, funcs in next, Scripts do
+        tooltip:HookScript(scriptName, function(...)
+            for i = 1, #funcs do
+                funcs[i](tooltip)
+            end
+        end)
+    end
+
+    for hookName, funcs in next, Hooks do
+        _G.hooksecurefunc(tooltip, hookName, function(...)
+            for i = 1, #funcs do
+                funcs[i](...)
+            end
+        end)
+    end
+end
 
 local AddDynamicInfo, ClearDynamicInfo do
     local maxAge, quickRefresh = 600, 10
@@ -150,7 +189,7 @@ local AddDynamicInfo, ClearDynamicInfo do
             for id, slot in next, slots do
                 if slot ~= "Shirt" then
                     local link = _G.GetInventoryItemLink(cache[guid].unit, id)
-                    debug(id, slot)
+                    Tooltips:debug(id, slot)
                     if link then
                         local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
                         if rarity and subTypeID then
@@ -158,9 +197,9 @@ local AddDynamicInfo, ClearDynamicInfo do
                                 ilvl = _G.RealUI.GetItemLevel(link)
                             end
 
-                            debug(ilvl, _G.strsplit("|", link))
+                            Tooltips:debug(ilvl, _G.strsplit("|", link))
                             if not ilvl or ilvl == 0 then
-                                debug("No ilvl data for", slot)
+                                Tooltips:debug("No ilvl data for", slot)
                                 isMissingInfo = true
                             end
 
@@ -175,7 +214,7 @@ local AddDynamicInfo, ClearDynamicInfo do
                                     totalILvl = totalILvl + ilvl
                                 end
 
-                                debug("itemClass", subTypeID)
+                                Tooltips:debug("itemClass", subTypeID)
 
                                 if subTypeID then
                                     if slot == "MainHand" then
@@ -192,11 +231,11 @@ local AddDynamicInfo, ClearDynamicInfo do
                                 totalILvl = totalILvl + ilvl
                             end
                         else
-                            debug("No item info for", slot)
+                            Tooltips:debug("No item info for", slot)
                             isMissingInfo = true
                         end
                     else
-                        debug("No item link for", slot)
+                        Tooltips:debug("No item link for", slot)
                         if slot ~= "SecondaryHand" then
                             isMissingInfo = true
                         end
@@ -207,7 +246,7 @@ local AddDynamicInfo, ClearDynamicInfo do
             if not isMissingInfo then
                 -- Artifacts are counted as one item
                 if mainArtifact or offArtifact then
-                    debug("Artifacts", mainArtifact, offArtifact)
+                    Tooltips:debug("Artifacts", mainArtifact, offArtifact)
                     artifactILvl = _G.max(mainArtifact or 0, offArtifact or 0)
                     totalILvl = totalILvl + artifactILvl
 
@@ -215,7 +254,7 @@ local AddDynamicInfo, ClearDynamicInfo do
                         totalILvl = totalILvl + artifactILvl
                     end
 
-                    if artifactILvl <= 750 then
+                    if artifactILvl < 152 then
                         totalILvl = nil
                     end
                 end
@@ -232,7 +271,7 @@ local AddDynamicInfo, ClearDynamicInfo do
 
                 local ilvl
                 if totalILvl and totalILvl > 0 then
-                    debug("totalILvl", totalILvl, numItems)
+                    Tooltips:debug("totalILvl", totalILvl, numItems)
                     ilvl = round(totalILvl / numItems)
                 end
                 cache[guid].ilvl = ilvl
@@ -260,6 +299,7 @@ local AddDynamicInfo, ClearDynamicInfo do
         end
     end
 
+    --[[
     local AddTargetInfo, ClearTargetInfo do
         local targetLine
         local targetYou = ">".._G.YOU.."<"
@@ -273,22 +313,29 @@ local AddDynamicInfo, ClearDynamicInfo do
         end
 
         function AddTargetInfo(unit)
-            if not _G.UnitExists(unit) then return end
+            local leftText, rightText
+            if _G.UnitExists(unit) then
+                local tarRicon = (_G.GetRaidTargetIndex(unit))
+                Tooltips:debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
 
-            local tarRicon, text = (_G.GetRaidTargetIndex(unit))
-            debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
-
-            if tarRicon and _G.ICON_LIST[tarRicon] then
-                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", GetTarget(unit))
+                leftText = _G.TARGET
+                if tarRicon and _G.ICON_LIST[tarRicon] then
+                    rightText = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", GetTarget(unit))
+                else
+                    rightText = GetTarget(unit)
+                end
             else
-                text = GetTarget(unit)
+                leftText = "target"
+                rightText = ""
             end
 
-            if targetLine and text then
-                _G["GameTooltipTextLeft"..targetLine]:SetText(_G.TARGET)
-                _G["GameTooltipTextRight"..targetLine]:SetText(text)
+
+            if targetLine and leftText then
+                _G["GameTooltipTextLeft"..targetLine]:SetText(leftText)
+                _G["GameTooltipTextRight"..targetLine]:SetText(rightText)
+                _G["GameTooltipTextRight"..targetLine]:SetTextColor(GetUnitColor(unit))
             elseif not targetLine then
-                _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unit))
+                _G.GameTooltip:AddDoubleLine(leftText, rightText, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unit))
                 targetLine = _G.GameTooltip:NumLines()
             end
         end
@@ -296,6 +343,7 @@ local AddDynamicInfo, ClearDynamicInfo do
             targetLine = nil
         end
     end
+    ]]
 
     local AddSpecInfo, ClearSpecInfo do
         local specLine
@@ -361,7 +409,7 @@ local AddDynamicInfo, ClearDynamicInfo do
         local unit = GetUnit(_G.GameTooltip)
         local isPlayer = _G.UnitIsPlayer(unit)
 
-        AddTargetInfo(unit.."target")
+        --AddTargetInfo(unit.."target")
         AddSpecInfo(isPlayer, unit)
         AddItemLevelInfo(isPlayer, unit)
 
@@ -369,14 +417,14 @@ local AddDynamicInfo, ClearDynamicInfo do
     end)
 
     function AddDynamicInfo(unit, isPlayer)
-        AddTargetInfo(unit.."target")
+        --AddTargetInfo(unit.."target")
         AddSpecInfo(isPlayer, unit)
         AddItemLevelInfo(isPlayer, unit)
         frame:Show()
     end
 
     function ClearDynamicInfo(...)
-        ClearTargetInfo()
+        --ClearTargetInfo()
         ClearSpecInfo()
         ClearItemLevelInfo()
         frame:Hide()
@@ -404,19 +452,21 @@ local factionIcon = {
         coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
     },
 }
-_G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
-    debug("--- OnTooltipSetUnit ---")
+
+private.AddHook("OnTooltipSetUnit", function(self)
+    Tooltips:debug("--- OnTooltipSetUnit ---")
 
     local unit = GetUnit(self)
-    debug("unit:", unit)
+    Tooltips:debug("unit:", unit)
     if _G.UnitExists(unit) then
         if not self.factionIcon then
             self.factionIcon = self:CreateTexture(nil, "BORDER")
             self.factionIcon:SetPoint("CENTER", _G.GameTooltip, "LEFT", 0, 0)
         end
 
+        local faction =  _G.UnitFactionGroup(unit)
         if _G.UnitIsPVP(unit) then
-            local icon = factionIcon[_G.UnitFactionGroup(unit) or "Neutral"]
+            local icon = factionIcon[faction or "Neutral"]
             self.factionIcon:SetTexture(icon.texture)
             self.factionIcon:SetTexCoord(icon.coords[1], icon.coords[2], icon.coords[3], icon.coords[4])
             self.factionIcon:SetSize(32, 38)
@@ -432,15 +482,13 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
 
             if isPlayer then
                 local unitName, server = _G.UnitName(unit)
-                --print("player", unitName, defaults.global.showTitles)
-                if defaults.global.showTitles then
+                if Tooltips.db.global.showTitles then
                     unitName = _G.UnitPVPName(unit) or unitName
                     --print("title", unitName)
                 end
 
-                --print("realm", server, defaults.global.showRealm)
                 if server and server ~= "" then
-                    if defaults.global.showRealm then
+                    if Tooltips.db.global.showRealm then
                         unitName = unitName.."-"..server
                     else
                         local relationship = _G.UnitRealmRelationship(unit)
@@ -458,7 +506,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             end
 
             local iconIndex = _G.GetRaidTargetIndex(unit)
-            debug("iconIndex:", iconIndex, _G.ICON_LIST[iconIndex])
+            Tooltips:debug("iconIndex:", iconIndex, _G.ICON_LIST[iconIndex])
             if iconIndex and _G.ICON_LIST[iconIndex] then
                 -- iconIndex can be > 8, which is outside ICON_LIST's index
                 _G.GameTooltipTextLeft1:SetFormattedText("%s12|t %s", _G.ICON_LIST[iconIndex], lineText)
@@ -485,6 +533,7 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             level = _G.UnitLevel(unit)
         end
 
+        local previousLine = 1
         local dead = _G.UnitIsDeadOrGhost(unit)
         if level then
             local unitType
@@ -523,15 +572,76 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             local classify = _G.UnitClassification(unit) or ""
             local textLevel = ("|cff%s%s%s|r"):format(RealUI.GetColorString(diff), level, classification[classify] or "")
 
-            for i = 2, self:NumLines() do
+            for i = previousLine + 1, self:NumLines() do
                 local tiptext = _G["GameTooltipTextLeft"..i]
                 local linetext = tiptext:GetText()
 
                 if linetext and linetext:find(_G.LEVEL) then
                     tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType or "unitType", (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
+                    previousLine = i
                     break
                 end
             end
+        end
+
+        do -- Objective Progress
+            local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
+            local line, addedProgress
+
+            local challengeMapID = _G.C_ChallengeMode.GetActiveChallengeMapID()
+            if challengeMapID then
+                local isTeeming = false
+                local _, activeAffixIDs = _G.C_ChallengeMode.GetActiveKeystoneInfo()
+                for i = 1, #activeAffixIDs do
+                    if activeAffixIDs[i] == 5 then
+                        isTeeming = true
+                        break
+                    end
+                end
+
+                local _, _, _, _, _, _, _, instanceMapID = _G.GetInstanceInfo()
+                local isAlternate = challengeMapID == 234 -- Upper Karazhan
+                if instanceMapID == 1822 then -- Siege of Boralus
+                    isAlternate = faction == "Horde"
+                end
+
+                addedProgress = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
+            else
+                local weightsTable = LOP:GetNPCWeightByCurrentQuests(tonumber(npcID))
+                if weightsTable then
+                    for questID, npcWeight in next, weightsTable do
+                        local questTitle = _G.C_TaskQuest.GetQuestInfoByQuestID(questID)
+                        for i = previousLine + 1, self:NumLines() do
+                            line = _G["GameTooltipTextLeft" .. i]
+                            if line and line:GetText() == questTitle then
+                                addedProgress = npcWeight
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+
+            if line and addedProgress then
+                line:SetFormattedText(("%s | +%s%%"), line:GetText(), addedProgress)
+            end
+        end
+
+        local unittarget = unit.."target"
+        if _G.UnitExists(unittarget) then
+            local text
+            if _G.UnitIsUnit(unittarget, "player") then
+                text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
+            else
+                text = _G.UnitName(unittarget)
+            end
+
+            local tarRicon = (_G.GetRaidTargetIndex(unittarget))
+            if tarRicon and _G.ICON_LIST[tarRicon] then
+                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", text)
+            end
+
+            _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unittarget))
         end
 
         AddDynamicInfo(unit, isPlayer)
@@ -540,19 +650,81 @@ _G.GameTooltip:HookScript("OnTooltipSetUnit", function(self)
             _G.GameTooltipStatusBar:Hide()
         end
     end
+end, true)
 
-    --SetStatusBar(self, unit)
-end)
+private.AddHook("OnTooltipSetItem", function(self)
+    local _, link = self:GetItem()
+    if Tooltips.db.global.showTransmog and link then
+        local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
+        if appearanceID and sourceID then
+            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)
+            if isInfoReady then
+                if canCollect then
+                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(sourceID)
+                    if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
+                        self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                    else
+                        local sources = _G.C_TransmogCollection.GetAppearanceSources(appearanceID)
+                        if sources then
+                            for i, source in next, sources do
+                                if source.isCollected then
+                                    self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                                    break
+                                end
+                            end
+                        end
+                    end
+                else
+                    self:AddLine(_G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                end
+            end
+        end
+    end
+end, true)
 
 local frameColor = Aurora.Color.frame
-_G.GameTooltip:HookScript("OnTooltipCleared", function(self)
+private.AddHook("OnTooltipCleared", function(self)
     if self.factionIcon then
         self.factionIcon:Hide()
     end
 
     ClearDynamicInfo()
+    self._id = nil
 
     self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
+end, true)
+
+
+local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
+tooltipAnchor:SetSize(50, 50)
+_G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+    tooltip:ClearAllPoints()
+    tooltip:SetPoint(Tooltips.db.global.position.point, tooltipAnchor)
 end)
 
---local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
+
+
+
+function Tooltips:OnInitialize()
+    self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
+
+    FramePoint:RegisterMod(self)
+    FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
+
+    if RealUI.realmInfo.realmNormalized then
+        private.SetupCurrency()
+    else
+        self:RegisterMessage("NormalizedRealmReceived", private.SetupCurrency)
+    end
+
+    if Tooltips.db.global.showIDs then
+        private.SetupIDTips()
+    end
+    if Tooltips.db.global.multiTip then
+        private.SetupMultiTip()
+    end
+
+    for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
+        private.HookTooltip(tooltip)
+    end
+end

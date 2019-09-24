@@ -1,14 +1,9 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals floor next type tonumber max
 
-local Aurora = private.Aurora
-local RealUI = _G.RealUI
-
-local debug = RealUI.GetDebug("Skins")
-private.debug = debug
-
+-- Libs --
 local LSM = _G.LibStub("LibSharedMedia-3.0")
 local fonts = {}
 for fontType, fontName in next, private.fontNames do
@@ -17,6 +12,11 @@ for fontType, fontName in next, private.fontNames do
         path = LSM:Fetch("font", fontName)
     }
 end
+
+-- RealUI --
+local RealUI = _G.RealUI
+local Aurora = private.Aurora
+
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
@@ -163,9 +163,7 @@ function private.OnLoad()
     skinsDB:RegisterCallback("OnProfileReset", function(db)
         RealUI:ReloadUIDialog()
     end)
-
     private.skinsDB = skinsDB.profile
-    RealUI:RegisterAddOnDB(ADDON_NAME, skinsDB)
 
     -- Transfer settings
     if _G.RealUI_Storage.nibRealUI_Init then
@@ -352,7 +350,7 @@ function private.OnLoad()
             local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
             stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
             stripes:SetAlpha(private.skinsDB.stripeAlpha)
-            stripes:SetAllPoints()
+            stripes:SetAllPoints(bg)
             stripes:SetHorizTile(true)
             stripes:SetVertTile(true)
             stripes:SetBlendMode("ADD")
@@ -389,6 +387,9 @@ function private.OnLoad()
     end)
 
     function private.AddOns.nibRealUI()
+        local Skins = RealUI:NewModule("Skins")
+        Skins.db = skinsDB
+
         Skin.UIPanelButtonTemplate(scaleBtn)
 
         if not _G.IsAddOnLoaded("Ace3") then

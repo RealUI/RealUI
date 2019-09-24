@@ -111,7 +111,7 @@ function RealUI:GetResolutionVals(raw)
         return resWidth, resHeight
     end
 
-    if RealUI:GetAddOnDB("RealUI_Skins").profile.isHighRes then
+    if RealUI.GetOptions("Skins").profile.isHighRes then
         resHeight = resHeight / 2
         resWidth = resWidth / 2
     end
@@ -224,7 +224,6 @@ end
 -- Frames
 function RealUI:CreateCheckbox(name, parent, label, side, size)
     local f = _G.CreateFrame("CheckButton", name, parent, "ChatConfigCheckButtonTemplate")
-    f:SetSize(size, size)
     f:SetHitRectInsets(0,0,0,0)
     f:SetFrameLevel(parent:GetFrameLevel() + 2)
     f.type = "checkbox"
@@ -241,13 +240,6 @@ function RealUI:CreateCheckbox(name, parent, label, side, size)
         f.text:SetPoint("LEFT", f, "RIGHT", 4, 0)
         f.text:SetJustifyH("LEFT")
     end
-
-    local cbg = _G.CreateFrame("Frame", nil, f)
-    cbg:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
-    cbg:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
-    RealUI:CreateBD(cbg)
-    cbg:SetBackdropColor(0.8, 0.8, 0.8, 0.15)
-    cbg:SetFrameLevel(f:GetFrameLevel() - 1)
 
     Skin.ChatConfigCheckButtonTemplate(f)
     return f

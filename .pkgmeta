@@ -8,7 +8,6 @@ ignore:
     - nibRealUI_Dev
     - RealUI_Chat
     - RealUI_Inventory
-    - RealUI_Tooltips
 
 externals:
     nibRealUI/Libs/AceAddon-3.0:
@@ -94,14 +93,19 @@ externals:
         url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
         tag: latest
 
+    RealUI_Tooltips/Libs/LibObjectiveProgress-1.0:
+        url: https://repos.curseforge.com/wow/libobjectiveprogress-1-0
+        type: hg
+        tag: latest
+
 manual-changelog:
     filename: CHANGELOG.md
     markup-type: markdown
 
 move-folders:
     nibRealUI/cargBags_Nivaya: cargBags_Nivaya
-    nibRealUI/FreebTip: FreebTip
     nibRealUI/nibRealUI: nibRealUI
     nibRealUI/nibRealUI_Config: nibRealUI_Config
     nibRealUI/RealUI_Bugs: RealUI_Bugs
     nibRealUI/RealUI_Skins: RealUI_Skins
+    nibRealUI/RealUI_Tooltips: RealUI_Tooltips

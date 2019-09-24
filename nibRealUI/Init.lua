@@ -32,12 +32,43 @@ private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "Ace
 local RealUI = private.RealUI
 
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
-RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 2 and _G.tonumber(minor) >= 0)
+RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 2 and _G.tonumber(minor) >= 5)
+
+RealUI.realmInfo = {
+    realm = _G.GetRealmName(),
+    connectedRealms = _G.GetAutoCompleteRealms(),
+    id = RealUI.isPatch and _G.GetRealmID() or 0,
+}
+
+if RealUI.realmInfo.connectedRealms[1] then
+    RealUI.realmInfo.isConnected = true
+end
+
+local function CheckforRealm()
+    RealUI.realmInfo.realmNormalized = _G.GetNormalizedRealmName()
+    if RealUI.realmInfo.realmNormalized then
+        if not RealUI.realmInfo.isConnected then
+            RealUI.realmInfo.connectedRealms[1] = RealUI.realmInfo.realmNormalized
+        end
+
+        RealUI:SendMessage("NormalizedRealmReceived")
+        return true
+    end
+
+    return false
+end
+
+if not CheckforRealm() then
+    local frame = _G.CreateFrame("Frame")
+    frame:SetScript("OnUpdate", function(self)
+        self:SetShown(not CheckforRealm())
+    end)
+end
 
 local classLocale, classToken, classID = _G.UnitClass("player")
 RealUI.charInfo = {
     name = _G.UnitName("player"),
-    realm = _G.GetRealmName(),
+    realm = RealUI.realmInfo.realm,
     faction = _G.UnitFactionGroup("player"),
     class = {
         locale = classLocale,
@@ -66,6 +97,12 @@ for specIndex = 1, _G.GetNumSpecializationsForClassID(classID) do
     end
 end
 
+-- Disable FreebTip
+local enabled = _G.GetAddOnEnableState(RealUI.charInfo.name, "RealUI_Tooltips")
+if enabled > 0 then
+    _G.DisableAddOn("FreebTip", true)
+end
+
 RealUI.globals = {
     anchorPoints = {
         "TOPLEFT",    "TOP",    "TOPRIGHT",
@@ -88,17 +125,3 @@ RealUI.globals = {
     }
 }
 
-
-local black = _G.Aurora.Color.black
-local a = RealUI:GetAddOnDB("RealUI_Skins").profile.frameColor.a
-local LDD = _G.LibStub("LibDropDown")
-LDD:RegisterStyle("REALUI", {
-    padding = 10,
-    spacing = 1,
-    backdrop = {
-        bgFile = [[Interface\Buttons\WHITE8x8]],
-        edgeFile = [[Interface\Buttons\WHITE8x8]], edgeSize = 1,
-    },
-    backdropColor = _G.CreateColor(black.r, black.g, black.b, a),
-    backdropBorderColor = black,
-})
