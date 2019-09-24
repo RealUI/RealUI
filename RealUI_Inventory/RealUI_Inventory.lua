@@ -143,13 +143,13 @@ function _G.CloseAllBags()
     private.Toggle(false)
 end
 
---local oldCloseAllBags = _G.CloseAllBags
-function _G.ToggleBackpack()
+--local oldToggleAllBags = _G.ToggleAllBags
+function _G.ToggleAllBags()
     private.Toggle()
 end
 
---local oldToggleAllBags = _G.ToggleAllBags
-_G.ToggleAllBags = _G.ToggleBackpack
+--local oldToggleBackpack = _G.ToggleBackpack
+_G.ToggleBackpack = _G.ToggleAllBags
 
 --local oldToggleBag = _G.ToggleBag
 _G.ToggleBag = _G.nop
