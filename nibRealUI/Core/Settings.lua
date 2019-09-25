@@ -146,7 +146,7 @@ local function CreateInstallWindow()
     installFrame:RegisterForClicks("LeftButtonUp")
     installFrame:SetScript("OnClick", function()
         RunStage1()
-        --_G.ReloadUI()
+        _G.ReloadUI()
     end)
     installFrame:Hide()
 
