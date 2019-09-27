@@ -1162,74 +1162,73 @@ function Infobar:CreateBlocks()
                 -- Battle.net Friends
                 for i = 1, _G.BNGetNumFriends() do
                     local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(i)
-                    if accountInfo then
-                        local client = accountInfo.gameAccountInfo.clientProgram ~= "" and accountInfo.gameAccountInfo.clientProgram or nil
+                    if accountInfo and accountInfo.gameAccountInfo.isOnline then
+                        local gameAccountInfo = accountInfo.gameAccountInfo
+                        local client = gameAccountInfo.clientProgram ~= "" and gameAccountInfo.clientProgram or nil
                         local noteText = accountInfo.note
-                        if accountInfo.gameAccountInfo.isOnline then
-                            local characterName = accountInfo.gameAccountInfo.characterName
-                            local class = accountInfo.gameAccountInfo.className or ""
-                            local zoneName = accountInfo.gameAccountInfo.areaName or ""
-                            local level = accountInfo.gameAccountInfo.characterLevel or ""
-                            local gameText = accountInfo.gameAccountInfo.richPresence or ""
+                        local characterName = gameAccountInfo.characterName
+                        local class = gameAccountInfo.className or ""
+                        local zoneName = gameAccountInfo.areaName or ""
+                        local level = gameAccountInfo.characterLevel or ""
+                        local gameText = gameAccountInfo.richPresence or ""
 
-                            local name
-                            if accountInfo.accountName then
-                                name = accountInfo.accountName
-                                characterName = _G.BNet_GetValidatedCharacterName(characterName, accountInfo.battleTag, client)
-                            else
-                                name = _G.UNKNOWN
-                            end
-
-                            if characterName then
-                                if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
-                                    name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
-                                else
-                                    if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
-                                        name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
-                                    else
-                                        name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
-                                    end
-                                end
-                            end
-
-                            if accountInfo.isAFK or accountInfo.gameAccountInfo.isGameAFK then
-                                name = PlayerStatus[1] .. name
-                            elseif accountInfo.isDND or accountInfo.gameAccountInfo.isGameBusy then
-                                name = PlayerStatus[2] .. name
-                            end
-                            name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
-
-                            -- Difficulty color levels
-                            local lvl = tonumber(level)
-                            if lvl then
-                                local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
-                                level = ("%s%d|r"):format(color, level)
-                            end
-
-                            local status
-                            if client == _G.BNET_CLIENT_WOW then
-                                if ( not zoneName or zoneName == "" ) then
-                                    status = _G.UNKNOWN
-                                else
-                                    status = zoneName
-                                end
-                            else
-                                status = gameText
-                            end
-
-                            if noteText == "" then noteText = nil end
-
-
-                            tinsert(friendsData, {
-                                id = i,
-                                info = {
-                                    name, level, status, noteText
-                                },
-                                meta = {
-                                    i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID}
-                                }
-                            })
+                        local name
+                        if accountInfo.accountName then
+                            name = accountInfo.accountName
+                            characterName = _G.BNet_GetValidatedCharacterName(characterName, accountInfo.battleTag, client)
+                        else
+                            name = _G.UNKNOWN
                         end
+
+                        if characterName then
+                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
+                                name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
+                            else
+                                if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
+                                else
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
+                                end
+                            end
+                        end
+
+                        if accountInfo.isAFK or gameAccountInfo.isGameAFK then
+                            name = PlayerStatus[1] .. name
+                        elseif accountInfo.isDND or gameAccountInfo.isGameBusy then
+                            name = PlayerStatus[2] .. name
+                        end
+                        name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
+
+                        -- Difficulty color levels
+                        local lvl = tonumber(level)
+                        if lvl then
+                            local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
+                            level = ("%s%d|r"):format(color, level)
+                        end
+
+                        local status
+                        if client == _G.BNET_CLIENT_WOW then
+                            if ( not zoneName or zoneName == "" ) then
+                                status = _G.UNKNOWN
+                            else
+                                status = zoneName
+                            end
+                        else
+                            status = gameText
+                        end
+
+                        if noteText == "" then noteText = nil end
+
+
+                        tinsert(friendsData, {
+                            id = i,
+                            info = {
+                                name, level, status, noteText
+                            },
+                            meta = {
+                                i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID}
+                            }
+                        })
                     end
                 end
 
