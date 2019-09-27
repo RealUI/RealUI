@@ -1161,20 +1161,27 @@ function Infobar:CreateBlocks()
 
                 -- Battle.net Friends
                 for i = 1, _G.BNGetNumFriends() do
-                    local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
-                    if isOnline then
-                        local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
+                    local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(i)
+                    if accountInfo and accountInfo.gameAccountInfo.isOnline then
+                        local gameAccountInfo = accountInfo.gameAccountInfo
+                        local client = gameAccountInfo.clientProgram ~= "" and gameAccountInfo.clientProgram or nil
+                        local noteText = accountInfo.note
+                        local characterName = gameAccountInfo.characterName
+                        local class = gameAccountInfo.className or ""
+                        local zoneName = gameAccountInfo.areaName or ""
+                        local level = gameAccountInfo.characterLevel or ""
+                        local gameText = gameAccountInfo.richPresence or ""
 
                         local name
-                        if accountName then
-                            name = accountName
-                            characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
+                        if accountInfo.accountName then
+                            name = accountInfo.accountName
+                            characterName = _G.BNet_GetValidatedCharacterName(characterName, accountInfo.battleTag, client)
                         else
                             name = _G.UNKNOWN
                         end
 
                         if characterName then
-                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
+                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
                                 name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
@@ -1185,9 +1192,9 @@ function Infobar:CreateBlocks()
                             end
                         end
 
-                        if isBnetAFK or isGameAFK then
+                        if accountInfo.isAFK or gameAccountInfo.isGameAFK then
                             name = PlayerStatus[1] .. name
-                        elseif isBnetDND or isGameDND then
+                        elseif accountInfo.isDND or gameAccountInfo.isGameBusy then
                             name = PlayerStatus[2] .. name
                         end
                         name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
@@ -1219,7 +1226,7 @@ function Infobar:CreateBlocks()
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, {characterName, accountName, bnetIDAccount}
+                                i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID}
                             }
                         })
                     end
