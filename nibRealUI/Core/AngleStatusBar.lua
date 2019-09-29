@@ -357,8 +357,7 @@ function AngleStatusBarMixin:GetReversePercent()
     return bars[self].isReversePerc
 end
 
--- Setting this to true will make the bars show full when at 0%.
-function AngleStatusBarMixin:SetOrientation(isReversePerc)
+function AngleStatusBarMixin:SetOrientation(orientaion)
 end
 function AngleStatusBarMixin:GetOrientation()
     return "HORIZONTAL"
