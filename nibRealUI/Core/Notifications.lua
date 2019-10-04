@@ -74,7 +74,7 @@ local function display(name, message, clickFunc, texture, ...)
     end
 
     if texture then
-        local info = _G.C_Texture.GetAtlasInfo(texture)
+        local info = RealUI.compatRelease  and _G.C_Texture.GetAtlasInfo(texture) or _G.GetAtlasInfo(texture)
         if info.filename or info.file then
             icon:SetAtlas(texture)
         else
