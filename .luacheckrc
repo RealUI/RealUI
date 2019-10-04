@@ -1,6 +1,7 @@
 exclude_files = {
     "**/Libs/**",
-    "**/Locale/**"
+    "**/Locale/**",
+    ".release/**"
 }
 
 max_line_length = false
