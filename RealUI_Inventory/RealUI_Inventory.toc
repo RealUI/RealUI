@@ -2,7 +2,7 @@
 ## Title: RealUI Inventory
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe
-## Version: 2.1.1
+## Version: 2.1.2
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibContainer
 ## SavedVariables: RealUI_InventoryDB
