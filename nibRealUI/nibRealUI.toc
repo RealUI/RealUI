@@ -2,7 +2,7 @@
 ## Title: nibRealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
-## Version: 2.1.1
+## Version: 2.1.2
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs Blizzard_WorldMap
 ## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDropDown, LibIconFonts, LibQTip-1.0, LibRangeCheck-2.0, LibWindow-1.1, oUF, Raven, UTF8
