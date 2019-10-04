@@ -6,7 +6,7 @@ local _, private = ...
 -- RealUI --
 local RealUI = private.RealUI
 
-function RealUI.AddOns.Bartender4()
+function private.AddOns.Bartender4()
     local namespaces = _G.Bartender4DB.namespaces
     local ActionBars = namespaces.ActionBars.profiles
     ActionBars["RealUI"] = {
@@ -334,9 +334,7 @@ function RealUI.AddOns.Bartender4()
     }
 end
 
-function RealUI.Profiles.Bartender4()
-    if not _G.Bartender4 then return end
-
+function private.Profiles.Bartender4()
     local db = _G.Bartender4.db
     db:SetDualSpecEnabled(true)
     for specIndex = 1, #RealUI.charInfo.specs do

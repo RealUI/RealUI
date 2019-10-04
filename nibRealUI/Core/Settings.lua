@@ -121,10 +121,10 @@ local function RunStage1()
         dbg.tutorial.stage = 0
 
         ---- Addon Data
-        RealUI:LoadAddonData()
+        RealUI:AddRealUIProfiles()
     end
 
-    RealUI:LoadAddonProfiles()
+    RealUI:SetProfilesToRealUI()
 
     -- Make Chat windows transparent (again)
     _G.SetChatWindowAlpha(1, 0)

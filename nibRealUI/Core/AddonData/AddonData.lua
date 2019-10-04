@@ -7,28 +7,35 @@ local next = _G.next
 local RealUI = private.RealUI
 local L = RealUI.L
 
-RealUI.AddOns = {}
-function RealUI:LoadAddonData()
-    for name, func in next, self.AddOns do
-        func()
+private.AddOns = {}
+function RealUI:AddRealUIProfileToAddOn(addonName)
+    --local loaded, finished = _G.IsAddOnLoaded(addonName)
+    if private.AddOns[addonName] and _G.IsAddOnLoaded(addonName) then
+        private.AddOns[addonName]()
     end
 end
 
-RealUI.Profiles = {}
-function RealUI:LoadAddonProfiles()
-    for name, func in next, self.Profiles do
-        func()
+function RealUI:AddRealUIProfiles()
+    for addonName, func in next, private.AddOns do
+        self:AddRealUIProfileToAddOn(addonName)
     end
 end
 
-function RealUI:LoadSpecificAddOnData(addon, skipReload)
-    --print("RealUI:LoadSpecificAddOnData", addon, skipReload, self.AddOns[addon])
-    if self.AddOns[addon] then
-        self.AddOns[addon]()
+private.Profiles = {}
+function RealUI:SetAddOnProfileToRealUI(addonName)
+    if private.Profiles[addonName] and _G.IsAddOnLoaded(addonName) then
+        private.Profiles[addonName]()
     end
-    if self.Profiles[addon] then
-        self.Profiles[addon]()
+end
+function RealUI:SetProfilesToRealUI()
+    for addonName, func in next, private.Profiles do
+        self:SetAddOnProfileToRealUI(addonName)
     end
+end
+
+function RealUI:SetUpAddonProfile(addonName, skipReload)
+    self:AddRealUIProfileToAddOn(addonName)
+    self:SetAddOnProfileToRealUI(addonName)
 
     if skipReload then return end
     self:ReloadUIDialog()
@@ -39,7 +46,7 @@ _G.StaticPopupDialogs["RealUI_ResetAddonProfile"] = {
     button1 = _G.YES,
     button2 = _G.NO,
     OnAccept = function(self)
-        RealUI:LoadSpecificAddOnData(self.text.text_arg1)
+        RealUI:SetUpAddonProfile(self.text.text_arg1)
     end,
     OnCancel = function() end,
     timeout = 0,

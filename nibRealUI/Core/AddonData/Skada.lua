@@ -1,9 +1,6 @@
 local _, private = ...
 
--- RealUI --
-local RealUI = private.RealUI
-
-RealUI.AddOns.Skada = function()
+private.AddOns.Skada = function()
 	_G.SkadaDB = {
 		["profileKeys"] = {
 		},

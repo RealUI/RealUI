@@ -1,9 +1,6 @@
 local _, private = ...
 
--- RealUI --
-local RealUI = private.RealUI
-
-RealUI.AddOns.mikScrollingBattleText = function()
+private.AddOns.mikScrollingBattleText = function()
 	_G.MSBTProfiles_SavedVars = {
 		["profiles"] = {
 			["RealUI"] = {
