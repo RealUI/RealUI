@@ -1,3 +1,15 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Fixed ###
+
+  * Addon profiles would not apply if an addon is missing.
+
+
+
+
 ## [2.1.1] - 2019-10-03 ##
 ### Modified AddOns ###
 
