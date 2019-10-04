@@ -6,7 +6,7 @@ local _, private = ...
 -- RealUI --
 local RealUI = private.RealUI
 
-function RealUI.AddOns.Grid2()
+function private.AddOns.Grid2()
     local namespaces = _G.Grid2DB.namespaces
     local Grid2Layout = namespaces.Grid2Layout.profiles
     Grid2Layout["RealUI-Healing"] = {
@@ -1556,9 +1556,7 @@ function RealUI.AddOns.Grid2()
     }
 end
 
-function RealUI.Profiles.Grid2()
-    if not _G.Grid2 then return end
-
+function private.Profiles.Grid2()
     local db = _G.Grid2.profiles.char
     db.enabled = true
     for specIndex = 1, #RealUI.charInfo.specs do

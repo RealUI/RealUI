@@ -1,9 +1,6 @@
 local _, private = ...
 
--- RealUI --
-local RealUI = private.RealUI
-
-RealUI.AddOns.Raven = function()
+private.AddOns.Raven = function()
 	_G.RavenDB = {
 		["profileKeys"] = {
 		},

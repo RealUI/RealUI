@@ -213,7 +213,7 @@ function AddonControl:CreateOptionsFrame()
                 acAddonSect.lastReset = bReset[cnt]
             end
             bReset[cnt]:SetScript("OnClick", function(button)
-                RealUI:LoadSpecificAddOnData(button.addon)
+                RealUI:SetUpAddonProfile(button.addon)
             end)
             bReset[cnt]:SetScript("OnEnter", function(button)
                 --print("OnEnter", button.addon)

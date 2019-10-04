@@ -389,7 +389,7 @@ function RealUI:OnProfileUpdate(event, database, profile)
     dbc = database.char
     dbg = database.global
 
-    RealUI:LoadAddonProfiles()
+    RealUI:SetProfilesToRealUI()
 
     for name, module in self:IterateModules() do
        module:OnProfileUpdate(event, profile)

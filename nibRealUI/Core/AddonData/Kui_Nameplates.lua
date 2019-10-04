@@ -1,9 +1,6 @@
 local _, private = ...
 
--- RealUI --
-local RealUI = private.RealUI
-
-RealUI.AddOns.Kui_Nameplates_Core = function()
+private.AddOns.Kui_Nameplates_Core = function()
 	_G.KuiNameplatesCoreSaved = {
 		["profiles"] = {
 			["RealUI"] = {
