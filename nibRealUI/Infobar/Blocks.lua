@@ -898,7 +898,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local time, tableWidth = _G.GetTime(), 320
+        local tableWidth = 320
         local guildData = {}
         local headerData = {
             sort = {
@@ -927,6 +927,10 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Guild: OnEnable", block.side, ...)
                 if _G.IsInGuild() then
                     UpdateRanks()
+
+                    if _G.GetNumGuildMembers() == 0 then
+                        _G.C_GuildInfo.GuildRoster()
+                    end
                 else
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                     Infobar:HideBlock(block.name, block.dataObj, info)
@@ -1009,6 +1013,13 @@ function Infobar:CreateBlocks()
                 if event == "GUILD_RANKS_UPDATE" then
                     UpdateRanks()
                 else
+                    if event == "GUILD_ROSTER_UPDATE" then
+                        local canRequestRosterUpdate = ...;
+                        if canRequestRosterUpdate then
+                            _G.C_GuildInfo.GuildRoster()
+                        end
+                    end
+
                     local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
                     if isVisible and not isInGuild then
                         local info = Infobar:GetBlockInfo(block.name, block.dataObj)
@@ -1018,19 +1029,12 @@ function Infobar:CreateBlocks()
                         Infobar:ShowBlock(block.name, block.dataObj, info)
                     end
 
-                    local now = _G.GetTime()
-                    Infobar:debug("Guild: time", now - time)
-                    if now - time > 10 then
-                        _G.C_GuildInfo.GuildRoster()
-                        time = now
+                    local _, online, onlineAndMobile = _G.GetNumGuildMembers()
+                    block.dataObj.value = online
+                    if online == onlineAndMobile then
+                        block.dataObj.suffix = ""
                     else
-                        local _, online, onlineAndMobile = _G.GetNumGuildMembers()
-                        block.dataObj.value = online
-                        if online == onlineAndMobile then
-                            block.dataObj.suffix = ""
-                        else
-                            block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
-                        end
+                        block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
                     end
                 end
             end,
