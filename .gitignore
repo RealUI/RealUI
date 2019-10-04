@@ -1,5 +1,5 @@
 .release
-auth.*
+.env
 
 **/test.lua
 RealUI_Skins/Aurora

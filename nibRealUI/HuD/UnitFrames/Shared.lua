@@ -112,7 +112,7 @@ local function CreateHealthBar(parent, info)
     Health:SetSize(width, height)
     Health:SetPoint("TOP"..info.point, parent)
     Health:SetReverseFill(info.point == "RIGHT")
-    Health:SetReversePercent(ndb.settings.reverseUnitFrameBars)
+    Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
     Health:SetAngleVertex(info.leftVertex, info.rightVertex)
 
     if info.text then

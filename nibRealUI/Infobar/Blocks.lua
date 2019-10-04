@@ -898,7 +898,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local time, tableWidth = _G.GetTime(), 320
+        local tableWidth = 320
         local guildData = {}
         local headerData = {
             sort = {
@@ -927,6 +927,10 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Guild: OnEnable", block.side, ...)
                 if _G.IsInGuild() then
                     UpdateRanks()
+
+                    if _G.GetNumGuildMembers() == 0 then
+                        _G.C_GuildInfo.GuildRoster()
+                    end
                 else
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                     Infobar:HideBlock(block.name, block.dataObj, info)
@@ -1009,6 +1013,13 @@ function Infobar:CreateBlocks()
                 if event == "GUILD_RANKS_UPDATE" then
                     UpdateRanks()
                 else
+                    if event == "GUILD_ROSTER_UPDATE" then
+                        local canRequestRosterUpdate = ...;
+                        if canRequestRosterUpdate then
+                            _G.C_GuildInfo.GuildRoster()
+                        end
+                    end
+
                     local isVisible, isInGuild = block:IsVisible(), _G.IsInGuild()
                     if isVisible and not isInGuild then
                         local info = Infobar:GetBlockInfo(block.name, block.dataObj)
@@ -1018,19 +1029,12 @@ function Infobar:CreateBlocks()
                         Infobar:ShowBlock(block.name, block.dataObj, info)
                     end
 
-                    local now = _G.GetTime()
-                    Infobar:debug("Guild: time", now - time)
-                    if now - time > 10 then
-                        _G.C_GuildInfo.GuildRoster()
-                        time = now
+                    local _, online, onlineAndMobile = _G.GetNumGuildMembers()
+                    block.dataObj.value = online
+                    if online == onlineAndMobile then
+                        block.dataObj.suffix = ""
                     else
-                        local _, online, onlineAndMobile = _G.GetNumGuildMembers()
-                        block.dataObj.value = online
-                        if online == onlineAndMobile then
-                            block.dataObj.suffix = ""
-                        else
-                            block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
-                        end
+                        block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
                     end
                 end
             end,
@@ -1161,20 +1165,27 @@ function Infobar:CreateBlocks()
 
                 -- Battle.net Friends
                 for i = 1, _G.BNGetNumFriends() do
-                    local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
-                    if isOnline then
-                        local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
+                    local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(i)
+                    if accountInfo and accountInfo.gameAccountInfo.isOnline then
+                        local gameAccountInfo = accountInfo.gameAccountInfo
+                        local client = gameAccountInfo.clientProgram ~= "" and gameAccountInfo.clientProgram or nil
+                        local noteText = accountInfo.note
+                        local characterName = gameAccountInfo.characterName
+                        local class = gameAccountInfo.className or ""
+                        local zoneName = gameAccountInfo.areaName or ""
+                        local level = gameAccountInfo.characterLevel or ""
+                        local gameText = gameAccountInfo.richPresence or ""
 
                         local name
-                        if accountName then
-                            name = accountName
-                            characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
+                        if accountInfo.accountName then
+                            name = accountInfo.accountName
+                            characterName = _G.BNet_GetValidatedCharacterName(characterName, accountInfo.battleTag, client)
                         else
                             name = _G.UNKNOWN
                         end
 
                         if characterName then
-                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
+                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
                                 name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
@@ -1185,9 +1196,9 @@ function Infobar:CreateBlocks()
                             end
                         end
 
-                        if isBnetAFK or isGameAFK then
+                        if accountInfo.isAFK or gameAccountInfo.isGameAFK then
                             name = PlayerStatus[1] .. name
-                        elseif isBnetDND or isGameDND then
+                        elseif accountInfo.isDND or gameAccountInfo.isGameBusy then
                             name = PlayerStatus[2] .. name
                         end
                         name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
@@ -1201,10 +1212,10 @@ function Infobar:CreateBlocks()
 
                         local status
                         if client == _G.BNET_CLIENT_WOW then
-                            if ( not zoneName or zoneName == "" ) then
-                                status = _G.UNKNOWN
-                            else
+                            if zoneName and zoneName ~= "" then
                                 status = zoneName
+                            else
+                                status = _G.UNKNOWN
                             end
                         else
                             status = gameText
@@ -1219,42 +1230,38 @@ function Infobar:CreateBlocks()
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, {characterName, accountName, bnetIDAccount}
+                                i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID}
                             }
                         })
                     end
                 end
 
                 -- WoW Friends
-                for i = 1, _G.GetNumFriends() do
-                    local name, level, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
-                    if isOnline then
-                        -- Class color names
-                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, name)
+                for i = 1, _G.C_FriendList.GetNumOnlineFriends() do
+                    local info = _G.C_FriendList.GetFriendInfoByIndex(i)
 
-                        if status == _G.CHAT_FLAG_AFK then
-                            cName = PlayerStatus[1] .. cName
-                        elseif status == _G.CHAT_FLAG_DND then
-                            cName = PlayerStatus[2] .. cName
-                        end
+                    -- Class color names
+                    local name = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[ClassLookup[info.className]].colorStr, info.name)
 
-                        -- Difficulty color levels
-                        local lvl = tonumber(level)
-                        if lvl then
-                            level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
-                        end
-
-                        -- Add Friend to list
-                        tinsert(friendsData, {
-                            id = #friendsData + i,
-                            info = {
-                                cName, level, area, noteText
-                            },
-                            meta = {
-                                #friendsData + i, lvl, {name}
-                            }
-                        })
+                    if info.afk then
+                        name = PlayerStatus[1] .. name
+                    elseif info.dnd then
+                        name = PlayerStatus[2] .. name
                     end
+
+                    -- Difficulty color levels
+                    local level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(info.level)), info.level)
+
+                    -- Add Friend to list
+                    tinsert(friendsData, {
+                        id = #friendsData + i,
+                        info = {
+                            name, level, info.area, info.notes
+                        },
+                        meta = {
+                            #friendsData + i, info.level, {info.name}
+                        }
+                    })
                 end
 
                 lineNum, colNum = tooltip:AddLine()
@@ -1269,7 +1276,7 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Friend: OnEvent", event, ...)
 
                 local _, numBNetOnline = _G.BNGetNumFriends()
-                local _, numWoWOnline = _G.GetNumFriends()
+                local numWoWOnline = _G.C_FriendList.GetNumOnlineFriends()
 
                 block.dataObj.value = numBNetOnline + numWoWOnline
             end,
