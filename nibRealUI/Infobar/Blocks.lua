@@ -1208,10 +1208,10 @@ function Infobar:CreateBlocks()
 
                         local status
                         if client == _G.BNET_CLIENT_WOW then
-                            if ( not zoneName or zoneName == "" ) then
-                                status = _G.UNKNOWN
-                            else
+                            if zoneName and zoneName ~= "" then
                                 status = zoneName
+                            else
+                                status = _G.UNKNOWN
                             end
                         else
                             status = gameText
@@ -1233,35 +1233,31 @@ function Infobar:CreateBlocks()
                 end
 
                 -- WoW Friends
-                for i = 1, _G.GetNumFriends() do
-                    local name, level, class, area, isOnline, status, noteText = _G.GetFriendInfo(i)
-                    if isOnline then
-                        -- Class color names
-                        local cName = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, name)
+                for i = 1, _G.C_FriendList.GetNumOnlineFriends() do
+                    local info = _G.C_FriendList.GetFriendInfoByIndex(i)
 
-                        if status == _G.CHAT_FLAG_AFK then
-                            cName = PlayerStatus[1] .. cName
-                        elseif status == _G.CHAT_FLAG_DND then
-                            cName = PlayerStatus[2] .. cName
-                        end
+                    -- Class color names
+                    local name = _G.PLAYER_CLASS_NO_SPEC:format(_G.CUSTOM_CLASS_COLORS[ClassLookup[info.className]].colorStr, info.name)
 
-                        -- Difficulty color levels
-                        local lvl = tonumber(level)
-                        if lvl then
-                            level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
-                        end
-
-                        -- Add Friend to list
-                        tinsert(friendsData, {
-                            id = #friendsData + i,
-                            info = {
-                                cName, level, area, noteText
-                            },
-                            meta = {
-                                #friendsData + i, lvl, {name}
-                            }
-                        })
+                    if info.afk then
+                        name = PlayerStatus[1] .. name
+                    elseif info.dnd then
+                        name = PlayerStatus[2] .. name
                     end
+
+                    -- Difficulty color levels
+                    local level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(info.level)), info.level)
+
+                    -- Add Friend to list
+                    tinsert(friendsData, {
+                        id = #friendsData + i,
+                        info = {
+                            name, level, info.area, info.notes
+                        },
+                        meta = {
+                            #friendsData + i, info.level, {info.name}
+                        }
+                    })
                 end
 
                 lineNum, colNum = tooltip:AddLine()
@@ -1276,7 +1272,7 @@ function Infobar:CreateBlocks()
                 Infobar:debug("Friend: OnEvent", event, ...)
 
                 local _, numBNetOnline = _G.BNGetNumFriends()
-                local _, numWoWOnline = _G.GetNumFriends()
+                local numWoWOnline = _G.C_FriendList.GetNumOnlineFriends()
 
                 block.dataObj.value = numBNetOnline + numWoWOnline
             end,
