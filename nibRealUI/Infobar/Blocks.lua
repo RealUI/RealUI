@@ -1119,7 +1119,6 @@ function Infobar:CreateBlocks()
     end
 
     do  -- Friends
-        local C_FriendList = _G.C_FriendList
         local nameFormat = "|cff%s%s|r |c%s(%s)|r"
         local bnetFriendColor = ("%.2x%.2x%.2x"):format(_G.FRIENDS_BNET_NAME_COLOR.r * 255, _G.FRIENDS_BNET_NAME_COLOR.g * 255, _G.FRIENDS_BNET_NAME_COLOR.b * 255)
         local NameSort do
