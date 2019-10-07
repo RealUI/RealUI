@@ -1,10 +1,9 @@
 local _, private = ...
 
-if not _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then return end
-
 -- RealUI --
 local RealUI = private.RealUI
 local db
+if RealUI.isClassic then return end
 
 local MODNAME = "Objectives Adv."
 local ObjectivesAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")

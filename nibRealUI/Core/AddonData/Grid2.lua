@@ -4,7 +4,6 @@ local _, private = ...
 -- luacheck: globals type
 
 -- RealUI --
-local RealUI = private.RealUI
 
 function private.AddOns.Grid2()
     local namespaces = _G.Grid2DB.namespaces
@@ -1557,24 +1556,5 @@ function private.AddOns.Grid2()
 end
 
 function private.Profiles.Grid2()
-    local db = _G.Grid2.profiles.char
-    db.enabled = true
-    for specIndex = 1, #RealUI.charInfo.specs do
-        local profile = private.layoutToProfile[1]
-        if RealUI.charInfo.specs[specIndex].role == "HEALER" then
-            profile = private.layoutToProfile[2]
-        end
-
-        db[specIndex] = profile
-    end
-
-    if RealUI.compatRelease and _G.Grid2.ReloadProfile then
-        _G.Grid2:ReloadProfile()
-    else
-        -- print("do hack")
-        local pro = RealUI.compatRelease and (db[_G.GetSpecialization() or 0] or db) or (private.layoutToProfile[RealUI.db.char.layout.current])
-        if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
-            _G.Grid2.db:SetProfile(pro)
-        end
-    end
+    _G.Grid2.db:SetProfile("RealUI")
 end

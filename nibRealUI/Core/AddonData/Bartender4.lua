@@ -4,7 +4,6 @@ local _, private = ...
 -- luacheck: globals type
 
 -- RealUI --
-local RealUI = private.RealUI
 
 function private.AddOns.Bartender4()
     local namespaces = _G.Bartender4DB.namespaces
@@ -341,23 +340,5 @@ function private.AddOns.Bartender4()
 end
 
 function private.Profiles.Bartender4()
-    local db = _G.Bartender4.db
-    if RealUI.compatRelease then
-        db:SetDualSpecEnabled(true)
-    end
-    for specIndex = 1, #RealUI.charInfo.specs do
-        local profile = private.layoutToProfile[1]
-        if RealUI.charInfo.specs[specIndex].role == "HEALER" then
-            profile = private.layoutToProfile[2]
-        end
-
-        if RealUI.compatRelease then
-            db:SetDualSpecProfile(profile, specIndex)
-        end
-    end
-
-    local pro = RealUI.compatRelease and (db[_G.GetSpecialization() or 0] or db) or (private.layoutToProfile[RealUI.db.char.layout.current])
-    if type(pro) == "string" and pro ~= _G.Bartender4.db:GetCurrentProfile() then
-        _G.Bartender4.db:SetProfile(pro)
-    end
+    _G.Grid2.db:SetProfile("RealUI")
 end

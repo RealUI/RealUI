@@ -19,13 +19,6 @@ UnitFrames.target = {
         self.RaidTargetIndicator:SetSize(20, 20)
         self.RaidTargetIndicator:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
 
-        if RealUI.compatRelease then
-            self.Threat = self.overlay:CreateFontString(nil, "OVERLAY")
-            self.Threat:SetPoint("TOPRIGHT", self, "TOPLEFT", -10, -18)
-            self.Threat:SetFontObject("SystemFont_Shadow_Med1")
-            self:Tag(self.Threat, "[realui:threat]")
-        end
-
         self.Range = self.overlay:CreateFontString(nil, "OVERLAY")
         self.Range:SetPoint("TOPRIGHT", self, "TOPLEFT", -10, -4)
         self.Range:SetFontObject("SystemFont_Shadow_Med1")

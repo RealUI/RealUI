@@ -3,10 +3,9 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals select tonumber ipairs tinsert
 
+local RealUI = _G.RealUI
 local Aurora = _G.Aurora
 local Color = Aurora.Color
-
-local compatRelease = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 
 -- Shamelessly copied from PTRFeedback_Tooltips
 local TooltipTypes = {
@@ -74,9 +73,6 @@ end
 
 local function SetupUnitTooltips()
     private.AddHook("OnTooltipSetUnit", function(self)
-        if compatRelease and _G.C_PetBattles.IsInBattle() then
-            return
-        end
         local _, unit = self:GetUnit()
         if unit then
             local guid = _G.UnitGUID(unit) or ""
@@ -89,7 +85,7 @@ local function SetupUnitTooltips()
 end
 
 local function SetupQuestTooltips()
-    if not compatRelease then return end
+    if RealUI.isClassic then return end
     _G.hooksecurefunc("QuestMapLogTitleButton_OnEnter", function(self)
         if self.questID then
             AddToTooltip(_G.GameTooltip, TooltipTypes.quest, self.questID)
@@ -97,59 +93,9 @@ local function SetupQuestTooltips()
     end)
 end
 
-local function SetupAchievementTooltips()
-    local frame = _G.CreateFrame("frame")
-    frame:RegisterEvent("ADDON_LOADED")
-    frame:SetScript("OnEvent", function(_, _, addonName)
-        if addonName == "Blizzard_AchievementUI" then
-            for i, button in ipairs(_G.AchievementFrameAchievementsContainer.buttons) do
-                button:HookScript("OnEnter", function()
-                    _G.GameTooltip:SetOwner(button, "ANCHOR_NONE")
-                    _G.GameTooltip:SetPoint("TOPLEFT", button, "TOPRIGHT", 0, 0)
-                    if button.id then
-                        AddToTooltip(_G.GameTooltip, TooltipTypes.achievement, button.id)
-                        _G.GameTooltip:Show()
-                    end
-                end)
-                button:HookScript("OnLeave", function()
-                    _G.GameTooltip:Hide()
-                end)
-            end
-            frame:UnregisterEvent("ADDON_LOADED")
-        end
-    end)
-end
-
-local function SetupCurrencyTooltips()
-    local function setCurrencyTooltipFunction(self, link)
-        local currencyID = link:match("currency:(%d+)")
-        if currencyID then
-            AddToTooltip(self, TooltipTypes.currency, currencyID)
-        end
-    end
-
-    private.AddHook("SetHyperlink", setCurrencyTooltipFunction)
-    private.AddHook("SetCurrencyToken", function(self, index)
-        setCurrencyTooltipFunction(self, _G.GetCurrencyListLink(index))
-    end)
-end
-
-local function SetupAzeriteTooltips()
-    if compatRelease then
-        private.AddHook("SetAzeriteEssence", function(self, azeriteID, rank)
-            if azeriteID then
-                AddToTooltip(self, TooltipTypes.azerite, azeriteID)
-            end
-        end)
-    end
-end
-
 function private.SetupIDTips()
     SetupSpellTooltips()
     SetupItemTooltips()
     SetupUnitTooltips()
     SetupQuestTooltips()
-    SetupAchievementTooltips()
-    SetupCurrencyTooltips()
-    SetupAzeriteTooltips()
 end

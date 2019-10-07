@@ -33,6 +33,7 @@ local RealUI = private.RealUI
 
 local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
 RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 2 and _G.tonumber(minor) >= 5)
+RealUI.isClassic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
 
 RealUI.realmInfo = {
     realm = _G.GetRealmName(),

@@ -152,17 +152,6 @@ function FrameMover:HideFrames()
 end
 
 ---- Hook into addons to display PopUpMessage and reposition frames
--- VSI
-local function Hook_VSI()
-    _G.hooksecurefunc(_G.VehicleSeatIndicator, "SetPoint", function(_, _, parent)
-        if RealUI:GetModuleEnabled(MODNAME) and db.uiframes.vsi.move then
-            if (parent == "MinimapCluster") or (parent == _G["MinimapCluster"]) then
-                MoveFrameGroup(FrameList.uiframes.vsi.frames, db.uiframes.vsi.frames)
-            end
-        end
-    end)
-end
-
 -- Raven - To stop bars repositioning themselves
 local function Hook_Raven()
     if not _G.IsAddOnLoaded("Raven") then return end
@@ -193,9 +182,6 @@ function FrameMover:PLAYER_ENTERING_WORLD()
 
     if not EnteredWorld then
         Hook_Raven()
-        if RealUI.compatRelease then
-            Hook_VSI()
-        end
 
         self:MoveUIFrames()
         self:MoveAddons()

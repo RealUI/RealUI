@@ -41,12 +41,8 @@ tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 tags.Methods["realui:level"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return end
 
-    local level, levelColor
-    if RealUI.compatRelease and (_G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit)) then
-        level = _G.UnitBattlePetLevel(unit)
-    else
-        level = _G.UnitLevel(unit)
-    end
+    local level = _G.UnitLevel(unit)
+    local levelColor
     if level <= 0 then
         level = "??"
         levelColor = _G.QuestDifficultyColors.impossible
@@ -147,6 +143,7 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 
 
 -- Colored Threat Percent
+--[[
 tags.Methods["realui:threat"] = function(unit)
     local color = tags.Methods['threatcolor'](unit)
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
@@ -162,9 +159,8 @@ tags.Methods["realui:threat"] = function(unit)
         end
     end
 end
-if RealUI.compatRelease then
-    tags.Events["realui:threat"] = "UNIT_THREAT_SITUATION_UPDATE UNIT_THREAT_LIST_UPDATE"
-end
+tags.Events["realui:threat"] = "UNIT_THREAT_SITUATION_UPDATE UNIT_THREAT_LIST_UPDATE"
+]]
 
 -- Range
 local rangeColors = {

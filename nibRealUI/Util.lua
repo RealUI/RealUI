@@ -1,7 +1,8 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals floor type pcall tonumber
+-- luacheck: globals type pcall table wipe tinsert
+-- luacheck: globals floor tonumber random
 
 local RealUI = _G.RealUI
 
@@ -54,7 +55,7 @@ end
 local scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
 scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 
-local cache = {}
+local ilvlCache = {}
 local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
 function RealUI.GetItemLevel(itemLink)
     local iLvl = _G.GetDetailedItemLevelInfo(itemLink)
@@ -62,8 +63,8 @@ function RealUI.GetItemLevel(itemLink)
         return iLvl
     end
 
-    if cache[itemLink] then
-        return cache[itemLink]
+    if ilvlCache[itemLink] then
+        return ilvlCache[itemLink]
     end
 
     scanningTooltip:ClearLines()
@@ -77,13 +78,30 @@ function RealUI.GetItemLevel(itemLink)
         if l and l:GetText() then
             iLvl = tonumber(l:GetText():match(itemLevelPattern))
             if iLvl then
-                cache[itemLink] = iLvl
+                ilvlCache[itemLink] = iLvl
                 break
             end
         end
     end
 
     return iLvl or 0
+end
+
+local charset = {} do -- [0-9A-Za-z]
+    local char = _G.string.char
+    for c = 48, 57  do tinsert(charset, char(c)) end
+    for c = 65, 90  do tinsert(charset, char(c)) end
+    for c = 97, 122 do tinsert(charset, char(c)) end
+end
+function RealUI.GenerateGUID(length)
+    length = length or 16
+
+    local idTable = {}
+    for i = 1, length do
+        tinsert(idTable, charset[random(1, #charset)])
+    end
+
+    return table.concat(idTable)
 end
 
 function RealUI.GetOptions(modName, path)
@@ -194,36 +212,30 @@ local classicClassSpecs = {
 }
 
 function RealUI.GetSpecialization()
-    return RealUI.compatRelease and _G.GetSpecialization() or RealUI.charInfo.specs.current.index
+    return RealUI.charInfo.specs.current.index
 end
 function RealUI.GetLootSpecialization()
-    return RealUI.compatRelease and _G.GetLootSpecialization() or RealUI.charInfo.specs.current.id
+    return RealUI.charInfo.specs.current.id
 end
 function RealUI.GetNumSpecializations(isInspect, isPet)
-    if RealUI.compatRelease then return _G.GetNumSpecializations(isInspect, isPet) end
     local _, _, classID = _G.UnitClass("player")
     return RealUI.GetNumSpecializationsForClassID(classID)
 end
 function RealUI.GetNumSpecializationsForClassID(classID)
-    if RealUI.compatRelease then return _G.GetNumSpecializationsForClassID(classID) end
     return classicClassSpecs[classID] and #classicClassSpecs[classID] or 0
 end
 function RealUI.GetSpecializationInfoForClassID(classID, specIndex)
-    if RealUI.compatRelease then return _G.GetSpecializationInfoForClassID(classID, specIndex) end
     return _G.unpack(classicClassSpecs[classID][specIndex])
 end
 function RealUI.GetSpecializationInfo(specIndex, isInspect, isPet, inspectTarget, sex)
-    if RealUI.compatRelease then return _G.GetSpecializationInfo(specIndex, isInspect, isPet, inspectTarget, sex) end
     local _, _, classID = _G.UnitClass("player")
     return RealUI.GetSpecializationInfoForClassID(classID, specIndex)
 end
 function RealUI.GetSpecializationInfoByID(id)
-    if RealUI.compatRelease then return _G.GetSpecializationInfoByID(id) end
     local _, name, description, icon, role = _G.unpack(classicSpecs[id])
     return id, name, description, icon, role, classicSpecToClass[id]
 end
 function RealUI.GetInspectSpecialization(unit)
-    if RealUI.compatRelease then return _G.GetInspectSpecialization(unit) end
     if "player" == unit then
         return RealUI.charInfo.specs.current
     end

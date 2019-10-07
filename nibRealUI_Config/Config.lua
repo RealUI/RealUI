@@ -31,13 +31,6 @@ local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
 local RavenTimer
-if RealUI.compatRelease then
-    _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
-        if self._show then
-            self:Show()
-        end
-    end)
-end
 function RealUI:HuDTestMode(isConfigMode)
     FramePoint:ToggleAll(not isConfigMode)
 
@@ -70,61 +63,15 @@ function RealUI:HuDTestMode(isConfigMode)
         end
     end
 
-    if RealUI.compatRelease and not _G.ObjectiveTrackerFrame.collapsed then
+    --[[
+    if not _G.ObjectiveTrackerFrame.collapsed then
         _G.ObjectiveTrackerFrame:SetShown(not isConfigMode)
     end
+    ]]
 
     -- Boss Frames
     RealUI:BossConfig(isConfigMode)
 
-    -- Spell Alerts
-    local sAlert = {
-        id = 17941,
-        texture = [[TEXTURES\SPELLACTIVATIONOVERLAYS\NIGHTFALL]],
-        positions = "Left + Right (Flipped)",
-        scale = 1,
-        r = 255, g = 255, b = 255,
-    }
-    if isConfigMode then
-        _G.SpellActivationOverlay_ShowAllOverlays(_G.SpellActivationOverlayFrame, sAlert.id, sAlert.texture, sAlert.positions, sAlert.scale, sAlert.r, sAlert.g, sAlert.b);
-    else
-        _G.SpellActivationOverlay_HideOverlays(_G.SpellActivationOverlayFrame, sAlert.id)
-    end
-
-    -- Extra Action Button
-    local EABFrame = _G.ExtraActionBarFrame
-    if not _G.HasExtraActionBar() then
-        if isConfigMode then
-            EABFrame.button:Show()
-            EABFrame:Show()
-            EABFrame.outro:Stop()
-            EABFrame.intro:Play()
-            if not EABFrame.button.icon:GetTexture() then
-                EABFrame.button.icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
-                EABFrame.button.icon:Show()
-            end
-        else
-            EABFrame:Hide()
-            EABFrame.button:Hide()
-            EABFrame.intro:Stop()
-            EABFrame.outro:Play()
-        end
-    end
-
-    -- Zone Ability Button
-    local ZAFFrame = _G.ZoneAbilityFrame
-    if not _G.HasZoneAbility() then
-        if isConfigMode then
-            ZAFFrame:Show()
-            ZAFFrame.SpellButton:Disable()
-            ZAFFrame._show = true
-            ZAFFrame.SpellButton.Icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
-        else
-            ZAFFrame._show = false
-            ZAFFrame.SpellButton:Enable()
-            ZAFFrame:Hide()
-        end
-    end
     self.isConfigMode = isConfigMode
 end
 

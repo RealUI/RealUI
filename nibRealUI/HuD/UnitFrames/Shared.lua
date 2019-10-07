@@ -184,128 +184,6 @@ local CreateHealthStatus do
     end
 end
 
-local CreateHealthPredictBar do
-    local function PredictOverride(self, event, unit)
-        if(self.unit ~= unit) then return end
-
-        local hp = self.HealthPrediction
-        local healthBar = self.Health
-
-        local myIncomingHeal = RealUI.compatRelease and _G.UnitGetIncomingHeals(unit, 'player') or 0
-        local allIncomingHeal = RealUI.compatRelease and _G.UnitGetIncomingHeals(unit) or 0
-        local totalAbsorb = RealUI.compatRelease and _G.UnitGetTotalAbsorbs(unit) or 0
-        local myCurrentHealAbsorb = RealUI.compatRelease and _G.UnitGetTotalHealAbsorbs(unit) or 0
-        local health, maxHealth = _G.UnitHealth(unit), _G.UnitHealthMax(unit)
-
-        --local overHealAbsorb = false
-        if (health < myCurrentHealAbsorb) then
-            --overHealAbsorb = true
-            myCurrentHealAbsorb = health
-        end
-
-        if (health - myCurrentHealAbsorb + allIncomingHeal > maxHealth * hp.maxOverflow) then
-            allIncomingHeal = maxHealth * hp.maxOverflow - health + myCurrentHealAbsorb
-        end
-
-        local otherIncomingHeal = 0
-        if (allIncomingHeal < myIncomingHeal) then
-            myIncomingHeal = allIncomingHeal
-        else
-            otherIncomingHeal = allIncomingHeal - myIncomingHeal
-        end
-
-        local overAbsorb, atMax
-        if healthBar:GetReversePercent() then
-            if (totalAbsorb >= health) then
-                overAbsorb = true
-
-                if (allIncomingHeal > myCurrentHealAbsorb) then
-                    totalAbsorb = _G.max(0, health - myCurrentHealAbsorb + allIncomingHeal)
-                else
-                    totalAbsorb = _G.max(0, health)
-                end
-            end
-            atMax = health == maxHealth
-        else
-            if (health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth) then
-                if (totalAbsorb > 0) then
-                    overAbsorb = true
-                end
-
-                if (allIncomingHeal > myCurrentHealAbsorb) then
-                    totalAbsorb = _G.max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
-                else
-                    totalAbsorb = _G.max(0, maxHealth - health)
-                end
-            end
-        end
-
-        if (myCurrentHealAbsorb > allIncomingHeal) then
-            myCurrentHealAbsorb = myCurrentHealAbsorb - allIncomingHeal
-        else
-            myCurrentHealAbsorb = 0
-        end
-
-        if (hp.myBar) then
-            hp.myBar:SetMinMaxValues(0, maxHealth)
-            hp.myBar:SetValue(myIncomingHeal)
-        end
-
-        if (hp.otherBar) then
-            hp.otherBar:SetMinMaxValues(0, maxHealth)
-            hp.otherBar:SetValue(otherIncomingHeal)
-        end
-
-        if (hp.absorbBar) then
-            hp.absorbBar:SetMinMaxValues(0, maxHealth)
-            hp.absorbBar:SetValue(totalAbsorb)
-            hp.absorbBar:ClearAllPoints()
-            local fill = healthBar:GetStatusBarTexture()
-            if healthBar:GetReverseFill() then
-                if atMax then
-                    hp.absorbBar:SetPoint("TOPRIGHT", healthBar)
-                else
-                    hp.absorbBar:SetPoint("TOPRIGHT", fill, "TOPLEFT", fill:GetHeight(), 0)
-                end
-                if overAbsorb then
-                    hp.absorbBar:SetPoint("TOPLEFT", healthBar)
-                end
-            else
-                if atMax then
-                    hp.absorbBar:SetPoint("TOPLEFT", healthBar)
-                else
-                    hp.absorbBar:SetPoint("TOPLEFT", fill, "TOPRIGHT", -fill:GetHeight(), 0)
-                end
-                if overAbsorb then
-                    hp.absorbBar:SetPoint("TOPRIGHT", healthBar)
-                end
-            end
-        end
-
-        if (hp.healAbsorbBar) then
-            hp.healAbsorbBar:SetMinMaxValues(0, maxHealth)
-            hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
-        end
-    end
-    function CreateHealthPredictBar(parent, info)
-        local width, height = parent.Health:GetSize()
-        local absorbBar = parent:CreateAngle("StatusBar", nil, parent.Health)
-        absorbBar:SetSize(width, height)
-        absorbBar:SetBackgroundColor(0, 0, 0, 0)
-        absorbBar:SetBackgroundBorderColor(0, 0, 0, 0)
-        absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-        absorbBar:SetAngleVertex(info.leftVertex, info.rightVertex)
-        absorbBar:SetReverseFill(parent.Health:GetReverseFill())
-        absorbBar:SetFrameLevel(parent.Health:GetFrameLevel())
-
-        parent.HealthPrediction = {
-            absorbBar = absorbBar,
-            frequentUpdates = true,
-            Override = PredictOverride,
-        }
-    end
-end
-
 local function CreatePowerBar(parent, info)
     local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
     local xOffset = parent.Health:GetHeight() - height
@@ -523,7 +401,6 @@ local function Shared(self, unit)
     CreateHealthBar(self, unitData.health)
     CreateHealthStatus(self, unitData.health)
     if unitData.isBig then
-        CreateHealthPredictBar(self, unitData.health)
         CreatePowerBar(self, unitData.power)
     end
     CreatePowerStatus(self, unitData)

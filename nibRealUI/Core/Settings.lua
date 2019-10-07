@@ -62,13 +62,6 @@ local characterCVars = {
     ["autoLootDefault"] = 1,                   -- Turn on Auto Loot
 }
 
-if RealUI.compatRelease then
-    accountCVars["spellActivationOverlayOpacity"] = 0.75  -- Spell Alert Opacity
-    characterCVars["nameplateShowSelf"] = 0               -- Hide Personal Resource Display
-    -- Combat
-    characterCVars["displaySpellActivationOverlays"] = 1  -- Turn on Spell Alerts
-end
-
 -- CVars
 local function SetDefaultCVars()
     debug("SetDefaultCVars")

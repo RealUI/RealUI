@@ -275,18 +275,6 @@ function MinimapAdv:UpdateButtonsPosition()
         MMFrames.config.mouseover = false
     end
 
-    -- Tracking
-    if RealUI.compatRelease then
-        if _G.Minimap:IsVisible() and not isInFarmMode then
-            MMFrames.tracking:Show()
-            _G.tinsert(frameOrder, "tracking")
-            bfWidth = bfWidth + 15
-        else
-            MMFrames.tracking:Hide()
-            MMFrames.tracking.mouseover = false
-        end
-    end
-
     -- Farm mode
     if _G.Minimap:IsVisible() and not _G.IsInInstance() then
         MMFrames.farm:Show()
@@ -351,7 +339,7 @@ function MinimapAdv:UpdateMinimapPosition()
     local scale = mapPoints.scale
     local opacity = mapPoints.opacity
     local isTop = mapPoints.isTop
-    local isLeft = mapPoints.isLeft
+    --local isLeft = mapPoints.isLeft
 
     -- Set new size and position
     _G.Minimap:SetFrameStrata("LOW")
@@ -365,58 +353,6 @@ function MinimapAdv:UpdateMinimapPosition()
     _G.Minimap:ClearAllPoints()
     _G.Minimap:SetPoint(anchor, "UIParent", anchor, xofs, yofs)
     _G.Minimap:SetUserPlaced(true)
-
-    -- Kinda dirty, but it works
-    local LFDrpoint, LFDpoint, Qpoint, Gpoint
-    if isTop then
-        LFDpoint = "TOP"
-        LFDrpoint = "TOP"
-        Qpoint = "BOTTOM"
-        Gpoint = "TOP"
-    else
-        LFDpoint = "BOTTOM"
-        LFDrpoint = "BOTTOM"
-        Qpoint = "TOP"
-        Gpoint = "BOTTOM"
-    end
-    if isLeft then
-        LFDpoint = LFDpoint .. "LEFT"
-        LFDrpoint = LFDrpoint .. "RIGHT"
-        Qpoint = Qpoint .. "RIGHT"
-        Gpoint = Gpoint .. "RIGHT"
-    else
-        LFDpoint = LFDpoint .. "RIGHT"
-        LFDrpoint = LFDrpoint .. "LEFT"
-        Qpoint = Qpoint .. "LEFT"
-        Gpoint = Gpoint .. "LEFT"
-    end
-
-    if RealUI.compatRelease then
-        -- Queue Status
-        _G.QueueStatusMinimapButton:ClearAllPoints()
-        _G.QueueStatusMinimapButton:SetPoint(Qpoint, isLeft and 2 or -2, isTop and -2 or 2)
-
-        -- LFD Button Tooltip
-        _G.QueueStatusFrame:ClearAllPoints()
-        _G.QueueStatusFrame:SetPoint(LFDpoint, "QueueStatusMinimapButton", LFDrpoint)
-        _G.QueueStatusFrame:SetClampedToScreen(true)
-
-        -- Garrisons
-        _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
-        _G.GarrisonLandingPageMinimapButton:SetPoint(Gpoint, isLeft and 2 or -2, isTop and 2 or -2)
-
-        _G.GarrisonLandingPageTutorialBox:ClearAllPoints()
-        _G.GarrisonLandingPageTutorialBox.Arrow:ClearAllPoints()
-        if isTop then
-            _G.GarrisonLandingPageTutorialBox:SetPoint("TOP", _G.GarrisonLandingPageMinimapButton, "BOTTOM", 0, -20)
-            _G.GarrisonLandingPageTutorialBox.Arrow:SetPoint("BOTTOM", _G.GarrisonLandingPageTutorialBox, "TOP", 0, -3)
-            _G.SetClampedTextureRotation(_G.GarrisonLandingPageTutorialBox.Arrow, 180)
-        else
-            _G.GarrisonLandingPageTutorialBox:SetPoint("BOTTOM", _G.GarrisonLandingPageMinimapButton, "TOP", 0, 20)
-            _G.GarrisonLandingPageTutorialBox.Arrow:SetPoint("TOP", _G.GarrisonLandingPageTutorialBox, "BOTTOM", 0, 3)
-            _G.SetClampedTextureRotation(_G.GarrisonLandingPageTutorialBox.Arrow, 0)
-        end
-    end
 
     _G.ButtonCollectFrame:ClearAllPoints()
     if isTop then
@@ -718,23 +654,23 @@ function MinimapAdv:InitializePOI()
 end
 
 function MinimapAdv:UpdatePOIEnabled()
-    if RealUI.compatRelease then
-        if db.poi.enabled then
-            if not poiTable then
-                self:InitializePOI()
-            end
+    if RealUI.isClassic then return end
 
-            self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
-            self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
-            self:RegisterEvent("SUPER_TRACKED_QUEST_CHANGED", "POIUpdate")
-            self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
-        else
-            self:RemoveAllPOIs()
-            self:UnregisterEvent("QUEST_POI_UPDATE")
-            self:UnregisterEvent("QUEST_LOG_UPDATE")
-            self:UnregisterEvent("SUPER_TRACKED_QUEST_CHANGED")
-            self:UnregisterEvent("QUEST_WATCH_LIST_CHANGED")
+    if db.poi.enabled then
+        if not poiTable then
+            self:InitializePOI()
         end
+
+        self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
+        self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
+        self:RegisterEvent("SUPER_TRACKED_QUEST_CHANGED", "POIUpdate")
+        self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
+    else
+        self:RemoveAllPOIs()
+        self:UnregisterEvent("QUEST_POI_UPDATE")
+        self:UnregisterEvent("QUEST_LOG_UPDATE")
+        self:UnregisterEvent("SUPER_TRACKED_QUEST_CHANGED")
+        self:UnregisterEvent("QUEST_WATCH_LIST_CHANGED")
     end
 end
 
@@ -850,21 +786,14 @@ function MinimapAdv:DungeonDifficultyUpdate()
     self:debug("DungeonDifficultyUpdate")
     -- If in a Party/Raid then show Dungeon Difficulty text
     MMFrames.info.DungeonDifficulty.text:SetText("")
-    local maxPlayerLimitDungeon = 5
     local instanceName, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = _G.GetInstanceInfo()
-    if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC then
-        maxPlayers = classicMaxPlayers[instanceName] or maxPlayers
-        maxPlayerLimitDungeon = classicMaxPlayers[instanceName] or 5
-    end
-    local isHeroic, isChallengeMode
-    if RealUI.compatRelease then
-        _, _, isHeroic, isChallengeMode = _G.GetDifficultyInfo(difficulty)
-    end
+    maxPlayers = classicMaxPlayers[instanceName] or maxPlayers
+    local maxPlayerLimitDungeon = classicMaxPlayers[instanceName] or 5
+
     self:debug("instanceType", instanceType)
     if instanceType ~= "none" and not instanceName:find("Garrison") then
-        if (instanceType == "party" or instanceType == "scenario") and (maxPlayers <= maxPlayerLimitDungeon) then
+        if instanceType == "party" and maxPlayers <= maxPlayerLimitDungeon then
             self.DifficultyText = "D: "..maxPlayers
-            if isChallengeMode then self.DifficultyText = self.DifficultyText.."+" end
         elseif (instanceType == "raid") then
             self.DifficultyText = "R: "
 
@@ -893,8 +822,6 @@ function MinimapAdv:DungeonDifficultyUpdate()
                 self.DifficultyText = self.DifficultyText..maxPlayers
             end
         end
-
-        if isHeroic then self.DifficultyText = self.DifficultyText.."+" end
 
         -- Update Frames
         MMFrames.info.DungeonDifficulty.text:SetText(self.DifficultyText.." ")
@@ -928,52 +855,14 @@ function MinimapAdv:DungeonDifficultyUpdate()
         MMFrames.info.DungeonDifficulty:SetScript("OnEnter", nil)
     end
 
-    -- Loot Spec
-    self:LootSpecUpdate()
-
     if not UpdateProcessing then
         self:UpdateInfoPosition()
-    end
-end
-
-function MinimapAdv:UpdateGuildPartyState(event, ...)
-    self:debug("UpdateGuildPartyState", event, ...)
-    -- Update Guild info and then update Dungeon Difficulty
-    if event == "GUILD_PARTY_STATE_UPDATED" then
-        local isGuildGroup = ...
-        if isGuildGroup ~= self.IsGuildGroup then
-            self.IsGuildGroup = isGuildGroup
-            self:DungeonDifficultyUpdate()
-        end
-    else
-        if RealUI.compatRelease and _G.IsInGuild() then
-            _G.RequestGuildPartyState()
-        else
-            self.IsGuildGroup = nil
-        end
     end
 end
 
 function MinimapAdv:InstanceDifficultyOnEvent(event, ...)
     self:debug("InstanceDifficultyOnEvent", event, ...)
     self:DungeonDifficultyUpdate()
-end
-
----- Loot Specialization ----
-function MinimapAdv:LootSpecUpdate()
-    if not RealUI.compatRelease then return end
-    self:debug("LootSpecUpdate")
-    -- If in a Dungeon, Raid or Garrison show Loot Spec
-    local _, instanceType = _G.GetInstanceInfo()
-    if (instanceType == "party" or instanceType == "raid") then
-        self:debug("IsInInstance", RealUI.GetColorString(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
-        MMFrames.info.LootSpec.text:SetFormattedText("|cff%s%s:|r %s", RealUI.GetColorString(RealUI.media.colors.blue), _G.LOOT, RealUI:GetCurrentLootSpecName())
-        MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
-        infoTexts.LootSpec.shown = true
-    else
-        MMFrames.info.LootSpec.text:SetText("")
-        infoTexts.LootSpec.shown = false
-    end
 end
 
 
@@ -1041,10 +930,10 @@ function MinimapAdv:FadeButtons()
     local scale = mapPoints.scale
 
     if _G.Minimap:IsVisible() then
-        if _G.Minimap.mouseover or (MMFrames.tracking and MMFrames.tracking.dropdown:IsVisible()) or MMFrames.toggle.mouseover or MMFrames.config.mouseover or (MMFrames.tracking and MMFrames.tracking.mouseover) or MMFrames.farm.mouseover then
+        if _G.Minimap.mouseover or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
 
-            if RealUI.compatRelease and not isInFarmMode then
+            if not isInFarmMode then
                 MMFrames.tracking:Show()
                 numButtons = numButtons + 1
             end
@@ -1064,9 +953,6 @@ function MinimapAdv:FadeButtons()
             MMFrames.buttonframe:Show()
         else
             MMFrames.buttonframe:Hide()
-            if RealUI.compatRelease then
-                MMFrames.tracking:Hide()
-            end
             MMFrames.farm:Hide()
         end
     end
@@ -1149,40 +1035,6 @@ local function Config_OnLeave()
     if _G.GameTooltip:IsShown() then _G.GameTooltip:Hide() end
 end
 
----- Tracking Button ----
-local function Tracking_OnMouseDown()
-    MMFrames.tracking.dropdown:Toggle()
-end
-
-local function Tracking_OnEnter()
-    MMFrames.tracking.mouseover = true
-
-    MMFrames.tracking.icon:SetVertexColor(RealUI.charInfo.class.color:GetRGB())
-    MMFrames.tracking:SetFrameLevel(6)
-
-    if not isInFarmMode then
-        MMFrames.buttonframe.tooltip:SetText("Tracking")
-        MMFrames.buttonframe.tooltip:Show()
-        MMFrames.buttonframe.tooltipIcon:Show()
-    end
-
-    MinimapAdv:FadeButtons()
-end
-
-local function Tracking_OnLeave()
-    MMFrames.tracking.mouseover = false
-
-    MMFrames.tracking.icon:SetVertexColor(0.8, 0.8, 0.8)
-    MMFrames.tracking:SetFrameLevel(5)
-
-    MMFrames.buttonframe.tooltip:Hide()
-    MMFrames.buttonframe.tooltipIcon:Hide()
-
-    MinimapAdv:FadeButtons()
-
-    if _G.GameTooltip:IsShown() then _G.GameTooltip:Hide() end
-end
-
 ---- Farm Button ----
 function MinimapAdv:ToggleGatherer()
     if ( (not db.expand.extras.gatherertoggle) or (not _G.Gatherer) ) then return end
@@ -1208,9 +1060,7 @@ local function Farm_OnMouseDown()
 
     MinimapAdv:ToggleGatherer()
     MinimapAdv:UpdateMinimapPosition()
-    if RealUI.compatRelease then
-        MinimapAdv:UpdateFarmModePOI()
-    end
+    MinimapAdv:UpdateFarmModePOI()
     MinimapAdv:UpdateButtonCollection()
 end
 
@@ -1246,109 +1096,6 @@ local function Farm_OnLeave()
     MinimapAdv:FadeButtons()
 end
 
---[[ Garrison ]]--
--- GarrisonLandingPageMinimapButton.MinimapLoopPulseAnim:Play()
--- ShowGarrisonPulse(GarrisonLandingPageMinimapButton)
-local function HideCommandBar(...)
-    MinimapAdv:debug("HideCommandBar", ...)
-    _G.OrderHallCommandBar:Hide()
-end
-
-local function ShowGarrisonPulse(self)
-    local isPlaying = self.MinimapLoopPulseAnim:IsPlaying()
-    MinimapAdv:debug("ShowGarrisonPulse", isPlaying)
-    self.MinimapLoopPulseAnim:Stop()
-    self.shouldShow = true
-    fadeIn(self)
-    if isPlaying then
-        _G.C_Timer.After(0.2, function()
-            self.MinimapLoopPulseAnim:Play()
-        end)
-    end
-end
-
-local isPulseEvent = {
-    GARRISON_BUILDING_ACTIVATABLE = true,
-    GARRISON_MISSION_FINISHED = true,
-    GARRISON_INVASION_AVAILABLE = true,
-    SHIPMENT_UPDATE = true,
-}
-
-local categoryInfo = {}
-local currencyId
-if RealUI.compatRelease then
-    currencyId = _G.C_Garrison.GetCurrencyTypes(_G.LE_GARRISON_TYPE_7_0)
-    do -- by nebula
-        local frame = _G.CreateFrame("Frame")
-        frame:SetScript("OnEvent", function(self, event)
-            if _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_7_0 then return end
-
-            if event == "GARRISON_FOLLOWER_CATEGORIES_UPDATED" then
-                categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
-            else
-                _G.C_Garrison.RequestClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
-            end
-        end)
-        frame:RegisterEvent("GARRISON_FOLLOWER_CATEGORIES_UPDATED")
-        frame:RegisterEvent("GARRISON_FOLLOWER_ADDED")
-        frame:RegisterEvent("GARRISON_FOLLOWER_REMOVED")
-        frame:RegisterEvent("GARRISON_TALENT_COMPLETE")
-        frame:RegisterEvent("GARRISON_TALENT_UPDATE")
-        frame:RegisterEvent("GARRISON_SHOW_LANDING_PAGE")
-    end
-end
-
-local function Garrison_OnEvent(self, event, ...)
-    MinimapAdv:debug("Garrison_OnEvent", event, ...)
-    MinimapAdv:debug("button has pulse", self.MinimapLoopPulseAnim:IsPlaying())
-    if event == "GARRISON_SHOW_LANDING_PAGE" then
-        local alpha = self:GetAlpha()
-        -- This fires quite often, so only react when the frame is actually shown.
-        if _G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
-            MinimapAdv:debug("inLandingPage fadein")
-            fadeIn(self)
-        elseif not self.shouldShow and alpha > 0 then
-            MinimapAdv:debug("outLandingPage fadeout")
-            fadeOut(self)
-        else
-            MinimapAdv:debug("notLandingPage")
-            self.shouldShow = self.MinimapLoopPulseAnim:IsPlaying()
-        end
-    elseif isPulseEvent[event] then
-        ShowGarrisonPulse(self)
-    end
-end
-local function Garrison_OnLeave(self)
-    MinimapAdv:debug("Garrison_OnLeave")
-    if not (self.MinimapLoopPulseAnim:IsPlaying() and (_G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown())) then
-        self.shouldShow = false
-        fadeOut(self)
-    end
-end
-local function Garrison_OnEnter(self)
-    MinimapAdv:debug("Garrison_OnEnter")
-    if not self.title then return end
-    local isLeft = db.position.anchorto:find("LEFT")
-    _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
-    _G.GameTooltip:SetText(self.title, 1, 1, 1)
-    _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
-    if _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0 then
-        _G.GameTooltip:AddLine(" ")
-
-        local currency, amount = _G.GetCurrencyInfo(currencyId)
-        _G.GameTooltip:AddDoubleLine(currency, RealUI:ReadableNumber(amount), 1, 1, 1, 1, 1, 1)
-
-        if #categoryInfo > 0 then
-            _G.GameTooltip:AddLine(" ")
-            for index, category in ipairs(categoryInfo) do
-                _G.GameTooltip:AddDoubleLine(category.name, _G.ORDER_HALL_COMMANDBAR_CATEGORY_COUNT:format(category.count, category.limit), 1, 1, 1, 1, 1, 1)
-            end
-        end
-    end
-    _G.GameTooltip:Show()
-    self.shouldShow = true
-    fadeIn(self)
-end
 ---- Minimap
 local function Minimap_OnEnter()
     _G.Minimap.mouseover = true
@@ -1439,10 +1186,6 @@ function MinimapAdv:ADDON_LOADED(event, ...)
             _G.TimeManagerClockButton:Hide()
         end)
         _G.TimeManagerClockButton:Hide()
-    elseif addon == "Blizzard_OrderHallUI" then
-        _G.C_Timer.After(0.1, HideCommandBar)
-        _G.OrderHallCommandBar.SetShown = HideCommandBar
-        _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     end
 
     self:UpdateButtonCollection()
@@ -1475,32 +1218,11 @@ function MinimapAdv:RegEvents()
     }, 0.2, "ZoneChange")
 
     -- Dungeon Difficulty
-    self:RegisterEvent("GUILD_PARTY_STATE_UPDATED", "UpdateGuildPartyState")
-    self:RegisterEvent("PLAYER_GUILD_UPDATE", "UpdateGuildPartyState")
-    if RealUI.compatRelease then
-        self:RegisterBucketEvent({
-            "PLAYER_DIFFICULTY_CHANGED",
-            "UPDATE_INSTANCE_INFO",
-            "PARTY_MEMBER_ENABLE",
-            "PARTY_MEMBER_DISABLE",
-        }, 1, "InstanceDifficultyOnEvent")
-    else
-        self:RegisterBucketEvent({
-            "UPDATE_INSTANCE_INFO",
-            "PARTY_MEMBER_ENABLE",
-            "PARTY_MEMBER_DISABLE",
-        }, 1, "InstanceDifficultyOnEvent")
-    end
-
-    if RealUI.compatRelease then
-        -- Queue
-        self:RegisterEvent("LFG_UPDATE", "GetLFGQueue")
-        self:RegisterEvent("LFG_PROPOSAL_SHOW", "GetLFGQueue")
-        self:RegisterEvent("LFG_QUEUE_STATUS_UPDATE", "GetLFGQueue")
-        self:RegisterEvent("LFG_LIST_APPLICANT_UPDATED", "GetLFGList")
-        self:RegisterEvent("LFG_LIST_ACTIVE_ENTRY_UPDATE", "GetLFGList")
-        self:GetLFGList("OnEnable", true)
-    end
+    self:RegisterBucketEvent({
+        "UPDATE_INSTANCE_INFO",
+        "PARTY_MEMBER_ENABLE",
+        "PARTY_MEMBER_DISABLE",
+    }, 1, "InstanceDifficultyOnEvent")
 end
 
 --------------------------
@@ -1618,91 +1340,6 @@ local function CreateFrames()
     MMFrames.config:SetScript("OnLeave", Config_OnLeave)
     MMFrames.config:SetScript("OnMouseDown", Config_OnMouseDown)
 
-    if RealUI.compatRelease then
-        -- Tracking Button
-        MMFrames.tracking = CreateButton("MinimapAdv_Tracking", Textures.Tracking, 3)
-        MMFrames.tracking:SetScript("OnEnter", Tracking_OnEnter)
-        MMFrames.tracking:SetScript("OnLeave", Tracking_OnLeave)
-        MMFrames.tracking:SetScript("OnMouseDown", Tracking_OnMouseDown)
-
-        local menu = LDD:NewMenu(MMFrames.tracking, "RealUIMinimapTrackingDropDown")
-        menu:SetAnchor("TOPLEFT", MMFrames.tracking, "BOTTOMLEFT", 5, -5)
-        menu:SetStyle("REALUI")
-        MMFrames.tracking.dropdown = menu
-
-        local menuList = {
-            {text = _G.MINIMAP_TRACKING_NONE,
-                checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive,
-                func = _G.ClearAllTracking
-            },
-        }
-        do
-            local name, texture, category, nested, numTracking
-            local count = _G.GetNumTrackingTypes()
-            local classToken = RealUI.charInfo.class.token
-
-            local hunterTracking
-            if classToken == "HUNTER" then --only show hunter dropdown for hunters
-                numTracking = 0
-                -- make sure there are at least two options in dropdown
-                for id = 1, count do
-                    _, _, _, category, nested = _G.GetTrackingInfo(id)
-                    if (nested == _G.HUNTER_TRACKING and category == "spell") then
-                        numTracking = numTracking + 1
-                    end
-                end
-                if numTracking > 1 then
-                    hunterTracking = {
-                        text = _G.HUNTER_TRACKING_TEXT,
-                        menu = {}
-                    }
-                    tinsert(menuList, hunterTracking)
-                end
-            end
-
-            local townsfolk = {
-                text = _G.TOWNSFOLK_TRACKING_TEXT,
-                menu = {}
-            }
-            tinsert(menuList, townsfolk)
-
-            for id = 1, count do
-                name, texture, _, category, nested  = _G.GetTrackingInfo(id)
-                local info = {
-                    text = name,
-                    icon = texture,
-                    checked = function(self)
-                        local _, _, active = _G.GetTrackingInfo(id)
-                        return active
-                    end,
-                    func = function(self)
-                        local state = not self:GetCheckedState()
-                        self:SetCheckedState(state)
-                        _G.SetTracking(id, state)
-                    end,
-                    keepShown = true
-                }
-
-                if category == "spell" then
-                    info.iconTexCoords = {0.0625, 0.9, 0.0625, 0.9}
-                else
-                    info.iconTexCoords = {0, 1, 0, 1}
-                end
-
-                if (nested < 0 or -- this tracking shouldn't be nested
-                        (nested == _G.HUNTER_TRACKING and classToken ~= "HUNTER") or
-                        (numTracking == 1 and category == "spell")) then -- this is a hunter tracking ability, but you only have one
-                    tinsert(menuList, info)
-                elseif nested == _G.TOWNSFOLK then
-                    tinsert(townsfolk.menu, info)
-                elseif nested == _G.HUNTER_TRACKING and classToken == "HUNTER" then
-                    tinsert(hunterTracking.menu, info)
-                end
-            end
-        end
-        menu:AddLines(unpack(menuList))
-    end
-
     -- Farm Button
     MMFrames.farm = CreateButton("MinimapAdv_Farm", Textures.Expand, 4)
     MMFrames.farm:SetScript("OnEnter", Farm_OnEnter)
@@ -1769,36 +1406,7 @@ local function SetUpMinimapFrame()
     _G.Minimap:SetScript("OnEnter", Minimap_OnEnter)
     _G.Minimap:SetScript("OnLeave", Minimap_OnLeave)
 
-    if RealUI.compatRelease then
-        -- Hide/Move Minimap elements
-        _G.MiniMapTracking:Hide()
-
-        _G.QueueStatusMinimapButton:ClearAllPoints()
-        _G.QueueStatusMinimapButton:SetParent(_G.Minimap)
-        _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
-        _G.QueueStatusMinimapButtonBorder:Hide()
-
-        _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
-        local GLPButton = _G.GarrisonLandingPageMinimapButton
-        GLPButton:SetParent(_G.Minimap)
-        GLPButton:SetAlpha(0)
-        GLPButton:ClearAllPoints()
-        GLPButton:SetPoint("TOPRIGHT", 2, 2)
-        GLPButton:SetSize(32, 32)
-        GLPButton:HookScript("OnEvent", Garrison_OnEvent)
-        GLPButton:HookScript("OnLeave", Garrison_OnLeave)
-        GLPButton:SetScript("OnEnter", Garrison_OnEnter)
-        GLPButton.shouldShow = false
-
-        _G.MiniMapInstanceDifficulty:Hide()
-        _G.MiniMapInstanceDifficulty.Show = function() end
-        _G.GuildInstanceDifficulty:Hide()
-        _G.GuildInstanceDifficulty.Show = function() end
-        _G.MiniMapChallengeMode:Hide()
-        _G.MiniMapChallengeMode.Show = function() end
-    else
-        _G.MinimapToggleButton:Hide()
-    end
+    --_G.MinimapToggleButton:Hide()
 
     _G.MiniMapMailFrame:Hide()
     _G.MiniMapMailFrame.Show = function() end

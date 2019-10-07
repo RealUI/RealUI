@@ -84,6 +84,8 @@ do
         INVTYPE_SHIELD      = 20,
         INVTYPE_HOLDABLE    = 21,
 
+        INVTYPE_AMMO        = 22,
+
         INVTYPE_BAG         = 25
     }
     local func = function(v1, v2)
@@ -571,7 +573,7 @@ function MyContainer:OnCreate(name, settings)
     if tBag or tBank then
         -- Bag bar for changing bags
         local bagType = tBag and "backpack+bags" or "bank"
-        local numBags = tBag and 4 or 7
+        local numBags = tBag and _G.NUM_BAG_SLOTS or _G.NUM_BANKBAGSLOTS
 
         local bagButtons = self:SpawnPlugin("BagBar", bagType)
         bagButtons:SetSize(bagButtons:LayoutButtons("grid", numBags))
@@ -695,11 +697,7 @@ function MyContainer:OnCreate(name, settings)
 
     -- Item drop target
     if (tBag or tBank or tReagent) then
-        if cargBags.compatRelease then
-            self.DropTarget = _G.CreateFrame("ItemButton", self.name.."DropTarget", self)
-        else
-            self.DropTarget = _G.CreateFrame("Button", self.name.."DropTarget", self, "ItemButtonTemplate")
-        end
+        self.DropTarget = _G.CreateFrame("Button", self.name.."DropTarget", self, "ItemButtonTemplate")
         local dtNT = _G[self.DropTarget:GetName().."NormalTexture"]
         if dtNT then dtNT:SetTexture(nil) end
 

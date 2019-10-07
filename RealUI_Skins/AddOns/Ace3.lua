@@ -18,11 +18,7 @@ local function SkinAceConfig()
     end
     if AceCD.popup then
         local popup = AceCD.popup
-        if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE then
-            Skin.DialogBorderDarkTemplate(popup:GetChildren())
-        else
-            Base.SetBackdrop(popup)
-        end
+        Skin.DialogBorderDarkTemplate(popup:GetChildren())
 
         popup.accept:SetNormalTexture("")
         popup.accept:SetPushedTexture("")

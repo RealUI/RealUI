@@ -257,9 +257,6 @@ function Implementation:Init()
     self:RegisterEvent("ITEM_LOCK_CHANGED", self, self.ITEM_LOCK_CHANGED)
     self:RegisterEvent("GET_ITEM_INFO_RECEIVED", self, self.GET_ITEM_INFO_RECEIVED)
     self:RegisterEvent("PLAYERBANKSLOTS_CHANGED", self, self.PLAYERBANKSLOTS_CHANGED)
-    if cargBags.compatRelease then
-        self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED", self, self.PLAYERREAGENTBANKSLOTS_CHANGED)
-    end
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", self, self.UNIT_QUEST_LOG_CHANGED)
     self:RegisterEvent("BAG_CLOSED", self, self.BAG_CLOSED)
 end
@@ -395,18 +392,18 @@ function Implementation:GetItemInfo(bagID, slotID)
             item.affix2 = tonumber(affix2)
             item.affix3 = tonumber(affix3)
         else
-            local itemID, itemTexture, stackCount, equipLoc, sellPrice, _
-            name, _, rarity, level, minLevel, type, subType, stackCount, equipLoc, itemTexture, sellPrice, typeID, subTypeID = _G.GetItemInfo(link)
+            local itemID, itemTexture, stackCount, sellPrice, _
+            name, _, rarity, level, minLevel, type, subType, stackCount, _, itemTexture, sellPrice, typeID, subTypeID = _G.GetItemInfo(link)
             if name then
                 item.stackCount = stackCount
                 item.sellPrice = sellPrice
             else
-                itemID, type, subType, equipLoc, itemTexture, typeID, subTypeID = _G.GetItemInfoInstant(link)
+                itemID, type, subType, _, itemTexture, typeID, subTypeID = _G.GetItemInfoInstant(link)
                 mustGather = true
             end
 
-            if cargBags.compatRelease and typeID == _G.LE_ITEM_CLASS_QUESTITEM then
-                item.isQuestItem, item.questID, item.questActive = _G.GetContainerItemQuestInfo(bagID, slotID)
+            if typeID == _G.LE_ITEM_CLASS_QUESTITEM then
+                item.isQuestItem = true
             end
             if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
                 level = _G.RealUI.GetItemLevel(link)
@@ -414,11 +411,6 @@ function Implementation:GetItemInfo(bagID, slotID)
 
             id = id or itemID
             texture = texture or itemTexture
-
-            item.equipLoc = equipLoc
-            if cargBags.compatRelease then
-                item.isInSet, item.setName = _G.GetContainerItemEquipmentSetInfo(bagID, slotID)
-            end
         end
     end
 

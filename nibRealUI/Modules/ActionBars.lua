@@ -207,28 +207,6 @@ function ActionBars:ApplyABSettings(tag)
     if BT4ActionBars then BT4ActionBars:ApplyConfig() end
 
     ----
-    -- Vehicle Bar
-    ----
-    local vbX, vbY = -36, -59.5
-
-    if RealUI.compatRelease then
-        -- Set Position
-        local profileVehicle = BT4DB["namespaces"]["Vehicle"]["profiles"][prof]
-        if profileVehicle then
-            profileVehicle["position"] = {
-                ["x"] = vbX,
-                ["y"] = vbY,
-                ["point"] = "TOPRIGHT",
-                ["scale"] = 0.84,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-        end
-        local BT4Vehicle = BT4:GetModule("Vehicle", true)
-        if BT4Vehicle then BT4Vehicle:ApplyConfig() end
-    end
-
-    ----
     -- Pet Bar
     ----
     if barSettings.moveBars.pet then
@@ -266,45 +244,6 @@ function ActionBars:ApplyABSettings(tag)
             local BT4PetBar = BT4:GetModule("PetBar", true)
             if BT4PetBar then BT4PetBar:ApplyConfig() end
         -- end
-    end
-
-    ----
-    -- Extra Action Bar
-    ----
-    if RealUI.compatRelease and barSettings.moveBars.eab then
-        local eabX, eabY
-
-        -- Calculate X, Y
-        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
-        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 61
-
-        local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
-        if profileEAB then
-            profileEAB["position"] = {
-                ["y"] = eabY,
-                ["x"] = eabX,
-                ["point"] = "BOTTOM",
-                ["scale"] = 0.985,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-        end
-        local BT4EAB = BT4:GetModule("ExtraActionBar", true)
-        if BT4EAB then BT4EAB:ApplyConfig() end
-
-        local profileZAB = BT4DB["namespaces"]["ZoneAbilityBar"]["profiles"][prof]
-        if profileZAB then
-            profileZAB["position"] = {
-                ["y"] = eabY,
-                ["x"] = -(eabX + 64),
-                ["point"] = "BOTTOM",
-                ["scale"] = 0.985,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-        end
-        local BT4ZAB = BT4:GetModule("ZoneAbilityBar", true)
-        if BT4ZAB then BT4ZAB:ApplyConfig() end
     end
 
     -- Stance Bar

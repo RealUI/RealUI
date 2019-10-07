@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next ipairs error assert min type
+-- luacheck: globals next ipairs error assert min type pcall
 -- luacheck: globals tinsert tremove wipe sort unpack
 
 -- Libs --

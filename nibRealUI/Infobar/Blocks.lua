@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals min max tonumber floor
--- luacheck: globals sort tinsert unpack wipe
+-- luacheck: globals sort tinsert tremove unpack wipe
 -- luacheck: globals next date strsplit type
 
 -- Libs --
@@ -500,7 +500,6 @@ end
 
 function Infobar:CreateBlocks()
     local dbc = Infobar.db.char
-    local ndbc = RealUI.db.char
 
     if not TextTableCellPrototype then
         iconFont = {
@@ -517,161 +516,69 @@ function Infobar:CreateBlocks()
 
     --[[ Static Blocks ]]--
     do  -- Start
-        local guildText
-        if _G.CommunitiesFrame_IsEnabled() then
-            guildText = _G.GUILD_AND_COMMUNITIES
-        elseif _G.IsInGuild() then
-            guildText = _G.GUILD
-        else
-            guildText = _G.LOOKINGFORGUILD
-        end
-
         local function ToggleUI(this, button, func, arg)
             if _G.InCombatLockdown() then return end
 
             _G[func](arg)
         end
 
-        local menuList
-        if RealUI.compatRelease then
-            menuList = {
-                {text = L["Start_Config"],
-                    func = function() RealUI.LoadConfig("HuD") end,
-                },
-                {text = L["General_Lock"],
-                    func = function()
-                        if Infobar.locked then
-                            Infobar:Unlock()
-                        else
-                            Infobar:Lock()
-                        end
-                    end,
-                    checked = function() return Infobar.locked end,
-                },
-                {isSpacer = true},
-                {text = _G.CHARACTER_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleCharacter", "PaperDollFrame"},
-                },
-                {text = _G.SPELLBOOK_ABILITIES_BUTTON,
-                    func = ToggleUI,
-                        -- ToggleSpellBook causes taint
-                    args = {"ToggleFrame", _G.SpellBookFrame},
-                },
-                {text = _G.TALENTS_BUTTON,
-                    func = function()
-                        if _G.InCombatLockdown() then return end
+        local menuList = {
+            {text = L["Start_Config"],
+                func = function() RealUI.LoadConfig("HuD") end,
+            },
+            {text = L["General_Lock"],
+                func = function()
+                    if Infobar.locked then
+                        Infobar:Unlock()
+                    else
+                        Infobar:Lock()
+                    end
+                end,
+                checked = function() return Infobar.locked end,
+            },
+            {isSpacer = true},
+            {text = _G.CHARACTER_BUTTON,
+                func = ToggleUI,
+                args = {"ToggleCharacter", "PaperDollFrame"},
+            },
+            {text = _G.SPELLBOOK_ABILITIES_BUTTON,
+                func = ToggleUI,
+                    -- ToggleSpellBook causes taint
+                args = {"ToggleFrame", _G.SpellBookFrame},
+            },
+            {text = _G.TALENTS_BUTTON,
+                func = function()
+                    if _G.InCombatLockdown() then return end
 
-                        if not _G.PlayerTalentFrame then
-                            _G.TalentFrame_LoadUI()
-                        end
+                    if not _G.TalentFrame then
+                        _G.TalentFrame_LoadUI()
+                    end
 
-                        _G.ShowUIPanel(_G.PlayerTalentFrame)
-                    end,
-                    disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
-                },
-                {text = _G.ACHIEVEMENT_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleAchievementFrame"},
-                },
-                {text = _G.QUESTLOG_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleQuestLog"},
-                },
-                {text = guildText,
-                    func = ToggleUI,
-                    args = {"ToggleGuildFrame"},
-                    disabled = _G.IsCommunitiesUIDisabledByTrialAccount(),
-                },
-                {text = _G.SOCIAL_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleFriendsFrame", 1},
-                },
-                {text = _G.DUNGEONS_BUTTON,
-                    func = ToggleUI,
-                    args = {"PVEFrame_ToggleFrame"},
-                    disabled = _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
-                },
-                {text = _G.COLLECTIONS,
-                    func = ToggleUI,
-                    args = {"ToggleCollectionsJournal"},
-                },
-                {text = _G.ADVENTURE_JOURNAL,
-                    func = ToggleUI,
-                    args = {"ToggleEncounterJournal"},
-                },
-                {text = _G.BLIZZARD_STORE,
-                    func = ToggleUI,
-                    args = {"ToggleStoreUI"},
-                },
-                {text = _G.HELP_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleHelpFrame"},
-                },
-                {isSpacer = true},
-                {text = _G.CANCEL,
-                    func = function() LDD:CloseAll() end,
-                },
-            }
-        else
-            menuList = {
-                {text = L["Start_Config"],
-                    func = function() RealUI.LoadConfig("HuD") end,
-                },
-                {text = L["General_Lock"],
-                    func = function()
-                        if Infobar.locked then
-                            Infobar:Unlock()
-                        else
-                            Infobar:Lock()
-                        end
-                    end,
-                    checked = function() return Infobar.locked end,
-                },
-                {isSpacer = true},
-                {text = _G.CHARACTER_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleCharacter", "PaperDollFrame"},
-                },
-                {text = _G.SPELLBOOK_ABILITIES_BUTTON,
-                    func = ToggleUI,
-                        -- ToggleSpellBook causes taint
-                    args = {"ToggleFrame", _G.SpellBookFrame},
-                },
-                {text = _G.TALENTS,
-                    func = function()
-                        if _G.InCombatLockdown() then return end
-
-                        if not _G.PlayerTalentFrame then
-                            _G.TalentFrame_LoadUI()
-                        end
-
-                        _G.ShowUIPanel(_G.PlayerTalentFrame)
-                    end,
-                    disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
-                },
-                {text = _G.QUESTLOG_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleQuestLog"},
-                },
-                {text = _G.SOCIAL_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleFriendsFrame", 1},
-                },
-                {text = _G.WORLDMAP_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleWorldMap"},
-                },
-                {text = _G.HELP_BUTTON,
-                    func = ToggleUI,
-                    args = {"ToggleHelpFrame"},
-                },
-                {isSpacer = true},
-                {text = _G.CANCEL,
-                    func = function() LDD:CloseAll() end,
-                },
-            }
-        end
+                    if _G.TalentFrame:IsShown() then
+                        _G.HideUIPanel(_G.TalentFrame)
+                    else
+                        _G.ShowUIPanel(_G.TalentFrame)
+                    end
+                end,
+                disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
+            },
+            {text = _G.QUESTLOG_BUTTON,
+                func = ToggleUI,
+                args = {"ToggleQuestLog"},
+            },
+            {text = _G.SOCIAL_BUTTON,
+                func = ToggleUI,
+                args = {"ToggleFriendsFrame", 1},
+            },
+            {text = _G.HELP_BUTTON,
+                func = ToggleUI,
+                args = {"ToggleHelpFrame"},
+            },
+            {isSpacer = true},
+            {text = _G.CANCEL,
+                func = function() LDD:CloseAll() end,
+            },
+        }
 
         local errors
         local function ShowBugIcon(menu, callback, errorObject)
@@ -758,10 +665,6 @@ function Infobar:CreateBlocks()
             return timeFormat, hour, min, suffix
         end
 
-        local events = {}
-        if RealUI.compatRelease then
-            tinsert(events, "CALENDAR_UPDATE_EVENT_LIST")
-        end
         LDB:NewDataObject("clock", {
             name = _G.TIMEMANAGER_TITLE,
             type = "RealUI",
@@ -777,19 +680,6 @@ function Infobar:CreateBlocks()
                 _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
                 setTimeOptions(block)
 
-                local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                Scale.Point(alert, "BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
-                Scale.Point(alert.Arrow, "TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
-                alert.CloseButton:SetScript("OnClick", function(btn)
-                    alert:Hide()
-                    alert.isHidden = true
-                end)
-                alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                Scale.Width(alert.Text, 145)
-
-                Scale.Size(alert, 177, alert.Text:GetStringHeight() + 42)
-                block.alert = alert
-
                 Infobar:ScheduleRepeatingTimer(function()
                     local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
                     block.dataObj.value = timeFormat:format(hour, min)
@@ -798,21 +688,7 @@ function Infobar:CreateBlocks()
             end,
             OnClick = function(block, ...)
                 Infobar:debug("Clock: OnClick", block.side, ...)
-                if RealUI.compatRelease then
-                    if _G.IsAltKeyDown() then
-                        _G.ToggleTimeManager()
-                    else
-                        if _G.IsAddOnLoaded("GroupCalendar5") then
-                            if _G.GroupCalendar.UI.Window:IsShown() then
-                                _G.HideUIPanel(_G.GroupCalendar.UI.Window)
-                            else
-                                _G.ShowUIPanel(_G.GroupCalendar.UI.Window)
-                            end
-                        else
-                            _G.ToggleCalendar()
-                        end
-                    end
-                end
+                _G.TimeManager_Toggle()
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
@@ -820,7 +696,6 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                local lineNum, colNum
 
                 tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
 
@@ -841,45 +716,8 @@ function Infobar:CreateBlocks()
                     tooltip:AddLine(L["Clock_CalenderInvites"], block.invites)
                 end
 
-                if RealUI.compatRelease then
-                    -- World Bosses
-                    local numSavedBosses = _G.GetNumSavedWorldBosses()
-                    if (_G.UnitLevel("player") >= 90) and (numSavedBosses > 0) then
-                        tooltip:AddLine(" ")
-                        lineNum, colNum = tooltip:AddHeader()
-                        tooltip:SetCell(lineNum, colNum, _G.LFG_LIST_BOSSES_DEFEATED, nil, 2)
-                        for i = 1, numSavedBosses do
-                            local bossName, _, bossReset = _G.GetSavedWorldBossInfo(i)
-                            tooltip:AddLine(bossName, _G.format(_G.SecondsToTimeAbbrev(bossReset)))
-                        end
-                    end
-
-                    tooltip:AddLine(" ")
-
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
-                    tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
-
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
-                    tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
-                end
                 tooltip:Show()
             end,
-            OnEvent = function(block, event, ...)
-                --Infobar:debug("Clock: OnEvent", event, ...)
-                if RealUI.compatRelease then
-                    local alert = block.alert
-                    block.invites = _G.C_Calendar.GetNumPendingInvites()
-                    if block.invites > 0 and not alert.isHidden then
-                        alert:Show()
-                        alert.isHidden = false
-                    else
-                        alert:Hide()
-                    end
-                end
-            end,
-            events = events,
         })
     end
 
@@ -996,11 +834,7 @@ function Infobar:CreateBlocks()
                     UpdateRanks()
 
                     if _G.GetNumGuildMembers() == 0 then
-                        if RealUI.compatRelease then
-                            _G.C_GuildInfo.GuildRoster()
-                        else
-                            _G.GuildRoster()
-                        end
+                        _G.GuildRoster()
                     end
                 else
                     local info = Infobar:GetBlockInfo(block.name, block.dataObj)
@@ -1085,9 +919,9 @@ function Infobar:CreateBlocks()
                     UpdateRanks()
                 else
                     if event == "GUILD_ROSTER_UPDATE" then
-                        local canRequestRosterUpdate = ...;
+                        local canRequestRosterUpdate = ...
                         if canRequestRosterUpdate then
-                            _G.C_GuildInfo.GuildRoster()
+                            _G.GuildRoster()
                         end
                     end
 
@@ -1236,139 +1070,69 @@ function Infobar:CreateBlocks()
 
                 -- Battle.net Friends
                 for i = 1, _G.BNGetNumFriends() do
-                    if RealUI.compatRelease then
-                        local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(i)
-                        if accountInfo and accountInfo.gameAccountInfo.isOnline then
-                            local gameAccountInfo = accountInfo.gameAccountInfo
-                            local client = gameAccountInfo.clientProgram ~= "" and gameAccountInfo.clientProgram or nil
-                            local noteText = accountInfo.note
-                            local characterName = gameAccountInfo.characterName
-                            local class = gameAccountInfo.className or ""
-                            local zoneName = gameAccountInfo.areaName or ""
-                            local level = gameAccountInfo.characterLevel or ""
-                            local gameText = gameAccountInfo.richPresence or ""
+                    local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
+                    if isOnline then
+                        local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
 
-                            local name
-                            if accountInfo.accountName then
-                                name = accountInfo.accountName
-                                characterName = _G.BNet_GetValidatedCharacterName(characterName, accountInfo.battleTag, client)
-                            else
-                                name = _G.UNKNOWN
-                            end
-
-                            if characterName then
-                                if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
-                                    name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
-                                else
-                                    if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
-                                        name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
-                                    else
-                                        name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
-                                    end
-                                end
-                            end
-
-                            if accountInfo.isAFK or gameAccountInfo.isGameAFK then
-                                name = PlayerStatus[1] .. name
-                            elseif accountInfo.isDND or gameAccountInfo.isGameBusy then
-                                name = PlayerStatus[2] .. name
-                            end
-                            name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
-
-                            -- Difficulty color levels
-                            local lvl = tonumber(level)
-                            if lvl then
-                                local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
-                                level = ("%s%d|r"):format(color, level)
-                            end
-
-                            local status
-                            if client == _G.BNET_CLIENT_WOW then
-                                if zoneName and zoneName ~= "" then
-                                    status = zoneName
-                                else
-                                    status = _G.UNKNOWN
-                                end
-                            else
-                                status = gameText
-                            end
-
-                            if noteText == "" then noteText = nil end
-
-
-                            tinsert(friendsData, {
-                                id = i,
-                                info = {
-                                    name, level, status, noteText
-                                },
-                                meta = {
-                                    i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID}
-                                }
-                            })
+                        local name
+                        if accountName then
+                            name = accountName
+                            characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
+                        else
+                            name = _G.UNKNOWN
                         end
-                    else
-                        local bnetIDAccount, accountName, battleTag, _, characterName, bnetIDGameAccount, client, isOnline, _, isBnetAFK, isBnetDND, _, noteText = _G.BNGetFriendInfo(i)
-                        if isOnline then
-                            local _, _, _, _, _, _, _, class, _, zoneName, level, gameText, _, _, _, _, _, isGameAFK, isGameDND = _G.BNGetGameAccountInfo(bnetIDGameAccount)
 
-                            local name
-                            if accountName then
-                                name = accountName
-                                characterName = _G.BNet_GetValidatedCharacterName(characterName, battleTag, client)
-                            else
-                                name = _G.UNKNOWN
-                            end
-
-                            if characterName then
-                                if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
-                                    name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
-                                else
-                                    if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
-                                        name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
-                                    else
-                                        name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
-                                    end
-                                end
-                            end
-
-                            if isBnetAFK or isGameAFK then
-                                name = PlayerStatus[1] .. name
-                            elseif isBnetDND or isGameDND then
-                                name = PlayerStatus[2] .. name
-                            end
-                            name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
-
-                            -- Difficulty color levels
-                            local lvl = tonumber(level)
-                            if lvl then
-                                local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
-                                level = ("%s%d|r"):format(color, level)
-                            end
-
-                            local status
-                            if client == _G.BNET_CLIENT_WOW then
-                                if ( not zoneName or zoneName == "" ) then
-                                    status = _G.UNKNOWN
-                                else
-                                    status = zoneName
+                        if characterName then
+                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(bnetIDGameAccount) then
+                                local classToken = ClassLookup[class]
+                                if classToken then
+                                    name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[classToken].colorStr, characterName)
                                 end
                             else
-                                status = gameText
+                                if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName.._G.CANNOT_COOPERATE_LABEL)
+                                else
+                                    name = nameFormat:format(bnetFriendColor, name, "ff7b8489", characterName)
+                                end
                             end
-
-                            if noteText == "" then noteText = nil end
-
-
-                            tinsert(friendsData, {
-                                id = i,
-                                info = {
-                                    name, level, status, noteText
-                                },
-                                meta = {
-                                    i, lvl, {characterName, accountName, bnetIDAccount}
-                                }
-                            })
                         end
+
+                        if isBnetAFK or isGameAFK then
+                            name = PlayerStatus[1] .. name
+                        elseif isBnetDND or isGameDND then
+                            name = PlayerStatus[2] .. name
+                        end
+                        name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
+
+                        -- Difficulty color levels
+                        local lvl = tonumber(level)
+                        if lvl then
+                            local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
+                            level = ("%s%d|r"):format(color, level)
+                        end
+
+                        local status
+                        if client == _G.BNET_CLIENT_WOW then
+                            if ( not zoneName or zoneName == "" ) then
+                                status = _G.UNKNOWN
+                            else
+                                status = zoneName
+                            end
+                        else
+                            status = gameText
+                        end
+
+                        if noteText == "" then noteText = nil end
+
+                        tinsert(friendsData, {
+                            id = i,
+                            info = {
+                                name, level, status, noteText
+                            },
+                            meta = {
+                                i, lvl, {characterName, accountName, bnetIDAccount}
+                            }
+                        })
                     end
                 end
 
@@ -1446,10 +1210,8 @@ function Infobar:CreateBlocks()
             {slot = "Back", hasDura = false},
             {slot = "MainHand", hasDura = true},
             {slot = "SecondaryHand", hasDura = true},
+            {slot = "Ranged", hasDura = true},
         }
-        if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC then
-            tinsert(itemSlots, {slot = "Ranged", hasDura = true})
-        end
 
         LDB:NewDataObject("durability", {
             name = _G.DURABILITY,
@@ -1464,11 +1226,9 @@ function Infobar:CreateBlocks()
                     alert:Hide()
                     alert.isHidden = true
                 end)
-                if _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC then
-                    -- Classic FrameXML/MainMenuBarMicroButtons.lua is missing constant MAIN_MENU_MICRO_ALERT_PRIORITY called in MicroButtonAlertTemplate_OnHide
-                    local function noop() end
-                    alert:SetScript("OnHide", noop)
-                end
+
+                -- Classic FrameXML/MainMenuBarMicroButtons.lua is missing constant MAIN_MENU_MICRO_ALERT_PRIORITY called in MicroButtonAlertTemplate_OnHide
+                alert:SetScript("OnHide", _G.nop)
 
                 Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
                 Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
@@ -1547,16 +1307,12 @@ function Infobar:CreateBlocks()
     end
 
     do -- Progress Watch
-        local C_AzeriteItem = _G.C_AzeriteItem
-        local azeriteItem, azeriteItemLocation
         local watchStates = {}
         watchStates["xp"] = {
             GetNext = function(XP)
                 if watchStates["rep"]:IsValid() then
                     return "rep"
-                elseif watchStates["artifact"] and watchStates["artifact"]:IsValid() then
-                    return "artifact"
-                elseif watchStates["honor"] and watchStates["honor"]:IsValid() then
+                elseif watchStates["honor"]:IsValid() then
                     return "honor"
                 elseif watchStates["xp"]:IsValid() then
                     return "xp"
@@ -1583,11 +1339,7 @@ function Infobar:CreateBlocks()
                 local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
                 tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                 tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
-                if RealUI.compatRelease and _G.IsXPUserDisabled() then
-                    lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
-                    tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                    tooltip:SetCellTextColor(lineNum, 2, Color.gray:GetRGB())
-                elseif restXP then
+                if restXP then
                     lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
                     tooltip:SetLineTextColor(lineNum, Color.grayLight:GetRGB())
                 end
@@ -1600,9 +1352,7 @@ function Infobar:CreateBlocks()
         watchStates["rep"] = {
             hint = L["Progress_OpenRep"],
             GetNext = function(Rep)
-                if watchStates["artifact"] and watchStates["artifact"]:IsValid() then
-                    return "artifact"
-                elseif watchStates["honor"] and watchStates["honor"]:IsValid() then
+                if watchStates["honor"]:IsValid() then
                     return "honor"
                 elseif watchStates["xp"]:IsValid() then
                     return "xp"
@@ -1613,34 +1363,13 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Rep)
-                local name, reaction, minRep, maxRep, curRep, factionID = _G.GetWatchedFactionInfo()
+                local name, reaction, minRep, maxRep, curRep = _G.GetWatchedFactionInfo()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
 
-                local friendshipID = _G.GetFriendshipReputation(factionID)
-                if friendshipID then
-                    local _, friendRep, _, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = _G.GetFriendshipReputation(factionID)
-                    if nextFriendThreshold then
-                        minRep, maxRep, curRep = friendThreshold, nextFriendThreshold, friendRep
-                    else
-                        -- max rank, make it look like a full bar
-                        minRep, maxRep, curRep = 0, 1, 1
-                    end
-                    Rep.colorIndex = 5     -- always color friendships green
-                    Rep.factionStandingtext = friendTextLevel
-                elseif _G.C_Reputation.IsFactionParagon(factionID) then
-                    local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
-                    maxRep = threshold
-                    curRep = currentValue % threshold
-                    if hasRewardPending then
-                        curRep = curRep + threshold
-                    end
-                    return curRep, maxRep, name, hasRewardPending
-                else
-                    if reaction == _G.MAX_REPUTATION_REACTION then
-                        -- We're exalted
-                        minRep = 0
-                    end
+                if reaction == _G.MAX_REPUTATION_REACTION then
+                    -- We're exalted
+                    minRep = 0
                 end
 
                 -- Normalize values
@@ -1679,118 +1408,56 @@ function Infobar:CreateBlocks()
                 _G.ToggleCharacter("ReputationFrame")
             end
         }
-        if RealUI.compatRelease then
-            watchStates["artifact"] = {
-                hint = L["Progress_OpenArt"],
-                GetNext = function(Art)
-                    if watchStates["honor"]:IsValid() then
-                        return "honor"
-                    elseif watchStates["xp"]:IsValid() then
-                        return "xp"
-                    elseif watchStates["rep"]:IsValid() then
-                        return "rep"
-                    elseif watchStates["artifact"]:IsValid() then
-                        return "artifact"
-                    else
-                        return nil
-                    end
-                end,
-                GetStats = function(Art)
-                    -- /dump C_AzeriteItem.GetAzeriteItemXPInfo(C_AzeriteItem.FindActiveAzeriteItem())
-                    azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem()
-
-                    if azeriteItemLocation then
-                        if not azeriteItem then
-                            azeriteItem = _G.Item:CreateFromItemLocation(azeriteItemLocation)
-                        end
-
-                        local xp, totalLevelXP, currentLevel
-                        if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then
-                            xp, totalLevelXP = 0, 1
-                            currentLevel = -1
-                        else
-                            xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
-                            currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItemLocation)
-                        end
-
-                        return xp, totalLevelXP, azeriteItem:GetItemName() or "", currentLevel
-                    end
-                end,
-                GetColor = function(Art)
-                    return _G.ARTIFACT_BAR_COLOR:GetRGB()
-                end,
-                IsValid = function(Art)
-                    return C_AzeriteItem.HasActiveAzeriteItem() and not C_AzeriteItem.IsAzeriteItemAtMaxLevel()
-                end,
-                SetTooltip = function(Art, tooltip)
-                    local xp, totalLevelXP, name, currentLevel = Art:GetStats()
-                    local xpToNextLevel = totalLevelXP - xp
-
-                    local title
-                    if currentLevel == -1 then
-                        title = _G.HEART_OF_AZEROTH_MISSING_ERROR
-                    else
-                        title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
-                    end
-
-                    local lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, title, nil, nil, 2)
-                    tooltip:SetCellTextColor(lineNum, colNum, Color.orange:GetRGB())
-
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, _G.AZERITE_POWER_TOOLTIP_BODY:format(name), nil, nil, 2)
-                    tooltip:SetCellTextColor(lineNum, colNum, Color.grayLight:GetRGB())
-
-                    tooltip:AddLine(" ")
-                end,
-                OnClick = function(Art)
-                    _G.ToggleCharacter("PaperDollFrame")
+        watchStates["honor"] = {
+            hint = L["Progress_OpenHonor"],
+            GetNext = function(Honor)
+                if watchStates["xp"]:IsValid() then
+                    return "xp"
+                elseif watchStates["rep"]:IsValid() then
+                    return "rep"
+                elseif watchStates["honor"]:IsValid() then
+                    return "honor"
+                else
+                    return nil
                 end
-            }
-            watchStates["honor"] = {
-                hint = L["Progress_OpenHonor"],
-                GetNext = function(Honor)
-                    if watchStates["xp"]:IsValid() then
-                        return "xp"
-                    elseif watchStates["rep"]:IsValid() then
-                        return "rep"
-                    elseif watchStates["artifact"]:IsValid() then
-                        return "artifact"
-                    elseif watchStates["honor"]:IsValid() then
-                        return "honor"
-                    else
-                        return nil
-                    end
-                end,
-                GetStats = function(Honor)
-                    return _G.UnitHonor("player"), _G.UnitHonorMax("player")
-                end,
-                GetColor = function(Honor, isRested)
-                    if isRested then
-                        return 1.0, 0.71, 0
-                    else
-                        return 1.0, 0.24, 0
-                    end
-                end,
-                IsValid = function(Honor)
-                    return true
-                end,
-                SetTooltip = function(Honor, tooltip)
-                    local minHonor, maxHonor = Honor:GetStats()
-                    local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
-
-                    local level = _G.UnitHonorLevel("player")
-                    local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
-                    tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                    tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
-
-                    tooltip:AddLine(" ")
-                end,
-                OnClick = function(Honor)
-                    _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end,
+            GetStats = function(Honor)
+                return _G.GetPVPRankProgress()
+            end,
+            GetColor = function(Honor, isRested)
+                if isRested then
+                    return 1.0, 0.71, 0
+                else
+                    return 1.0, 0.24, 0
                 end
-            }
-        end
+            end,
+            IsValid = function(Honor)
+                return _G.HonorSystemEnabled()
+            end,
+            SetTooltip = function(Honor, tooltip)
+                local minHonor, maxHonor = Honor:GetStats()
+                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+
+                local rankName, rankNumber = _G.GetPVPRankInfo(_G.UnitPVPRank("player"))
+                if not rankName then
+                    rankName = _G.NONE
+                end
+
+                local rankIcon = CreateTextureMarkup(([[Interface\PvPRankBadges\PvPRank]]..rankNumber), 32, 32, 16, 16, 0, 1, 0, 1)
+                local lineNum = tooltip:AddLine(_G.HONOR.._G.HEADER_COLON, rankIcon.." "..rankName)
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
+
+                lineNum = tooltip:AddLine(rankName, honorStatus)
+                tooltip:SetCellTextColor(lineNum, 1, Color.grayLight:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
+
+                tooltip:AddLine(" ")
+            end,
+            OnClick = function(Honor)
+                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+            end
+        }
 
         function Infobar.frame.watch:UpdateColors()
             local alpha = _G.Lerp(0.4, 0.5, (Infobar.db.profile.bgAlpha / 1))
@@ -1868,27 +1535,6 @@ function Infobar:CreateBlocks()
                 Infobar:HideBlock(block.name, block.dataObj, block)
             end
         end
-
-        local events = {
-            "UPDATE_EXPANSION_LEVEL",
-            "PLAYER_LEVEL_UP",
-            "UPDATE_EXHAUSTION",
-
-            "PLAYER_XP_UPDATE",
-            "PLAYER_UPDATE_RESTING",
-            "DISABLE_XP_GAIN",
-            "ENABLE_XP_GAIN",
-
-            "UPDATE_FACTION",
-        }
-        if RealUI.compatRelease then
-            tinsert(events, "AZERITE_ITEM_EXPERIENCE_CHANGED")
-            tinsert(events, "AZERITE_ITEM_POWER_LEVEL_CHANGED")
-            tinsert(events, "AZERITE_EMPOWERED_ITEM_SELECTION_UPDATED")
-            tinsert(events, "HONOR_XP_UPDATE")
-            tinsert(events, "HONOR_LEVEL_UPDATE")
-        end
-
 
         LDB:NewDataObject("progress", {
             name = L["Progress"],
@@ -1974,7 +1620,18 @@ function Infobar:CreateBlocks()
 
                 UpdateProgress(block)
             end,
-            events = events,
+            events = {
+                "UPDATE_EXPANSION_LEVEL",
+                "PLAYER_LEVEL_UP",
+                "UPDATE_EXHAUSTION",
+
+                "PLAYER_XP_UPDATE",
+                "PLAYER_UPDATE_RESTING",
+                "DISABLE_XP_GAIN",
+                "ENABLE_XP_GAIN",
+
+                "UPDATE_FACTION",
+            },
         })
     end
 
@@ -2064,212 +1721,13 @@ function Infobar:CreateBlocks()
         })
     end
 
-    if RealUI.compatRelease then
-        do -- Specialization
-            local C_EquipmentSet = _G.C_EquipmentSet
-            local specInfo, specLines = RealUI.charInfo.specs, {}
-            local equipmentSetIDs, equipmentSetInfos = {}, {}
-            local equipmentNeedsUpdate = false
-
-            local function Line_OnMouseUp(line, specIndex, button)
-                local tooltip = line:GetParent():GetParent():GetParent()
-                if button == "LeftButton" then
-                    if _G.IsAltKeyDown() then
-                        _G.SetLootSpecialization(specInfo[specIndex].id)
-                    else
-                        if not _G.InCombatLockdown() then
-                            if specIndex == specInfo.current.index then
-                                if dbc.specgear[specIndex] >= 0 then
-                                    _G.EquipmentManager_EquipSet(dbc.specgear[specIndex])
-                                end
-                            else
-                                _G.SetSpecialization(specIndex)
-                                if dbc.specgear[specIndex] >= 0 then
-                                    equipmentNeedsUpdate = dbc.specgear[specIndex]
-                                end
-                            end
-                        end
-                    end
-                elseif button == "RightButton" and #equipmentSetIDs > 0 then
-                    if _G.IsAltKeyDown() then
-                        dbc.specgear[specIndex] = -1
-                        tooltip:SetCell(specLines[specIndex], 2, "---")
-                    else
-                        local equipIndex
-                        if dbc.specgear[specIndex] < 0 then
-                            equipIndex = 1
-                        else
-                            equipIndex = _G.Wrap(equipmentSetInfos[dbc.specgear[specIndex]].index + 1, #equipmentSetIDs)
-                        end
-                        dbc.specgear[specIndex] = equipmentSetIDs[equipIndex]
-                        tooltip:SetCell(specLines[specIndex], 2, equipmentSetInfos[dbc.specgear[specIndex]].name)
-                    end
-                end
-            end
-
-            local function UpdateGearSets()
-                equipmentSetIDs = C_EquipmentSet.GetEquipmentSetIDs()
-                wipe(equipmentSetInfos)
-                for index = 1, #equipmentSetIDs do
-                    local equipName = C_EquipmentSet.GetEquipmentSetInfo(equipmentSetIDs[index])
-                    equipmentSetInfos[equipmentSetIDs[index]] = {
-                        name = equipName,
-                        index = index
-                    }
-                end
-
-                for specIndex = 1, #specInfo do
-                    if not equipmentSetInfos[dbc.specgear[specIndex]] then
-                        dbc.specgear[specIndex] = -1
-                    end
-                end
-            end
-            local function UpdateBlock(block)
-                block.dataObj.icon = specInfo[specInfo.current.index].icon
-                block.dataObj.text = specInfo[specInfo.current.index].name
-            end
-
-            local lootSpec, hintSpec, hintGear
-            local function Spec_TooltipOnUpdate(tooltip)
-                local numColumns = tooltip:GetColumnCount()
-                tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, numColumns)
-                tooltip:SetCell(hintGear, 1, nil, nil, numColumns)
-
-                if tooltip:IsMouseOver() then
-                    tooltip:SetCell(hintSpec, 1, L["Spec_ChangeSpec"], nil, numColumns)
-                    if #equipmentSetIDs > 0 then
-                        tooltip:SetCell(hintGear, 1, L["Spec_ChangeGear"], nil, numColumns)
-                        tooltip:SetCellTextColor(hintGear, 1, Color.green:GetRGB())
-                    end
-                else
-                    tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, numColumns)
-                end
-            end
-
-            LDB:NewDataObject("spec", {
-                name = _G.SPECIALIZATION,
-                type = "RealUI",
-                icon = specInfo[1].icon,
-                iconCoords = {.08, .92, .08, .92},
-                text = "",
-                OnEnable = function(block)
-                    Infobar:debug("spec: OnEnable", block.side)
-                    UpdateGearSets()
-                    UpdateBlock(block)
-                end,
-                OnEnter = function(block, ...)
-                    if qTip:IsAcquired(block) then return end
-                    --Infobar:debug("spec: OnEnter", block.side, ...)
-
-                    local tooltip = qTip:Acquire(block, 2, "LEFT", "LEFT")
-                    SetupTooltip(tooltip, block)
-                    tooltip:SetScript("OnUpdate", Spec_TooltipOnUpdate)
-                    local lineNum, colNum
-
-                    lineNum, colNum = tooltip:AddHeader()
-                    tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
-                    for specIndex = 1, #RealUI.charInfo.specs do
-                        if #equipmentSetIDs > 0 then
-                            tooltip:AddColumn("LEFT")
-                            local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
-                            lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", RealUI.db:GetDualSpecProfile(specIndex))
-                        else
-                            lineNum = tooltip:AddLine(specInfo[specIndex].name, RealUI.db:GetDualSpecProfile(specIndex))
-                        end
-
-                        tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
-                        specLines[specIndex] = lineNum
-                        if specIndex == specInfo.current.index then
-                            tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
-                        end
-                    end
-
-                    tooltip:AddLine(" ")
-                    lootSpec = tooltip:AddLine()
-                    hintSpec = tooltip:AddLine()
-                    hintGear = tooltip:AddLine()
-                    tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, tooltip:GetColumnCount())
-                    tooltip:SetCellTextColor(hintSpec, 1, Color.green:GetRGB())
-
-                    tooltip:Show()
-                end,
-                OnClick = function(block, ...)
-                    Infobar:debug("spec: OnClick", block.side, ...)
-                    _G.ToggleTalentFrame(_G.TalentMicroButton.suggestedTab)
-                end,
-                OnEvent = function(block, event, ...)
-                    Infobar:debug("spec: OnEvent", block.side, event, ...)
-                    if event == "EQUIPMENT_SETS_CHANGED" then
-                        UpdateGearSets()
-                    elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
-                        UpdateBlock(block)
-                        if ndbc.layout.spec[specInfo.current.index] ~= ndbc.layout.current then
-                            ndbc.layout.current = ndbc.layout.spec[specInfo.current.index]
-                            RealUI:UpdateLayout()
-                        end
-
-                        if equipmentNeedsUpdate then
-                            _G.EquipmentManager_EquipSet(equipmentNeedsUpdate)
-                            equipmentNeedsUpdate = false
-                        end
-                    end
-                end,
-                events = {
-                    "PLAYER_SPECIALIZATION_CHANGED",
-                    "EQUIPMENT_SETS_CHANGED",
-                    "EQUIPMENT_SWAP_FINISHED",
-                    "PLAYER_EQUIPMENT_CHANGED",
-                },
-            })
-        end
-    else
-        do -- Layout
-            local layout = {
-                L["Layout_DPSTank"],
-                L["Layout_Healing"]
-            }
-            local function UpdateBlock(block)
-                block.dataObj.text = layout[ndbc.layout.current]
-            end
-            LDB:NewDataObject("spec", {
-                name = L["Layout_Layout"],
-                type = "RealUI",
-                icon = fa["layout"],
-                iconFont = iconFont,
-                text = 1,
-                OnClick = function(block, ...)
-                    Infobar:debug("Layout: OnClick", block.side, ...)
-                    if ndbc.layout.current == 1 then
-                        ndbc.layout.current = 2
-                    else
-                        ndbc.layout.current = 1
-                    end
-                    RealUI:UpdateLayout()
-                    UpdateBlock(block)
-                end,
-                OnEnable = function(block, ...)
-                    UpdateBlock(block)
-                end,
-            })
-        end
-    end
-
     do -- Currency
         local GOLD_AMOUNT_STRING = "%s|cfffff226%s|r"
         local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
         local COPPER_AMOUNT_STRING = "%d|cffbf734f%s|r"
-        local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
         local charName = "%s |c%s%s|r"
 
         local currencyDB
-        local ignore = _G.LOCALE_koKR or _G.LOCALE_zhCN or _G.LOCALE_zhTW
-        local function ShortenCurrencyName(name)
-            if ignore then
-                return name
-            else
-                return name ~= nil and name:gsub("%l*%s*%p*", "") or "-"
-            end
-        end
         local function SplitMoney(money)
             if not money then return 0,0,0 end
             local gold = floor(money / (_G.COPPER_PER_SILVER * _G.SILVER_PER_GOLD))
@@ -2322,20 +1780,14 @@ function Infobar:CreateBlocks()
         local currencyStates = {}
         currencyStates["money"] = {
             GetNext = function(Money)
-                if RealUI.compatRelease then
-                    if currencyStates["token1"]:IsValid() then
-                        return "token1"
-                    elseif currencyStates["token2"]:IsValid() then
-                        return "token2"
-                    elseif currencyStates["token3"]:IsValid() then
-                        return "token3"
-                    elseif currencyStates["money"]:IsValid() then
-                        return "money"
-                    end
-                else
-                    if currencyStates["money"]:IsValid() then
-                        return "money"
-                    end
+                if currencyStates["token1"]:IsValid() then
+                    return "token1"
+                elseif currencyStates["token2"]:IsValid() then
+                    return "token2"
+                elseif currencyStates["token3"]:IsValid() then
+                    return "token3"
+                elseif currencyStates["money"]:IsValid() then
+                    return "money"
                 end
                 return nil
             end,
@@ -2366,55 +1818,6 @@ function Infobar:CreateBlocks()
             OnClick = function(Money)
             end
         }
-        for i = 1, (_G.MAX_WATCHED_TOKENS or 0) do
-            currencyStates["token"..i] = {
-                index = i,
-                GetNext = function(token)
-                    if i == 3 then
-                        return "money"
-                    else
-                        if currencyStates["token"..i+1]:IsValid() then
-                            return "token"..i+1
-                        else
-                            return "money"
-                        end
-                    end
-                end,
-                GetText = function(token)
-                    if token.id and RealUI.realmInfo.realmNormalized then
-                        return currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name][token.id] or 0
-                    else
-                        return false
-                    end
-                end,
-                GetIcon = function(token)
-                    return token.icon, ShortenCurrencyName(token.name)
-                end,
-                IsValid = function(token)
-                    return not not token.id
-                end,
-                OnClick = function(token)
-                end
-            }
-        end
-
-        local function UpdateTrackedCurrency(block)
-            if not RealUI.realmInfo.realmNormalized then return end
-            local changeIndex
-            for i = 1, (_G.MAX_WATCHED_TOKENS or 0) do
-                local token = currencyStates["token"..i]
-                local name, _, icon, currencyID = _G.GetBackpackCurrencyInfo(token.index)
-                if token.id ~= currencyID and not changeIndex then
-                    changeIndex = i
-                end
-
-                token.name = name
-                token.icon = icon
-                token.id = currencyID
-                currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyID
-            end
-            return changeIndex
-        end
 
         local function UpdateBlock(block)
             local icon, label = currencyStates[dbc.currencyState]:GetIcon()
@@ -2425,9 +1828,6 @@ function Infobar:CreateBlocks()
         end
 
         local function UpdateState(block)
-            if RealUI.compatRelease then
-                UpdateTrackedCurrency(block)
-            end
             local state = currencyStates[dbc.currencyState]:GetNext()
             Infobar:debug("check state", dbc.currencyState, state)
             dbc.currencyState = state
@@ -2453,52 +1853,20 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local hintLine
-        local function Currency_TooltipOnUpdate(tooltip)
-            if RealUI.compatRelease then
-                if tooltip:IsMouseOver() then
-                    tooltip:SetCell(hintLine, 1, L["Currency_EraseData"])
-                else
-                    tooltip:SetCell(hintLine, 1, L["Currency_Cycle"])
-                end
-            end
-        end
-
-        local tokens, tableWidth = {}, 250
+        local tableWidth = 125
         local currencyData = {}
-        local headerData
-        if RealUI.compatRelease then
-            headerData = {
-                info = {
-                    _G.NAME, _G.MONEY, _G.CURRENCY.." 1", _G.CURRENCY.." 2", _G.CURRENCY.." 3", L["Currency_UpdatedAbbr"]
-                },
-                justify = {
-                    "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
-                },
-                size = {
-                    "FILL", "FIT", "FIT", "FIT", "FIT", 0.15
-                }
+        local headerData = {
+            info = {
+                _G.NAME, _G.MONEY, L["Currency_UpdatedAbbr"]
+            },
+            justify = {
+                "LEFT", "RIGHT", "LEFT"
+            },
+            size = {
+                "FILL", "FIT", 0.2
             }
-        else
-            headerData = {
-                info = {
-                    _G.NAME, _G.MONEY, L["Currency_UpdatedAbbr"]
-                },
-                justify = {
-                    "LEFT", "RIGHT", "LEFT"
-                },
-                size = {
-                    "FILL", "FIT", 0.15
-                }
-            }
-        end
-
-        local events = {
-            "PLAYER_MONEY",
         }
-        if RealUI.compatRelease then
-            tinsert(events, "CURRENCY_DISPLAY_UPDATE")
-        end
+
         LDB:NewDataObject("currency", {
             name = _G.CURRENCY,
             type = "RealUI",
@@ -2509,36 +1877,9 @@ function Infobar:CreateBlocks()
                 Infobar:debug("currency: OnEnable", block.side)
                 if RealUI.realmInfo.realmNormalized then
                     currencyDB = RealUI.db.global.currency
-                    if RealUI.compatRelease then
-                        _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
-                            local trackedIndex, trackedName = currencyStates[dbc.currencyState].index, currencyStates[dbc.currencyState].name
-                            local changeIndex = UpdateTrackedCurrency(block)
-                            if changeIndex and trackedIndex then
-                                if changeIndex < trackedIndex then
-                                    if flag == 0 and trackedName == currencyStates["token"..trackedIndex-1].name then
-                                        dbc.currencyState = "token"..trackedIndex-1
-                                    end
-                                elseif changeIndex == trackedIndex then
-                                    if flag == 1 and trackedName == currencyStates["token"..trackedIndex+1].name then
-                                        dbc.currencyState = "token"..trackedIndex+1
-                                    end
-                                end
-
-                                if currencyStates[dbc.currencyState].index >= changeIndex then
-                                    UpdateBlock(block)
-
-                                    if not currencyStates[dbc.currencyState]:IsValid() then
-                                        UpdateState(block)
-                                    end
-                                end
-                            end
-                        end)
-                    end
-
                     if not currencyStates[dbc.currencyState]:IsValid() then
                         UpdateState(block)
                     else
-                        UpdateTrackedCurrency(block)
                         UpdateBlock(block)
                     end
                 else
@@ -2561,7 +1902,6 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                tooltip:SetScript("OnUpdate", Currency_TooltipOnUpdate)
                 local lineNum, colNum
 
                 tooltip:AddHeader(_G.CURRENCY)
@@ -2585,39 +1925,15 @@ function Infobar:CreateBlocks()
                                 local money = GetMoneyString(data.money, true)
                                 realmMoneyTotal = realmMoneyTotal + data.money
 
-                                if RealUI.compatRelease then
-                                    wipe(tokens)
-                                    for i = 1, _G.MAX_WATCHED_TOKENS do
-                                        if data["token"..i] then
-                                            local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                            local amount = data[data["token"..i]] or 0
-                                            tokens[i] = TOKEN_STRING:format(texture, amount)
-                                            tokens[i+3] = tokenName
-                                        else
-                                            tokens[i] = "---"
-                                        end
-                                    end
-
-                                    tinsert(currencyData, {
-                                        id = #currencyData + 1,
-                                        info = {
-                                            name, money, tokens[1], tokens[2], tokens[3], date("%b %d", data.lastSeen)
-                                        },
-                                        meta = {
-                                            realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                        }
-                                    })
-                                else
-                                    tinsert(currencyData, {
-                                        id = #currencyData + 1,
-                                        info = {
-                                            name, money, date("%b %d", data.lastSeen)
-                                        },
-                                        meta = {
-                                            realm_faction, GetMoneyString(data.money), ""
-                                        }
-                                    })
-                                end
+                                tinsert(currencyData, {
+                                    id = #currencyData + 1,
+                                    info = {
+                                        name, money, date("%b %d", data.lastSeen)
+                                    },
+                                    meta = {
+                                        realm_faction, GetMoneyString(data.money), ""
+                                    }
+                                })
                             end
                         end
                     end
@@ -2629,19 +1945,15 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(L["Currency_TotalMoney"]..GetMoneyString(realmMoneyTotal))
                 tooltip:AddLine(" ")
 
-
-                if RealUI.compatRelease then
-                    hintLine = tooltip:AddLine(L["Currency_Cycle"])
-                    tooltip:SetLineTextColor(hintLine, Color.green:GetRGB())
-                end
-
                 tooltip:Show()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("currency: OnEvent", block.side, event, ...)
                 UpdateBlock(block)
             end,
-            events = events,
+            events = {
+                "PLAYER_MONEY",
+            },
         })
     end
 

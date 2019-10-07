@@ -55,12 +55,7 @@ function BagButton:Create(bagID)
     buttonNum = buttonNum + 1
     local name = addon .. "BagButton" .. buttonNum
 
-    local buttonFrame
-    if cargBags.compatRelease then
-        buttonFrame = _G.CreateFrame("ItemButton", name, nil)
-    else
-        buttonFrame = _G.CreateFrame("Button", name, nil, "ItemButtonTemplate")
-    end
+    local buttonFrame = _G.CreateFrame("Button", name, nil, "ItemButtonTemplate")
     local button = _G.setmetatable(buttonFrame, self.__index)
 
     local invID = _G.ContainerIDToInventoryID(bagID)
@@ -230,13 +225,11 @@ local function onLock(self, event, bagID, slotID)
 end
 
 local disabled = {
-    [-2] = true,
-    [-1] = true,
-    [0] = true,
+    [_G.KEYRING_CONTAINER] = true,
+    [_G.BANK_CONTAINER] = true,
+    [_G.BACKPACK_CONTAINER] = true,
+    [_G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS] = true,
 }
-if not cargBags.compatRelease then
-    disabled[11] = true
-end
 
 -- Register the plugin
 cargBags:RegisterPlugin("BagBar", function(self, bags)

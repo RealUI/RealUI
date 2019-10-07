@@ -30,32 +30,6 @@ local cargBags = ns.cargBags
 -- Lua Globals --
 -- luacheck: globals select tonumber
 
--- Upgrade Level retrieval
-local GetItemLevelBonusFromRelic do
-    local relicBoostPattern = _G.RELIC_TOOLTIP_ILVL_INCREASE:gsub("%%d", "(%%d+)")
-    local scanningTooltip = _G.RealUIScanningTooltip
-    function GetItemLevelBonusFromRelic(itemLink)
-        local iLvl = _G.C_ArtifactUI.GetItemLevelIncreaseProvidedByRelic(itemLink)
-        if not iLvl then
-            scanningTooltip:ClearLines()
-            local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
-            if not success then
-                return 0
-            end
-
-            for i = 5, 6 do
-                local l = _G["RealUIScanningTooltipTextLeft"..i]
-                if l and l:GetText() then
-                    iLvl = tonumber(l:GetText():match(relicBoostPattern))
-                    if iLvl then break end
-                end
-            end
-        end
-
-        return iLvl or 0
-    end
-end
-
 local function Round(num, idp)
     local mult = 10^(idp or 0)
     return _G.floor(num * mult + 0.5) / mult
@@ -148,13 +122,7 @@ local function ItemButton_Update(self, item)
 
     -- Item Level
     if item.link then
-        if item.rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
-            item.level = _G.RealUI.GetItemLevel(item.link)
-        end
-
-        if cargBags.compatRelease and _G.IsArtifactRelicItem(item.link) then
-            self.BottomString:SetFormattedText("+%d", GetItemLevelBonusFromRelic(item.link))
-        elseif (item.equipLoc ~= "") and (item.level and item.level > 0) then
+        if (item.equipLoc ~= "") and (item.level and item.level > 0) then
             self.BottomString:SetText(item.level)
         else
             self.BottomString:SetText("")

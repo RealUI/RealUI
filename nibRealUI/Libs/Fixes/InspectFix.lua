@@ -10,7 +10,6 @@ local loaded = false
 local debugging = false
 local allowDetarget = false     -- allow window to remain open when target is not inspectable (experimental)
 local serverTimeout = 1         -- timeout for INSPECT_READY response to assume server dropped it
-local compatRelease = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
 
 local function debug(msg)
   if debugging then
@@ -34,12 +33,12 @@ local function inspectfilter(self, event, ...)
     elseif event == nil and not inspectable then
        return false
     elseif event == "PLAYER_TARGET_CHANGED" then -- suppress close on change
-       if compatRelease and inspectable and InspectFix.UserInspecting() then
+       if inspectable and InspectFix.UserInspecting() then
           InspectFrame_UnitChanged(InspectFrame);
        end
        return false
     end
-    if compatRelease and inspectable and lastUINITime and not lastUIIRTime and
+    if inspectable and lastUINITime and not lastUIIRTime and
        InspectFix.UserInspecting() and
        (lastUINITime + serverTimeout) < GetTime() then
        debug("Re-issuing dropped notify")
@@ -232,7 +231,7 @@ local function inspectunit(unit)
   -- which would effectively cancel the user's manual inspect, causing the frame to never be shown
   ShowUIPanel(InspectFrame)
   -- issue a (duplicate) NotifyInspect with the frame open, to engage our retry and be extra-sure
-  if compatRelease then InspectFrame_UnitChanged(InspectFrame) end
+  InspectFrame_UnitChanged(InspectFrame)
 end
 
 

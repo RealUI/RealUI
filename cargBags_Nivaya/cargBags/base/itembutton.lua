@@ -84,13 +84,7 @@ function ItemButton:Create(tpl, parent)
     impl.numSlots = (impl.numSlots or 0) + 1
     local name = ("%sSlot%d"):format(impl.name, impl.numSlots)
 
-    local buttonFrame
-    if cargBags.compatRelease then
-        buttonFrame = _G.CreateFrame("ItemButton", name, parent, tpl)
-    else
-        buttonFrame = _G.CreateFrame("Button", name, parent, tpl)
-    end
-    local button = _G.setmetatable(buttonFrame, self.__index)
+    local button = _G.setmetatable(_G.CreateFrame("Button", name, parent, tpl), self.__index)
 
     if button.Scaffold then button:Scaffold(tpl) end
     if button.OnCreate then button:OnCreate(tpl) end

@@ -4,14 +4,12 @@ local _, private = ...
 -- luacheck: globals time next select tonumber tostring tinsert
 
 -- Libs --
-local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
 -- RealUI --
 local RealUI = _G.RealUI
 local FramePoint = RealUI:GetModule("FramePoint")
-local round = RealUI.Round
 
 local Tooltips = RealUI:NewModule("Tooltips", "AceEvent-3.0")
 private.Tooltips = Tooltips
@@ -21,9 +19,7 @@ local defaults = {
         showTitles = true,
         showRealm = false,
         showIDs = false,
-        showTransmog = RealUI.compatRelease,
         multiTip = true,
-        currency = {},
         position = {
             x = -100,
             y = 130,
@@ -102,335 +98,6 @@ function private.HookTooltip(tooltip)
                 funcs[i](...)
             end
         end)
-    end
-end
-
-local AddDynamicInfo, ClearDynamicInfo do
-    local maxAge, quickRefresh = 600, 10
-    local cache = {}
-
-    local function IsCacheFresh(guid)
-        if cache[guid] and cache[guid].time then
-            return (time() - cache[guid].time) < maxAge
-        end
-    end
-
-    local slots = {
-        "Head",
-        "Neck",
-        "Shoulder",
-        "Shirt",
-        "Chest",
-        "Waist",
-        "Legs",
-        "Feet",
-        "Wrist",
-        "Hands",
-        "Finger0",
-        "Finger1",
-        "Trinket0",
-        "Trinket1",
-        "Back",
-        "MainHand",
-        "SecondaryHand",
-    }
-    local TwoHanders = {
-        [_G.LE_ITEM_WEAPON_AXE2H] = true,
-        [_G.LE_ITEM_WEAPON_MACE2H] = true,
-        [_G.LE_ITEM_WEAPON_SWORD2H] = true,
-
-        [_G.LE_ITEM_WEAPON_POLEARM] = true,
-        [_G.LE_ITEM_WEAPON_STAFF] = true,
-
-        [_G.LE_ITEM_WEAPON_BOWS] = true,
-        [_G.LE_ITEM_WEAPON_CROSSBOW] = true,
-        [_G.LE_ITEM_WEAPON_GUNS] = true,
-
-        [_G.LE_ITEM_WEAPON_FISHINGPOLE] = true
-    }
-    local DualWield = {
-        [_G.LE_ITEM_WEAPON_AXE1H] = true,
-        [_G.LE_ITEM_WEAPON_MACE1H] = true,
-        [_G.LE_ITEM_WEAPON_SWORD1H] = true,
-
-        [_G.LE_ITEM_WEAPON_WARGLAIVE] = true,
-        [_G.LE_ITEM_WEAPON_DAGGER] = true,
-
-        [_G.LE_ITEM_WEAPON_GENERIC] = true,
-        [_G.LE_ITEM_ARMOR_SHIELD] = true,
-    }
-
-    local frame = _G.CreateFrame("Frame")
-    frame:RegisterEvent("INSPECT_READY")
-    frame:SetScript("OnEvent", function(self, event, guid)
-        if not cache[guid] or _G.UnitGUID(cache[guid].unit) ~= guid then return end
-        local unit = cache[guid].unit
-
-
-        if not _G.CanInspect(unit) then return end
-        cache[guid].time = time()
-        if not RealUI.compatRelease then return end
-        local isMissingInfo
-
-        do -- spec
-            local specID = _G.GetInspectSpecialization(unit)
-            if specID then
-                local _, specName = _G.GetSpecializationInfoByID(specID, _G.UnitSex(unit))
-                cache[guid].spec = specName
-            else
-                isMissingInfo = true
-            end
-        end
-
-        do -- item level
-            local totalILvl = 0
-            local hasTwoHander, isDualWield
-            local artifactILvl, mainArtifact, offArtifact
-
-            for id, slot in next, slots do
-                if slot ~= "Shirt" then
-                    local link = _G.GetInventoryItemLink(cache[guid].unit, id)
-                    Tooltips:debug(id, slot)
-                    if link then
-                        local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
-                        if rarity and subTypeID then
-                            if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
-                                ilvl = _G.RealUI.GetItemLevel(link)
-                            end
-
-                            Tooltips:debug(ilvl, _G.strsplit("|", link))
-                            if not ilvl or ilvl == 0 then
-                                Tooltips:debug("No ilvl data for", slot)
-                                isMissingInfo = true
-                            end
-
-                            if slot == "MainHand" or slot == "SecondaryHand" then
-                                if rarity == _G.LE_ITEM_QUALITY_ARTIFACT then
-                                    if slot == "MainHand" then
-                                        mainArtifact = ilvl
-                                    elseif slot == "SecondaryHand" then
-                                        offArtifact = ilvl
-                                    end
-                                else
-                                    totalILvl = totalILvl + ilvl
-                                end
-
-                                Tooltips:debug("itemClass", subTypeID)
-
-                                if subTypeID then
-                                    if slot == "MainHand" then
-                                        hasTwoHander = TwoHanders[subTypeID] and ilvl
-                                    elseif slot == "SecondaryHand" then
-                                        if hasTwoHander then
-                                            isDualWield = TwoHanders[subTypeID] -- Titan's Grip
-                                        else
-                                            isDualWield = DualWield[subTypeID]
-                                        end
-                                    end
-                                end
-                            else
-                                totalILvl = totalILvl + ilvl
-                            end
-                        else
-                            Tooltips:debug("No item info for", slot)
-                            isMissingInfo = true
-                        end
-                    else
-                        Tooltips:debug("No item link for", slot)
-                        if slot ~= "SecondaryHand" then
-                            isMissingInfo = true
-                        end
-                    end
-                end
-            end
-
-            if not isMissingInfo then
-                -- Artifacts are counted as one item
-                if mainArtifact or offArtifact then
-                    Tooltips:debug("Artifacts", mainArtifact, offArtifact)
-                    artifactILvl = _G.max(mainArtifact or 0, offArtifact or 0)
-                    totalILvl = totalILvl + artifactILvl
-
-                    if offArtifact then
-                        totalILvl = totalILvl + artifactILvl
-                    end
-
-                    if artifactILvl < 152 then
-                        totalILvl = nil
-                    end
-                end
-
-                local numItems = 15
-                if hasTwoHander or isDualWield then
-                    numItems = 16
-                end
-
-                if hasTwoHander and not isDualWield then
-                    -- Two handers are counted twice
-                    totalILvl = totalILvl + hasTwoHander
-                end
-
-                local ilvl
-                if totalILvl and totalILvl > 0 then
-                    Tooltips:debug("totalILvl", totalILvl, numItems)
-                    ilvl = round(totalILvl / numItems)
-                end
-                cache[guid].ilvl = ilvl
-            end
-        end
-
-        if isMissingInfo then
-            cache[guid].time = cache[guid].time - (maxAge - quickRefresh)
-        end
-    end)
-
-    local function GetInspectInfo(infoType, unit)
-        local guid = _G.UnitGUID(unit)
-        if IsCacheFresh(guid) then
-            return cache[guid][infoType]
-        else
-            if _G.CanInspect(unit) then
-                if not cache[guid] then
-                    cache[guid] = {}
-                end
-
-                cache[guid].unit = unit
-                _G.NotifyInspect(unit)
-            end
-        end
-    end
-
-    --[[
-    local AddTargetInfo, ClearTargetInfo do
-        local targetLine
-        local targetYou = ">".._G.YOU.."<"
-
-        local function GetTarget(unit)
-            if _G.UnitIsUnit(unit, "player") then
-                return ("|cffff0000%s|r"):format(targetYou)
-            else
-                return _G.UnitName(unit)
-            end
-        end
-
-        function AddTargetInfo(unit)
-            local leftText, rightText
-            if _G.UnitExists(unit) then
-                local tarRicon = (_G.GetRaidTargetIndex(unit))
-                Tooltips:debug("tarRicon:", tarRicon, _G.ICON_LIST[tarRicon])
-
-                leftText = _G.TARGET
-                if tarRicon and _G.ICON_LIST[tarRicon] then
-                    rightText = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", GetTarget(unit))
-                else
-                    rightText = GetTarget(unit)
-                end
-            else
-                leftText = "target"
-                rightText = ""
-            end
-
-
-            if targetLine and leftText then
-                _G["GameTooltipTextLeft"..targetLine]:SetText(leftText)
-                _G["GameTooltipTextRight"..targetLine]:SetText(rightText)
-                _G["GameTooltipTextRight"..targetLine]:SetTextColor(GetUnitColor(unit))
-            elseif not targetLine then
-                _G.GameTooltip:AddDoubleLine(leftText, rightText, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unit))
-                targetLine = _G.GameTooltip:NumLines()
-            end
-        end
-        function ClearTargetInfo()
-            targetLine = nil
-        end
-    end
-    ]]
-
-    local AddSpecInfo, ClearSpecInfo do
-        local specLine
-        local function GetSpec(unit)
-            return GetInspectInfo("spec", unit)
-        end
-
-        function AddSpecInfo(isPlayer, unit)
-            if not RealUI.compatRelease or not isPlayer then return end
-
-            local spec = GetSpec(unit)
-            if specLine and spec then
-                _G["GameTooltipTextLeft"..specLine]:SetText(_G.SPECIALIZATION)
-                _G["GameTooltipTextRight"..specLine]:SetText(spec)
-            elseif not specLine then
-                _G.GameTooltip:AddDoubleLine(_G.SPECIALIZATION, spec or _G.SEARCH_LOADING_TEXT, normalFont.r, normalFont.g, normalFont.b, 1,1,1)
-                specLine = _G.GameTooltip:NumLines()
-            end
-        end
-        function ClearSpecInfo()
-            specLine = nil
-        end
-    end
-
-    local AddItemLevelInfo, ClearItemLevelInfo do
-        local iLvlLine
-
-        local function GetItemLevel(unit)
-            if _G.UnitIsUnit(unit, "player") then
-                local _, avgItemLevelEquipped = _G.GetAverageItemLevel()
-                return avgItemLevelEquipped
-            else
-                return GetInspectInfo("ilvl", unit)
-            end
-        end
-
-        function AddItemLevelInfo(isPlayer, unit)
-            if not RealUI.compatRelease or not isPlayer then return end
-
-            local iLvl = GetItemLevel(unit)
-            if iLvl and iLvl <= 0 then
-                iLvl  = nil
-            end
-
-            if iLvlLine and iLvl then
-                _G["GameTooltipTextLeft"..iLvlLine]:SetText(_G.ITEM_LEVEL_ABBR)
-                _G["GameTooltipTextRight"..iLvlLine]:SetText(iLvl)
-            elseif not iLvlLine then
-                _G.GameTooltip:AddDoubleLine(_G.ITEM_LEVEL_ABBR, iLvl or _G.SEARCH_LOADING_TEXT, normalFont.r, normalFont.g, normalFont.b, 1,1,1)
-                iLvlLine = _G.GameTooltip:NumLines()
-            end
-        end
-        function ClearItemLevelInfo()
-            if not RealUI.compatRelease then return end
-            iLvlLine = nil
-        end
-    end
-
-    local updateTime = 0
-    frame:SetScript("OnUpdate", function(self, elapsed)
-        updateTime = (updateTime or 0) + elapsed
-        if updateTime < 1 then return end
-
-        local unit = GetUnit(_G.GameTooltip)
-        local isPlayer = _G.UnitIsPlayer(unit)
-
-        --AddTargetInfo(unit.."target")
-        AddSpecInfo(isPlayer, unit)
-        AddItemLevelInfo(isPlayer, unit)
-
-        updateTime = 0
-    end)
-
-    function AddDynamicInfo(unit, isPlayer)
-        --AddTargetInfo(unit.."target")
-        AddSpecInfo(isPlayer, unit)
-        AddItemLevelInfo(isPlayer, unit)
-        frame:Show()
-    end
-
-    function ClearDynamicInfo(...)
-        --ClearTargetInfo()
-        ClearSpecInfo()
-        ClearItemLevelInfo()
-        frame:Hide()
-        updateTime = nil
     end
 end
 
@@ -527,13 +194,7 @@ private.AddHook("OnTooltipSetUnit", function(self)
             end
         end
 
-        local level
-        local IsBattlePet = RealUI.compatRelease and _G.UnitIsBattlePet(unit)
-        if IsBattlePet then
-            level = _G.UnitBattlePetLevel(unit)
-        else
-            level = _G.UnitLevel(unit)
-        end
+        local level = _G.UnitLevel(unit)
 
         local previousLine = 1
         local dead = _G.UnitIsDeadOrGhost(unit)
@@ -541,8 +202,6 @@ private.AddHook("OnTooltipSetUnit", function(self)
             local unitType
             if isPlayer then
                 unitType = ("%s |cff%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GetUnitColor(unit)), _G.UnitClass(unit))
-            elseif IsBattlePet then
-                unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
             else
                 unitType = _G.UnitCreatureType(unit)
             end
@@ -551,22 +210,6 @@ private.AddHook("OnTooltipSetUnit", function(self)
             if level == -1 then
                 level = "??"
                 diff = _G.QuestDifficultyColors.impossible
-            elseif IsBattlePet then
-                local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
-                if teamLevel then -- from WorldMapFrame.lua: 2522
-                    if teamLevel < level then
-                        --add 2 to the min level because it's really hard to fight higher level pets
-                        diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2)
-                    elseif teamLevel > level then
-                        diff = _G.GetRelativeDifficultyColor(teamLevel, level)
-                    else
-                        --if your team is in the level range, no need to call the function, just make it yellow
-                        diff = _G.QuestDifficultyColors["difficult"]
-                    end
-                else
-                    --If you unlocked pet battles but have no team, level ranges are meaningless so make them grey
-                    diff = _G.QuestDifficultyColors["header"]
-                end
             else
                 diff = _G.GetCreatureDifficultyColor(level)
             end
@@ -580,54 +223,11 @@ private.AddHook("OnTooltipSetUnit", function(self)
 
                 if linetext and linetext:find(_G.LEVEL) then
                     tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType or "unitType", (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
-                    previousLine = i
                     break
                 end
             end
         end
 
-        do -- Objective Progress
-            local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
-            local line, addedProgress
-
-            local challengeMapID = RealUI.compatRelease and _G.C_ChallengeMode.GetActiveChallengeMapID()
-            if challengeMapID then
-                local isTeeming = false
-                local _, activeAffixIDs = _G.C_ChallengeMode.GetActiveKeystoneInfo()
-                for i = 1, #activeAffixIDs do
-                    if activeAffixIDs[i] == 5 then
-                        isTeeming = true
-                        break
-                    end
-                end
-
-                local _, _, _, _, _, _, _, instanceMapID = _G.GetInstanceInfo()
-                local isAlternate = challengeMapID == 234 -- Upper Karazhan
-                if instanceMapID == 1822 then -- Siege of Boralus
-                    isAlternate = faction == "Horde"
-                end
-
-                addedProgress = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
-            else
-                local weightsTable = LOP:GetNPCWeightByCurrentQuests(tonumber(npcID))
-                if weightsTable then
-                    for questID, npcWeight in next, weightsTable do
-                        local questTitle = _G.C_TaskQuest.GetQuestInfoByQuestID(questID)
-                        for i = previousLine + 1, self:NumLines() do
-                            line = _G["GameTooltipTextLeft" .. i]
-                            if line and line:GetText() == questTitle then
-                                addedProgress = npcWeight
-                                break
-                            end
-                        end
-                    end
-                end
-            end
-
-            if line and addedProgress then
-                line:SetFormattedText(("%s | +%s%%"), line:GetText(), addedProgress)
-            end
-        end
 
         local unittarget = unit.."target"
         if _G.UnitExists(unittarget) then
@@ -646,40 +246,8 @@ private.AddHook("OnTooltipSetUnit", function(self)
             _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unittarget))
         end
 
-        AddDynamicInfo(unit, isPlayer)
-
         if dead then
             _G.GameTooltipStatusBar:Hide()
-        end
-    end
-end, true)
-
-private.AddHook("OnTooltipSetItem", function(self)
-    local _, link = self:GetItem()
-    if RealUI.compatRelease and Tooltips.db.global.showTransmog and link then
-        local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
-        if appearanceID and sourceID then
-            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)
-            if isInfoReady then
-                if canCollect then
-                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(sourceID)
-                    if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
-                        self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
-                    else
-                        local sources = _G.C_TransmogCollection.GetAppearanceSources(appearanceID)
-                        if sources then
-                            for i, source in next, sources do
-                                if source.isCollected then
-                                    self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
-                                    break
-                                end
-                            end
-                        end
-                    end
-                else
-                    self:AddLine(_G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
-                end
-            end
         end
     end
 end, true)
@@ -690,7 +258,6 @@ private.AddHook("OnTooltipCleared", function(self)
         self.factionIcon:Hide()
     end
 
-    ClearDynamicInfo()
     self._id = nil
 
     self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)

@@ -9,44 +9,8 @@ local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
-local function CreateTotems(parent)
-    -- DestroyTotem is protected, so we hack the default
-    local totemBar = _G["TotemFrame"]
-    totemBar:SetParent(parent.overlay)
-    _G.hooksecurefunc("TotemFrame_Update", function()
-        totemBar:ClearAllPoints()
-        totemBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
-    end)
-    for i = 1, 4 do
-        local name = "TotemFrameTotem"..i
-        local totem = _G[name]
-        totem:SetSize(22, 22)
-        totem:ClearAllPoints()
-        totem:SetPoint("TOPLEFT", totemBar, i * (totem:GetWidth() + 3), 0)
-        RealUI:CreateBG(totem)
-
-        local bg = _G[name.."Background"]
-        bg:SetTexture("")
-        local dur = _G[name.."Duration"]
-        dur:Hide()
-        dur.Show = function() end
-
-        local icon = _G[name.."IconTexture"]
-        icon:SetTexCoord(.08, .92, .08, .92)
-        icon:ClearAllPoints()
-        icon:SetAllPoints()
-
-        local _, border = totem:GetChildren()
-        border:DisableDrawLayer("OVERLAY")
-    end
-end
-
 UnitFrames.player = {
     create = function(self)
-        if RealUI.compatRealease then
-            CreateTotems(self)
-        end
-
         --[[ Additional Power ]]--
         local AdditionalPower = _G.CreateFrame("StatusBar", nil, self.Power)
         AdditionalPower:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")

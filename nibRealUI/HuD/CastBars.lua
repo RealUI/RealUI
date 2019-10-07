@@ -64,43 +64,6 @@ do
 
     -- Warlock
     RegisterSpellName(755, 6 / 1, false)      -- Health Funnel
-
-    if RealUI.compatRelease then
-        -- Death Knight
-        RegisterSpellName(206931, 3 / 1, true) -- Blooddrinker
-
-        -- Demon Hunter
-        RegisterSpellName(198013, 2 / 2, true)    -- Eye Beam
-        RegisterSpellName(211053, 2 / 0.25, true) -- Fel Barrage
-        RegisterSpellName(212084, 2 / 0.2, true)  -- Fel Devastation
-
-        -- Hunter
-        RegisterSpellName(120360, 3 / 0.2, true) -- Barrage
-        RegisterSpellName(212640, 6 / 1, false)  -- Mending Bandage
-
-        --Mage
-        RegisterSpellName(205021, 10 / 1, false) -- Ray of Frost
-
-        -- Monk
-        RegisterSpellName(117952, 4 / 1, false)     -- Crackling Jade Lightning
-        RegisterSpellName(191837, 3 / 1.002, false) -- Essence Font
-        RegisterSpellName(113656, 4 / 1, true)      -- Fists of Fury
-        RegisterSpellName(115175, 20 / 0.5, false)  -- Soothing Mist
-        RegisterSpellName(101546, 1.5 / 0.5, true)  -- Spinning Crane Kick
-
-        -- Priest
-        RegisterSpellName(64843, 4 / 2, true)     -- Divine Hymn
-        RegisterSpellName(47540, 2 / 1, true)     -- Penance
-
-        -- Shaman
-        RegisterSpellName(204437, 6 / 1, false) -- Lightning Lasso
-
-        -- Warlock
-        RegisterSpellName(193440, 3 / 0.2, false) -- Demonfire
-        RegisterSpellName(193440, 3 / 1, false)   -- Demonwrath
-        RegisterSpellName(234153, 6 / 1, false)   -- Drain Life
-        RegisterSpellName(198590, 6 / 1, false)   -- Drain Soul
-    end
 end
 
 function CastBars:SetBarTicks(tickInfo)
