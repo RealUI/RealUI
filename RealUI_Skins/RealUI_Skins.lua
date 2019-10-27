@@ -134,6 +134,9 @@ end
 local ScaleAPI = {}
 
 local skinnedFrames = {}
+function RealUI:IsFrameSkinned(frame)
+    return not not skinnedFrames[frame]
+end
 function RealUI:RegisterSkinnedFrame(frame, color, stripes)
     skinnedFrames[frame] = {
         color = color,
@@ -346,22 +349,24 @@ function private.OnLoad()
             local r, g, b, a = Frame:GetBackdropColor()
             Frame:SetBackdropColor(r, g, b, frameColor.a)
 
-            local bg = Frame:GetBackdropTexture("bg")
-            local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
-            stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-            stripes:SetAlpha(private.skinsDB.stripeAlpha)
-            stripes:SetAllPoints(bg)
-            stripes:SetHorizTile(true)
-            stripes:SetVertTile(true)
-            stripes:SetBlendMode("ADD")
+            if not RealUI:IsFrameSkinned(Frame) then
+                local bg = Frame:GetBackdropTexture("bg")
+                local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
+                stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+                stripes:SetAlpha(private.skinsDB.stripeAlpha)
+                stripes:SetAllPoints(bg)
+                stripes:SetHorizTile(true)
+                stripes:SetVertTile(true)
+                stripes:SetBlendMode("ADD")
 
-            r, g, b = Frame:GetBackdropBorderColor()
-            if Color.frame:IsEqualTo(r, g, b, a) then
-                color = Color.frame
-            else
-                color = Color.button
+                r, g, b = Frame:GetBackdropBorderColor()
+                if Color.frame:IsEqualTo(r, g, b, a) then
+                    color = Color.frame
+                else
+                    color = Color.button
+                end
+                RealUI:RegisterSkinnedFrame(Frame, color, stripes)
             end
-            RealUI:RegisterSkinnedFrame(Frame, color, stripes)
         end
     end)
 
