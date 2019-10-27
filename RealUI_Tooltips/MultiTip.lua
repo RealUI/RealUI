@@ -4,7 +4,7 @@ local _, private = ...
 -- luacheck: globals select tonumber ipairs
 
 local Aurora = _G.Aurora
-local Hook, Skin = Aurora.Hook, Aurora.Skin
+local Skin = Aurora.Skin
 
 local types = {
     item = true,
@@ -41,7 +41,6 @@ end
 function private.SetupMultiTip()
     tooltipPool = _G.CreateObjectPool(TooltipFactory, TooltipReset)
     tooltipPool.frameTemplate = "RealUIMultiTipTemplate"
-    _G.hooksecurefunc(tooltipPool, "Acquire", Hook.ObjectPoolMixin_Acquire)
 
     local oldSetItemRef = _G.SetItemRef
     function _G.SetItemRef(link, text, button, ...)

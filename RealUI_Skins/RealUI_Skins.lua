@@ -16,6 +16,7 @@ end
 -- RealUI --
 local RealUI = _G.RealUI
 local Aurora = private.Aurora
+private.isDev = RealUI.isDev
 
 local defaults = {
     profile = {
