@@ -21,5 +21,6 @@ FrameXML\PaperDollFrame.lua
 AddOns\Blizzard_WorldMap.lua
 
 AddOns\Ace3.lua
+AddOns\Clique.lua
 AddOns\DBM-GUI.lua
 AddOns\Masque.lua
