@@ -150,7 +150,6 @@ for type, offsetFactor in next, CPFEditBoxes do
     editbox:SetSize(50, 15)
     editbox:SetPoint("BOTTOMLEFT", (70 * offsetFactor) + 13, 34)
     editbox:SetAutoFocus(false)
-    RealUI:RegisterSkinnedFrame(editbox, Color.frame)
 
     editbox:SetScript("OnEnterPressed", function(self)
         UpdateCPFRGB(self)
