@@ -737,10 +737,10 @@ function Tooltips:OnInitialize()
         self:RegisterMessage("NormalizedRealmReceived", private.SetupCurrency)
     end
 
-    if Tooltips.db.global.showIDs then
+    if self.db.global.showIDs then
         private.SetupIDTips()
     end
-    if Tooltips.db.global.multiTip then
+    if self.db.global.multiTip then
         private.SetupMultiTip()
     end
 
