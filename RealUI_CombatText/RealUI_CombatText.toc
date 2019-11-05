@@ -1,0 +1,13 @@
+## Interface: 80200
+## Title: RealUI Combat Text
+## Notes: Scrolling combat text designed for RealUI
+## Author: Gethe
+## Version: 2.1.2
+## RequiredDeps: nibRealUI
+## SavedVariables: RealUI_CombatTextDB
+
+Libs\Libs.xml
+
+RealUI_CombatText.lua
+ScrollAreas.lua
+ScrollLines.lua
