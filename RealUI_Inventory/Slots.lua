@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals tinsert ipairs
+-- luacheck: globals tinsert ipairs next
 
 -- RealUI --
 --local Inventory = private.Inventory
@@ -106,6 +106,7 @@ local function UpdateSlot(slot)
 
     slot:SetMatchesSearch(not isFiltered)
 end
+
 function private.UpdateSlots(bagID)
     for slotIndex = 1, _G.GetContainerNumSlots(bagID) do
         local slot = private.GetSlot(bagID, slotIndex)
@@ -153,7 +154,12 @@ end
 function private.GetSlot(bagID, slotIndex)
     for slot in slots:EnumerateActive() do
         if slot:IsEqualToBagAndSlot(bagID, slotIndex) then
-            return slot
+            if slot:IsValid() then
+                return slot
+            else
+                slots:Release(slot)
+                return
+            end
         end
     end
 
@@ -165,4 +171,40 @@ function private.GetSlot(bagID, slotIndex)
     else
         slots:Release(slot)
     end
+end
+
+local function GetFirstFreeSlot(bagID)
+    if _G.GetContainerNumFreeSlots(bagID) > 0 then
+        local numSlots = _G.GetContainerNumSlots(bagID)
+        for slotIndex = 1, numSlots do
+            if not _G.GetContainerItemLink(bagID, slotIndex) then
+                return slotIndex
+            end
+        end
+    end
+end
+function private.GetFirstFreeSlot(bagType)
+    if bagType == "main" then
+        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
+            local slotIndex = GetFirstFreeSlot(bagID)
+            if slotIndex then
+                return bagID, slotIndex
+            end
+        end
+    elseif bagType == "bankReagent" then
+        local bagID = _G.REAGENTBANK_CONTAINER
+        local slotIndex = GetFirstFreeSlot(bagID)
+        if slotIndex then
+            return bagID, slotIndex
+        end
+    else
+        local containerIDs = {-1,5,6,7,8,9,10,11}
+        for _, bagID in next, containerIDs do
+            local slotIndex = GetFirstFreeSlot(bagID)
+            if slotIndex then
+                return bagID, slotIndex
+            end
+        end
+    end
+    return false
 end

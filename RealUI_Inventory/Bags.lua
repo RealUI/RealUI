@@ -1,12 +1,13 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals tinsert next wipe ipairs
+-- luacheck: globals tinsert next wipe ipairs sort
 
 -- Libs --
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 local Skin = Aurora.Skin
+local Color = Aurora.Color
 
 -- RealUI --
 local Inventory = private.Inventory
@@ -63,6 +64,10 @@ function private.UpdateBags()
     for tag, bag in next, bags do
         sort(bag.slots, SortSlots)
 
+        if tag == "main" then
+            tinsert(bag.slots, bag.dropTarget)
+        end
+
         local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
         bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
     end
@@ -89,6 +94,13 @@ local function SetupBag(bag)
     bag.offsetTop = 5
     bag.offsetBottom = 0
     bag.baseWidth = 5
+end
+
+local function DropTargetFindSlot(bagType)
+    local bagID, slotIndex = private.GetFirstFreeSlot(bagType)
+    if bagID then
+        _G.PickupContainerItem(bagID, slotIndex)
+    end
 end
 local function CreateBag(bagType)
     local main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
@@ -124,11 +136,40 @@ local function CreateBag(bagType)
     main.search = search
     main.offsetBottom = main.offsetBottom + 25
 
+    local dropTarget = _G.CreateFrame("Button", "$parentEmptySlot", main)
+    dropTarget:SetSize(37, 37)
+    Base.CreateBackdrop(dropTarget, {
+        bgFile = [[Interface\PaperDoll\UI-Backpack-EmptySlot]],
+        tile = false,
+        offsets = {
+            left = -1,
+            right = -1,
+            top = -1,
+            bottom = -1,
+        }
+    })
+    Base.CropIcon(dropTarget:GetBackdropTexture("bg"))
+    dropTarget:SetBackdropColor(1, 1, 1, 0.75)
+    dropTarget:SetBackdropBorderColor(Color.frame:GetRGB())
+    dropTarget:SetScript("OnMouseUp", function()
+        DropTargetFindSlot(bagType)
+    end)
+    dropTarget:SetScript("OnReceiveDrag", function()
+        DropTargetFindSlot(bagType)
+    end)
+    main.dropTarget = dropTarget
+
+    local count = dropTarget:CreateFontString(nil, "ARTWORK")
+    count:SetFontObject("NumberFontNormal")
+    count:SetPoint("BOTTOMRIGHT", 0, 2)
+    count:SetText(_G.CalculateTotalNumberOfFreeBagSlots())
+    dropTarget.count = count
+
     main:RegisterEvent("BAG_OPEN")
     main:RegisterEvent("BAG_CLOSED")
     main:RegisterEvent("QUEST_ACCEPTED")
     main:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-    main:SetScript("OnEvent", function(event, ...)
+    main:SetScript("OnEvent", function(self, event, ...)
         if event == "BAG_OPEN" then
             private.Toggle(true)
         elseif event == "BAG_CLOSED" then
@@ -137,10 +178,13 @@ local function CreateBag(bagType)
             local bagID, slotIndex = ...
             if bagID and slotIndex then
                 local slot = private.GetSlot(bagID, slotIndex)
-                _G.SetItemButtonDesaturated(slot, slot:IsItemLocked())
+                if slot then
+                    _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
+                end
             end
         else
             private.Update()
+            dropTarget.count:SetText(_G.CalculateTotalNumberOfFreeBagSlots())
         end
     end)
     main:Hide()
