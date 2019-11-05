@@ -2,9 +2,7 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!--@non-debug@
-    <Include file="LibContainer\embed.xml"/>
     @end-non-debug@-->
     <!--@debug@-->
-    <Include file="..\..\LibContainer\embed.xml"/>
     <!--@end-debug@-->
 </Ui>

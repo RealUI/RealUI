@@ -10,3 +10,7 @@
 Libs\Libs.xml
 
 RealUI_Inventory.lua
+Blizz.lua
+Filters.lua
+Slots.lua
+Bags.lua
