@@ -13,16 +13,56 @@ local Inventory = private.Inventory
 
 local bags = {}
 Inventory.bags = bags
+
+
+local function SortSlots(a, b)
+    local qualityA = a.item:GetItemQuality()
+    local qualityB = b.item:GetItemQuality()
+    if qualityA ~= qualityB then
+        if qualityA and qualityB then
+            return qualityA > qualityB
+        elseif (qualityA == nil) or (qualityB == nil) then
+            return not not qualityA
+        else
+            return false
+        end
+    end
+
+
+    local invTypeA = a.item:GetInventoryType()
+    local invTypeB = b.item:GetInventoryType()
+    if invTypeA ~= invTypeB then
+        return invTypeA < invTypeB
+    end
+
+
+    local idA = a.item:GetItemID()
+    local idB = b.item:GetItemID()
+    if idA ~= idB then
+        return idA > idB
+    end
+
+
+    if Inventory.isPatch then
+        local stackA = _G.C_Item.GetStackCount(a)
+        local stackB = _G.C_Item.GetStackCount(b)
+        if stackA ~= stackB then
+            return stackA > stackB
+        end
+    end
+end
 function private.UpdateBags()
     for tag, bag in next, bags do
         wipe(bag.slots)
     end
 
-    for bagID = 0, _G.NUM_BAG_SLOTS do
+    for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
         private.UpdateSlots(bagID)
     end
 
     for tag, bag in next, bags do
+        sort(bag.slots, SortSlots)
+
         local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
         bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
     end
