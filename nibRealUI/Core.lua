@@ -649,6 +649,7 @@ end
 
 do
     local prototype = {
+        isPatch = RealUI.isPatch,
         debug = function(self, ...)
             return RealUI.Debug(self.moduleName, ...)
         end,

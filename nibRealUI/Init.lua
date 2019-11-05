@@ -1,5 +1,8 @@
 local ADDON_NAME, private = ...
 
+-- Lua Globals --
+-- luacheck: globals select
+
 local loaded = _G.LoadAddOn("RealUI_Skins")
 local tries = 1
 while not loaded do
@@ -31,13 +34,12 @@ end
 private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local RealUI = private.RealUI
 
-local xpac, major, minor = _G.strsplit(".", _G.GetBuildInfo())
-RealUI.isPatch = _G.tonumber(xpac) == 8 and (_G.tonumber(major) >= 2 and _G.tonumber(minor) >= 5)
+RealUI.isPatch = select(4, _G.GetBuildInfo()) >= 80300
 
 RealUI.realmInfo = {
     realm = _G.GetRealmName(),
     connectedRealms = _G.GetAutoCompleteRealms(),
-    id = RealUI.isPatch and _G.GetRealmID() or 0,
+    id = _G.GetRealmID(),
 }
 
 if RealUI.realmInfo.connectedRealms[1] then
