@@ -4,7 +4,6 @@
 ## Author: Gethe
 ## Version: 2.1.2
 ## RequiredDeps: nibRealUI
-## OptionalDeps: LibContainer
 ## SavedVariables: RealUI_InventoryDB
 
 Libs\Libs.xml
