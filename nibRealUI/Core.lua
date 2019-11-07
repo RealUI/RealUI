@@ -335,11 +335,6 @@ function _G.RealUI_TestRaidWarnings()
     end, 5)
 end
 
-function RealUI:CPU_Profiling_Toggle()
-    _G.SetCVar("scriptProfile", (_G.GetCVar("scriptProfile") == "1") and "0" or "1")
-    _G.ReloadUI()
-end
-
 function RealUI:Taint_Logging_Toggle()
     local taintLog = _G.GetCVar("taintLog")
     _G.SetCVar("taintLog", (taintLog ~= "0") and "0" or "2")
@@ -392,6 +387,22 @@ function RealUI:OnProfileUpdate(event, database, profile)
         debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
         RealUI:ReloadUIDialog()
     end
+end
+
+_G.StaticPopupDialogs["PUDRUIRELOADUI"] = {
+    text = L["DoReloadUI"],
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        _G.ReloadUI()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    notClosableByLogout = false,
+}
+function RealUI:ReloadUIDialog()
+    _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
 function RealUI:OnInitialize()
@@ -480,9 +491,7 @@ function RealUI:OnInitialize()
         RealUI.Debug("Config", "/realadv")
         RealUI.LoadConfig("RealUI")
     end)
-    self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", _G.ReloadUI)
-    self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
     self:RegisterChatCommand("findSpell", function(input)
         -- /findSpell "Spell Name" (player)|target (buff)|debuff
@@ -493,7 +502,7 @@ function RealUI:OnInitialize()
             -- Default this to false for player, true for target.
             auraType = unit == "target" and "debuff" or "buff"
         end
-        self:FindSpellID(spellName, unit, auraType)
+        self.FindSpellID(spellName, unit, auraType)
     end)
 
     -- Hide store button

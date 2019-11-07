@@ -9,6 +9,31 @@ local RealUI = private.RealUI
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
+
+local utf8len, utf8sub = _G.string.utf8len, _G.string.utf8sub
+local function AbbreviateName(name, maxLength)
+    if not name then return "" end
+    local maxNameLength = maxLength or 12
+
+    local words, newName = {_G.strsplit(" ", name)}
+    if #words > 2 and utf8len(name) > maxNameLength then
+        local i = 1
+        repeat
+            words[i] = utf8sub(words[i], 1, 1) .. "."
+            i = i + 1
+        until i == #words
+
+        newName = _G.strjoin(" ", _G.unpack(words))
+    else
+        newName = name
+    end
+
+    if utf8len(newName) > maxNameLength then
+        newName = utf8sub(newName, 1, maxNameLength)..".."
+    end
+    return newName
+end
+
 ------------------
 ------ Tags ------
 ------------------
@@ -23,7 +48,7 @@ tags.Methods["realui:name"] = function(unit)
 
     --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
     local name = _G.UnitName(unit) or ""
-    name = RealUI:AbbreviateName(name, UnitFrames[unitTag].nameLength)
+    name = AbbreviateName(name, UnitFrames[unitTag].nameLength)
 
     local nameColor = "ffffffff"
     if isDead then
@@ -62,7 +87,7 @@ tags.Methods["realui:pvptimer"] = function(unit)
     --print("Tag:pvptimer", unit)
     if not _G.IsPVPTimerRunning() then return "" end
 
-    return RealUI:ConvertSecondstoTime(_G.floor(_G.GetPVPTimer() / 1000))
+    return _G.SecondsToClock(_G.floor(_G.GetPVPTimer() / 1000))
 end
 tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 
@@ -72,7 +97,7 @@ tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 tags.Methods["realui:healthValue"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return 0 end
 
-    return RealUI:ReadableNumber(_G.UnitHealth(unit))
+    return RealUI.ReadableNumber(_G.UnitHealth(unit))
 end
 tags.Events["realui:healthValue"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
@@ -109,7 +134,7 @@ tags.Events["realui:health"] = tags.Events["realui:healthValue"]
 tags.Methods["realui:powerValue"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return 0 end
 
-    return RealUI:ReadableNumber(_G.UnitPower(unit))
+    return RealUI.ReadableNumber(_G.UnitPower(unit))
 end
 tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
 

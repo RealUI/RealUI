@@ -230,7 +230,7 @@ function ClassResource:CreateStagger(unitFrame, unit)
             r, g, b = color[1], color[2], color[3]
         end
         element:SetShown(cur > 0)
-        element:SetStatusBarColor(RealUI:ColorDarken(0.5, r, g, b))
+        element:SetStatusBarColor(RealUI.ColorDarken(0.5, r, g, b))
     end
 
     return Stagger

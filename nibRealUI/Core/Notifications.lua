@@ -196,7 +196,7 @@ function RealUI:InitNotifications()
     f:Hide()
     f:SetAlpha(0.1)
     f:SetScale(0.1)
-    RealUI:CreateBD(f)
+    _G.Aurora.Base.SetBackdrop(f)
 
     icon = f:CreateTexture(nil, "OVERLAY")
     icon:SetSize(32, 32)

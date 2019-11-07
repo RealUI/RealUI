@@ -253,14 +253,14 @@ function ScreenSaver:CreateFrames()
         self.panel.right:SetWidth(4)
 
     -- Timer
-    self.timeLabel = RealUI:CreateFS(self.panel, "CENTER")
+    self.timeLabel = self.panel:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
+        self.timeLabel:SetJustifyH("CENTER")
         self.timeLabel:SetPoint("RIGHT", self.panel, "CENTER", 15, 0)
-        self.timeLabel:SetFontObject("SystemFont_Shadow_Med1")
         self.timeLabel:SetText("|cffffffffAFK |r|c"..RealUI.charInfo.class.color.colorStr.."TIME:")
 
-    self.time = RealUI:CreateFS(self.panel, "LEFT")
+    self.time = self.panel:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
+        self.time:SetJustifyH("LEFT")
         self.time:SetPoint("LEFT", self.panel, "CENTER", 17, 0)
-        self.time:SetFontObject("SystemFont_Shadow_Med1")
         self.time:SetText("0s")
 end
 

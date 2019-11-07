@@ -1435,7 +1435,7 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
-                local xpStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curXP), RealUI:ReadableNumber(maxXP), (curXP/maxXP)*100)
+                local xpStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(curXP), RealUI.ReadableNumber(maxXP), (curXP/maxXP)*100)
                 local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
                 tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                 tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
@@ -1444,7 +1444,7 @@ function Infobar:CreateBlocks()
                     tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                     tooltip:SetCellTextColor(lineNum, 2, Color.gray:GetRGB())
                 elseif restXP then
-                    lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI:ReadableNumber(restXP))
+                    lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI.ReadableNumber(restXP))
                     tooltip:SetLineTextColor(lineNum, Color.grayLight:GetRGB())
                 end
 
@@ -1519,7 +1519,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
-                local repStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(curRep), RealUI:ReadableNumber(maxRep), (curRep/maxRep)*100)
+                local repStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(curRep), RealUI.ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
                 tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
@@ -1632,7 +1632,7 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
-                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI:ReadableNumber(minHonor), RealUI:ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(minHonor), RealUI.ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
 
                 local level = _G.UnitHonorLevel("player")
                 local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
@@ -1982,7 +1982,7 @@ function Infobar:CreateBlocks()
         local lootSpec, hintSpec, hintGear
         local function Spec_TooltipOnUpdate(tooltip)
             local numColumns = tooltip:GetColumnCount()
-            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI:GetCurrentLootSpecName()), nil, numColumns)
+            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI.GetCurrentLootSpecName()), nil, numColumns)
             tooltip:SetCell(hintGear, 1, nil, nil, numColumns)
 
             if tooltip:IsMouseOver() then
@@ -2109,7 +2109,7 @@ function Infobar:CreateBlocks()
             local goldString, silverString, copperString
             local gold, silver, copper = SplitMoney(money)
 
-            goldString = GOLD_AMOUNT_STRING:format(RealUI:ReadableNumber(gold), _G.GOLD_AMOUNT_SYMBOL)
+            goldString = GOLD_AMOUNT_STRING:format(RealUI.ReadableNumber(gold), _G.GOLD_AMOUNT_SYMBOL)
             silverString = SILVER_AMOUNT_STRING:format(silver, _G.SILVER_AMOUNT_SYMBOL)
             copperString = COPPER_AMOUNT_STRING:format(copper, _G.COPPER_AMOUNT_SYMBOL)
 

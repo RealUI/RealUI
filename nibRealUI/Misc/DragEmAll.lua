@@ -167,8 +167,8 @@ function DragEmAll:HookFrame(name, moveParent)
         frame:EnableMouse(true)
         frame:SetMovable(true)
         frame:SetClampedToScreen(false)
-        RealUI:HookScript(frame, "OnMouseDown", MouseDownHandler)
-        RealUI:HookScript(frame, "OnMouseUp", MouseUpHandler)
+        frame:HookScript("OnMouseDown", MouseDownHandler)
+        frame:HookScript("OnMouseUp", MouseUpHandler)
         hooked[name] = true
     end
 end

@@ -1,7 +1,4 @@
 local _, private = ...
-local options = private.options
-local CloseHuDWindow = private.CloseHuDWindow
-local debug = private.debug
 
 -- Lua Globals --
 local next = _G.next
@@ -18,6 +15,11 @@ local round = RealUI.Round
 local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 local uiWidth, uiHeight = RealUI.GetInterfaceSize()
+
+local ValidateOffset = private.ValidateOffset
+local CloseHuDWindow = private.CloseHuDWindow
+local options = private.options
+local debug = private.debug
 
 local other do
     debug("HuD Other")
@@ -83,7 +85,7 @@ local other do
                             RealUI.ncLayout = RealUI.cLayout == 1 and 2 or 1
 
                             if value then
-                                RealUI.db.profile.positions[RealUI.ncLayout] = RealUI:DeepCopy(RealUI.db.profile.positions[RealUI.cLayout])
+                                RealUI.db.profile.positions[RealUI.ncLayout] = RealUI.DeepCopy(RealUI.db.profile.positions[RealUI.cLayout])
                             end
                         end,
                         order = 20,
@@ -628,7 +630,7 @@ local unitframes do
             order = 10,
             get = function(info) return tostring(UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].x) end,
             set = function(info, value)
-                value = RealUI:ValidateOffset(value)
+                value = ValidateOffset(value)
                 UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].x = value
             end,
         }
@@ -638,7 +640,7 @@ local unitframes do
             order = 20,
             get = function(info) return tostring(UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y) end,
             set = function(info, value)
-                value = RealUI:ValidateOffset(value)
+                value = ValidateOffset(value)
                 UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y = value
             end,
         }
@@ -1049,7 +1051,7 @@ local classresource do
                         hidden = RealUI.charInfo.class.token == "PALADIN",
                         get = function(info) return tostring(ClassResource.db.class.points.size.gap) end,
                         set = function(info, value)
-                            value = RealUI:ValidateOffset(value)
+                            value = ValidateOffset(value)
                             ClassResource.db.class.points.size.gap = value
                             ClassResource:SettingsUpdate("points", "gap")
                         end,

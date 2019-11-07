@@ -201,7 +201,10 @@ function AddonListAdv:RenameSet(set, name)
     _G.print(("Set [%s] renamed to [%s]."):format(oldName, set.name))
 end
 
-local setsButton = RealUI:CreateTextButton("Sets", _G.AddonList, 100, 22)
+local setsButton = _G.CreateFrame("Button", nil, _G.AddonList, "UIPanelButtonTemplate")
+_G.Aurora.Skin.UIPanelButtonTemplate(setsButton)
+setsButton:SetSize(100, 22)
+setsButton:SetText(_G.WARDROBE_SETS)
 setsButton:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
 setsButton:SetScript("OnClick", function(self)
     self.menu:ClearLines()

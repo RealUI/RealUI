@@ -39,19 +39,6 @@ local isInFarmMode = false
 local UpdateProcessing = false
 
 ----------
--- Seconds to Time
-local function ConvertSecondstoTime(value)
-    local minutes, seconds
-    minutes = _G.floor(value / 60)
-    seconds = _G.floor(value - (minutes * 60))
-    if ( minutes > 0 ) then
-        if ( seconds < 10 ) then seconds = ("0%d"):format(seconds) end
-        return ("%s:%s"):format(minutes, seconds)
-    else
-        return ("%ss"):format(seconds)
-    end
-end
-
 -- Zoom Out
 local function ZoomMinimapOut()
     _G.Minimap:SetZoom(0)
@@ -778,7 +765,7 @@ function MinimapAdv:GetLFGQueue(event, ...)
             if not hasData then
                 queueStr = _G.LESS_THAN_ONE_MINUTE
             else
-                local timeInQueue = ConvertSecondstoTime(_G.GetTime() - queuedTime)
+                local timeInQueue = _G.SecondsToClock(_G.GetTime() - queuedTime)
                 if myWait > 0 then
                     local avgWait = _G.SecondsToTime(myWait, false, false, 1)
                     queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
@@ -933,8 +920,8 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
-        self:debug("IsInInstance", RealUI.GetColorString(RealUI.media.colors.blue), RealUI:GetCurrentLootSpecName())
-        MMFrames.info.LootSpec.text:SetFormattedText("|cff%s%s:|r %s", RealUI.GetColorString(RealUI.media.colors.blue), _G.LOOT, RealUI:GetCurrentLootSpecName())
+        self:debug("IsInInstance", RealUI.GetColorString(RealUI.media.colors.blue), RealUI.GetCurrentLootSpecName())
+        MMFrames.info.LootSpec.text:SetFormattedText("|cff%s%s:|r %s", RealUI.GetColorString(RealUI.media.colors.blue), _G.LOOT, RealUI.GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
     else
@@ -1296,7 +1283,7 @@ local function Garrison_OnEnter(self)
         _G.GameTooltip:AddLine(" ")
 
         local currency, amount = _G.GetCurrencyInfo(currencyId)
-        _G.GameTooltip:AddDoubleLine(currency, RealUI:ReadableNumber(amount), 1, 1, 1, 1, 1, 1)
+        _G.GameTooltip:AddDoubleLine(currency, RealUI.ReadableNumber(amount), 1, 1, 1, 1, 1, 1)
 
         if #categoryInfo > 0 then
             _G.GameTooltip:AddLine(" ")
@@ -1479,7 +1466,7 @@ local function NewInfoFrame(name, parent, format)
             self.updateThrottle = (self.updateThrottle or 0.1) - elapsed
             if ( self.updateThrottle <= 0 ) then
                 local queueStr
-                local timeInQueue = ConvertSecondstoTime(_G.GetTime() - self.queuedTime)
+                local timeInQueue = _G.SecondsToClock(_G.GetTime() - self.queuedTime)
                 if self.myWait > 0 then
                     local avgWait = _G.SecondsToTime(self.myWait, false, false, 1)
                     queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
@@ -1536,7 +1523,7 @@ local function CreateFrames()
     MMFrames.buttonframe:SetSize(66, 17)
     MMFrames.buttonframe:SetFrameStrata("MEDIUM")
     MMFrames.buttonframe:SetFrameLevel(5)
-    RealUI:CreateBD(MMFrames.buttonframe, nil, true, true)
+    _G.Aurora.Base.SetBackdrop(MMFrames.buttonframe)
 
     MMFrames.buttonframe.edge = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
     MMFrames.buttonframe.edge:SetColorTexture(1, 1, 1, 1)
@@ -1764,7 +1751,10 @@ local function SetUpMinimapFrame()
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
 
     -- Create New Border
-    RealUI:CreateBG(_G.Minimap)
+    local bg = _G.Minimap:CreateTexture(nil, "BACKGROUND")
+    bg:SetPoint("TOPLEFT", -1, 1)
+    bg:SetPoint("BOTTOMRIGHT", 1, -1)
+    bg:SetColorTexture(0, 0, 0)
 
     -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)

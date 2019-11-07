@@ -23,10 +23,12 @@ local function CreateTotems(parent)
         totem:SetSize(22, 22)
         totem:ClearAllPoints()
         totem:SetPoint("TOPLEFT", totemBar, i * (totem:GetWidth() + 3), 0)
-        RealUI:CreateBG(totem)
 
         local bg = _G[name.."Background"]
-        bg:SetTexture("")
+        bg:SetPoint("TOPLEFT", -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", 1, -1)
+        bg:SetColorTexture(0, 0, 0)
+
         local dur = _G[name.."Duration"]
         dur:Hide()
         dur.Show = function() end

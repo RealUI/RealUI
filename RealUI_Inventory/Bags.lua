@@ -10,6 +10,8 @@ local Skin = Aurora.Skin
 local Color = Aurora.Color
 
 -- RealUI --
+local RealUI = _G.RealUI
+
 local Inventory = private.Inventory
 
 local bags = {}
@@ -106,14 +108,7 @@ local function CreateBag(bagType)
     local main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
     _G.Mixin(main, _G.ContinuableContainer)
     main:SetPoint("BOTTOMRIGHT", -100, 100)
-    main:SetMovable(true)
-    main:RegisterForDrag("LeftButton")
-    main:SetScript("OnMouseDown", function()
-        main:ClearAllPoints()
-        main:StartMoving()
-    end)
-    main:SetScript("OnMouseUp",  main.StopMovingOrSizing)
-
+    RealUI.MakeFrameDraggable(main)
 
     main.filter = function()
         return true

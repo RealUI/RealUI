@@ -1,10 +1,13 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next type tinsert
 
 -- Libs --
 local ace = _G.LibStub("AceAddon-3.0")
+local Aurora = _G.Aurora
+local Skin = Aurora.Skin
+
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -89,45 +92,103 @@ end
 ------------------------
 ---- Options Window ----
 ------------------------
+local function CreateCheckbox(name, parent, label, side, size)
+    local f = _G.CreateFrame("CheckButton", name, parent, "ChatConfigCheckButtonTemplate")
+    Skin.ChatConfigCheckButtonTemplate(f)
+    f:SetHitRectInsets(0, 0, 0, 0)
+    f.type = "checkbox"
+
+    f.text = _G[f:GetName() .. "Text"]
+    f.text:SetFontObject("SystemFont_Shadow_Med1")
+    f.text:SetTextColor(1, 1, 1)
+    f.text:SetText(label)
+    f.text:ClearAllPoints()
+    if side == "LEFT" then
+        f.text:SetPoint("RIGHT", f, "LEFT", -4, 0)
+        f.text:SetJustifyH("RIGHT")
+    else
+        f.text:SetPoint("LEFT", f, "RIGHT", 4, 0)
+        f.text:SetJustifyH("LEFT")
+    end
+
+    return f
+end
+local function CreateTextButton(text, parent, width, height)
+    local f = _G.CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    Skin.UIPanelButtonTemplate(f)
+    f:SetSize(width, height)
+    f:SetText(text)
+    return f
+end
+local function CreateFS(parent, justify, size)
+    local font = "SystemFont_Shadow_Med1"
+    if size == "large" then
+        font = "Fancy16Font"
+    end
+
+    local f = parent:CreateFontString(nil, "OVERLAY", font)
+    f:SetJustifyH(justify)
+    return f
+end
+local function CreateWindow(name, width, height)
+    local f = _G.CreateFrame("Frame", name, _G.UIParent)
+    Aurora.Base.SetBackdrop(f)
+    f:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
+    f:SetSize(width, height)
+    f:SetFrameStrata("DIALOG")
+    f:SetFrameLevel(10)
+    RealUI.MakeFrameDraggable(f)
+
+    tinsert(_G.UISpecialFrames, name)
+    f.close = _G.CreateFrame("Button", nil, f, "UIPanelCloseButton")
+    f.close:SetPoint("TOPRIGHT", 6, 4)
+    f.close:SetScript("OnClick", function(button)
+        button:GetParent():Hide()
+    end)
+    Skin.UIPanelCloseButton(f.close)
+
+    return f
+end
+
 
 function AddonControl:CreateOptionsFrame()
     if self.options then return end
 
     local color = _G.Aurora.Color.highlight
-    self.options = RealUI:CreateWindow("RealUIAddonControlOptions", 290, 240, true, true)
+    self.options = CreateWindow("RealUIAddonControlOptions", 290, 240)
     local acO = self.options
         acO:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
         acO:Hide()
 
-    acO.okay = RealUI:CreateTextButton(_G.OKAY, acO, 100, 24)
+    acO.okay = CreateTextButton(_G.OKAY, acO, 100, 24)
         acO.okay:SetPoint("BOTTOM", acO, "BOTTOM", -51, 5)
         acO.okay:SetScript("OnClick", function() self.options:Hide() end)
 
-    acO.reloadui = RealUI:CreateTextButton("Reload UI", acO, 100, 24)
+    acO.reloadui = CreateTextButton("Reload UI", acO, 100, 24)
         acO.reloadui:SetPoint("BOTTOM", acO, "BOTTOM", 50, 5)
         acO.reloadui:SetScript("OnClick", _G.ReloadUI)
 
     -- Header
-    local header = RealUI:CreateFS(acO, "CENTER", "large")
+    local header = CreateFS(acO, "CENTER", "large")
         header:SetText(L["Control_AddonControl"])
         header:SetPoint("TOP", acO, "TOP", 0, -9)
 
     -- Label AddOn
-    local lAddon = RealUI:CreateFS(acO, "LEFT", "small")
+    local lAddon = CreateFS(acO, "LEFT", "small")
         lAddon:SetPoint("TOPLEFT", acO, "TOPLEFT", 12, -30)
         lAddon:SetText("AddOn")
         lAddon:SetWidth(130)
         lAddon:SetTextColor(color:GetRGB())
 
     -- Label Base
-    local lBase = RealUI:CreateFS(acO, "CENTER", "small")
+    local lBase = CreateFS(acO, "CENTER", "small")
         lBase:SetPoint("LEFT", lAddon, "RIGHT", 0, 0)
         lBase:SetText("Base")
         lBase:SetWidth(40)
         lBase:SetTextColor(color:GetRGB())
 
     -- Label Position
-    local lPosition = RealUI:CreateFS(acO, "CENTER", "small")
+    local lPosition = CreateFS(acO, "CENTER", "small")
         lPosition:SetPoint("LEFT", lBase, "RIGHT", 0, 0)
         lPosition:SetText("Pos")
         lPosition:SetWidth(40)
@@ -165,7 +226,7 @@ function AddonControl:CreateOptionsFrame()
             prevLabel = fs
 
             -- Base Checkboxes
-            cbBase[cnt] = RealUI:CreateCheckbox("RealUIAddonControlBase"..cnt, acAddonSect, "", "LEFT", 21)
+            cbBase[cnt] = CreateCheckbox("RealUIAddonControlBase"..cnt, acAddonSect, "", "LEFT", 21)
             cbBase[cnt].addon = addon
             cbBase[cnt].id = cnt
             if not prevCBBase then
@@ -182,7 +243,7 @@ function AddonControl:CreateOptionsFrame()
             prevCBBase = cbBase[cnt]
 
             -- Position Checkboxes
-            cbPosition[cnt] = RealUI:CreateCheckbox("RealUIAddonControlPosition"..cnt, acAddonSect, "", "LEFT", 21)
+            cbPosition[cnt] = CreateCheckbox("RealUIAddonControlPosition"..cnt, acAddonSect, "", "LEFT", 21)
             cbPosition[cnt].addon = addon
             cbPosition[cnt].id = cnt
             if not prevCBPosition then
@@ -199,7 +260,7 @@ function AddonControl:CreateOptionsFrame()
             prevCBPosition = cbPosition[cnt]
 
             -- Reset
-            bReset[cnt] = RealUI:CreateTextButton("Reset", acAddonSect, 60, 18)
+            bReset[cnt] = CreateTextButton("Reset", acAddonSect, 60, 18)
             bReset[cnt].addon = altAddOnTable[addon] or addon
             bReset[cnt].id = cnt
             if not prevReset then

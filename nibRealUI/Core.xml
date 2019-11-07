@@ -2,7 +2,6 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!-- Core -->
-    <Script file="Core\Fun.lua"/>
     <Include file="Core\AddonData.xml"/>
     <Script file="Core\AddonControl.lua"/>
     <Script file="Core\MiniPatches.lua"/>
