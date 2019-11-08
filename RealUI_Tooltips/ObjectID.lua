@@ -101,11 +101,13 @@ local function SetupAchievementTooltips()
         if addonName == "Blizzard_AchievementUI" then
             for i, button in ipairs(_G.AchievementFrameAchievementsContainer.buttons) do
                 button:HookScript("OnEnter", function()
-                    _G.GameTooltip:SetOwner(button, "ANCHOR_NONE")
-                    _G.GameTooltip:SetPoint("TOPLEFT", button, "TOPRIGHT", 0, 0)
+                    if not _G.GameTooltip:IsOwned(button) then
+                        _G.GameTooltip:SetOwner(button, "ANCHOR_NONE")
+                        _G.GameTooltip:SetPoint("TOPLEFT", button, "TOPRIGHT", 0, 0)
+                    end
+
                     if button.id then
                         AddToTooltip(_G.GameTooltip, TooltipTypes.achievement, button.id)
-                        _G.GameTooltip:Show()
                     end
                 end)
                 button:HookScript("OnLeave", function()
