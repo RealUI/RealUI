@@ -245,7 +245,8 @@ end
 function RealUI.GetCurrentLootSpecName()
     local lootSpec = _G.GetLootSpecialization()
     if lootSpec and lootSpec > 0 then
-        return RealUI.charInfo.specs[lootSpec].name
+        local _, specName = _G.GetSpecializationInfoByID(lootSpec)
+        return specName
     else
         return RealUI.charInfo.specs.current.name
     end
