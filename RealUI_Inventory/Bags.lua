@@ -54,10 +54,11 @@ local function SortSlots(a, b)
     end
 end
 
-local function UpdateBag(bag, columnHeight, columnBase)
+local function UpdateBag(index, tag, columnHeight, columnBase)
+    local bag = bags[tag]
     sort(bag.slots, SortSlots)
 
-    if bag.tag == "main" then
+    if tag == "main" then
         tinsert(bag.slots, bag.dropTarget)
     end
 
@@ -65,18 +66,21 @@ local function UpdateBag(bag, columnHeight, columnBase)
     bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
 
     local height = bag:GetHeight()
-    if bag.tag == "main" then
+    if tag == "main" then
         columnHeight = columnHeight + height + 5
     else
         if columnHeight + height >= Inventory.db.global.maxHeight then
             bag:SetPoint("BOTTOMRIGHT", bags[columnBase], "BOTTOMLEFT", -5, 0)
-            columnBase = bag.tag
-            columnHeight = 0
+            columnBase = tag
+            columnHeight = height + 5
         else
             columnHeight = columnHeight + height + 5
-            if bag.anchor then
-                bag:SetPoint("BOTTOMRIGHT", bags[bag.anchor], "TOPRIGHT", 0, 5)
+
+            local anchor = "main"
+            if index > 1 then
+                anchor = Inventory.db.global.filters[index - 1]
             end
+            bag:SetPoint("BOTTOMRIGHT", bags[anchor], "TOPRIGHT", 0, 5)
         end
     end
 
@@ -92,18 +96,18 @@ function private.UpdateBags()
     end
 
     local columnHeight, columnBase = 0, "main"
-    columnHeight, columnBase = UpdateBag(bags.main, columnHeight, columnBase)
+    columnHeight, columnBase = UpdateBag(nil, columnBase, columnHeight, columnBase)
 
-    for i, bag in ipairs(bags.main) do
-        columnHeight, columnBase = UpdateBag(bag, columnHeight, columnBase)
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        columnHeight, columnBase = UpdateBag(i, tag, columnHeight, columnBase)
     end
 end
 
 function private.AddSlotToBag(slot, bagID)
     local bag = Inventory.main
-    for _, info in ipairs(private.filters) do
-        if info.filter(slot) then
-            bag = bags[info.tag]
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        if private.filters[tag].filter(slot) then
+            bag = bags[tag]
         end
     end
 
@@ -209,14 +213,11 @@ local function CreateBag(bagType)
     end)
     main:Hide()
 
-    main:ContinueOnLoad(function()
-        private.Update()
-    end)
-
-    for i, info in ipairs(private.filters) do
-        local bag = _G.CreateFrame("Frame", "$parent_"..info.tag, main)
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
         SetupBag(bag)
 
+        local info = private.filters[tag]
         local name = bag:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
         name:SetPoint("TOPLEFT")
         name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -15)
@@ -224,17 +225,12 @@ local function CreateBag(bagType)
         name:SetJustifyV("MIDDLE")
         bag.offsetTop = bag.offsetTop + 15
 
-        bag.tag = info.tag
-        bag.filter = info.filter
-
-        bag.anchor = bagType
-        if i > 1 then
-            bag.anchor = private.filters[i - 1].tag
-        end
-
-        main[i] = bag
-        bags[info.tag] = bag
+        bags[tag] = bag
     end
+
+    main:ContinueOnLoad(function()
+        private.Update()
+    end)
 end
 
 

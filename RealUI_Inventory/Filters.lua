@@ -4,12 +4,11 @@ local _, private = ...
 -- luacheck: globals tinsert ipairs
 
 private.filters = {}
-local function CreateFilter(info)
-    tinsert(private.filters, info)
+local function CreateFilter(tag, info)
+    private.filters[tag] = info
 end
 
-CreateFilter({
-    tag = "equipment",
+CreateFilter("equipment", {
     name = _G.BAG_FILTER_EQUIPMENT,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
@@ -17,8 +16,7 @@ CreateFilter({
     end,
 })
 
-CreateFilter({
-    tag = "tradegoods",
+CreateFilter("tradegoods", {
     name = _G.AUCTION_CATEGORY_TRADE_GOODS,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
@@ -26,8 +24,7 @@ CreateFilter({
     end,
 })
 
-CreateFilter({
-    tag = "consumables",
+CreateFilter("consumables", {
     name = _G.AUCTION_CATEGORY_CONSUMABLES,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
@@ -35,8 +32,7 @@ CreateFilter({
     end,
 })
 
-CreateFilter({
-    tag = "questitems",
+CreateFilter("questitems", {
     name = _G.AUCTION_CATEGORY_QUEST_ITEMS,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())

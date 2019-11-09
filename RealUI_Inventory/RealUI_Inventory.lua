@@ -13,6 +13,10 @@ local defaults = {
     global = {
         maxHeight = 600,
         filters = {
+            "questitems",
+            "consumables",
+            "equipment",
+            "tradegoods",
         },
     }
 }
