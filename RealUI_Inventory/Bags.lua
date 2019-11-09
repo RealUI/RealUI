@@ -17,7 +17,6 @@ local Inventory = private.Inventory
 local bags = {}
 Inventory.bags = bags
 
-
 local function SortSlots(a, b)
     local qualityA = a.item:GetItemQuality()
     local qualityB = b.item:GetItemQuality()
@@ -54,6 +53,35 @@ local function SortSlots(a, b)
         end
     end
 end
+
+local function UpdateBag(bag, columnHeight, columnBase)
+    sort(bag.slots, SortSlots)
+
+    if bag.tag == "main" then
+        tinsert(bag.slots, bag.dropTarget)
+    end
+
+    local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
+    bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
+
+    local height = bag:GetHeight()
+    if bag.tag == "main" then
+        columnHeight = columnHeight + height + 5
+    else
+        if columnHeight + height >= Inventory.db.global.maxHeight then
+            bag:SetPoint("BOTTOMRIGHT", bags[columnBase], "BOTTOMLEFT", -5, 0)
+            columnBase = bag.tag
+            columnHeight = 0
+        else
+            columnHeight = columnHeight + height + 5
+            if bag.anchor then
+                bag:SetPoint("BOTTOMRIGHT", bags[bag.anchor], "TOPRIGHT", 0, 5)
+            end
+        end
+    end
+
+    return columnHeight, columnBase
+end
 function private.UpdateBags()
     for tag, bag in next, bags do
         wipe(bag.slots)
@@ -63,15 +91,11 @@ function private.UpdateBags()
         private.UpdateSlots(bagID)
     end
 
-    for tag, bag in next, bags do
-        sort(bag.slots, SortSlots)
+    local columnHeight, columnBase = 0, "main"
+    columnHeight, columnBase = UpdateBag(bags.main, columnHeight, columnBase)
 
-        if tag == "main" then
-            tinsert(bag.slots, bag.dropTarget)
-        end
-
-        local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
-        bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
+    for i, bag in ipairs(bags.main) do
+        columnHeight, columnBase = UpdateBag(bag, columnHeight, columnBase)
     end
 end
 
@@ -110,6 +134,7 @@ local function CreateBag(bagType)
     main:SetPoint("BOTTOMRIGHT", -100, 100)
     RealUI.MakeFrameDraggable(main)
 
+    main.tag = "main"
     main.filter = function()
         return true
     end
@@ -202,12 +227,12 @@ local function CreateBag(bagType)
         bag.tag = info.tag
         bag.filter = info.filter
 
-        local anchor = bagType
+        bag.anchor = bagType
         if i > 1 then
-            anchor = private.filters[i - 1].tag
+            bag.anchor = private.filters[i - 1].tag
         end
-        bag:SetPoint("BOTTOMRIGHT", bags[anchor], "TOPRIGHT", 0, 5)
 
+        main[i] = bag
         bags[info.tag] = bag
     end
 end

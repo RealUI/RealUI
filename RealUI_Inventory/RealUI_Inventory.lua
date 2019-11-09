@@ -11,6 +11,7 @@ private.Inventory = Inventory
 
 local defaults = {
     global = {
+        maxHeight = 600,
         filters = {
         },
     }
