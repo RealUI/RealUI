@@ -39,12 +39,15 @@ local function UpdateSlot(slot)
     _G.SetItemButtonDesaturated(slot, item:IsItemLocked())
 
     local questTexture = _G[slot:GetName().."IconQuestTexture"]
-    if questId and not isActive then
-        questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BANG)
-        questTexture:Show()
-    elseif questId or isQuestItem then
-        questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BORDER)
-        questTexture:Show()
+    if questId then
+        slot._auroraIconBorder:SetBackdropBorderColor(1, 1, 0)
+        if not isActive then
+            questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BANG)
+            questTexture:Show()
+        elseif isQuestItem then
+            questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BORDER)
+            questTexture:Show()
+        end
     else
         questTexture:Hide()
     end
