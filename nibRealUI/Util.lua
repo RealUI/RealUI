@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals type pcall tonumber next
--- luacheck: globals floor min max
+-- luacheck: globals floor min max math
 
 local RealUI = _G.RealUI
 
@@ -59,9 +59,39 @@ function RealUI.GetColorString(red, green, blue)
     return hexColor:format(red * 255, green * 255, blue * 255)
 end
 
+function RealUI.ColorGradient(percent, colors)
+    local num = #colors
+
+    if percent >= 1 then
+        return colors[num]
+    elseif percent <= 0 then
+        return colors[0]
+    end
+
+    local segment, relperc = math.modf(percent * num)
+
+    local r1, g1, b1, r2, g2, b2
+    r1, g1, b1 = colors[segment]:GetRGB()
+    r2, g2, b2 = colors[segment+1]:GetRGB()
+
+    if ( not r2 or not g2 or not b2 ) then
+        return colors[0]
+    else
+        local r = r1 + (r2-r1) * relperc
+        local g = g1 + (g2-g1) * relperc
+        local b = b1 + (b2-b1) * relperc
+
+        return _G.Aurora.Color.Create(r, g, b, 1)
+    end
+end
+
+local durabilityColors = {
+    [0] = _G.CreateColor(1, 0, 0),
+    [1] = _G.CreateColor(1, 1, 0),
+    [2] = _G.CreateColor(0, 1, 0),
+}
 function RealUI.GetDurabilityColor(curDura, maxDura)
-    local low, mid, high = _G.Aurora.Color.red, _G.Aurora.Color.yellow, _G.Aurora.Color.green
-    return private.oUF:RGBColorGradient(curDura, maxDura or 1, low.r,low.g,low.b, mid.r,mid.g,mid.b, high.r,high.g,high.b)
+    return RealUI.ColorGradient(curDura / (maxDura or 1), durabilityColors)
 end
 
 --[[

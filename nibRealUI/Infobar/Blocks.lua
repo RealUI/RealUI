@@ -1354,9 +1354,9 @@ function Infobar:CreateBlocks()
                     if item.hasDura and item.dura then
                         lineNum = tooltip:AddLine(item.slot, round(item.dura * 100, 1) .. "%")
                         if slotID == itemSlots.lowSlot then
-                            tooltip:SetLineTextColor(lineNum, RealUI.GetDurabilityColor(item.min, item.max))
+                            tooltip:SetLineTextColor(lineNum, RealUI.GetDurabilityColor(item.min, item.max):GetRGB())
                         else
-                            tooltip:SetCellTextColor(lineNum, 2, RealUI.GetDurabilityColor(item.min, item.max))
+                            tooltip:SetCellTextColor(lineNum, 2, RealUI.GetDurabilityColor(item.min, item.max):GetRGB())
                         end
                     end
                 end
@@ -1392,7 +1392,7 @@ function Infobar:CreateBlocks()
                     alert:Hide()
                 end
                 block.dataObj.text = round(lowDur * 100) .. "%"
-                block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax)
+                block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax):GetRGB()
                 block.timer = false
             end,
             events = {
