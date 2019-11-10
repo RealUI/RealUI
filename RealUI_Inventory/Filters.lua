@@ -26,13 +26,29 @@ CreateFilter("questitems", {
     end,
 })
 
-CreateFilter("tradegoods", {
-    name = _G.AUCTION_CATEGORY_TRADE_GOODS,
-    filter = function(slot)
-        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-        return typeID == _G.LE_ITEM_CLASS_TRADEGOODS
-    end,
-})
+local tradegoods, prefix = {}, _G.BAG_FILTER_TRADE_GOODS .. ": %s"
+local classIndex = _G.LE_ITEM_CLASS_TRADEGOODS
+local subClassIndex = 0
+local subClassName = _G.GetItemSubClassInfo(classIndex, subClassIndex)
+
+while subClassName and subClassName ~= "" do
+    tradegoods[subClassIndex] = subClassName
+
+    subClassIndex = subClassIndex + 1
+    subClassName = _G.GetItemSubClassInfo(classIndex, subClassIndex)
+end
+
+for i = 0, #tradegoods do
+    if not tradegoods[i]:find("OBSOLETE") then
+        CreateFilter("tradegoods_"..tradegoods[i], {
+            name = prefix:format(tradegoods[i]),
+            filter = function(slot)
+                local _, _, _, _, _, typeID, subTypeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+                return typeID == _G.LE_ITEM_CLASS_TRADEGOODS and subTypeID == i
+            end,
+        })
+    end
+end
 
 CreateFilter("equipment", {
     name = _G.BAG_FILTER_EQUIPMENT,
