@@ -44,7 +44,16 @@ local function FontReset(pool, fontString)
     fontString:ClearAllPoints()
     fontString:Hide()
 end
+local function GetLine(self, scrollArea)
+    local scrollLine = self:Acquire()
+    scrollLine.scrollArea = scrollArea
 
+    if self.isSticky then
+        scrollLine:SetPoint("CENTER", scrollArea)
+    else
+        scrollLine:SetPoint("BOTTOM", scrollArea)
+    end
+end
 local function CreateFontStringPool(parent, layer, subLayer, fontStringTemplate, isSticky)
     local pool = _G.CreateObjectPool(FontFactory, FontReset)
     pool.parent = parent
@@ -52,13 +61,14 @@ local function CreateFontStringPool(parent, layer, subLayer, fontStringTemplate,
     pool.subLayer = subLayer
     pool.fontStringTemplate = fontStringTemplate
     pool.isSticky = isSticky
+    pool.GetLine = GetLine
 
     return pool
 end
 
 local frame = _G.CreateFrame("Frame", nil, _G.UIParent)
 local scrollLines = {}
-scrollLines.normal = CreateFontStringPool(frame, "BACKGROUND", 0, "GameFontHighlight")
-scrollLines.sticky = CreateFontStringPool(frame, "BACKGROUND", 0, "GameFontHighlight", true)
+scrollLines.normal = CreateFontStringPool(frame, "BACKGROUND", 0, "NumberFont_Outline_Med")
+scrollLines.sticky = CreateFontStringPool(frame, "BACKGROUND", 0, "NumberFont_Outline_Huge", true)
 
 private.scrollLines = scrollLines

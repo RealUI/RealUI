@@ -20,3 +20,28 @@ function private.CreateScrollArea(scrollType)
     return scrollArea
 end
 
+function private.CreateScrollAreas()
+    private.CreateScrollArea("incoming")
+    private.CreateScrollArea("outgoing")
+end
+
+function private.AddEvent(scrollType, isSticky, text)
+    local scrollArea = scrollAreas[scrollType]
+
+    local scrollLines = private.scrollLines.normal
+    if isSticky then
+        scrollLines = private.scrollLines.sticky
+    end
+
+    local scrollLine = scrollLines:Acquire()
+    if isSticky then
+        scrollLine:SetPoint("CENTER", scrollArea)
+    else
+        scrollLine:SetPoint("BOTTOM", scrollArea)
+    end
+
+    scrollLine.scrollArea = scrollArea
+    scrollLine:SetText(text)
+    scrollLine:Show()
+    scrollLine.scrollAnim:Play()
+end

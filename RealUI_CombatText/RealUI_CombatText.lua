@@ -6,7 +6,7 @@ local _, private = ...
 -- RealUI --
 local RealUI = _G.RealUI
 
-local CombatText = RealUI:NewModule("CombatText")
+local CombatText = RealUI:NewModule("CombatText", "AceEvent-3.0")
 private.CombatText = CombatText
 
 local defaults = {
@@ -28,9 +28,30 @@ local defaults = {
     }
 }
 
+local playerGUID = _G.UnitGUID("player")
+local function FilterEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    local scrollType
+    if sourceGUID == playerGUID then
+        scrollType = "outgoing"
+    elseif destGUID == playerGUID then
+        scrollType = "incoming"
+    end
+
+    local eventBase, eventType = event:match("(%w+)_([%w_]+)")
+
+    if scrollType then
+        private[eventBase](scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    end
+end
+
+function CombatText:COMBAT_LOG_EVENT_UNFILTERED()
+    FilterEvent(_G.CombatLogGetCurrentEventInfo())
+end
+
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
 
+    CombatText:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     private.CreateScrollAreas()
 
 

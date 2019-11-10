@@ -9,5 +9,6 @@
 Libs\Libs.xml
 
 RealUI_CombatText.lua
+Events.lua
 ScrollAreas.lua
 ScrollLines.lua
