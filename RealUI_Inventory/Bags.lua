@@ -54,7 +54,7 @@ local function SortSlots(a, b)
     end
 end
 
-local function UpdateBag(index, tag, columnHeight, columnBase)
+local function UpdateBag(index, tag, columnHeight, columnBase, numSkipped)
     local bag = bags[tag]
     sort(bag.slots, SortSlots)
 
@@ -78,7 +78,7 @@ local function UpdateBag(index, tag, columnHeight, columnBase)
 
             local anchor = "main"
             if index > 1 then
-                anchor = Inventory.db.global.filters[index - 1]
+                anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
             end
             bag:SetPoint("BOTTOMRIGHT", bags[anchor], "TOPRIGHT", 0, 5)
         end
@@ -96,10 +96,18 @@ function private.UpdateBags()
     end
 
     local columnHeight, columnBase = 0, "main"
-    columnHeight, columnBase = UpdateBag(nil, columnBase, columnHeight, columnBase)
+    columnHeight, columnBase = UpdateBag(nil, "main", columnHeight, columnBase)
 
+    local numSkipped = 0
     for i, tag in ipairs(Inventory.db.global.filters) do
-        columnHeight, columnBase = UpdateBag(i, tag, columnHeight, columnBase)
+        if #bags[tag].slots <= 0 then
+            bags[tag]:Hide()
+            numSkipped = numSkipped + 1
+        else
+            columnHeight, columnBase = UpdateBag(i, tag, columnHeight, columnBase, numSkipped)
+            bags[tag]:Show()
+            numSkipped = 0
+        end
     end
 end
 
