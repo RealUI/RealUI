@@ -16,6 +16,9 @@ local function SlotReset(pool, slot)
     slot:ClearAllPoints()
     slot:Hide()
 
+    if slot.cancel then
+        slot.cancel()
+    end
     slot.item = nil
     slot:Clear()
 end
@@ -171,6 +174,9 @@ function private.GetSlot(bagID, slotIndex)
     if slot:IsValid() then
         slot:SetID(slotIndex)
         slot.item = _G.Item:CreateFromItemLocation(slot)
+        slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
+            UpdateSlot(slot)
+        end)
     else
         slots:Release(slot)
     end
