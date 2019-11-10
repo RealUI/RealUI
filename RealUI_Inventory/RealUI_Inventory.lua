@@ -12,12 +12,6 @@ private.Inventory = Inventory
 local defaults = {
     global = {
         maxHeight = 600,
-        filters = {
-            "questitems",
-            "consumables",
-            "equipment",
-            "tradegoods",
-        },
     }
 }
 
@@ -58,6 +52,7 @@ function private.Toggle(show)
 end
 
 function Inventory:OnInitialize()
+    defaults.global.filters = private.filterList
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
     private.CreateBags()

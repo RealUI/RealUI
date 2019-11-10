@@ -4,8 +4,10 @@ local _, private = ...
 -- luacheck: globals tinsert ipairs
 
 private.filters = {}
+private.filterList = {}
 local function CreateFilter(tag, info)
     private.filters[tag] = info
+    tinsert(private.filterList, tag)
 end
 
 CreateFilter("equipment", {
