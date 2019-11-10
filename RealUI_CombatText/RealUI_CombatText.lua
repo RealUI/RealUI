@@ -11,29 +11,27 @@ private.CombatText = CombatText
 
 local defaults = {
     global = {
+        incoming = {
+            position = {
+                x = -200,
+                y = 0,
+                point = "CENTER"
+            }
+        },
+        outgoing = {
+            position = {
+                x = 200,
+                y = 0,
+                point = "CENTER"
+            }
+        }
     }
 }
 
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
 
-    local scrollArea = private.CreateScrollArea()
-    local scrollLines = private.scrollLines
-    _G.C_Timer.NewTicker(1.5, function( ... )
-        local normal = scrollLines.normal:Acquire()
-        normal.scrollArea = scrollArea
-        normal:SetPoint("BOTTOM", scrollArea)
-        normal:SetText("text")
-        normal:Show()
-        normal.scrollAnim:Play()
-
-        local sticky = scrollLines.sticky:Acquire()
-        sticky.scrollArea = scrollArea
-        sticky:SetPoint("CENTER", scrollArea)
-        sticky:SetText("STICKY")
-        sticky:Show()
-        sticky.scrollAnim:Play()
-    end)
+    private.CreateScrollAreas()
 
 
     --[[
