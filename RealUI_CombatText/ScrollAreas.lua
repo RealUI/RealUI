@@ -1,5 +1,8 @@
 local _, private = ...
 
+-- Lua Globals --
+-- luacheck: globals tremove tinsert
+
 local CombatText = private.CombatText
 
 local scrollAreas = {}
@@ -25,7 +28,7 @@ function private.CreateScrollAreas()
     private.CreateScrollArea("outgoing")
 end
 
-function private.AddEvent(scrollType, isSticky, text)
+local function DisplayEvent(scrollType, isSticky, text)
     local scrollArea = scrollAreas[scrollType]
 
     local scrollLines = private.scrollLines.normal
@@ -44,4 +47,17 @@ function private.AddEvent(scrollType, isSticky, text)
     scrollLine:SetText(text)
     scrollLine:Show()
     scrollLine.scrollAnim:Play()
+end
+
+local eventQueue = {}
+_G.C_Timer.NewTicker(0.1, function( ... )
+    if #eventQueue > 0 then
+        local event = tremove(eventQueue, 1)
+        DisplayEvent(event[1], event[2], event[3])
+    end
+end)
+
+
+function private.AddEvent(scrollType, isSticky, text)
+    tinsert(eventQueue, {scrollType, isSticky, text})
 end
