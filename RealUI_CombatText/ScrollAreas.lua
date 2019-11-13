@@ -37,16 +37,8 @@ local function DisplayEvent(scrollType, isSticky, text)
     end
 
     local scrollLine = scrollLines:Acquire()
-    if isSticky then
-        scrollLine:SetPoint("CENTER", scrollArea)
-    else
-        scrollLine:SetPoint("BOTTOM", scrollArea)
-    end
-
-    scrollLine.scrollArea = scrollArea
-    scrollLine:SetText(text)
-    scrollLine:Show()
-    scrollLine.scrollAnim:Play()
+    scrollLine:AddToScrollArea(scrollArea)
+    scrollLine:DisplayText(text)
 end
 
 local eventQueue = {}
@@ -56,7 +48,6 @@ _G.C_Timer.NewTicker(0.1, function( ... )
         DisplayEvent(event[1], event[2], event[3])
     end
 end)
-
 
 function private.AddEvent(scrollType, isSticky, text)
     tinsert(eventQueue, {scrollType, isSticky, text})

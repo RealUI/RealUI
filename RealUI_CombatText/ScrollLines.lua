@@ -1,27 +1,12 @@
 local _, private = ...
 
 local animDuration = 1
-local function FontFactory(pool)
-    local fontString = pool.parent:CreateFontString(nil, pool.layer, pool.fontStringTemplate, pool.subLayer)
-    fontString:SetSize(100, 10)
-    fontString:SetJustifyH("CENTER")
+local ScrollLineMixin = {}
+function ScrollLineMixin:OnLoad()
+    self:SetJustifyH("CENTER")
 
-    local scrollAnim = fontString:CreateAnimationGroup()
-    fontString.scrollAnim = scrollAnim
-
-    local scale, translate
-    if pool.isSticky then
-        scale = scrollAnim:CreateAnimation("Scale")
-        scale:SetDuration(animDuration * 0.2)
-        scale:SetFromScale(4, 4)
-        scale:SetToScale(1, 1)
-    else
-        translate = scrollAnim:CreateAnimation("Translation")
-        translate:SetDuration(animDuration)
-        translate:SetScript("OnPlay", function(self)
-            translate:SetOffset(0, fontString.scrollArea:GetHeight())
-        end)
-    end
+    local scrollAnim = self:CreateAnimationGroup()
+    self.scrollAnim = scrollAnim
 
     local alphaIn = scrollAnim:CreateAnimation("Alpha")
     alphaIn:SetDuration(animDuration * 0.2)
@@ -34,17 +19,62 @@ local function FontFactory(pool)
     alphaOut:SetFromAlpha(1)
     alphaOut:SetToAlpha(0)
 
-    scrollAnim:SetScript("OnFinished", function(self, requested)
-        pool:Release(fontString)
-    end)
+    if self:GetParent().isSticky then
+        local scale = scrollAnim:CreateAnimation("Scale")
+        scale:SetDuration(animDuration * 0.2)
+        scale:SetFromScale(4, 4)
+        scale:SetToScale(1, 1)
+    else
+        local translate = scrollAnim:CreateAnimation("Translation")
+        translate:SetDuration(animDuration)
+        translate:SetScript("OnPlay", function(trans)
+            translate:SetOffset(0, self.scrollArea:GetHeight())
+        end)
+    end
 
-    return fontString
+    scrollAnim:SetScript("OnFinished", function(anim, requested)
+        self:GetParent():Release(self)
+    end)
 end
-local function FontReset(pool, fontString)
-    fontString:ClearAllPoints()
-    fontString:Hide()
+function ScrollLineMixin:AddToScrollArea(scrollArea)
+    if self:GetParent().isSticky then
+        self:SetPoint("CENTER", scrollArea)
+    else
+        self:SetPoint("BOTTOM", scrollArea)
+    end
+
+    self.scrollArea = scrollArea
 end
-local function GetLine(self, scrollArea)
+function ScrollLineMixin:DisplayText(text)
+    self:SetText(text)
+    self:Show()
+    self.scrollAnim:Play()
+end
+function ScrollLineMixin:Clear()
+    self:ClearAllPoints()
+    self:Hide()
+end
+
+
+local ScrollLinePoolMixin = _G.CreateFromMixins(_G.FontStringPoolMixin)
+local function ScrollLinePoolFactory(scrollLinePool)
+    local scrollLine = scrollLinePool:CreateFontString(nil, scrollLinePool.layer, scrollLinePool.fontStringTemplate, scrollLinePool.subLayer)
+    _G.Mixin(scrollLine, ScrollLineMixin)
+    scrollLine:OnLoad()
+
+    return scrollLine
+end
+function ScrollLinePoolMixin:OnLoad(parent, layer, subLayer, fontStringTemplate, resetterFunc)
+    _G.ObjectPoolMixin.OnLoad(self, ScrollLinePoolFactory, resetterFunc)
+    self.parent = parent
+    self.layer = layer
+    self.subLayer = subLayer
+    self.fontStringTemplate = fontStringTemplate
+end
+function ScrollLinePoolMixin:SetSticky(isSticky)
+    self.isSticky = isSticky
+end
+function ScrollLinePoolMixin:GetLine(scrollArea)
     local scrollLine = self:Acquire()
     scrollLine.scrollArea = scrollArea
 
@@ -54,21 +84,21 @@ local function GetLine(self, scrollArea)
         scrollLine:SetPoint("BOTTOM", scrollArea)
     end
 end
-local function CreateFontStringPool(parent, layer, subLayer, fontStringTemplate, isSticky)
-    local pool = _G.CreateObjectPool(FontFactory, FontReset)
-    pool.parent = parent
-    pool.layer = layer
-    pool.subLayer = subLayer
-    pool.fontStringTemplate = fontStringTemplate
-    pool.isSticky = isSticky
-    pool.GetLine = GetLine
 
-    return pool
+
+local function ScrollLinePool_Reset(scrollLinePool, scrollLine)
+    scrollLine:Clear()
+end
+local function CreateScrollLinePool(parent, layer, subLayer, fontStringTemplate)
+    local scrollLinePool = _G.Mixin(parent, ScrollLinePoolMixin)
+    scrollLinePool:OnLoad(parent, layer, subLayer, fontStringTemplate, ScrollLinePool_Reset)
+
+    return scrollLinePool
 end
 
-local frame = _G.CreateFrame("Frame", nil, _G.UIParent)
 local scrollLines = {}
-scrollLines.normal = CreateFontStringPool(frame, "BACKGROUND", 0, "NumberFont_Outline_Med")
-scrollLines.sticky = CreateFontStringPool(frame, "BACKGROUND", 0, "NumberFont_Outline_Huge", true)
+scrollLines.normal = CreateScrollLinePool(_G.CreateFrame("Frame", nil, _G.UIParent), "BACKGROUND", 0, "NumberFont_Outline_Med")
+scrollLines.sticky = CreateScrollLinePool(_G.CreateFrame("Frame", nil, _G.UIParent), "BACKGROUND", 0, "NumberFont_Outline_Huge")
+scrollLines.sticky:SetSticky(true)
 
 private.scrollLines = scrollLines
