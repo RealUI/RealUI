@@ -110,3 +110,38 @@ function eventTypes.DAMAGE(baseInfo, amount, overkill, school, resisted, blocked
 
     return SpellColors[school]:WrapTextInColorCode(text), critical
 end
+
+function eventTypes.MISSED(baseInfo, missType, isOffHand, amountMissed, critical)
+    local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
+
+    local resultStr
+    if missType == "ABSORB" then
+        _G.CombatLog_String_DamageResultString(nil, nil, amountMissed, critical, nil, nil, nil, nil, baseInfo.spellId)
+    elseif missType == "RESIST" or missType == "BLOCK" then
+        if amountMissed ~= 0 then
+            resultStr = _G["TEXT_MODE_A_STRING_RESULT_"..missType]:format(amountMissed)
+        end
+    else
+        resultStr = _G["ACTION_"..baseInfo.eventBase.."_MISSED_"..missType]
+    end
+
+    return baseInfo.format:format(text, amountMissed, resultStr), critical
+end
+
+function eventTypes.HEAL(baseInfo, amount, overhealing, absorbed, critical)
+    local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
+
+    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, absorbed, critical, nil, nil, overhealing, nil, baseInfo.spellId)
+    resultStr = resultStr or ""
+
+    return baseInfo.format:format(text, amount, resultStr), critical
+end
+
+function eventTypes.ENERGIZE(baseInfo, amount, overEnergize, powerType, alternatePowerType)
+    local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
+
+    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, nil, nil, nil, nil, nil, nil, baseInfo.spellId, nil, overEnergize)
+    resultStr = resultStr or ""
+
+    return baseInfo.format:format(text, amount, resultStr)
+end
