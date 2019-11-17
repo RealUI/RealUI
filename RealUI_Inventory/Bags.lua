@@ -222,6 +222,7 @@ local function CreateBag(bagType)
         end
     end)
 
+    private.CreateDummyBags(bagType)
     for i, tag in ipairs(Inventory.db.global.filters) do
         local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
         SetupBag(bag)
