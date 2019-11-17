@@ -143,8 +143,9 @@ end
 local function CreateBag(bagType)
     local main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
     _G.Mixin(main, _G.ContinuableContainer)
-    main:SetPoint("BOTTOMRIGHT", -100, 100)
     RealUI.MakeFrameDraggable(main)
+    main:SetPoint("BOTTOMRIGHT", -100, 100)
+    main:Hide()
 
     main.tag = "main"
     main.filter = function()
@@ -219,7 +220,6 @@ local function CreateBag(bagType)
             dropTarget.count:SetText(_G.CalculateTotalNumberOfFreeBagSlots())
         end
     end)
-    main:Hide()
 
     for i, tag in ipairs(Inventory.db.global.filters) do
         local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
