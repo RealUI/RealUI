@@ -144,6 +144,7 @@ local function CreateBag(bagType)
     local main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
     _G.Mixin(main, _G.ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
+    main:SetToplevel(true)
     main:SetPoint("BOTTOMRIGHT", -100, 100)
     main:Hide()
 
