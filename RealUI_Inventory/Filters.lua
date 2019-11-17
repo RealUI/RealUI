@@ -40,7 +40,7 @@ end
 for i = 1, #tradegoods do
     local subClassID = tradegoods[i]
     local name = _G.GetItemSubClassInfo(_G.LE_ITEM_CLASS_TRADEGOODS, subClassID)
-    CreateFilter("tradegoods_"..name, {
+    CreateFilter("tradegoods_"..subClassID, {
         name = prefix:format(name),
         filter = function(slot)
             local _, _, _, _, _, typeID, subTypeID = _G.GetItemInfoInstant(slot.item:GetItemID())
