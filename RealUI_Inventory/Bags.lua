@@ -14,9 +14,6 @@ local RealUI = _G.RealUI
 
 local Inventory = private.Inventory
 
-local bags = {}
-Inventory.bags = bags
-
 local function SortSlots(a, b)
     local qualityA = a.item:GetItemQuality()
     local qualityB = b.item:GetItemQuality()
@@ -54,11 +51,10 @@ local function SortSlots(a, b)
     end
 end
 
-local function UpdateBag(index, tag, columnHeight, columnBase, numSkipped)
-    local bag = bags[tag]
+local function UpdateBag(bag, columnHeight, columnBase, numSkipped)
     sort(bag.slots, SortSlots)
 
-    if tag == "main" then
+    if bag.tag == "main" then
         tinsert(bag.slots, bag.dropTarget)
     end
 
@@ -66,28 +62,31 @@ local function UpdateBag(index, tag, columnHeight, columnBase, numSkipped)
     bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
 
     local height = bag:GetHeight()
-    if tag == "main" then
+    if bag.tag == "main" then
         columnHeight = columnHeight + height + 5
     else
         if columnHeight + height >= Inventory.db.global.maxHeight then
-            bag:SetPoint("BOTTOMRIGHT", bags[columnBase], "BOTTOMLEFT", -5, 0)
-            columnBase = tag
+            bag:SetPoint("BOTTOMRIGHT", bag.parent.bags[columnBase] or bag.parent, "BOTTOMLEFT", -5, 0)
+            columnBase = bag.tag
             columnHeight = height + 5
         else
             columnHeight = columnHeight + height + 5
 
             local anchor = "main"
-            if index > 1 then
-                anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
+            if bag.index > 1 then
+                anchor = Inventory.db.global.filters[bag.index - (1 + numSkipped)]
             end
-            bag:SetPoint("BOTTOMRIGHT", bags[anchor], "TOPRIGHT", 0, 5)
+            bag:SetPoint("BOTTOMRIGHT", bag.parent.bags[anchor] or bag.parent, "TOPRIGHT", 0, 5)
         end
     end
 
     return columnHeight, columnBase
 end
 function private.UpdateBags()
-    for tag, bag in next, bags do
+    local main = Inventory.main
+
+    wipe(main.slots)
+    for tag, bag in next, main.bags do
         wipe(bag.slots)
     end
 
@@ -95,33 +94,36 @@ function private.UpdateBags()
         private.UpdateSlots(bagID)
     end
 
-    local columnHeight, columnBase = 0, "main"
-    columnHeight, columnBase = UpdateBag(nil, "main", columnHeight, columnBase)
+    local columnHeight, columnBase = 0, main.tag
+    columnHeight, columnBase = UpdateBag(main, columnHeight, columnBase)
 
     local numSkipped = 0
     for i, tag in ipairs(Inventory.db.global.filters) do
-        if #bags[tag].slots <= 0 then
-            bags[tag]:Hide()
+        local bag = main.bags[tag]
+        if #bag.slots <= 0 then
+            bag:Hide()
             numSkipped = numSkipped + 1
         else
-            columnHeight, columnBase = UpdateBag(i, tag, columnHeight, columnBase, numSkipped)
-            bags[tag]:Show()
+            columnHeight, columnBase = UpdateBag(bag, columnHeight, columnBase, numSkipped)
+            bag:Show()
             numSkipped = 0
         end
     end
 end
 
 function private.AddSlotToBag(slot, bagID)
-    local bag = Inventory.main
+    local main = Inventory.main
+
+    local bag = main
     for i, tag in ipairs(Inventory.db.global.filters) do
         if private.filters[tag].filter(slot) then
-            bag = bags[tag]
+            bag = main.bags[tag]
         end
     end
 
     tinsert(bag.slots, slot)
     slot:SetParent(private.blizz[bagID])
-    Inventory.main:AddContinuable(slot.item)
+    main:AddContinuable(slot.item)
 end
 
 local function SetupBag(bag)
@@ -147,13 +149,8 @@ local function CreateBag(bagType)
     main:SetToplevel(true)
     main:SetPoint("BOTTOMRIGHT", -100, 100)
     main:Hide()
+    main.tag = bagType
 
-    main.tag = "main"
-    main.filter = function()
-        return true
-    end
-
-    bags[bagType] = main
     Inventory[bagType] = main
     SetupBag(main)
 
@@ -222,6 +219,7 @@ local function CreateBag(bagType)
         end
     end)
 
+    main.bags = {}
     private.CreateDummyBags(bagType)
     for i, tag in ipairs(Inventory.db.global.filters) do
         local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
@@ -235,7 +233,11 @@ local function CreateBag(bagType)
         name:SetJustifyV("MIDDLE")
         bag.offsetTop = bag.offsetTop + 15
 
-        bags[tag] = bag
+        bag.index = i
+        bag.tag = tag
+        bag.parent = main
+
+        main.bags[tag] = bag
     end
 
     main:ContinueOnLoad(function()
