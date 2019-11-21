@@ -25,30 +25,18 @@ function private.Toggle(show)
     end
 
     if show then
-        main:RegisterEvent("BAG_UPDATE")
-        main:RegisterEvent("UNIT_INVENTORY_CHANGED")
-        main:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-        main:RegisterEvent("ITEM_LOCK_CHANGED")
-        main:RegisterEvent("BAG_UPDATE_COOLDOWN")
-        main:RegisterEvent("DISPLAY_SIZE_CHANGED")
-        main:RegisterEvent("INVENTORY_SEARCH_UPDATE")
-        main:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
-        main:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
-
         private.Update()
-    else
-        main:UnregisterEvent("BAG_UPDATE")
-        main:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-        main:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-        main:UnregisterEvent("ITEM_LOCK_CHANGED")
-        main:UnregisterEvent("BAG_UPDATE_COOLDOWN")
-        main:UnregisterEvent("DISPLAY_SIZE_CHANGED")
-        main:UnregisterEvent("INVENTORY_SEARCH_UPDATE")
-        main:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
-        main:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
     end
 
     main:SetShown(show)
+    Inventory.bank:SetShown(show and Inventory.showBank)
+end
+function private.GetBagTypeForBagID(bagID)
+    if bagID >= _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
+        return "main"
+    else
+        return "bank"
+    end
 end
 
 function Inventory:OnInitialize()

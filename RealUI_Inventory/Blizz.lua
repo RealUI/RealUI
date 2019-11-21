@@ -27,15 +27,24 @@ _G.ToggleBackpack = _G.ToggleAllBags
 --local oldToggleBag = _G.ToggleBag
 _G.ToggleBag = _G.nop
 
+--_G.BankFrame:UnregisterAllEvents()
+
+local function CreateBag(bagID, parent)
+    local bag = _G.CreateFrame("Frame", "$parent_Bag"..bagID, parent)
+    bag:SetID(bagID)
+    blizz[bagID] = bag
+end
+
 function private.CreateDummyBags(bagType)
     local bagStart, bagEnd
     if bagType == "main" then
         bagStart, bagEnd = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS
+    elseif bagType == "bank" then
+        CreateBag(_G.BANK_CONTAINER, Inventory[bagType])
+        bagStart, bagEnd = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS
     end
 
     for bagID = bagStart, bagEnd do
-        local bag = _G.CreateFrame("Frame", "RealUIInventory_Bag"..bagID, Inventory[bagType])
-        bag:SetID(bagID)
-        blizz[bagID] = bag
+        CreateBag(bagID, Inventory[bagType])
     end
 end

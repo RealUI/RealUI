@@ -51,7 +51,7 @@ local function SortSlots(a, b)
     end
 end
 
-local function UpdateBag(bag, columnHeight, columnBase, numSkipped)
+local function SetupSlots(bag, columnHeight, columnBase, numSkipped)
     sort(bag.slots, SortSlots)
 
     if bag.tag == "main" then
@@ -65,8 +65,13 @@ local function UpdateBag(bag, columnHeight, columnBase, numSkipped)
     if bag.tag == "main" then
         columnHeight = columnHeight + height + 5
     else
+        local parent = bag.parent
         if columnHeight + height >= Inventory.db.global.maxHeight then
-            bag:SetPoint("BOTTOMRIGHT", bag.parent.bags[columnBase] or bag.parent, "BOTTOMLEFT", -5, 0)
+            if parent.bagType == "main" then
+                bag:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
+            else
+                bag:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
+            end
             columnBase = bag.tag
             columnHeight = height + 5
         else
@@ -76,26 +81,35 @@ local function UpdateBag(bag, columnHeight, columnBase, numSkipped)
             if bag.index > 1 then
                 anchor = Inventory.db.global.filters[bag.index - (1 + numSkipped)]
             end
-            bag:SetPoint("BOTTOMRIGHT", bag.parent.bags[anchor] or bag.parent, "TOPRIGHT", 0, 5)
+            if parent.bagType == "main" then
+                bag:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
+            else
+                bag:SetPoint("TOPLEFT", parent.bags[anchor] or parent, "BOTTOMLEFT", 0, -5)
+            end
         end
     end
 
     return columnHeight, columnBase
 end
-function private.UpdateBags()
-    local main = Inventory.main
-
+local function UpdateBag(main)
     wipe(main.slots)
     for tag, bag in next, main.bags do
         wipe(bag.slots)
     end
 
-    for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-        private.UpdateSlots(bagID)
+    if main.bagType == "main" then
+        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
+            private.UpdateSlots(bagID)
+        end
+    elseif main.bagType == "bank" then
+        private.UpdateSlots(_G.BANK_CONTAINER)
+        for bagID = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
+            private.UpdateSlots(bagID)
+        end
     end
 
     local columnHeight, columnBase = 0, main.tag
-    columnHeight, columnBase = UpdateBag(main, columnHeight, columnBase)
+    columnHeight, columnBase = SetupSlots(main, columnHeight, columnBase)
 
     local numSkipped = 0
     for i, tag in ipairs(Inventory.db.global.filters) do
@@ -104,15 +118,21 @@ function private.UpdateBags()
             bag:Hide()
             numSkipped = numSkipped + 1
         else
-            columnHeight, columnBase = UpdateBag(bag, columnHeight, columnBase, numSkipped)
+            columnHeight, columnBase = SetupSlots(bag, columnHeight, columnBase, numSkipped)
             bag:Show()
             numSkipped = 0
         end
     end
 end
+function private.UpdateBags()
+    UpdateBag(Inventory.main)
+    if Inventory.showBank then
+        UpdateBag(Inventory.bank)
+    end
+end
 
 function private.AddSlotToBag(slot, bagID)
-    local main = Inventory.main
+    local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
     local bag = main
     for i, tag in ipairs(Inventory.db.global.filters) do
@@ -143,13 +163,105 @@ local function DropTargetFindSlot(bagType)
     end
 end
 local function CreateBag(bagType)
-    local main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
+    local main
+    if bagType == "main" then
+        main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
+        main:SetPoint("BOTTOMRIGHT", -100, 100)
+        main:RegisterEvent("BAG_OPEN")
+        main:RegisterEvent("BAG_CLOSED")
+        main:RegisterEvent("QUEST_ACCEPTED")
+        main:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+        main:SetScript("OnEvent", function(self, event, ...)
+            if event == "BAG_OPEN" then
+                private.Toggle(true)
+            elseif event == "BAG_CLOSED" then
+                private.Toggle(false)
+            elseif event == "ITEM_LOCK_CHANGED" then
+                local bagID, slotIndex = ...
+                if bagID and slotIndex then
+                    local slot = private.GetSlot(bagID, slotIndex)
+                    if slot then
+                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
+                    end
+                end
+            else
+                private.Update()
+                self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
+            end
+        end)
+        main:SetScript("OnShow", function(self)
+            self:RegisterEvent("BAG_UPDATE")
+            self:RegisterEvent("UNIT_INVENTORY_CHANGED")
+            self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+            self:RegisterEvent("ITEM_LOCK_CHANGED")
+            self:RegisterEvent("BAG_UPDATE_COOLDOWN")
+            self:RegisterEvent("DISPLAY_SIZE_CHANGED")
+            self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
+            self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
+            self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
+        end)
+        main:SetScript("OnHide", function(self)
+            self:UnregisterEvent("BAG_UPDATE")
+            self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+            self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+            self:UnregisterEvent("ITEM_LOCK_CHANGED")
+            self:UnregisterEvent("BAG_UPDATE_COOLDOWN")
+            self:UnregisterEvent("DISPLAY_SIZE_CHANGED")
+            self:UnregisterEvent("INVENTORY_SEARCH_UPDATE")
+            self:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
+            self:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
+        end)
+    elseif bagType == "bank" then
+        main = _G.CreateFrame("Frame", "RealUIBank", _G.UIParent)
+        main:SetPoint("TOPLEFT", 100, -100)
+        main:RegisterEvent("BANKFRAME_OPENED")
+        main:RegisterEvent("BANKFRAME_CLOSED")
+        main:SetScript("OnEvent", function(self, event, ...)
+            if event == "BANKFRAME_OPENED" then
+                Inventory.showBank = true
+                private.Toggle(true)
+            elseif event == "BANKFRAME_CLOSED" then
+                Inventory.showBank = false
+                private.Toggle(false)
+            elseif event == "ITEM_LOCK_CHANGED" then
+                local bagID, slotIndex = ...
+                if bagID and slotIndex then
+                    local slot = private.GetSlot(bagID, slotIndex)
+                    if slot then
+                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
+                    end
+                end
+            else
+                private.Update()
+                self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
+            end
+        end)
+        main:SetScript("OnShow", function(self)
+            self:RegisterEvent("ITEM_LOCK_CHANGED")
+            self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
+            self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
+            self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
+            self:RegisterEvent("PLAYER_MONEY")
+            self:RegisterEvent("BAG_UPDATE_COOLDOWN")
+            self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
+        end)
+        main:SetScript("OnHide", function(self)
+            self:UnregisterEvent("ITEM_LOCK_CHANGED")
+            self:UnregisterEvent("PLAYERBANKSLOTS_CHANGED")
+            self:UnregisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
+            self:UnregisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
+            self:UnregisterEvent("PLAYER_MONEY")
+            self:UnregisterEvent("BAG_UPDATE_COOLDOWN")
+            self:UnregisterEvent("INVENTORY_SEARCH_UPDATE")
+        end)
+    end
+
     _G.Mixin(main, _G.ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
     main:SetToplevel(true)
-    main:SetPoint("BOTTOMRIGHT", -100, 100)
     main:Hide()
-    main.tag = bagType
+    main.tag = "main"
+    main.bagType = bagType
 
     Inventory[bagType] = main
     SetupBag(main)
@@ -193,31 +305,8 @@ local function CreateBag(bagType)
     local count = dropTarget:CreateFontString(nil, "ARTWORK")
     count:SetFontObject("NumberFontNormal")
     count:SetPoint("BOTTOMRIGHT", 0, 2)
-    count:SetText(_G.CalculateTotalNumberOfFreeBagSlots())
+    count:SetText(private.GetNumFreeSlots(main))
     dropTarget.count = count
-
-    main:RegisterEvent("BAG_OPEN")
-    main:RegisterEvent("BAG_CLOSED")
-    main:RegisterEvent("QUEST_ACCEPTED")
-    main:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-    main:SetScript("OnEvent", function(self, event, ...)
-        if event == "BAG_OPEN" then
-            private.Toggle(true)
-        elseif event == "BAG_CLOSED" then
-            private.Toggle(false)
-        elseif event == "ITEM_LOCK_CHANGED" then
-            local bagID, slotIndex = ...
-            if bagID and slotIndex then
-                local slot = private.GetSlot(bagID, slotIndex)
-                if slot then
-                    _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                end
-            end
-        else
-            private.Update()
-            dropTarget.count:SetText(_G.CalculateTotalNumberOfFreeBagSlots())
-        end
-    end)
 
     main.bags = {}
     private.CreateDummyBags(bagType)
@@ -248,4 +337,5 @@ end
 
 function private.CreateBags()
     CreateBag("main")
+    CreateBag("bank")
 end
