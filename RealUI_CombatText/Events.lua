@@ -29,6 +29,7 @@ local SpellColors = {
 
 
 local SWING = {
+    format = "%s %d %s",
     eventBase = "SWING",
 }
 function private.SWING(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
