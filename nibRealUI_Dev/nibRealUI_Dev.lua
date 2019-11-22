@@ -1,7 +1,7 @@
 local ADDON_NAME, ns = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next select
 
 -- RealUI --
 local debug = _G.RealUI.GetDebug("Dev")
@@ -201,7 +201,7 @@ local autorunScripts = {
 }
 
 local autorunAddon = {
-    --fstack = "Blizzard_DebugTools",
+    combatEvents = "Blizzard_DebugTools",
 }
 local eventFrame = _G.CreateFrame("Frame")
 eventFrame:RegisterAllEvents()
@@ -331,6 +331,23 @@ function ns.commands:mouse()
     end
 
     _G.C_Timer.NewTicker(pollingRate, mouse)
+end
+
+function ns.commands:combatEvents()
+    local function addArgs(args, index, ...)
+        for i = 1, select("#", ...) do
+            if not args[i] then
+                args[i] = {}
+            end
+            args[i][index] = select(i, ...)
+        end
+    end
+
+    _G.EventTraceFrame:HookScript("OnEvent", function(this, event)
+        if event == "COMBAT_LOG_EVENT_UNFILTERED" and not this.ignoredEvents[event] and this.events[this.lastIndex] == event then
+            addArgs(this.args, this.lastIndex, _G.CombatLogGetCurrentEventInfo())
+        end
+    end)
 end
 
 -- Slash Commands
