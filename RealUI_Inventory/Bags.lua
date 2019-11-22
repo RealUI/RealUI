@@ -162,6 +162,13 @@ local function DropTargetFindSlot(bagType)
         _G.PickupContainerItem(bagID, slotIndex)
     end
 end
+
+local BagEvents = {
+    "BAG_UPDATE",
+    "BAG_UPDATE_COOLDOWN",
+    "INVENTORY_SEARCH_UPDATE",
+    "ITEM_LOCK_CHANGED",
+}
 local function CreateBag(bagType)
     local main
     if bagType == "main" then
@@ -185,29 +192,21 @@ local function CreateBag(bagType)
                     end
                 end
             else
-                private.Update()
+                UpdateBag(main)
                 self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
         main:SetScript("OnShow", function(self)
-            self:RegisterEvent("BAG_UPDATE")
+            _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
             self:RegisterEvent("UNIT_INVENTORY_CHANGED")
             self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-            self:RegisterEvent("ITEM_LOCK_CHANGED")
-            self:RegisterEvent("BAG_UPDATE_COOLDOWN")
-            self:RegisterEvent("DISPLAY_SIZE_CHANGED")
-            self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
             self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
             self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
         end)
         main:SetScript("OnHide", function(self)
-            self:UnregisterEvent("BAG_UPDATE")
+            _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
             self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
             self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-            self:UnregisterEvent("ITEM_LOCK_CHANGED")
-            self:UnregisterEvent("BAG_UPDATE_COOLDOWN")
-            self:UnregisterEvent("DISPLAY_SIZE_CHANGED")
-            self:UnregisterEvent("INVENTORY_SEARCH_UPDATE")
             self:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
             self:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
         end)
@@ -232,27 +231,23 @@ local function CreateBag(bagType)
                     end
                 end
             else
-                private.Update()
+                UpdateBag(main)
                 self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
         main:SetScript("OnShow", function(self)
-            self:RegisterEvent("ITEM_LOCK_CHANGED")
+            _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
             self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
             self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
             self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
-            self:RegisterEvent("PLAYER_MONEY")
-            self:RegisterEvent("BAG_UPDATE_COOLDOWN")
-            self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
+            self:RegisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
         end)
         main:SetScript("OnHide", function(self)
-            self:UnregisterEvent("ITEM_LOCK_CHANGED")
+            _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
             self:UnregisterEvent("PLAYERBANKSLOTS_CHANGED")
             self:UnregisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
             self:UnregisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
-            self:UnregisterEvent("PLAYER_MONEY")
-            self:UnregisterEvent("BAG_UPDATE_COOLDOWN")
-            self:UnregisterEvent("INVENTORY_SEARCH_UPDATE")
+            self:UnregisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
         end)
     end
 
@@ -330,7 +325,7 @@ local function CreateBag(bagType)
     end
 
     main:ContinueOnLoad(function()
-        private.Update()
+        UpdateBag(main)
     end)
 end
 
