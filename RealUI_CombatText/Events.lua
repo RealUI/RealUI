@@ -64,15 +64,41 @@ local SPELL = {
 }
 function private.SPELL(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     SPELL.spellId, SPELL.spellName, SPELL.spellSchool = ...
-
-    local eventMod
-    if eventType:find("PERIODIC") or eventType:find("BUILDING") then
-        eventMod = eventType -- retain this so we still have the full event name
-        eventType = eventType:match("%w+_([%w_]+)")
-    end
-    SPELL.eventType = eventMod or eventType
+    SPELL.eventType = eventType
 
     local text, isSticky = eventTypes[eventType](SPELL, select(4, ...))
+
+    private.AddEvent(scrollType, isSticky, text)
+end
+
+local SPELL_PERIODIC = {
+    format = "%s %d %s",
+    eventBase = "SPELL_PERIODIC",
+    spellId = 0,
+    spellName = 0,
+    spellSchool = 0,
+}
+function private.SPELL_PERIODIC(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    SPELL_PERIODIC.spellId, SPELL_PERIODIC.spellName, SPELL_PERIODIC.spellSchool = ...
+    SPELL_PERIODIC.eventType = eventType
+
+    local text, isSticky = eventTypes[eventType](SPELL_PERIODIC, select(4, ...))
+
+    private.AddEvent(scrollType, isSticky, text)
+end
+
+local SPELL_BUILDING = {
+    format = "%s %d %s",
+    eventBase = "SPELL_BUILDING",
+    spellId = 0,
+    spellName = 0,
+    spellSchool = 0,
+}
+function private.SPELL_BUILDING(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    SPELL_BUILDING.spellId, SPELL_BUILDING.spellName, SPELL_BUILDING.spellSchool = ...
+    SPELL_BUILDING.eventType = eventType
+
+    local text, isSticky = eventTypes[eventType](SPELL_BUILDING, select(4, ...))
 
     private.AddEvent(scrollType, isSticky, text)
 end

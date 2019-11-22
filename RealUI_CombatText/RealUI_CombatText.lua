@@ -37,10 +37,19 @@ local function FilterEvent(timestamp, event, hideCaster, sourceGUID, sourceName,
         scrollType = "incoming"
     end
 
-    local eventBase, eventType = event:match("(%w+)_([%w_]+)")
-
     if scrollType then
-        private[eventBase](scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+        local eventBase, eventType = event:match("(%w+)_([%w_]+)")
+        if eventType:find("PERIODIC") or eventType:find("BUILDING") then
+            local eventMod
+            eventMod, eventType = eventType:match("(%w+)_([%w_]+)")
+            eventBase = eventBase .. "_" .. eventMod
+        end
+
+        if private[eventBase] then
+            private[eventBase](scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+        else
+            _G.print("missing base event", eventBase, eventType)
+        end
     end
 end
 
