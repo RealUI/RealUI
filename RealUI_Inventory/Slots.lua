@@ -226,6 +226,8 @@ function private.GetSlot(bagID, slotIndex)
         slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
             slot:Update()
         end)
+
+        return slot
     else
         slots:Release(slot)
     end
