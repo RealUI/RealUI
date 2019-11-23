@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next tinsert ceil
+-- luacheck: globals next tinsert ceil tostring tostringall
 
 -- RealUI --
 local RealUI = _G.RealUI
@@ -28,8 +28,26 @@ local defaults = {
     }
 }
 
+local debugFormat = [[%s - %s
+    hideCaster: %s
+    sourceGUID: %s
+    sourceName: %s
+    sourceFlags: %X
+    sourceRaidFlags: %X
+    destGUID: %s
+    destName: %s
+    destFlags: %X
+    destRaidFlags: %X
+    args:
+]]
+local function DebugEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    CombatText:debug(debugFormat:format(timestamp, event, tostring(hideCaster), sourceGUID, sourceName or "nil", sourceFlags, sourceRaidFlags, destGUID, destName or "nil", destFlags, destRaidFlags), tostringall(...))
+end
+
 local playerGUID = _G.UnitGUID("player")
 local function FilterEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    DebugEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+
     local scrollType
     if sourceGUID == playerGUID then
         scrollType = "outgoing"
