@@ -12,6 +12,10 @@ private.CombatText = CombatText
 local defaults = {
     global = {
         incoming = {
+            size = {
+                x = 100,
+                y = 300,
+            },
             position = {
                 x = -200,
                 y = 0,
@@ -19,6 +23,10 @@ local defaults = {
             }
         },
         outgoing = {
+            size = {
+                x = 100,
+                y = 300,
+            },
             position = {
                 x = 200,
                 y = 0,
