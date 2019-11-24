@@ -11,7 +11,7 @@ local function MissingEvent(baseInfo, ... )
     _G.print("Missing combat event", baseInfo.eventBase, baseInfo.eventType)
 end
 
-local eventTypes = _G.setmetatable({}, {
+local eventSuffix = _G.setmetatable({}, {
     __index = function()
         return MissingEvent
     end
@@ -27,15 +27,17 @@ local SpellColors = {
     [_G.SCHOOL_MASK_ARCANE] = Color.Create(1, 0.5, 1),
 }
 
+local eventPrefix = {}
+private.eventPrefix = eventPrefix
 
 local SWING = {
     format = "%s %d %s",
     eventBase = "SWING",
 }
-function private.SWING(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function eventPrefix.SWING(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     SWING.eventType = eventType
 
-    local text, isSticky = eventTypes[eventType](SWING, ...)
+    local text, isSticky = eventSuffix[eventType](SWING, ...)
 
     private.AddEvent(scrollType, isSticky, text)
 end
@@ -47,11 +49,11 @@ local RANGE = {
     spellName = 0,
     spellSchool = 0,
 }
-function private.RANGE(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function eventPrefix.RANGE(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     RANGE.spellId, RANGE.spellName, RANGE.spellSchool = ...
     RANGE.eventType = eventType
 
-    local text, isSticky = eventTypes[eventType](RANGE, select(4, ...))
+    local text, isSticky = eventSuffix[eventType](RANGE, select(4, ...))
 
     private.AddEvent(scrollType, isSticky, text)
 end
@@ -63,11 +65,11 @@ local SPELL = {
     spellName = 0,
     spellSchool = 0,
 }
-function private.SPELL(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function eventPrefix.SPELL(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     SPELL.spellId, SPELL.spellName, SPELL.spellSchool = ...
     SPELL.eventType = eventType
 
-    local text, isSticky = eventTypes[eventType](SPELL, select(4, ...))
+    local text, isSticky = eventSuffix[eventType](SPELL, select(4, ...))
 
     private.AddEvent(scrollType, isSticky, text)
 end
@@ -79,11 +81,11 @@ local SPELL_PERIODIC = {
     spellName = 0,
     spellSchool = 0,
 }
-function private.SPELL_PERIODIC(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function eventPrefix.SPELL_PERIODIC(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     SPELL_PERIODIC.spellId, SPELL_PERIODIC.spellName, SPELL_PERIODIC.spellSchool = ...
     SPELL_PERIODIC.eventType = eventType
 
-    local text, isSticky = eventTypes[eventType](SPELL_PERIODIC, select(4, ...))
+    local text, isSticky = eventSuffix[eventType](SPELL_PERIODIC, select(4, ...))
 
     private.AddEvent(scrollType, isSticky, text)
 end
@@ -95,11 +97,11 @@ local SPELL_BUILDING = {
     spellName = 0,
     spellSchool = 0,
 }
-function private.SPELL_BUILDING(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function eventPrefix.SPELL_BUILDING(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     SPELL_BUILDING.spellId, SPELL_BUILDING.spellName, SPELL_BUILDING.spellSchool = ...
     SPELL_BUILDING.eventType = eventType
 
-    local text, isSticky = eventTypes[eventType](SPELL_BUILDING, select(4, ...))
+    local text, isSticky = eventSuffix[eventType](SPELL_BUILDING, select(4, ...))
 
     private.AddEvent(scrollType, isSticky, text)
 end
@@ -109,21 +111,18 @@ local ENVIRONMENTAL = {
     eventBase = "ENVIRONMENTAL",
     environmentalType = 0,
 }
-function private.ENVIRONMENTAL(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+function eventPrefix.ENVIRONMENTAL(scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
     ENVIRONMENTAL.environmentalType = ...
     ENVIRONMENTAL.eventType = eventType
 
-    local text, isSticky = eventTypes[eventType](ENVIRONMENTAL, select(2, ...))
+    local text, isSticky = eventSuffix[eventType](ENVIRONMENTAL, select(2, ...))
 
     private.AddEvent(scrollType, isSticky, text)
 end
 
 
 
-
-
-
-function eventTypes.DAMAGE(baseInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
+function eventSuffix.DAMAGE(baseInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
     local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
 
     local resultStr = _G.CombatLog_String_DamageResultString(resisted, blocked, absorbed, critical, glancing, crushing, nil, nil, baseInfo.spellId, overkill)
@@ -138,7 +137,7 @@ function eventTypes.DAMAGE(baseInfo, amount, overkill, school, resisted, blocked
     return SpellColors[school]:WrapTextInColorCode(text), critical
 end
 
-function eventTypes.MISSED(baseInfo, missType, isOffHand, amountMissed, critical)
+function eventSuffix.MISSED(baseInfo, missType, isOffHand, amountMissed, critical)
     local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
 
     local resultStr
@@ -155,7 +154,7 @@ function eventTypes.MISSED(baseInfo, missType, isOffHand, amountMissed, critical
     return baseInfo.format:format(text, amountMissed, resultStr), critical
 end
 
-function eventTypes.HEAL(baseInfo, amount, overhealing, absorbed, critical)
+function eventSuffix.HEAL(baseInfo, amount, overhealing, absorbed, critical)
     local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
 
     local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, absorbed, critical, nil, nil, overhealing, nil, baseInfo.spellId)
@@ -164,11 +163,32 @@ function eventTypes.HEAL(baseInfo, amount, overhealing, absorbed, critical)
     return baseInfo.format:format(text, amount, resultStr), critical
 end
 
-function eventTypes.ENERGIZE(baseInfo, amount, overEnergize, powerType, alternatePowerType)
+function eventSuffix.ENERGIZE(baseInfo, amount, overEnergize, powerType, alternatePowerType)
     local text = baseInfo.spellName or _G["ACTION_"..baseInfo.eventBase]
 
     local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, nil, nil, nil, nil, nil, nil, baseInfo.spellId, nil, overEnergize)
     resultStr = resultStr or ""
 
     return baseInfo.format:format(text, amount, resultStr)
+end
+
+
+
+local eventSpecial = {}
+private.eventSpecial = eventSpecial
+
+local PARTY_KILL = {
+    format = "%s %s %s",
+    eventBase = "PARTY_KILL",
+}
+function eventSpecial.PARTY_KILL(scrollType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    local _, unconsciousOnDeath = ...
+
+    local resultStr = _G.ACTION_PARTY_KILL
+    if unconsciousOnDeath then
+        resultStr = _G.ACTION_PARTY_KILL_UNCONSCIOUS
+    end
+
+    local isSticky = true
+    private.AddEvent(scrollType, isSticky, PARTY_KILL.format:format(sourceName, resultStr, destName))
 end
