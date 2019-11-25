@@ -61,43 +61,63 @@ local debugFormat = [[%s - %s
     destRaidFlags: %X
     args:
 ]]
-local function DebugEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
-    CombatText:debug(debugFormat:format(timestamp, event, tostring(hideCaster), sourceGUID, sourceName or "nil", sourceFlags, sourceRaidFlags, destGUID, destName or "nil", destFlags, destRaidFlags), tostringall(...))
+local function DebugEvent(eventInfo, ...)
+    CombatText:debug(debugFormat:format(eventInfo.timestamp, eventInfo.event, tostring(eventInfo.hideCaster),
+        eventInfo.sourceGUID, eventInfo.sourceName or "nil", eventInfo.sourceFlags, eventInfo.sourceRaidFlags,
+        eventInfo.destGUID, eventInfo.destName or "nil", eventInfo.destFlags, eventInfo.destRaidFlags),
+        tostringall(...))
 end
 
 local playerGUID = _G.UnitGUID("player")
-local function FilterEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
-    DebugEvent(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+local function FilterEvent(eventInfo, ...)
+    DebugEvent(eventInfo, ...)
 
     local scrollType
-    if sourceGUID == playerGUID then
+    if eventInfo.sourceGUID == playerGUID then
         scrollType = "outgoing"
-    elseif destGUID == playerGUID then
+    elseif eventInfo.destGUID == playerGUID then
         scrollType = "incoming"
     end
 
     if scrollType then
-        if private.eventSpecial[event] then
-            return private.eventSpecial[event](scrollType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+        if private.eventSpecial[eventInfo.event] then
+            return private.eventSpecial[eventInfo.event](scrollType, eventInfo, ...)
         end
 
-        local eventBase, eventType = event:match("(%w+)_([%w_]+)")
+        local eventBase, eventType = eventInfo.event:match("(%w+)_([%w_]+)")
         if eventType:find("PERIODIC") or eventType:find("BUILDING") then
             local eventMod
             eventMod, eventType = eventType:match("(%w+)_([%w_]+)")
             eventBase = eventBase .. "_" .. eventMod
         end
+        eventInfo.eventBase, eventInfo.eventType = eventBase, eventType
 
         if private.eventPrefix[eventBase] then
-            private.eventPrefix[eventBase](scrollType, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+            private.eventPrefix[eventBase](scrollType, eventInfo, ...)
         else
             _G.print("missing base event", eventBase, eventType)
         end
     end
 end
 
+local function FormatEventInfo(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    local eventInfo = {
+        timestamp = timestamp,
+        event = event,
+        hideCaster = hideCaster,
+        sourceGUID = sourceGUID,
+        sourceName = sourceName,
+        sourceFlags = sourceFlags,
+        sourceRaidFlags = sourceRaidFlags,
+        destGUID = destGUID,
+        destName = destName,
+        destFlags = destFlags,
+        destRaidFlags = destRaidFlags,
+    }
+    return eventInfo, ...
+end
 function CombatText:COMBAT_LOG_EVENT_UNFILTERED()
-    FilterEvent(_G.CombatLogGetCurrentEventInfo())
+    FilterEvent(FormatEventInfo(_G.CombatLogGetCurrentEventInfo()))
 end
 
 function CombatText:OnInitialize()
