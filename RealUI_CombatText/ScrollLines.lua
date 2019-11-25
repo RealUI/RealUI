@@ -1,5 +1,7 @@
 local _, private = ...
 
+local CombatText = private.CombatText
+
 local animDuration = 1
 local ScrollLineMixin = {}
 function ScrollLineMixin:OnLoad()
@@ -19,12 +21,17 @@ function ScrollLineMixin:OnLoad()
     alphaOut:SetFromAlpha(1)
     alphaOut:SetToAlpha(0)
 
+    local font
     if self:GetParent().isSticky then
+        font = CombatText.db.global.fontSticky
+
         local scale = scrollAnim:CreateAnimation("Scale")
         scale:SetDuration(animDuration * 0.2)
         scale:SetFromScale(4, 4)
         scale:SetToScale(1, 1)
     else
+        font = CombatText.db.global.fontNormal
+
         local translate = scrollAnim:CreateAnimation("Translation")
         translate:SetDuration(animDuration)
         translate:SetScript("OnPlay", function(trans)
@@ -32,6 +39,7 @@ function ScrollLineMixin:OnLoad()
         end)
     end
 
+    self:SetFont(font.path, font.size, font.flags)
     scrollAnim:SetScript("OnFinished", function(anim, requested)
         self:GetParent():Release(self)
     end)
@@ -97,8 +105,8 @@ local function CreateScrollLinePool(parent, layer, subLayer, fontStringTemplate)
 end
 
 local scrollLines = {}
-scrollLines.normal = CreateScrollLinePool(_G.CreateFrame("Frame", nil, _G.UIParent), "BACKGROUND", 0, "NumberFont_Outline_Med")
-scrollLines.sticky = CreateScrollLinePool(_G.CreateFrame("Frame", nil, _G.UIParent), "BACKGROUND", 0, "NumberFont_Outline_Huge")
+scrollLines.normal = CreateScrollLinePool(_G.CreateFrame("Frame", nil, _G.UIParent), "BACKGROUND", 0)
+scrollLines.sticky = CreateScrollLinePool(_G.CreateFrame("Frame", nil, _G.UIParent), "BACKGROUND", 0)
 scrollLines.sticky:SetSticky(true)
 
 private.scrollLines = scrollLines
