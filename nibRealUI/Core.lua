@@ -262,49 +262,6 @@ function RealUI:RegisterLockdownUpdate(id, fun, ...)
     end
 end
 
-local THIRTY_DAYS = 60 * 60 * 24 * 30
-local function InitCurrencyDB()
-    local currencyDB = RealUI.db.global.currency
-    local realmInfo = RealUI.realmInfo
-
-    -- clear out old data
-    local now = _G.time()
-    for index, realm in next, realmInfo.connectedRealms do
-        local realmDB = currencyDB[realm]
-        if realmDB then
-            for faction, factionDB in next, realmDB do
-                for name, data in next, factionDB do
-                    if not data.lastSeen or not data.class or not data.money then
-                        currencyDB[realm][faction][name] = nil
-                    elseif (now - data.lastSeen) >= THIRTY_DAYS then
-                        currencyDB[realm][faction][name] = nil
-                    end
-                end
-            end
-        end
-    end
-
-    -- init current player
-    local charInfo = RealUI.charInfo
-    local realm   = realmInfo.realmNormalized
-    local faction = charInfo.faction
-    local player  = charInfo.name
-
-    if not currencyDB[realm] then
-        currencyDB[realm] = {}
-    end
-    if not currencyDB[realm][faction] then
-        currencyDB[realm][faction] = {}
-    end
-    if not currencyDB[realm][faction][player] then
-        currencyDB[realm][faction][player] = {
-            class = charInfo.class.token
-        }
-    end
-
-    currencyDB[realm][faction][player].lastSeen = now
-end
-
 local function UpdateSpec()
     local old = RealUI.charInfo.specs.current.index
     local new = _G.GetSpecialization()
@@ -573,11 +530,6 @@ local onLoadMessages = {
 }
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
-    if RealUI.realmInfo.realmNormalized then
-        InitCurrencyDB()
-    else
-        self:RegisterMessage("NormalizedRealmReceived", InitCurrencyDB)
-    end
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()

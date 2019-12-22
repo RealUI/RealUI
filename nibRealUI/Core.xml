@@ -2,9 +2,9 @@
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
     <!-- Core -->
+    <Script file="Core\MiniPatches.lua"/>
     <Include file="Core\AddonData.xml"/>
     <Script file="Core\AddonControl.lua"/>
-    <Script file="Core\MiniPatches.lua"/>
     <Script file="Core\Settings.lua"/>
     <Script file="Core\Positioners.lua"/>
     <Script file="Core\Tutorial.lua"/>
@@ -13,4 +13,5 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>
     <Script file="Core\FramePoint.lua"/>
+    <Script file="Core\Currency.lua"/>
 </Ui>
