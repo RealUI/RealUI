@@ -88,6 +88,7 @@ local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
     if uiScaleChanging then return end
 
+    -- https://www.reddit.com/r/wow/comments/95o2qn/how_to_pixel_perfect_ui/
     local _, pysHeight = _G.GetPhysicalScreenSize()
     uiMod = (pysHeight / 768) * (private.uiScale or 1)
     pixelScale = 768 / pysHeight

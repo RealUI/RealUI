@@ -320,7 +320,7 @@ function RealUI.MakeFrameDraggable(frame, noClamp)
     frame:RegisterForDrag("LeftButton")
     frame:SetClampedToScreen(not noClamp)
     frame:SetScript("OnMouseDown", MouseDownHandler)
-    frame:SetScript("OnMouseUp",  frame.StopMovingOrSizing)
+    frame:SetScript("OnMouseUp", frame.StopMovingOrSizing)
 end
 
 function RealUI.GetOptions(modName, path)
