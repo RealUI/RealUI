@@ -123,7 +123,7 @@ end
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
 
-    CombatText:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     private.CreateScrollAreas()
 
 
