@@ -3,7 +3,10 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next type tinsert
+
+-- Libs --
+local LibWin = _G.LibStub("LibWindow-1.1")
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -11,170 +14,233 @@ local RealUI = private.RealUI
 local MODNAME = "DragEmAll"
 local DragEmAll = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
--- Based on the frame list from NDragIt by Nemes.
--- These frames are hooked on login.
-local frames = {
-    -- ["FrameName"] = true/false (the parent / the frame itself) or another frame
+local baseFames = {
+    --[[
+    FrameName = { list of child frames to hook }
+    ]]
 
-    -- Blizzard Frames
-    ["AddonList"] = false,
-    ["AudioOptionsFrame"] = false,
-    ["BankFrame"] = false,
-    ["CharacterFrame"] = false,
-    ["DressUpFrame"] = false,
-    ["EncounterJournal"] = false, -- only in 4.2
-    ["FriendsFrame"] = false,
-    ["GameMenuFrame"] = false,
-    --["GhostFrame"] = false,
-    ["GossipFrame"] = false,
-    ["GuildInviteFrame"] = false,
-    ["GuildRegistrarFrame"] = false,
-    ["HelpFrame"] = false,
-    ["InterfaceOptionsFrame"] = false,
-    ["ItemTextFrame"] = false,
-    ["LootFrame"] = false,
-    ["MacOptionsFrame"] = false,
-    ["MailFrame"] = false,
-    ["MerchantFrame"] = false,
-    ["MissingLootFrame"] = false,
-    ["OpenMailFrame"] = false,
-    --["PaperDollFrame"] = true,
-    ["PetitionFrame"] = false,
-    --["PetPaperDollFrame"] = true,
-    ["PetStableFrame"] = false,
-    ["PVEFrame"] = false, -- dungeon finder + PvP + challenges
-    ["QuestFrame"] = false,
-    ["QuestLogPopupDetailFrame"] = false,
-    --["PetPaperDollFrameCompanionFrame"] = "CharacterFrame",
-    ["RaidParentFrame"] = false,
-    --["ReputationFrame"] = true,
-    ["ScrollOfResurrectionSelectionFrame"] = false,
-    ["SendMailFrame"] = true,
-    ["SpellBookFrame"] = false,
-    -- ["StaticPopup1"] = false, -- Can't be moved, protected
-    ["StackSplitFrame"] = false,
-    ["TabardFrame"] = false,
-    ["TaxiFrame"] = false,
-    --["TicketStatusFrame"] = false,
-    ["TokenFrame"] = true,
-    --["TokenFrameContainer"] = "TokenFrame",
-    ["TradeFrame"] = false,
-    ["TutorialFrame"] = false,
-    ["VideoOptionsFrame"] = false,
-    ["WorldMapFrame"] = false,
-    ["WorldMapFrame.BorderFrame"] = true,
-    --["WorldMapPositioningGuide"] = true,
-    ["WorldStateScoreFrame"] = false,
+    AddonList = {},
+    AudioOptionsFrame = {},
+    BankFrame = {},
+    CharacterFrame = {},
+    DressUpFrame = {},
+    FriendsFrame = {},
+    GameMenuFrame = {},
+    GossipFrame = {},
+    GuildInviteFrame = {},
+    GuildRegistrarFrame = {},
+    HelpFrame = {},
+    InterfaceOptionsFrame = {},
+    ItemTextFrame = {},
+    LootFrame = {},
+    MailFrame = {"SendMailFrame", "OpenMailFrame"},
+    MerchantFrame = {},
+    PetitionFrame = {},
+    PetStableFrame = {},
+    PVEFrame = {},
+    QuestFrame = {},
+    QuestLogPopupDetailFrame = {},
+    RaidParentFrame = {},
+    SpellBookFrame = {},
+    TabardFrame = {},
+    TaxiFrame = {},
+    TradeFrame = {},
+    TutorialFrame = {},
+    VideoOptionsFrame = {},
 }
 
--- Frames provided by load on demand addons, hooked when the addon is loaded.
-local lodFrames = {
-    -- AddonName = { list of frames, same syntax as above }
-    Blizzard_AchievementUI = { ["AchievementFrame"] = false, ["AchievementFrameHeader"] = true, ["AchievementFrameCategoriesContainer"] = "AchievementFrame" },
-    Blizzard_ArchaeologyUI = { ["ArchaeologyFrame"] = false },
-    --Blizzard_ArenaUI
-    Blizzard_AuctionUI = { ["AuctionFrame"] = false },
-    Blizzard_BarbershopUI = { ["BarberShopFrame"] = false },
-    --Blizzard_BattlefieldMinimap
-    Blizzard_BindingUI = { ["KeyBindingFrame"] = false },
-    Blizzard_BlackMarketUI = { ["BlackMarketFrame"] = false },
-    Blizzard_Calendar = { ["CalendarFrame"] = false, ["CalendarCreateEventFrame"] = true },
-    Blizzard_ChallengesUI = { ["ChallengesLeaderboardFrame"] = false },
-    Blizzard_Collections = { ["MountJournal"] = true, ["PetJournal"] = true, ["ToyBox"] = true, ["HeirloomsJournal"] = true, ["WardrobeCollectionFrame"] = true },
-    --Blizzard_DeathRecap
-    Blizzard_EncounterJournal = { ["EncounterJournal"] = false },
-    Blizzard_GarrisonUI = { ["GarrisonLandingPage"] = false, ["GarrisonBuildingFrame"] = false, ["GarrisonMissionFrame"] = false },
-    --Blizzard_GlyphUI = { ["GlyphFrame"] = true },
-    --Blizzard_GMChatUI
-    Blizzard_GMSurveyUI = { ["GMSurveyFrame"] = false },
-    Blizzard_GuildBankUI = { ["GuildBankFrame"] = false, ["GuildBankEmblemFrame"] = true },
-    --Blizzard_GuildControlUI
-    Blizzard_GuildUI = { ["GuildFrame"] = false, ["GuildRosterFrame"] = true, ["GuildFrame.TitleMouseover"] = true },
-    Blizzard_InspectUI = { ["InspectFrame"] = false, ["InspectPVPFrame"] = true, ["InspectTalentFrame"] = true },
-    Blizzard_ItemAlterationUI = { ["TransmogrifyFrame"] = false },
-    Blizzard_ItemSocketingUI = { ["ItemSocketingFrame"] = false },
-    Blizzard_ItemUpgradeUI = { ["ItemUpgradeFrame"] = false, },
-    Blizzard_LookingForGuildUI = { ["LookingForGuildFrame"] = false },
-    Blizzard_MacroUI = { ["MacroFrame"] = false },
-    --Blizzard_ObjectiveTracker
-    --Blizzard_PVPUI
-    Blizzard_QuestChoice = { ["QuestChoiceFrame"] = false },
-    --Blizzard_RaidUI
-    --Blizzard_SocialUI
-    --Blizzard_StoreUI
-    Blizzard_TalentUI = { ["PlayerTalentFrame"] = false },
-    Blizzard_TimeManager = { ["TimeManagerFrame"] = false },
-    --Blizzard_TokenUI = { ["TokenFrame"] = true },
-    Blizzard_TradeSkillUI = { ["TradeSkillFrame"] = false },
-    Blizzard_TrainerUI = { ["ClassTrainerFrame"] = false },
-    Blizzard_VoidStorageUI = { ["VoidStorageFrame"] = false, ["VoidStorageBorderFrameMouseBlockFrame"] = "VoidStorageFrame" },
-    Blizzard_WorldMap = { ["TestWorldMapFrame"] = false, ["TestWorldMapFrame.BorderFrame"] = true },
+local addonFrames = {
+    --[[
+    AddonName = {
+        FrameName = { list of child frames to hook }
+            OR
+        FrameName = "Name of parent in baseFames"
+    ]]
+
+    Blizzard_AchievementUI = {
+         AchievementFrame = {"AchievementFrameHeader", "AchievementFrameCategoriesContainer"},
+    },
+    Blizzard_AlliedRacesUI = {},
+    Blizzard_ArchaeologyUI = {
+        ArchaeologyFrame = {}
+    },
+    Blizzard_ArenaUI = {},
+    Blizzard_ArtifactUI = {},
+    Blizzard_AuctionHouseUI = {
+        AuctionFrame = {}
+    },
+    Blizzard_AzeriteEssenceUI = {},
+    Blizzard_AzeriteRespecUI = {},
+    Blizzard_AzeriteUI = {},
+    Blizzard_BarbershopUI = {
+        BarberShopFrame = {}
+    },
+    Blizzard_BattlefieldMap = {},
+    Blizzard_BindingUI = {
+        KeyBindingFrame = {}
+    },
+    Blizzard_BlackMarketUI = {
+        BlackMarketFrame = {}
+    },
+    Blizzard_BoostTutorial = {},
+    Blizzard_Calendar = {
+        CalendarFrame = {"CalendarCreateEventFrame"}
+    },
+    Blizzard_ChallengesUI = {
+        ChallengesLeaderboardFrame = {}
+    },
+    Blizzard_Channels = {
+        ChannelFrame = {}
+    },
+    Blizzard_ClassTrial = {},
+    Blizzard_Collections = {
+        CollectionsJournal = {}
+    },
+    Blizzard_Communities = {
+        CommunitiesFrame = {}
+    },
+    Blizzard_CompactRaidFrames = {},
+    Blizzard_Contribution = {},
+    Blizzard_DeathRecap = {},
+    Blizzard_DebugTools = {},
+    Blizzard_EncounterJournal = {
+        EncounterJournal = {}
+    },
+    Blizzard_FlightMap = {
+        FlightMapFrame = {}
+    },
+    Blizzard_GarrisonUI = {
+        GarrisonLandingPage = {},
+        GarrisonBuildingFrame = {},
+        GarrisonMissionFrame = {}
+    },
+    Blizzard_GMChatUI = {},
+    Blizzard_GMSurveyUI = {
+        GMSurveyFrame = {}
+    },
+    Blizzard_GuildBankUI = {
+        GuildBankFrame = {"GuildBankEmblemFrame"}
+    },
+    Blizzard_GuildControlUI = {},
+    Blizzard_GuildUI = {
+        GuildFrame = {"GuildRosterFrame", "TitleMouseover" }
+    },
+    Blizzard_InspectUI = {
+        InspectFrame = {"InspectPVPFrame", "InspectTalentFrame"}
+    },
+    Blizzard_IslandsPartyPoseUI = {},
+    Blizzard_IslandsQueueUI = {},
+    Blizzard_ItemInteractionUI = {},
+    Blizzard_ItemSocketingUI = {
+        ItemSocketingFrame = {}
+    },
+    Blizzard_ItemUpgradeUI = {
+        ItemUpgradeFrame = {},
+    },
+    Blizzard_LookingForGuildUI = {
+        LookingForGuildFrame = {}
+    },
+    Blizzard_MacroUI = {
+        MacroFrame = {}
+    },
+    Blizzard_ObjectiveTracker = {},
+    Blizzard_ObliterumUI = {},
+    Blizzard_OrderHallUI = {},
+    Blizzard_PartyPoseUI = {},
+    Blizzard_PVPMatch = {},
+    Blizzard_PVPUI = {},
+    Blizzard_QuestChoice = {
+        QuestChoiceFrame = {}
+    },
+    Blizzard_RaidUI = {},
+    Blizzard_ScrappingMachineUI = {},
+    Blizzard_SocialUI = {},
+    Blizzard_StoreUI = {},
+    Blizzard_TalentUI = {
+        PlayerTalentFrame = {}
+    },
+    Blizzard_TimeManager = {
+        TimeManagerFrame = {}
+    },
+    Blizzard_TokenUI = {},
+    Blizzard_TradeSkillUI = {
+        TradeSkillFrame = {}
+    },
+    Blizzard_TrainerUI = {
+        ClassTrainerFrame = {}
+    },
+    Blizzard_VoidStorageUI = {
+        VoidStorageFrame = {"VoidStorageBorderFrameMouseBlockFrame"},
+    },
+    Blizzard_WarboardUI = {
+        WarboardQuestChoiceFrame = {}
+    },
+    Blizzard_WarfrontsPartyPoseUI = {},
+    Blizzard_WorldMap = {
+        WorldMapFrame = {}
+    },
 }
 
-local parentFrame = {}
-local hooked = {}
-
-local function MouseDownHandler(frame, button)
-    frame = parentFrame[frame] or frame
-    if frame and button == "LeftButton" then
-        frame:StartMoving()
-        frame:SetUserPlaced(false)
-    end
-end
-
-local function MouseUpHandler(frame, button)
-    frame = parentFrame[frame] or frame
-    if frame and button == "LeftButton" then
-        frame:StopMovingOrSizing()
-    end
-end
-
+local frames = {}
 function DragEmAll:HookFrames(list)
-    for name, child in next, list do
-        self:HookFrame(name, child)
+    for frameName, children in next, list do
+        self:HookFrame(frameName, children)
     end
 end
 
-function DragEmAll:HookFrame(name, moveParent)
-    local frame = _G
-    for s in name:gmatch("%w+") do
-        if frame then
-            frame = frame[s]
-        end
-    end
-    -- check if frame was found
-    if frame == _G then
-        frame = nil
+function DragEmAll:HookFrame(frameName, children)
+    local frame = _G[frameName]
+    if not frame then return end
+
+    if type(children) == "string" then
+        local parentName = children
+        frame = _G[parentName]
+
+        children = frames[parentName]
+        tinsert(children, frameName)
+
+        frameName = parentName
     end
 
-    local parent
-    if frame and not hooked[name] then
-        if moveParent then
-            if _G.type(moveParent) == "string" then
-                parent = _G[moveParent]
-            else
-                parent = frame:GetParent()
-            end
-            if not parent then
-                return
-            end
-            parentFrame[frame] = parent
+    for i, childName in next, children do
+        local child = _G[childName] or frame[childName]
+        if child then
+            child:HookScript("OnMouseDown", function(this)
+                LibWin.OnDragStart(frame)
+            end)
+            child:HookScript("OnMouseUp", function(this)
+                LibWin.OnDragStop(frame)
+            end)
         end
-        if parent then
-            parent:SetMovable(true)
-            parent:SetClampedToScreen(false)
+    end
+
+    frame:EnableMouse(true)
+    frame:SetMovable(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetClampedToScreen(false)
+    frame:HookScript("OnDragStart", LibWin.OnDragStart)
+    frame:HookScript("OnDragStop", LibWin.OnDragStop)
+
+    LibWin.RegisterConfig(frame, self.db.global[frameName])
+    frames[frameName] = children
+end
+
+local function UpdateFrames()
+    for frameName, children in next, frames do
+        local frame = _G[frameName]
+        if frame:IsVisible() and not DragEmAll.db.global[frameName].seen then
+            LibWin.SavePosition(frame)
+            DragEmAll.db.global[frameName].seen = true
         end
-        frame:EnableMouse(true)
-        frame:SetMovable(true)
-        frame:SetClampedToScreen(false)
-        frame:HookScript("OnMouseDown", MouseDownHandler)
-        frame:HookScript("OnMouseUp", MouseUpHandler)
-        hooked[name] = true
+
+        if DragEmAll.db.global[frameName].seen then
+            LibWin.RestorePosition(frame)
+        end
     end
 end
 
 function DragEmAll:ADDON_LOADED(event, name)
-    local frameList = lodFrames[name]
+    local frameList = addonFrames[name]
     if frameList then
         self:HookFrames(frameList)
     end
@@ -184,18 +250,34 @@ end
 -- Initialization --
 --------------------
 function DragEmAll:OnInitialize()
+    self.db = RealUI.db:RegisterNamespace(MODNAME)
+    self.db:RegisterDefaults({
+        global = {
+            ["**"] = {
+                x = 0,
+                y = 0,
+                point = "TOPLEFT",
+                seen = false,
+            }
+        },
+    })
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function DragEmAll:OnEnable()
-    self:HookFrames(frames)
+    self:HookFrames(baseFames)
 
     -- Hook prior loaded addons
-    for addon, frameList in _G.next, lodFrames do
+    for addon, frameList in next, addonFrames do
         if _G.IsAddOnLoaded(addon) then
             self:HookFrames(frameList)
         end
     end
+
+    _G.hooksecurefunc("ShowUIPanel", UpdateFrames)
+    _G.hooksecurefunc("HideUIPanel", UpdateFrames)
+    _G.hooksecurefunc("UpdateUIPanelPositions", UpdateFrames)
 
     self:RegisterEvent("ADDON_LOADED")
 end
