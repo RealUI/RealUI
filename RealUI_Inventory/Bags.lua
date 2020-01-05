@@ -50,8 +50,7 @@ local function SortSlots(a, b)
         end
     end
 end
-
-local function SetupSlots(bag, columnHeight, columnBase, numSkipped)
+local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
     sort(bag.slots, SortSlots)
 
     if bag.tag == "main" then
@@ -91,7 +90,27 @@ local function SetupSlots(bag, columnHeight, columnBase, numSkipped)
 
     return columnHeight, columnBase
 end
+local function SetupSlots(main)
+    local columnHeight, columnBase = 0, main.tag
+    columnHeight, columnBase = UpdateBagSize(main, columnHeight, columnBase)
+
+    local numSkipped = 0
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        local bag = main.bags[tag]
+        if #bag.slots <= 0 then
+            bag:Hide()
+            numSkipped = numSkipped + 1
+        else
+            columnHeight, columnBase = UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
+            bag:Show()
+            numSkipped = 0
+        end
+    end
+end
+
 local function UpdateBag(main)
+    if main:AreAnyLoadsOutstanding() then return end
+
     wipe(main.slots)
     for tag, bag in next, main.bags do
         wipe(bag.slots)
@@ -108,21 +127,9 @@ local function UpdateBag(main)
         end
     end
 
-    local columnHeight, columnBase = 0, main.tag
-    columnHeight, columnBase = SetupSlots(main, columnHeight, columnBase)
-
-    local numSkipped = 0
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        local bag = main.bags[tag]
-        if #bag.slots <= 0 then
-            bag:Hide()
-            numSkipped = numSkipped + 1
-        else
-            columnHeight, columnBase = SetupSlots(bag, columnHeight, columnBase, numSkipped)
-            bag:Show()
-            numSkipped = 0
-        end
-    end
+    main:ContinueOnLoad(function()
+        SetupSlots(main)
+    end)
 end
 function private.UpdateBags()
     UpdateBag(Inventory.main)
@@ -143,6 +150,7 @@ function private.AddSlotToBag(slot, bagID)
 
     tinsert(bag.slots, slot)
     slot:SetParent(private.blizz[bagID])
+
     main:AddContinuable(slot.item)
 end
 
@@ -161,6 +169,24 @@ local function DropTargetFindSlot(bagType)
     if bagID then
         _G.PickupContainerItem(bagID, slotIndex)
     end
+end
+
+local ContinuableContainer = _G.CreateFromMixins(_G.ContinuableContainer)
+function ContinuableContainer:RecheckEvictableContinuables()
+    local areAllLoaded = true
+    if self.evictableObjects then
+        for i, evictableObject in ipairs(self.evictableObjects) do
+            if not evictableObject:IsItemDataCached() then
+                areAllLoaded = false
+
+                self.numOutstanding = self.numOutstanding + 1
+
+                -- The version of this in FrameXML uses `continuable` instead of `evictableObject`
+                tinsert(self.continuables, evictableObject:ContinueWithCancelOnItemLoad(self.onContinuableLoadedCallback))
+            end
+        end
+    end
+    return areAllLoaded
 end
 
 local BagEvents = {
@@ -192,7 +218,7 @@ local function CreateBag(bagType)
                     end
                 end
             else
-                UpdateBag(main)
+                UpdateBag(self)
                 self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
@@ -202,8 +228,8 @@ local function CreateBag(bagType)
             self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
             self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
             self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
-            UpdateBag(main)
 
+            UpdateBag(self)
             self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
         end)
         main:SetScript("OnHide", function(self)
@@ -212,6 +238,7 @@ local function CreateBag(bagType)
             self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
             self:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
             self:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
+            self:Cancel()
         end)
     elseif bagType == "bank" then
         main = _G.CreateFrame("Frame", "RealUIBank", _G.UIParent)
@@ -234,7 +261,7 @@ local function CreateBag(bagType)
                     end
                 end
             else
-                UpdateBag(main)
+                UpdateBag(self)
                 self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
@@ -244,8 +271,8 @@ local function CreateBag(bagType)
             self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
             self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
             self:RegisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
-            UpdateBag(main)
 
+            UpdateBag(self)
             self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
         end)
         main:SetScript("OnHide", function(self)
@@ -257,7 +284,7 @@ local function CreateBag(bagType)
         end)
     end
 
-    _G.Mixin(main, _G.ContinuableContainer)
+    _G.Mixin(main, ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
     main:SetToplevel(true)
     main:Hide()
@@ -329,10 +356,6 @@ local function CreateBag(bagType)
 
         main.bags[tag] = bag
     end
-
-    main:ContinueOnLoad(function()
-        UpdateBag(main)
-    end)
 end
 
 

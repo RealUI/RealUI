@@ -161,8 +161,10 @@ function private.UpdateSlots(bagID)
     for slotIndex = 1, _G.GetContainerNumSlots(bagID) do
         local slot = private.GetSlot(bagID, slotIndex)
         if slot then
-            private.AddSlotToBag(slot, bagID)
-            slot:Update()
+            slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
+                slot:Update()
+                private.AddSlotToBag(slot, bagID)
+            end)
             slot:Show()
         end
     end
@@ -223,10 +225,6 @@ function private.GetSlot(bagID, slotIndex)
     if slot:IsValid() then
         slot:SetID(slotIndex)
         slot.item = _G.Item:CreateFromItemLocation(slot)
-        slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
-            slot:Update()
-        end)
-
         return slot
     else
         slots:Release(slot)
