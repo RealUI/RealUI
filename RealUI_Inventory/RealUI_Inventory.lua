@@ -24,10 +24,6 @@ function private.Toggle(show)
         show = not main:IsShown()
     end
 
-    if show then
-        private.Update()
-    end
-
     main:SetShown(show)
     Inventory.bank:SetShown(show and Inventory.showBank)
 end
