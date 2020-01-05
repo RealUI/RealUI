@@ -68,14 +68,6 @@ function eventPrefix.SPELL_BUILDING(scrollType, eventInfo, ...)
     private.AddEvent(scrollType, isSticky, text)
 end
 
-function eventPrefix.ENVIRONMENTAL(scrollType, eventInfo, ...)
-    eventInfo.environmentalType = ...
-
-    local text, isSticky = eventSuffix[eventInfo.eventType](eventInfo, select(2, ...))
-
-    private.AddEvent(scrollType, isSticky, text)
-end
-
 
 local eventFormat = "%s %d %s"
 function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
@@ -144,4 +136,22 @@ function eventSpecial.PARTY_KILL(scrollType, eventInfo, ...)
 
     local isSticky = true
     private.AddEvent(scrollType, isSticky, PARTY_KILL:format(eventInfo.sourceName, resultStr, eventInfo.destName))
+end
+
+local ENVIRONMENTAL_DAMAGE = "%d %s %s"
+function eventSpecial.ENVIRONMENTAL_DAMAGE(scrollType, eventInfo, ...)
+    local environmentalType, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
+    environmentalType = environmentalType:upper()
+
+    local text = _G["ACTION_ENVIRONMENTAL_DAMAGE_"..environmentalType]
+    local resultStr = _G.CombatLog_String_DamageResultString(resisted, blocked, absorbed, critical, glancing, crushing, nil, nil, nil, overkill)
+    resultStr = resultStr or ""
+
+
+    if overkill > 0 then
+        amount = amount - overkill
+    end
+
+    text = ENVIRONMENTAL_DAMAGE:format(amount, text, resultStr)
+    private.AddEvent(scrollType, critical, SpellColors[school]:WrapTextInColorCode(text))
 end
