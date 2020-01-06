@@ -15,6 +15,7 @@ end
 
 CreateFilter("junk", {
     name = _G.BAG_FILTER_JUNK,
+    rank = -1,
     filter = function(slot)
         local _, _, _, quality, _, _, _, _, noValue = _G.GetContainerItemInfo(slot:GetBagAndSlot())
         return quality == _G.LE_ITEM_QUALITY_POOR and not noValue
@@ -23,6 +24,7 @@ CreateFilter("junk", {
 
 CreateFilter("consumables", {
     name = _G.AUCTION_CATEGORY_CONSUMABLES,
+    rank = 1,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == _G.LE_ITEM_CLASS_CONSUMABLE
@@ -31,6 +33,7 @@ CreateFilter("consumables", {
 
 CreateFilter("questitems", {
     name = _G.AUCTION_CATEGORY_QUEST_ITEMS,
+    rank = 0,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == _G.LE_ITEM_CLASS_QUESTITEM
@@ -50,6 +53,7 @@ for i = 1, #tradegoods do
     local name = _G.GetItemSubClassInfo(_G.LE_ITEM_CLASS_TRADEGOODS, subClassID)
     CreateFilter("tradegoods_"..subClassID, {
         name = prefix:format(name),
+        rank = 2,
         filter = function(slot)
             local _, _, _, _, _, typeID, subTypeID = _G.GetItemInfoInstant(slot.item:GetItemID())
             return typeID == _G.LE_ITEM_CLASS_TRADEGOODS and subTypeID == subClassID
@@ -59,6 +63,7 @@ end
 
 CreateFilter("equipment", {
     name = _G.BAG_FILTER_EQUIPMENT,
+    rank = 1,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == _G.LE_ITEM_CLASS_ARMOR or typeID == _G.LE_ITEM_CLASS_WEAPON
@@ -211,6 +216,7 @@ local travel = {
 }
 CreateFilter("travel", {
     name = _G.TUTORIAL_TITLE35,
+    rank = 0,
     filter = function(slot)
         return travel[slot.item:GetItemID()]
     end,

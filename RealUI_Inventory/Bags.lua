@@ -141,12 +141,21 @@ end
 function private.AddSlotToBag(slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
-    local bag = main
+    local filterTag
     for i, tag in ipairs(Inventory.db.global.filters) do
         if private.filters[tag].filter(slot) then
-            bag = main.bags[tag]
+            if filterTag then
+                -- Lower ranks have priority
+                if private.filters[filterTag].rank > private.filters[tag].rank then
+                    filterTag = tag
+                end
+            else
+                filterTag = tag
+            end
         end
     end
+
+    local bag = main.bags[filterTag] or main
 
     tinsert(bag.slots, slot)
     slot:SetParent(private.blizz[bagID])
