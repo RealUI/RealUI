@@ -23,6 +23,7 @@ local baseFames = {
     AudioOptionsFrame = {},
     BankFrame = {},
     CharacterFrame = {},
+    ChatConfigFrame = {},
     DressUpFrame = {},
     FriendsFrame = {},
     GameMenuFrame = {},
@@ -40,7 +41,6 @@ local baseFames = {
     PVEFrame = {},
     QuestFrame = {},
     QuestLogPopupDetailFrame = {},
-    RaidParentFrame = {},
     SpellBookFrame = {},
     TabardFrame = {},
     TaxiFrame = {},
@@ -71,7 +71,9 @@ local addonFrames = {
     },
     Blizzard_AzeriteEssenceUI = {},
     Blizzard_AzeriteRespecUI = {},
-    Blizzard_AzeriteUI = {},
+    Blizzard_AzeriteUI = {
+        AzeriteEmpoweredItemUI = {}
+    },
     Blizzard_BarbershopUI = {
         BarberShopFrame = {}
     },
@@ -97,7 +99,7 @@ local addonFrames = {
         CollectionsJournal = {}
     },
     Blizzard_Communities = {
-        CommunitiesFrame = {}
+        CommunitiesFrame = {"CommunitiesGuildLogFrame"}
     },
     Blizzard_CompactRaidFrames = {},
     Blizzard_Contribution = {},
