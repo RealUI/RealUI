@@ -45,7 +45,8 @@ local defaults = {
                 y = 0,
                 point = "CENTER"
             }
-        }
+        },
+        ignore = {}
     }
 }
 
@@ -68,9 +69,21 @@ local function DebugEvent(eventInfo, ...)
         tostringall(...))
 end
 
+local IGNORE_EVENT = {
+    SPELL_CAST_START = true,
+    SPELL_CAST_SUCCESS = true,
+    SPELL_CAST_FAILED = true,
+
+    ENCHANT_APPLIED = true,
+    ENCHANT_REMOVED = true,
+}
+
 local playerGUID = _G.UnitGUID("player")
 local function FilterEvent(eventInfo, ...)
     DebugEvent(eventInfo, ...)
+    if IGNORE_EVENT[eventInfo.event] then
+        return
+    end
 
     local scrollType
     if eventInfo.sourceGUID == playerGUID then
@@ -122,6 +135,10 @@ end
 
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
+
+    for event in next, self.db.global.ignore do
+        IGNORE_EVENT[event] = true
+    end
 
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     private.CreateScrollAreas()
