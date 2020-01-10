@@ -9,7 +9,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Core\Positioners.lua"/>
     <Script file="Core\Tutorial.lua"/>
     <Script file="Core\Notifications.lua"/>
-    <Script file="Core\SpiralBorder.lua"/>
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>
     <Script file="Core\FramePoint.lua"/>
