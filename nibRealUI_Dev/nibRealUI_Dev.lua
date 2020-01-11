@@ -170,6 +170,7 @@ end
 
 local seenEvent, lastEvent = {}
 local taintCheck = {
+    GameTooltipMoneyFrame1 = false,
     WorldMap_UpdateQuestBonusObjectives = false,
     NUM_WORLDMAP_DEBUG_ZONEMAP = false,
     WorldMapFrame = false,
