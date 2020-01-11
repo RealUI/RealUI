@@ -86,10 +86,10 @@ local function FilterEvent(eventInfo, ...)
     end
 
     local scrollType
-    if eventInfo.sourceGUID == playerGUID then
-        scrollType = "outgoing"
-    elseif eventInfo.destGUID == playerGUID then
+    if eventInfo.destGUID == playerGUID then
         scrollType = "incoming"
+    elseif eventInfo.sourceGUID == playerGUID then
+        scrollType = "outgoing"
     end
 
     if scrollType then
