@@ -40,11 +40,17 @@ end
 local eventQueue = {}
 _G.C_Timer.NewTicker(0.1, function( ... )
     if #eventQueue > 0 then
-        local event = tremove(eventQueue, 1)
-        DisplayEvent(event[1], event[2], event[3])
+        local eventInfo = tremove(eventQueue, 1)
+        if eventInfo.string then
+            DisplayEvent(eventInfo.scrollType, eventInfo.isSticky, eventInfo.string)
+        else
+            local data = eventInfo.data
+            local eventStr = eventInfo.eventFormat:format(eventInfo[data[1]], eventInfo[data[2]], eventInfo[data[3]])
+            DisplayEvent(eventInfo.scrollType, eventInfo.isSticky, eventStr)
+        end
     end
 end)
 
-function private.AddEvent(scrollType, isSticky, text)
-    tinsert(eventQueue, {scrollType, isSticky, text})
+function private.AddEvent(eventInfo)
+    tinsert(mergeQueue, eventInfo)
 end

@@ -93,8 +93,10 @@ local function FilterEvent(eventInfo, ...)
     end
 
     if scrollType then
+        eventInfo.scrollType = scrollType
+        eventInfo.data = {}
         if private.eventSpecial[eventInfo.event] then
-            return private.eventSpecial[eventInfo.event](scrollType, eventInfo, ...)
+            return private.eventSpecial[eventInfo.event](eventInfo, ...)
         end
 
         local eventBase, eventType = eventInfo.event:match("(%w+)_([%w_]+)")
@@ -105,8 +107,9 @@ local function FilterEvent(eventInfo, ...)
         end
         eventInfo.eventBase, eventInfo.eventType = eventBase, eventType
 
+
         if private.eventPrefix[eventBase] then
-            private.eventPrefix[eventBase](scrollType, eventInfo, ...)
+            private.eventPrefix[eventBase](eventInfo, ...)
         else
             _G.print("missing base event", eventBase, eventType)
         end
