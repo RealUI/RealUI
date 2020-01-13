@@ -169,6 +169,7 @@ function eventSpecial.PARTY_KILL(eventInfo, ...)
     end
     eventInfo.resultStr = resultStr
 
+    eventInfo.canMerge = false
     eventInfo.isSticky = true
     eventInfo.string = PARTY_KILL:format(eventInfo.sourceName, resultStr, eventInfo.destName)
     private.AddEvent(eventInfo)

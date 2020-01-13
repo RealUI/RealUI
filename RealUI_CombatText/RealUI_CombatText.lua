@@ -129,6 +129,8 @@ local function FormatEventInfo(timestamp, event, hideCaster, sourceGUID, sourceN
         destName = destName,
         destFlags = destFlags,
         destRaidFlags = destRaidFlags,
+
+        canMerge = true,
     }
     return eventInfo, ...
 end
