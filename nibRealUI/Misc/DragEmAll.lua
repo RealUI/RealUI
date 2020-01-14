@@ -235,7 +235,7 @@ function DragEmAll:HookFrame(frameName, children)
     frames[frameName] = children
 end
 
-local function UpdateFrames()
+local function _UpdateFrames()
     if _G.InCombatLockdown() then return end
 
     for frameName, children in next, frames do
@@ -249,6 +249,9 @@ local function UpdateFrames()
             LibWin.RestorePosition(frame)
         end
     end
+end
+local function UpdateFrames()
+    RealUI.TryInCombat(_UpdateFrames)
 end
 
 function DragEmAll:ADDON_LOADED(event, name)

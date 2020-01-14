@@ -218,49 +218,9 @@ function RealUI:SetLayout()
     dbc.layout.needchanged = false
 end
 function RealUI:UpdateLayout()
-    if _G.InCombatLockdown() then
-        -- Register to update once combat ends
-        if not self.oocFunctions["SetLayout"] then
-            self:RegisterLockdownUpdate("SetLayout", function() RealUI:SetLayout() end)
-            dbc.layout.needchanged = true
-        end
-        self:Notification("RealUI", true, L["Layout_ApplyOOC"])
-    else
-        -- Set layout in 0.5 seconds
-        self.oocFunctions["SetLayout"] = nil
-        self:ScheduleTimer("SetLayout", 0.5)
-    end
+    RealUI.TryInCombat(RealUI.SetLayout, L["Layout_ApplyOOC"])
 end
 
--- Lockdown check, out-of-combat updates
-function RealUI:LockdownUpdates()
-    if not _G.InCombatLockdown() then
-        local stillProcessing
-        for k, fun in next, self.oocFunctions do
-            self.oocFunctions[k] = nil
-            if type(fun) == "function" then
-                fun()
-                stillProcessing = true
-                break
-            end
-        end
-        if not stillProcessing then
-            self:CancelTimer(self.lockdownTimer)
-            self.lockdownTimer = nil
-        end
-    end
-end
-function RealUI:UpdateLockdown(...)
-    if not self.lockdownTimer then self.lockdownTimer = self:ScheduleRepeatingTimer("LockdownUpdates", 0.5) end
-end
-function RealUI:RegisterLockdownUpdate(id, fun, ...)
-    if not _G.InCombatLockdown() then
-        self.oocFunctions[id] = nil
-        fun(...)
-    else
-        self.oocFunctions[id] = function(...) fun(...) end
-    end
-end
 
 local function UpdateSpec()
     local old = RealUI.charInfo.specs.current.index
@@ -410,8 +370,6 @@ function RealUI:OnInitialize()
 
     -- Register events
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
-    self:RegisterEvent("PLAYER_ENTERING_WORLD", "LockdownUpdates")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
     self:RegisterEvent("ADDON_LOADED", function()
         if RealUI.recheckFonts then
             local SkinsDB = RealUI.GetOptions("Skins").profile

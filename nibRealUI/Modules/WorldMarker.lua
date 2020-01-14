@@ -93,9 +93,7 @@ local function WorldMarker_oocUpdate()
     end
 end
 function WorldMarker:UpdateLockdown(...)
-    RealUI:RegisterLockdownUpdate("WorldMarker_oocUpdate", function()
-        WorldMarker_oocUpdate()
-    end)
+    RealUI.TryInCombat(WorldMarker_oocUpdate)
 end
 
 function WorldMarker:HighlightUpdate(btn)

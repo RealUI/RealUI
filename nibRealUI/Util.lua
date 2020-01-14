@@ -2,6 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals type pcall tonumber next
+-- luacheck: globals tinsert tremove unpack
 -- luacheck: globals floor min max math
 
 local RealUI = _G.RealUI
@@ -322,6 +323,30 @@ function RealUI.MakeFrameDraggable(frame, noClamp)
     frame:SetScript("OnMouseDown", MouseDownHandler)
     frame:SetScript("OnMouseUp", frame.StopMovingOrSizing)
 end
+
+local queue, args = {}, {}
+function RealUI.TryInCombat(func, alert, ...)
+    if _G.InCombatLockdown() then
+        if not args[func] then
+            tinsert(queue, 1, func)
+        end
+
+        args[func] = {...}
+
+        if alert then
+            RealUI:Notification("RealUI", true, alert)
+        end
+    else
+        func(...)
+    end
+end
+_G.C_Timer.NewTicker(0.5, function()
+    if #queue > 0 and not _G.InCombatLockdown() then
+        local func = tremove(queue)
+        func(unpack(args[func]))
+        args[func] = nil
+    end
+end)
 
 function RealUI.GetOptions(modName, path)
     local options = RealUI:GetModule(modName).db
