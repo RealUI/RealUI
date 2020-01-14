@@ -60,31 +60,35 @@ local addonFrames = {
     Blizzard_AchievementUI = {
          AchievementFrame = {"AchievementFrameHeader", "AchievementFrameCategoriesContainer"},
     },
-    Blizzard_AlliedRacesUI = {},
+    --Blizzard_AlliedRacesUI = {},
     Blizzard_ArchaeologyUI = {
         ArchaeologyFrame = {}
     },
-    Blizzard_ArenaUI = {},
-    Blizzard_ArtifactUI = {},
+    --Blizzard_ArenaUI = {},
+    --Blizzard_ArtifactUI = {},
     Blizzard_AuctionHouseUI = {
         AuctionFrame = {}
     },
-    Blizzard_AzeriteEssenceUI = {},
-    Blizzard_AzeriteRespecUI = {},
+    Blizzard_AzeriteEssenceUI = {
+        AzeriteEssenceUI = {}
+    },
+    Blizzard_AzeriteRespecUI = {
+        AzeriteRespecFrame = {}
+    },
     Blizzard_AzeriteUI = {
         AzeriteEmpoweredItemUI = {}
     },
     Blizzard_BarbershopUI = {
         BarberShopFrame = {}
     },
-    Blizzard_BattlefieldMap = {},
+    --Blizzard_BattlefieldMap = {},
     Blizzard_BindingUI = {
         KeyBindingFrame = {}
     },
     Blizzard_BlackMarketUI = {
         BlackMarketFrame = {}
     },
-    Blizzard_BoostTutorial = {},
+    --Blizzard_BoostTutorial = {},
     Blizzard_Calendar = {
         CalendarFrame = {"CalendarCreateEventFrame"}
     },
@@ -94,17 +98,17 @@ local addonFrames = {
     Blizzard_Channels = {
         ChannelFrame = {}
     },
-    Blizzard_ClassTrial = {},
+    --Blizzard_ClassTrial = {},
     Blizzard_Collections = {
         CollectionsJournal = {}
     },
     Blizzard_Communities = {
         CommunitiesFrame = {"CommunitiesGuildLogFrame"}
     },
-    Blizzard_CompactRaidFrames = {},
-    Blizzard_Contribution = {},
-    Blizzard_DeathRecap = {},
-    Blizzard_DebugTools = {},
+    --Blizzard_CompactRaidFrames = {},
+    --Blizzard_Contribution = {},
+    --Blizzard_DeathRecap = {},
+    --Blizzard_DebugTools = {},
     Blizzard_EncounterJournal = {
         EncounterJournal = {}
     },
@@ -116,23 +120,25 @@ local addonFrames = {
         GarrisonBuildingFrame = {},
         GarrisonMissionFrame = {}
     },
-    Blizzard_GMChatUI = {},
+    --Blizzard_GMChatUI = {},
     Blizzard_GMSurveyUI = {
         GMSurveyFrame = {}
     },
     Blizzard_GuildBankUI = {
         GuildBankFrame = {"GuildBankEmblemFrame"}
     },
-    Blizzard_GuildControlUI = {},
+    --Blizzard_GuildControlUI = {},
     Blizzard_GuildUI = {
         GuildFrame = {"GuildRosterFrame", "TitleMouseover" }
     },
     Blizzard_InspectUI = {
         InspectFrame = {"InspectPVPFrame", "InspectTalentFrame"}
     },
-    Blizzard_IslandsPartyPoseUI = {},
-    Blizzard_IslandsQueueUI = {},
-    Blizzard_ItemInteractionUI = {},
+    --Blizzard_IslandsPartyPoseUI = {},
+    --Blizzard_IslandsQueueUI = {},
+    Blizzard_ItemInteractionUI = {
+        ItemInteractionFrame = {}
+    },
     Blizzard_ItemSocketingUI = {
         ItemSocketingFrame = {}
     },
@@ -145,26 +151,28 @@ local addonFrames = {
     Blizzard_MacroUI = {
         MacroFrame = {}
     },
-    Blizzard_ObjectiveTracker = {},
+    --Blizzard_ObjectiveTracker = {},
     Blizzard_ObliterumUI = {},
-    Blizzard_OrderHallUI = {},
-    Blizzard_PartyPoseUI = {},
-    Blizzard_PVPMatch = {},
-    Blizzard_PVPUI = {},
+    Blizzard_OrderHallUI = {
+        OrderHallTalentFrame = {}
+    },
+    --Blizzard_PartyPoseUI = {},
+    --Blizzard_PVPMatch = {},
+    --Blizzard_PVPUI = {},
     Blizzard_QuestChoice = {
         QuestChoiceFrame = {}
     },
-    Blizzard_RaidUI = {},
+    --Blizzard_RaidUI = {},
     Blizzard_ScrappingMachineUI = {},
-    Blizzard_SocialUI = {},
-    Blizzard_StoreUI = {},
+    --Blizzard_SocialUI = {},
+    --Blizzard_StoreUI = {},
     Blizzard_TalentUI = {
         PlayerTalentFrame = {}
     },
     Blizzard_TimeManager = {
         TimeManagerFrame = {}
     },
-    Blizzard_TokenUI = {},
+    --Blizzard_TokenUI = {},
     Blizzard_TradeSkillUI = {
         TradeSkillFrame = {}
     },
@@ -177,7 +185,7 @@ local addonFrames = {
     Blizzard_WarboardUI = {
         WarboardQuestChoiceFrame = {}
     },
-    Blizzard_WarfrontsPartyPoseUI = {},
+    --Blizzard_WarfrontsPartyPoseUI = {},
     Blizzard_WorldMap = {
         WorldMapFrame = {}
     },
