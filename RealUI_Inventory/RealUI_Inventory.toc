@@ -1,8 +1,8 @@
-## Interface: 80200
+## Interface: 80300
 ## Title: RealUI Inventory
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe
-## Version: 2.1.2
+## Version: 2.1.3
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_InventoryDB
 
