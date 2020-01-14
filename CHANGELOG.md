@@ -1,4 +1,4 @@
-## [Unreleased] ##
+﻿## [2.1.3] - 2020-01-14 ##
 ### Modified AddOns ###
 
   * cargBags_Nivaya
@@ -393,6 +393,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.3]: https://github.com/RealUI/RealUI/compare/2.1.2...2.1.3
 [2.1.2]: https://github.com/RealUI/RealUI/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/RealUI/RealUI/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/RealUI/RealUI/compare/2.0.14...2.1.0
