@@ -432,6 +432,7 @@ local AddDynamicInfo, ClearDynamicInfo do
     end
 end
 
+local progressFormat = "%s\n     |cFFFFFFFF+%s%%|r"
 local classification = {
     elite = "+",
     rare = " |cff6699ffR|r",
@@ -586,7 +587,8 @@ private.AddHook("OnTooltipSetUnit", function(self)
 
         do -- Objective Progress
             local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
-            local line, addedProgress
+            npcID = tonumber(npcID)
+            local progressInfo = {}
 
             local challengeMapID = _G.C_ChallengeMode.GetActiveChallengeMapID()
             if challengeMapID then
@@ -605,25 +607,43 @@ private.AddHook("OnTooltipSetUnit", function(self)
                     isAlternate = faction == "Horde"
                 end
 
-                addedProgress = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
+                local weight = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
+                if weight then
+                    progressInfo[challengeMapID] = {
+                        weight = weight,
+                        text = _G.ENEMY
+                    }
+                end
             else
-                local weightsTable = LOP:GetNPCWeightByCurrentQuests(tonumber(npcID))
-                if weightsTable then
-                    for questID, npcWeight in next, weightsTable do
-                        local questTitle = _G.C_TaskQuest.GetQuestInfoByQuestID(questID)
-                        for i = previousLine + 1, self:NumLines() do
-                            line = _G["GameTooltipTextLeft" .. i]
-                            if line and line:GetText() == questTitle then
-                                addedProgress = npcWeight
-                                break
-                            end
+                -- /dump C_TaskQuest.GetQuestsForPlayerByMapID(C_Map.GetBestMapForUnit("player"))
+                local taskPOIs = _G.C_TaskQuest.GetQuestsForPlayerByMapID(_G.C_Map.GetBestMapForUnit("player"))
+                for i, poiData in next, taskPOIs do
+                    local weight = LOP:GetNPCWeightByQuest(poiData.questId, npcID)
+                    if poiData.inProgress and weight then
+                        progressInfo[poiData.questId] = {
+                            weight = weight,
+                            text = _G.C_TaskQuest.GetQuestInfoByQuestID(poiData.questId)
+                        }
+                    end
+                end
+
+                for id, info in next, progressInfo do
+                    for i = previousLine + 1, self:NumLines() do
+                        local line = _G["GameTooltipTextLeft" .. i]
+                        if line and line:GetText() == info.text then
+                            info.line = line
+                            break
                         end
                     end
                 end
             end
 
-            if line and addedProgress then
-                line:SetFormattedText(("%s | +%s%%"), line:GetText(), addedProgress)
+            for id, info in next, progressInfo do
+                if info.line then
+                    info.line:SetFormattedText(progressFormat, info.line:GetText(), info.weight)
+                else
+                    _G.GameTooltip:AddLine(progressFormat:format(info.text, info.weight))
+                end
             end
         end
 
@@ -717,10 +737,10 @@ function Tooltips:OnInitialize()
         self:RegisterMessage("NormalizedRealmReceived", private.SetupCurrency)
     end
 
-    if Tooltips.db.global.showIDs then
+    if self.db.global.showIDs then
         private.SetupIDTips()
     end
-    if Tooltips.db.global.multiTip then
+    if self.db.global.multiTip then
         private.SetupMultiTip()
     end
 

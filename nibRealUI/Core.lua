@@ -218,92 +218,9 @@ function RealUI:SetLayout()
     dbc.layout.needchanged = false
 end
 function RealUI:UpdateLayout()
-    if _G.InCombatLockdown() then
-        -- Register to update once combat ends
-        if not self.oocFunctions["SetLayout"] then
-            self:RegisterLockdownUpdate("SetLayout", function() RealUI:SetLayout() end)
-            dbc.layout.needchanged = true
-        end
-        self:Notification("RealUI", true, L["Layout_ApplyOOC"])
-    else
-        -- Set layout in 0.5 seconds
-        self.oocFunctions["SetLayout"] = nil
-        self:ScheduleTimer("SetLayout", 0.5)
-    end
+    RealUI.TryInCombat(RealUI.SetLayout, L["Layout_ApplyOOC"])
 end
 
--- Lockdown check, out-of-combat updates
-function RealUI:LockdownUpdates()
-    if not _G.InCombatLockdown() then
-        local stillProcessing
-        for k, fun in next, self.oocFunctions do
-            self.oocFunctions[k] = nil
-            if type(fun) == "function" then
-                fun()
-                stillProcessing = true
-                break
-            end
-        end
-        if not stillProcessing then
-            self:CancelTimer(self.lockdownTimer)
-            self.lockdownTimer = nil
-        end
-    end
-end
-function RealUI:UpdateLockdown(...)
-    if not self.lockdownTimer then self.lockdownTimer = self:ScheduleRepeatingTimer("LockdownUpdates", 0.5) end
-end
-function RealUI:RegisterLockdownUpdate(id, fun, ...)
-    if not _G.InCombatLockdown() then
-        self.oocFunctions[id] = nil
-        fun(...)
-    else
-        self.oocFunctions[id] = function(...) fun(...) end
-    end
-end
-
-local THIRTY_DAYS = 60 * 60 * 24 * 30
-local function InitCurrencyDB()
-    local currencyDB = RealUI.db.global.currency
-    local realmInfo = RealUI.realmInfo
-
-    -- clear out old data
-    local now = _G.time()
-    for index, realm in next, realmInfo.connectedRealms do
-        local realmDB = currencyDB[realm]
-        if realmDB then
-            for faction, factionDB in next, realmDB do
-                for name, data in next, factionDB do
-                    if not data.lastSeen or not data.class or not data.money then
-                        currencyDB[realm][faction][name] = nil
-                    elseif (now - data.lastSeen) >= THIRTY_DAYS then
-                        currencyDB[realm][faction][name] = nil
-                    end
-                end
-            end
-        end
-    end
-
-    -- init current player
-    local charInfo = RealUI.charInfo
-    local realm   = realmInfo.realmNormalized
-    local faction = charInfo.faction
-    local player  = charInfo.name
-
-    if not currencyDB[realm] then
-        currencyDB[realm] = {}
-    end
-    if not currencyDB[realm][faction] then
-        currencyDB[realm][faction] = {}
-    end
-    if not currencyDB[realm][faction][player] then
-        currencyDB[realm][faction][player] = {
-            class = charInfo.class.token
-        }
-    end
-
-    currencyDB[realm][faction][player].lastSeen = now
-end
 
 local function UpdateSpec()
     local old = RealUI.charInfo.specs.current.index
@@ -333,11 +250,6 @@ function _G.RealUI_TestRaidWarnings()
         _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
         _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
     end, 5)
-end
-
-function RealUI:CPU_Profiling_Toggle()
-    _G.SetCVar("scriptProfile", (_G.GetCVar("scriptProfile") == "1") and "0" or "1")
-    _G.ReloadUI()
 end
 
 function RealUI:Taint_Logging_Toggle()
@@ -394,6 +306,22 @@ function RealUI:OnProfileUpdate(event, database, profile)
     end
 end
 
+_G.StaticPopupDialogs["PUDRUIRELOADUI"] = {
+    text = L["DoReloadUI"],
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        _G.ReloadUI()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    notClosableByLogout = false,
+}
+function RealUI:ReloadUIDialog()
+    _G.StaticPopup_Show("PUDRUIRELOADUI")
+end
+
 function RealUI:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, private.layoutToProfile[1])
     _G.LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "RealUI")
@@ -442,8 +370,6 @@ function RealUI:OnInitialize()
 
     -- Register events
     self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
-    self:RegisterEvent("PLAYER_ENTERING_WORLD", "LockdownUpdates")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
     self:RegisterEvent("ADDON_LOADED", function()
         if RealUI.recheckFonts then
             local SkinsDB = RealUI.GetOptions("Skins").profile
@@ -480,9 +406,7 @@ function RealUI:OnInitialize()
         RealUI.Debug("Config", "/realadv")
         RealUI.LoadConfig("RealUI")
     end)
-    self:RegisterChatCommand("memory", "MemoryDisplay")
     self:RegisterChatCommand("rl", _G.ReloadUI)
-    self:RegisterChatCommand("cpuProfiling", "CPU_Profiling_Toggle")
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
     self:RegisterChatCommand("findSpell", function(input)
         -- /findSpell "Spell Name" (player)|target (buff)|debuff
@@ -493,7 +417,7 @@ function RealUI:OnInitialize()
             -- Default this to false for player, true for target.
             auraType = unit == "target" and "debuff" or "buff"
         end
-        self:FindSpellID(spellName, unit, auraType)
+        self.FindSpellID(spellName, unit, auraType)
     end)
 
     -- Hide store button
@@ -564,11 +488,6 @@ local onLoadMessages = {
 }
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
-    if RealUI.realmInfo.realmNormalized then
-        InitCurrencyDB()
-    else
-        self:RegisterMessage("NormalizedRealmReceived", InitCurrencyDB)
-    end
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
@@ -649,6 +568,7 @@ end
 
 do
     local prototype = {
+        isPatch = RealUI.isPatch,
         debug = function(self, ...)
             return RealUI.Debug(self.moduleName, ...)
         end,

@@ -1,7 +1,4 @@
 local _, private = ...
-local options = private.options
-local debug = private.debug
-
 -- Lua Globals --
 local next, tostring = _G.next, _G.tostring
 
@@ -16,6 +13,10 @@ local round = RealUI.Round
 local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 local order = 0
+
+local ValidateOffset = private.ValidateOffset
+local options = private.options
+local debug = private.debug
 
 --[[
 local uiTweaks do
@@ -155,7 +156,7 @@ local core do
                     width = "half",
                     get = function(info) return _G.tostring(Infobar.db.profile.blockGap) end,
                     set = function(info, value)
-                        value = RealUI:ValidateOffset(value)
+                        value = ValidateOffset(value)
                         Infobar.db.profile.blockGap = value
                         Infobar:SettingsUpdate(info[#info])
                     end,
@@ -957,7 +958,7 @@ local uiTweaks do
                             width = "half",
                             get = function(info) return tostring(AltPowerBar.db.profile.size.width) end,
                             set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
+                                value = ValidateOffset(value)
                                 AltPowerBar.db.profile.size.width = value
                                 altPowerBar:UpdatePosition()
                             end,
@@ -969,7 +970,7 @@ local uiTweaks do
                             width = "half",
                             get = function(info) return tostring(AltPowerBar.db.profile.size.height) end,
                             set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
+                                value = ValidateOffset(value)
                                 AltPowerBar.db.profile.size.height = value
                                 altPowerBar:UpdatePosition()
                             end,
@@ -1001,7 +1002,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(AltPowerBar.db.profile.position.x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         AltPowerBar.db.profile.position.x = value
                                         altPowerBar:UpdatePosition()
                                     end,
@@ -1013,7 +1014,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(AltPowerBar.db.profile.position.y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         AltPowerBar.db.profile.position.y = value
                                         altPowerBar:UpdatePosition()
                                     end,
@@ -1442,7 +1443,7 @@ local uiTweaks do
                                 width = "half",
                                 get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frames[i].x) end,
                                 set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
+                                    value = ValidateOffset(value)
                                     FrameMover.db.profile.addons[addonSlug].frames[i].x = value
                                     FrameMover:MoveAddons()
                                 end,
@@ -1454,7 +1455,7 @@ local uiTweaks do
                                 width = "half",
                                 get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frames[i].y) end,
                                 set = function(info, value)
-                                    value = RealUI:ValidateOffset(value)
+                                    value = ValidateOffset(value)
                                     FrameMover.db.profile.addons[addonSlug].frames[i].y = value
                                     FrameMover:MoveAddons()
                                 end,
@@ -1546,7 +1547,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frameshealing[i].x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         FrameMover.db.profile.addons[addonSlug].frameshealing[i].x = value
                                         FrameMover:MoveAddons()
                                     end,
@@ -1558,7 +1559,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frameshealing[i].y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         FrameMover.db.profile.addons[addonSlug].frameshealing[i].y = value
                                         FrameMover:MoveAddons()
                                     end,
@@ -1678,7 +1679,7 @@ local uiTweaks do
                                     order = 10,
                                     get = function(info) return tostring(FrameMover.db.profile.uiframes[uiSlug].frames[i].x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         FrameMover.db.profile.uiframes[uiSlug].frames[i].x = value
                                         MoveFrameGroup(ui.frames, FrameMover.db.profile.uiframes[uiSlug].frames)
                                     end,
@@ -1690,7 +1691,7 @@ local uiTweaks do
                                     order = 20,
                                     get = function(info) return tostring(FrameMover.db.profile.uiframes[uiSlug].frames[i].y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         FrameMover.db.profile.uiframes[uiSlug].frames[i].y = value
                                         MoveFrameGroup(ui.frames, FrameMover.db.profile.uiframes[uiSlug].frames)
                                     end,
@@ -1900,7 +1901,7 @@ local uiTweaks do
                                             width = "half",
                                             get = function(info) return tostring(Loot.db.profile.loot.static.x) end,
                                             set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
+                                                value = ValidateOffset(value)
                                                 Loot.db.profile.loot.static.x = value
                                                 Loot:UpdateLootPosition()
                                             end,
@@ -1912,7 +1913,7 @@ local uiTweaks do
                                             width = "half",
                                             get = function(info) return tostring(Loot.db.profile.loot.static.y) end,
                                             set = function(info, value)
-                                                value = RealUI:ValidateOffset(value)
+                                                value = ValidateOffset(value)
                                                 Loot.db.profile.loot.static.y = value
                                                 Loot:UpdateLootPosition()
                                             end,
@@ -1970,7 +1971,7 @@ local uiTweaks do
                             width = "half",
                             get = function(info) return tostring(Loot.db.profile.roll.vertical) end,
                             set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
+                                value = ValidateOffset(value)
                                 Loot.db.profile.roll.vertical = value
                                 Loot:GroupLootPosition()
                             end,
@@ -1982,7 +1983,7 @@ local uiTweaks do
                             width = "half",
                             get = function(info) return tostring(Loot.db.profile.roll.horizontal) end,
                             set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
+                                value = ValidateOffset(value)
                                 Loot.db.profile.roll.horizontal = value
                                 Loot:GroupLootPosition()
                             end,
@@ -2112,7 +2113,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(MinimapAdv.db.profile.information.position.x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MinimapAdv.db.profile.information.position.x = value
                                         MinimapAdv:UpdateInfoPosition()
                                     end,
@@ -2124,7 +2125,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(MinimapAdv.db.profile.information.position.y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MinimapAdv.db.profile.information.position.y = value
                                         MinimapAdv:UpdateInfoPosition()
                                     end,
@@ -2235,7 +2236,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(MinimapAdv.db.profile.position.x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MinimapAdv.db.profile.position.x = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
@@ -2247,7 +2248,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(MinimapAdv.db.profile.position.y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MinimapAdv.db.profile.position.y = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
@@ -2330,7 +2331,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(MinimapAdv.db.profile.expand.position.x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MinimapAdv.db.profile.expand.position.x = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
@@ -2342,7 +2343,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return tostring(MinimapAdv.db.profile.expand.position.y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MinimapAdv.db.profile.expand.position.y = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
@@ -2563,7 +2564,7 @@ local uiTweaks do
                             width = "half",
                             get = function(info) return _G.tostring(MirrorBar.db.profile.size.width) end,
                             set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
+                                value = ValidateOffset(value)
                                 MirrorBar.db.profile.size.width = value
                                 MirrorBar:UpdatePosition()
                             end,
@@ -2575,7 +2576,7 @@ local uiTweaks do
                             width = "half",
                             get = function(info) return _G.tostring(MirrorBar.db.profile.size.height) end,
                             set = function(info, value)
-                                value = RealUI:ValidateOffset(value)
+                                value = ValidateOffset(value)
                                 MirrorBar.db.profile.size.height = value
                                 MirrorBar:UpdatePosition()
                             end,
@@ -2607,7 +2608,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return _G.tostring(MirrorBar.db.profile.position.x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MirrorBar.db.profile.position.x = value
                                         MirrorBar:UpdatePosition()
                                     end,
@@ -2619,7 +2620,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return _G.tostring(MirrorBar.db.profile.position.y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         MirrorBar.db.profile.position.y = value
                                         MirrorBar:UpdatePosition()
                                     end,
@@ -2740,7 +2741,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.x) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         ObjectivesAdv.db.profile.position.x = value
                                         ObjectivesAdv:RefreshMod()
                                     end,
@@ -2752,7 +2753,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.y) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         ObjectivesAdv.db.profile.position.y = value
                                         ObjectivesAdv:RefreshMod()
                                     end,
@@ -2765,7 +2766,7 @@ local uiTweaks do
                                     width = "half",
                                     get = function(info) return _G.tostring(ObjectivesAdv.db.profile.position.negheightofs) end,
                                     set = function(info, value)
-                                        value = RealUI:ValidateOffset(value)
+                                        value = ValidateOffset(value)
                                         ObjectivesAdv.db.profile.position.negheightofs = value
                                         ObjectivesAdv:RefreshMod()
                                     end,

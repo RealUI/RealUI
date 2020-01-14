@@ -4,6 +4,10 @@ exclude_files = {
     ".release/**"
 }
 
+ignore = {
+    "211/_.*", -- Unused local variable starting with _
+}
+
 max_line_length = false
 max_cyclomatic_complexity = 76
 unused_args = false

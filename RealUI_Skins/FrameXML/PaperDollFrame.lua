@@ -101,7 +101,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                 local curDurability, maxDurability = _G.GetInventoryItemDurability(slotID)
                 if maxDurability then
                     self.dura:SetValue(RealUI.GetSafeVals(curDurability, maxDurability))
-                    self.dura:SetStatusBarColor(RealUI.GetDurabilityColor(curDurability, maxDurability))
+                    self.dura:SetStatusBarColor(RealUI.GetDurabilityColor(curDurability, maxDurability):GetRGB())
                     self.dura:Show()
                 else
                     self.dura:Hide()

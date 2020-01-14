@@ -1,5 +1,6 @@
 .release
 .env
+*.ini
 
 **/test.lua
 RealUI_Skins/Aurora

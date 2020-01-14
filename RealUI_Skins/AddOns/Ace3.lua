@@ -332,6 +332,12 @@ local function SkinAceGUI()
             end,
             Dropdown = function(widget)
                 Skin.UIDropDownMenuTemplate(widget.dropdown)
+                widget.dropdown:SetBackdropOption("offsets", {
+                    left = 21,
+                    right = 20,
+                    top = 5,
+                    bottom = 3,
+                })
             end,
             EditBox = function(widget)
                 Skin.InputBoxTemplate(widget.editbox)

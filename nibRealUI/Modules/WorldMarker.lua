@@ -93,9 +93,7 @@ local function WorldMarker_oocUpdate()
     end
 end
 function WorldMarker:UpdateLockdown(...)
-    RealUI:RegisterLockdownUpdate("WorldMarker_oocUpdate", function()
-        WorldMarker_oocUpdate()
-    end)
+    RealUI.TryInCombat(WorldMarker_oocUpdate)
 end
 
 function WorldMarker:HighlightUpdate(btn)
@@ -146,7 +144,8 @@ local function CreateButton(id)
     frame.bg = _G.CreateFrame("Frame", nil, frame)
     frame.bg:SetPoint("LEFT", frame, "LEFT", 0, 0)
     frame.bg:SetWidth(ButtonWidthCollapsed)
-    RealUI:CreateBD(frame.bg, 0.8)
+    _G.Aurora.Base.SetBackdrop(frame.bg, _G.Aurora.Color.frame)
+
     local color = MarkerColors[id]
     frame.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
 

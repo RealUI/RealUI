@@ -126,7 +126,7 @@ function Loot:UpdateGroupLoot()
             frame:SetScript("OnLeave", GroupLootFrameOnLeave)
             frame:SetScript("OnEnter", GroupLootFrameOnEnter)
 
-            RealUI:CreateBD(frame)
+            _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame)
 
             frame.pass = _G.CreateFrame("Button", nil, frame)
             frame.pass.type = 0
@@ -171,7 +171,8 @@ function Loot:UpdateGroupLoot()
             frame.need:SetPoint("RIGHT", frame.disenchant, "LEFT", -1, 0)
             frame.need:SetScript("OnClick", GroupLootButtonOnClick)
 
-            frame.text = RealUI:CreateFS(frame, "LEFT")
+            frame.text = frame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
+            frame.text:SetJustifyH("LEFT")
             frame.text:SetPoint("LEFT", 2, 0)
             frame.text:SetPoint("RIGHT", frame.need, "LEFT")
 
@@ -184,10 +185,8 @@ function Loot:UpdateGroupLoot()
             local icon = iconFrame:CreateTexture(nil, "OVERLAY")
             icon:SetPoint("TOPLEFT")
             icon:SetPoint("BOTTOMRIGHT")
-            icon:SetTexCoord(.08, .92, .08, .92)
+            _G.Aurora.Base.CropIcon(icon, iconFrame)
             frame.icon = icon
-
-            RealUI:CreateBG(icon)
 
             _G.tinsert(grouplootframes, frame)
         end
@@ -327,12 +326,14 @@ local createSlot = function(id)
     _G.Aurora.Base.CropIcon(icon, iconFrame)
     frame.icon = icon
 
-    local count = RealUI:CreateFS(iconFrame, "CENTER")
+    local count = iconFrame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
+    count:SetJustifyH("CENTER")
     count:SetPoint("TOP", iconFrame, 1, -2)
     count:SetText(1)
     frame.count = count
 
-    local name = RealUI:CreateFS(frame, "LEFT")
+    local name = frame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
+    name:SetJustifyH("LEFT")
     name:SetPoint("RIGHT", frame)
     name:SetPoint("LEFT", icon, "RIGHT", 8, 0)
     name:SetNonSpaceWrap(true)

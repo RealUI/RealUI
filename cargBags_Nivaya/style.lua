@@ -263,7 +263,9 @@ local function restackItems(self)
     --local loc = tBank and "bank" or "bags"
     if tBank then
         _G.SortBankBags()
-        _G.SortReagentBankBags()
+        if _G.IsReagentBankUnlocked() then
+            _G.SortReagentBankBags()
+        end
     elseif tBag then
         _G.SortBags()
     end

@@ -173,8 +173,8 @@ end
 function UnitFrames:OnEnable()
     -- Override the green that oUF uses
     oUF.colors.health = {0.66, 0.22, 0.22}
-    oUF.colors.power.MANA = RealUI:ColorDesaturate(0.1, oUF.colors.power.MANA)
-    oUF.colors.power.MANA = RealUI:ColorShift(-0.07, oUF.colors.power.MANA)
+    oUF.colors.power.MANA = RealUI.ColorDesaturate(0.1, oUF.colors.power.MANA)
+    oUF.colors.power.MANA = RealUI.ColorShift(-0.07, oUF.colors.power.MANA)
 
     self:InitializeLayout()
 end

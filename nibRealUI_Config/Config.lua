@@ -3,7 +3,7 @@ local options = {}
 private.options = options
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals next tonumber max min
 
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
@@ -406,4 +406,14 @@ function RealUI.ToggleConfig(app, section, ...)
     if ... then
         ACD:SelectGroup(app, section, ...)
     end
+end
+
+function private.ValidateOffset(value, ...)
+    local val = tonumber(value)
+    local vmin, vmax = -5000, 5000
+    if ... then vmin, vmax = ... end
+    if val == nil then val = 0 end
+    val = max(val, vmin)
+    val = min(val, vmax)
+    return val
 end
