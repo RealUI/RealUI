@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80300
 ## Title: RealUI Combat Text
 ## Notes: Scrolling combat text designed for RealUI
 ## Author: Gethe

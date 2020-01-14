@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80300
 ## Title: RealUI Skins
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe

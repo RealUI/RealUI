@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80300
 ## Title: cargBags_Nivaya: |cffffffffReal|r|cffbf3030UI|r
 ## Author: Luzzifus (Modified by Nibelheim and Gethe)
 ## Version: 2.1.3

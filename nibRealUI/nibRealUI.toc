@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80300
 ## Title: nibRealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
