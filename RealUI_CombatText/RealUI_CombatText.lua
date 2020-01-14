@@ -70,6 +70,14 @@ local function DebugEvent(eventInfo, ...)
 end
 
 local IGNORE_EVENT = {
+    SPELL_AURA_APPLIED = true,
+    SPELL_AURA_APPLIED_DOSE = true,
+    SPELL_AURA_REMOVED = true,
+    SPELL_AURA_REMOVED_DOSE = true,
+    SPELL_AURA_REFRESH = true,
+    SPELL_AURA_BROKEN = true,
+    SPELL_AURA_BROKEN_SPELL = true,
+
     SPELL_CAST_START = true,
     SPELL_CAST_SUCCESS = true,
     SPELL_CAST_FAILED = true,
