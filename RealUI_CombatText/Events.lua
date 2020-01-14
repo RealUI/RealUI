@@ -26,7 +26,13 @@ local SpellColors = {
     [_G.SCHOOL_MASK_SHADOW] = Color.Create(0.5, 0.5, 1),
     [_G.SCHOOL_MASK_ARCANE] = Color.Create(1, 0.5, 1),
 }
-local SPELL_SCHOOL_DEFAULT = _G.SCHOOL_MASK_NONE
+local function GetSpellColor(school)
+    if not school then
+        return SpellColors[_G.SCHOOL_MASK_NONE]
+    end
+
+    return SpellColors[school] or SpellColors[_G.SCHOOL_MASK_NONE]
+end
 
 local eventPrefix = {}
 private.eventPrefix = eventPrefix
@@ -88,7 +94,7 @@ function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, block
     eventInfo.isSticky = critical
 
     eventInfo.data = event.data
-    eventInfo.eventFormat = SpellColors[school or SPELL_SCHOOL_DEFAULT]:WrapTextInColorCode(event.format)
+    eventInfo.eventFormat = GetSpellColor(school):WrapTextInColorCode(event.format)
     return true
 end
 
@@ -190,6 +196,6 @@ function eventSpecial.ENVIRONMENTAL_DAMAGE(eventInfo, ...)
     eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing)
 
     eventInfo.data = ENVIRONMENTAL_DAMAGE.data
-    eventInfo.eventFormat = SpellColors[school]:WrapTextInColorCode(ENVIRONMENTAL_DAMAGE.format)
+    eventInfo.eventFormat = GetSpellColor(school):WrapTextInColorCode(ENVIRONMENTAL_DAMAGE.format)
     private.AddEvent(eventInfo)
 end
