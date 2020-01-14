@@ -1,4 +1,32 @@
-﻿## [2.1.2] - 2019-10-04 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Added ###
+
+  * Skin for the Clique settings.
+
+### Changed ###
+
+  * Objective progress in tooltips should now be more reliable.
+
+### Fixed ###
+
+  * Error when opening the bank if the reagent bank isn't purchased.
+  * Conflict between Tooltips and Overachiever.
+  * Draggable UI frames will now properly re-open in the position they were last in.
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.1.2] - 2019-10-04 ##
 ### Modified AddOns ###
 
   * nibRealUI
