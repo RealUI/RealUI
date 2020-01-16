@@ -163,14 +163,16 @@ function private.AddSlotToBag(slot, bagID)
     main:AddContinuable(slot.item)
 end
 
+local HEADER_SPACE = 27
+local BAG_MARGIN = 5
 local function SetupBag(bag)
     Base.SetBackdrop(bag)
     bag:EnableMouse(true)
     bag.slots = {}
 
-    bag.offsetTop = 5
+    bag.offsetTop = BAG_MARGIN + HEADER_SPACE
     bag.offsetBottom = 0
-    bag.baseWidth = 5
+    bag.baseWidth = BAG_MARGIN
 end
 
 local function DropTargetFindSlot(bagType)
@@ -303,17 +305,45 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     SetupBag(main)
 
-    local money = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
-    money:SetPoint("TOPRIGHT", 10, -3)
-    main.money = money
-    main.offsetTop = main.offsetTop + 15
+    local close = _G.CreateFrame("Button", "$parentClose", main, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", 5, 5)
+    Skin.UIPanelCloseButton(close)
+    main.close = close
 
-    local search = _G.CreateFrame("EditBox", "$parentSearch", main, "BagSearchBoxTemplate")
-    search:SetPoint("BOTTOMLEFT", 5, 5)
-    search:SetPoint("BOTTOMRIGHT", -5, 5)
-    search:SetHeight(20)
-    Skin.BagSearchBoxTemplate(search)
-    main.search = search
+    local money = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
+    money:SetPoint("BOTTOMRIGHT", 8, 8)
+    main.money = money
+
+    local searchButton = _G.CreateFrame("Button", "$parentSearchButton", main)
+    searchButton:SetHitRectInsets(-5, -40, -5, -5)
+    searchButton:SetPoint("BOTTOMLEFT", 8, 9)
+    searchButton:SetSize(10, 10)
+    searchButton:SetNormalFontObject("GameFontDisableSmall")
+    searchButton:SetText("Search")
+    searchButton:GetFontString():SetPoint("LEFT", searchButton, "RIGHT", 4, 1)
+    searchButton:SetNormalAtlas("common-search-magnifyingglass")
+    searchButton:GetNormalTexture():SetVertexColor(0.6, 0.6, 0.6)
+    searchButton:SetHighlightAtlas("common-search-magnifyingglass")
+    searchButton:SetScript("OnClick", function(self)
+        self:Hide()
+        main.money:Hide()
+        main.searchBox:Show()
+        main.searchBox:SetFocus()
+    end)
+    main.searchButton = searchButton
+
+    local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
+    searchBox:SetPoint("BOTTOMLEFT", 5, 5)
+    searchBox:SetPoint("BOTTOMRIGHT", -5, 5)
+    searchBox:SetHeight(20)
+    searchBox:Hide()
+    _G.hooksecurefunc(searchBox, "ClearFocus", function(self)
+        self:Hide()
+        main.money:Show()
+        main.searchButton:Show()
+    end)
+    Skin.BagSearchBoxTemplate(searchBox)
+    main.searchBox = searchBox
     main.offsetBottom = main.offsetBottom + 25
 
     local dropTarget = _G.CreateFrame("Button", "$parentEmptySlot", main)
@@ -352,12 +382,11 @@ local function CreateBag(bagType)
         SetupBag(bag)
 
         local info = private.filters[tag]
-        local name = bag:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         name:SetPoint("TOPLEFT")
-        name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -15)
+        name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
         name:SetText(info.name)
         name:SetJustifyV("MIDDLE")
-        bag.offsetTop = bag.offsetTop + 15
 
         bag.index = i
         bag.tag = tag
