@@ -127,6 +127,7 @@ local function UpdateBag(main)
         end
     end
 
+    main.showBags:ToggleBags(false)
     main:ContinueOnLoad(function()
         SetupSlots(main)
     end)
@@ -158,7 +159,7 @@ function private.AddSlotToBag(slot, bagID)
     local bag = main.bags[filterTag] or main
 
     tinsert(bag.slots, slot)
-    slot:SetParent(private.blizz[bagID])
+    slot:SetParent(private.bagSlots[main.bagType][bagID])
 
     main:AddContinuable(slot.item)
 end
@@ -305,21 +306,58 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     SetupBag(main)
 
+    local showBags = _G.CreateFrame("Button", "$parentSearchButton", main)
+    showBags:SetHitRectInsets(-5, -40, -5, -5)
+    showBags:SetPoint("TOPLEFT", 8, -9)
+    showBags:SetSize(13.3333, 16)
+    showBags:SetNormalFontObject("GameFontDisableSmall")
+    showBags:SetText(_G.BAGSLOTTEXT)
+    showBags:GetFontString():SetPoint("LEFT", showBags, "RIGHT", 4, 1)
+    showBags:SetNormalAtlas("ParagonReputation_Bag")
+    showBags:SetHighlightAtlas("ParagonReputation_Bag")
+    showBags:SetScript("OnClick", function(self)
+        self:ToggleBags()
+    end)
+    function showBags:ToggleBags(show)
+        if show == nil then
+            show = not self.isShowing
+        end
+
+        local bagSlots = private.bagSlots[bagType]
+        if show then
+            self:SetText("")
+            self:SetHitRectInsets(-5, -5, -5, -5)
+
+            bagSlots[0]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 3)
+            for i = 0, #bagSlots do
+                bagSlots[i]:Update()
+            end
+        else
+            self:SetText(_G.BAGSLOTTEXT)
+            self:SetHitRectInsets(-5, -50, -5, -5)
+
+            bagSlots[0]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 3)
+            for bagID, bagSlot in next, bagSlots do
+                bagSlot:Update()
+            end
+            private.SearchItemsForBag(0)
+        end
+
+        self.isShowing = show
+    end
+    main.showBags = showBags
+
     local close = _G.CreateFrame("Button", "$parentClose", main, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", 5, 5)
     Skin.UIPanelCloseButton(close)
     main.close = close
-
-    local money = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
-    money:SetPoint("BOTTOMRIGHT", 8, 8)
-    main.money = money
 
     local searchButton = _G.CreateFrame("Button", "$parentSearchButton", main)
     searchButton:SetHitRectInsets(-5, -40, -5, -5)
     searchButton:SetPoint("BOTTOMLEFT", 8, 9)
     searchButton:SetSize(10, 10)
     searchButton:SetNormalFontObject("GameFontDisableSmall")
-    searchButton:SetText("Search")
+    searchButton:SetText(_G.SEARCH)
     searchButton:GetFontString():SetPoint("LEFT", searchButton, "RIGHT", 4, 1)
     searchButton:SetNormalAtlas("common-search-magnifyingglass")
     searchButton:GetNormalTexture():SetVertexColor(0.6, 0.6, 0.6)
@@ -344,6 +382,10 @@ local function CreateBag(bagType)
     end)
     Skin.BagSearchBoxTemplate(searchBox)
     main.searchBox = searchBox
+
+    local money = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
+    money:SetPoint("BOTTOMRIGHT", 8, 8)
+    main.money = money
     main.offsetBottom = main.offsetBottom + 25
 
     local dropTarget = _G.CreateFrame("Button", "$parentEmptySlot", main)
@@ -376,7 +418,7 @@ local function CreateBag(bagType)
     dropTarget.count = count
 
     main.bags = {}
-    private.CreateDummyBags(bagType)
+    private.CreateBagSlots(main)
     for i, tag in ipairs(Inventory.db.global.filters) do
         local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
         SetupBag(bag)

@@ -1,7 +1,7 @@
 local _, private = ...
 
--- RealUI --
-local Inventory = private.Inventory
+-- Lua Globals --
+-- luacheck: globals ipairs
 
 local blizz = {}
 private.blizz = blizz
@@ -28,23 +28,3 @@ _G.ToggleBackpack = _G.ToggleAllBags
 _G.ToggleBag = _G.nop
 
 --_G.BankFrame:UnregisterAllEvents()
-
-local function CreateBag(bagID, parent)
-    local bag = _G.CreateFrame("Frame", "$parent_Bag"..bagID, parent)
-    bag:SetID(bagID)
-    blizz[bagID] = bag
-end
-
-function private.CreateDummyBags(bagType)
-    local bagStart, bagEnd
-    if bagType == "main" then
-        bagStart, bagEnd = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS
-    elseif bagType == "bank" then
-        CreateBag(_G.BANK_CONTAINER, Inventory[bagType])
-        bagStart, bagEnd = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS
-    end
-
-    for bagID = bagStart, bagEnd do
-        CreateBag(bagID, Inventory[bagType])
-    end
-end
