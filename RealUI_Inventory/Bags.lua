@@ -194,6 +194,18 @@ function ContinuableContainer:RecheckEvictableContinuables()
     return areAllLoaded
 end
 
+local function CreateFeatureButton(bag, text, atlas, onClick)
+    local button = _G.CreateFrame("Button", "$parentSearchButton", bag)
+    button:SetHitRectInsets(-5, -50, -5, -5)
+    button:SetNormalFontObject("GameFontDisableSmall")
+    button:SetText(text)
+    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 4, 1)
+    button:SetNormalAtlas(atlas)
+    button:SetHighlightAtlas(atlas)
+    button:SetScript("OnClick", onClick)
+    return button
+end
+
 local BagEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
@@ -299,18 +311,12 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     SetupBag(main)
 
-    local showBags = _G.CreateFrame("Button", "$parentSearchButton", main)
-    showBags:SetHitRectInsets(-5, -40, -5, -5)
-    showBags:SetPoint("TOPLEFT", 8, -9)
-    showBags:SetSize(13.3333, 16)
-    showBags:SetNormalFontObject("GameFontDisableSmall")
-    showBags:SetText(_G.BAGSLOTTEXT)
-    showBags:GetFontString():SetPoint("LEFT", showBags, "RIGHT", 4, 1)
-    showBags:SetNormalAtlas("ParagonReputation_Bag")
-    showBags:SetHighlightAtlas("ParagonReputation_Bag")
-    showBags:SetScript("OnClick", function(self)
+    local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "ParagonReputation_Bag",
+    function(self)
         self:ToggleBags()
     end)
+    showBags:SetPoint("TOPLEFT", 8, -9)
+    showBags:SetSize(13.3333, 16)
     function showBags:ToggleBags(show)
         if show == nil then
             show = not self.isShowing
@@ -345,22 +351,15 @@ local function CreateBag(bagType)
     Skin.UIPanelCloseButton(close)
     main.close = close
 
-    local searchButton = _G.CreateFrame("Button", "$parentSearchButton", main)
-    searchButton:SetHitRectInsets(-5, -40, -5, -5)
-    searchButton:SetPoint("BOTTOMLEFT", 8, 9)
-    searchButton:SetSize(10, 10)
-    searchButton:SetNormalFontObject("GameFontDisableSmall")
-    searchButton:SetText(_G.SEARCH)
-    searchButton:GetFontString():SetPoint("LEFT", searchButton, "RIGHT", 4, 1)
-    searchButton:SetNormalAtlas("common-search-magnifyingglass")
-    searchButton:GetNormalTexture():SetVertexColor(0.6, 0.6, 0.6)
-    searchButton:SetHighlightAtlas("common-search-magnifyingglass")
-    searchButton:SetScript("OnClick", function(self)
+    local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
+    function(self)
         self:Hide()
         main.money:Hide()
         main.searchBox:Show()
         main.searchBox:SetFocus()
     end)
+    searchButton:SetPoint("BOTTOMLEFT", 8, 9)
+    searchButton:SetSize(10, 10)
     main.searchButton = searchButton
 
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
