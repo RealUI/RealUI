@@ -288,8 +288,6 @@ function BagSlotMixin:Init(bagID)
     self:SetID(bagID)
     self:SetSize(20, 20)
     self:SetFrameLevel(5)
-    self.isBackpack = bagID == _G.BACKPACK_CONTAINER
-    self.isBank = bagID == _G.BANK_CONTAINER
 
     local highlight = self:CreateTexture(nil, "OVERLAY")
     highlight:SetAllPoints()
@@ -306,50 +304,31 @@ function BagSlotMixin:Init(bagID)
     self:SetScript("OnClick", self.OnClick)
 
     Skin.FrameTypeItemButton(self)
-    if self.isBackpack or self.isBank then
-        _G.SetItemButtonTexture(self, [[Interface\Buttons\Button-Backpack-Up]])
-    else
-        local _, textureName = _G.GetInventorySlotInfo(self:GetInventorySlot())
+    if bagID > _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
+        self.inventorySlot = "Bag"..(bagID - 1).."Slot"
+    elseif bagID > _G.NUM_BAG_SLOTS then
+        self.inventorySlot = "Bag"..(bagID - _G.NUM_BAG_SLOTS)
+    end
+
+    if self.inventorySlot then
+        local inventoryID, textureName = _G.GetInventorySlotInfo(self.inventorySlot)
+        self.inventoryID = inventoryID
         self.fallbackTexture = textureName
         _G.SetItemButtonTexture(self, textureName)
-    end
-end
-function BagSlotMixin:GetInventoryID()
-    local bagID = self:GetID()
-    if self.isBackpack or self.isBank then
-        return
-    end
-
-    if bagID <= _G.NUM_BAG_SLOTS then
-        return bagID + _G.CONTAINER_BAG_OFFSET
     else
-        return bagID + 59
-    end
-end
-function BagSlotMixin:GetInventorySlot()
-    local bagID = self:GetID()
-    if self.isBackpack or self.isBank then
-        return
-    end
-
-    if bagID <= _G.NUM_BAG_SLOTS then
-        return "Bag"..(bagID - 1).."Slot"
-    else
-        return "Bag"..(bagID - _G.NUM_BAG_SLOTS)
+        _G.SetItemButtonTexture(self, [[Interface\Buttons\Button-Backpack-Up]])
     end
 end
 function BagSlotMixin:GetItemContextMatchResult()
     return _G.ItemButtonUtil.GetItemContextMatchResultForContainer(self:GetID())
 end
 function BagSlotMixin:Update()
-    if not (self.isBackpack or self.isBank) then
-        local inventoryID = self:GetInventoryID()
-
-        local textureName = _G.GetInventoryItemTexture("player", inventoryID)
+    if self.inventoryID then
+        local textureName = _G.GetInventoryItemTexture("player", self.inventoryID)
         _G.SetItemButtonTexture(self, textureName or self.fallbackTexture)
 
-        local quality = _G.GetInventoryItemQuality("player", inventoryID)
-        _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", inventoryID), true)
+        local quality = _G.GetInventoryItemQuality("player", self.inventoryID)
+        _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", self.inventoryID), true)
     end
 
     searchBags[self:GetID()] = true
@@ -364,15 +343,15 @@ function BagSlotMixin:OnEvent(event, ...)
 end
 function BagSlotMixin:OnEnter()
     _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    if self.isBackpack then
-        _G.GameTooltip:SetText(_G.BACKPACK_TOOLTIP, 1.0, 1.0, 1.0);
-        _G.GameTooltip:Show();
-    else
-        if _G.GameTooltip:SetInventoryItem("player", self:GetInventoryID()) then
+    if self.inventoryID then
+        if _G.GameTooltip:SetInventoryItem("player", self.inventoryID) then
             _G.GameTooltip:Show()
         else
             _G.GameTooltip:SetText(_G.EQUIP_CONTAINER, 1.0, 1.0, 1.0)
         end
+    else
+        _G.GameTooltip:SetText(_G.BACKPACK_TOOLTIP, 1.0, 1.0, 1.0);
+        _G.GameTooltip:Show();
     end
 end
 function BagSlotMixin:OnLeave()
