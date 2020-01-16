@@ -116,15 +116,8 @@ local function UpdateBag(main)
         wipe(bag.slots)
     end
 
-    if main.bagType == "main" then
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            private.UpdateSlots(bagID)
-        end
-    elseif main.bagType == "bank" then
-        private.UpdateSlots(_G.BANK_CONTAINER)
-        for bagID = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
-            private.UpdateSlots(bagID)
-        end
+    for k, bagID in private.IterateBagIDs(main.bagType) do
+        private.UpdateSlots(bagID)
     end
 
     main.showBags:ToggleBags(false)

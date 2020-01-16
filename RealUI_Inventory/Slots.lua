@@ -239,20 +239,10 @@ end
 
 function private.GetNumFreeSlots(bag)
     local totalFree, freeSlots, bagFamily = 0
-    if bag.bagType == "main" then
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
-            if bagFamily == 0 then
-                totalFree = totalFree + freeSlots
-            end
-        end
-    elseif bag.bagType == "bank" then
-        totalFree = totalFree + _G.GetContainerNumFreeSlots(_G.BANK_CONTAINER)
-        for bagID = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
-            freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
-            if bagFamily == 0 then
-                totalFree = totalFree + freeSlots
-            end
+    for k, bagID in private.IterateBagIDs(bag.bagType) do
+        freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
+        if bagFamily == 0 then
+            totalFree = totalFree + freeSlots
         end
     end
 
@@ -269,28 +259,13 @@ local function GetFirstFreeSlot(bagID)
     end
 end
 function private.GetFirstFreeSlot(bagType)
-    if bagType == "main" then
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            local slotIndex = GetFirstFreeSlot(bagID)
-            if slotIndex then
-                return bagID, slotIndex
-            end
-        end
-    elseif bagType == "bankReagent" then
-        local bagID = _G.REAGENTBANK_CONTAINER
+    for k, bagID in private.IterateBagIDs(bagType) do
         local slotIndex = GetFirstFreeSlot(bagID)
         if slotIndex then
             return bagID, slotIndex
         end
-    else
-        local containerIDs = {-1,5,6,7,8,9,10,11}
-        for _, bagID in next, containerIDs do
-            local slotIndex = GetFirstFreeSlot(bagID)
-            if slotIndex then
-                return bagID, slotIndex
-            end
-        end
     end
+
     return false
 end
 
@@ -417,53 +392,19 @@ function BagSlotMixin:OnClick()
 end
 
 private.bagSlots = {}
-function private.IterateBagSlots(bag)
-    local bagStart, bagEnd
-    if bag.bagType == "main" then
-        bagStart, bagEnd = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS
-    elseif bag.bagType == "bank" then
-        CreateBag(_G.BANK_CONTAINER, Inventory[bag.bagType])
-        bagStart, bagEnd = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS
-    end
-
-    -- body
-end
-
 function private.CreateBagSlots(bag)
     local bagSlots, bagType = private.bagSlots, bag.bagType
     bagSlots[bagType] = {}
 
-    if bagType == "main" then
-        local bagSlot
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag"..bagID, bag)
-            _G.Mixin(bagSlot, BagSlotMixin)
-            bagSlot:Init(bagID)
-
-            if bagID ~= _G.BACKPACK_CONTAINER then
-                bagSlot:SetPoint("TOPLEFT", bagSlots[bagType][bagID - 1], "TOPRIGHT", 5, 0)
-            end
-            bagSlots[bagType][bagID] = bagSlot
-        end
-    elseif bagType == "bankReagent" then
-        local bagID = _G.REAGENTBANK_CONTAINER
-        local slotIndex = GetFirstFreeSlot(bagID)
-        if slotIndex then
-            return bagID, slotIndex
-        end
-    else
-        local bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag".._G.BANK_CONTAINER, bag)
+    local bagSlot
+    for k, bagID in private.IterateBagIDs(bagType) do
+        bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag"..bagID, bag)
         _G.Mixin(bagSlot, BagSlotMixin)
-        bagSlot:Init(_G.BANK_CONTAINER)
-        bagSlots[bagType][_G.BANK_CONTAINER] = bagSlot
+        bagSlot:Init(bagID)
 
-        for bagID = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
-            bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag"..bagID, bag)
-            _G.Mixin(bagSlot, BagSlotMixin)
-            bagSlot:Init(bagID)
-
+        if not (bagSlot.isBackpack or bagSlot.isBank) then
             bagSlot:SetPoint("TOPLEFT", bagSlots[bagType][bagID - 1], "TOPRIGHT", 5, 0)
-            bagSlots[bagType][bagID] = bagSlot
         end
+        bagSlots[bagType][bagID] = bagSlot
     end
 end
