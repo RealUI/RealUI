@@ -121,6 +121,7 @@ local function UpdateBag(main)
     end
 
     main.showBags:ToggleBags(false)
+    main.dropTarget.count:SetText(private.GetNumFreeSlots(main))
     main:ContinueOnLoad(function()
         SetupSlots(main)
     end)
@@ -236,7 +237,6 @@ local function CreateBag(bagType)
                 end
             else
                 UpdateBag(self)
-                self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
         main:SetScript("OnShow", function(self)
@@ -247,7 +247,6 @@ local function CreateBag(bagType)
             self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
 
             UpdateBag(self)
-            self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
         end)
         main:SetScript("OnHide", function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
@@ -279,7 +278,6 @@ local function CreateBag(bagType)
                 end
             else
                 UpdateBag(self)
-                self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
         main:SetScript("OnShow", function(self)
@@ -290,7 +288,6 @@ local function CreateBag(bagType)
             self:RegisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
 
             UpdateBag(self)
-            self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
         end)
         main:SetScript("OnHide", function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
@@ -354,7 +351,7 @@ local function CreateBag(bagType)
     local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
     function(self)
         self:Hide()
-        main.money:Hide()
+        main.moneyFrame:Hide()
         main.searchBox:Show()
         main.searchBox:SetFocus()
     end)
@@ -369,15 +366,15 @@ local function CreateBag(bagType)
     searchBox:Hide()
     _G.hooksecurefunc(searchBox, "ClearFocus", function(self)
         self:Hide()
-        main.money:Show()
+        main.moneyFrame:Show()
         main.searchButton:Show()
     end)
     Skin.BagSearchBoxTemplate(searchBox)
     main.searchBox = searchBox
 
-    local money = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
-    money:SetPoint("BOTTOMRIGHT", 8, 8)
-    main.money = money
+    local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
+    moneyFrame:SetPoint("BOTTOMRIGHT", 8, 8)
+    main.moneyFrame = moneyFrame
     main.offsetBottom = main.offsetBottom + 25
 
     local dropTarget = _G.CreateFrame("Button", "$parentEmptySlot", main)
