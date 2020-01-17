@@ -426,6 +426,14 @@ local function CreateBag(bagType)
         bag.tag = tag
         bag.parent = main
 
+        if tag == "junk" then
+            local sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
+            sellJunk:SetPoint("TOPLEFT", 5, -9)
+            sellJunk:SetSize(16, 14.4)
+            sellJunk:Hide()
+            bag.sellJunk = sellJunk
+        end
+
         main.bags[tag] = bag
     end
 end

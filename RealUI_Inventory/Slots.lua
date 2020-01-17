@@ -28,7 +28,7 @@ function InventoryItemMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
     local item = self.item
 
-    local _, itemCount, _, _, readable, _, _, isFiltered, noValue = _G.GetContainerItemInfo(bagID, slotIndex)
+    local _, itemCount, _, _, readable, _, _, isFiltered = _G.GetContainerItemInfo(bagID, slotIndex)
     local isQuestItem, questId, isActive = _G.GetContainerItemQuestInfo(bagID, slotIndex)
 
     local icon = item:GetItemIcon()
@@ -90,8 +90,6 @@ function InventoryItemMixin:Update()
     _G[self:GetName().."Cooldown"]:Hide()
 
     if self:IsValid() then
-        local isJunk = quality == _G.LE_ITEM_QUALITY_POOR and not noValue and _G.MerchantFrame:IsShown()
-        self.JunkIcon:SetShown(isJunk)
         _G.ContainerFrame_UpdateCooldown(bagID, self)
     end
 
