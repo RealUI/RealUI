@@ -1,4 +1,21 @@
-﻿## [2.1.3] - 2020-01-14 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Added ###
+
+  * New notification when RealUI tries to update certain things while in combat.
+  * A new chat command, `/resetFrames`, that will reset the position of standard Blizzard frames that are outside the visible UI.
+
+### Fixed ###
+
+  * Error when logging into a new character or transfered character.
+
+
+
+
+## [2.1.3] - 2020-01-14 ##
 ### Modified AddOns ###
 
   * cargBags_Nivaya
