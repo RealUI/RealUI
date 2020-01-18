@@ -252,6 +252,43 @@ local function UpdateFrames()
     RealUI.TryInCombat(_UpdateFrames)
 end
 
+local function ResetFrames()
+    local reset
+    local left, right, top, bottom
+    left = _G.UIParent:GetLeft()
+    right = _G.UIParent:GetRight()
+    top = _G.UIParent:GetTop()
+    bottom = _G.UIParent:GetBottom()
+
+    for frameName, children in next, frames do
+        local frame = _G[frameName]
+        if frame:IsVisible() then
+            if frame:GetLeft() > right then
+                reset = true
+            end
+
+            if frame:GetRight() < left then
+                reset = true
+            end
+
+            if frame:GetTop() > top then
+                reset = true
+            end
+
+            if frame:GetBottom() < bottom then
+                reset = true
+            end
+
+            if reset then
+                frame:ClearAllPoints()
+                frame:SetPoint("CENTER")
+                _G.print(_G.INSTANCE_RESET_SUCCESS:format(frame:GetName()))
+                reset = false
+            end
+        end
+    end
+end
+
 function DragEmAll:ADDON_LOADED(event, name)
     local frameList = addonFrames[name]
     if frameList then
@@ -293,4 +330,7 @@ function DragEmAll:OnEnable()
     _G.hooksecurefunc("UpdateUIPanelPositions", UpdateFrames)
 
     self:RegisterEvent("ADDON_LOADED")
+    RealUI:RegisterChatCommand("resetFrames", function()
+        RealUI.TryInCombat(ResetFrames)
+    end)
 end
