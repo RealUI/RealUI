@@ -106,8 +106,8 @@ local function SetupCurrency()
 end
 
 function Currency:NormalizedRealmReceived()
-    UpdateMoney()
     SetupCurrency()
+    UpdateMoney()
 end
 
 function Currency:NEUTRAL_FACTION_SELECT_RESULT()
