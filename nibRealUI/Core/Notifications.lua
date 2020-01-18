@@ -75,7 +75,12 @@ local function display(name, message, clickFunc, texture, ...)
 
     if texture then
         local info = _G.C_Texture.GetAtlasInfo(texture)
-        if info.filename or info.file then
+        local file
+        if info then
+            file = info.filename or info.file
+        end
+
+        if file then
             icon:SetAtlas(texture)
         else
             icon:SetTexture(texture)
