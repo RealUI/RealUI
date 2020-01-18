@@ -205,23 +205,23 @@ function RealUI:InitNotifications()
 
     icon = f:CreateTexture(nil, "OVERLAY")
     icon:SetSize(32, 32)
-    icon:SetPoint("LEFT", f, "LEFT", 9, 0)
+    icon:SetPoint("LEFT", f, "LEFT", 5, 0)
 
     sep = f:CreateTexture(nil, "BACKGROUND")
     sep:SetSize(1, 50)
-    sep:SetPoint("LEFT", icon, "RIGHT", 9, 0)
+    sep:SetPoint("LEFT", icon, "RIGHT", 5, 0)
     sep:SetColorTexture(0, 0, 0)
 
     title = f:CreateFontString(nil, "OVERLAY")
     title:SetFontObject("Fancy16Font")
-    title:SetPoint("TOPLEFT", sep, "TOPRIGHT", 9, -9)
-    title:SetPoint("RIGHT", f, -9, 0)
+    title:SetPoint("TOPLEFT", sep, "TOPRIGHT", 5, -5)
+    title:SetPoint("BOTTOMRIGHT", f, -5, 30)
     title:SetJustifyH("LEFT")
 
     text = f:CreateFontString(nil, "OVERLAY")
     text:SetFontObject("SystemFont_Shadow_Med1")
-    text:SetPoint("BOTTOMLEFT", sep, "BOTTOMRIGHT", 9, 9)
-    text:SetPoint("RIGHT", f, -9, 0)
+    text:SetPoint("TOPLEFT", sep, "BOTTOMRIGHT", 5, 30)
+    text:SetPoint("BOTTOMRIGHT", f, -5, 5)
     text:SetJustifyH("LEFT")
 
     hasInitialized = true

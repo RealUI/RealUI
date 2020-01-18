@@ -236,8 +236,6 @@ function DragEmAll:HookFrame(frameName, children)
 end
 
 local function _UpdateFrames()
-    if _G.InCombatLockdown() then return end
-
     for frameName, children in next, frames do
         local frame = _G[frameName]
         if frame:IsVisible() and not DragEmAll.db.global[frameName].seen then
