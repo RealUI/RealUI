@@ -2,7 +2,7 @@
 ## Title: RealUI Chat
 ## Notes: Useful chat mods
 ## Author: Gethe
-## Version: 2.1.3
+## Version: 2.1.4
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_ChatDB
 

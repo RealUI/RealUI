@@ -116,17 +116,12 @@ local function UpdateBag(main)
         wipe(bag.slots)
     end
 
-    if main.bagType == "main" then
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            private.UpdateSlots(bagID)
-        end
-    elseif main.bagType == "bank" then
-        private.UpdateSlots(_G.BANK_CONTAINER)
-        for bagID = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
-            private.UpdateSlots(bagID)
-        end
+    for k, bagID in private.IterateBagIDs(main.bagType) do
+        private.UpdateSlots(bagID)
     end
 
+    main.showBags:ToggleBags(false)
+    main.dropTarget.count:SetText(private.GetNumFreeSlots(main))
     main:ContinueOnLoad(function()
         SetupSlots(main)
     end)
@@ -158,19 +153,21 @@ function private.AddSlotToBag(slot, bagID)
     local bag = main.bags[filterTag] or main
 
     tinsert(bag.slots, slot)
-    slot:SetParent(private.blizz[bagID])
+    slot:SetParent(private.bagSlots[main.bagType][bagID])
 
     main:AddContinuable(slot.item)
 end
 
+local HEADER_SPACE = 27
+local BAG_MARGIN = 5
 local function SetupBag(bag)
     Base.SetBackdrop(bag)
     bag:EnableMouse(true)
     bag.slots = {}
 
-    bag.offsetTop = 5
+    bag.offsetTop = BAG_MARGIN + HEADER_SPACE
     bag.offsetBottom = 0
-    bag.baseWidth = 5
+    bag.baseWidth = BAG_MARGIN
 end
 
 local function DropTargetFindSlot(bagType)
@@ -196,6 +193,18 @@ function ContinuableContainer:RecheckEvictableContinuables()
         end
     end
     return areAllLoaded
+end
+
+local function CreateFeatureButton(bag, text, atlas, onClick)
+    local button = _G.CreateFrame("Button", "$parentSearchButton", bag)
+    button:SetHitRectInsets(-5, -50, -5, -5)
+    button:SetNormalFontObject("GameFontDisableSmall")
+    button:SetText(text)
+    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 4, 1)
+    button:SetNormalAtlas(atlas)
+    button:SetHighlightAtlas(atlas)
+    button:SetScript("OnClick", onClick)
+    return button
 end
 
 local BagEvents = {
@@ -228,7 +237,6 @@ local function CreateBag(bagType)
                 end
             else
                 UpdateBag(self)
-                self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
         main:SetScript("OnShow", function(self)
@@ -239,7 +247,6 @@ local function CreateBag(bagType)
             self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
 
             UpdateBag(self)
-            self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
         end)
         main:SetScript("OnHide", function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
@@ -271,7 +278,6 @@ local function CreateBag(bagType)
                 end
             else
                 UpdateBag(self)
-                self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
             end
         end)
         main:SetScript("OnShow", function(self)
@@ -282,7 +288,6 @@ local function CreateBag(bagType)
             self:RegisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
 
             UpdateBag(self)
-            self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
         end)
         main:SetScript("OnHide", function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
@@ -303,17 +308,73 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     SetupBag(main)
 
-    local money = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
-    money:SetPoint("TOPRIGHT", 10, -3)
-    main.money = money
-    main.offsetTop = main.offsetTop + 15
+    local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "ParagonReputation_Bag",
+    function(self)
+        self:ToggleBags()
+    end)
+    showBags:SetPoint("TOPLEFT", 8, -9)
+    showBags:SetSize(13.3333, 16)
+    function showBags:ToggleBags(show)
+        if show == nil then
+            show = not self.isShowing
+        end
 
-    local search = _G.CreateFrame("EditBox", "$parentSearch", main, "BagSearchBoxTemplate")
-    search:SetPoint("BOTTOMLEFT", 5, 5)
-    search:SetPoint("BOTTOMRIGHT", -5, 5)
-    search:SetHeight(20)
-    Skin.BagSearchBoxTemplate(search)
-    main.search = search
+        local bagSlots = private.bagSlots[bagType]
+        if show then
+            self:SetText("")
+            self:SetHitRectInsets(-5, -5, -5, -5)
+
+            bagSlots[0]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 3)
+            for i = 0, #bagSlots do
+                bagSlots[i]:Update()
+            end
+        else
+            self:SetText(_G.BAGSLOTTEXT)
+            self:SetHitRectInsets(-5, -50, -5, -5)
+
+            bagSlots[0]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 3)
+            for bagID, bagSlot in next, bagSlots do
+                bagSlot:Update()
+            end
+            private.SearchItemsForBag(0)
+        end
+
+        self.isShowing = show
+    end
+    main.showBags = showBags
+
+    local close = _G.CreateFrame("Button", "$parentClose", main, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", 5, 5)
+    Skin.UIPanelCloseButton(close)
+    main.close = close
+
+    local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
+    function(self)
+        self:Hide()
+        main.moneyFrame:Hide()
+        main.searchBox:Show()
+        main.searchBox:SetFocus()
+    end)
+    searchButton:SetPoint("BOTTOMLEFT", 8, 9)
+    searchButton:SetSize(10, 10)
+    main.searchButton = searchButton
+
+    local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
+    searchBox:SetPoint("BOTTOMLEFT", 5, 5)
+    searchBox:SetPoint("BOTTOMRIGHT", -5, 5)
+    searchBox:SetHeight(20)
+    searchBox:Hide()
+    _G.hooksecurefunc(searchBox, "ClearFocus", function(self)
+        self:Hide()
+        main.moneyFrame:Show()
+        main.searchButton:Show()
+    end)
+    Skin.BagSearchBoxTemplate(searchBox)
+    main.searchBox = searchBox
+
+    local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
+    moneyFrame:SetPoint("BOTTOMRIGHT", 8, 8)
+    main.moneyFrame = moneyFrame
     main.offsetBottom = main.offsetBottom + 25
 
     local dropTarget = _G.CreateFrame("Button", "$parentEmptySlot", main)
@@ -346,22 +407,29 @@ local function CreateBag(bagType)
     dropTarget.count = count
 
     main.bags = {}
-    private.CreateDummyBags(bagType)
+    private.CreateBagSlots(main)
     for i, tag in ipairs(Inventory.db.global.filters) do
         local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
         SetupBag(bag)
 
         local info = private.filters[tag]
-        local name = bag:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         name:SetPoint("TOPLEFT")
-        name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -15)
+        name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
         name:SetText(info.name)
         name:SetJustifyV("MIDDLE")
-        bag.offsetTop = bag.offsetTop + 15
 
         bag.index = i
         bag.tag = tag
         bag.parent = main
+
+        if tag == "junk" then
+            local sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
+            sellJunk:SetPoint("TOPLEFT", 5, -9)
+            sellJunk:SetSize(16, 14.4)
+            sellJunk:Hide()
+            bag.sellJunk = sellJunk
+        end
 
         main.bags[tag] = bag
     end

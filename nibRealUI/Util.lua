@@ -324,7 +324,7 @@ function RealUI.MakeFrameDraggable(frame, noClamp)
     frame:SetScript("OnMouseUp", frame.StopMovingOrSizing)
 end
 
-local queue, args = {}, {}
+local queue, args, alertShown = {}, {}
 function RealUI.TryInCombat(func, alert, ...)
     if _G.InCombatLockdown() then
         if not args[func] then
@@ -333,8 +333,9 @@ function RealUI.TryInCombat(func, alert, ...)
 
         args[func] = {...}
 
-        if alert then
-            RealUI:Notification("RealUI", true, alert)
+        if not alertShown then
+            RealUI:Notification(RealUI.L["Alert_CombatLockdown"], true, alert or RealUI.L["Alert_WaitCombatLockdown"], nil, [[Interface\DialogFrame\UI-Dialog-Icon-AlertNew]])
+            alertShown = true
         end
     else
         func(...)
@@ -345,6 +346,8 @@ _G.C_Timer.NewTicker(0.5, function()
         local func = tremove(queue)
         func(unpack(args[func]))
         args[func] = nil
+
+        alertShown = false
     end
 end)
 

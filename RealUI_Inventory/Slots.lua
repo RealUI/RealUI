@@ -3,6 +3,11 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals tinsert ipairs next
 
+-- Libs --
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+local Skin = Aurora.Skin
+
 -- RealUI --
 --local Inventory = private.Inventory
 
@@ -17,12 +22,13 @@ local function SlotReset(pool, slot)
     slot:Clear()
 end
 
+--[[ Item Slots ]]--
 local InventoryItemMixin = _G.CreateFromMixins(_G.ItemLocationMixin)
 function InventoryItemMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
     local item = self.item
 
-    local _, itemCount, _, _, readable, _, _, isFiltered, noValue = _G.GetContainerItemInfo(bagID, slotIndex)
+    local _, itemCount, _, _, readable, _, _, isFiltered = _G.GetContainerItemInfo(bagID, slotIndex)
     local isQuestItem, questId, isActive = _G.GetContainerItemQuestInfo(bagID, slotIndex)
 
     local icon = item:GetItemIcon()
@@ -84,8 +90,6 @@ function InventoryItemMixin:Update()
     _G[self:GetName().."Cooldown"]:Hide()
 
     if self:IsValid() then
-        local isJunk = quality == _G.LE_ITEM_QUALITY_POOR and not noValue and _G.MerchantFrame:IsShown()
-        self.JunkIcon:SetShown(isJunk)
         _G.ContainerFrame_UpdateCooldown(bagID, self)
     end
 
@@ -233,20 +237,10 @@ end
 
 function private.GetNumFreeSlots(bag)
     local totalFree, freeSlots, bagFamily = 0
-    if bag.bagType == "main" then
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
-            if bagFamily == 0 then
-                totalFree = totalFree + freeSlots
-            end
-        end
-    elseif bag.bagType == "bank" then
-        totalFree = totalFree + _G.GetContainerNumFreeSlots(_G.BANK_CONTAINER)
-        for bagID = _G.NUM_BAG_SLOTS + 1, _G.NUM_BAG_SLOTS + _G.NUM_BANKBAGSLOTS do
-            freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
-            if bagFamily == 0 then
-                totalFree = totalFree + freeSlots
-            end
+    for k, bagID in private.IterateBagIDs(bag.bagType) do
+        freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
+        if bagFamily == 0 then
+            totalFree = totalFree + freeSlots
         end
     end
 
@@ -263,27 +257,131 @@ local function GetFirstFreeSlot(bagID)
     end
 end
 function private.GetFirstFreeSlot(bagType)
-    if bagType == "main" then
-        for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-            local slotIndex = GetFirstFreeSlot(bagID)
-            if slotIndex then
-                return bagID, slotIndex
-            end
-        end
-    elseif bagType == "bankReagent" then
-        local bagID = _G.REAGENTBANK_CONTAINER
+    for k, bagID in private.IterateBagIDs(bagType) do
         local slotIndex = GetFirstFreeSlot(bagID)
         if slotIndex then
             return bagID, slotIndex
         end
-    else
-        local containerIDs = {-1,5,6,7,8,9,10,11}
-        for _, bagID in next, containerIDs do
-            local slotIndex = GetFirstFreeSlot(bagID)
-            if slotIndex then
-                return bagID, slotIndex
-            end
-        end
     end
+
     return false
+end
+
+--[[ Bag Slots ]]--
+local searchBags = {}
+local function SearchItemsForBag(bagID)
+    local slots = inventorySlots
+    if bagID == _G.BANK_CONTAINER then
+        slots = bankSlots
+    end
+
+    for slot in slots:EnumerateActive() do
+        slot:SetMatchesSearch(searchBags[(slot:GetBagAndSlot())])
+    end
+end
+private.SearchItemsForBag = SearchItemsForBag
+
+local BagSlotMixin = {}
+function BagSlotMixin:Init(bagID)
+    self:SetID(bagID)
+    self:SetSize(20, 20)
+    self:SetFrameLevel(5)
+
+    local highlight = self:CreateTexture(nil, "OVERLAY")
+    highlight:SetAllPoints()
+    highlight:SetBlendMode("ADD")
+    highlight:SetTexture([[Interface\Buttons\CheckButtonHilight]])
+    Base.CropIcon(highlight)
+    self.highlight = highlight
+
+    self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
+    self:SetScript("OnEvent", self.OnEvent)
+    self:SetScript("OnEnter", self.OnEnter)
+    self:SetScript("OnLeave", self.OnLeave)
+    self:SetScript("OnClick", self.OnClick)
+
+    Skin.FrameTypeItemButton(self)
+    if bagID > _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
+        self.inventorySlot = "Bag"..(bagID - 1).."Slot"
+    elseif bagID > _G.NUM_BAG_SLOTS then
+        self.inventorySlot = "Bag"..(bagID - _G.NUM_BAG_SLOTS)
+    end
+
+    if self.inventorySlot then
+        local inventoryID, textureName = _G.GetInventorySlotInfo(self.inventorySlot)
+        self.inventoryID = inventoryID
+        self.fallbackTexture = textureName
+        _G.SetItemButtonTexture(self, textureName)
+    else
+        _G.SetItemButtonTexture(self, [[Interface\Buttons\Button-Backpack-Up]])
+    end
+end
+function BagSlotMixin:GetItemContextMatchResult()
+    return _G.ItemButtonUtil.GetItemContextMatchResultForContainer(self:GetID())
+end
+function BagSlotMixin:Update()
+    if self.inventoryID then
+        local textureName = _G.GetInventoryItemTexture("player", self.inventoryID)
+        _G.SetItemButtonTexture(self, textureName or self.fallbackTexture)
+
+        local quality = _G.GetInventoryItemQuality("player", self.inventoryID)
+        _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", self.inventoryID), true)
+    end
+
+    searchBags[self:GetID()] = true
+    self.highlight:Show()
+    self:UpdateItemContextMatching()
+end
+
+function BagSlotMixin:OnEvent(event, ...)
+    if event == "INVENTORY_SEARCH_UPDATE" then
+        self:SetMatchesSearch(not _G.IsContainerFiltered(self:GetID()))
+    end
+end
+function BagSlotMixin:OnEnter()
+    _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    if self.inventoryID then
+        if _G.GameTooltip:SetInventoryItem("player", self.inventoryID) then
+            _G.GameTooltip:Show()
+        else
+            _G.GameTooltip:SetText(_G.EQUIP_CONTAINER, 1.0, 1.0, 1.0)
+        end
+    else
+        _G.GameTooltip:SetText(_G.BACKPACK_TOOLTIP, 1.0, 1.0, 1.0);
+        _G.GameTooltip:Show();
+    end
+end
+function BagSlotMixin:OnLeave()
+    _G.GameTooltip:Hide()
+    _G.ResetCursor()
+end
+function BagSlotMixin:OnClick()
+    if self.highlight:IsShown() then
+        searchBags[self:GetID()] = false
+        self.highlight:Hide()
+    else
+        searchBags[self:GetID()] = true
+        self.highlight:Show()
+    end
+
+    SearchItemsForBag(self:GetID())
+end
+
+private.bagSlots = {}
+function private.CreateBagSlots(bag)
+    local bagSlots, bagType = private.bagSlots, bag.bagType
+    bagSlots[bagType] = {}
+
+    local bagSlot
+    for k, bagID in private.IterateBagIDs(bagType) do
+        bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag"..bagID, bag)
+        _G.Mixin(bagSlot, BagSlotMixin)
+        bagSlot:Init(bagID)
+
+        if not (bagSlot.isBackpack or bagSlot.isBank) then
+            bagSlot:SetPoint("TOPLEFT", bagSlots[bagType][bagID - 1], "TOPRIGHT", 5, 0)
+        end
+        bagSlots[bagType][bagID] = bagSlot
+    end
 end
