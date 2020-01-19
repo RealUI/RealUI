@@ -1,23 +1,17 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-    <!-- Misc -->
-    <Script file="Misc\ColorWindowAdv.lua"/>
-    <Script file="Misc\CopyChat.lua"/>
-    <Script file="Misc\DragEmAll.lua"/>
-    <Script file="Misc\Misc.lua"/>
-    <Script file="Misc\GuildFinderSort.lua"/>
-    <Script file="Misc\Screenshots.lua"/>
-    <Script file="Misc\StopAddonSpam.lua"/>
-
-    <!-- Modules -->
     <Script file="Infobar\Bar.lua"/>
     <Script file="Infobar\Blocks.lua"/>
+
     <Script file="Modules\ActionBars.lua"/>
     <Script file="Modules\AddonListAdv.lua"/>
     <Script file="Modules\AlertFrameMove.lua"/>
     <Script file="Modules\AltPowerBar.lua"/>
+    <Script file="Modules\ColorWindowAdv.lua"/>
     <Script file="Modules\CooldownCount.lua"/>
+    <Script file="Modules\CopyChat.lua"/>
+    <Script file="Modules\DragEmAll.lua"/>
     <Script file="Modules\EventNotifier.lua"/>
     <Script file="Modules\FrameMover.lua"/>
     <Script file="Modules\GridLayout.lua"/>
@@ -26,7 +20,9 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Modules\MirrorBar.lua"/>
     <Script file="Modules\ObjectivesAdv.lua"/>
     <Script file="Modules\ScreenSaver.lua"/>
+    <Script file="Modules\Screenshots.lua"/>
     <Script file="Modules\SpellAlerts.lua"/>
     <Script file="Modules\WorldMarker.lua"/>
+
     <Include file="Modules\Chat.xml"/>
 </Ui>
