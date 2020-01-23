@@ -37,21 +37,6 @@ local uiTweaks do
     }
 end
 ]]
-local function CreateToggleOption(slug, name)
-    local modObj = RealUI:GetModule(slug)
-    return {
-        name = name,
-        desc = L["General_EnabledDesc"]:format(name),
-        type = "toggle",
-        get = function() return RealUI:GetModuleEnabled(slug) end,
-        set = function(info, value)
-            RealUI:SetModuleEnabled(slug, value)
-            if modObj.RefreshMod then
-                modObj:RefreshMod()
-            end
-        end
-    }
-end
 
 local nameFormat = _G.ENABLE .. " %s"
 local function CreateDisabledAddon(name)
@@ -2989,7 +2974,6 @@ local uiTweaks do
                 type = "header",
                 order = 0,
             },
-            screenshot = CreateToggleOption("AchievementScreenshots", "Achievement Screenshots"),
             altPowerBar = altPowerBar,
             chat = chat,
             cooldown = cooldown,
@@ -3001,6 +2985,20 @@ local uiTweaks do
             objectives = objectives,
         }
     }
+
+    local InterfaceTweaks = RealUI:GetModule("InterfaceTweaks")
+    local tweaks = InterfaceTweaks:GetTweaks()
+    for tag, name in next, tweaks do
+        uiTweaks.args[tag] = {
+            name = L[name],
+            desc = L[name.."Desc"],
+            type = "toggle",
+            get = function() return InterfaceTweaks.db.global[tag] end,
+            set = function(info, value)
+                InterfaceTweaks.db.global[tag] = value
+            end
+        }
+    end
 end
 
 --[[
