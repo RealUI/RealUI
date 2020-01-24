@@ -120,7 +120,6 @@ local function UpdateBag(main)
         private.UpdateSlots(bagID)
     end
 
-    main.showBags:ToggleBags(false)
     main.dropTarget.count:SetText(private.GetNumFreeSlots(main))
     main:ContinueOnLoad(function()
         SetupSlots(main)
@@ -195,8 +194,9 @@ function ContinuableContainer:RecheckEvictableContinuables()
     return areAllLoaded
 end
 
-local function CreateFeatureButton(bag, text, atlas, onClick)
+local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     local button = _G.CreateFrame("Button", "$parentSearchButton", bag)
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetHitRectInsets(-5, -50, -5, -5)
     button:SetNormalFontObject("GameFontDisableSmall")
     button:SetText(text)
@@ -204,9 +204,14 @@ local function CreateFeatureButton(bag, text, atlas, onClick)
     button:SetNormalAtlas(atlas)
     button:SetHighlightAtlas(atlas)
     button:SetScript("OnClick", onClick)
+    button:SetScript("OnEnter", onEnter or _G.nop)
+    button:SetScript("OnLeave", function()
+        _G.GameTooltip_Hide()
+    end)
     return button
 end
 
+local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
 local BagEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
@@ -254,6 +259,8 @@ local function CreateBag(bagType)
             self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
             self:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
             self:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
+            self.showBags:ToggleBags(false)
+
             self:Cancel()
         end)
     elseif bagType == "bank" then
@@ -295,6 +302,9 @@ local function CreateBag(bagType)
             self:UnregisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
             self:UnregisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
             self:UnregisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
+            self.showBags:ToggleBags(false)
+
+            self:Cancel()
         end)
     end
 
@@ -309,8 +319,32 @@ local function CreateBag(bagType)
     SetupBag(main)
 
     local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "ParagonReputation_Bag",
+    function(self, button)
+        if bagType == "bank" and button == "RightButton" then
+            _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
+        else
+            self:ToggleBags()
+        end
+    end,
     function(self)
-        self:ToggleBags()
+        if bagType == "bank" then
+            local numSlots, full = _G.GetNumBankSlots()
+            if not full then
+                local cost = _G.GetBankSlotCost(numSlots)
+                _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
+                _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
+
+                local text = bagCost .. _G.GetMoneyString(cost)
+                if _G.GetMoney() >= cost then
+                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+                else
+                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+                end
+
+                _G.GameTooltip:Show()
+            end
+        end
     end)
     showBags:SetPoint("TOPLEFT", 8, -9)
     showBags:SetSize(13.3333, 16)
@@ -319,23 +353,29 @@ local function CreateBag(bagType)
             show = not self.isShowing
         end
 
+        local firstBag = _G.BACKPACK_CONTAINER
+        if bagType == "bank" then
+            firstBag = _G.BANK_CONTAINER
+        end
+
         local bagSlots = private.bagSlots[bagType]
         if show then
             self:SetText("")
             self:SetHitRectInsets(-5, -5, -5, -5)
 
-            bagSlots[0]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 3)
-            for i = 0, #bagSlots do
-                bagSlots[i]:Update()
+            bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 3)
+            for k, bagID in private.IterateBagIDs(bagType) do
+                bagSlots[bagID]:Update()
             end
         else
             self:SetText(_G.BAGSLOTTEXT)
             self:SetHitRectInsets(-5, -50, -5, -5)
 
-            bagSlots[0]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 3)
-            for bagID, bagSlot in next, bagSlots do
-                bagSlot:Update()
+            bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 3)
+            for k, bagID in private.IterateBagIDs(bagType) do
+                bagSlots[bagID]:Update()
             end
+
             private.SearchItemsForBag(0)
         end
 
