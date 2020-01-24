@@ -212,27 +212,31 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
 end
 
 local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
-local BagEvents = {
+local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
+}
+local BagEvents = {
+    "UNIT_INVENTORY_CHANGED",
+    "PLAYER_SPECIALIZATION_CHANGED",
+    "BAG_NEW_ITEMS_UPDATED",
+}
+local BankEvents = {
+    "PLAYERBANKSLOTS_CHANGED",
+    "PLAYERREAGENTBANKSLOTS_CHANGED",
+    "PLAYERBANKBAGSLOTS_CHANGED",
 }
 local function CreateBag(bagType)
     local main
     if bagType == "main" then
         main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
         main:SetPoint("BOTTOMRIGHT", -100, 100)
-        main:RegisterEvent("BAG_OPEN")
-        main:RegisterEvent("BAG_CLOSED")
         main:RegisterEvent("QUEST_ACCEPTED")
         main:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
         main:SetScript("OnEvent", function(self, event, ...)
-            if event == "BAG_OPEN" then
-                private.Toggle(true)
-            elseif event == "BAG_CLOSED" then
-                private.Toggle(false)
-            elseif event == "ITEM_LOCK_CHANGED" then
+            if event == "ITEM_LOCK_CHANGED" then
                 local bagID, slotIndex = ...
                 if bagID and slotIndex then
                     local slot = private.GetSlot(bagID, slotIndex)
@@ -245,22 +249,14 @@ local function CreateBag(bagType)
             end
         end)
         main:SetScript("OnShow", function(self)
+            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
             _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
-            self:RegisterEvent("UNIT_INVENTORY_CHANGED")
-            self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-            self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
-            self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
-
             UpdateBag(self)
         end)
         main:SetScript("OnHide", function(self)
+            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
             _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
-            self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-            self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-            self:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
-            self:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
             self.showBags:ToggleBags(false)
-
             self:Cancel()
         end)
     elseif bagType == "bank" then
@@ -288,22 +284,14 @@ local function CreateBag(bagType)
             end
         end)
         main:SetScript("OnShow", function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
-            self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
-            self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
-            self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
-            self:RegisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
-
+            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
+            _G.FrameUtil.RegisterFrameForEvents(self, BankEvents)
             UpdateBag(self)
         end)
         main:SetScript("OnHide", function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
-            self:UnregisterEvent("PLAYERBANKSLOTS_CHANGED")
-            self:UnregisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
-            self:UnregisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
-            self:UnregisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
+            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
+            _G.FrameUtil.UnregisterFrameForEvents(self, BankEvents)
             self.showBags:ToggleBags(false)
-
             self:Cancel()
         end)
     end
@@ -311,7 +299,6 @@ local function CreateBag(bagType)
     _G.Mixin(main, ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
     main:SetToplevel(true)
-    main:Hide()
     main.tag = "main"
     main.bagType = bagType
 
@@ -473,6 +460,8 @@ local function CreateBag(bagType)
 
         main.bags[tag] = bag
     end
+
+    main:Hide()
 end
 
 
