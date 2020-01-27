@@ -11,7 +11,7 @@ private.Inventory = Inventory
 
 local defaults = {
     global = {
-        maxHeight = 600,
+        maxHeight = 0.5,
         sellJunk = true
     }
 }
@@ -50,7 +50,7 @@ function private.SellJunk()
     local money = _G.GetMoneyString(profit, true)
     _G.print(_G.AMOUNT_RECEIVED_COLON, money)
 end
-function Inventory:MERCHANT_SHOW(event, ...)
+local function MERCHANT_SHOW(event, ...)
     local bag = Inventory.main.bags.junk
 
     if Inventory.db.global.sellJunk then
@@ -66,7 +66,7 @@ function Inventory:MERCHANT_SHOW(event, ...)
         end
     end
 end
-function Inventory:MERCHANT_CLOSED(event, ...)
+local function MERCHANT_CLOSED(event, ...)
     local bag = Inventory.main.bags.junk
 
     bag.sellJunk:Hide()
@@ -79,8 +79,10 @@ function Inventory:OnInitialize()
     defaults.global.filters = private.filterList
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
-    Inventory:RegisterEvent("MERCHANT_SHOW")
-    Inventory:RegisterEvent("MERCHANT_CLOSED")
+    Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
+    Inventory:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)
 
     private.CreateBags()
+
+    self.Update = private.Update
 end

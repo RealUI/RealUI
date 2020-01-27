@@ -60,12 +60,15 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
     local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
     bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
 
+    local _, screenHeight = RealUI.GetInterfaceSize()
+    local maxHeight = screenHeight * Inventory.db.global.maxHeight
+
     local height = bag:GetHeight()
     if bag.tag == "main" then
         columnHeight = columnHeight + height + 5
     else
         local parent = bag.parent
-        if columnHeight + height >= Inventory.db.global.maxHeight then
+        if columnHeight + height >= maxHeight then
             if parent.bagType == "main" then
                 bag:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
             else

@@ -526,6 +526,51 @@ local core do
         },
     }
 end
+local inventory do
+    debug("Inventory")
+    order = order + 1
+
+    local args
+    local Inventory = RealUI:GetModule("Inventory", true)
+    local function appGet(info)
+        return Inventory.db.global[info[#info]]
+    end
+    local function appSet(info, value)
+        Inventory.db.global[info[#info]] = value
+        Inventory.Update()
+    end
+
+    if Inventory then
+        args = {
+            maxHeight = {
+                name = L.Inventory_MaxHeight,
+                desc = L.Inventory_MaxHeightDesc,
+                type = "range",
+                isPercent = true,
+                min = 0.3, max = 0.7, step = 0.05,
+                get = appGet,
+                set = appSet,
+                order = 1,
+            },
+            sellJunk = {
+                name = L.Inventory_SellJunk,
+                type = "toggle",
+                get = appGet,
+                set = appSet,
+                order = 2,
+            },
+        }
+    else
+        args = CreateDisabledAddon("RealUI_Inventory")
+    end
+
+    inventory = {
+        name = L.Inventory,
+        type = "group",
+        order = order,
+        args = args
+    }
+end
 local skins do
     debug("Adv Skins")
     order = order + 1
@@ -3023,6 +3068,7 @@ options.RealUI = {
         core = core,
         skins = skins,
         tooltips = tooltips,
+        inventory = inventory,
         uiTweaks = uiTweaks,
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }
