@@ -198,6 +198,7 @@ end)
 local autorunScripts = {
     test = false,
     testFrame = false,
+    nudgeFrame = true,
 }
 
 local autorunAddon = {
@@ -291,6 +292,46 @@ function ns.commands:aurora()
 
     _G.print("Aurora addons loaded.")
     _G.AddonList_Update()
+end
+
+local keys = {
+    LEFT = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x - 1, y)
+    end,
+    RIGHT = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x + 1, y)
+    end,
+    UP = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x, y + 1)
+    end,
+    DOWN = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x, y - 1)
+    end,
+}
+function ns.commands:nudgeFrame()
+    local keyFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
+    keyFrame:SetSize(1, 1)
+    keyFrame:SetPoint("TOPLEFT")
+    keyFrame:SetFrameStrata("DIALOG")
+    keyFrame:EnableKeyboard(true)
+    keyFrame:SetPropagateKeyboardInput(true)
+    keyFrame:SetScript("OnKeyDown", function(this, key, ...)
+        if not _G.FrameStackTooltip then return end
+        if not _G.FrameStackTooltip.highlightFrame then return end
+
+        local frame = _G.FrameStackTooltip.highlightFrame
+        if keys[key] then
+            keys[key](frame)
+
+            if _G.RealUI.GetOptions("DragEmAll", {"global", frame}) then
+                _G.LibStub("LibWindow-1.1").SavePosition(frame)
+            end
+        end
+    end)
 end
 
 function ns.commands:combatEvents()
