@@ -500,7 +500,6 @@ end
 
 function Infobar:CreateBlocks()
     local dbc = Infobar.db.char
-    local ndbc = RealUI.db.char
 
     if not TextTableCellPrototype then
         iconFont = {
@@ -2053,10 +2052,6 @@ function Infobar:CreateBlocks()
                     UpdateGearSets()
                 elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
                     UpdateBlock(block)
-                    if ndbc.layout.spec[specInfo.current.index] ~= ndbc.layout.current then
-                        ndbc.layout.current = ndbc.layout.spec[specInfo.current.index]
-                        RealUI:UpdateLayout()
-                    end
 
                     if equipmentNeedsUpdate then
                         _G.EquipmentManager_EquipSet(equipmentNeedsUpdate)

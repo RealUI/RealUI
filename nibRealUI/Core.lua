@@ -202,11 +202,14 @@ function RealUI:StyleUpdateColors()
 end
 
 -- Layout Updates
-function RealUI:SetLayout()
+function RealUI:UpdateLayout(layout)
+    layout = layout or dbc.layout.current
+    dbc.layout.current = layout
+
     -- TODO: convert layouts to profiles
     -- Set Current and Not-Current layout variables
-    self.cLayout = dbc.layout.current
-    self.ncLayout = self.cLayout == 1 and 2 or 1
+    self.cLayout = layout
+    self.ncLayout = layout == 1 and 2 or 1
 
     if _G.RealUIGridConfiguring then
         self:ScheduleTimer(function()
@@ -214,19 +217,17 @@ function RealUI:SetLayout()
             self:ToggleGridTestMode(true)
         end, 0.5)
     end
-
-    dbc.layout.needchanged = false
-end
-function RealUI:UpdateLayout()
-    RealUI.TryInCombat(RealUI.SetLayout, L["Layout_ApplyOOC"])
 end
 
-
-local function UpdateSpec()
-    local old = RealUI.charInfo.specs.current.index
+local function UpdateSpec(...)
+    local specInfo = RealUI.charInfo.specs
     local new = _G.GetSpecialization()
-    if old ~= new then
-        RealUI.charInfo.specs.current = RealUI.charInfo.specs[new]
+    if specInfo.current.index ~= new then
+        specInfo.current = RealUI.charInfo.specs[new]
+
+        if dbc.layout.spec[specInfo.current.index] ~= dbc.layout.current then
+            RealUI:UpdateLayout(dbc.layout.spec[specInfo.current.index])
+        end
     end
 end
 
@@ -295,8 +296,7 @@ function RealUI:OnProfileUpdate(event, database, profile)
     end
 
     -- Update old stuff too for now
-    dbc.layout.current = private.profileToLayout[profile]
-    RealUI:SetLayout()
+    RealUI:UpdateLayout(private.profileToLayout[profile])
 
     if event == "OnProfileReset" then
         debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
@@ -369,7 +369,7 @@ function RealUI:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
 
     -- Register events
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
+    self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateSpec)
     self:RegisterEvent("ADDON_LOADED", function()
         if RealUI.recheckFonts then
             local SkinsDB = RealUI.GetOptions("Skins").profile
@@ -491,12 +491,6 @@ function RealUI:OnEnable()
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
-
-    -- Do we need a Layout change?
-    if dbc.layout.needchanged then
-        RealUI:UpdateLayout()
-    end
-
 
     local black = _G.Aurora.Color.black
     local a = RealUI.GetOptions("Skins").profile.frameColor.a
