@@ -202,6 +202,7 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetHitRectInsets(-5, -50, -5, -5)
     button:SetNormalFontObject("GameFontDisableSmall")
+    button:SetPushedTextOffset(0, 0)
     button:SetText(text)
     button:GetFontString():SetPoint("LEFT", button, "RIGHT", 4, 1)
     button:SetNormalAtlas(atlas)
@@ -378,20 +379,9 @@ local function CreateBag(bagType)
     Skin.UIPanelCloseButton(close)
     main.close = close
 
-    local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
-    function(self)
-        self:Hide()
-        main.moneyFrame:Hide()
-        main.searchBox:Show()
-        main.searchBox:SetFocus()
-    end)
-    searchButton:SetPoint("BOTTOMLEFT", 8, 9)
-    searchButton:SetSize(10, 10)
-    main.searchButton = searchButton
-
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
-    searchBox:SetPoint("BOTTOMLEFT", 5, 5)
-    searchBox:SetPoint("BOTTOMRIGHT", -5, 5)
+    searchBox:SetPoint("BOTTOMLEFT", 9, 5)
+    searchBox:SetPoint("BOTTOMRIGHT", -4, 5)
     searchBox:SetHeight(20)
     searchBox:Hide()
     _G.hooksecurefunc(searchBox, "ClearFocus", function(self)
@@ -401,6 +391,17 @@ local function CreateBag(bagType)
     end)
     Skin.BagSearchBoxTemplate(searchBox)
     main.searchBox = searchBox
+
+    local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
+    function(self)
+        self:Hide()
+        main.moneyFrame:Hide()
+        main.searchBox:Show()
+        main.searchBox:SetFocus()
+    end)
+    searchButton:SetPoint("BOTTOMLEFT", searchBox, 3, 4)
+    searchButton:SetSize(10, 10)
+    main.searchButton = searchButton
 
     local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
     moneyFrame:SetPoint("BOTTOMRIGHT", 8, 8)
