@@ -18,6 +18,9 @@ local RealUI = _G.RealUI
 local Aurora = private.Aurora
 private.isDev = RealUI.isDev
 
+local debug = RealUI.GetDebug("Skins")
+private.debug = debug
+
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
