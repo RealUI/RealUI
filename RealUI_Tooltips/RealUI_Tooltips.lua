@@ -615,8 +615,7 @@ private.AddHook("OnTooltipSetUnit", function(self)
                     }
                 end
             else
-                -- /dump C_TaskQuest.GetQuestsForPlayerByMapID(C_Map.GetBestMapForUnit("player"))
-                local taskPOIs = _G.C_TaskQuest.GetQuestsForPlayerByMapID(_G.C_Map.GetBestMapForUnit("player"))
+                local taskPOIs = _G.C_TaskQuest.GetQuestsForPlayerByMapID(_G.MapUtil.GetDisplayableMapForPlayer())
                 for i, poiData in next, taskPOIs do
                     local weight = LOP:GetNPCWeightByQuest(poiData.questId, npcID)
                     if poiData.inProgress and weight then
