@@ -39,17 +39,36 @@ end
 ]]
 
 local nameFormat = _G.ENABLE .. " %s"
-local function CreateDisabledAddon(name)
+local function CreateAddonSection(name, args)
+    local hide = false
+
+    if not args then
+        local addonName = "RealUI_" .. name
+        local _, _, _, loadable, reason = _G.GetAddOnInfo(addonName)
+        if loadable then
+            args = {
+                enable = {
+                    name = nameFormat:format(L[name]),
+                    type = "execute",
+                    func = function(info, value)
+                        _G.EnableAddOn(addonName)
+                        _G.ReloadUI()
+                    end,
+                    order = 1,
+                },
+            }
+        else
+            hide = reason == "MISSING"
+            args = {}
+        end
+    end
+
     return {
-        enable = {
-            name = nameFormat:format(name),
-            type = "execute",
-            func = function(info, value)
-                _G.EnableAddOn(name)
-                _G.ReloadUI()
-            end,
-            order = 1,
-        },
+        name = L[name],
+        type = "group",
+        hidden = hide,
+        order = order,
+        args = args
     }
 end
 
@@ -560,16 +579,9 @@ local inventory do
                 order = 2,
             },
         }
-    else
-        args = CreateDisabledAddon("RealUI_Inventory")
     end
 
-    inventory = {
-        name = L.Inventory,
-        type = "group",
-        order = order,
-        args = args
-    }
+    inventory = CreateAddonSection("Inventory", args)
 end
 local skins do
     debug("Adv Skins")
@@ -809,7 +821,6 @@ local tooltips do
     debug("Adv Tooltips")
     order = order + 1
 
-
     local args
     local Tooltips = RealUI:GetModule("Tooltips", true)
     local function appGet(info)
@@ -927,16 +938,9 @@ local tooltips do
                 }
             }
         }
-    else
-        args = CreateDisabledAddon("RealUI_Tooltips")
     end
 
-    tooltips = {
-        name = L.Tooltips,
-        type = "group",
-        order = order,
-        args = args
-    }
+    tooltips = CreateAddonSection("Tooltips", args)
 end
 local uiTweaks do
     debug("Adv UITweaks")
