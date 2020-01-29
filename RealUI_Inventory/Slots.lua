@@ -269,9 +269,9 @@ end
 
 --[[ Bag Slots ]]--
 local searchBags = {}
-local function SearchItemsForBag(bagID)
+local function SearchItemsForBag(bagType)
     local slots = inventorySlots
-    if bagID == _G.BANK_CONTAINER then
+    if bagType == "bank" then
         slots = bankSlots
     end
 
@@ -305,23 +305,26 @@ function BagSlotMixin:Init(bagID)
     self:SetScript("OnDragStart", self.OnDragStart)
     self:SetScript("OnReceiveDrag", self.OnReceiveDrag)
 
+    self.bagType = private.GetBagTypeForBagID(bagID)
     self.isBackpack = bagID == _G.BACKPACK_CONTAINER
     self.isBank = bagID == _G.BANK_CONTAINER
     self.isBag = not self.isBackpack and not self.isBank
 
     Skin.FrameTypeItemButton(self)
-    if bagID > _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
-        self.inventorySlot = "Bag"..(bagID - 1).."Slot"
+    if self.isBag then
+        if self.bagType == "main" then
+            self.inventorySlot = "Bag"..(bagID - 1).."Slot"
 
-        self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-    elseif bagID > _G.NUM_BAG_SLOTS then
-        local slotID = bagID - _G.NUM_BAG_SLOTS
-        self.inventorySlot = "Bag"..slotID
+            self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
+        else
+            local slotID = bagID - _G.NUM_BAG_SLOTS
+            self.inventorySlot = "Bag"..slotID
 
-        self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-        self.inventoryID = _G.BankButtonIDToInvSlotID(slotID, 1)
+            self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
+            self.inventoryID = _G.BankButtonIDToInvSlotID(slotID, 1)
 
-        self.bankSlotID = slotID
+            self.bankSlotID = slotID
+        end
     else
         self.fallbackTexture = [[Interface\Buttons\Button-Backpack-Up]]
     end
@@ -332,16 +335,14 @@ function BagSlotMixin:GetItemContextMatchResult()
     return _G.ItemButtonUtil.GetItemContextMatchResultForContainer(self:GetID())
 end
 function BagSlotMixin:Update()
-    if self.inventoryID then
+    if self.isBag then
         local textureName = _G.GetInventoryItemTexture("player", self.inventoryID)
         _G.SetItemButtonTexture(self, textureName or self.fallbackTexture)
 
         local quality = _G.GetInventoryItemQuality("player", self.inventoryID)
         _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", self.inventoryID), true)
-    end
 
-    if self.isBag then
-        if self.bankSlotID then
+        if self.bagType == "bank" then
             if self.bankSlotID <= _G.GetNumBankSlots() then
                 _G.SetItemButtonTextureVertexColor(self, 1.0, 1.0, 1.0)
                 self.tooltipText = _G.BANK_BAG
@@ -393,7 +394,7 @@ function BagSlotMixin:OnClick(button)
             self.highlight:Show()
         end
 
-        SearchItemsForBag(self:GetID())
+        SearchItemsForBag(self.bagType)
     end
 end
 function BagSlotMixin:OnDragStart()
