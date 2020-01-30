@@ -14,6 +14,44 @@ local RealUI = _G.RealUI
 
 local Inventory = private.Inventory
 
+local InventoryType = _G.Enum.InventoryType
+local invTypes = {
+    [InventoryType.IndexHeadType] = 1,
+    [InventoryType.IndexNeckType] = 2,
+    [InventoryType.IndexShoulderType] = 3,
+    [InventoryType.IndexCloakType] = 4,
+    [InventoryType.IndexChestType] = 5,
+    [InventoryType.IndexRobeType] = 5, -- Holiday chest
+    [InventoryType.IndexBodyType] = 6, -- Shirt
+    [InventoryType.IndexTabardType] = 7,
+    [InventoryType.IndexWristType] = 8,
+    [InventoryType.IndexHandType] = 9,
+    [InventoryType.IndexWaistType] = 10,
+    [InventoryType.IndexLegsType] = 11,
+    [InventoryType.IndexFeetType] = 12,
+    [InventoryType.IndexFingerType] = 13,
+    [InventoryType.IndexTrinketType] = 14,
+
+    [InventoryType.Index2HweaponType] = 15,
+    [InventoryType.IndexRangedType] = 16, -- Bows
+    [InventoryType.IndexRangedrightType] = 16, -- Wands, Guns, and Crossbows
+
+    [InventoryType.IndexWeaponType] = 17, -- One-Hand
+    [InventoryType.IndexWeaponmainhandType] = 18,
+    [InventoryType.IndexWeaponoffhandType] = 19,
+    [InventoryType.IndexShieldType] = 20,
+
+    [InventoryType.IndexHoldableType] = 21,
+    [InventoryType.IndexRelicType] = 21,
+
+    [InventoryType.IndexAmmoType] = 22,
+    [InventoryType.IndexThrownType] = 22,
+
+    [InventoryType.IndexBagType] = 25,
+    [InventoryType.IndexQuiverType] = 25,
+
+    [InventoryType.IndexNonEquipType] = 30,
+}
 local function SortSlots(a, b)
     local qualityA = a.item:GetItemQuality()
     local qualityB = b.item:GetItemQuality()
@@ -30,24 +68,22 @@ local function SortSlots(a, b)
 
     local invTypeA = a.item:GetInventoryType()
     local invTypeB = b.item:GetInventoryType()
-    if invTypeA ~= invTypeB then
-        return invTypeA < invTypeB
+    if invTypes[invTypeA] ~= invTypes[invTypeB] then
+        return invTypes[invTypeA] < invTypes[invTypeB]
     end
 
 
-    local idA = a.item:GetItemID()
-    local idB = b.item:GetItemID()
-    if idA ~= idB then
-        return idA > idB
+    local nameA = a.item:GetItemName()
+    local nameB = b.item:GetItemName()
+    if nameA ~= nameB then
+        return nameA < nameB
     end
 
 
-    if Inventory.isPatch then
-        local stackA = _G.C_Item.GetStackCount(a)
-        local stackB = _G.C_Item.GetStackCount(b)
-        if stackA ~= stackB then
-            return stackA > stackB
-        end
+    local stackA = _G.C_Item.GetStackCount(a)
+    local stackB = _G.C_Item.GetStackCount(b)
+    if stackA ~= stackB then
+        return stackA > stackB
     end
 end
 local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
