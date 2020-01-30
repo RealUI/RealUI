@@ -454,6 +454,19 @@ local function CreateBag(bagType)
         bag.tag = tag
         bag.parent = main
 
+        if tag == "new" then
+            local resetNew = CreateFeatureButton(bag, _G.RESET, "worldquest-questmarker-questbang", function(self)
+                for _, slot in ipairs(bag.slots) do
+                    _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
+                end
+
+                UpdateBag(main)
+            end)
+            resetNew:SetPoint("TOPLEFT", 5, -5)
+            resetNew:SetSize(8, 17)
+            bag.resetNew = resetNew
+        end
+
         if tag == "junk" then
             local sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
             sellJunk:SetPoint("TOPLEFT", 5, -9)

@@ -52,39 +52,8 @@ function InventoryItemMixin:Update()
         questTexture:Hide()
     end
 
-    local isNewItem = _G.C_NewItems.IsNewItem(bagID, slotIndex)
-    local isBattlePayItem = _G.IsBattlePayItem(bagID, slotIndex)
-
-    local battlepayItemTexture = self.BattlepayItemTexture
-    local newItemTexture = self.NewItemTexture
-    local flash = self.flashAnim
-    local newItemAnim = self.newitemglowAnim
-
-    if isNewItem then
-        if isBattlePayItem then
-            newItemTexture:Hide()
-            battlepayItemTexture:Show()
-        else
-            if (quality and _G.NEW_ITEM_ATLAS_BY_QUALITY[quality]) then
-                newItemTexture:SetAtlas(_G.NEW_ITEM_ATLAS_BY_QUALITY[quality])
-            else
-                newItemTexture:SetAtlas("bags-glow-white")
-            end
-            battlepayItemTexture:Hide()
-            newItemTexture:Show()
-        end
-        if (not flash:IsPlaying() and not newItemAnim:IsPlaying()) then
-            flash:Play()
-            newItemAnim:Play()
-        end
-    else
-        battlepayItemTexture:Hide()
-        newItemTexture:Hide()
-        if (flash:IsPlaying() or newItemAnim:IsPlaying()) then
-            flash:Stop()
-            newItemAnim:Stop()
-        end
-    end
+    self.NewItemTexture:Hide()
+    self.BattlepayItemTexture:SetShown(_G.IsBattlePayItem(bagID, slotIndex))
 
     self.JunkIcon:Hide()
     _G[self:GetName().."Cooldown"]:Hide()

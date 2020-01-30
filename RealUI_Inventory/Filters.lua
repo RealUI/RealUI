@@ -13,6 +13,14 @@ local function CreateFilter(tag, info)
     tinsert(private.filterList, tag)
 end
 
+CreateFilter("new", {
+    name = _G.NEW,
+    rank = 0,
+    filter = function(slot)
+        return _G.C_NewItems.IsNewItem(slot:GetBagAndSlot())
+    end,
+})
+
 CreateFilter("junk", {
     name = _G.BAG_FILTER_JUNK,
     rank = -1,
