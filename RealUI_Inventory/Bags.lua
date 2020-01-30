@@ -198,20 +198,34 @@ function ContinuableContainer:RecheckEvictableContinuables()
 end
 
 local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
-    local button = _G.CreateFrame("Button", "$parentSearchButton", bag)
-    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    local button = _G.CreateFrame("Button", nil, bag)
+    button:SetPoint("TOPLEFT", 7, -7)
+    button:SetSize(16, 16)
     button:SetHitRectInsets(-5, -50, -5, -5)
+
+    local atlasInfo = _G.C_Texture.GetAtlasInfo(atlas)
+    button:SetNormalAtlas(atlas)
+    local texture = button:GetNormalTexture()
+    texture:ClearAllPoints()
+    texture:SetPoint("CENTER")
+    texture:SetSize(atlasInfo.width, atlasInfo.height)
+    button.texture = texture
+
+    button:SetHighlightAtlas(atlas)
+    button:GetHighlightTexture():SetAllPoints(texture)
+
     button:SetNormalFontObject("GameFontDisableSmall")
     button:SetPushedTextOffset(0, 0)
     button:SetText(text)
-    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 4, 1)
-    button:SetNormalAtlas(atlas)
-    button:SetHighlightAtlas(atlas)
+    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 1, 1)
+
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetScript("OnClick", onClick)
     button:SetScript("OnEnter", onEnter or _G.nop)
     button:SetScript("OnLeave", function()
         _G.GameTooltip_Hide()
     end)
+
     return button
 end
 
@@ -337,8 +351,7 @@ local function CreateBag(bagType)
             end
         end
     end)
-    showBags:SetPoint("TOPLEFT", 8, -9)
-    showBags:SetSize(13.3333, 16)
+    showBags.texture:SetSize(13.3333, 16)
     function showBags:ToggleBags(show)
         if show == nil then
             show = not self.isShowing
@@ -399,8 +412,8 @@ local function CreateBag(bagType)
         main.searchBox:Show()
         main.searchBox:SetFocus()
     end)
-    searchButton:SetPoint("BOTTOMLEFT", searchBox, 3, 4)
-    searchButton:SetSize(10, 10)
+    searchButton:SetPoint("TOPLEFT", searchBox, 0, -3)
+    searchButton.texture:SetSize(10, 10)
     main.searchButton = searchButton
 
     local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
@@ -455,24 +468,18 @@ local function CreateBag(bagType)
         bag.parent = main
 
         if tag == "new" then
-            local resetNew = CreateFeatureButton(bag, _G.RESET, "worldquest-questmarker-questbang", function(self)
+            bag.resetNew = CreateFeatureButton(bag, _G.RESET, "worldquest-questmarker-questbang", function(self)
                 for _, slot in ipairs(bag.slots) do
                     _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
                 end
 
                 UpdateBag(main)
             end)
-            resetNew:SetPoint("TOPLEFT", 5, -5)
-            resetNew:SetSize(8, 17)
-            bag.resetNew = resetNew
         end
 
         if tag == "junk" then
-            local sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
-            sellJunk:SetPoint("TOPLEFT", 5, -9)
-            sellJunk:SetSize(16, 14.4)
-            sellJunk:Hide()
-            bag.sellJunk = sellJunk
+            bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
+            bag.sellJunk:Hide()
         end
 
         main.bags[tag] = bag
