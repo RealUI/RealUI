@@ -1,5 +1,5 @@
 --
--- $Id: BugGrabber.lua 234 2018-07-27 00:10:22Z funkydude $
+-- $Id: BugGrabber.lua 238 2019-09-25 01:35:39Z funkydude $
 --
 -- The BugSack and !BugGrabber team is:
 -- Current Developer: Funkydude
@@ -34,8 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 local _G = _G
 local type, table, next, tostring, tonumber, print =
       type, table, next, tostring, tonumber, print
-local debuglocals, debugstack, wipe, InCombatLockdown, UnitAffectingCombat, GetTime =
-      debuglocals, debugstack, wipe, InCombatLockdown, UnitAffectingCombat, GetTime
+local debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime =
+      debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime
 -- GLOBALS: LibStub, GetLocale, GetBuildInfo, DisableAddOn, Swatter, GetAddOnInfo
 -- GLOBALS: BugGrabberDB, ItemRefTooltip, date
 -- GLOBALS: seterrorhandler, IsAddOnLoaded, GetAddOnMetadata
@@ -121,7 +121,7 @@ local paused = nil
 local isBugGrabbedRegistered = nil
 local callbacks = nil
 local playerName = UnitName("player")
-local chatLinkFormat = "|Hbuggrabber:%s:%s|h|cffff0000[Error %s]|r|h"
+local chatLinkFormat = "|Hbuggrabber:%s:%s:|h|cffff0000[Error %s]|r|h"
 local tableToString = "table: %s"
 
 -----------------------------------------------------------------------
@@ -357,11 +357,11 @@ do
 				for line in stack:gmatch("(.-)\n") do
 					tmp[#tmp+1] = findVersions(line)
 				end
-				local inCombat = InCombatLockdown() or UnitAffectingCombat("player")
+				local inCombat = IsEncounterInProgress() -- debuglocals can be slow sometimes (200ms+)
 				errorObject = {
 					message = sanitizedMessage,
 					stack = table.concat(tmp, "\n"),
-					locals = inCombat and "InCombatSkipped" or debuglocals(3),
+					locals = inCombat and "Skipped (In Encounter)" or debuglocals(3),
 					session = addon:GetSessionId(),
 					time = date("%Y/%m/%d %H:%M:%S"),
 					counter = 1,
@@ -402,7 +402,7 @@ do
 		-- Set up the ItemRef hook that allow us to link bugs.
 		local SetHyperlink = ItemRefTooltip.SetHyperlink
 		function ItemRefTooltip:SetHyperlink(link, ...)
-			local player, tableId = link:match("^buggrabber:([^:]+):(%x+)")
+			local player, tableId = link:match("^buggrabber:([^:]+):([^:]+):")
 			if player then
 				addon:HandleBugLink(player, tableId, link)
 			else

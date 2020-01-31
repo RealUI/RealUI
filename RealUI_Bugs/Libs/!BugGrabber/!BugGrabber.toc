@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80205
 ## Title: BugGrabber
 ## Notes: Grabs bugs for the bug sack.
 ## Notes-deDE: Grabs bugs for the bug sack.
