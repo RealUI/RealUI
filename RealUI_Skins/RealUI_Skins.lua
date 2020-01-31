@@ -173,63 +173,6 @@ function private.OnLoad()
     end)
     private.skinsDB = skinsDB.profile
 
-    -- Transfer settings
-    if _G.RealUI_Storage.nibRealUI_Init then
-        local RealUI_InitDB = _G.RealUI_Storage.nibRealUI_Init.RealUI_InitDB
-        if RealUI_InitDB then
-            private.skinsDB.stripeAlpha = RealUI_InitDB.stripeOpacity
-            private.skinsDB.uiModScale = RealUI_InitDB.uiModScale
-        end
-        _G.RealUI_Storage.nibRealUI_Init = nil
-    end
-
-    if _G.RealUI_Storage.Aurora then
-        local AuroraConfig = _G.RealUI_Storage.Aurora.AuroraConfig
-        private.skinsDB.frameColor.a = AuroraConfig.alpha
-        if type(AuroraConfig.customClassColors) == "table" then
-            private.skinsDB.customClassColors = AuroraConfig.customClassColors
-        end
-        _G.RealUI_Storage.Aurora = nil
-    end
-
-    if _G.RealUI_Storage.nibRealUI and _G.RealUI_Storage.nibRealUI.nibRealUIDB then
-        local profile = _G.RealUI_Storage.nibRealUI.nibRealUIDB.profiles.RealUI
-        if profile and profile.media and profile.media.font then
-            local font = profile.media.font
-            if font.standard then
-                private.skinsDB.fonts.normal = font.standard[4]
-            end
-            if font.chat then
-                private.skinsDB.fonts.chat = font.chat[4]
-            end
-            if font.crit then
-                private.skinsDB.fonts.crit = font.crit[4]
-            end
-            if font.header then
-                private.skinsDB.fonts.header = font.header[4]
-            end
-            profile.media.font = nil
-        end
-
-        local global = _G.RealUI_Storage.nibRealUI.nibRealUIDB.global
-        if global and global.retinaDisplay then
-            private.skinsDB.isHighRes = global.retinaDisplay.set
-            global.retinaDisplay = nil
-        end
-
-        local namespace = _G.RealUI_Storage.nibRealUI.nibRealUIDB.namespaces.UIScaler
-        if namespace and namespace.profiles.RealUI then
-            local customScale = _G.tonumber(namespace.profiles.RealUI.customScale)
-            if customScale then
-                private.skinsDB.customScale = customScale
-            end
-            private.skinsDB.isPixelScale = namespace.profiles.RealUI.pixelScale
-            _G.RealUI_Storage.nibRealUI.nibRealUIDB.namespaces.UIScaler = nil
-        end
-    else
-        _G.ReloadUI()
-    end
-
     -- Set flags
     private.disabled.bags = true
     private.disabled.mainmenubar = true
@@ -237,44 +180,6 @@ function private.OnLoad()
 
     private.uiScale = private.skinsDB.uiModScale
     private.UpdateUIScale = RealUI.UpdateUIScale
-
-    -- convert existing fields /dump LibStub("LibSharedMedia-3.0"):Fetch("font", "font")
-    local recheckFonts
-    for fontType, font in next, private.skinsDB.fonts do
-        if type(font) ~= "table" then
-            for name, path in next, LSM.MediaTable.font do
-                if font == name or font == path then
-                    private.skinsDB.fonts[fontType] = {
-                        name = name,
-                        path = path
-                    }
-                    break
-                end
-            end
-            if type(font) ~= "table" then
-                recheckFonts = recheckFonts or {}
-                if font:lower():find("interface") then
-                    private.skinsDB.fonts[fontType] = {
-                        name = "",
-                        path = font
-                    }
-                    recheckFonts[fontType] = true
-                elseif font ~= "" then
-                    private.skinsDB.fonts[fontType] = {
-                        name = font,
-                        path = LSM:Fetch("font", font)
-                    }
-                    recheckFonts[fontType] = true
-                else
-                    private.skinsDB.fonts[fontType] = fonts[fontType]
-                end
-            end
-        end
-    end
-    RealUI.recheckFonts = recheckFonts
-    for fontType, font in next, private.skinsDB.fonts do
-        private.font[fontType] = font.path or LSM:Fetch("font", font.name)
-    end
 
     local Base = Aurora.Base
     local Hook, Skin = Aurora.Hook, Aurora.Skin
