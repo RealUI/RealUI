@@ -403,7 +403,7 @@ local function CreateBag(bagType)
             self:SetText("")
             self:SetHitRectInsets(-5, -5, -5, -5)
 
-            bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 3)
+            bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 1)
             for k, bagID in private.IterateBagIDs(bagType) do
                 bagSlots[bagID]:Update()
             end
@@ -411,12 +411,12 @@ local function CreateBag(bagType)
             self:SetText(_G.BAGSLOTTEXT)
             self:SetHitRectInsets(-5, -50, -5, -5)
 
-            bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 3)
+            bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
             for k, bagID in private.IterateBagIDs(bagType) do
                 bagSlots[bagID]:Update()
             end
 
-            private.SearchItemsForBag(0)
+            private.SearchItemsForBag(bagType)
         end
 
         self.isShowing = show
