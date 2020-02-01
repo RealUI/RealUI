@@ -72,7 +72,10 @@ function FramePoint:RestorePosition(mod)
 end
 
 FramePoint.OnDragStart = LibWin.OnDragStart
-FramePoint.OnDragStop = LibWin.OnDragStop
+function FramePoint.OnDragStop(frame)
+    RealUI.SetPixelPoint(frame)
+    LibWin.OnDragStop(frame)
+end
 function FramePoint:PositionFrame(mod, frame, optionPath)
     local dragFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
     _G.Aurora.Base.SetBackdrop(dragFrame, _G.Aurora.Color.white, 0.2)
