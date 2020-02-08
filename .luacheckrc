@@ -9,7 +9,7 @@ ignore = {
 }
 
 max_line_length = false
-max_cyclomatic_complexity = 76
+max_cyclomatic_complexity = 73
 unused_args = false
 self = false
 std = "none"
