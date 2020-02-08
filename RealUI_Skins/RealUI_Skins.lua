@@ -204,30 +204,7 @@ function private.OnLoad()
     if not classColors[private.charClass.token] then
         private.classColorsReset(classColors, true)
     end
-
-    function private.classColorsHaveChanged()
-        local hasChanged = false
-        for i = 1, #_G.CLASS_SORT_ORDER do
-            local classToken = _G.CLASS_SORT_ORDER[i]
-            local color = _G.CUSTOM_CLASS_COLORS[classToken]
-            local cache = classColors[classToken]
-
-            if not color:IsEqualTo(cache) then
-                --print("Change found in", classToken)
-                color:SetRGB(cache.r, cache.g, cache.b)
-                hasChanged = true
-            end
-        end
-        return hasChanged
-    end
-    function private.classColorsInit()
-        if private.classColorsHaveChanged() then
-            private.updateHighlightColor()
-        end
-    end
-    _G.CUSTOM_CLASS_COLORS:RegisterCallback(function()
-        private.updateHighlightColor()
-    end)
+    private.setColorCache(classColors)
 
     -- Set overrides and hooks
     local C = Aurora[2]
