@@ -6,7 +6,7 @@ local _, private = ...
 -- Libs --
 local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 
-local progressFormat = "%s\n     |cFFFFFFFF+%s%%|r"
+local progressFormat = "%s |cFFFFFFFF(+%s%%)|r"
 local progressInfo, challengeData = {}, {}
 
 function private.AddObjectiveProgress(tooltip, unit, previousLine)
