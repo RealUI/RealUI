@@ -202,7 +202,7 @@ function private.OnLoad()
 
     local classColors = private.skinsDB.classColors
     if not classColors[private.charClass.token] then
-        private.classColorsReset(classColors, true)
+        private.classColorsReset(classColors, _G.RAID_CLASS_COLORS)
     end
     private.setColorCache(classColors)
 

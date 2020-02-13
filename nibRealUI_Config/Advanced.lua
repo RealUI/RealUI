@@ -618,15 +618,13 @@ local skins do
             }
         }
 
-        for class, color in next, SkinsDB.profile.classColors do
-            classColors.args[class] = {
-                name = class,
+        for classToken, color in next, _G.CUSTOM_CLASS_COLORS do
+            classColors.args[classToken] = {
+                name = _G.LOCALIZED_CLASS_NAMES_MALE[classToken],
                 type = "color",
-                get = function(info) return color.r, color.g, color.b end,
+                get = function(info) return color:GetRGB() end,
                 set = function(info, r, g, b)
-                    color.r = r
-                    color.g = g
-                    color.b = b
+                    color:SetRGB(r, g, b)
                     _G.CUSTOM_CLASS_COLORS:NotifyChanges()
                 end,
             }
