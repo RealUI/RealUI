@@ -447,33 +447,29 @@ local core do
         local MODNAME = "WorldMarker"
         local WorldMarker = RealUI:GetModule(MODNAME)
         worldMarker = {
-            name = "World Marker",
-            desc = "Quick access to World Markers.",
+            name = L["WorldMarker"],
+            desc = L["WorldMarkerDesc"],
             type = "group",
             childGroups = "tab",
             args = {
                 header = {
-                    name = "World Marker",
+                    name = L["WorldMarker"],
                     type = "header",
                     order = 10,
                 },
                 desc = {
-                    name = "Quick access to World Markers.",
+                    name = L["WorldMarkerDesc"],
                     type = "description",
                     fontSize = "medium",
                     order = 20,
                 },
                 enabled = {
-                    name = "Enabled",
-                    desc = "Enable/Disable the WorldMarker module.",
+                    name = L["General_Enabled"],
+                    desc = L["General_EnabledDesc"]:format(L[MODNAME]),
                     type = "toggle",
                     get = function() return RealUI:GetModuleEnabled(MODNAME) end,
                     set = function(info, value)
-                        if not _G.InCombatLockdown() then
-                            RealUI:SetModuleEnabled(MODNAME, value)
-                        else
-                            _G.print("|cff0099ffRealUI: |r World Marker can't be enabled or disabled during combat.")
-                        end
+                        RealUI:SetModuleEnabled(MODNAME, value)
                     end,
                     order = 30,
                 },
@@ -483,7 +479,7 @@ local core do
                     order = 31,
                 },
                 visibility = {
-                    name = "Show the World Marker in..",
+                    name = L["WorldMarker_Show"],
                     type = "group",
                     disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                     order = 40,
@@ -527,6 +523,16 @@ local core do
                                 WorldMarker:UpdateVisibility()
                             end,
                             order = 40,
+                        },
+                        none = {
+                            name = _G.WORLD,
+                            type = "toggle",
+                            get = function(info) return WorldMarker.db.profile.visibility.none end,
+                            set = function(info, value)
+                                WorldMarker.db.profile.visibility.none = value
+                                WorldMarker:UpdateVisibility()
+                            end,
+                            order = 50,
                         },
                     },
                 },
