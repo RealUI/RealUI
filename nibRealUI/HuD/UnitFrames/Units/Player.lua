@@ -49,7 +49,7 @@ UnitFrames.player = {
 
         --[[ Additional Power ]]--
         local AdditionalPower = _G.CreateFrame("StatusBar", nil, self.Power)
-        AdditionalPower:SetStatusBarTexture(RealUI.media.textures.plain, "BORDER")
+        AdditionalPower:SetStatusBarTexture(RealUI.textures.plain, "BORDER")
         AdditionalPower:SetStatusBarColor(0, 0, 0, 0.75)
         AdditionalPower:SetPoint("BOTTOMLEFT", self.Power, "TOPLEFT", 0, 0)
         AdditionalPower:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -self.Power:GetHeight(), 0)

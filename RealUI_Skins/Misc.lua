@@ -42,10 +42,10 @@ end
 
 
 --[[ Backgrounds ]]--
-LSM:Register("background", "Plain", [[Interface\Buttons\WHITE8x8]])
+LSM:Register("background", "Plain", private.textures.plain)
 
 --[[ Statusbars ]]--
-LSM:Register("statusbar", "Plain", [[Interface\Buttons\WHITE8x8]])
+LSM:Register("statusbar", "Plain", private.textures.plain)
 
 --[[ Borders ]]--
-LSM:Register("border", "Plain", [[Interface\Buttons\WHITE8x8]])
+LSM:Register("border", "Plain", private.textures.plain)

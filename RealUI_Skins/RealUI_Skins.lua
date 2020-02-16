@@ -42,12 +42,7 @@ local defaults = {
     }
 }
 
--- TODO: remove and convert to Aurora.Color
-RealUI.media = {
-    textures = {
-        plain = [[Interface\Buttons\WHITE8x8]],
-    },
-}
+RealUI.textures = private.textures
 
 local moddedFrames, pixelScale = {}
 local function ResetScale(frame)
