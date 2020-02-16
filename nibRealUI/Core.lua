@@ -121,6 +121,11 @@ local defaults, charInit do
             positions = RealUI.defaultPositions,
             -- Action Bar settings
             abSettingsLink = false,
+            -- Dynamic UI settings
+            settings = {
+                hudSize = 2,
+                reverseUnitFrameBars = false,
+            },
             media = RealUI.media
         },
     }
