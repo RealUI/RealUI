@@ -1,21 +1,36 @@
 {
-	"folders":
-	[
-		{
-			"path": ".",
-			"file_exclude_patterns":
-			[
-				"*.sublime*",
-			],
-			"folder_exclude_patterns":
-			[
-				".idea",
-				".release",
-				"Aurora",
-			],
-		}
-	],
-    "syntax_override": {
-        "\\.lua$": ["WoWDevelopment", "WoW Lua"]
+    "folders":
+    [
+        {
+            "file_exclude_patterns":
+            [
+                "*.sublime*"
+            ],
+            "folder_exclude_patterns":
+            [
+                ".idea",
+                ".release",
+                "Aurora"
+            ],
+            "path": "."
+        }
+    ],
+    "settings":
+    {
+        "LSP":
+        {
+            "lua-ls":
+            {
+                "enabled": true
+            }
+        }
+    },
+    "syntax_override":
+    {
+        "\\.lua$":
+        [
+            "WoWDevelopment",
+            "WoW Lua"
+        ]
     }
 }
