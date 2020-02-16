@@ -16,9 +16,7 @@ for i = 1, 3 do
 end
 RealUI.verinfo.string = version
 
-RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
-
 RealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
         ["HuDX"] = 0,
@@ -110,14 +108,12 @@ local defaults, charInit do
             init = charInit,
             layout = {
                 current = 1,    -- 1 = DPS/Tank, 2 = Healing
-                needchanged = false,
                 spec = spec -- Save layout for each spec
             },
         },
         profile = {
             modules = {
                 ['*'] = true,
-                ["AchievementScreenshots"] = false,
             },
             registeredChars = {},
             -- HuD positions
@@ -125,13 +121,6 @@ local defaults, charInit do
             positions = RealUI.defaultPositions,
             -- Action Bar settings
             abSettingsLink = false,
-            -- Dynamic UI settings
-            settings = {
-                powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-                fontStyle = 2,
-                hudSize = 2,
-                reverseUnitFrameBars = false,
-            },
             media = RealUI.media
         },
     }
@@ -178,18 +167,6 @@ end
 function RealUI:IsUsingHighResDisplay()
     local _, resHeight = _G.GetPhysicalScreenSize()
     return resHeight >= 1440
-end
-
--- Power Mode
-function RealUI:SetPowerMode(val)
-    -- TODO: remove cruft
-    -- Core\SpiralBorder, HuD\UnitFrames, Modules\PlayerShields, Modules\RaidDebuffs, Modules\Pitch
-    db.settings.powerMode = val
-    for k, mod in self:IterateModules() do
-        if self:GetModuleEnabled(k) and mod.SetUpdateSpeed and type(mod.SetUpdateSpeed) == "function" then
-            mod:SetUpdateSpeed()
-        end
-    end
 end
 
 -- Style - Global Colors
@@ -524,7 +501,7 @@ function RealUI:OnEnable()
                 end
             end
             if not _G.LOCALE_enUS then
-                 _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+                 _G.print("Want to contribute? You can help localize RealUI into your native language at bit.ly/RealUILocale")
             end
         end
     end
@@ -543,22 +520,6 @@ function RealUI:OnEnable()
     self:UpdateFrameStyle()
 end
 
-
-function RealUI:RegisterConfigModeModule(module)
-    if module and module.ToggleConfigMode and type(module.ToggleConfigMode) == "function" then
-        _G.tinsert(self.configModeModules, module)
-    end
-end
-local addonSkins = {}
-function RealUI:RegisterAddOnSkin(name)
-    local skin = self:NewModule(name, "AceEvent-3.0")
-    skin:SetEnabledState(self:GetModuleEnabled(name))
-    _G.tinsert(addonSkins, name)
-    return skin
-end
-function RealUI:GetAddOnSkins()
-    return addonSkins
-end
 
 do
     local prototype = {
