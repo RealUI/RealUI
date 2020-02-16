@@ -169,15 +169,6 @@ function RealUI:IsUsingHighResDisplay()
     return resHeight >= 1440
 end
 
--- Style - Global Colors
-function RealUI:StyleUpdateColors()
-    for k, mod in self:IterateModules() do
-        if self:GetModuleEnabled(k) and mod.UpdateGlobalColors and type(mod.UpdateGlobalColors) == "function" then
-            mod:UpdateGlobalColors()
-        end
-    end
-end
-
 -- Layout Updates
 function RealUI:UpdateLayout(layout)
     layout = layout or dbc.layout.current

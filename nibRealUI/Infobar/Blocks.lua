@@ -13,6 +13,10 @@ local qTip = _G.LibStub("LibQTip-1.0")
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
 fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
 
+-- Libs --
+local Aurora = _G.Aurora
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 local Scale = RealUI.Scale
@@ -21,7 +25,6 @@ local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
-local Color = _G.Aurora.Color
 
 local testCell = _G.UIParent:CreateFontString()
 Scale.Point(testCell, "CENTER")
@@ -982,7 +985,7 @@ function Infobar:CreateBlocks()
                         end
 
                         -- Difficulty color levels
-                        lvl = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
+                        lvl = ("|c%s%d|r"):format(RealUI.GetColorString(_G.GetQuestDifficultyColor(lvl)), lvl)
 
                         if note == "" then note = nil end
                         if offnote == "" then offnote = nil end
@@ -1205,8 +1208,8 @@ function Infobar:CreateBlocks()
                         -- Difficulty color levels
                         local lvl = tonumber(level)
                         if lvl then
-                            local color = _G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(level))
-                            level = ("%s%d|r"):format(color, level)
+                            local color = RealUI.GetColorString(_G.GetQuestDifficultyColor(level))
+                            level = ("|c%s%d|r"):format(color, level)
                         end
 
                         local status
@@ -1249,7 +1252,7 @@ function Infobar:CreateBlocks()
                     end
 
                     -- Difficulty color levels
-                    local level = ("%s%d|r"):format(_G.ConvertRGBtoColorString(_G.GetQuestDifficultyColor(info.level)), info.level)
+                    local level = ("|c%s%d|r"):format(RealUI.GetColorString(_G.GetQuestDifficultyColor(info.level)), info.level)
 
                     -- Add Friend to list
                     tinsert(friendsData, {
@@ -1319,7 +1322,7 @@ function Infobar:CreateBlocks()
             text = 1,
             OnEnable = function(block)
                 local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                _G.Aurora.Skin.MicroButtonAlertTemplate(alert)
+                Aurora.Skin.MicroButtonAlertTemplate(alert)
                 alert.CloseButton:SetScript("OnClick", function(btn)
                     alert:Hide()
                     alert.isHidden = true

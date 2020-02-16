@@ -5,6 +5,10 @@ local _, private = ...
 -- Lua Globals --
 local next = _G.next
 
+-- Libs --
+local Aurora = _G.Aurora
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 local round = RealUI.Round
@@ -23,8 +27,11 @@ local DAY, HOUR, MINUTE = 86400, 3600, 60 --used for formatting text
 local DAYISH, HOURISH, MINUTEISH = 3600 * 23.5, 60 * 59.5, 59.5 --used for formatting text at transition points
 local HALFDAYISH, HALFHOURISH, HALFMINUTEISH = DAY/2 + 0.5, HOUR/2 + 0.5, MINUTE/2 + 0.5 --used for calculating next update times
 
-local SECONDS_FORMAT, MINUTES_FORMAT, HOURS_FORMAT, DAYS_FORMAT, EXPIRING_FORMAT
-local GetColorString = RealUI.GetColorString
+local EXPIRING_FORMAT = Color.red:WrapTextInColorCode("%d")
+local SECONDS_FORMAT = Color.yellow:WrapTextInColorCode("%d")
+local MINUTES_FORMAT = Color.white:WrapTextInColorCode("%dm")
+local HOURS_FORMAT = Color.cyan:WrapTextInColorCode("%dh")
+local DAYS_FORMAT = Color.blue:WrapTextInColorCode("%dd")
 
 --returns both what text to display, and how long until the next update
 local function getTimeText(s)
@@ -48,13 +55,6 @@ local function getTimeText(s)
     end
 end
 
-local function setTimeFormats()
-    EXPIRING_FORMAT = "|cff"..GetColorString(db.colors.expiring).."%d|r"
-    SECONDS_FORMAT = "|cff"..GetColorString(db.colors.seconds).."%d|r"
-    MINUTES_FORMAT = "|cff"..GetColorString(db.colors.minutes).."%dm|r"
-    HOURS_FORMAT = "|cff"..GetColorString(db.colors.hours).."%dh|r"
-    DAYS_FORMAT = "|cff"..GetColorString(db.colors.days).."%dd|r"
-end
 
 ---------------
 ---- Timer ----
@@ -156,13 +156,6 @@ function CooldownCount:OnInitialize()
             minDuration = 2,
             expiringDuration = 5,
             point = "BOTTOMLEFT",
-            colors = {
-                expiring =  {1,     0,      0},
-                seconds =   {1,     1,      0},
-                minutes =   {1,     1,      1},
-                hours =     {0.25,  1,      1},
-                days =      {0.25,  0.25,   1},
-            },
         },
     })
     db = self.db.profile
@@ -177,7 +170,6 @@ function CooldownCount:OnEnable()
         flags = "OUTLINE"
     }
 
-    setTimeFormats()
     _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
         if not cd:IsForbidden() and not cd.noCooldownCount then
             if not cd.timer then

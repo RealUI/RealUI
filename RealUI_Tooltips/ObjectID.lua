@@ -3,6 +3,7 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals select tonumber ipairs tinsert
 
+-- Libs --
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 

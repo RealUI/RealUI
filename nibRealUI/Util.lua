@@ -47,7 +47,7 @@ end
 ----====####$$$$%%%%%$$$$####====----
 --              Color              --
 ----====####$$$$%%%%%$$$$####====----
-local hexColor = "%02x%02x%02x"
+local hexColor = "ff%02x%02x%02x"
 function RealUI.GetColorString(red, green, blue)
     if type(red) == "table" then
         if red.r and red.g and red.b then

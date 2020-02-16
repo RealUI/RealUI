@@ -116,7 +116,7 @@ local function GetUnitClassification(unit)
 
     local unitType
     if _G.UnitIsPlayer(unit) then
-        unitType = ("%s |cff%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GetUnitColor(unit)), _G.UnitClass(unit))
+        unitType = ("%s |c%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GetUnitColor(unit)), _G.UnitClass(unit))
     elseif IsBattlePet then
         unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
     else
@@ -151,7 +151,7 @@ local function GetUnitClassification(unit)
         unitType = ("%s |cffCCCCCC%s|r"):format(unitType, _G.DEAD)
     end
 
-    return ("|cff%s%s%s|r %s"):format(RealUI.GetColorString(diff), level, classificationTypes[_G.UnitClassification(unit)] or "", unitType)
+    return ("|c%s%s%s|r %s"):format(RealUI.GetColorString(diff), level, classificationTypes[_G.UnitClassification(unit)] or "", unitType)
 end
 
 local Hooks = {}

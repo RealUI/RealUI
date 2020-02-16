@@ -3,10 +3,13 @@ local _, private = ...
 -- Lua Globals --
 local next = _G.next
 
+-- Libs --
+local Aurora = _G.Aurora
+local Skin = Aurora.Skin
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
-local Skin = _G.Aurora.Skin
-local Color = _G.Aurora.Color
 
 local CPF, OSF = _G.ColorPickerFrame, _G.OpacitySliderFrame
 
@@ -44,7 +47,7 @@ CPFCopyButton:SetScript("OnClick", function()
     red, green, blue = CPF:GetColorRGB()
     opacity = OSF:GetValue()
 
-    CPFCopyButton:SetFormattedText("|cff%sCopy", RealUI.GetColorString(red, blue, green))
+    CPFCopyButton:SetFormattedText("|c%sCopy", RealUI.GetColorString(red, blue, green))
 end)
 RealUI:RegisterSkinnedFrame(CPFCopyButton, Color.button)
 
@@ -131,7 +134,7 @@ local UpdateRGBA = function()
     CPFEditBoxes.Red:SetText(r * 255)
     CPFEditBoxes.Green:SetText(g * 255)
     CPFEditBoxes.Blue:SetText(b * 255)
-    CPFEditBoxes.Hex:SetText(RealUI.GetColorString(r, g, b))
+    CPFEditBoxes.Hex:SetFormattedText("%02x%02x%02x", r * 255, g * 255, b * 255)
 
     if CPF.hasOpacity then
         _G.ColorSwatch:SetColorTexture(r, g, b, 1 - OSF:GetValue())

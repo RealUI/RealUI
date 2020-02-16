@@ -1,12 +1,13 @@
 local _, private = ...
 
--- RealUI --
-local RealUI = private.RealUI
-local loc = RealUI.locale
-
+-- Libs --
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 local Color = Aurora.Color
+
+-- RealUI --
+local RealUI = private.RealUI
+local loc = RealUI.locale
 
 local ToolTipColors = {
     "|cFF269CFF",   -- Header 1

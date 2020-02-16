@@ -44,16 +44,6 @@ local defaults = {
 
 -- TODO: remove and convert to Aurora.Color
 RealUI.media = {
-    colors = {
-        red =       {0.85, 0.14, 0.14, 1},
-        orange =    {1.00, 0.38, 0.08, 1},
-        amber =     {1.00, 0.64, 0.00, 1},
-        yellow =    {1.00, 1.00, 0.15, 1},
-        green =     {0.13, 0.90, 0.13, 1},
-        cyan =      {0.11, 0.92, 0.72, 1},
-        blue =      {0.15, 0.61, 1.00, 1},
-        purple =    {0.70, 0.28, 1.00, 1},
-    },
     textures = {
         plain = [[Interface\Buttons\WHITE8x8]],
     },

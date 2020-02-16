@@ -3,6 +3,7 @@ local _, private = ...
 -- Libs --
 local oUF = private.oUF
 local tags = oUF.Tags
+local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -78,7 +79,7 @@ tags.Methods["realui:level"] = function(unit)
     else
         levelColor = _G.GetQuestDifficultyColor(level)
     end
-    return ("|cff%s%s|r"):format(RealUI.GetColorString(levelColor), level)
+    return ("|c%s%s|r"):format(RealUI.GetColorString(levelColor), level)
 end
 tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
 
@@ -111,7 +112,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     end
 
     UnitFrames:debug("realui:healthPercent", percent)
-    return ("%.1f|cff%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
+    return ("%.1f|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
 end
 tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]
 
@@ -148,7 +149,7 @@ tags.Methods["realui:powerPercent"] = function(unit)
     end
 
     local _, ptoken = _G.UnitPowerType(unit)
-    return ("%.1f|cff%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))
+    return ("%.1f|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))
 end
 tags.Events["realui:powerPercent"] = tags.Events["realui:powerValue"]
 
@@ -191,12 +192,12 @@ tags.Events["realui:threat"] = "UNIT_THREAT_SITUATION_UPDATE UNIT_THREAT_LIST_UP
 
 -- Range
 local rangeColors = {
-    [5] = RealUI.media.colors.green,
-    [30] = RealUI.media.colors.yellow,
-    [35] = RealUI.media.colors.amber,
-    [40] = RealUI.media.colors.orange,
-    [50] = RealUI.media.colors.red,
-    [100] = RealUI.media.colors.red,
+    [5] = Color.green,
+    [30] = Color.yellow,
+    [35] = Color.yellow,
+    [40] = Color.orange,
+    [50] = Color.red,
+    [100] = Color.red,
 }
 local rangeCheck = _G.LibStub("LibRangeCheck-2.0")
 tags.Methods["realui:range"] = function(unit)
@@ -216,6 +217,6 @@ tags.Methods["realui:range"] = function(unit)
         else
             section = 100
         end
-        return ("|cff%s%d|r"):format(RealUI.GetColorString(rangeColors[section]), maxRange)
+        return ("|c%s%d|r"):format(rangeColors[section].colorStr, maxRange)
     end
 end
