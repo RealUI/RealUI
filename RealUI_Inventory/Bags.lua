@@ -14,6 +14,44 @@ local RealUI = _G.RealUI
 
 local Inventory = private.Inventory
 
+local InventoryType = _G.Enum.InventoryType
+local invTypes = {
+    [InventoryType.IndexHeadType] = 1,
+    [InventoryType.IndexNeckType] = 2,
+    [InventoryType.IndexShoulderType] = 3,
+    [InventoryType.IndexCloakType] = 4,
+    [InventoryType.IndexChestType] = 5,
+    [InventoryType.IndexRobeType] = 5, -- Holiday chest
+    [InventoryType.IndexBodyType] = 6, -- Shirt
+    [InventoryType.IndexTabardType] = 7,
+    [InventoryType.IndexWristType] = 8,
+    [InventoryType.IndexHandType] = 9,
+    [InventoryType.IndexWaistType] = 10,
+    [InventoryType.IndexLegsType] = 11,
+    [InventoryType.IndexFeetType] = 12,
+    [InventoryType.IndexFingerType] = 13,
+    [InventoryType.IndexTrinketType] = 14,
+
+    [InventoryType.Index2HweaponType] = 15,
+    [InventoryType.IndexRangedType] = 16, -- Bows
+    [InventoryType.IndexRangedrightType] = 16, -- Wands, Guns, and Crossbows
+
+    [InventoryType.IndexWeaponType] = 17, -- One-Hand
+    [InventoryType.IndexWeaponmainhandType] = 18,
+    [InventoryType.IndexWeaponoffhandType] = 19,
+    [InventoryType.IndexShieldType] = 20,
+
+    [InventoryType.IndexHoldableType] = 21,
+    [InventoryType.IndexRelicType] = 21,
+
+    [InventoryType.IndexAmmoType] = 22,
+    [InventoryType.IndexThrownType] = 22,
+
+    [InventoryType.IndexBagType] = 25,
+    [InventoryType.IndexQuiverType] = 25,
+
+    [InventoryType.IndexNonEquipType] = 30,
+}
 local function SortSlots(a, b)
     local qualityA = a.item:GetItemQuality()
     local qualityB = b.item:GetItemQuality()
@@ -30,24 +68,22 @@ local function SortSlots(a, b)
 
     local invTypeA = a.item:GetInventoryType()
     local invTypeB = b.item:GetInventoryType()
-    if invTypeA ~= invTypeB then
-        return invTypeA < invTypeB
+    if invTypes[invTypeA] ~= invTypes[invTypeB] then
+        return invTypes[invTypeA] < invTypes[invTypeB]
     end
 
 
-    local idA = a.item:GetItemID()
-    local idB = b.item:GetItemID()
-    if idA ~= idB then
-        return idA > idB
+    local nameA = a.item:GetItemName()
+    local nameB = b.item:GetItemName()
+    if nameA ~= nameB then
+        return nameA < nameB
     end
 
 
-    if Inventory.isPatch then
-        local stackA = _G.C_Item.GetStackCount(a)
-        local stackB = _G.C_Item.GetStackCount(b)
-        if stackA ~= stackB then
-            return stackA > stackB
-        end
+    local stackA = _G.C_Item.GetStackCount(a)
+    local stackB = _G.C_Item.GetStackCount(b)
+    if stackA ~= stackB then
+        return stackA > stackB
     end
 end
 local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
@@ -60,12 +96,15 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
     local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
     bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
 
+    local _, screenHeight = RealUI.GetInterfaceSize()
+    local maxHeight = screenHeight * Inventory.db.global.maxHeight
+
     local height = bag:GetHeight()
     if bag.tag == "main" then
         columnHeight = columnHeight + height + 5
     else
         local parent = bag.parent
-        if columnHeight + height >= Inventory.db.global.maxHeight then
+        if columnHeight + height >= maxHeight then
             if parent.bagType == "main" then
                 bag:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
             else
@@ -120,7 +159,6 @@ local function UpdateBag(main)
         private.UpdateSlots(bagID)
     end
 
-    main.showBags:ToggleBags(false)
     main.dropTarget.count:SetText(private.GetNumFreeSlots(main))
     main:ContinueOnLoad(function()
         SetupSlots(main)
@@ -195,39 +233,64 @@ function ContinuableContainer:RecheckEvictableContinuables()
     return areAllLoaded
 end
 
-local function CreateFeatureButton(bag, text, atlas, onClick)
-    local button = _G.CreateFrame("Button", "$parentSearchButton", bag)
+local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
+    local button = _G.CreateFrame("Button", nil, bag)
+    button:SetPoint("TOPLEFT", 7, -7)
+    button:SetSize(16, 16)
     button:SetHitRectInsets(-5, -50, -5, -5)
-    button:SetNormalFontObject("GameFontDisableSmall")
-    button:SetText(text)
-    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 4, 1)
+
+    local atlasInfo = _G.C_Texture.GetAtlasInfo(atlas)
     button:SetNormalAtlas(atlas)
+    local texture = button:GetNormalTexture()
+    texture:ClearAllPoints()
+    texture:SetPoint("CENTER")
+    texture:SetSize(atlasInfo.width, atlasInfo.height)
+    button.texture = texture
+
     button:SetHighlightAtlas(atlas)
+    button:GetHighlightTexture():SetAllPoints(texture)
+
+    button:SetNormalFontObject("GameFontDisableSmall")
+    button:SetPushedTextOffset(0, 0)
+    button:SetText(text)
+    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 1, 1)
+
+    button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetScript("OnClick", onClick)
+    button:SetScript("OnEnter", onEnter or _G.nop)
+    button:SetScript("OnLeave", function()
+        _G.GameTooltip_Hide()
+    end)
+
     return button
 end
 
-local BagEvents = {
+local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
+local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
+}
+local BagEvents = {
+    "UNIT_INVENTORY_CHANGED",
+    "PLAYER_SPECIALIZATION_CHANGED",
+    "BAG_NEW_ITEMS_UPDATED",
+}
+local BankEvents = {
+    "PLAYERBANKSLOTS_CHANGED",
+    "PLAYERREAGENTBANKSLOTS_CHANGED",
+    "PLAYERBANKBAGSLOTS_CHANGED",
 }
 local function CreateBag(bagType)
     local main
     if bagType == "main" then
         main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
         main:SetPoint("BOTTOMRIGHT", -100, 100)
-        main:RegisterEvent("BAG_OPEN")
-        main:RegisterEvent("BAG_CLOSED")
         main:RegisterEvent("QUEST_ACCEPTED")
         main:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
         main:SetScript("OnEvent", function(self, event, ...)
-            if event == "BAG_OPEN" then
-                private.Toggle(true)
-            elseif event == "BAG_CLOSED" then
-                private.Toggle(false)
-            elseif event == "ITEM_LOCK_CHANGED" then
+            if event == "ITEM_LOCK_CHANGED" then
                 local bagID, slotIndex = ...
                 if bagID and slotIndex then
                     local slot = private.GetSlot(bagID, slotIndex)
@@ -240,20 +303,14 @@ local function CreateBag(bagType)
             end
         end)
         main:SetScript("OnShow", function(self)
+            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
             _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
-            self:RegisterEvent("UNIT_INVENTORY_CHANGED")
-            self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-            self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
-            self:RegisterEvent("BAG_SLOT_FLAGS_UPDATED")
-
             UpdateBag(self)
         end)
         main:SetScript("OnHide", function(self)
+            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
             _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
-            self:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-            self:UnregisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-            self:UnregisterEvent("BAG_NEW_ITEMS_UPDATED")
-            self:UnregisterEvent("BAG_SLOT_FLAGS_UPDATED")
+            self.showBags:ToggleBags(false)
             self:Cancel()
         end)
     elseif bagType == "bank" then
@@ -281,27 +338,21 @@ local function CreateBag(bagType)
             end
         end)
         main:SetScript("OnShow", function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
-            self:RegisterEvent("PLAYERBANKSLOTS_CHANGED")
-            self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
-            self:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
-            self:RegisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
-
+            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
+            _G.FrameUtil.RegisterFrameForEvents(self, BankEvents)
             UpdateBag(self)
         end)
         main:SetScript("OnHide", function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
-            self:UnregisterEvent("PLAYERBANKSLOTS_CHANGED")
-            self:UnregisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
-            self:UnregisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
-            self:UnregisterEvent("BANK_BAG_SLOT_FLAGS_UPDATED")
+            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
+            _G.FrameUtil.UnregisterFrameForEvents(self, BankEvents)
+            self.showBags:ToggleBags(false)
+            self:Cancel()
         end)
     end
 
     _G.Mixin(main, ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
     main:SetToplevel(true)
-    main:Hide()
     main.tag = "main"
     main.bagType = bagType
 
@@ -309,14 +360,42 @@ local function CreateBag(bagType)
     SetupBag(main)
 
     local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "ParagonReputation_Bag",
+    function(self, button)
+        if bagType == "bank" and button == "RightButton" then
+            _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
+        else
+            self:ToggleBags()
+        end
+    end,
     function(self)
-        self:ToggleBags()
+        if bagType == "bank" then
+            local numSlots, full = _G.GetNumBankSlots()
+            if not full then
+                local cost = _G.GetBankSlotCost(numSlots)
+                _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
+                _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
+
+                local text = bagCost .. _G.GetMoneyString(cost)
+                if _G.GetMoney() >= cost then
+                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+                else
+                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+                end
+
+                _G.GameTooltip:Show()
+            end
+        end
     end)
-    showBags:SetPoint("TOPLEFT", 8, -9)
-    showBags:SetSize(13.3333, 16)
+    showBags.texture:SetSize(13.3333, 16)
     function showBags:ToggleBags(show)
         if show == nil then
             show = not self.isShowing
+        end
+
+        local firstBag = _G.BACKPACK_CONTAINER
+        if bagType == "bank" then
+            firstBag = _G.BANK_CONTAINER
         end
 
         local bagSlots = private.bagSlots[bagType]
@@ -324,19 +403,20 @@ local function CreateBag(bagType)
             self:SetText("")
             self:SetHitRectInsets(-5, -5, -5, -5)
 
-            bagSlots[0]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 3)
-            for i = 0, #bagSlots do
-                bagSlots[i]:Update()
+            bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 1)
+            for k, bagID in private.IterateBagIDs(bagType) do
+                bagSlots[bagID]:Update()
             end
         else
             self:SetText(_G.BAGSLOTTEXT)
             self:SetHitRectInsets(-5, -50, -5, -5)
 
-            bagSlots[0]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 3)
-            for bagID, bagSlot in next, bagSlots do
-                bagSlot:Update()
+            bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
+            for k, bagID in private.IterateBagIDs(bagType) do
+                bagSlots[bagID]:Update()
             end
-            private.SearchItemsForBag(0)
+
+            private.SearchItemsForBag(bagType)
         end
 
         self.isShowing = show
@@ -348,20 +428,9 @@ local function CreateBag(bagType)
     Skin.UIPanelCloseButton(close)
     main.close = close
 
-    local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
-    function(self)
-        self:Hide()
-        main.moneyFrame:Hide()
-        main.searchBox:Show()
-        main.searchBox:SetFocus()
-    end)
-    searchButton:SetPoint("BOTTOMLEFT", 8, 9)
-    searchButton:SetSize(10, 10)
-    main.searchButton = searchButton
-
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
-    searchBox:SetPoint("BOTTOMLEFT", 5, 5)
-    searchBox:SetPoint("BOTTOMRIGHT", -5, 5)
+    searchBox:SetPoint("BOTTOMLEFT", 9, 5)
+    searchBox:SetPoint("BOTTOMRIGHT", -4, 5)
     searchBox:SetHeight(20)
     searchBox:Hide()
     _G.hooksecurefunc(searchBox, "ClearFocus", function(self)
@@ -371,6 +440,17 @@ local function CreateBag(bagType)
     end)
     Skin.BagSearchBoxTemplate(searchBox)
     main.searchBox = searchBox
+
+    local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
+    function(self)
+        self:Hide()
+        main.moneyFrame:Hide()
+        main.searchBox:Show()
+        main.searchBox:SetFocus()
+    end)
+    searchButton:SetPoint("TOPLEFT", searchBox, 0, -3)
+    searchButton.texture:SetSize(10, 10)
+    main.searchButton = searchButton
 
     local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
     moneyFrame:SetPoint("BOTTOMRIGHT", 8, 8)
@@ -423,16 +503,25 @@ local function CreateBag(bagType)
         bag.tag = tag
         bag.parent = main
 
+        if tag == "new" then
+            bag.resetNew = CreateFeatureButton(bag, _G.RESET, "worldquest-questmarker-questbang", function(self)
+                for _, slot in ipairs(bag.slots) do
+                    _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
+                end
+
+                UpdateBag(main)
+            end)
+        end
+
         if tag == "junk" then
-            local sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
-            sellJunk:SetPoint("TOPLEFT", 5, -9)
-            sellJunk:SetSize(16, 14.4)
-            sellJunk:Hide()
-            bag.sellJunk = sellJunk
+            bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
+            bag.sellJunk:Hide()
         end
 
         main.bags[tag] = bag
     end
+
+    main:Hide()
 end
 
 

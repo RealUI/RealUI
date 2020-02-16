@@ -3,6 +3,10 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals next ipairs unpack tinsert
 
+-- Libs --
+local Aurora = _G.Aurora
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 local db
@@ -435,7 +439,7 @@ do -- ButtonCollectFrame
     }
 
     local buttonFrame = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
-    _G.Aurora.Base.SetBackdrop(buttonFrame, _G.Aurora.frameColor:GetRGBA())
+    Aurora.Base.SetBackdrop(buttonFrame, Color.frame:GetRGBA())
     buttonFrame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
     buttonFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
     buttonFrame:SetHeight(32)
@@ -732,8 +736,7 @@ function MinimapAdv:GetLFGList(event, arg)
             local _, numActiveApplicants = _G.C_LFGList.GetNumApplicants()
             status = _G.LFG_LIST_PENDING_APPLICANTS:format(numActiveApplicants)
         end
-        local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
-        MMFrames.info.LFG.text:SetFormattedText("|cff%sLFG:|r %s", colorOrange, status)
+        MMFrames.info.LFG.text:SetFormattedText("|c%sLFG:|r %s", Color.orange.colorStr, status)
         MMFrames.info.LFG:SetHeight(MMFrames.info.LFG.text:GetStringHeight())
         infoTexts.LFG.shown = true
     else
@@ -774,8 +777,7 @@ function MinimapAdv:GetLFGQueue(event, ...)
                 end
             end
 
-            local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
-            queueFrame.text:SetFormattedText(infoText.format, colorOrange, queueStr)
+            queueFrame.text:SetFormattedText(infoText.format, Color.orange.colorStr, queueStr)
             queueFrame:SetHeight(queueFrame.text:GetStringHeight())
             queueFrame.myWait = myWait
             queueFrame.queuedTime = queuedTime
@@ -920,8 +922,8 @@ function MinimapAdv:LootSpecUpdate()
     -- If in a Dungeon, Raid or Garrison show Loot Spec
     local _, instanceType = _G.GetInstanceInfo()
     if (instanceType == "party" or instanceType == "raid") then
-        self:debug("IsInInstance", RealUI.GetColorString(RealUI.media.colors.blue), RealUI.GetCurrentLootSpecName())
-        MMFrames.info.LootSpec.text:SetFormattedText("|cff%s%s:|r %s", RealUI.GetColorString(RealUI.media.colors.blue), _G.LOOT, RealUI.GetCurrentLootSpecName())
+        self:debug("IsInInstance", Color.blue.colorStr, RealUI.GetCurrentLootSpecName())
+        MMFrames.info.LootSpec.text:SetFormattedText("|c%s%s:|r %s", Color.blue.colorStr, _G.LOOT, RealUI.GetCurrentLootSpecName())
         MMFrames.info.LootSpec:SetHeight(MMFrames.info.LootSpec.text:GetStringHeight())
         infoTexts.LootSpec.shown = true
     else
@@ -1473,8 +1475,8 @@ local function NewInfoFrame(name, parent, format)
                 else
                     queueStr = ("%s"):format(timeInQueue)
                 end
-                local colorOrange = RealUI.GetColorString(RealUI.media.colors.orange)
-                self.text:SetFormattedText(format, colorOrange, queueStr)
+
+                self.text:SetFormattedText(format, Color.orange.colorStr, queueStr)
                 self:SetHeight(self.text:GetStringHeight())
                 self.updateThrottle = 0.1
             end
@@ -1523,7 +1525,7 @@ local function CreateFrames()
     MMFrames.buttonframe:SetSize(66, 17)
     MMFrames.buttonframe:SetFrameStrata("MEDIUM")
     MMFrames.buttonframe:SetFrameLevel(5)
-    _G.Aurora.Base.SetBackdrop(MMFrames.buttonframe)
+    Aurora.Base.SetBackdrop(MMFrames.buttonframe)
 
     MMFrames.buttonframe.edge = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
     MMFrames.buttonframe.edge:SetColorTexture(1, 1, 1, 1)
@@ -1650,9 +1652,9 @@ local function CreateFrames()
     MMFrames.info.LootSpec = NewInfoFrame("LootSpec", _G.Minimap)
     MMFrames.info.DungeonDifficulty = NewInfoFrame("DungeonDifficulty", _G.Minimap)
     MMFrames.info.LFG = NewInfoFrame("LFG", _G.Minimap)
-    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|cff%sDF:|r %s")
-    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|cff%sRF:|r %s")
-    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|cff%sS:|r %s")
+    MMFrames.info.Queue = NewInfoFrame("Queue", _G.Minimap, "|c%sDF:|r %s")
+    MMFrames.info.RFQueue = NewInfoFrame("RFQueue", _G.Minimap, "|c%sRF:|r %s")
+    MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|c%sS:|r %s")
 
     -- Coordinates
     local lastUpdate, threshold = 0, 0.5

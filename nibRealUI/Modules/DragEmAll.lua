@@ -10,6 +10,7 @@ local LibWin = _G.LibStub("LibWindow-1.1")
 
 -- RealUI --
 local RealUI = private.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local MODNAME = "DragEmAll"
 local DragEmAll = RealUI:NewModule(MODNAME, "AceEvent-3.0")
@@ -216,10 +217,10 @@ function DragEmAll:HookFrame(frameName, children)
         local child = _G[childName] or frame[childName]
         if child then
             child:HookScript("OnMouseDown", function(this)
-                LibWin.OnDragStart(frame)
+                FramePoint.OnDragStart(frame)
             end)
             child:HookScript("OnMouseUp", function(this)
-                LibWin.OnDragStop(frame)
+                FramePoint.OnDragStop(frame)
             end)
         end
     end
@@ -228,8 +229,8 @@ function DragEmAll:HookFrame(frameName, children)
     frame:SetMovable(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetClampedToScreen(false)
-    frame:HookScript("OnDragStart", LibWin.OnDragStart)
-    frame:HookScript("OnDragStop", LibWin.OnDragStop)
+    frame:HookScript("OnDragStart", FramePoint.OnDragStart)
+    frame:HookScript("OnDragStop", FramePoint.OnDragStop)
 
     LibWin.RegisterConfig(frame, self.db.global[frameName])
     frames[frameName] = children

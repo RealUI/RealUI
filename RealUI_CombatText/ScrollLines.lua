@@ -2,7 +2,7 @@ local _, private = ...
 
 local CombatText = private.CombatText
 
-local animDuration = 1
+local animDuration = 2
 local ScrollLineMixin = {}
 function ScrollLineMixin:OnLoad()
     local font = CombatText.db.global.fontNormal

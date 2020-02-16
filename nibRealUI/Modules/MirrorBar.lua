@@ -3,6 +3,10 @@ local _, private = ...
 -- Lua Globals --
 local next, ipairs = _G.next, _G.ipairs
 
+-- Libs --
+local Aurora = _G.Aurora
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 local db
@@ -82,7 +86,7 @@ function MirrorBar:OnUpdate(bar, elapsed)
         self.loopElapsed = 0
         self:SetNextTimer()
         local color = self.timerColors[self.timerList[self.currentTimer]]
-        MBFrames.bar:SetStatusBarColor(color[1], color[2], color[3], 0.85)
+        MBFrames.bar:SetStatusBarColor(color.r, color.g, color.b, 0.85)
     end
 
     local curTimer = self.timers[self.timerList[self.currentTimer]]
@@ -153,7 +157,7 @@ function MirrorBar:CreateFrames()
     -- BG + Border
     MBFrames.bg = _G.CreateFrame("Frame", "RealUI_MirrorBar", _G.UIParent)
     MBFrames.bg:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
-    _G.Aurora.Base.SetBackdrop(MBFrames.bg)
+    Aurora.Base.SetBackdrop(MBFrames.bg)
 
     -- Bar + Text
     MBFrames.bar = _G.CreateFrame("StatusBar", nil, MBFrames.bg)
@@ -174,16 +178,6 @@ function MirrorBar:CreateFrames()
     end)
 
     MBFrames.bg:Hide()
-end
-
-function MirrorBar:UpdateGlobalColors()
-    self.timerColors = {
-        ["EXHAUSTION"] =    RealUI.media.colors.orange,
-        ["BREATH"] =        RealUI.media.colors.blue,
-        ["FEIGNDEATH"] =    RealUI.media.colors.red,
-        ["DEATH"] =         RealUI.media.colors.red,
-    }
-    self.loopElapsed = 1
 end
 
 ----------
@@ -227,7 +221,12 @@ function MirrorBar:OnEnable()
         ["FEIGNDEATH"] =    {},
         ["DEATH"] =         {},
     }
-    self:UpdateGlobalColors()
+    self.timerColors = {
+        ["EXHAUSTION"] =    Color.orange,
+        ["BREATH"] =        Color.blue,
+        ["FEIGNDEATH"] =    Color.red,
+        ["DEATH"] =         Color.red,
+    }
     self.loopElapsed = 1
     self.elapsed = 1
 

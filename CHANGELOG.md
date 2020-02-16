@@ -1,4 +1,26 @@
-﻿## [2.1.4] - 2020-01-18 ##
+﻿## [2.1.5] - 2020-02-16 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Added ###
+
+  * A simple cursor trail can be enabled in `/realadv` -> UI Tweaks.
+
+### Fixed ###
+
+  * Tooltip error when in certain locations.
+  * Error when switching specs.
+  * Error when targeting certain mobs
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.1.4] - 2020-01-18 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -410,6 +432,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.5]: https://github.com/RealUI/RealUI/compare/2.1.4...2.1.5
 [2.1.4]: https://github.com/RealUI/RealUI/compare/2.1.3...2.1.4
 [2.1.3]: https://github.com/RealUI/RealUI/compare/2.1.2...2.1.3
 [2.1.2]: https://github.com/RealUI/RealUI/compare/2.1.1...2.1.2

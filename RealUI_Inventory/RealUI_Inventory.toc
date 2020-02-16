@@ -2,7 +2,7 @@
 ## Title: RealUI Inventory
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe
-## Version: 2.1.4
+## Version: 2.1.5
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_InventoryDB
 
@@ -10,6 +10,7 @@ Libs\Libs.xml
 
 RealUI_Inventory.lua
 Blizz.lua
+FilterData.lua
 Filters.lua
 Slots.lua
 Bags.lua

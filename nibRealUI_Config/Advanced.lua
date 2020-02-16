@@ -37,34 +37,38 @@ local uiTweaks do
     }
 end
 ]]
-local function CreateToggleOption(slug, name)
-    local modObj = RealUI:GetModule(slug)
-    return {
-        name = name,
-        desc = L["General_EnabledDesc"]:format(name),
-        type = "toggle",
-        get = function() return RealUI:GetModuleEnabled(slug) end,
-        set = function(info, value)
-            RealUI:SetModuleEnabled(slug, value)
-            if modObj.RefreshMod then
-                modObj:RefreshMod()
-            end
-        end
-    }
-end
 
 local nameFormat = _G.ENABLE .. " %s"
-local function CreateDisabledAddon(name)
+local function CreateAddonSection(name, args)
+    local hide = false
+
+    if not args then
+        local addonName = "RealUI_" .. name
+        local _, _, _, loadable, reason = _G.GetAddOnInfo(addonName)
+        if loadable then
+            args = {
+                enable = {
+                    name = nameFormat:format(L[name]),
+                    type = "execute",
+                    func = function(info, value)
+                        _G.EnableAddOn(addonName)
+                        _G.ReloadUI()
+                    end,
+                    order = 1,
+                },
+            }
+        else
+            hide = reason == "MISSING"
+            args = {}
+        end
+    end
+
     return {
-        enable = {
-            name = nameFormat:format(name),
-            type = "execute",
-            func = function(info, value)
-                _G.EnableAddOn(name)
-                _G.ReloadUI()
-            end,
-            order = 1,
-        },
+        name = L[name],
+        type = "group",
+        hidden = hide,
+        order = order,
+        args = args
     }
 end
 
@@ -541,6 +545,44 @@ local core do
         },
     }
 end
+local inventory do
+    debug("Inventory")
+    order = order + 1
+
+    local args
+    local Inventory = RealUI:GetModule("Inventory", true)
+    local function appGet(info)
+        return Inventory.db.global[info[#info]]
+    end
+    local function appSet(info, value)
+        Inventory.db.global[info[#info]] = value
+        Inventory.Update()
+    end
+
+    if Inventory then
+        args = {
+            maxHeight = {
+                name = L.Inventory_MaxHeight,
+                desc = L.Inventory_MaxHeightDesc,
+                type = "range",
+                isPercent = true,
+                min = 0.3, max = 0.7, step = 0.05,
+                get = appGet,
+                set = appSet,
+                order = 1,
+            },
+            sellJunk = {
+                name = L.Inventory_SellJunk,
+                type = "toggle",
+                get = appGet,
+                set = appSet,
+                order = 2,
+            },
+        }
+    end
+
+    inventory = CreateAddonSection("Inventory", args)
+end
 local skins do
     debug("Adv Skins")
     order = order + 1
@@ -576,15 +618,13 @@ local skins do
             }
         }
 
-        for class, color in next, SkinsDB.profile.classColors do
-            classColors.args[class] = {
-                name = class,
+        for classToken, color in next, _G.CUSTOM_CLASS_COLORS do
+            classColors.args[classToken] = {
+                name = _G.LOCALIZED_CLASS_NAMES_MALE[classToken],
                 type = "color",
-                get = function(info) return color.r, color.g, color.b end,
+                get = function(info) return color:GetRGB() end,
                 set = function(info, r, g, b)
-                    color.r = r
-                    color.g = g
-                    color.b = b
+                    color:SetRGB(r, g, b)
                     _G.CUSTOM_CLASS_COLORS:NotifyChanges()
                 end,
             }
@@ -779,7 +819,6 @@ local tooltips do
     debug("Adv Tooltips")
     order = order + 1
 
-
     local args
     local Tooltips = RealUI:GetModule("Tooltips", true)
     local function appGet(info)
@@ -897,16 +936,9 @@ local tooltips do
                 }
             }
         }
-    else
-        args = CreateDisabledAddon("RealUI_Tooltips")
     end
 
-    tooltips = {
-        name = L.Tooltips,
-        type = "group",
-        order = order,
-        args = args
-    }
+    tooltips = CreateAddonSection("Tooltips", args)
 end
 local uiTweaks do
     debug("Adv UITweaks")
@@ -1205,85 +1237,6 @@ local uiTweaks do
                         CooldownCount.db.profile.point = anchors[value]
                     end,
                     order = 90,
-                },
-                gap2 = {
-                    name = " ",
-                    type = "description",
-                    order = 91,
-                },
-                colors = {
-                    name = "Colors",
-                    type = "group",
-                    inline = true,
-                    disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 100,
-                    args = {
-                        expiring = {
-                            name = "Expiring",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return CooldownCount.db.profile.colors.expiring[1], CooldownCount.db.profile.colors.expiring[2], CooldownCount.db.profile.colors.expiring[3]
-                            end,
-                            set = function(info,r,g,b)
-                                CooldownCount.db.profile.colors.expiring[1] = r
-                                CooldownCount.db.profile.colors.expiring[2] = g
-                                CooldownCount.db.profile.colors.expiring[3] = b
-                            end,
-                            order = 10,
-                        },
-                        seconds = {
-                            name = "Seconds",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return CooldownCount.db.profile.colors.seconds[1], CooldownCount.db.profile.colors.seconds[2], CooldownCount.db.profile.colors.seconds[3]
-                            end,
-                            set = function(info,r,g,b)
-                                CooldownCount.db.profile.colors.seconds[1] = r
-                                CooldownCount.db.profile.colors.seconds[2] = g
-                                CooldownCount.db.profile.colors.seconds[3] = b
-                            end,
-                            order = 20,
-                        },
-                        minutes = {
-                            name = "Minutes",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return CooldownCount.db.profile.colors.minutes[1], CooldownCount.db.profile.colors.minutes[2], CooldownCount.db.profile.colors.minutes[3]
-                            end,
-                            set = function(info,r,g,b)
-                                CooldownCount.db.profile.colors.minutes[1] = r
-                                CooldownCount.db.profile.colors.minutes[2] = g
-                                CooldownCount.db.profile.colors.minutes[3] = b
-                            end,
-                            order = 30,
-                        },
-                        hours = {
-                            name = "Hours",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return CooldownCount.db.profile.colors.hours[1], CooldownCount.db.profile.colors.hours[2], CooldownCount.db.profile.colors.hours[3]
-                            end,
-                            set = function(info,r,g,b)
-                                CooldownCount.db.profile.colors.hours[1] = r
-                                CooldownCount.db.profile.colors.hours[2] = g
-                                CooldownCount.db.profile.colors.hours[3] = b
-                            end,
-                            order = 40,
-                        },
-                        days = {
-                            name = "days",
-                            type = "color",
-                            get = function(info,r,g,b)
-                                return CooldownCount.db.profile.colors.days[1], CooldownCount.db.profile.colors.days[2], CooldownCount.db.profile.colors.days[3]
-                            end,
-                            set = function(info,r,g,b)
-                                CooldownCount.db.profile.colors.days[1] = r
-                                CooldownCount.db.profile.colors.days[2] = g
-                                CooldownCount.db.profile.colors.days[3] = b
-                            end,
-                            order = 50,
-                        },
-                    },
                 },
             },
         }
@@ -2989,7 +2942,6 @@ local uiTweaks do
                 type = "header",
                 order = 0,
             },
-            screenshot = CreateToggleOption("AchievementScreenshots", "Achievement Screenshots"),
             altPowerBar = altPowerBar,
             chat = chat,
             cooldown = cooldown,
@@ -3001,6 +2953,20 @@ local uiTweaks do
             objectives = objectives,
         }
     }
+
+    local InterfaceTweaks = RealUI:GetModule("InterfaceTweaks")
+    local tweaks = InterfaceTweaks:GetTweaks()
+    for tag, name in next, tweaks do
+        uiTweaks.args[tag] = {
+            name = L[name],
+            desc = L[name.."Desc"],
+            type = "toggle",
+            get = function() return InterfaceTweaks.db.global[tag] end,
+            set = function(info, value)
+                InterfaceTweaks.db.global[tag] = value
+            end
+        }
+    end
 end
 
 --[[
@@ -3025,6 +2991,7 @@ options.RealUI = {
         core = core,
         skins = skins,
         tooltips = tooltips,
+        inventory = inventory,
         uiTweaks = uiTweaks,
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }

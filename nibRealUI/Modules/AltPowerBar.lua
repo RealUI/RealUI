@@ -1,12 +1,14 @@
 local _, private = ...
 
+-- Libs --
+local Aurora = _G.Aurora
+
 -- RealUI --
 local RealUI = private.RealUI
 local db
 
 local MODNAME = "AltPowerBar"
 local AltPowerBar = RealUI:NewModule(MODNAME, "AceEvent-3.0")
-local Aurora = _G.Aurora
 
 local LoggedIn = false
 local UpdateInterval = 0

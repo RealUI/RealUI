@@ -4,6 +4,7 @@ local _, private = ...
 local RealUI = private.RealUI
 local db, ndb, ndbc
 
+-- Libs --
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 

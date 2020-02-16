@@ -8,9 +8,10 @@ private.options = options
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
 local ACD = _G.LibStub("AceConfigDialog-3.0")
-local Base = _G.Aurora.Base
-local Skin = _G.Aurora.Skin
-local Color = _G.Aurora.Color
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+local Skin = Aurora.Skin
+local Color = Aurora.Color
 
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
 fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")

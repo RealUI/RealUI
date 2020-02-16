@@ -16,9 +16,7 @@ for i = 1, 3 do
 end
 RealUI.verinfo.string = version
 
-RealUI.oocFunctions = {}
 RealUI.configModeModules = {}
-
 RealUI.defaultPositions = {
     [1] = {     -- DPS/Tank
         ["HuDX"] = 0,
@@ -110,14 +108,12 @@ local defaults, charInit do
             init = charInit,
             layout = {
                 current = 1,    -- 1 = DPS/Tank, 2 = Healing
-                needchanged = false,
                 spec = spec -- Save layout for each spec
             },
         },
         profile = {
             modules = {
                 ['*'] = true,
-                ["AchievementScreenshots"] = false,
             },
             registeredChars = {},
             -- HuD positions
@@ -127,8 +123,6 @@ local defaults, charInit do
             abSettingsLink = false,
             -- Dynamic UI settings
             settings = {
-                powerMode = 1,  -- 1 = Normal, 2 = Economy, 3 = Turbo
-                fontStyle = 2,
                 hudSize = 2,
                 reverseUnitFrameBars = false,
             },
@@ -180,33 +174,15 @@ function RealUI:IsUsingHighResDisplay()
     return resHeight >= 1440
 end
 
--- Power Mode
-function RealUI:SetPowerMode(val)
-    -- TODO: remove cruft
-    -- Core\SpiralBorder, HuD\UnitFrames, Modules\PlayerShields, Modules\RaidDebuffs, Modules\Pitch
-    db.settings.powerMode = val
-    for k, mod in self:IterateModules() do
-        if self:GetModuleEnabled(k) and mod.SetUpdateSpeed and type(mod.SetUpdateSpeed) == "function" then
-            mod:SetUpdateSpeed()
-        end
-    end
-end
-
--- Style - Global Colors
-function RealUI:StyleUpdateColors()
-    for k, mod in self:IterateModules() do
-        if self:GetModuleEnabled(k) and mod.UpdateGlobalColors and type(mod.UpdateGlobalColors) == "function" then
-            mod:UpdateGlobalColors()
-        end
-    end
-end
-
 -- Layout Updates
-function RealUI:SetLayout()
+function RealUI:UpdateLayout(layout)
+    layout = layout or dbc.layout.current
+    dbc.layout.current = layout
+
     -- TODO: convert layouts to profiles
     -- Set Current and Not-Current layout variables
-    self.cLayout = dbc.layout.current
-    self.ncLayout = self.cLayout == 1 and 2 or 1
+    self.cLayout = layout
+    self.ncLayout = layout == 1 and 2 or 1
 
     if _G.RealUIGridConfiguring then
         self:ScheduleTimer(function()
@@ -214,19 +190,17 @@ function RealUI:SetLayout()
             self:ToggleGridTestMode(true)
         end, 0.5)
     end
-
-    dbc.layout.needchanged = false
-end
-function RealUI:UpdateLayout()
-    RealUI.TryInCombat(RealUI.SetLayout, L["Layout_ApplyOOC"])
 end
 
-
-local function UpdateSpec()
-    local old = RealUI.charInfo.specs.current.index
+local function UpdateSpec(...)
+    local specInfo = RealUI.charInfo.specs
     local new = _G.GetSpecialization()
-    if old ~= new then
-        RealUI.charInfo.specs.current = RealUI.charInfo.specs[new]
+    if specInfo.current.index ~= new then
+        specInfo.current = RealUI.charInfo.specs[new]
+
+        if dbc.layout.spec[specInfo.current.index] ~= dbc.layout.current then
+            RealUI:UpdateLayout(dbc.layout.spec[specInfo.current.index])
+        end
     end
 end
 
@@ -295,8 +269,7 @@ function RealUI:OnProfileUpdate(event, database, profile)
     end
 
     -- Update old stuff too for now
-    dbc.layout.current = private.profileToLayout[profile]
-    RealUI:SetLayout()
+    RealUI:UpdateLayout(private.profileToLayout[profile])
 
     if event == "OnProfileReset" then
         debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
@@ -369,7 +342,7 @@ function RealUI:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
 
     -- Register events
-    self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", UpdateSpec)
+    self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateSpec)
     self:RegisterEvent("ADDON_LOADED", function()
         if RealUI.recheckFonts then
             local SkinsDB = RealUI.GetOptions("Skins").profile
@@ -492,12 +465,6 @@ function RealUI:OnEnable()
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
 
-    -- Do we need a Layout change?
-    if dbc.layout.needchanged then
-        RealUI:UpdateLayout()
-    end
-
-
     local black = _G.Aurora.Color.black
     local a = RealUI.GetOptions("Skins").profile.frameColor.a
     local LDD = _G.LibStub("LibDropDown")
@@ -530,7 +497,7 @@ function RealUI:OnEnable()
                 end
             end
             if not _G.LOCALE_enUS then
-                 _G.print("Help localize RealUI to your language. Go to http://goo.gl/SHZewK")
+                 _G.print("Want to contribute? You can help localize RealUI into your native language at bit.ly/RealUILocale")
             end
         end
     end
@@ -549,22 +516,6 @@ function RealUI:OnEnable()
     self:UpdateFrameStyle()
 end
 
-
-function RealUI:RegisterConfigModeModule(module)
-    if module and module.ToggleConfigMode and type(module.ToggleConfigMode) == "function" then
-        _G.tinsert(self.configModeModules, module)
-    end
-end
-local addonSkins = {}
-function RealUI:RegisterAddOnSkin(name)
-    local skin = self:NewModule(name, "AceEvent-3.0")
-    skin:SetEnabledState(self:GetModuleEnabled(name))
-    _G.tinsert(addonSkins, name)
-    return skin
-end
-function RealUI:GetAddOnSkins()
-    return addonSkins
-end
 
 do
     local prototype = {

@@ -430,17 +430,20 @@ end
 
 local CreateEndBox do
     local function UpdateEndBox(self, ...)
-        local unit, color = self.unit
-        local _, class = _G.UnitClass(unit)
-        if class and _G.UnitIsPlayer(unit) then
-            color = self.colors.class[class]
+        local unit = self.unit
+
+        local color
+        if _G.UnitIsPlayer(unit) or _G.UnitPlayerControlled(unit) and not _G.UnitIsPlayer(unit) then
+            local _, classToken = _G.UnitClass(unit)
+            color = self.colors.class[classToken]
+        elseif not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) then
+            color = self.colors.tapped
+        elseif _G.UnitReaction(unit, "player") then
+            color = self.colors.reaction[_G.UnitReaction(unit, "player")]
         else
-            if not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) then
-                color = self.colors.tapped
-            else
-                color = self.colors.reaction[_G.UnitReaction(unit, "player")]
-            end
+            color = self.colors.selection[_G.UnitSelectionType(unit, true)]
         end
+
         for i = 1, #self.EndBox do
             self.EndBox[i]:SetBackgroundColor(color[1], color[2], color[3], 1)
         end

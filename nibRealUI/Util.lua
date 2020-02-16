@@ -3,7 +3,7 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals type pcall tonumber next
 -- luacheck: globals tinsert tremove unpack
--- luacheck: globals floor min max math
+-- luacheck: globals floor min max math abs
 
 local RealUI = _G.RealUI
 
@@ -47,7 +47,7 @@ end
 ----====####$$$$%%%%%$$$$####====----
 --              Color              --
 ----====####$$$$%%%%%$$$$####====----
-local hexColor = "%02x%02x%02x"
+local hexColor = "ff%02x%02x%02x"
 function RealUI.GetColorString(red, green, blue)
     if type(red) == "table" then
         if red.r and red.g and red.b then
@@ -284,6 +284,54 @@ function RealUI:FindSpellID(spellName, affectedUnit, auraType)
 end
 
 
+----====####$$$$%%%%$$$$####====----
+--          Widget Utils          --
+----====####$$$$%%%%$$$$####====----
+function RealUI.SetPixelPoint(frame)
+    local point, anchor, relPoint, x, y = frame:GetPoint()
+
+    local modx, modY = RealUI.Round(x), RealUI.Round(y)
+    local newX, newY
+    if point == "CENTER" or point == "TOP" or point == "BOTTOM" then
+        newX = RealUI.Round(x * 2) / 2
+        local diff = abs(newX - modx)
+        if not (diff > 0.4 and diff < 0.6) then
+            newX = newX + 0.5
+        end
+    else
+        newX = modx
+    end
+
+    if point == "CENTER" or point == "LEFT" or point == "RIGHT" then
+        newY = RealUI.Round(y * 2) / 2
+        local diff = abs(newY - modY)
+        if not (diff > 0.4 and diff < 0.6) then
+            newY = newY + 0.5
+        end
+    else
+        newY = modY
+    end
+
+    frame:SetPoint(point, anchor, relPoint, newX, newY)
+end
+
+local function MouseDownHandler(frame, button)
+    frame:ClearAllPoints()
+    frame:StartMoving()
+end
+local function MouseUpHandler(frame, button)
+    frame:StopMovingOrSizing()
+    RealUI.SetPixelPoint(frame)
+end
+function RealUI.MakeFrameDraggable(frame, noClamp)
+    frame:SetMovable(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetClampedToScreen(not noClamp)
+    frame:SetScript("OnMouseDown", MouseDownHandler)
+    frame:SetScript("OnMouseUp", MouseUpHandler)
+end
+
+
 ----====####$$$$%%%%%$$$$####====----
 --          Miscellaneous          --
 ----====####$$$$%%%%%$$$$####====----
@@ -310,18 +358,6 @@ function RealUI.DeepCopy(object, seen)
         copy[RealUI.DeepCopy(key, s)] = RealUI.DeepCopy(value, s)
     end
     return copy
-end
-
-local function MouseDownHandler(frame, button)
-    frame:ClearAllPoints()
-    frame:StartMoving()
-end
-function RealUI.MakeFrameDraggable(frame, noClamp)
-    frame:SetMovable(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetClampedToScreen(not noClamp)
-    frame:SetScript("OnMouseDown", MouseDownHandler)
-    frame:SetScript("OnMouseUp", frame.StopMovingOrSizing)
 end
 
 local queue, args, alertShown = {}, {}

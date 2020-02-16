@@ -4,7 +4,6 @@ local _, private = ...
 -- luacheck: globals time next select tonumber tostring tinsert
 
 -- Libs --
-local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
@@ -33,6 +32,13 @@ local defaults = {
 }
 
 local normalFont = _G.NORMAL_FONT_COLOR
+local classificationTypes = {
+    elite = "+",
+    rare = " |cff6699ffR|r",
+    rareelite = " |cff6699ffR+|r",
+    worldboss = (" |cffFF0000%s|r"):format(_G.BOSS)
+}
+
 local function GetUnit(self)
     Tooltips:debug("GetUnit", self and self:GetName())
     local _, unit = _G.GameTooltip:GetUnit()
@@ -47,7 +53,6 @@ local function GetUnit(self)
 
     return unit or "mouseover"
 end
--- based on GameTooltip_UnitColor
 local function GetUnitColor(unit)
     local r, g, b
     if _G.UnitPlayerControlled(unit) then
@@ -70,6 +75,83 @@ local function GetUnitColor(unit)
 
     --print("unit color", r, g, b)
     return r, g, b
+end
+local function GetUnitName(unit)
+    local unitName, server = _G.UnitName(unit)
+    if Tooltips.db.global.showTitles then
+        unitName = _G.UnitPVPName(unit) or unitName
+    end
+
+    if server and server ~= "" then
+        if Tooltips.db.global.showRealm then
+            unitName = unitName.."-"..server
+        else
+            local relationship = _G.UnitRealmRelationship(unit)
+            --print("relationship", relationship)
+            if relationship == _G.LE_REALM_RELATION_VIRTUAL then
+                unitName = unitName.._G.INTERACTIVE_SERVER_LABEL
+            elseif relationship == _G.LE_REALM_RELATION_COALESCED then
+                unitName = unitName.._G.FOREIGN_SERVER_LABEL
+            end
+        end
+    end
+
+    local iconIndex = (_G.GetRaidTargetIndex(unit))
+    if iconIndex and _G.ICON_LIST[iconIndex] then
+        unitName = ("%s12|t %s"):format(_G.ICON_LIST[iconIndex], unitName)
+    end
+
+    return unitName
+end
+local function GetUnitClassification(unit)
+    local level
+    local IsBattlePet = _G.UnitIsBattlePet(unit)
+    if IsBattlePet then
+        level = _G.UnitBattlePetLevel(unit)
+    else
+        level = _G.UnitLevel(unit)
+    end
+
+    if not level then return end
+
+    local unitType
+    if _G.UnitIsPlayer(unit) then
+        unitType = ("%s |c%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GetUnitColor(unit)), _G.UnitClass(unit))
+    elseif IsBattlePet then
+        unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
+    else
+        unitType = _G.UnitCreatureType(unit) or "unitType"
+    end
+
+    local diff
+    if level == -1 then
+        level = "??"
+        diff = _G.QuestDifficultyColors.impossible
+    elseif IsBattlePet then
+        local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
+        if teamLevel then -- from WorldMapFrame.lua: 2522
+            if teamLevel < level then
+                --add 2 to the min level because it's really hard to fight higher level pets
+                diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2)
+            elseif teamLevel > level then
+                diff = _G.GetRelativeDifficultyColor(teamLevel, level)
+            else
+                --if your team is in the level range, no need to call the function, just make it yellow
+                diff = _G.QuestDifficultyColors.difficult
+            end
+        else
+            --If you unlocked pet battles but have no team, level ranges are meaningless so make them grey
+            diff = _G.QuestDifficultyColors.header
+        end
+    else
+        diff = _G.GetCreatureDifficultyColor(level)
+    end
+
+    if _G.UnitIsDeadOrGhost(unit) then
+        unitType = ("%s |cffCCCCCC%s|r"):format(unitType, _G.DEAD)
+    end
+
+    return ("|c%s%s%s|r %s"):format(RealUI.GetColorString(diff), level, classificationTypes[_G.UnitClassification(unit)] or "", unitType)
 end
 
 local Hooks = {}
@@ -105,7 +187,140 @@ function private.HookTooltip(tooltip)
     end
 end
 
-local AddDynamicInfo, ClearDynamicInfo do
+local AddDynamicInfo, ClearDynamicInfo
+local factionIcon = {
+    Alliance = {
+        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
+        coords = {0.693359375, 0.748046875, 0.603515625, 0.732421875}
+    },
+    Horde = {
+        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
+        coords = {0.638671875, 0.693359375, 0.603515625, 0.732421875},
+    },
+    Neutral = {
+        texture = [[Interface\PVPFrame\TournamentOrganizer]],
+        coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
+    },
+}
+private.AddHook("OnTooltipSetUnit", function(self)
+    Tooltips:debug("--- OnTooltipSetUnit ---")
+    local unit = GetUnit(self)
+    if not _G.UnitExists(unit) then return end
+    Tooltips:debug("unit:", unit)
+
+    if not self.factionIcon then
+        self.factionIcon = self:CreateTexture(nil, "BORDER")
+        self.factionIcon:SetPoint("CENTER", _G.GameTooltip, "LEFT", 0, 0)
+    end
+
+    local faction =  _G.UnitFactionGroup(unit)
+    if _G.UnitIsPVP(unit) then
+        local icon = factionIcon[faction or "Neutral"]
+        self.factionIcon:SetTexture(icon.texture)
+        self.factionIcon:SetTexCoord(icon.coords[1], icon.coords[2], icon.coords[3], icon.coords[4])
+        self.factionIcon:SetSize(32, 38)
+        self.factionIcon:Show()
+    else
+        self.factionIcon:Hide()
+    end
+
+    _G.GameTooltipTextLeft1:SetText(GetUnitName(unit))
+    _G.GameTooltipTextLeft1:SetTextColor(GetUnitColor(unit))
+
+    if _G.UnitIsPlayer(unit) then -- guild
+        local unitGuild, unitRank = _G.GetGuildInfo(unit)
+        if unitGuild then
+            _G.GameTooltipTextLeft2:SetFormattedText("|cffffffb3<%s> |cff00E6A8%s|r", unitGuild, unitRank)
+        end
+    end
+
+    local previousLine = 1
+    local classification = GetUnitClassification(unit)
+    if classification then
+        for i = previousLine + 1, self:NumLines() do
+            local tiptext = _G["GameTooltipTextLeft"..i]
+            local linetext = tiptext:GetText()
+
+            if linetext and linetext:find(_G.LEVEL) then
+                tiptext:SetText(classification)
+                previousLine = i
+                break
+            end
+        end
+    end
+
+    private.AddObjectiveProgress(self, unit, previousLine)
+
+    local unittarget = unit.."target"
+    if _G.UnitExists(unittarget) then
+        local text
+        if _G.UnitIsUnit(unittarget, "player") then
+            text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
+        else
+            text = GetUnitName(unittarget)
+        end
+
+        _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unittarget))
+    end
+
+    AddDynamicInfo(unit, _G.UnitIsPlayer(unit))
+
+    if _G.UnitIsDeadOrGhost(unit) then
+        _G.GameTooltipStatusBar:Hide()
+    end
+end, true)
+
+private.AddHook("OnTooltipSetItem", function(self)
+    local _, link = self:GetItem()
+    if Tooltips.db.global.showTransmog and link then
+        local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
+        if appearanceID and sourceID then
+            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)
+            if isInfoReady then
+                if canCollect then
+                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(sourceID)
+                    if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
+                        self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                    else
+                        local sources = _G.C_TransmogCollection.GetAppearanceSources(appearanceID)
+                        if sources then
+                            for i, source in next, sources do
+                                if source.isCollected then
+                                    self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                                    break
+                                end
+                            end
+                        end
+                    end
+                else
+                    self:AddLine(_G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                end
+            end
+        end
+    end
+end, true)
+
+local frameColor = Aurora.Color.frame
+private.AddHook("OnTooltipCleared", function(self)
+    if self.factionIcon then
+        self.factionIcon:Hide()
+    end
+
+    ClearDynamicInfo()
+    self._id = nil
+
+    self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
+end, true)
+
+
+local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
+tooltipAnchor:SetSize(50, 50)
+_G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+    tooltip:ClearAllPoints()
+    tooltip:SetPoint(Tooltips.db.global.position.point, tooltipAnchor)
+end)
+
+do -- AddDynamicInfo, ClearDynamicInfo
     local maxAge, quickRefresh = 600, 10
     local cache = {}
 
@@ -431,296 +646,6 @@ local AddDynamicInfo, ClearDynamicInfo do
         updateTime = nil
     end
 end
-
-local progressFormat = "%s\n     |cFFFFFFFF+%s%%|r"
-local classification = {
-    elite = "+",
-    rare = " |cff6699ffR|r",
-    rareelite = " |cff6699ffR+|r",
-    worldboss = (" |cffFF0000%s|r"):format(_G.BOSS)
-}
-local factionIcon = {
-    Alliance = {
-        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
-        coords = {0.693359375, 0.748046875, 0.603515625, 0.732421875}
-    },
-    Horde = {
-        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
-        coords = {0.638671875, 0.693359375, 0.603515625, 0.732421875},
-    },
-    Neutral = {
-        texture = [[Interface\PVPFrame\TournamentOrganizer]],
-        coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
-    },
-}
-
-private.AddHook("OnTooltipSetUnit", function(self)
-    Tooltips:debug("--- OnTooltipSetUnit ---")
-
-    local unit = GetUnit(self)
-    Tooltips:debug("unit:", unit)
-    if _G.UnitExists(unit) then
-        if not self.factionIcon then
-            self.factionIcon = self:CreateTexture(nil, "BORDER")
-            self.factionIcon:SetPoint("CENTER", _G.GameTooltip, "LEFT", 0, 0)
-        end
-
-        local faction =  _G.UnitFactionGroup(unit)
-        if _G.UnitIsPVP(unit) then
-            local icon = factionIcon[faction or "Neutral"]
-            self.factionIcon:SetTexture(icon.texture)
-            self.factionIcon:SetTexCoord(icon.coords[1], icon.coords[2], icon.coords[3], icon.coords[4])
-            self.factionIcon:SetSize(32, 38)
-            self.factionIcon:Show()
-        else
-            self.factionIcon:Hide()
-        end
-
-        local isPlayer = _G.UnitIsPlayer(unit)
-        do -- Name
-            local lineText = _G.GameTooltipTextLeft1:GetText()
-            --print("text", lineText, isPlayer)
-
-            if isPlayer then
-                local unitName, server = _G.UnitName(unit)
-                if Tooltips.db.global.showTitles then
-                    unitName = _G.UnitPVPName(unit) or unitName
-                    --print("title", unitName)
-                end
-
-                if server and server ~= "" then
-                    if Tooltips.db.global.showRealm then
-                        unitName = unitName.."-"..server
-                    else
-                        local relationship = _G.UnitRealmRelationship(unit)
-                        --print("relationship", relationship)
-                        if relationship == _G.LE_REALM_RELATION_VIRTUAL then
-                            unitName = unitName.._G.INTERACTIVE_SERVER_LABEL
-                        elseif relationship == _G.LE_REALM_RELATION_COALESCED then
-                            unitName = unitName.._G.FOREIGN_SERVER_LABEL
-                        end
-                    end
-                end
-
-                --print("name", unitName)
-                lineText = unitName
-            end
-
-            local iconIndex = _G.GetRaidTargetIndex(unit)
-            Tooltips:debug("iconIndex:", iconIndex, _G.ICON_LIST[iconIndex])
-            if iconIndex and _G.ICON_LIST[iconIndex] then
-                -- iconIndex can be > 8, which is outside ICON_LIST's index
-                _G.GameTooltipTextLeft1:SetFormattedText("%s12|t %s", _G.ICON_LIST[iconIndex], lineText)
-            else
-                _G.GameTooltipTextLeft1:SetText(lineText)
-            end
-            --print("text", lineText)
-            _G.GameTooltipTextLeft1:SetTextColor(GetUnitColor(unit))
-        end
-
-        --do return end
-        if isPlayer then -- guild
-            local unitGuild, unitRank = _G.GetGuildInfo(unit)
-            if unitGuild then
-                _G.GameTooltipTextLeft2:SetFormattedText("|cffffffb3<%s> |cff00E6A8%s|r", unitGuild, unitRank)
-            end
-        end
-
-        local level
-        local IsBattlePet = _G.UnitIsBattlePet(unit)
-        if IsBattlePet then
-            level = _G.UnitBattlePetLevel(unit)
-        else
-            level = _G.UnitLevel(unit)
-        end
-
-        local previousLine = 1
-        local dead = _G.UnitIsDeadOrGhost(unit)
-        if level then
-            local unitType
-            if isPlayer then
-                unitType = ("%s |cff%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GetUnitColor(unit)), _G.UnitClass(unit))
-            elseif IsBattlePet then
-                unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
-            else
-                unitType = _G.UnitCreatureType(unit)
-            end
-
-            local diff
-            if level == -1 then
-                level = "??"
-                diff = _G.QuestDifficultyColors.impossible
-            elseif IsBattlePet then
-                local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
-                if teamLevel then -- from WorldMapFrame.lua: 2522
-                    if teamLevel < level then
-                        --add 2 to the min level because it's really hard to fight higher level pets
-                        diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2)
-                    elseif teamLevel > level then
-                        diff = _G.GetRelativeDifficultyColor(teamLevel, level)
-                    else
-                        --if your team is in the level range, no need to call the function, just make it yellow
-                        diff = _G.QuestDifficultyColors["difficult"]
-                    end
-                else
-                    --If you unlocked pet battles but have no team, level ranges are meaningless so make them grey
-                    diff = _G.QuestDifficultyColors["header"]
-                end
-            else
-                diff = _G.GetCreatureDifficultyColor(level)
-            end
-
-            local classify = _G.UnitClassification(unit) or ""
-            local textLevel = ("|cff%s%s%s|r"):format(RealUI.GetColorString(diff), level, classification[classify] or "")
-
-            for i = previousLine + 1, self:NumLines() do
-                local tiptext = _G["GameTooltipTextLeft"..i]
-                local linetext = tiptext:GetText()
-
-                if linetext and linetext:find(_G.LEVEL) then
-                    tiptext:SetFormattedText(("%s %s %s"), textLevel, unitType or "unitType", (dead and "|cffCCCCCC".._G.DEAD.."|r" or ""))
-                    previousLine = i
-                    break
-                end
-            end
-        end
-
-        do -- Objective Progress
-            local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
-            npcID = tonumber(npcID)
-            local progressInfo = {}
-
-            local challengeMapID = _G.C_ChallengeMode.GetActiveChallengeMapID()
-            if challengeMapID then
-                local isTeeming = false
-                local _, activeAffixIDs = _G.C_ChallengeMode.GetActiveKeystoneInfo()
-                for i = 1, #activeAffixIDs do
-                    if activeAffixIDs[i] == 5 then
-                        isTeeming = true
-                        break
-                    end
-                end
-
-                local _, _, _, _, _, _, _, instanceMapID = _G.GetInstanceInfo()
-                local isAlternate = challengeMapID == 234 -- Upper Karazhan
-                if instanceMapID == 1822 then -- Siege of Boralus
-                    isAlternate = faction == "Horde"
-                end
-
-                local weight = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
-                if weight then
-                    progressInfo[challengeMapID] = {
-                        weight = weight,
-                        text = _G.ENEMY
-                    }
-                end
-            else
-                -- /dump C_TaskQuest.GetQuestsForPlayerByMapID(C_Map.GetBestMapForUnit("player"))
-                local taskPOIs = _G.C_TaskQuest.GetQuestsForPlayerByMapID(_G.C_Map.GetBestMapForUnit("player"))
-                for i, poiData in next, taskPOIs do
-                    local weight = LOP:GetNPCWeightByQuest(poiData.questId, npcID)
-                    if poiData.inProgress and weight then
-                        progressInfo[poiData.questId] = {
-                            weight = weight,
-                            text = _G.C_TaskQuest.GetQuestInfoByQuestID(poiData.questId)
-                        }
-                    end
-                end
-
-                for id, info in next, progressInfo do
-                    for i = previousLine + 1, self:NumLines() do
-                        local line = _G["GameTooltipTextLeft" .. i]
-                        if line and line:GetText() == info.text then
-                            info.line = line
-                            break
-                        end
-                    end
-                end
-            end
-
-            for id, info in next, progressInfo do
-                if info.line then
-                    info.line:SetFormattedText(progressFormat, info.line:GetText(), info.weight)
-                else
-                    _G.GameTooltip:AddLine(progressFormat:format(info.text, info.weight))
-                end
-            end
-        end
-
-        local unittarget = unit.."target"
-        if _G.UnitExists(unittarget) then
-            local text
-            if _G.UnitIsUnit(unittarget, "player") then
-                text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
-            else
-                text = _G.UnitName(unittarget)
-            end
-
-            local tarRicon = (_G.GetRaidTargetIndex(unittarget))
-            if tarRicon and _G.ICON_LIST[tarRicon] then
-                text = ("%s %s"):format(_G.ICON_LIST[tarRicon].."10|t", text)
-            end
-
-            _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unittarget))
-        end
-
-        AddDynamicInfo(unit, isPlayer)
-
-        if dead then
-            _G.GameTooltipStatusBar:Hide()
-        end
-    end
-end, true)
-
-private.AddHook("OnTooltipSetItem", function(self)
-    local _, link = self:GetItem()
-    if Tooltips.db.global.showTransmog and link then
-        local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
-        if appearanceID and sourceID then
-            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)
-            if isInfoReady then
-                if canCollect then
-                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(sourceID)
-                    if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
-                        self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
-                    else
-                        local sources = _G.C_TransmogCollection.GetAppearanceSources(appearanceID)
-                        if sources then
-                            for i, source in next, sources do
-                                if source.isCollected then
-                                    self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
-                                    break
-                                end
-                            end
-                        end
-                    end
-                else
-                    self:AddLine(_G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
-                end
-            end
-        end
-    end
-end, true)
-
-local frameColor = Aurora.Color.frame
-private.AddHook("OnTooltipCleared", function(self)
-    if self.factionIcon then
-        self.factionIcon:Hide()
-    end
-
-    ClearDynamicInfo()
-    self._id = nil
-
-    self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
-end, true)
-
-
-local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
-tooltipAnchor:SetSize(50, 50)
-_G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-    tooltip:ClearAllPoints()
-    tooltip:SetPoint(Tooltips.db.global.position.point, tooltipAnchor)
-end)
 
 
 

@@ -67,9 +67,8 @@ local other do
                             return RealUI.db.char.layout.current
                         end,
                         set = function(info, value)
-                            RealUI.db.char.layout.current = value
                             RealUI.db.char.layout.spec[_G.GetSpecialization()] = value
-                            RealUI:UpdateLayout()
+                            RealUI:UpdateLayout(value)
                         end,
                         order = 10,
                     },

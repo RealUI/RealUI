@@ -198,7 +198,7 @@ end)
 local autorunScripts = {
     test = false,
     testFrame = false,
-    mouse = true,
+    nudgeFrame = true,
 }
 
 local autorunAddon = {
@@ -294,44 +294,44 @@ function ns.commands:aurora()
     _G.AddonList_Update()
 end
 
-function ns.commands:mouse()
-    local r, g, b = 1, 1, 1
-    local pollingRate, numLines = 0.05, 15
+local keys = {
+    LEFT = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x - 1, y)
+    end,
+    RIGHT = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x + 1, y)
+    end,
+    UP = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x, y + 1)
+    end,
+    DOWN = function(frame)
+        local point, anchor, relPoint, x, y = frame:GetPoint()
+        frame:SetPoint(point, anchor, relPoint, x, y - 1)
+    end,
+}
+function ns.commands:nudgeFrame()
+    local keyFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
+    keyFrame:SetSize(1, 1)
+    keyFrame:SetPoint("TOPLEFT")
+    keyFrame:SetFrameStrata("DIALOG")
+    keyFrame:EnableKeyboard(true)
+    keyFrame:SetPropagateKeyboardInput(true)
+    keyFrame:SetScript("OnKeyDown", function(this, key, ...)
+        if not _G.FrameStackTooltip then return end
+        if not _G.FrameStackTooltip.highlightFrame then return end
 
-    local frame = _G.CreateFrame("Frame", nil, _G.UIParent)
-    frame:SetFrameStrata("DIALOG")
-    frame:SetSize(1, 1)
-    frame:SetPoint("TOPLEFT")
+        local frame = _G.FrameStackTooltip.highlightFrame
+        if keys[key] then
+            keys[key](frame)
 
-    local lines = {}
-    for i = 1, numLines do
-        local line = frame:CreateLine()
-        line:SetThickness(_G.Lerp(5, 1, (i - 1)/numLines))
-        line:SetColorTexture(1, 1, 1)
-
-        lines[i] = {line = line, x = 0, y = 0}
-    end
-
-    local function mouse()
-        local scale = frame:GetEffectiveScale()
-        local startX, startY = _G.GetCursorPosition()
-
-        for i = 1, numLines do
-            local info = lines[i]
-
-            local startA, endA = _G.Lerp(1, 0, (i - 1)/numLines), _G.Lerp(1, 0, i/numLines)
-            info.line:SetGradientAlpha("HORIZONTAL", r, g, b, startA, r, g, b, endA)
-
-            local endX, endY = info.x, info.y
-            info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX / scale, startY / scale)
-            info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX / scale, endY / scale)
-
-            info.x, info.y = startX, startY
-            startX, startY = endX, endY
+            if _G.RealUI.GetOptions("DragEmAll", {"global", frame}) then
+                _G.LibStub("LibWindow-1.1").SavePosition(frame)
+            end
         end
-    end
-
-    _G.C_Timer.NewTicker(pollingRate, mouse)
+    end)
 end
 
 function ns.commands:combatEvents()

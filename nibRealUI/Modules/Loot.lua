@@ -35,6 +35,12 @@ local _, private = ...
 -- Lua Globals --
 local next = _G.next
 
+-- Libs --
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+local Skin = Aurora.Skin
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 local db
@@ -126,7 +132,7 @@ function Loot:UpdateGroupLoot()
             frame:SetScript("OnLeave", GroupLootFrameOnLeave)
             frame:SetScript("OnEnter", GroupLootFrameOnEnter)
 
-            _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.frame)
+            Base.SetBackdrop(frame, Color.frame)
 
             frame.pass = _G.CreateFrame("Button", nil, frame)
             frame.pass.type = 0
@@ -185,7 +191,7 @@ function Loot:UpdateGroupLoot()
             local icon = iconFrame:CreateTexture(nil, "OVERLAY")
             icon:SetPoint("TOPLEFT")
             icon:SetPoint("BOTTOMRIGHT")
-            _G.Aurora.Base.CropIcon(icon, iconFrame)
+            Base.CropIcon(icon, iconFrame)
             frame.icon = icon
 
             _G.tinsert(grouplootframes, frame)
@@ -245,7 +251,7 @@ RealUILootFrame:SetToplevel(true)
 RealUILootFrame:SetHeight(64)
 
 RealUILootFrame.close = _G.CreateFrame("Button", "RealUI_Loot_Close", RealUILootFrame, "UIPanelCloseButton")
-_G.Aurora.Skin.UIPanelCloseButton(RealUILootFrame.close)
+Skin.UIPanelCloseButton(RealUILootFrame.close)
 RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
 RealUILootFrame.slots = {}
 
@@ -309,8 +315,8 @@ local createSlot = function(id)
     frame:SetScript("OnLeave", LootOnLeave)
     frame:SetScript("OnUpdate", LootOnUpdate)
 
-    _G.Aurora.Base.SetBackdrop(frame, _G.Aurora.Color.button)
-    _G.Aurora.Base.SetHighlight(frame, "backdrop")
+    Base.SetBackdrop(frame, Color.button)
+    Base.SetHighlight(frame, "backdrop")
 
     local iconFrame = _G.CreateFrame("Frame", nil, frame)
     iconFrame:SetHeight(LootIconSize)
@@ -323,7 +329,7 @@ local createSlot = function(id)
     local icon = iconFrame:CreateTexture(nil, "ARTWORK")
     icon:SetPoint("TOPLEFT", 1, -1)
     icon:SetPoint("BOTTOMRIGHT", -1, 1)
-    _G.Aurora.Base.CropIcon(icon, iconFrame)
+    Base.CropIcon(icon, iconFrame)
     frame.icon = icon
 
     local count = iconFrame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")

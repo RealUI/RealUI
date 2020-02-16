@@ -10,6 +10,7 @@ local L = RealUI.L
 local MODNAME = "CombatFader"
 local CombatFader = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
+-- TODO: refactor this to use SecureHandlerStateTemplate
 local LoggedIn = false
 local FirstLog = true
 

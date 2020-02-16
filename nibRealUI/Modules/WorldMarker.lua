@@ -1,5 +1,9 @@
 local _, private = ...
 
+-- Libs --
+local Aurora = _G.Aurora
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 local db
@@ -17,15 +21,15 @@ local ButtonWidthCollapsed = 3
 local NeedRefreshed, FramesCreated
 
 local MarkerColors = {
-    {0.98, 0.98, 0.98, 0.8}, --White  RaidTargetingIcon_8
-    {1.0,  0.24, 0.17, 0.8}, --Red    RaidTargetingIcon_7
-    {0.0,  0.71, 1.0,  0.8}, --Blue   RaidTargetingIcon_6
-    {0.7,  0.82, 0.87, 0.8}, --Silver RaidTargetingIcon_5
-    {0.04, 0.95, 0.0,  0.8}, --Green  RaidTargetingIcon_4
-    {0.83, 0.22, 0.9,  0.8}, --Purple RaidTargetingIcon_3
-    {0.98, 0.57, 0.0,  0.8}, --Orange RaidTargetingIcon_2
-    {1.0,  0.92, 0.0,  0.8}, --Yellow RaidTargetingIcon_1
-    {0.3,  0.3,  0.3,  0.8}, --Clear all
+    Color.white,   -- Icon 8 - Skull
+    Color.red,     -- Icon 7 - Cross
+    Color.marine,  -- Icon 6 - Square
+    Color.cyan,    -- Icon 5 - Moon
+    Color.green,   -- Icon 4 - Triangle
+    Color.magenta, -- Icon 3 - Diamond
+    Color.orange,  -- Icon 2 - Circle
+    Color.yellow,  -- Icon 1 - Star
+    Color.gray,    -- Clear all
 }
 
 -- OnLeave
@@ -141,13 +145,11 @@ local function CreateButton(id)
     frame:SetScript("OnEnter", function(self) ButtonOnEnter(id) end)
     frame:SetScript("OnLeave", function(self) ButtonOnLeave(id) end)
 
+    local color = MarkerColors[id]
     frame.bg = _G.CreateFrame("Frame", nil, frame)
     frame.bg:SetPoint("LEFT", frame, "LEFT", 0, 0)
     frame.bg:SetWidth(ButtonWidthCollapsed)
-    _G.Aurora.Base.SetBackdrop(frame.bg, _G.Aurora.Color.frame)
-
-    local color = MarkerColors[id]
-    frame.bg:SetBackdropColor(color[1], color[2], color[3], color[4])
+    _G.Aurora.Base.SetBackdrop(frame.bg, color)
 
     return frame
 end
