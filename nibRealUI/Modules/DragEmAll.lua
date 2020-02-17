@@ -25,6 +25,7 @@ local baseFames = {
     BankFrame = {},
     CharacterFrame = {},
     ChatConfigFrame = {},
+    ColorPickerFrame = {},
     DressUpFrame = {},
     FriendsFrame = {},
     GameMenuFrame = {},
