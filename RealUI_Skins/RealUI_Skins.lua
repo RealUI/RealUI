@@ -166,6 +166,10 @@ function private.OnLoad()
     private.uiScale = private.skinsDB.uiModScale
     private.UpdateUIScale = RealUI.UpdateUIScale
 
+    for fontType, font in next, private.skinsDB.fonts do
+        private.font[fontType] = font.path or LSM:Fetch("font", font.name)
+    end
+
     local Base = Aurora.Base
     local Hook, Skin = Aurora.Hook, Aurora.Skin
     local Color = Aurora.Color
