@@ -1,4 +1,23 @@
-﻿## [2.1.5] - 2020-02-16 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Changed ###
+
+  * Improved minimap world markers
+  * Minor tweaks to the color picker
+
+### Fixed ###
+
+  * Font path error
+
+
+
+
+## [2.1.5] - 2020-02-16 ##
 ### Modified AddOns ###
 
   * nibRealUI
