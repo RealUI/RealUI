@@ -384,59 +384,15 @@ local core do
                     disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                     order = 40,
                     args = {
-                        opacity1 = {
-                            name = "Initial Dim",
-                            desc = "How dark to set the gameworld when you go AFK.",
-                            type = "range",
-                            isPercent = true,
-                            min = 0, max = 1, step = 0.05,
-                            get = function(info) return ScreenSaver.db.profile.general.opacity1 end,
-                            set = function(info, value) ScreenSaver.db.profile.general.opacity1 = value end,
-                            order = 10,
-                        },
-                        opacity2 = {
-                            name = "5min+ Dim",
-                            desc = "How dark to set the gameworld after 5 minutes of being AFK.",
-                            type = "range",
-                            isPercent = true,
-                            min = 0, max = 1, step = 0.05,
-                            get = function(info) return ScreenSaver.db.profile.general.opacity2 end,
-                            set = function(info, value) ScreenSaver.db.profile.general.opacity2 = value end,
-                            order = 20,
-                        },
                         combatwarning = {
                             name = "Combat Warning",
                             desc = "Play a warning sound if you enter combat while AFK.",
                             type = "toggle",
-                            get = function() return ScreenSaver.db.profile.general.combatwarning end,
+                            get = function() return ScreenSaver.db.profile.combatwarning end,
                             set = function(info, value)
-                                ScreenSaver.db.profile.general.combatwarning = value
+                                ScreenSaver.db.profile.combatwarning = value
                             end,
                             order = 30,
-                        },
-                    },
-                },
-                gap2 = {
-                    name = " ",
-                    type = "description",
-                    order = 41,
-                },
-                panel = {
-                    name = "Panel",
-                    type = "group",
-                    inline = true,
-                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 50,
-                    args = {
-                        automove = {
-                            name = "Auto Move",
-                            desc = "Reposition the Panel up and down the screen once every minute.",
-                            type = "toggle",
-                            get = function() return ScreenSaver.db.profile.panel.automove end,
-                            set = function(info, value)
-                                ScreenSaver.db.profile.panel.automove = value
-                            end,
-                            order = 20,
                         },
                     },
                 },
