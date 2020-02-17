@@ -178,12 +178,12 @@ function ClassResource:CreateRunes(unitFrame, unit)
         PositionRune(Rune, index)
 
         local tex = Rune:CreateTexture(nil, "ARTWORK")
-        tex:SetTexture([[Interface\Buttons\WHITE8x8]])
+        tex:SetTexture(RealUI.textures.plain)
         Rune:SetStatusBarTexture(tex)
         Rune.tex = tex
 
         local runeBG = Rune:CreateTexture(nil, "BACKGROUND")
-        runeBG:SetTexture([[Interface\Buttons\WHITE8x8]])
+        runeBG:SetTexture(RealUI.textures.plain)
         runeBG:SetPoint("TOPLEFT", Rune, -1, 1)
         runeBG:SetPoint("BOTTOMRIGHT", Rune, 1, -1)
         runeBG.multiplier = 0.2

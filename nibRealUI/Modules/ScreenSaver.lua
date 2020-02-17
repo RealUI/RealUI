@@ -1,313 +1,128 @@
 local _, private = ...
 
--- RealUI --
-local RealUI = private.RealUI
-local db, ndb, ndbc
-
 -- Libs --
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 
+-- RealUI --
+local RealUI = private.RealUI
+local db
+
 local MODNAME = "ScreenSaver"
 local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-local LoggedIn
-local SecToMin = 1/60
-local SecToHour = SecToMin * SecToMin
-
-local IsDark = false
-local IsWarning = false
-local OpacityLevel = 0
-local AFKLevel = 0
-
--- Timer
-function ScreenSaver:UpdateAFKTime(elapsed)
-    local Hour = _G.min(_G.floor(elapsed * SecToHour), 99)
-    local Min = (elapsed * SecToMin) % 60
-    local Sec = _G.floor(elapsed % 60)
-    local timeStr
-
-    if Hour >= 1 then
-        if Min >= 1 then
-            timeStr = ("%dh %dm"):format(Hour, Min)
-        else
-            timeStr = ("%dh"):format(Hour)
-        end
-    elseif Min >= 10 then
-        timeStr = ("%dm"):format(Min)
-    elseif Min >= 1 then
-        timeStr = ("%d:%02d"):format(Min, Sec)
-    else
-        timeStr = ("%ds"):format(Sec)
-    end
-
-    self.time:SetText("|cffC0C0C0"..timeStr.."|r")
-
-    if Sec % 60 == 0 then
-        self:RepositionPanel(true)
-    end
-end
-
-local AFKTimer = _G.CreateFrame("Frame")
-AFKTimer:Hide()
-AFKTimer:SetScript("OnUpdate", function(self, elapsed)
-    AFKTimer.elapsed = AFKTimer.elapsed + elapsed
-
-    if AFKTimer.elapsed > AFKTimer.lastElapsed + 1 then
-        AFKTimer.lastElapsed = AFKTimer.elapsed
-
-        -- Set BG opacity
-        if AFKTimer.elapsed > 300 then
-            OpacityLevel = db.general.opacity2
-            AFKLevel = 2
-        else
-            OpacityLevel = db.general.opacity1
-            AFKLevel = 1
-        end
-        if not( _G.UnitAffectingCombat("player") and db.general.combatwarning ) and _G.GetCVar("autoClearAFK") then
-            if ScreenSaver.bg:GetAlpha() ~= OpacityLevel then
-                _G.UIFrameFadeIn(ScreenSaver.bg, 0.2, ScreenSaver.bg:GetAlpha(), OpacityLevel)
-                ScreenSaver:ToggleOverlay(true)
-            end
-        end
-
-        ScreenSaver:UpdateFrames()
-
-        -- Update AFK Time
-        ScreenSaver:UpdateAFKTime(AFKTimer.elapsed)
-
-        -- Check Auto AFK status
-        if not _G.GetCVar("autoClearAFK") then ScreenSaver:AFKEvent() end
-    end
-end)
-
--- Show/Hide Warning
-function ScreenSaver:ToggleWarning(val)
-    if val then
-        if not IsWarning then
-            IsWarning = true
-
-            -- Play warning sound if Screen Saver is active and you get put into combat
-            if _G.UnitAffectingCombat("player") and db.general.combatwarning then
-                _G.PlaySound(15262, "MASTER") -- Aggro_Enter_Warning_State
-            end
-        end
-    else
-        if IsWarning then
-            IsWarning = false
-        end
-    end
-end
-
--- Show/Hide Screen Saver
-function ScreenSaver:ToggleOverlay(val)
-    if val and _G.GetCVar("autoClearAFK") then
-        if not IsDark then
-            IsDark = true
-
-            -- Fade In Screen Saver
-            self:RepositionPanel()
-            _G.UIFrameFadeIn(self.bg, 0.2, 0, db.general["opacity"..AFKLevel])
-            _G.UIFrameFadeIn(self.panel, 0.2, 0, 1)
-            AFKTimer:Show()
-        end
-    else
-        if IsDark then
-            IsDark = false
-
-            -- Fade Out Screen Saver
-            local function bgHide()
-                self.bg:Hide()
-            end
-            local bgFadeInfo = {
-                mode = "OUT",
-                timeToFade = 0.2,
-                finishedFunc = bgHide,
-                startAlpha = self.bg:GetAlpha(),
-            }
-            _G.UIFrameFade(self.bg, bgFadeInfo)
-
-            local function panelHide()
-                self.panel:Hide()
-                if not _G.UnitIsAFK("player") then
-                    self.time:SetText("0s")
-                end
-            end
-            local panelFadeInfo = {
-                mode = "OUT",
-                timeToFade = 0.2,
-                finishedFunc = panelHide,
-            }
-            _G.UIFrameFade(self.panel, panelFadeInfo)
-
-            -- Hide Screen Saver if we're not AFK
-            if not _G.UnitIsAFK("player") then
-                AFKTimer:Hide()
-            end
-        end
-    end
-end
-
 -- Update AFK status
-function ScreenSaver:AFKEvent()
-    if not _G.GetCVar("autoClearAFK") then
-        -- Disable ScreenSaver if Auto Clear AFK is disabled
-        self:ToggleOverlay(false)
-        self:ToggleWarning(false)
-        AFKLevel = 0
-    elseif _G.UnitIsAFK("player") then
-        -- AFK
-        if not AFKTimer:IsShown() then
-            AFKTimer.elapsed = 0
-            AFKTimer.lastElapsed = 0
-            if not( _G.UnitAffectingCombat("player") and db.general.combatwarning ) then
-                _G.UIFrameFadeIn(self.bg, 0.2, self.bg:GetAlpha(), db.general.opacity1)
-                _G.UIFrameFadeIn(self.panel, 0.2, 0, 1)
-            end
-            AFKTimer:Show()
-            AFKLevel = 1
+function ScreenSaver:UpdateTimer(...)
+    if _G.UnitIsAFK("player") then
+        if not db.afkStart then
+            db.afkStart = _G.GetServerTime()
+            self.frame.alphaIn:Play()
         end
 
-        if ( _G.UnitAffectingCombat("player") and db.general.combatwarning ) then
-            -- AFK and In Combat
-            if IsDark then
-                self:ToggleOverlay(false)   -- Hide Screen Saver
-                self:ToggleWarning(true)        -- Activate Warning
-            end
-        else
-            -- AFK and not In Combat
-            if not IsDark then
-                self:ToggleOverlay(true)        -- Show Screen Saver
-                self:ToggleWarning(false)   -- Deactivate Warning
-                AFKLevel = 1
-            end
+        if _G.UnitAffectingCombat("player") and db.combatwarning then
+            _G.PlaySound(15262, "MASTER") -- Aggro_Enter_Warning_State
         end
     else
-        -- Not AFK
-        AFKTimer.elapsed = 0
-        AFKTimer.lastElapsed = 0
-        AFKTimer:Hide()
-        AFKLevel = 0
-
-        self:ToggleOverlay(false)   -- Hide Screen Saver
-        self:ToggleWarning(false)   -- Deactivate Warning
+        db.afkStart = nil
+        self.frame.alphaOut:Play()
     end
-end
-
-function ScreenSaver:RepositionPanel(...)
-    if ... and not db.panel.automove then return end
-    self.panel:ClearAllPoints()
-
-    local _, height = RealUI.GetInterfaceSize()
-    self.panel:SetPoint("BOTTOM", _G.UIParent, "CENTER", 0, _G.math.random(
-        ndb.positions[ndbc.layout.current]["HuDY"] + 100,
-        height / 2 - 180
-    ))
-end
-
--- Frame Updates
-function ScreenSaver:UpdateFrames()
-    -- self.panel:SetBackdropColor(0.075, 0.075, 0.075, db.panel.opacity)
-
-    -- Make sure Size is still good
-    local width, height = RealUI.GetInterfaceSize()
-    self.bg:SetSize(width, height)
-    self.panel:SetSize(width, 21)
-end
-
-function ScreenSaver:PLAYER_LOGIN()
-    LoggedIn = true
-
-    self:RefreshMod()
 end
 
 -- Frame Creation
 function ScreenSaver:CreateFrames()
-    -- Panel
-    self.panel = _G.CreateFrame("Frame", "RealUIScreenSaver", _G.UIParent)
-        self.panel:SetFrameStrata("MEDIUM")
-        self.panel:SetFrameLevel("1")
-        Base.SetBackdrop(self.panel)
-        self.panel:SetAlpha(0)
-        self.panel:Hide()
-        self:RepositionPanel()
+    local frame = _G.CreateFrame("Frame", "RealUIScreenSaver", _G.UIParent)
+    frame:SetPoint("TOPLEFT", 0, -300)
+    frame:SetPoint("TOPRIGHT", 0, -300)
+    frame:SetHeight(21)
+    Base.SetBackdrop(frame)
+    self.frame = frame
 
-    -- Dark Background
-    self.bg = self.panel:CreateTexture(nil, "BACKGROUND")
-        self.bg:SetColorTexture(0, 0, 0, 1)
-        self.bg:SetPoint("CENTER", _G.UIParent)
-        self.bg:SetAlpha(0)
-        self.bg:Hide()
+    frame:SetScript("OnUpdate", function(this, elapsed)
+        if db.afkStart then
+            local timeStr = _G.SecondsToClock(_G.GetServerTime() - db.afkStart)
+            this.time:SetFormattedText(_G.MARKED_AFK_MESSAGE, timeStr)
+        end
+    end)
 
-    self:UpdateFrames()
+    local alphaIn = frame:CreateAnimationGroup()
+    alphaIn:SetScript("OnPlay", function(this)
+        frame:Show()
+    end)
+    alphaIn:SetScript("OnFinished", function(this)
+        frame:SetAlpha(1)
+    end)
+    local animIn = alphaIn:CreateAnimation("Alpha")
+    animIn:SetDuration(0.5)
+    animIn:SetFromAlpha(0)
+    animIn:SetToAlpha(1)
+    frame.alphaIn = alphaIn
 
-    self.panel.left = self.panel:CreateTexture(nil, "ARTWORK")
-        self.panel.left:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
-        self.panel.left:SetPoint("LEFT", self.panel, "LEFT", 0, 0)
-        self.panel.left:SetHeight(19)
-        self.panel.left:SetWidth(4)
+    local alphaOut = frame:CreateAnimationGroup()
+    alphaIn:SetScript("OnPlay", function(this)
+        frame.time:SetText("")
+    end)
+    alphaOut:SetScript("OnFinished", function(this)
+        frame:SetAlpha(0)
+        frame:Hide()
+    end)
+    local animOut = alphaOut:CreateAnimation("Alpha")
+    animOut:SetDuration(0.5)
+    animOut:SetFromAlpha(1)
+    animOut:SetToAlpha(0)
+    frame.alphaOut = alphaOut
 
-    self.panel.right = self.panel:CreateTexture(nil, "ARTWORK")
-        self.panel.right:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
-        self.panel.right:SetPoint("RIGHT", self.panel, "RIGHT", 0, 0)
-        self.panel.right:SetHeight(19)
-        self.panel.right:SetWidth(4)
 
-    -- Timer
-    self.timeLabel = self.panel:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
-        self.timeLabel:SetJustifyH("CENTER")
-        self.timeLabel:SetPoint("RIGHT", self.panel, "CENTER", 15, 0)
-        self.timeLabel:SetText("|cffffffffAFK |r|c"..RealUI.charInfo.class.color.colorStr.."TIME:")
 
-    self.time = self.panel:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
-        self.time:SetJustifyH("LEFT")
-        self.time:SetPoint("LEFT", self.panel, "CENTER", 17, 0)
-        self.time:SetText("0s")
+    local bg = frame:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(0, 0, 0, 0.5)
+    bg:SetAllPoints(_G.UIParent)
+
+    local left = frame:CreateTexture(nil, "ARTWORK")
+    left:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
+    left:SetPoint("LEFT", frame, "LEFT", 0, 0)
+    left:SetHeight(19)
+    left:SetWidth(4)
+
+    local right = frame:CreateTexture(nil, "ARTWORK")
+    right:SetColorTexture(RealUI.charInfo.class.color:GetRGB())
+    right:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
+    right:SetHeight(19)
+    right:SetWidth(4)
+
+    local timeText = frame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
+    timeText:SetJustifyH("CENTER")
+    timeText:SetPoint("CENTER")
+    timeText:SetText(_G.MARKED_AFK_MESSAGE)
+    frame.time = timeText
 end
 
 ----
 function ScreenSaver:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
 
-    db = self.db.profile
-    ndb = RealUI.db.profile
-
-    self:UpdateFrames()
-    self:AFKEvent()
+    self:UpdateTimer("Refresh")
 end
 
 function ScreenSaver:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
-            general = {
-                opacity1 = 0.30,
-                opacity2 = 0.50,
-                combatwarning = true,
-            },
-            panel = {
-                automove = true,
-            },
+            afkStart = nil,
+            combatwarning = true,
         },
     })
     db = self.db.profile
-    ndb = RealUI.db.profile
-    ndbc = RealUI.db.char
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
     ScreenSaver:CreateFrames()
-
-    self:RegisterEvent("PLAYER_LOGIN")
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function ScreenSaver:OnEnable()
-    self:RegisterEvent("PLAYER_FLAGS_CHANGED", "AFKEvent")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "AFKEvent")
-    self:RegisterEvent("PLAYER_REGEN_DISABLED", "AFKEvent")
+    self:RegisterEvent("PLAYER_FLAGS_CHANGED", "UpdateTimer")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateTimer")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateTimer")
 
-    if LoggedIn then
-        ScreenSaver:RefreshMod()
-    end
+    ScreenSaver:RefreshMod()
 end
 
 function ScreenSaver:OnDisable()
@@ -315,10 +130,5 @@ function ScreenSaver:OnDisable()
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 
-    AFKTimer.elapsed = 0
-    AFKTimer.lastElapsed = 0
-    self.panel:Hide()
-    AFKTimer:Hide()
-    ScreenSaver:ToggleOverlay(false)
-    ScreenSaver:ToggleWarning(false)
+    self.frame:Hide()
 end

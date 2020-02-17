@@ -187,7 +187,7 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
         Button.upgrades = upgrades
 
         local dura = _G.CreateFrame("StatusBar", nil, Button)
-        dura:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
+        dura:SetStatusBarTexture(private.textures.plain)
         dura:SetOrientation("VERTICAL")
         dura:SetMinMaxValues(0, 1)
         dura:SetValue(0)

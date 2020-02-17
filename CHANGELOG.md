@@ -1,4 +1,23 @@
-﻿## [2.1.5] - 2020-02-16 ##
+﻿## [2.1.6] - 2020-02-17 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Changed ###
+
+  * Improved minimap world markers
+  * Minor tweaks to the color picker
+
+### Fixed ###
+
+  * Font path error
+
+
+
+
+## [2.1.5] - 2020-02-16 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -432,6 +451,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.6]: https://github.com/RealUI/RealUI/compare/2.1.5...2.1.6
 [2.1.5]: https://github.com/RealUI/RealUI/compare/2.1.4...2.1.5
 [2.1.4]: https://github.com/RealUI/RealUI/compare/2.1.3...2.1.4
 [2.1.3]: https://github.com/RealUI/RealUI/compare/2.1.2...2.1.3

@@ -2,7 +2,7 @@
 ## Title: RealUI Skins
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe
-## Version: 2.1.5
+## Version: 2.1.6
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibItemUpgradeInfo-1.0, LibSharedMedia-3.0, Masque, nibRealUI_Dev, RealUI_AsianFonts
@@ -14,6 +14,7 @@ Misc.lua
 Locale.lua
 RealUI_Skins.lua
 
+FrameXML\ColorPickerFrame.lua
 FrameXML\LFGFrame.lua
 FrameXML\MailFrame.lua
 FrameXML\PaperDollFrame.lua

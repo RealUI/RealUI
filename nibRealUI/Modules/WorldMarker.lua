@@ -1,7 +1,11 @@
 local _, private = ...
 
+-- Lua Globals --
+-- luacheck: globals tostring
+
 -- Libs --
 local Aurora = _G.Aurora
+local Base = Aurora.Base
 local Color = Aurora.Color
 
 -- RealUI --
@@ -11,205 +15,155 @@ local db
 local MODNAME = "WorldMarker"
 local WorldMarker = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
-local LoggedIn = false
-
-local WMF = {}
-
-local ButtonWidthExpanded = 18
-local ButtonWidthCollapsed = 3
-
-local NeedRefreshed, FramesCreated
-
-local MarkerColors = {
-    Color.white,   -- Icon 8 - Skull
-    Color.red,     -- Icon 7 - Cross
-    Color.marine,  -- Icon 6 - Square
-    Color.cyan,    -- Icon 5 - Moon
-    Color.green,   -- Icon 4 - Triangle
-    Color.magenta, -- Icon 3 - Diamond
-    Color.orange,  -- Icon 2 - Circle
-    Color.yellow,  -- Icon 1 - Star
-    Color.gray,    -- Clear all
+local BUTTON_WIDTH = 18
+local markers = {
+    {   -- Icon 8 - Skull
+        color = Color.white,
+        text = _G.WORLD_MARKER8,
+        id = "8"
+    },
+    {   -- Icon 7 - Cross
+        color = Color.red,
+        text = _G.WORLD_MARKER4,
+        id = "4"
+    },
+    {   -- Icon 6 - Square
+        color = Color.marine,
+        text = _G.WORLD_MARKER1,
+        id = "1"
+    },
+    {   -- Icon 5 - Moon
+        color = Color.cyan,
+        text = _G.WORLD_MARKER7,
+        id = "7"
+    },
+    {   -- Icon 4 - Triangle
+        color = Color.green,
+        text = _G.WORLD_MARKER2,
+        id = "2"
+    },
+    {   -- Icon 3 - Diamond
+        color = Color.magenta,
+        text = _G.WORLD_MARKER3,
+        id = "3"
+    },
+    {   -- Icon 2 - Circle
+        color = Color.orange,
+        text = _G.WORLD_MARKER6,
+        id = "6"
+    },
+    {   -- Icon 1 - Star
+        color = Color.yellow,
+        text = _G.WORLD_MARKER5,
+        id = "5"
+    },
+    {   -- Clear all
+        color = Color.gray,
+        text = _G.REMOVE_WORLD_MARKERS
+    },
 }
 
--- OnLeave
-local function ButtonOnLeave(index)
-    WMF.Buttons[index].mouseover = false
-    WorldMarker:HighlightUpdate(WMF.Buttons[index])
-end
+function WorldMarker:UpdateUsed()
+    local frame = self.frame
+    for index = 1, #markers do
+        local button = frame[index]
 
--- OnEnter
-local function ButtonOnEnter(index)
-    WMF.Buttons[index].mouseover = true
-    WorldMarker:HighlightUpdate(WMF.Buttons[index])
+        if markers[index].id then
+            if _G.IsRaidMarkerActive(markers[index].id) then
+                button:SetBackdropBorderColor(Color.gray)
+            else
+                button:SetBackdropBorderColor(markers[index].color)
+            end
+        end
+    end
 end
-
--- Toggle visibility of World Marker frame
 function WorldMarker:UpdateVisibility()
-    -- Refresh
-    if ( (NeedRefreshed or not FramesCreated) and (not _G.InCombatLockdown()) ) then
-        -- Mod needs refreshing
-        WorldMarker:RefreshMod()
-        return
-    elseif _G.InCombatLockdown() then
-        NeedRefreshed = true
-        return
-    end
-
-    -- Should we hide the WM?
-    local Hide = false
-    if not RealUI:GetModuleEnabled(MODNAME) then Hide = true end
-    local Inst, InstType = _G.IsInInstance()
-    if Inst and not(Hide) then
-        if (InstType == "pvp" and not(db.visibility.pvp)) then          -- Battlegrounds
-            Hide = true
-        elseif (InstType == "arena" and not(db.visibility.arena)) then  -- Arena
-            Hide = true
-        elseif (InstType == "party" and not(db.visibility.party)) then  -- 5 Man Dungeons
-            Hide = true
-        elseif (InstType == "raid" and not(db.visibility.raid)) then    -- Raid Dungeons
-            Hide = true
+    local shouldShow = false
+    if _G.GetNumGroupMembers() > 0 and _G.UnitIsGroupLeader("player") or _G.UnitIsGroupAssistant("player") then
+        local _, instanceType = _G.IsInInstance()
+        if db.visibility[instanceType] ~= nil then
+            shouldShow = db.visibility[instanceType]
         end
     end
-    if not(Hide) and not( (_G.GetNumGroupMembers() > 0) and (_G.UnitIsGroupLeader("player") or _G.UnitIsGroupAssistant("player")) ) then
-        Hide = true
-    end
 
-    -- Update visibility
-    if not(Hide) then
-        -- Viable to use World Markers
-        if not WMF.Parent:IsShown() then
-            WMF.Parent:Show()
-        end
+    if shouldShow then
+        self.frame:Show()
     else
-        -- Not viable to use World Markers
-        if WMF.Parent:IsShown() then
-            WMF.Parent:Hide()
-        end
+        self.frame:Hide()
     end
 end
+function WorldMarker:UpdateSize()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
 
-local function WorldMarker_oocUpdate()
-    if NeedRefreshed then
-        WorldMarker:RefreshMod()
-    else
-        WorldMarker:UpdateVisibility()
-    end
-end
-function WorldMarker:UpdateLockdown(...)
-    RealUI.TryInCombat(WorldMarker_oocUpdate)
-end
+    local frame = self.frame
+    local maxHeight = frame:GetHeight()
 
-function WorldMarker:HighlightUpdate(btn)
-    btn.bg:SetWidth(btn.mouseover and ButtonWidthExpanded or ButtonWidthCollapsed)
-end
-
--- Set World Marker Position
-function WorldMarker:UpdatePosition()
-    if not FramesCreated then return end
-
-    local MMHeight = _G.Minimap:GetHeight()
-
-    -- Parent
-    WMF.Parent:ClearAllPoints()
-    WMF.Parent:SetPoint("TOPLEFT", _G["Minimap"], "TOPRIGHT", 0, 0)
-    WMF.Parent:SetFrameStrata("BACKGROUND")
-    WMF.Parent:SetFrameLevel(5)
-
-    WMF.Parent:SetWidth(ButtonWidthExpanded)
-    WMF.Parent:SetHeight(MMHeight)
-
-    local numBtns = #MarkerColors
-    local totHeight, btnHeight = 0, _G.floor(MMHeight / numBtns) + 2
-    for i = 1, numBtns do
-        WMF.Buttons[i]:ClearAllPoints()
-        if i == numBtns then
-            WMF.Buttons[i]:SetPoint("TOPLEFT", WMF.Parent, "TOPLEFT", 0, -totHeight + 1)
-            WMF.Buttons[i]:SetHeight(MMHeight - totHeight + 2)
-            WMF.Buttons[i].bg:SetHeight(MMHeight - totHeight + 2)
+    local numBtns = #markers
+    local totalHeight, buttonHeight = 0, _G.ceil(maxHeight / numBtns)
+    for index = 1, numBtns do
+        if markers[index].id then
+            frame[index]:SetHeight(buttonHeight)
         else
-            WMF.Buttons[i]:SetPoint("TOPLEFT", WMF.Parent, "TOPLEFT", 0, -totHeight + 1)
-            WMF.Buttons[i]:SetHeight(btnHeight)
-            WMF.Buttons[i].bg:SetHeight(btnHeight)
+            frame[index]:SetHeight(maxHeight - totalHeight)
         end
-        WMF.Buttons[i]:SetWidth(ButtonWidthExpanded)
-        totHeight = totHeight + btnHeight - 1
+
+        totalHeight = totalHeight + buttonHeight
     end
 end
 
 -----------------
+local function OnLeave(self)
+    self.text:Hide()
+    self:SetBackdropOption("offsets", {
+        left = 0,
+        right = (BUTTON_WIDTH - 2),
+        top = 0,
+        bottom = 0,
+    })
+end
+local function OnEnter(self)
+    self.text:Show()
+    self:SetBackdropOption("offsets", {
+        left = 0,
+        right = 0,
+        top = 0,
+        bottom = 0,
+    })
+end
 local function CreateButton(id)
-    local frame = _G.CreateFrame("Button", "RealUI_WorldMarker_Button".._G.tostring(id), WMF.Parent, "SecureActionButtonTemplate")
+    local button = _G.CreateFrame("Button", "RealUI_WorldMarker"..id, WorldMarker.frame, "SecureActionButtonTemplate")
+    button:SetSize(BUTTON_WIDTH, 1)
+    Base.SetBackdrop(button, markers[id].color)
 
-    frame:SetAttribute("type", "macro")
-    frame:SetScript("OnEnter", function(self) ButtonOnEnter(id) end)
-    frame:SetScript("OnLeave", function(self) ButtonOnLeave(id) end)
+    button:SetNormalFontObject("GameFontNormal")
+    button:SetText(markers[id].text)
+    button.text = button:GetFontString()
+    button.text:SetPoint("LEFT", button, "RIGHT", 2, 0)
 
-    local color = MarkerColors[id]
-    frame.bg = _G.CreateFrame("Frame", nil, frame)
-    frame.bg:SetPoint("LEFT", frame, "LEFT", 0, 0)
-    frame.bg:SetWidth(ButtonWidthCollapsed)
-    _G.Aurora.Base.SetBackdrop(frame.bg, color)
+    button:SetAttribute("type", "worldmarker")
+    button:SetScript("OnEnter", OnEnter)
+    button:SetScript("OnLeave", OnLeave)
+    OnLeave(button)
 
-    return frame
-end
-
-local function CreateFrames()
-    if _G.InCombatLockdown() or FramesCreated then return end
-
-    -- Parent Frame
-    WMF.Parent = _G.CreateFrame("Frame", "RealUI_WorldMarker", _G["Minimap"])
-
-    -- Buttons
-    local numBtns = #MarkerColors
-    WMF.Buttons = {}
-    for i = 1, numBtns do
-        if i == numBtns then
-            --clear markers
-            WMF.Buttons[i] = CreateButton(i)
-            WMF.Buttons[i]:SetAttribute("macrotext", "/cwm all")
-        else
-            WMF.Buttons[i] = CreateButton(i)
-            WMF.Buttons[i]:SetAttribute("macrotext", "/wm ".._G.WORLD_RAID_MARKER_ORDER[i])
-        end
-    end
-
-    FramesCreated = true
-end
-
-function WorldMarker:PLAYER_LOGIN()
-    LoggedIn = true
-
-    WorldMarker:RefreshMod()
-    _G.hooksecurefunc(_G.Minimap, "SetSize", function()
-        if not(_G.InCombatLockdown()) then
-            WorldMarker:UpdatePosition()
-        end
-    end)
+    return button
 end
 
 ---------------
+local function Refresh()
+    WorldMarker:UpdateUsed()
+    WorldMarker:UpdateSize()
+    WorldMarker:UpdateVisibility()
+end
 function WorldMarker:RefreshMod()
-    if not RealUI:GetModuleEnabled(MODNAME) or not _G.IsAddOnLoaded("Blizzard_CompactRaidFrames") then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
 
-    db = self.db.profile
+    RealUI.TryInCombat(Refresh)
+end
 
-    -- Create Frames if it has been delayed
-    if not _G.InCombatLockdown() and not FramesCreated then
-        CreateFrames()
-    end
-
-    -- Refresh Mod
-    if _G.InCombatLockdown() or not FramesCreated then
-        -- In combat or have no frames, set flag so we can refresh once combat ends
-        NeedRefreshed = true
-    else
-        -- Ready to refresh
-        NeedRefreshed = false
-
-        WorldMarker:UpdatePosition()
-        WorldMarker:UpdateVisibility()
-    end
+function WorldMarker:GLOBAL_MOUSE_UP()
+    _G.C_Timer.After(1, function()
+        self:UpdateUsed()
+    end)
 end
 
 function WorldMarker:OnInitialize()
@@ -221,40 +175,61 @@ function WorldMarker:OnInitialize()
                 arena = false,
                 party = true,
                 raid = true,
+                none = true,
             },
         },
     })
     db = self.db.profile
 
+
+    local frame = _G.CreateFrame("Frame", "RealUI_WorldMarker", _G.Minimap)
+    frame:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 1, 1)
+    frame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMRIGHT", 1, -1)
+    frame:SetWidth(BUTTON_WIDTH)
+    self.frame = frame
+
+    for index = 1, #markers do
+        local button = CreateButton(index)
+
+        if index == 1 then
+            button:SetPoint("TOPLEFT")
+        else
+            button:SetPoint("TOPLEFT", frame[index - 1], "BOTTOMLEFT", 0, 0)
+        end
+
+        if markers[index].id then
+            button:SetAttribute("action", "set")
+            button:SetAttribute("marker", markers[index].id)
+        else
+            button:SetAttribute("action", "clear")
+        end
+
+        frame[index] = button
+    end
+
+    _G.hooksecurefunc(_G.Minimap, "SetSize", function()
+        WorldMarker:UpdateSize()
+    end)
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function WorldMarker:OnEnable()
-    self:RegisterEvent("PLAYER_LOGIN")
-    self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateLockdown")
-    self:RegisterBucketEvent({"PLAYER_ENTERING_WORLD", "UNIT_FLAGS", "PARTY_LEADER_CHANGED", "GROUP_ROSTER_UPDATE"}, 1, "UpdateVisibility")
-    -- self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateVisibility")
-    -- self:RegisterEvent("UNIT_FLAGS", "UpdateVisibility")
-    -- self:RegisterEvent("PARTY_LEADER_CHANGED", "UpdateVisibility")
-    -- self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateVisibility")
+    self:RegisterEvent("GLOBAL_MOUSE_UP")
 
-    if LoggedIn then WorldMarker:RefreshMod() end
+    self.bucket = self:RegisterBucketEvent({
+        "PLAYER_ENTERING_WORLD",
+        "UNIT_FLAGS",
+        "PARTY_LEADER_CHANGED",
+        "GROUP_ROSTER_UPDATE",
+    }, 1, "UpdateVisibility")
+
+    WorldMarker:RefreshMod()
 end
 
 function WorldMarker:OnDisable()
-    self:UnregisterEvent("PLAYER_LOGIN")
-    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-    self:UnregisterEvent("UNIT_FLAGS")
-    self:UnregisterEvent("PARTY_LEADER_CHANGED")
-    self:UnregisterEvent("GROUP_ROSTER_UPDATE")
+    self:UnregisterEvent("GLOBAL_MOUSE_UP")
+    self:UnregisterBucket(self.bucket)
 
-    NeedRefreshed = false
-
-    if _G.InCombatLockdown() then
-        -- Trying to disable while in combat. Display message and block mouse input to World Markers.
-        _G.print("|cff00ffffRealUI: |r World Marker can't fully disable during combat. Please wait until you leave combat, then reload the UI (type: /rl)")
-    else
-        WorldMarker:UpdateVisibility()
-    end
+    self.frame:Hide()
 end

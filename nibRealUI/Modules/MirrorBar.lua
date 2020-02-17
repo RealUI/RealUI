@@ -161,7 +161,7 @@ function MirrorBar:CreateFrames()
 
     -- Bar + Text
     MBFrames.bar = _G.CreateFrame("StatusBar", nil, MBFrames.bg)
-    MBFrames.bar:SetStatusBarTexture(RealUI.media.textures.plain)
+    MBFrames.bar:SetStatusBarTexture(RealUI.textures.plain)
     MBFrames.bar:SetMinMaxValues(0, 1)
     MBFrames.bar:SetPoint("TOPLEFT", MBFrames.bg, "TOPLEFT", 1, -1)
     MBFrames.bar:SetPoint("BOTTOMRIGHT", MBFrames.bg, "BOTTOMRIGHT", -1, 1)

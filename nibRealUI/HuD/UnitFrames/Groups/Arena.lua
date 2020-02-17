@@ -64,7 +64,7 @@ local function CreateHealthBar(parent)
     parent.Health = _G.CreateFrame("StatusBar", nil, parent)
     parent.Health:SetPoint("BOTTOMLEFT", 1, 4)
     parent.Health:SetPoint("TOPRIGHT", -1, -1)
-    parent.Health:SetStatusBarTexture(RealUI.media.textures.plain)
+    parent.Health:SetStatusBarTexture(RealUI.textures.plain)
     local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
     parent.Health.frequentUpdates = true
@@ -101,7 +101,7 @@ local function CreatePowerBar(parent)
     power:SetFrameLevel(6)
     power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 1)
     power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 3)
-    power:SetStatusBarTexture(RealUI.media.textures.plain)
+    power:SetStatusBarTexture(RealUI.textures.plain)
     power.colorPower = true
     power.PostUpdate = function(bar, unit, cur, min, max)
         bar:SetShown(max > 0)
@@ -145,7 +145,7 @@ local function CreateTrinket(parent)
 
     trinket.timer = _G.CreateFrame("StatusBar", nil, trinket)
     trinket.timer:SetMinMaxValues(0, 1)
-    trinket.timer:SetStatusBarTexture(RealUI.media.textures.plain)
+    trinket.timer:SetStatusBarTexture(RealUI.textures.plain)
     trinket.timer:SetStatusBarColor(1,1,1,1)
 
     trinket.timer:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1, 1)

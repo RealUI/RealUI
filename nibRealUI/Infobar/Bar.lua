@@ -771,7 +771,7 @@ function Infobar:CreateBar()
     -- Watch bars
     local watch = {}
     watch.main = _G.CreateFrame("StatusBar", nil, frame)
-    watch.main:SetStatusBarTexture(RealUI.media.textures.plain)
+    watch.main:SetStatusBarTexture(RealUI.textures.plain)
     watch.main:SetAllPoints()
     watch.main:Hide()
 
@@ -781,7 +781,7 @@ function Infobar:CreateBar()
     watch.main.rested:Hide()
     for i = 1, 2 do
         local bar = _G.CreateFrame("StatusBar", nil, frame)
-        bar:SetStatusBarTexture(RealUI.media.textures.plain)
+        bar:SetStatusBarTexture(RealUI.textures.plain)
         Scale.Height(bar, 1)
         bar:SetFrameLevel(watch.main:GetFrameLevel() + 1)
         bar:Hide()

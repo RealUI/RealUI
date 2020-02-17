@@ -226,7 +226,7 @@ local function SkinAceGUI()
                         bg:SetPoint("TOPLEFT", 3, -3)
 
                         check:SetSize(18, 18)
-                        check:SetTexture([[Interface\Buttons\WHITE8x8]])
+                        check:SetTexture(private.textures.plain)
                         check:SetBlendMode("ADD")
                     else
                         bg:SetSize(18, 18)

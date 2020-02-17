@@ -203,5 +203,8 @@ L["UnitFrames_SetFocus"] = "Click to set Focus"
 L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
 L["UnitFrames_Units"] = "Units"
 L["Version"] = "Version"
+L["WorldMarker"] = "World Marker"
+L["WorldMarkerDesc"] = "Quick access to World Markers"
+L["WorldMarker_Show"] = "Show the World Marker in..."
 
 RealUI.L = L

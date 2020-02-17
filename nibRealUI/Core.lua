@@ -126,7 +126,6 @@ local defaults, charInit do
                 hudSize = 2,
                 reverseUnitFrameBars = false,
             },
-            media = RealUI.media
         },
     }
 end
@@ -472,8 +471,9 @@ function RealUI:OnEnable()
         padding = 10,
         spacing = 1,
         backdrop = {
-            bgFile = [[Interface\Buttons\WHITE8x8]],
-            edgeFile = [[Interface\Buttons\WHITE8x8]], edgeSize = 1,
+            bgFile = RealUI.textures.plain,
+            edgeFile = RealUI.textures.plain,
+            edgeSize = 1,
         },
         backdropColor = _G.CreateColor(black.r, black.g, black.b, a),
         backdropBorderColor = black,
