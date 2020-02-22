@@ -399,102 +399,6 @@ local core do
             },
         }
     end
-    local worldMarker do
-        local MODNAME = "WorldMarker"
-        local WorldMarker = RealUI:GetModule(MODNAME)
-        worldMarker = {
-            name = L["WorldMarker"],
-            desc = L["WorldMarkerDesc"],
-            type = "group",
-            childGroups = "tab",
-            args = {
-                header = {
-                    name = L["WorldMarker"],
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = L["WorldMarkerDesc"],
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = L["General_Enabled"],
-                    desc = L["General_EnabledDesc"]:format(L[MODNAME]),
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    end,
-                    order = 30,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-                visibility = {
-                    name = L["WorldMarker_Show"],
-                    type = "group",
-                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 40,
-                    args = {
-                        arena = {
-                            name = _G.ARENA_BATTLES,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.arena end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.arena = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 10,
-                        },
-                        pvp = {
-                            name = _G.BATTLEGROUNDS,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.pvp end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.pvp = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 20,
-                        },
-                        party = {
-                            name = _G.DUNGEONS,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.party end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.party = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 30,
-                        },
-                        raid = {
-                            name = _G.RAIDS,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.raid end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.raid = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 40,
-                        },
-                        none = {
-                            name = _G.WORLD,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.none end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.none = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 50,
-                        },
-                    },
-                },
-            },
-        }
-    end
     core = {
         name = "Core",
         desc = "Core RealUI modules.",
@@ -503,7 +407,6 @@ local core do
         args = {
             infobar = infobar,
             screenSaver = screenSaver,
-            worldMarker = worldMarker,
         },
     }
 end

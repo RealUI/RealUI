@@ -10,7 +10,6 @@ local Color = Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
-local db
 
 local MODNAME = "WorldMarker"
 local WorldMarker = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
@@ -78,15 +77,7 @@ function WorldMarker:UpdateUsed()
     end
 end
 function WorldMarker:UpdateVisibility()
-    local shouldShow = false
-    if _G.GetNumGroupMembers() > 0 and _G.UnitIsGroupLeader("player") or _G.UnitIsGroupAssistant("player") then
-        local _, instanceType = _G.IsInInstance()
-        if db.visibility[instanceType] ~= nil then
-            shouldShow = db.visibility[instanceType]
-        end
-    end
-
-    if shouldShow then
+    if _G.IsInGroup() and _G.UnitIsGroupLeader("player") or _G.UnitIsGroupAssistant("player") then
         self.frame:Show()
     else
         self.frame:Hide()
@@ -167,21 +158,6 @@ function WorldMarker:GLOBAL_MOUSE_UP()
 end
 
 function WorldMarker:OnInitialize()
-    self.db = RealUI.db:RegisterNamespace(MODNAME)
-    self.db:RegisterDefaults({
-        profile = {
-            visibility = {
-                pvp = false,
-                arena = false,
-                party = true,
-                raid = true,
-                none = true,
-            },
-        },
-    })
-    db = self.db.profile
-
-
     local frame = _G.CreateFrame("Frame", "RealUI_WorldMarker", _G.Minimap)
     frame:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 1, 1)
     frame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMRIGHT", 1, -1)
@@ -211,7 +187,7 @@ function WorldMarker:OnInitialize()
         WorldMarker:UpdateSize()
     end)
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    self:SetEnabledState(RealUI:GetModuleEnabled("MinimapAdv"))
 end
 
 function WorldMarker:OnEnable()
