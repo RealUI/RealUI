@@ -216,13 +216,11 @@ end
 
 function WorldMarker:OnEnable()
     self:RegisterEvent("GLOBAL_MOUSE_UP")
-
     self.bucket = self:RegisterBucketEvent({
         "PLAYER_ENTERING_WORLD",
-        "UNIT_FLAGS",
         "PARTY_LEADER_CHANGED",
         "GROUP_ROSTER_UPDATE",
-    }, 1, "UpdateVisibility")
+    }, 1, "RefreshMod")
 
     WorldMarker:RefreshMod()
 end
