@@ -62,10 +62,11 @@ local markers = {
     },
 }
 
-function WorldMarker:UpdateUsed()
-    local frame = self.frame
+local function UpdateUsed()
+    if not WorldMarker.frame:IsShown() then return end
+
     for index = 1, #markers do
-        local button = frame[index]
+        local button = WorldMarker.frame[index]
 
         if markers[index].id then
             if _G.IsRaidMarkerActive(markers[index].id) then
@@ -76,17 +77,17 @@ function WorldMarker:UpdateUsed()
         end
     end
 end
-function WorldMarker:UpdateVisibility()
+local function UpdateVisibility()
     if _G.IsInGroup() and _G.UnitIsGroupLeader("player") or _G.UnitIsGroupAssistant("player") then
-        self.frame:Show()
+        WorldMarker.frame:Show()
     else
-        self.frame:Hide()
+        WorldMarker.frame:Hide()
     end
 end
-function WorldMarker:UpdateSize()
+local function UpdateSize()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
 
-    local frame = self.frame
+    local frame = WorldMarker.frame
     local maxHeight = frame:GetHeight()
 
     local numBtns = #markers
@@ -140,21 +141,10 @@ local function CreateButton(id)
 end
 
 ---------------
-local function Refresh()
-    WorldMarker:UpdateUsed()
-    WorldMarker:UpdateSize()
-    WorldMarker:UpdateVisibility()
-end
 function WorldMarker:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
 
-    RealUI.TryInCombat(Refresh)
-end
-
-function WorldMarker:GLOBAL_MOUSE_UP()
-    _G.C_Timer.After(1, function()
-        self:UpdateUsed()
-    end)
+    RealUI.TryInCombat(UpdateVisibility)
 end
 
 function WorldMarker:OnInitialize()
@@ -183,15 +173,13 @@ function WorldMarker:OnInitialize()
         frame[index] = button
     end
 
-    _G.hooksecurefunc(_G.Minimap, "SetSize", function()
-        WorldMarker:UpdateSize()
-    end)
+    _G.hooksecurefunc(_G.Minimap, "SetSize", UpdateSize)
+    _G.C_Timer.NewTicker(1, UpdateUsed)
 
     self:SetEnabledState(RealUI:GetModuleEnabled("MinimapAdv"))
 end
 
 function WorldMarker:OnEnable()
-    self:RegisterEvent("GLOBAL_MOUSE_UP")
     self.bucket = self:RegisterBucketEvent({
         "PLAYER_ENTERING_WORLD",
         "PARTY_LEADER_CHANGED",
@@ -202,7 +190,6 @@ function WorldMarker:OnEnable()
 end
 
 function WorldMarker:OnDisable()
-    self:UnregisterEvent("GLOBAL_MOUSE_UP")
     self:UnregisterBucket(self.bucket)
 
     self.frame:Hide()
