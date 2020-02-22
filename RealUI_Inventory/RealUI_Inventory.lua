@@ -12,7 +12,8 @@ private.Inventory = Inventory
 local defaults = {
     global = {
         maxHeight = 0.5,
-        sellJunk = true
+        sellJunk = true,
+        assignedFilters = {}
     }
 }
 

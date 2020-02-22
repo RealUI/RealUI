@@ -32,6 +32,7 @@ end
 --[[ Item Slots ]]--
 local ItemSlotMixin = _G.CreateFromMixins(_G.ItemLocationMixin)
 function ItemSlotMixin:OnLoad()
+    self:HookScript("OnClick", self.OnClick)
 end
 function ItemSlotMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
@@ -71,6 +72,11 @@ function ItemSlotMixin:Update()
 
     self:UpdateItemContextMatching()
     self:SetMatchesSearch(not isFiltered)
+end
+function ItemSlotMixin:OnClick(button)
+    if button == "RightButton" and _G.IsAltKeyDown() and _G.IsControlKeyDown() then
+        private.menu:Open(self)
+    end
 end
 
 

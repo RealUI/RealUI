@@ -174,16 +174,18 @@ end
 function private.AddSlotToBag(slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
-    local filterTag
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        if private.filters[tag].filter(slot) then
-            if filterTag then
-                -- Lower ranks have priority
-                if private.filters[filterTag].rank > private.filters[tag].rank then
+    local filterTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
+    if not filterTag then
+        for i, tag in ipairs(Inventory.db.global.filters) do
+            if private.filters[tag].filter(slot) then
+                if filterTag then
+                    -- Lower ranks have priority
+                    if private.filters[filterTag].rank > private.filters[tag].rank then
+                        filterTag = tag
+                    end
+                else
                     filterTag = tag
                 end
-            else
-                filterTag = tag
             end
         end
     end

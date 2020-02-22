@@ -3,14 +3,56 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals tinsert ipairs
 
+-- Libs --
+local LDD = _G.LibStub("LibDropDown")
+
 -- RealUI --
 local Inventory = private.Inventory
 
+local menu do
+    menu = _G.CreateFrame("Frame", nil, _G.UIParent)
+    menu:SetFrameStrata("DIALOG")
+
+    local list = LDD:NewMenu(menu, "RealUI_InventoryDropDown")
+    list:SetStyle("REALUI")
+    list:AddLine({
+        text = "Choose bag",
+        isTitle = true,
+    })
+    menu.list = list
+
+    function menu:Open(slot)
+        if slot.item then
+            menu.item = slot.item
+            list:SetAnchor("BOTTOMLEFT", slot, "TOPLEFT")
+            list:Toggle()
+        end
+    end
+    private.menu = menu
+end
+
 private.filters = {}
 private.filterList = {}
+local function SetToFilter(filterButton, button, args)
+    if filterButton.checked() then
+        Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
+    else
+        Inventory.db.global.assignedFilters[menu.item:GetItemID()] = args
+    end
+    private.Update()
+end
+
 local function CreateFilter(tag, info)
     private.filters[tag] = info
     tinsert(private.filterList, tag)
+    menu.list:AddLine({
+        text = info.name,
+        func = SetToFilter,
+        args = {tag},
+        checked = function(...)
+            return Inventory.db.global.assignedFilters[menu.item:GetItemID()] == tag
+        end
+    })
 end
 
 CreateFilter("new", {
