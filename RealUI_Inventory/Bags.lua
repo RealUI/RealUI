@@ -239,7 +239,6 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     local button = _G.CreateFrame("Button", nil, bag)
     button:SetPoint("TOPLEFT", 7, -7)
     button:SetSize(16, 16)
-    button:SetHitRectInsets(-5, -50, -5, -5)
 
     local atlasInfo = _G.C_Texture.GetAtlasInfo(atlas)
     button:SetNormalAtlas(atlas)
@@ -252,10 +251,13 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     button:SetHighlightAtlas(atlas)
     button:GetHighlightTexture():SetAllPoints(texture)
 
-    button:SetNormalFontObject("GameFontDisableSmall")
-    button:SetPushedTextOffset(0, 0)
-    button:SetText(text)
-    button:GetFontString():SetPoint("LEFT", button, "RIGHT", 1, 1)
+    if text then
+        button:SetHitRectInsets(-5, -50, -5, -5)
+        button:SetNormalFontObject("GameFontDisableSmall")
+        button:SetPushedTextOffset(0, 0)
+        button:SetText(text)
+        button:GetFontString():SetPoint("LEFT", button, "RIGHT", 1, 1)
+    end
 
     button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetScript("OnClick", onClick)
@@ -429,6 +431,16 @@ local function CreateBag(bagType)
     close:SetPoint("TOPRIGHT", 5, 5)
     Skin.UIPanelCloseButton(close)
     main.close = close
+
+    if bagType == "main" then
+        local settingsButton = CreateFeatureButton(main, nil, "Warfronts-BaseMapIcons-Empty-Workshop-Minimap-small",
+        function(self)
+            RealUI.LoadConfig("RealUI", "inventory")
+        end)
+        settingsButton:ClearAllPoints()
+        settingsButton:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
+        main.settingsButton = settingsButton
+    end
 
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
     searchBox:SetPoint("BOTTOMLEFT", 9, 5)
