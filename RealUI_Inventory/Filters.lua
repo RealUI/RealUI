@@ -122,6 +122,14 @@ for i = 1, #tradegoods do
     })
 end
 
+CreateFilter("sets", {
+    name = (":"):split(_G.EQUIPMENT_SETS),
+    rank = 1,
+    filter = function(slot)
+        return _G.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
+    end,
+})
+
 CreateFilter("equipment", {
     name = _G.BAG_FILTER_EQUIPMENT,
     rank = 1,
