@@ -164,13 +164,13 @@ function RealUI:SetLowResOptimizations(...)
 end
 
 function RealUI:IsUsingLowResDisplay()
-    local _, resHeight = _G.GetPhysicalScreenSize()
-    return resHeight < 900
+    local _, pysHeight = _G.GetPhysicalScreenSize()
+    return pysHeight < 1080
 end
 
 function RealUI:IsUsingHighResDisplay()
-    local _, resHeight = _G.GetPhysicalScreenSize()
-    return resHeight >= 1440
+    local _, pysHeight = _G.GetPhysicalScreenSize()
+    return pysHeight >= 1440
 end
 
 -- Layout Updates
