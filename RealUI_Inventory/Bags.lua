@@ -104,6 +104,8 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
         columnHeight = columnHeight + height + 5
     else
         local parent = bag.parent
+        bag:ClearAllPoints()
+
         if columnHeight + height >= maxHeight then
             if parent.bagType == "main" then
                 bag:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
@@ -116,9 +118,11 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
             columnHeight = columnHeight + height + 5
 
             local anchor = "main"
-            if bag.index > 1 then
-                anchor = Inventory.db.global.filters[bag.index - (1 + numSkipped)]
+            local index = Inventory:GetFilterIndex(bag.tag)
+            if index > 1 then
+                anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
             end
+
             if parent.bagType == "main" then
                 bag:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
             else
@@ -506,14 +510,12 @@ local function CreateBag(bagType)
         local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
         SetupBag(bag)
 
-        local info = private.filters[tag]
         local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         name:SetPoint("TOPLEFT")
         name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
-        name:SetText(info.name)
+        name:SetText(private.filters[tag].name)
         name:SetJustifyV("MIDDLE")
 
-        bag.index = i
         bag.tag = tag
         bag.parent = main
 

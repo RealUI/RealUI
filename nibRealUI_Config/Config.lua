@@ -400,11 +400,13 @@ function RealUI.ToggleConfig(app, section, ...)
     --if not app:match("RealUI") then app = "RealUI" end
     if ACD.OpenFrames[app] and not section then
         ACD:Close(app)
-    elseif section or app ~= "HuD" then
+    elseif app == "HuD" then
         ACD:Open(app, section)
-    end
-
-    if ... then
+        if ... then
+            ACD:SelectGroup(app, section, ...)
+        end
+    else
+        ACD:Open(app)
         ACD:SelectGroup(app, section, ...)
     end
 end

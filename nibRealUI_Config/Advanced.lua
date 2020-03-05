@@ -1,9 +1,11 @@
 local _, private = ...
+
 -- Lua Globals --
-local next, tostring = _G.next, _G.tostring
+-- luacheck: globals ipairs next tremove tinsert
+-- luacheck: globals tostring tonumber
 
 -- Libs --
---local ACD = _G.LibStub("AceConfigDialog-3.0")
+local ACR = _G.LibStub("AceConfigRegistry-3.0")
 
 -- RealUI --
 local RealUI = _G.RealUI
@@ -443,6 +445,62 @@ local inventory do
                 set = appSet,
                 order = 2,
             },
+            filters = {
+                name = _G.FILTERS,
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                }
+            }
+        }
+    end
+
+    local function SetIndex(tag, oldIndex, newIndex)
+        if oldIndex == newIndex then return end
+        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
+
+        tremove(Inventory.db.global.filters, oldIndex)
+        tinsert(Inventory.db.global.filters, newIndex, tag)
+        ACR:NotifyChange("RealUI")
+        Inventory.Update()
+    end
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        args.filters.args[tag.."Index"] = {
+            name = Inventory:GetFilterName(tag),
+            type = "input",
+            width = "half",
+            get = function() return tostring(Inventory:GetFilterIndex(tag)) end,
+            set = function(_, value)
+                SetIndex(tag, Inventory:GetFilterIndex(tag), tonumber(value))
+            end,
+            order = function()
+                return Inventory:GetFilterIndex(tag) * 10
+            end,
+        }
+        args.filters.args[tag.."Up"] = {
+            name = _G.TRACKER_SORT_MANUAL_UP,
+            type = "execute",
+            width = 1.3,
+            func = function()
+                local index = Inventory:GetFilterIndex(tag)
+                SetIndex(tag, index, index - 1)
+            end,
+            order = function()
+                return (Inventory:GetFilterIndex(tag) * 10) + 1
+            end,
+        }
+        args.filters.args[tag.."Down"] = {
+            name = _G.TRACKER_SORT_MANUAL_DOWN,
+            type = "execute",
+            width = 1.3,
+            func = function()
+                local index = Inventory:GetFilterIndex(tag)
+                SetIndex(tag, index, index + 1)
+            end,
+            order = function()
+                return (Inventory:GetFilterIndex(tag) * 10) + 2
+            end,
         }
     end
 

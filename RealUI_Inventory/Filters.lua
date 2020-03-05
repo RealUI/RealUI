@@ -33,6 +33,17 @@ end
 
 private.filters = {}
 private.filterList = {}
+function Inventory:GetFilterIndex(tagQuery)
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        if tag == tagQuery then
+            return i
+        end
+    end
+end
+function Inventory:GetFilterName(tagQuery)
+    return private.filters[tagQuery].name
+end
+
 local function SetToFilter(filterButton, button, args)
     if filterButton.checked() then
         Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
@@ -41,10 +52,10 @@ local function SetToFilter(filterButton, button, args)
     end
     private.Update()
 end
-
 local function CreateFilter(tag, info)
     private.filters[tag] = info
     tinsert(private.filterList, tag)
+
     menu.list:AddLine({
         text = info.name,
         func = SetToFilter,
