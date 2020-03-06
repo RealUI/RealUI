@@ -4,6 +4,9 @@ local _, private = ...
 -- luacheck: globals tinsert next wipe ipairs sort
 
 -- Libs --
+local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
+fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
+
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 local Skin = Aurora.Skin
@@ -244,29 +247,52 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     button:SetPoint("TOPLEFT", 7, -7)
     button:SetSize(16, 16)
 
-    local atlasInfo = _G.C_Texture.GetAtlasInfo(atlas)
-    button:SetNormalAtlas(atlas)
-    local texture = button:GetNormalTexture()
-    texture:ClearAllPoints()
-    texture:SetPoint("CENTER")
-    texture:SetSize(atlasInfo.width, atlasInfo.height)
-    button.texture = texture
-
-    button:SetHighlightAtlas(atlas)
-    button:GetHighlightTexture():SetAllPoints(texture)
+    if fa[atlas] then
+        local icon = button:CreateFontString(nil, "ARTWORK")
+        icon:SetFont(fa.path, 14, "")
+        icon:SetText(fa[atlas])
+        icon:SetTextColor(Color.white:GetRGB())
+        icon:SetJustifyV("MIDDLE")
+        icon:SetJustifyH("CENTER")
+        icon:SetAllPoints()
+        button.icon = icon
+    else
+        local atlasInfo = _G.C_Texture.GetAtlasInfo(atlas)
+        button:SetNormalAtlas(atlas)
+        local texture = button:GetNormalTexture()
+        texture:ClearAllPoints()
+        texture:SetPoint("CENTER")
+        texture:SetSize(atlasInfo.width, atlasInfo.height)
+        button.texture = texture
+    end
 
     if text then
         button:SetHitRectInsets(-5, -50, -5, -5)
         button:SetNormalFontObject("GameFontDisableSmall")
         button:SetPushedTextOffset(0, 0)
         button:SetText(text)
-        button:GetFontString():SetPoint("LEFT", button, "RIGHT", 1, 1)
+        button.text = button:GetFontString()
+        button.text:SetPoint("LEFT", button, "RIGHT", 1, 0)
     end
 
     button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetScript("OnClick", onClick)
-    button:SetScript("OnEnter", onEnter or _G.nop)
-    button:SetScript("OnLeave", function()
+    button:SetScript("OnEnter", function(self)
+        if self.icon then
+            self.icon:SetTextColor(Color.highlight:GetRGB())
+        else
+            self.texture:SetVertexColor(Color.highlight:GetRGB())
+        end
+        if onEnter then
+            onEnter(self)
+        end
+    end)
+    button:SetScript("OnLeave", function(self)
+        if self.icon then
+            self.icon:SetTextColor(Color.white:GetRGB())
+        else
+            self.texture:SetVertexColor(Color.white:GetRGB())
+        end
         _G.GameTooltip_Hide()
     end)
 
@@ -367,7 +393,7 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     SetupBag(main)
 
-    local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "ParagonReputation_Bag",
+    local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
     function(self, button)
         if bagType == "bank" and button == "RightButton" then
             _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
@@ -395,7 +421,6 @@ local function CreateBag(bagType)
             end
         end
     end)
-    showBags.texture:SetSize(13.3333, 16)
     function showBags:ToggleBags(show)
         if show == nil then
             show = not self.isShowing
@@ -437,7 +462,7 @@ local function CreateBag(bagType)
     main.close = close
 
     if bagType == "main" then
-        local settingsButton = CreateFeatureButton(main, nil, "Warfronts-BaseMapIcons-Empty-Workshop-Minimap-small",
+        local settingsButton = CreateFeatureButton(main, nil, "cog",
         function(self)
             RealUI.LoadConfig("RealUI", "inventory")
         end)
@@ -468,6 +493,7 @@ local function CreateBag(bagType)
     end)
     searchButton:SetPoint("TOPLEFT", searchBox, 0, -3)
     searchButton.texture:SetSize(10, 10)
+    searchButton.text:SetPoint("LEFT", searchButton, "RIGHT", 1, 1)
     main.searchButton = searchButton
 
     local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
@@ -520,7 +546,7 @@ local function CreateBag(bagType)
         bag.parent = main
 
         if tag == "new" then
-            bag.resetNew = CreateFeatureButton(bag, _G.RESET, "worldquest-questmarker-questbang", function(self)
+            bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(self)
                 for _, slot in ipairs(bag.slots) do
                     _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
                 end
@@ -530,7 +556,7 @@ local function CreateBag(bagType)
         end
 
         if tag == "junk" then
-            bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "bags-junkcoin", private.SellJunk)
+            bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
             bag.sellJunk:Hide()
         end
 
