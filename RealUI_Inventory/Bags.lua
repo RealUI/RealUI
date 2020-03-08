@@ -283,6 +283,7 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
         else
             self.texture:SetVertexColor(Color.highlight:GetRGB())
         end
+
         if onEnter then
             onEnter(self)
         end
@@ -498,6 +499,12 @@ local function CreateBag(bagType)
         local settingsButton = CreateFeatureButton(main, nil, "cog",
         function(self)
             RealUI.LoadConfig("RealUI", "inventory")
+        end,
+        function(self)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+            _G.GameTooltip_SetTitle(_G.GameTooltip, _G.SETTINGS, nil, true)
+
+            _G.GameTooltip:Show()
         end)
         settingsButton:ClearAllPoints()
         settingsButton:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
