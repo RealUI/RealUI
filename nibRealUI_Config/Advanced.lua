@@ -42,6 +42,8 @@ end
 
 local nameFormat = _G.ENABLE .. " %s"
 local function CreateAddonSection(name, args)
+    debug("CreateAddonSection", name, args)
+
     local hide = false
 
     if not args then
@@ -426,6 +428,77 @@ local inventory do
         Inventory.Update()
     end
 
+    local function SetIndex(tag, oldIndex, newIndex)
+        if oldIndex == newIndex then return end
+        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
+
+        tremove(Inventory.db.global.filters, oldIndex)
+        tinsert(Inventory.db.global.filters, newIndex, tag)
+        ACR:NotifyChange("RealUI")
+        Inventory.Update()
+    end
+    local function AddFilter(tag)
+        debug("AddFilter", tag)
+        args.filters.args[tag.."Index"] = {
+            name = Inventory:GetFilterName(tag),
+            type = "input",
+            width = "half",
+            get = function() return tostring(Inventory:GetFilterIndex(tag)) end,
+            set = function(_, value)
+                SetIndex(tag, Inventory:GetFilterIndex(tag), tonumber(value))
+            end,
+            order = function()
+                return Inventory:GetFilterIndex(tag) * 10
+            end,
+        }
+        args.filters.args[tag.."Up"] = {
+            name = _G.TRACKER_SORT_MANUAL_UP,
+            type = "execute",
+            width = Inventory.db.global.customFilters[tag] and 1.05 or 1.3,
+            func = function()
+                local index = Inventory:GetFilterIndex(tag)
+                SetIndex(tag, index, index - 1)
+            end,
+            order = function()
+                return (Inventory:GetFilterIndex(tag) * 10) + 1
+            end,
+        }
+        args.filters.args[tag.."Down"] = {
+            name = _G.TRACKER_SORT_MANUAL_DOWN,
+            type = "execute",
+            width = Inventory.db.global.customFilters[tag] and 1.05 or 1.3,
+            func = function()
+                local index = Inventory:GetFilterIndex(tag)
+                SetIndex(tag, index, index + 1)
+            end,
+            order = function()
+                return (Inventory:GetFilterIndex(tag) * 10) + 2
+            end,
+        }
+        args.filters.args[tag.."Delete"] = {
+            name = _G.DELETE,
+            type = "execute",
+            hidden = not Inventory.db.global.customFilters[tag],
+            width = "half",
+            func = function()
+                Inventory.db.global.customFilters[tag] = nil
+                tremove(Inventory.db.global.filters, Inventory:GetFilterIndex(tag))
+
+                args.filters.args[tag.."Index"] = nil
+                args.filters.args[tag.."Up"] = nil
+                args.filters.args[tag.."Down"] = nil
+                args.filters.args[tag.."Delete"] = nil
+
+                ACR:NotifyChange("RealUI")
+                Inventory.Update()
+            end,
+            order = function()
+                return (Inventory:GetFilterIndex(tag) * 10) + 3
+            end,
+        }
+    end
+
+    debug("Module", Inventory)
     if Inventory then
         args = {
             maxHeight = {
@@ -445,6 +518,23 @@ local inventory do
                 set = appSet,
                 order = 2,
             },
+            headerAppear = {
+                name = _G.FILTERS,
+                type = "header",
+                order = 0,
+            },
+            addFilter = {
+                name = _G.ADD_FILTER,
+                type = "input",
+                get = function() return _G.FILTER_NAME end,
+                set = function(_, value)
+                    local tag = value:lower()
+
+                    Inventory:CreateFilter(tag, value)
+                    AddFilter(tag)
+                end,
+                order = 3,
+            },
             filters = {
                 name = _G.FILTERS,
                 type = "group",
@@ -454,56 +544,14 @@ local inventory do
                 }
             }
         }
+
+        for i, tag in ipairs(Inventory.db.global.filters) do
+            AddFilter(tag)
+        end
     end
 
-    local function SetIndex(tag, oldIndex, newIndex)
-        if oldIndex == newIndex then return end
-        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
 
-        tremove(Inventory.db.global.filters, oldIndex)
-        tinsert(Inventory.db.global.filters, newIndex, tag)
-        ACR:NotifyChange("RealUI")
-        Inventory.Update()
-    end
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        args.filters.args[tag.."Index"] = {
-            name = Inventory:GetFilterName(tag),
-            type = "input",
-            width = "half",
-            get = function() return tostring(Inventory:GetFilterIndex(tag)) end,
-            set = function(_, value)
-                SetIndex(tag, Inventory:GetFilterIndex(tag), tonumber(value))
-            end,
-            order = function()
-                return Inventory:GetFilterIndex(tag) * 10
-            end,
-        }
-        args.filters.args[tag.."Up"] = {
-            name = _G.TRACKER_SORT_MANUAL_UP,
-            type = "execute",
-            width = 1.3,
-            func = function()
-                local index = Inventory:GetFilterIndex(tag)
-                SetIndex(tag, index, index - 1)
-            end,
-            order = function()
-                return (Inventory:GetFilterIndex(tag) * 10) + 1
-            end,
-        }
-        args.filters.args[tag.."Down"] = {
-            name = _G.TRACKER_SORT_MANUAL_DOWN,
-            type = "execute",
-            width = 1.3,
-            func = function()
-                local index = Inventory:GetFilterIndex(tag)
-                SetIndex(tag, index, index + 1)
-            end,
-            order = function()
-                return (Inventory:GetFilterIndex(tag) * 10) + 2
-            end,
-        }
-    end
-
+    debug("Inventory create")
     inventory = CreateAddonSection("Inventory", args)
 end
 local skins do

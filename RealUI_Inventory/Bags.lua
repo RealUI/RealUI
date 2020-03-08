@@ -144,7 +144,6 @@ local function SetupSlots(main)
     for i, tag in ipairs(Inventory.db.global.filters) do
         local bag = main.bags[tag]
         if #bag.slots <= 0 then
-            bag:Hide()
             numSkipped = numSkipped + 1
         else
             columnHeight, columnBase = UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
@@ -159,6 +158,7 @@ local function UpdateBag(main)
 
     wipe(main.slots)
     for tag, bag in next, main.bags do
+        bag:Hide()
         wipe(bag.slots)
     end
 
@@ -297,6 +297,23 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     end)
 
     return button
+end
+function private.CreateFilterBag(main, tag)
+    local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
+    SetupBag(bag)
+
+    local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    name:SetPoint("TOPLEFT")
+    name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
+    name:SetText(Inventory:GetFilterName(tag))
+    name:SetJustifyV("MIDDLE")
+
+    bag.tag = tag
+    bag.parent = main
+
+    main.bags[tag] = bag
+
+    return bag
 end
 
 local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
@@ -533,17 +550,7 @@ local function CreateBag(bagType)
     main.bags = {}
     private.CreateBagSlots(main)
     for i, tag in ipairs(Inventory.db.global.filters) do
-        local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
-        SetupBag(bag)
-
-        local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-        name:SetPoint("TOPLEFT")
-        name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
-        name:SetText(private.filters[tag].name)
-        name:SetJustifyV("MIDDLE")
-
-        bag.tag = tag
-        bag.parent = main
+        local bag = private.CreateFilterBag(main, tag)
 
         if tag == "new" then
             bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(self)
@@ -559,8 +566,6 @@ local function CreateBag(bagType)
             bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
             bag.sellJunk:Hide()
         end
-
-        main.bags[tag] = bag
     end
 
     main:Hide()

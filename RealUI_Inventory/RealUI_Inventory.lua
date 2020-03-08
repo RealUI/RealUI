@@ -13,7 +13,8 @@ local defaults = {
     global = {
         maxHeight = 0.5,
         sellJunk = true,
-        assignedFilters = {}
+        assignedFilters = {},
+        customFilters = {}
     }
 }
 
@@ -79,6 +80,9 @@ end
 function Inventory:OnInitialize()
     defaults.global.filters = private.filterList
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
+    for tag, name in next, Inventory.db.global.customFilters do
+        Inventory:CreateFilter(tag, name)
+    end
 
     Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
     Inventory:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)

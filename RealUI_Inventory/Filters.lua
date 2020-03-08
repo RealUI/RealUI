@@ -21,6 +21,24 @@ local menu do
     })
     menu.list = list
 
+    local function SetToFilter(filterButton, button, args)
+        if filterButton.checked() then
+            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
+        else
+            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = args
+        end
+        private.Update()
+    end
+    function menu:AddFilter(tag)
+        menu.list:AddLine({
+            text = Inventory:GetFilterName(tag),
+            func = SetToFilter,
+            args = {tag},
+            checked = function(...)
+                return Inventory.db.global.assignedFilters[menu.item:GetItemID()] == tag
+            end
+        })
+    end
     function menu:Open(slot)
         if slot.item then
             menu.item = slot.item
@@ -44,26 +62,28 @@ function Inventory:GetFilterName(tagQuery)
     return private.filters[tagQuery].name
 end
 
-local function SetToFilter(filterButton, button, args)
-    if filterButton.checked() then
-        Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
-    else
-        Inventory.db.global.assignedFilters[menu.item:GetItemID()] = args
-    end
-    private.Update()
-end
 local function CreateFilter(tag, info)
     private.filters[tag] = info
     tinsert(private.filterList, tag)
 
-    menu.list:AddLine({
-        text = info.name,
-        func = SetToFilter,
-        args = {tag},
-        checked = function(...)
-            return Inventory.db.global.assignedFilters[menu.item:GetItemID()] == tag
-        end
-    })
+    private.menu:AddFilter(tag)
+end
+function Inventory:CreateFilter(tag, name)
+    private.filters[tag] = {
+        name = name,
+        isCustom = true,
+        filter = _G.nop
+    }
+
+    if not Inventory.db.global.customFilters[tag] then
+        Inventory.db.global.customFilters[tag] = name
+        tinsert(Inventory.db.global.filters, 1, tag)
+
+        private.CreateFilterBag(Inventory.main, tag)
+        private.CreateFilterBag(Inventory.bank, tag)
+    end
+
+    private.menu:AddFilter(tag)
 end
 
 CreateFilter("new", {
