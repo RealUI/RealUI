@@ -439,50 +439,51 @@ local inventory do
     end
     local function AddFilter(tag)
         debug("AddFilter", tag)
+        local filter = Inventory:GetFilter(tag)
+
         args.filters.args[tag.."Index"] = {
-            name = Inventory:GetFilterName(tag),
+            name = filter.name,
             type = "input",
             width = "half",
-            get = function() return tostring(Inventory:GetFilterIndex(tag)) end,
+            get = function() return tostring(filter:GetIndex()) end,
             set = function(_, value)
-                SetIndex(tag, Inventory:GetFilterIndex(tag), tonumber(value))
+                SetIndex(tag, filter:GetIndex(), tonumber(value))
             end,
             order = function()
-                return Inventory:GetFilterIndex(tag) * 10
+                return filter:GetIndex() * 10
             end,
         }
         args.filters.args[tag.."Up"] = {
             name = _G.TRACKER_SORT_MANUAL_UP,
             type = "execute",
-            width = Inventory.db.global.customFilters[tag] and 1.05 or 1.3,
+            width = filter.isCustom and 1.05 or 1.3,
             func = function()
-                local index = Inventory:GetFilterIndex(tag)
+                local index = filter:GetIndex()
                 SetIndex(tag, index, index - 1)
             end,
             order = function()
-                return (Inventory:GetFilterIndex(tag) * 10) + 1
+                return (filter:GetIndex() * 10) + 1
             end,
         }
         args.filters.args[tag.."Down"] = {
             name = _G.TRACKER_SORT_MANUAL_DOWN,
             type = "execute",
-            width = Inventory.db.global.customFilters[tag] and 1.05 or 1.3,
+            width = filter.isCustom and 1.05 or 1.3,
             func = function()
-                local index = Inventory:GetFilterIndex(tag)
+                local index = filter:GetIndex()
                 SetIndex(tag, index, index + 1)
             end,
             order = function()
-                return (Inventory:GetFilterIndex(tag) * 10) + 2
+                return (filter:GetIndex() * 10) + 2
             end,
         }
         args.filters.args[tag.."Delete"] = {
             name = _G.DELETE,
             type = "execute",
-            hidden = not Inventory.db.global.customFilters[tag],
+            hidden = not filter.isCustom,
             width = "half",
             func = function()
-                Inventory.db.global.customFilters[tag] = nil
-                tremove(Inventory.db.global.filters, Inventory:GetFilterIndex(tag))
+                filter:Delete()
 
                 args.filters.args[tag.."Index"] = nil
                 args.filters.args[tag.."Up"] = nil
@@ -493,7 +494,7 @@ local inventory do
                 Inventory.Update()
             end,
             order = function()
-                return (Inventory:GetFilterIndex(tag) * 10) + 3
+                return (filter:GetIndex() * 10) + 3
             end,
         }
     end
@@ -518,11 +519,6 @@ local inventory do
                 set = appSet,
                 order = 2,
             },
-            headerAppear = {
-                name = _G.FILTERS,
-                type = "header",
-                order = 0,
-            },
             addFilter = {
                 name = _G.ADD_FILTER,
                 type = "input",
@@ -530,7 +526,7 @@ local inventory do
                 set = function(_, value)
                     local tag = value:lower()
 
-                    Inventory:CreateFilter(tag, value)
+                    Inventory:CreateCustomFilter(tag, value)
                     AddFilter(tag)
                 end,
                 order = 3,

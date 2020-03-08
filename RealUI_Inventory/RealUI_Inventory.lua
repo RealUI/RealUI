@@ -13,6 +13,7 @@ local defaults = {
     global = {
         maxHeight = 0.5,
         sellJunk = true,
+        filters = {},
         assignedFilters = {},
         customFilters = {}
     }
@@ -78,16 +79,17 @@ local function MERCHANT_CLOSED(event, ...)
 end
 
 function Inventory:OnInitialize()
-    defaults.global.filters = private.filterList
-    self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
-    for tag, name in next, Inventory.db.global.customFilters do
-        Inventory:CreateFilter(tag, name)
+    for i, info in ipairs(private.filterList) do
+        defaults.global.filters[i] = info.tag
     end
+
+    self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
     Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
     Inventory:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)
 
     private.CreateBags()
+    private.CreateFilters()
 
     self.Update = private.Update
 end

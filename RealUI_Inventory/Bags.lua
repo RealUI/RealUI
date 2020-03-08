@@ -92,7 +92,7 @@ end
 local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
     sort(bag.slots, SortSlots)
 
-    if bag.tag == "main" then
+    if bag.isPrimary then
         tinsert(bag.slots, bag.dropTarget)
     end
 
@@ -103,7 +103,7 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
     local maxHeight = screenHeight * Inventory.db.global.maxHeight
 
     local height = bag:GetHeight()
-    if bag.tag == "main" then
+    if bag.isPrimary then
         columnHeight = columnHeight + height + 5
     else
         local parent = bag.parent
@@ -115,13 +115,13 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
             else
                 bag:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
             end
-            columnBase = bag.tag
+            columnBase = bag.filter.tag
             columnHeight = height + 5
         else
             columnHeight = columnHeight + height + 5
 
             local anchor = "main"
-            local index = Inventory:GetFilterIndex(bag.tag)
+            local index = bag.filter:GetIndex()
             if index > 1 then
                 anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
             end
@@ -137,7 +137,7 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
     return columnHeight, columnBase
 end
 local function SetupSlots(main)
-    local columnHeight, columnBase = 0, main.tag
+    local columnHeight, columnBase = 0, "main"
     columnHeight, columnBase = UpdateBagSize(main, columnHeight, columnBase)
 
     local numSkipped = 0
@@ -181,23 +181,23 @@ end
 function private.AddSlotToBag(slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
-    local filterTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
-    if not filterTag then
+    local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
+    if not Inventory:GetFilter(assignedTag) then
         for i, tag in ipairs(Inventory.db.global.filters) do
-            if private.filters[tag].filter(slot) then
-                if filterTag then
-                    -- Lower ranks have priority
-                    if private.filters[filterTag].rank > private.filters[tag].rank then
-                        filterTag = tag
+            local filter = Inventory:GetFilter(tag)
+            if filter:DoesMatchSlot(slot) then
+                if assignedTag then
+                    if filter:HasPriority(assignedTag) then
+                        assignedTag = tag
                     end
                 else
-                    filterTag = tag
+                    assignedTag = tag
                 end
             end
         end
     end
 
-    local bag = main.bags[filterTag] or main
+    local bag = main.bags[assignedTag] or main
 
     tinsert(bag.slots, slot)
     slot:SetParent(private.bagSlots[main.bagType][bagID])
@@ -298,18 +298,34 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
 
     return button
 end
-function private.CreateFilterBag(main, tag)
+function private.CreateFilterBag(main, filter)
+    local tag = filter.tag
     local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
     SetupBag(bag)
 
     local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     name:SetPoint("TOPLEFT")
     name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
-    name:SetText(Inventory:GetFilterName(tag))
+    name:SetText(filter.name)
     name:SetJustifyV("MIDDLE")
 
-    bag.tag = tag
     bag.parent = main
+    bag.filter = filter
+
+    if tag == "new" then
+        bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(self)
+            for _, slot in ipairs(bag.slots) do
+                _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
+            end
+
+            UpdateBag(main)
+        end)
+    end
+
+    if tag == "junk" then
+        bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
+        bag.sellJunk:Hide()
+    end
 
     main.bags[tag] = bag
 
@@ -404,7 +420,7 @@ local function CreateBag(bagType)
     _G.Mixin(main, ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
     main:SetToplevel(true)
-    main.tag = "main"
+    main.isPrimary = true
     main.bagType = bagType
 
     Inventory[bagType] = main
@@ -549,24 +565,6 @@ local function CreateBag(bagType)
 
     main.bags = {}
     private.CreateBagSlots(main)
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        local bag = private.CreateFilterBag(main, tag)
-
-        if tag == "new" then
-            bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(self)
-                for _, slot in ipairs(bag.slots) do
-                    _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
-                end
-
-                UpdateBag(main)
-            end)
-        end
-
-        if tag == "junk" then
-            bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
-            bag.sellJunk:Hide()
-        end
-    end
 
     main:Hide()
 end
