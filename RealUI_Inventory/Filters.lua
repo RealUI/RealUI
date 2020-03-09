@@ -108,6 +108,7 @@ do
 
         private.CreateFilterBag(Inventory.main, filter)
         private.CreateFilterBag(Inventory.bank, filter)
+        private.CreateFilterBag(Inventory.reagent, filter)
 
         filters[filter.tag] = filter
         menu:AddFilter(filter)

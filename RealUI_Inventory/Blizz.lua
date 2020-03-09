@@ -31,7 +31,8 @@ _G.ToggleBag = _G.nop
 
 local bagIDs = {
     main = {0, 1, 2, 3, 4}, -- BACKPACK_CONTAINER through NUM_BAG_SLOTS
-    bank = {-1, 5, 6, 7, 8, 9, 10, 11} -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
+    bank = {-1, 5, 6, 7, 8, 9, 10, 11}, -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
+    reagent = {-3} -- REAGENTBANK_CONTAINER
 }
 function private.IterateBagIDs(bagType)
     return ipairs(bagIDs[bagType])
