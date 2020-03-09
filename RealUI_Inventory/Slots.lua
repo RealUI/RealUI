@@ -159,7 +159,7 @@ end
 
 function private.GetSlot(bagID, slotIndex)
     local slots = inventorySlots
-    if private.GetBagTypeForBagID(bagID) == "bank" then
+    if bagID == _G.BANK_CONTAINER then
         slots = bankSlots
     end
 
