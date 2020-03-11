@@ -1,4 +1,24 @@
-﻿## [2.1.6] - 2020-02-17 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Changed ###
+
+  * Auction House can now be moved
+
+### Fixed ###
+
+  * File load error
+  * Various errors while in raid
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.1.6] - 2020-02-17 ##
 ### Modified AddOns ###
 
   * nibRealUI
