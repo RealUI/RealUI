@@ -27,7 +27,7 @@ _G.ToggleBackpack = _G.ToggleAllBags
 --local oldToggleBag = _G.ToggleBag
 _G.ToggleBag = _G.nop
 
---_G.BankFrame:UnregisterAllEvents()
+_G.BankFrame:UnregisterAllEvents()
 
 local bagIDs = {
     main = {0, 1, 2, 3, 4}, -- BACKPACK_CONTAINER through NUM_BAG_SLOTS

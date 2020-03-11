@@ -84,7 +84,6 @@ function Inventory:OnInitialize()
     for i, info in ipairs(private.filterList) do
         defaults.global.filters[i] = info.tag
     end
-
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
     Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)

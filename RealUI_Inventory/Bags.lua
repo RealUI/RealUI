@@ -217,13 +217,6 @@ local function SetupBag(bag)
     bag.baseWidth = BAG_MARGIN
 end
 
-local function DropTargetFindSlot(bagType)
-    local bagID, slotIndex = private.GetFirstFreeSlot(bagType)
-    if bagID then
-        _G.PickupContainerItem(bagID, slotIndex)
-    end
-end
-
 local ContinuableContainer = _G.CreateFromMixins(_G.ContinuableContainer)
 function ContinuableContainer:RecheckEvictableContinuables()
     local areAllLoaded = true
@@ -249,12 +242,10 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
 
     if fa[atlas] then
         local icon = button:CreateFontString(nil, "ARTWORK")
+        icon:SetPoint("CENTER")
         icon:SetFont(fa.path, 14, "")
         icon:SetText(fa[atlas])
         icon:SetTextColor(Color.white:GetRGB())
-        icon:SetJustifyV("MIDDLE")
-        icon:SetJustifyH("CENTER")
-        icon:SetAllPoints()
         button.icon = icon
     else
         local atlasInfo = _G.C_Texture.GetAtlasInfo(atlas)
@@ -340,27 +331,11 @@ local BasicEvents = {
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
 }
-local BagEvents = {
-    "UNIT_INVENTORY_CHANGED",
-    "PLAYER_SPECIALIZATION_CHANGED",
-    "BAG_NEW_ITEMS_UPDATED",
-}
-local BankEvents = {
-    "PLAYERBANKSLOTS_CHANGED",
-    "PLAYERBANKBAGSLOTS_CHANGED",
-}
-local ReagentEvents = {
-    "PLAYERREAGENTBANKSLOTS_CHANGED",
-    "REAGENTBANK_PURCHASED",
-}
-local function CreateBag(bagType)
-    local main
-    if bagType == "main" then
-        main = _G.CreateFrame("Frame", "RealUIInventory", _G.UIParent)
-        main:SetPoint("BOTTOMRIGHT", -100, 100)
-        main:RegisterEvent("QUEST_ACCEPTED")
-        main:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-        main:SetScript("OnEvent", function(self, event, ...)
+
+local bagInfo = {
+    main = {
+        name = "RealUIInventory",
+        OnEvent = function(self, event, ...)
             if event == "ITEM_LOCK_CHANGED" then
                 local bagID, slotIndex = ...
                 if bagID and slotIndex then
@@ -372,24 +347,32 @@ local function CreateBag(bagType)
             else
                 UpdateBag(self)
             end
-        end)
-        main:SetScript("OnShow", function(self)
+        end,
+        OnShow = function(self)
             _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, BagEvents)
+            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
             UpdateBag(self)
-        end)
-        main:SetScript("OnHide", function(self)
+        end,
+        OnHide = function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BagEvents)
+            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
             self.showBags:ToggleBags(false)
             self:Cancel()
-        end)
-    elseif bagType == "bank" then
-        main = _G.CreateFrame("Frame", "RealUIBank", _G.UIParent)
-        main:SetPoint("TOPLEFT", 100, -100)
-        main:RegisterEvent("BANKFRAME_OPENED")
-        main:RegisterEvent("BANKFRAME_CLOSED")
-        main:SetScript("OnEvent", function(self, event, ...)
+        end,
+        Setup = function(self)
+            self:SetPoint("BOTTOMRIGHT", -100, 100)
+            self:RegisterEvent("QUEST_ACCEPTED")
+            self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+        end,
+        events = {
+            "UNIT_INVENTORY_CHANGED",
+            "PLAYER_SPECIALIZATION_CHANGED",
+            "BAG_NEW_ITEMS_UPDATED",
+        }
+    },
+    bank = {
+        name = "RealUIBank",
+        OnEvent = function(self, event, ...)
             if event == "BANKFRAME_OPENED" then
                 Inventory.showBank = true
                 private.Toggle(true)
@@ -407,22 +390,34 @@ local function CreateBag(bagType)
             else
                 UpdateBag(self)
             end
-        end)
-        main:SetScript("OnShow", function(self)
+        end,
+        OnShow = function(self)
             _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, BankEvents)
+            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
             UpdateBag(self)
-        end)
-        main:SetScript("OnHide", function(self)
+        end,
+        OnHide = function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BankEvents)
+            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
             self.showBags:ToggleBags(false)
             self:Cancel()
-        end)
-    elseif bagType == "reagent" then
-        main = _G.CreateFrame("Frame", "RealUIReagent", _G.UIParent)
-        main:SetPoint("TOPLEFT", 100, -100)
-        main:SetScript("OnEvent", function(self, event, ...)
+        end,
+        Setup = function(self)
+            self:SetPoint("TOPLEFT", 100, -100)
+            self:RegisterEvent("BANKFRAME_OPENED")
+            self:RegisterEvent("BANKFRAME_CLOSED")
+            self:HookScript("OnDragStop", function()
+                Inventory.reagent:SetPoint("TOPLEFT", self)
+            end)
+        end,
+        events = {
+            "PLAYERBANKSLOTS_CHANGED",
+            "PLAYERBANKBAGSLOTS_CHANGED",
+        }
+    },
+    reagent = {
+        name = "RealUIReagent",
+        OnEvent = function(self, event, ...)
             if event == "ITEM_LOCK_CHANGED" then
                 local bagID, slotIndex = ...
                 if bagID and slotIndex then
@@ -434,27 +429,49 @@ local function CreateBag(bagType)
             else
                 UpdateBag(self)
             end
-        end)
-        main:SetScript("OnShow", function(self)
+        end,
+        OnShow = function(self)
             _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, ReagentEvents)
+            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
             UpdateBag(self)
-        end)
-        main:SetScript("OnHide", function(self)
+        end,
+        OnHide = function(self)
             _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, ReagentEvents)
+            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
             self:Cancel()
-        end)
-    end
+        end,
+        Setup = function(self)
+            self:SetPoint("TOPLEFT", 100, -100)
+            self:HookScript("OnDragStop", function()
+                local _, anchor = self:GetPoint()
+                Inventory.bank:ClearAllPoints()
+                Inventory.bank:SetPoint("TOPLEFT", anchor, self:GetLeft(), -self:GetTop())
+            end)
+        end,
+        events = {
+            "PLAYERREAGENTBANKSLOTS_CHANGED",
+            "REAGENTBANK_PURCHASED",
+        }
+    },
+}
+local function CreateBag(bagType)
+    local info = bagInfo[bagType]
+
+    local main = _G.CreateFrame("Frame", info.name, _G.UIParent)
+    main:SetScript("OnEvent", info.OnEvent)
+    main:SetScript("OnShow", info.OnShow)
+    main:SetScript("OnHide", info.OnHide)
 
     _G.Mixin(main, ContinuableContainer)
     RealUI.MakeFrameDraggable(main)
     main:SetToplevel(true)
     main.isPrimary = true
     main.bagType = bagType
+    main.events = info.events
 
     Inventory[bagType] = main
     SetupBag(main)
+    info.Setup(main)
 
     if bagType == "reagent" then
         local deposit = CreateFeatureButton(main, _G.BAGSLOTTEXT, "download",
@@ -576,10 +593,8 @@ local function CreateBag(bagType)
         if bagType == "bank" then
             reagents = CreateFeatureButton(main, nil, "archive",
             function(self)
-                local point, anchor, relPoint, x, y = main:GetPoint()
                 Inventory.reagent:Show()
-                Inventory.reagent:SetPoint(point, anchor, relPoint, x, y)
-                main:Hide()
+                Inventory.bank:Hide()
             end,
             function(self)
                 _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
@@ -588,16 +603,11 @@ local function CreateBag(bagType)
 
                 _G.GameTooltip:Show()
             end)
-            reagents:ClearAllPoints()
-            reagents:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
-            main.reagents = reagents
         elseif bagType == "reagent" then
             reagents = CreateFeatureButton(main, nil, "bank",
             function(self)
-                local point, anchor, relPoint, x, y = main:GetPoint()
                 Inventory.bank:Show()
-                Inventory.bank:SetPoint(point, anchor, relPoint, x, y)
-                main:Hide()
+                Inventory.reagent:Hide()
             end,
             function(self)
                 _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
@@ -658,12 +668,14 @@ local function CreateBag(bagType)
     Base.CropIcon(dropTarget:GetBackdropTexture("bg"))
     dropTarget:SetBackdropColor(1, 1, 1, 0.75)
     dropTarget:SetBackdropBorderColor(Color.frame:GetRGB())
-    dropTarget:SetScript("OnMouseUp", function()
-        DropTargetFindSlot(bagType)
-    end)
-    dropTarget:SetScript("OnReceiveDrag", function()
-        DropTargetFindSlot(bagType)
-    end)
+    function dropTarget:FindSlot()
+        local bagID, slotIndex = private.GetFirstFreeSlot(bagType)
+        if bagID then
+            _G.PickupContainerItem(bagID, slotIndex)
+        end
+    end
+    dropTarget:SetScript("OnMouseUp", dropTarget.FindSlot)
+    dropTarget:SetScript("OnReceiveDrag", dropTarget.FindSlot)
     main.dropTarget = dropTarget
 
     local count = dropTarget:CreateFontString(nil, "ARTWORK")
