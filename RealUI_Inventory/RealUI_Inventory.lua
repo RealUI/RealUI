@@ -12,7 +12,10 @@ private.Inventory = Inventory
 local defaults = {
     global = {
         maxHeight = 0.5,
-        sellJunk = true
+        sellJunk = true,
+        filters = {},
+        assignedFilters = {},
+        customFilters = {}
     }
 }
 
@@ -31,6 +34,8 @@ end
 function private.GetBagTypeForBagID(bagID)
     if bagID >= _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
         return "main"
+    elseif bagID == _G.REAGENTBANK_CONTAINER then
+        return "reagent"
     else
         return "bank"
     end
@@ -76,13 +81,16 @@ local function MERCHANT_CLOSED(event, ...)
 end
 
 function Inventory:OnInitialize()
-    defaults.global.filters = private.filterList
+    for i, info in ipairs(private.filterList) do
+        defaults.global.filters[i] = info.tag
+    end
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
     Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
     Inventory:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)
 
     private.CreateBags()
+    private.CreateFilters()
 
     self.Update = private.Update
 end

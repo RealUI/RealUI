@@ -315,11 +315,11 @@ function RealUI.SetPixelPoint(frame)
     frame:SetPoint(point, anchor, relPoint, newX, newY)
 end
 
-local function MouseDownHandler(frame, button)
+local function OnDragStart(frame, button)
     frame:ClearAllPoints()
     frame:StartMoving()
 end
-local function MouseUpHandler(frame, button)
+local function OnDragStop(frame, button)
     frame:StopMovingOrSizing()
     RealUI.SetPixelPoint(frame)
 end
@@ -327,8 +327,8 @@ function RealUI.MakeFrameDraggable(frame, noClamp)
     frame:SetMovable(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetClampedToScreen(not noClamp)
-    frame:SetScript("OnMouseDown", MouseDownHandler)
-    frame:SetScript("OnMouseUp", MouseUpHandler)
+    frame:SetScript("OnDragStart", OnDragStart)
+    frame:SetScript("OnDragStop", OnDragStop)
 end
 
 

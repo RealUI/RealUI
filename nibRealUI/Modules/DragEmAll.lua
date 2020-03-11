@@ -69,7 +69,7 @@ local addonFrames = {
     --Blizzard_ArenaUI = {},
     --Blizzard_ArtifactUI = {},
     Blizzard_AuctionHouseUI = {
-        AuctionFrame = {}
+        AuctionHouseFrame = {}
     },
     Blizzard_AzeriteEssenceUI = {
         AzeriteEssenceUI = {}

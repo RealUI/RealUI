@@ -32,6 +32,7 @@ end
 --[[ Item Slots ]]--
 local ItemSlotMixin = _G.CreateFromMixins(_G.ItemLocationMixin)
 function ItemSlotMixin:OnLoad()
+    self:HookScript("OnClick", self.OnClick)
 end
 function ItemSlotMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
@@ -72,6 +73,11 @@ function ItemSlotMixin:Update()
     self:UpdateItemContextMatching()
     self:SetMatchesSearch(not isFiltered)
 end
+function ItemSlotMixin:OnClick(button)
+    if button == "RightButton" and _G.IsAltKeyDown() and _G.IsControlKeyDown() then
+        private.menu:Open(self)
+    end
+end
 
 
 local InventorySlotMixin = _G.CreateFromMixins(ItemSlotMixin)
@@ -103,6 +109,18 @@ local bankSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "BankItemButtonGenericTemplate"
 bankSlots.parent = "RealUIBank"
 bankSlots.mixin = BankSlotMixin
+
+
+local ReagentSlotMixin = _G.CreateFromMixins(ItemSlotMixin)
+function ReagentSlotMixin:Update()
+    ItemSlotMixin.Update(self)
+
+    _G.ReagentFrameItemButton_UpdateLocked(self)
+end
+local reagentSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
+reagentSlots.frameTemplate = "ReagentBankItemButtonGenericTemplate"
+reagentSlots.parent = "RealUIReagent"
+reagentSlots.mixin = BankSlotMixin
 
 
 function private.UpdateSlots(bagID)
@@ -153,8 +171,10 @@ end
 
 function private.GetSlot(bagID, slotIndex)
     local slots = inventorySlots
-    if private.GetBagTypeForBagID(bagID) == "bank" then
+    if bagID == _G.BANK_CONTAINER then
         slots = bankSlots
+    elseif bagID == _G.REAGENTBANK_CONTAINER then
+        slots = reagentSlots
     end
 
     for slot in slots:EnumerateActive() do
@@ -234,6 +254,11 @@ local function SearchItemsForBag(bagType)
 end
 private.SearchItemsForBag = SearchItemsForBag
 
+local mainBags = {
+    [_G.BACKPACK_CONTAINER] = _G.BACKPACK_TOOLTIP,
+    [_G.BANK_CONTAINER] = _G.BANK,
+    [_G.REAGENTBANK_CONTAINER] = _G.REAGENT_BANK,
+}
 local BagSlotMixin = {}
 function BagSlotMixin:Init(bagID)
     self:SetID(bagID)
@@ -259,9 +284,7 @@ function BagSlotMixin:Init(bagID)
     self:SetScript("OnReceiveDrag", self.OnReceiveDrag)
 
     self.bagType = private.GetBagTypeForBagID(bagID)
-    self.isBackpack = bagID == _G.BACKPACK_CONTAINER
-    self.isBank = bagID == _G.BANK_CONTAINER
-    self.isBag = not self.isBackpack and not self.isBank
+    self.isBag = not mainBags[bagID]
 
     Skin.FrameTypeItemButton(self)
     if self.isBag then
@@ -307,7 +330,7 @@ function BagSlotMixin:Update()
             self.tooltipText = _G.EQUIP_CONTAINER
         end
     else
-        self.tooltipText = self.isBackpack and _G.BACKPACK_TOOLTIP or _G.BANK
+        self.tooltipText = mainBags[self:GetID()]
     end
 
     searchBags[self:GetID()] = true

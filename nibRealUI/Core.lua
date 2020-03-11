@@ -164,13 +164,13 @@ function RealUI:SetLowResOptimizations(...)
 end
 
 function RealUI:IsUsingLowResDisplay()
-    local _, resHeight = _G.GetPhysicalScreenSize()
-    return resHeight < 900
+    local _, pysHeight = _G.GetPhysicalScreenSize()
+    return pysHeight < 1080
 end
 
 function RealUI:IsUsingHighResDisplay()
-    local _, resHeight = _G.GetPhysicalScreenSize()
-    return resHeight >= 1440
+    local _, pysHeight = _G.GetPhysicalScreenSize()
+    return pysHeight >= 1440
 end
 
 -- Layout Updates
@@ -463,21 +463,6 @@ function RealUI:OnEnable()
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
-
-    local black = _G.Aurora.Color.black
-    local a = RealUI.GetOptions("Skins").profile.frameColor.a
-    local LDD = _G.LibStub("LibDropDown")
-    LDD:RegisterStyle("REALUI", {
-        padding = 10,
-        spacing = 1,
-        backdrop = {
-            bgFile = RealUI.textures.plain,
-            edgeFile = RealUI.textures.plain,
-            edgeSize = 1,
-        },
-        backdropColor = _G.CreateColor(black.r, black.g, black.b, a),
-        backdropBorderColor = black,
-    })
 
     if dbc.init.installStage == -1 then
         if self:IsUsingLowResDisplay() and not dbg.tags.lowResOptimized then

@@ -380,7 +380,10 @@ end
 function RealUI.ToggleConfig(app, section, ...)
     debug("Toggle", app, section, ...)
     if not initialized then InitializeOptions() end
-    if app == "HuD" then
+
+    if ACD.OpenFrames[app] then
+        ACD:Close(app)
+    elseif app == "HuD" then
         if not isHuDShown then
             hudToggle(section)
         end
@@ -396,16 +399,16 @@ function RealUI.ToggleConfig(app, section, ...)
                 end
             end
         end
-    end
-    --if not app:match("RealUI") then app = "RealUI" end
-    if ACD.OpenFrames[app] and not section then
-        ACD:Close(app)
-    elseif section or app ~= "HuD" then
-        ACD:Open(app, section)
-    end
 
-    if ... then
-        ACD:SelectGroup(app, section, ...)
+        ACD:Open(app, section)
+        if ... then
+            ACD:SelectGroup(app, section, ...)
+        end
+    else
+        ACD:Open(app)
+        if section then
+            ACD:SelectGroup(app, section, ...)
+        end
     end
 end
 

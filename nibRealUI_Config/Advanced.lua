@@ -1,9 +1,11 @@
 local _, private = ...
+
 -- Lua Globals --
-local next, tostring = _G.next, _G.tostring
+-- luacheck: globals ipairs next tremove tinsert
+-- luacheck: globals tostring tonumber
 
 -- Libs --
---local ACD = _G.LibStub("AceConfigDialog-3.0")
+local ACR = _G.LibStub("AceConfigRegistry-3.0")
 
 -- RealUI --
 local RealUI = _G.RealUI
@@ -40,6 +42,8 @@ end
 
 local nameFormat = _G.ENABLE .. " %s"
 local function CreateAddonSection(name, args)
+    debug("CreateAddonSection", name, args)
+
     local hide = false
 
     if not args then
@@ -399,102 +403,6 @@ local core do
             },
         }
     end
-    local worldMarker do
-        local MODNAME = "WorldMarker"
-        local WorldMarker = RealUI:GetModule(MODNAME)
-        worldMarker = {
-            name = L["WorldMarker"],
-            desc = L["WorldMarkerDesc"],
-            type = "group",
-            childGroups = "tab",
-            args = {
-                header = {
-                    name = L["WorldMarker"],
-                    type = "header",
-                    order = 10,
-                },
-                desc = {
-                    name = L["WorldMarkerDesc"],
-                    type = "description",
-                    fontSize = "medium",
-                    order = 20,
-                },
-                enabled = {
-                    name = L["General_Enabled"],
-                    desc = L["General_EnabledDesc"]:format(L[MODNAME]),
-                    type = "toggle",
-                    get = function() return RealUI:GetModuleEnabled(MODNAME) end,
-                    set = function(info, value)
-                        RealUI:SetModuleEnabled(MODNAME, value)
-                    end,
-                    order = 30,
-                },
-                gap1 = {
-                    name = " ",
-                    type = "description",
-                    order = 31,
-                },
-                visibility = {
-                    name = L["WorldMarker_Show"],
-                    type = "group",
-                    disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                    order = 40,
-                    args = {
-                        arena = {
-                            name = _G.ARENA_BATTLES,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.arena end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.arena = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 10,
-                        },
-                        pvp = {
-                            name = _G.BATTLEGROUNDS,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.pvp end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.pvp = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 20,
-                        },
-                        party = {
-                            name = _G.DUNGEONS,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.party end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.party = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 30,
-                        },
-                        raid = {
-                            name = _G.RAIDS,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.raid end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.raid = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 40,
-                        },
-                        none = {
-                            name = _G.WORLD,
-                            type = "toggle",
-                            get = function(info) return WorldMarker.db.profile.visibility.none end,
-                            set = function(info, value)
-                                WorldMarker.db.profile.visibility.none = value
-                                WorldMarker:UpdateVisibility()
-                            end,
-                            order = 50,
-                        },
-                    },
-                },
-            },
-        }
-    end
     core = {
         name = "Core",
         desc = "Core RealUI modules.",
@@ -503,7 +411,6 @@ local core do
         args = {
             infobar = infobar,
             screenSaver = screenSaver,
-            worldMarker = worldMarker,
         },
     }
 end
@@ -521,6 +428,78 @@ local inventory do
         Inventory.Update()
     end
 
+    local function SetIndex(tag, oldIndex, newIndex)
+        if oldIndex == newIndex then return end
+        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
+
+        tremove(Inventory.db.global.filters, oldIndex)
+        tinsert(Inventory.db.global.filters, newIndex, tag)
+        ACR:NotifyChange("RealUI")
+        Inventory.Update()
+    end
+    local function AddFilter(tag)
+        debug("AddFilter", tag)
+        local filter = Inventory:GetFilter(tag)
+
+        args.filters.args[tag.."Index"] = {
+            name = filter.name,
+            type = "input",
+            width = "half",
+            get = function() return tostring(filter:GetIndex()) end,
+            set = function(_, value)
+                SetIndex(tag, filter:GetIndex(), tonumber(value))
+            end,
+            order = function()
+                return filter:GetIndex() * 10
+            end,
+        }
+        args.filters.args[tag.."Up"] = {
+            name = _G.TRACKER_SORT_MANUAL_UP,
+            type = "execute",
+            width = filter.isCustom and 1.05 or 1.3,
+            func = function()
+                local index = filter:GetIndex()
+                SetIndex(tag, index, index - 1)
+            end,
+            order = function()
+                return (filter:GetIndex() * 10) + 1
+            end,
+        }
+        args.filters.args[tag.."Down"] = {
+            name = _G.TRACKER_SORT_MANUAL_DOWN,
+            type = "execute",
+            width = filter.isCustom and 1.05 or 1.3,
+            func = function()
+                local index = filter:GetIndex()
+                SetIndex(tag, index, index + 1)
+            end,
+            order = function()
+                return (filter:GetIndex() * 10) + 2
+            end,
+        }
+        args.filters.args[tag.."Delete"] = {
+            name = _G.DELETE,
+            type = "execute",
+            hidden = not filter.isCustom,
+            width = "half",
+            func = function()
+                filter:Delete()
+
+                args.filters.args[tag.."Index"] = nil
+                args.filters.args[tag.."Up"] = nil
+                args.filters.args[tag.."Down"] = nil
+                args.filters.args[tag.."Delete"] = nil
+
+                ACR:NotifyChange("RealUI")
+                Inventory.Update()
+            end,
+            order = function()
+                return (filter:GetIndex() * 10) + 3
+            end,
+        }
+    end
+
+    debug("Module", Inventory)
     if Inventory then
         args = {
             maxHeight = {
@@ -540,9 +519,35 @@ local inventory do
                 set = appSet,
                 order = 2,
             },
+            addFilter = {
+                name = _G.ADD_FILTER,
+                type = "input",
+                get = function() return _G.FILTER_NAME end,
+                set = function(_, value)
+                    local tag = value:lower()
+
+                    Inventory:CreateCustomFilter(tag, value)
+                    AddFilter(tag)
+                end,
+                order = 3,
+            },
+            filters = {
+                name = _G.FILTERS,
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                }
+            }
         }
+
+        for i, tag in ipairs(Inventory.db.global.filters) do
+            AddFilter(tag)
+        end
     end
 
+
+    debug("Inventory create")
     inventory = CreateAddonSection("Inventory", args)
 end
 local skins do
