@@ -162,6 +162,25 @@ tinsert(private.filterList, {
 })
 
 tinsert(private.filterList, {
+    tag = "equipment",
+    name = _G.BAG_FILTER_EQUIPMENT,
+    rank = 2,
+    filter = function(slot)
+        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+        return typeID == _G.LE_ITEM_CLASS_ARMOR or typeID == _G.LE_ITEM_CLASS_WEAPON
+    end,
+})
+
+tinsert(private.filterList, {
+    tag = "sets",
+    name = (":"):split(_G.EQUIPMENT_SETS),
+    rank = 1,
+    filter = function(slot)
+        return _G.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
+    end,
+})
+
+tinsert(private.filterList, {
     tag = "questitems",
     name = _G.AUCTION_CATEGORY_QUEST_ITEMS,
     rank = 0,
@@ -186,25 +205,6 @@ for i = 1, #tradegoods do
         end,
     })
 end
-
-tinsert(private.filterList, {
-    tag = "sets",
-    name = (":"):split(_G.EQUIPMENT_SETS),
-    rank = 1,
-    filter = function(slot)
-        return _G.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
-    end,
-})
-
-tinsert(private.filterList, {
-    tag = "equipment",
-    name = _G.BAG_FILTER_EQUIPMENT,
-    rank = 1,
-    filter = function(slot)
-        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-        return typeID == _G.LE_ITEM_CLASS_ARMOR or typeID == _G.LE_ITEM_CLASS_WEAPON
-    end,
-})
 
 local travel = private.travel
 tinsert(private.filterList, {
