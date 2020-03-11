@@ -13,10 +13,10 @@ local menu do
     local list = {}
     local menuFrame = _G.LibStub("LibDropDown"):NewMenu(menu, "RealUI_InventoryDropDown")
     menuFrame:SetStyle("REALUI")
-    menuFrame:AddLine({
+    local title = {
         text = "Choose bag",
         isTitle = true,
-    })
+    }
 
     local function SetToFilter(filterButton, button, args)
         if filterButton.checked() then
@@ -28,33 +28,29 @@ local menu do
     end
     function menu:AddFilter(filter)
         local tag = filter.tag
-        local index = filter:GetIndex()
 
-        -- Filters might be added out of order, so we need to tweak the
-        --     insert index if it's outside the current list.
-        if index > (#list + 1) then
-            index = #list + 1
-        end
-
-        tinsert(list, index, {
+        list[tag] = {
             text = filter.name,
             func = SetToFilter,
             args = {tag},
             checked = function(...)
                 return Inventory.db.global.assignedFilters[menu.item:GetItemID()] == tag
             end
-        })
+        }
 
         if menu.doUpdate then
             menu:UpdateLines()
         end
     end
     function menu:RemoveFilter(filter)
-        tremove(list, filter:GetIndex())
+        list[filter.tag] = nil
     end
     function menu:UpdateLines()
         menuFrame:ClearLines()
-        menuFrame:AddLines(unpack(list))
+        menuFrame:AddLine(title)
+        for i, tag in ipairs(Inventory.db.global.filters) do
+            menuFrame:AddLine(list[tag])
+        end
 
         menu.doUpdate = false
     end
@@ -79,6 +75,17 @@ do
             end
         end
     end
+    function FilterMixin:SetIndex(newIndex)
+        local oldIndex = self:GetIndex()
+        if oldIndex == newIndex then return end
+        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
+
+        tremove(Inventory.db.global.filters, oldIndex)
+        tinsert(Inventory.db.global.filters, newIndex, self.tag)
+
+        menu:UpdateLines()
+        private.Update()
+    end
     function FilterMixin:DoesMatchSlot(slot)
         if self.filter then
             return self.filter(slot)
@@ -89,12 +96,10 @@ do
         return filters[filterTag].rank > self.rank
     end
     function FilterMixin:Delete()
-        menu:RemoveFilter(self)
-        menu:UpdateLines()
-
         filters[self.tag] = nil
         Inventory.db.global.customFilters[self.tag] = nil
         tremove(Inventory.db.global.filters, self:GetIndex())
+        menu:UpdateLines()
 
         for itemID, tag in next, Inventory.db.global.assignedFilters do
             if tag == self.tag then

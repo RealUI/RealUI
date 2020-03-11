@@ -428,15 +428,6 @@ local inventory do
         Inventory.Update()
     end
 
-    local function SetIndex(tag, oldIndex, newIndex)
-        if oldIndex == newIndex then return end
-        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
-
-        tremove(Inventory.db.global.filters, oldIndex)
-        tinsert(Inventory.db.global.filters, newIndex, tag)
-        ACR:NotifyChange("RealUI")
-        Inventory.Update()
-    end
     local function AddFilter(tag)
         debug("AddFilter", tag)
         local filter = Inventory:GetFilter(tag)
@@ -447,7 +438,7 @@ local inventory do
             width = "half",
             get = function() return tostring(filter:GetIndex()) end,
             set = function(_, value)
-                SetIndex(tag, filter:GetIndex(), tonumber(value))
+                filter:SetIndex(tonumber(value))
             end,
             order = function()
                 return filter:GetIndex() * 10
@@ -458,8 +449,7 @@ local inventory do
             type = "execute",
             width = filter.isCustom and 1.05 or 1.3,
             func = function()
-                local index = filter:GetIndex()
-                SetIndex(tag, index, index - 1)
+                filter:SetIndex(filter:GetIndex() - 1)
             end,
             order = function()
                 return (filter:GetIndex() * 10) + 1
@@ -470,8 +460,7 @@ local inventory do
             type = "execute",
             width = filter.isCustom and 1.05 or 1.3,
             func = function()
-                local index = filter:GetIndex()
-                SetIndex(tag, index, index + 1)
+                filter:SetIndex(filter:GetIndex() + 1)
             end,
             order = function()
                 return (filter:GetIndex() * 10) + 2
