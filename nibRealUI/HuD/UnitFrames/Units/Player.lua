@@ -80,7 +80,7 @@ UnitFrames.player = {
         local pvp = self.PvP
         pvp.text = pvp:CreateFontString(nil, "OVERLAY")
         pvp.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)
-        pvp.text:SetFontObject("SystemFont_Shadow_Med1")
+        pvp.text:SetFontObject("SystemFont_Shadow_Med1_Outline")
         pvp.text:SetJustifyH("LEFT")
         pvp.text.frequentUpdates = 1
         self:Tag(pvp.text, "[realui:pvptimer]")
