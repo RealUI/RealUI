@@ -76,6 +76,13 @@ local function SortSlots(a, b)
     end
 
 
+    local ilvlA = a.item:GetCurrentItemLevel()
+    local ilvlB = b.item:GetCurrentItemLevel()
+    if ilvlA ~= ilvlB then
+        return ilvlA > ilvlB
+    end
+
+
     local nameA = a.item:GetItemName()
     local nameB = b.item:GetItemName()
     if nameA ~= nameB then
