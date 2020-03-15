@@ -336,3 +336,7 @@ function DragEmAll:OnEnable()
         RealUI.TryInCombat(ResetFrames)
     end)
 end
+
+function DragEmAll:OnDisable()
+    RealUI:ReloadUIDialog()
+end

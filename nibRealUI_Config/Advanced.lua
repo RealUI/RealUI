@@ -2923,6 +2923,16 @@ local uiTweaks do
             end
         }
     end
+
+    uiTweaks.args.dragFrames = {
+        name = L["DragFrames"],
+        desc = L["DragFramesDesc"],
+        type = "toggle",
+        get = function() return RealUI:GetModuleEnabled("DragEmAll") end,
+        set = function(info, value)
+            RealUI:SetModuleEnabled("DragEmAll", value)
+        end
+    }
 end
 
 --[[
