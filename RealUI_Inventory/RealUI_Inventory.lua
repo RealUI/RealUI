@@ -46,10 +46,14 @@ function private.SellJunk()
 
     for _, slot in ipairs(bag.slots) do
         local bagID, slotIndex = slot:GetBagAndSlot()
-        local _, itemCount = _G.GetContainerItemInfo(bagID, slotIndex)
-        local _, _, _, _, _, _, _, _, _, _, sellPrice = _G.GetItemInfo(slot.item:GetItemID())
-        profit = profit + (sellPrice * itemCount)
-        _G.UseContainerItem(bagID, slotIndex)
+        if slot.sellPrice then
+            local _, itemCount = _G.GetContainerItemInfo(bagID, slotIndex)
+            profit = profit + (slot.sellPrice * itemCount)
+
+            slot.sellPrice = nil
+            slot.JunkIcon:Hide()
+            _G.UseContainerItem(bagID, slotIndex)
+        end
     end
 
     local money = _G.GetMoneyString(profit, true)
@@ -66,8 +70,13 @@ local function MERCHANT_SHOW(event, ...)
         private.SellJunk()
     else
         bag.sellJunk:Show()
+        bag.profit = 0
         for _, slot in ipairs(bag.slots) do
-            slot.JunkIcon:Show()
+            local _, _, _, _, _, _, _, _, _, _, sellPrice = _G.GetItemInfo(slot.item:GetItemID())
+            if sellPrice > 0 then
+                slot.JunkIcon:Show()
+                slot.sellPrice = sellPrice
+            end
         end
     end
 end
