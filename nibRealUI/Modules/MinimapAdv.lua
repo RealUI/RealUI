@@ -683,6 +683,8 @@ function MinimapAdv:UpdatePOIVisibility(event, ...)
 end
 
 function MinimapAdv:RemoveAllPOIs()
+    if not poiTable then return end
+
     for _, poiType in next, poiTable do
         for _, poiButton in next, poiType do
             poiButton:Remove()
@@ -701,10 +703,15 @@ function MinimapAdv:InitializePOI()
         poiButton:UpdateScale()
         poiButton:UpdateAlpha()
     end)
+    poiTable = _G.Minimap.poiTable
 end
 
 function MinimapAdv:UpdatePOIEnabled()
     if db.poi.enabled then
+        if not poiTable then
+            self:InitializePOI()
+        end
+
         self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
         self:RegisterEvent("SUPER_TRACKED_QUEST_CHANGED", "POIUpdate")
@@ -1821,7 +1828,6 @@ function MinimapAdv:OnInitialize()
     })
     db = self.db.profile
 
-    poiTable = _G.Minimap.poiTable
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
