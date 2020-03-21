@@ -315,6 +315,12 @@ function DragEmAll:OnInitialize()
     })
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    RealUI:GetModule("InterfaceTweaks"):AddTweak("dragFrames", {
+        name = "DragFrames",
+        setEnabled = function(enabled)
+            RealUI:SetModuleEnabled(MODNAME, enabled)
+        end,
+    }, RealUI:GetModuleEnabled(MODNAME))
 end
 
 function DragEmAll:OnEnable()

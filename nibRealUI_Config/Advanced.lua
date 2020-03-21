@@ -2912,27 +2912,20 @@ local uiTweaks do
 
     local InterfaceTweaks = RealUI:GetModule("InterfaceTweaks")
     local tweaks = InterfaceTweaks:GetTweaks()
-    for tag, name in next, tweaks do
+    for tag, info in next, tweaks do
         uiTweaks.args[tag] = {
-            name = L[name],
-            desc = L[name.."Desc"],
+            name = L[info.name],
+            desc = L[info.name.."Desc"],
             type = "toggle",
             get = function() return InterfaceTweaks.db.global[tag] end,
-            set = function(info, value)
+            set = function(_, value)
                 InterfaceTweaks.db.global[tag] = value
+                if info.setEnabled then
+                    info.setEnabled(value)
+                end
             end
         }
     end
-
-    uiTweaks.args.dragFrames = {
-        name = L["DragFrames"],
-        desc = L["DragFramesDesc"],
-        type = "toggle",
-        get = function() return RealUI:GetModuleEnabled("DragEmAll") end,
-        set = function(info, value)
-            RealUI:SetModuleEnabled("DragEmAll", value)
-        end
-    }
 end
 
 --[[

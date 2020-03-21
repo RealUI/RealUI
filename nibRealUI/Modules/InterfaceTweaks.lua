@@ -10,14 +10,41 @@ local MODNAME = "InterfaceTweaks"
 local InterfaceTweaks = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local modules, moduleEvents = {}, {}
-local function AddTweak(tag, name, event, func)
-    modules[tag] = name
-    if event then
-        if not moduleEvents[event] then
-            moduleEvents[event] = {}
+local function AddTweak(tag, info)
+    modules[tag] = info
+    if info.event then
+        if not moduleEvents[info.event] then
+            moduleEvents[info.event] = {}
         end
 
-        tinsert(moduleEvents[event], func)
+        tinsert(moduleEvents[info.event], info.func)
+        InterfaceTweaks:RegisterEvent(info.event, "OnEvent")
+    end
+end
+
+
+function InterfaceTweaks:AddTweak(tag, info, enabled)
+    AddTweak(tag, info)
+    self.db.global[tag] = enabled
+end
+function InterfaceTweaks:GetTweaks()
+    return RealUI.ShallowCopy(modules)
+end
+
+function InterfaceTweaks:OnEvent(event, ...)
+    if event == "ADDON_LOADED" then
+        if ... == "nibRealUI" then
+            self:UnregisterEvent("ADDON_LOADED")
+            for tag, info in next, modules do
+                if info.setEnabled then
+                    info.setEnabled(self.db.global[tag])
+                end
+            end
+        end
+    else
+        for _, func in ipairs(moduleEvents[event]) do
+            func(...)
+        end
     end
 end
 
@@ -25,19 +52,26 @@ end
 ----====####$$$$%%%%%$$$$####====----
 --     Achievement Screenshots     --
 ----====####$$$$%%%%%$$$$####====----
-AddTweak("achShots", "Tweaks_Achievements", "ACHIEVEMENT_EARNED", function(self, event, achievementID, alreadyEarned)
-    if not InterfaceTweaks.db.global.achShots then return end
+AddTweak("achShots", {
+    name = "Tweaks_Achievements",
+    event = "ACHIEVEMENT_EARNED",
+    func = function(self, event, achievementID, alreadyEarned)
+        if not InterfaceTweaks.db.global.achShots then return end
 
-    _G.C_Timer.After(1, function()
-        _G.Screenshot()
-    end)
-end)
+        _G.C_Timer.After(1, function()
+            _G.Screenshot()
+        end)
+    end
+})
 
 
 ----====####$$$$%%%%%$$$$####====----
 --        Auto Holiday Boss        --
 ----====####$$$$%%%%%$$$$####====----
-AddTweak("autoHoliday", "Tweaks_AutoHoliday") do
+do
+    AddTweak("autoHoliday", {
+        name = "Tweaks_AutoHoliday",
+    })
     local doneHoliday
     _G.LFDParentFrame:HookScript("OnShow", function()
         if not InterfaceTweaks.db.global.autoHoliday then return end
@@ -62,9 +96,8 @@ end
 ----====####$$$$%%%%%$$$$####====----
 --           Mouse Trail           --
 ----====####$$$$%%%%%$$$$####====----
-AddTweak("mouseTrail", "Tweaks_MouseTrail") do
+do
     local pollingRate, numLines = 0.05, 15
-
     local lines = {}
     for i = 1, numLines do
         local line = _G.UIParent:CreateLine()
@@ -77,9 +110,7 @@ AddTweak("mouseTrail", "Tweaks_MouseTrail") do
         lines[i] = {line = line, x = 0, y = 0}
     end
 
-    _G.C_Timer.NewTicker(pollingRate, function()
-        if not InterfaceTweaks.db.global.mouseTrail then return end
-
+    local function UpdateTrail()
         local scale = _G.UIParent:GetEffectiveScale()
         local startX, startY = _G.GetCursorPosition()
 
@@ -93,20 +124,23 @@ AddTweak("mouseTrail", "Tweaks_MouseTrail") do
             info.x, info.y = startX, startY
             startX, startY = endX, endY
         end
-    end)
-end
-
-
-function InterfaceTweaks:GetTweaks()
-    return RealUI.ShallowCopy(modules)
-end
-
-function InterfaceTweaks:OnEvent(event, ...)
-    for _, func in ipairs(moduleEvents[event]) do
-        func(...)
     end
+
+    local ticker
+    AddTweak("mouseTrail", {
+        name = "Tweaks_MouseTrail",
+        setEnabled = function(enabled)
+            if enabled then
+                ticker = _G.C_Timer.NewTicker(pollingRate, UpdateTrail)
+            else
+                ticker:Cancel()
+            end
+        end,
+    })
 end
 
+
+InterfaceTweaks:RegisterEvent("ADDON_LOADED", "OnEvent")
 function InterfaceTweaks:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
@@ -114,8 +148,4 @@ function InterfaceTweaks:OnInitialize()
             ["**"] = false
         },
     })
-
-    for event in next, moduleEvents do
-        self:RegisterEvent(event, "OnEvent")
-    end
 end
