@@ -28,7 +28,7 @@ function ScrollLineMixin:OnLoad()
     local translate = scrollAnim:CreateAnimation("Translation")
     translate:SetDuration(animDuration)
     translate:SetScript("OnPlay", function(trans)
-        translate:SetOffset(0, self.scrollArea:GetHeight())
+        translate:SetOffset(0, translate.offset)
     end)
     self.translate = translate
 
@@ -37,8 +37,13 @@ function ScrollLineMixin:OnLoad()
     end)
 end
 function ScrollLineMixin:AddToScrollArea(scrollArea)
-    self:SetPoint("BOTTOM", scrollArea)
-    self.scrollArea = scrollArea
+    if scrollArea.direction == "up" then
+        self:SetPoint("BOTTOM", scrollArea)
+        self.translate.offset = scrollArea:GetHeight()
+    elseif scrollArea.direction == "down" then
+        self:SetPoint("TOP", scrollArea)
+        self.translate.offset = -scrollArea:GetHeight()
+    end
 end
 function ScrollLineMixin:DisplayText(text)
     self:SetText(text)
@@ -66,13 +71,21 @@ function StickyLineMixin:OnLoad()
     local translate = self.translate
     translate:SetDuration(animDuration * 0.8)
     translate:SetStartDelay(animDuration * 0.4)
-    translate:SetScript("OnPlay", function(trans)
-        translate:SetOffset(0, self.scrollArea:GetHeight() / 2)
-    end)
 end
 function StickyLineMixin:AddToScrollArea(scrollArea)
     self:SetPoint("CENTER", scrollArea)
     self.scrollArea = scrollArea
+
+    if scrollArea.direction then
+        local offset = scrollArea:GetHeight() / 2
+        if scrollArea.direction == "up" then
+            self.translate.offset = offset
+        elseif scrollArea.direction == "down" then
+            self.translate.offset = -offset
+        end
+    else
+        self.translate.offset = 0
+    end
 end
 
 local ScrollLinePoolMixin = _G.CreateFromMixins(_G.FontStringPoolMixin)

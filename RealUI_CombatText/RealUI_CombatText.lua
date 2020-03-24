@@ -46,6 +46,17 @@ local defaults = {
                 point = "CENTER"
             }
         },
+        notification = {
+            size = {
+                x = 200,
+                y = 50,
+            },
+            position = {
+                x = 0,
+                y = 200,
+                point = "CENTER"
+            }
+        },
         ignore = {}
     }
 }

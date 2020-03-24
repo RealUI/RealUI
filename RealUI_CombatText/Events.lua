@@ -168,6 +168,7 @@ private.eventSpecial = eventSpecial
 local PARTY_KILL = "%s %s %s"
 function eventSpecial.PARTY_KILL(eventInfo, ...)
     local _, unconsciousOnDeath = ...
+    eventInfo.scrollType = "notification"
 
     local resultStr = _G.ACTION_PARTY_KILL
     if unconsciousOnDeath then

@@ -21,8 +21,9 @@ local function CreateScrollArea(scrollType)
 end
 
 function private.CreateScrollAreas()
-    CreateScrollArea("incoming")
-    CreateScrollArea("outgoing")
+    CreateScrollArea("incoming").direction = "down"
+    CreateScrollArea("outgoing").direction = "up"
+    CreateScrollArea("notification")
 end
 
 local function DisplayEvent(scrollType, isSticky, text)
