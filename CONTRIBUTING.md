@@ -42,25 +42,28 @@ If you would like to contribute code, a [pull request](https://help.github.com/a
 
 Given the file structure of this project, it's recommended to setup symbolic links between the addons in the repo and your AddOns folder for the game. To facilitate this, [a script is available](https://gist.github.com/Gethe/aa3325ed88b2a92d23ec276c7383e034) to perform this setup. Be sure to update the file path to suit your own install directories. The script was written in Powershell, but it should be fairly simple to convert into another language if desired.
 
-Most of the libraries used are not included in the repo since they will get brought in when a new release is packaged. These libraries will need to be installed separately to ensure RealUI works properly. Most* of these are available via Curse.
+Most of the libraries used are not included in the repo since they will get brought in when a new release is packaged. These libraries will need to be installed separately to ensure RealUI works properly.
 
-  * [Ace3](https://mods.curse.com/addons/wow/ace3)
-  * [AceGUI-3.0-SharedMediaWidets](https://mods.curse.com/addons/wow/ace-gui-3-0-shared-media-widgets)
-  * [Aurora](https://mods.curse.com/addons/wow/aurora)
-  * [HereBeDragons](https://mods.curse.com/addons/wow/herebedragons)
-  * [LibChatAnims](https://mods.curse.com/addons/wow/libchatanims)
-  * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)*
-  * [LibIconFonts](https://github.com/Gethe/LibIconFonts)*
-  * [LibItemUpgradeInfo-1.0](https://mods.curse.com/addons/wow/libitemupgradeinfo-1-0)
-  * [LibQTip-1.0](https://mods.curse.com/addons/wow/libqtip-1-0)
-  * [LibRangeCheck-2.0](https://mods.curse.com/addons/wow/librangecheck-2-0)
-  * [LibSharedMedia-3.0](https://mods.curse.com/addons/wow/libsharedmedia-3-0)
-  * [LibStrataFix](https://mods.curse.com/addons/wow/libstratafix)
-  * [LibTextDump-1.0](https://mods.curse.com/addons/wow/libtextdump-1-0)
-  * [LibWindow-1.1](https://mods.curse.com/addons/wow/libwindow-1-1)
-  * [oUF](https://mods.curse.com/addons/wow/ouf)
-  * [UTF8](https://mods.curse.com/addons/wow/utf8)
+These can be downloaded from Curse:
+  * [Ace3](https://www.curseforge.com/wow/addons/ace3)
+  * [AceGUI-3.0-SharedMediaWidets](https://www.curseforge.com/wow/addons/ace-gui-3-0-shared-media-widgets)
+  * [Aurora](https://www.curseforge.com/wow/addons/aurora)
+  * [HereBeDragons](https://www.curseforge.com/wow/addons/herebedragons)
+  * [LibChatAnims](https://www.curseforge.com/wow/addons/libchatanims)
+  * [LibDualSpec-1.0](https://www.curseforge.com/wow/addons/libdualspec-1-0)
+  * [LibIconFonts](https://www.curseforge.com/wow/addons/libiconfonts)
+  * [LibItemUpgradeInfo-1.0](https://www.curseforge.com/wow/addons/libitemupgradeinfo-1-0)
+  * [LibObjectiveProgress](https://www.curseforge.com/wow/addons/libobjectiveprogress-1-0)
+  * [LibQTip-1.0](https://www.curseforge.com/wow/addons/libqtip-1-0)
+  * [LibRangeCheck-2.0](https://www.curseforge.com/wow/addons/librangecheck-2-0)
+  * [LibSharedMedia-3.0](https://www.curseforge.com/wow/addons/libsharedmedia-3-0)
+  * [LibTextDump-1.0](https://www.curseforge.com/wow/addons/libtextdump-1-0)
+  * [LibWindow-1.1](https://www.curseforge.com/wow/addons/libwindow-1-1)
+  * [oUF](https://www.curseforge.com/wow/addons/ouf)
+  * [UTF8](https://www.curseforge.com/wow/addons/utf8)
 
+This one is currently only available on Github:
+  * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)
 
 ## Packaging ##
 
