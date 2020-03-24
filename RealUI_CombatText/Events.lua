@@ -159,6 +159,15 @@ function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, altern
     eventInfo.eventFormat = event.format
     return true
 end
+function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternatePowerType)
+    eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
+
+    eventInfo.amount = amount
+
+    eventInfo.data = event.data
+    eventInfo.eventFormat = event.format
+    return true
+end
 
 
 
@@ -179,6 +188,40 @@ function eventSpecial.PARTY_KILL(eventInfo, ...)
     eventInfo.canMerge = false
     eventInfo.isSticky = true
     eventInfo.string = PARTY_KILL:format(eventInfo.sourceName, resultStr, eventInfo.destName)
+    private.AddEvent(eventInfo)
+end
+
+local SPELL_INSTAKILL = "%s %s %s"
+function eventSpecial.SPELL_INSTAKILL(eventInfo, ...)
+    local _, unconsciousOnDeath = ...
+    eventInfo.scrollType = "notification"
+
+    local resultStr = _G.ACTION_SPELL_INSTAKILL
+    if unconsciousOnDeath then
+        resultStr = _G.ACTION_SPELL_INSTAKILL_UNCONSCIOUS
+    end
+    eventInfo.resultStr = resultStr
+
+    eventInfo.canMerge = false
+    eventInfo.isSticky = true
+    eventInfo.string = SPELL_INSTAKILL:format(eventInfo.sourceName, resultStr, eventInfo.destName)
+    private.AddEvent(eventInfo)
+end
+
+local UNIT_DIED = "%s %s"
+function eventSpecial.UNIT_DIED(eventInfo, ...)
+    local _, unconsciousOnDeath = ...
+    eventInfo.scrollType = "notification"
+
+    local resultStr = _G.ACTION_UNIT_DIED
+    if unconsciousOnDeath then
+        resultStr = _G.ACTION_UNIT_BECCOMES_UNCONSCIOUS
+    end
+    eventInfo.resultStr = resultStr
+
+    eventInfo.canMerge = false
+    eventInfo.isSticky = true
+    eventInfo.string = UNIT_DIED:format(eventInfo.destName, resultStr)
     private.AddEvent(eventInfo)
 end
 
