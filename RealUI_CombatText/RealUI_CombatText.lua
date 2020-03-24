@@ -16,12 +16,12 @@ local defaults = {
     global = {
         fontNormal = {
             path = LSM:Fetch("font", "Roboto"),
-            size = 16,
+            size = 10,
             flags = "OUTLINE"
         },
         fontSticky = {
             path = LSM:Fetch("font", "Roboto Bold-Italic"),
-            size = 20,
+            size = 14,
             flags = "OUTLINE"
         },
         incoming = {
