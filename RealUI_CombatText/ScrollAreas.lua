@@ -12,6 +12,7 @@ local function CreateScrollArea(scrollType)
 
     local scrollArea = _G.CreateFrame("Frame", nil, _G.UIParent)
     scrollArea:SetSize(scrollSettings.size.x, scrollSettings.size.y)
+    scrollArea.scrollType = scrollType
 
     local position = scrollSettings.position
     scrollArea:SetPoint(position.point, position.x, position.y)
@@ -26,17 +27,15 @@ function private.CreateScrollAreas()
     CreateScrollArea("notification")
 end
 
-local function DisplayEvent(scrollType, isSticky, text)
-    local scrollArea = scrollAreas[scrollType]
-
-    local scrollLines = private.scrollLines.normal
-    if isSticky then
-        scrollLines = private.scrollLines.sticky
+local function DisplayEvent(eventInfo, text)
+    local scrollArea = scrollAreas[eventInfo.scrollType]
+    if not eventInfo.icon then
+        print("no icon", text)
     end
 
-    local scrollLine = scrollLines:Acquire()
+    local scrollLine = private.GetScrollLine(eventInfo.scrollType, eventInfo.isSticky)
     scrollLine:AddToScrollArea(scrollArea)
-    scrollLine:DisplayText(text)
+    scrollLine:DisplayText(text, eventInfo.icon)
 end
 
 local eventQueue = {}
@@ -44,11 +43,11 @@ _G.C_Timer.NewTicker(0.1, function( ... )
     if #eventQueue > 0 then
         local eventInfo = tremove(eventQueue, 1)
         if eventInfo.string then
-            DisplayEvent(eventInfo.scrollType, eventInfo.isSticky, eventInfo.string)
+            DisplayEvent(eventInfo, eventInfo.string)
         else
             local data = eventInfo.data
             local eventStr = eventInfo.eventFormat:format(eventInfo[data[1]], eventInfo[data[2]], eventInfo[data[3]])
-            DisplayEvent(eventInfo.scrollType, eventInfo.isSticky, eventStr)
+            DisplayEvent(eventInfo, eventStr)
         end
     end
 end)

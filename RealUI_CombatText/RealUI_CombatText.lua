@@ -25,6 +25,7 @@ local defaults = {
             flags = "OUTLINE"
         },
         incoming = {
+            justify = "RIGHT",
             size = {
                 x = 100,
                 y = 300,
@@ -36,6 +37,7 @@ local defaults = {
             }
         },
         outgoing = {
+            justify = "LEFT",
             size = {
                 x = 100,
                 y = 300,
@@ -47,6 +49,7 @@ local defaults = {
             }
         },
         notification = {
+            justify = "CENTER",
             size = {
                 x = 200,
                 y = 50,

@@ -38,34 +38,51 @@ local eventPrefix = {}
 private.eventPrefix = eventPrefix
 
 function eventPrefix.SWING(eventInfo, ...)
+    eventInfo.icon = 132223 -- Ability_MeleeDamage
     if eventSuffix[eventInfo.eventType](eventInfo, ...) then
         private.AddEvent(eventInfo)
     end
 end
 
 function eventPrefix.RANGE(eventInfo, ...)
-    eventInfo.spellId, eventInfo.spellName, eventInfo.spellSchool = ...
+    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
+
+    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = icon
+
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
     end
 end
 
 function eventPrefix.SPELL(eventInfo, ...)
-    eventInfo.spellId, eventInfo.spellName, eventInfo.spellSchool = ...
+    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
+
+    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = icon
+
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
     end
 end
 
 function eventPrefix.SPELL_PERIODIC(eventInfo, ...)
-    eventInfo.spellId, eventInfo.spellName, eventInfo.spellSchool = ...
+    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
+
+    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = icon
+
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
     end
 end
 
 function eventPrefix.SPELL_BUILDING(eventInfo, ...)
-    eventInfo.spellId, eventInfo.spellName, eventInfo.spellSchool = ...
+    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
+
+    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = icon
+
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
     end
@@ -83,7 +100,7 @@ local event = {
 function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr = _G.CombatLog_String_DamageResultString(resisted, blocked, absorbed, critical, glancing, crushing, nil, nil, eventInfo.spellId, overkill)
+    local resultStr = _G.CombatLog_String_DamageResultString(resisted, blocked, absorbed, critical, glancing, crushing, nil, nil, eventInfo.spellID, overkill)
     eventInfo.resultStr = resultStr or ""
 
     if overkill > 0 then
@@ -110,7 +127,7 @@ function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critic
 
     local resultStr
     if missType == "ABSORB" then
-        resultStr = _G.CombatLog_String_DamageResultString(nil, nil, amountMissed, critical, nil, nil, nil, nil, eventInfo.spellId)
+        resultStr = _G.CombatLog_String_DamageResultString(nil, nil, amountMissed, critical, nil, nil, nil, nil, eventInfo.spellID)
     elseif missType == "RESIST" or missType == "BLOCK" then
         if amountMissed ~= 0 then
             resultStr = _G["TEXT_MODE_A_STRING_RESULT_"..missType]:format(amountMissed)
@@ -136,7 +153,7 @@ end
 function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, absorbed, critical, nil, nil, overhealing, nil, eventInfo.spellId)
+    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, absorbed, critical, nil, nil, overhealing, nil, eventInfo.spellID)
     eventInfo.resultStr = resultStr or ""
 
     eventInfo.amount = amount
@@ -150,7 +167,7 @@ end
 function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, alternatePowerType)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, nil, nil, nil, nil, nil, nil, eventInfo.spellId, nil, overEnergize)
+    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, nil, nil, nil, nil, nil, nil, eventInfo.spellID, nil, overEnergize)
     eventInfo.resultStr = resultStr or ""
 
     eventInfo.amount = amount
