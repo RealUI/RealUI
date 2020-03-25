@@ -58,7 +58,7 @@ function ScreenSaver:CreateFrames()
     frame.alphaIn = alphaIn
 
     local alphaOut = frame:CreateAnimationGroup()
-    alphaIn:SetScript("OnPlay", function(this)
+    alphaOut:SetScript("OnPlay", function(this)
         frame.time:SetText("")
     end)
     alphaOut:SetScript("OnFinished", function(this)
