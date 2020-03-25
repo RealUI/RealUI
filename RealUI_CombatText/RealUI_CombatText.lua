@@ -5,6 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = _G.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local CombatText = RealUI:NewModule("CombatText", "AceEvent-3.0")
 private.CombatText = CombatText
@@ -201,6 +202,7 @@ end
 
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
+    FramePoint:RegisterMod(self)
 
     for event in next, self.db.global.ignore do
         IGNORE_EVENT[event] = true

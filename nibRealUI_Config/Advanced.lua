@@ -490,6 +490,21 @@ local combatText do
                     },
                 }
             },
+            lock = {
+                name = L["General_Lock"],
+                desc = L["General_LockDesc"],
+                type = "toggle",
+                width = "full",
+                get = function(info) return FramePoint:IsModLocked(CombatText) end,
+                set = function(info, value)
+                    if value then
+                        FramePoint:LockMod(CombatText)
+                    else
+                        FramePoint:UnlockMod(CombatText)
+                    end
+                end,
+                order = 0,
+            },
         }
     end
 

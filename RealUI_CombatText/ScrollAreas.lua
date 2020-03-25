@@ -5,6 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = _G.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local L = RealUI.L
 local CombatText = private.CombatText
@@ -13,12 +14,10 @@ local scrollAreas = {}
 local function CreateScrollArea(scrollType)
     local scrollSettings = CombatText.db.global[scrollType]
 
-    local scrollArea = _G.CreateFrame("Frame", nil, _G.UIParent)
+    local scrollArea = _G.CreateFrame("Frame", "CombatText_"..scrollType, _G.UIParent)
     scrollArea:SetSize(scrollSettings.size.x, scrollSettings.size.y)
+    FramePoint:PositionFrame(CombatText, scrollArea, {"global", scrollType, "position"})
     scrollArea.scrollType = scrollType
-
-    local position = scrollSettings.position
-    scrollArea:SetPoint(position.point, position.x, position.y)
 
     scrollAreas[scrollType] = scrollArea
     return scrollArea
