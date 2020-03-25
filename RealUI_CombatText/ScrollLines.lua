@@ -75,9 +75,9 @@ function ScrollLineMixin:AddToScrollArea(scrollArea)
     local scrollSettings = CombatText.db.global[scrollArea.scrollType]
     self.text:SetPoint(scrollSettings.justify)
     if scrollSettings.justify == "RIGHT" then
-        self.icon:SetPoint("LEFT", self.text, "RIGHT")
+        self.icon:SetPoint("LEFT", self.text, "RIGHT", 2, 0)
     else
-        self.icon:SetPoint("RIGHT", self.text, "LEFT")
+        self.icon:SetPoint("RIGHT", self.text, "LEFT", -2, 0)
     end
 end
 function ScrollLineMixin:DisplayText(text, icon)
