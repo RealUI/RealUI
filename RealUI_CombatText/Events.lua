@@ -19,6 +19,9 @@ local eventSuffix = _G.setmetatable({}, {
         return MissingEvent
     end
 })
+
+
+local defaultSchool = _G.SCHOOL_MASK_NONE
 local SpellColors = {
     [_G.SCHOOL_MASK_NONE] = Color.Create(1, 1, 1),
     [_G.SCHOOL_MASK_PHYSICAL] = Color.Create(1, 1, 0),
@@ -39,7 +42,36 @@ local function GetSpellColor(school)
     end
 
 
-    return SpellColors[_G.SCHOOL_MASK_NONE]
+    return SpellColors[defaultSchool]
+end
+
+--local defaultPower = _G.Enum.PowerType.Mana
+local alternatePower = _G.Enum.PowerType.Alternate
+local PowerColors = {
+    [_G.Enum.PowerType.Mana] = {Color.Create(0, 0, 1), _G.MANA},
+    [_G.Enum.PowerType.Rage] = {Color.Create(1, 0, 0), _G.RAGE},
+    [_G.Enum.PowerType.Focus] = {Color.Create(1, 0.5, 0.25), _G.FOCUS},
+    [_G.Enum.PowerType.Energy] = {Color.Create(1, 1, 0), _G.ENERGY},
+    [_G.Enum.PowerType.ComboPoints] = {Color.Create(1, 0.96, 0.41), _G.COMBO_POINTS},
+    [_G.Enum.PowerType.Runes] = {Color.Create(0.5, 0.5, 0.5), _G.RUNES},
+    [_G.Enum.PowerType.RunicPower] = {Color.Create(0, 0.82, 1), _G.RUNIC_POWER},
+    [_G.Enum.PowerType.SoulShards] = {Color.Create(0.5, 0.32, 0.55), _G.SOUL_SHARDS},
+    [_G.Enum.PowerType.LunarPower] = {Color.Create(0.3, 0.52, 0.9), _G.LUNAR_POWER},
+    [_G.Enum.PowerType.HolyPower] = {Color.Create(0.95, 0.9, 0.6), _G.HOLY_POWER},
+    [_G.Enum.PowerType.Maelstrom] = {Color.Create(0, 0.5, 1), _G.MAELSTROM_POWER},
+    [_G.Enum.PowerType.Chi] = {Color.Create(0.71, 1, 0.92), _G.CHI_POWER},
+    [_G.Enum.PowerType.Insanity] = {Color.Create(0.4, 0, 0.8), _G.INSANITY_POWER},
+    [_G.Enum.PowerType.ArcaneCharges] = {Color.Create(0.1, 0.1, 0.98), _G.ARCANE_CHARGES_POWER},
+    [_G.Enum.PowerType.Fury] = {Color.Create(0.788, 0.259, 0.992), _G.FURY},
+    [_G.Enum.PowerType.Pain] = {Color.Create(1, 0.612, 0), _G.PAIN},
+}
+local function GetPower(powerType, alternatePowerType)
+    local power = PowerColors[powerType]
+    if powerType == alternatePower and alternatePowerType then
+        power = PowerColors[alternatePowerType]
+    end
+
+    return power[1], power[2]
 end
 
 local eventPrefix = {}
@@ -168,7 +200,7 @@ local function GetResultString(resisted, blocked, absorbed, glancing, crushing, 
         end
     end
 
-    if overenergize then
+    if overenergize and overenergize > 0 then
         if resultStr then
             resultStr = resultStr.." "..partialEffects.overenergize:format(RealUI.ReadableNumber(overenergize))
         else
@@ -237,6 +269,10 @@ function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
     eventInfo.resultStr = resultStr or ""
 
+    if overhealing > 0 then
+        amount = amount - overhealing
+    end
+
     eventInfo.amount = amount
     eventInfo.isSticky = critical
 
@@ -246,7 +282,8 @@ function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
 end
 
 function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, alternatePowerType)
-    eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
+    local powerColor, powerName = GetPower(powerType, alternatePowerType)
+    eventInfo.text = powerName
 
     local resultStr = GetResultString(nil, nil, nil, nil, nil, nil, nil, overEnergize)
     eventInfo.resultStr = resultStr or ""
@@ -254,16 +291,20 @@ function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, altern
     eventInfo.amount = amount
 
     eventInfo.data = event.data
-    eventInfo.eventFormat = event.format
+    eventInfo.eventFormat = powerColor:WrapTextInColorCode(event.format)
     return true
 end
 function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternatePowerType)
-    eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
+    local powerColor, powerName = GetPower(powerType, alternatePowerType)
+    eventInfo.text = powerName
+    if extraAmount then
+        _G.print("DRAIN extraAmount", eventInfo.text, extraAmount)
+    end
 
     eventInfo.amount = amount
 
     eventInfo.data = event.data
-    eventInfo.eventFormat = event.format
+    eventInfo.eventFormat = powerColor:WrapTextInColorCode(event.format)
     return true
 end
 

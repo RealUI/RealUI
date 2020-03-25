@@ -108,7 +108,6 @@ local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
 local cachedGUIDs = {
     [_G.UnitGUID("player")] = "player"
 }
---local playerGUID = _G.UnitGUID("player")
 local function DoesEventAffectPlayer(eventInfo)
     local sourceUnit = cachedGUIDs[eventInfo.sourceGUID]
     if not sourceUnit then
