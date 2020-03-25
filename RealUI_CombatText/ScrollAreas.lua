@@ -40,18 +40,29 @@ local function DisplayEvent(eventInfo, text)
     scrollLine:DisplayText(text, eventInfo.icon)
 end
 
-local eventQueue = {}
+local eventQueue, eventFormat = {}, "%s %s"
 _G.C_Timer.NewTicker(0.1, function( ... )
     if #eventQueue > 0 then
         local eventInfo = tremove(eventQueue, 1)
         if eventInfo.string then
             DisplayEvent(eventInfo, eventInfo.string)
         else
-            eventInfo.amount = RealUI.ReadableNumber(eventInfo.amount)
+            local text = eventInfo.amount and RealUI.ReadableNumber(eventInfo.amount) or ""
+            if eventInfo.sourceUnit == "pet" and not eventInfo.text then
+                eventInfo.text = _G.PET
+            end
 
-            local data = eventInfo.data
-            local eventStr = eventInfo.eventFormat:format(eventInfo[data[1]], eventInfo[data[2]], eventInfo[data[3]])
-            DisplayEvent(eventInfo, eventStr)
+            if eventInfo.text then
+                text = eventFormat:format(eventInfo.text, text)
+            end
+            if eventInfo.resultStr then
+                text = eventFormat:format(text, eventInfo.resultStr)
+            end
+            if eventInfo.color then
+                text = eventInfo.color:WrapTextInColorCode(text)
+            end
+
+            DisplayEvent(eventInfo, text)
         end
     end
 end)

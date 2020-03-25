@@ -79,9 +79,6 @@ private.eventPrefix = eventPrefix
 
 function eventPrefix.SWING(eventInfo, ...)
     eventInfo.icon = 132223 -- Ability_MeleeDamage
-    if eventInfo.sourceUnit == "pet" then
-        eventInfo.spellName = _G.PET
-    end
     if eventSuffix[eventInfo.eventType](eventInfo, ...) then
         private.AddEvent(eventInfo)
     end
@@ -211,17 +208,7 @@ local function GetResultString(resisted, blocked, absorbed, glancing, crushing, 
     return resultStr
 end
 
-local event = {
-    format = "%s %s %s",
-    data = {
-        "text",
-        "amount",
-        "resultStr"
-    }
-}
 function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
-    eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
-
     local resultStr = GetResultString(resisted, blocked, absorbed, glancing, crushing, nil, overkill)
     eventInfo.resultStr = resultStr or ""
 
@@ -231,41 +218,19 @@ function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, block
 
     eventInfo.amount = amount
     eventInfo.isSticky = critical
-
-    eventInfo.data = event.data
-    eventInfo.eventFormat = GetSpellColor(school):WrapTextInColorCode(event.format)
+    eventInfo.color = GetSpellColor(school)
     return true
 end
 
-
-local MISSED = {
-    format = "%s %s",
-    data = {
-        "text",
-        "resultStr"
-    }
-}
 function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critical)
-    eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
-
-    local resultStr = _G[missType]
-    eventInfo.amount = amountMissed or 0
-    eventInfo.resultStr = resultStr
+    eventInfo.amount = amountMissed
+    eventInfo.resultStr = _G[missType]
     eventInfo.isSticky = critical
 
-    if amountMissed then
-        eventInfo.data = event.data
-        eventInfo.eventFormat = event.format
-    else
-        eventInfo.eventFormat = MISSED.format
-        eventInfo.data = MISSED.data
-    end
     return true
 end
 
 function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
-    eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
-
     local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
     eventInfo.resultStr = resultStr or ""
 
@@ -275,36 +240,28 @@ function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
 
     eventInfo.amount = amount
     eventInfo.isSticky = critical
-
-    eventInfo.data = event.data
-    eventInfo.eventFormat = Color.green:WrapTextInColorCode(event.format)
+    eventInfo.color = Color.green
     return true
 end
 
 function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, alternatePowerType)
-    local powerColor, powerName = GetPower(powerType, alternatePowerType)
-    eventInfo.text = powerName
+    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
 
     local resultStr = GetResultString(nil, nil, nil, nil, nil, nil, nil, overEnergize)
     eventInfo.resultStr = resultStr or ""
 
     eventInfo.amount = amount
 
-    eventInfo.data = event.data
-    eventInfo.eventFormat = powerColor:WrapTextInColorCode(event.format)
     return true
 end
 function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternatePowerType)
-    local powerColor, powerName = GetPower(powerType, alternatePowerType)
-    eventInfo.text = powerName
+    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
+    eventInfo.amount = amount
+
     if extraAmount then
         _G.print("DRAIN extraAmount", eventInfo.text, extraAmount)
     end
 
-    eventInfo.amount = amount
-
-    eventInfo.data = event.data
-    eventInfo.eventFormat = powerColor:WrapTextInColorCode(event.format)
     return true
 end
 
@@ -364,21 +321,12 @@ function eventSpecial.UNIT_DIED(eventInfo, ...)
     private.AddEvent(eventInfo)
 end
 
-local ENVIRONMENTAL_DAMAGE = {
-    format = "%s %s %s",
-    data = {
-        "amount",
-        "text",
-        "resultStr"
-    }
-}
 function eventSpecial.ENVIRONMENTAL_DAMAGE(eventInfo, ...)
     local environmentalType, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
     eventInfo.eventBase = "ENVIRONMENTAL_DAMAGE_"..environmentalType:upper()
 
     eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing)
 
-    eventInfo.data = ENVIRONMENTAL_DAMAGE.data
-    eventInfo.eventFormat = GetSpellColor(school):WrapTextInColorCode(ENVIRONMENTAL_DAMAGE.format)
+    eventInfo.color = GetSpellColor(school)
     private.AddEvent(eventInfo)
 end

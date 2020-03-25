@@ -33,7 +33,7 @@ function ScrollLineMixin:OnLoad()
     local icon = self:CreateTexture(nil, "BACKGROUND", nil, 0)
     icon:SetTexture([[Interface\Icons\INV_Misc_QuestionMark]])
     icon:SetSize(font.size, font.size)
-    Base.CropIcon(icon, self)
+    icon.bg = Base.CropIcon(icon, self)
     self.icon = icon
 
     local scrollAnim = self:CreateAnimationGroup()
@@ -84,6 +84,8 @@ end
 function ScrollLineMixin:DisplayText(text, icon)
     self.text:SetText(text)
     self.icon:SetTexture(icon)
+    self.icon.bg:SetShown(icon)
+
     self:Show()
     self.scrollAnim:Play()
 end
