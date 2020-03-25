@@ -458,7 +458,7 @@ local combatText do
                     size = {
                         name = "",
                         type = "range",
-                        min = 8, max = 16, step = 1,
+                        min = 8, max = 24, step = 1,
                         get = fontGet,
                         set = fontSet,
                         order = 2,
@@ -483,7 +483,7 @@ local combatText do
                     size = {
                         name = "",
                         type = "range",
-                        min = 8, max = 16, step = 1,
+                        min = 8, max = 24, step = 1,
                         get = fontGet,
                         set = fontSet,
                         order = 2,
