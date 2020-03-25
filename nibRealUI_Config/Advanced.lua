@@ -435,6 +435,7 @@ local combatText do
     end
     local function fontSet(info, value)
         CombatText.db.global.fonts[info[#info-1]][info[#info]] = value
+        CombatText:UpdateFonts()
     end
 
     debug("Module", CombatText)
@@ -523,7 +524,7 @@ local inventory do
     end
     local function appSet(info, value)
         Inventory.db.global[info[#info]] = value
-        Inventory.Update()
+        Inventory:Update()
     end
 
     local function AddFilter(tag)

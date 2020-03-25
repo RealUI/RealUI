@@ -32,7 +32,7 @@ function ScrollLineMixin:OnLoad()
 
     local icon = self:CreateTexture(nil, "BACKGROUND", nil, 0)
     icon:SetTexture([[Interface\Icons\INV_Misc_QuestionMark]])
-    icon:SetSize(16, 16)
+    icon:SetSize(font.size, font.size)
     Base.CropIcon(icon, self)
     self.icon = icon
 
@@ -130,6 +130,19 @@ normalLines.mixin = ScrollLineMixin
 local stickyLines = _G.CreateObjectPool(ScrollLineFactory, ScrollLineReset)
 stickyLines.mixin = StickyLineMixin
 
+function CombatText:UpdateFonts()
+    local normal = CombatText.db.global.fonts.normal
+    for line in normalLines:EnumerateActive() do
+        line.text:SetFont(LSM:Fetch("font", normal.name), normal.size, normal.flags)
+        line.icon:SetSize(normal.size, normal.size)
+    end
+
+    local sticky = CombatText.db.global.fonts.sticky
+    for line in stickyLines:EnumerateActive() do
+        line.text:SetFont(LSM:Fetch("font", sticky.name), sticky.size, sticky.flags)
+        line.icon:SetSize(sticky.size, sticky.size)
+    end
+end
 function private.GetScrollLine(scrollType, isSticky)
     if scrollType == "notification" or isSticky then
         return stickyLines:Acquire()
