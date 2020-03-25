@@ -135,10 +135,10 @@ local function DoesEventAffectPlayer(eventInfo)
     end
 
     local scrollType
-    if sourceUnit == "player" or sourceUnit == "pet" then
-        scrollType = "outgoing"
-    elseif destUnit == "player" or destUnit == "pet" then
+    if destUnit == "player" or destUnit == "pet" then
         scrollType = "incoming"
+    elseif sourceUnit == "player" or sourceUnit == "pet" then
+        scrollType = "outgoing"
     end
 
     if scrollType then
