@@ -6,6 +6,7 @@ local _, private = ...
 
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
+local LSM = _G.LibStub("LibSharedMedia-3.0")
 
 -- RealUI --
 local RealUI = _G.RealUI
@@ -414,6 +415,88 @@ local core do
         },
     }
 end
+local combatText do
+    debug("CombatText")
+    order = order + 1
+
+    local args
+    local CombatText = RealUI:GetModule("CombatText", true)
+    --[=[
+    local function appGet(info)
+        return CombatText.db.global[info[#info]]
+    end
+    local function appSet(info, value)
+        CombatText.db.global[info[#info]] = value
+    end
+    ]=]
+
+    local function fontGet(info)
+        return CombatText.db.global.fonts[info[#info-1]][info[#info]]
+    end
+    local function fontSet(info, value)
+        CombatText.db.global.fonts[info[#info-1]][info[#info]] = value
+    end
+
+    debug("Module", CombatText)
+    if CombatText then
+        args = {
+            normal = {
+                name = L.Fonts_Normal,
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                    name = {
+                        name = "",
+                        type = "select",
+                        dialogControl = "LSM30_Font",
+                        values = _G.AceGUIWidgetLSMlists.font,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 1,
+                    },
+                    size = {
+                        name = "",
+                        type = "range",
+                        min = 8, max = 16, step = 1,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 2,
+                    },
+                }
+            },
+            sticky = {
+                name = L.Fonts_Crit,
+                type = "group",
+                inline = true,
+                order = 20,
+                args = {
+                    name = {
+                        name = "",
+                        type = "select",
+                        dialogControl = "LSM30_Font",
+                        values = _G.AceGUIWidgetLSMlists.font,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 1,
+                    },
+                    size = {
+                        name = "",
+                        type = "range",
+                        min = 8, max = 16, step = 1,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 2,
+                    },
+                }
+            },
+        }
+    end
+
+
+    debug("CombatText create")
+    combatText = CreateAddonSection("CombatText", args)
+end
 local inventory do
     debug("Inventory")
     order = order + 1
@@ -552,7 +635,6 @@ local skins do
         RealUI:UpdateFrameStyle()
     end
 
-    local LSM = _G.LibStub("LibSharedMedia-3.0")
     local function fontGet(info)
         return SkinsDB.profile.fonts[info[#info]].name
     end
@@ -2948,9 +3030,10 @@ options.RealUI = {
     type = "group",
     args = {
         core = core,
+        combatText = combatText,
+        inventory = inventory,
         skins = skins,
         tooltips = tooltips,
-        inventory = inventory,
         uiTweaks = uiTweaks,
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }

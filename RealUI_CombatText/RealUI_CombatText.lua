@@ -3,9 +3,6 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals next tinsert ceil tostring tostringall
 
--- Libs --
-local LSM = _G.LibStub("LibSharedMedia-3.0")
-
 -- RealUI --
 local RealUI = _G.RealUI
 
@@ -14,15 +11,17 @@ private.CombatText = CombatText
 
 local defaults = {
     global = {
-        fontNormal = {
-            path = LSM:Fetch("font", "Roboto"),
-            size = 10,
-            flags = "OUTLINE"
-        },
-        fontSticky = {
-            path = LSM:Fetch("font", "Roboto Bold-Italic"),
-            size = 14,
-            flags = "OUTLINE"
+        fonts = {
+            normal = {
+                name = "Roboto",
+                size = 10,
+                flags = "OUTLINE"
+            },
+            sticky = {
+                name = "Roboto Bold-Italic",
+                size = 14,
+                flags = "OUTLINE"
+            },
         },
         incoming = {
             justify = "RIGHT",

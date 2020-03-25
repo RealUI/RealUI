@@ -1,6 +1,7 @@
 local _, private = ...
 
 -- Libs --
+local LSM = _G.LibStub("LibSharedMedia-3.0")
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 
@@ -24,9 +25,9 @@ local ScrollLineMixin = {}
 function ScrollLineMixin:OnLoad()
     self:SetSize(100, 16)
 
-    local font = CombatText.db.global.fontNormal
+    local font = CombatText.db.global.fonts.normal
     local text = self:CreateFontString(nil, "BACKGROUND", nil, 0)
-    text:SetFont(font.path, font.size, font.flags)
+    text:SetFont(LSM:Fetch("font", font.name), font.size, font.flags)
     self.text = text
 
     local icon = self:CreateTexture(nil, "BACKGROUND", nil, 0)
@@ -98,8 +99,8 @@ local StickyLineMixin = _G.CreateFromMixins(ScrollLineMixin)
 function StickyLineMixin:OnLoad()
     ScrollLineMixin.OnLoad(self)
 
-    local font = CombatText.db.global.fontSticky
-    self.text:SetFont(font.path, font.size, font.flags)
+    local font = CombatText.db.global.fonts.sticky
+    self.text:SetFont(LSM:Fetch("font", font.name), font.size, font.flags)
 
     local scale = self.scrollAnim:CreateAnimation("Scale")
     scale:SetDuration(animDuration * 0.2)
