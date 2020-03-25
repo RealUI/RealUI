@@ -7,6 +7,9 @@ local _, private = ...
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
+-- RealUI --
+local RealUI = _G.RealUI
+
 local function MissingEvent(eventInfo, ...)
     _G.print("Missing combat event", eventInfo.eventBase, eventInfo.eventType)
 end
@@ -27,11 +30,16 @@ local SpellColors = {
     [_G.SCHOOL_MASK_ARCANE] = Color.Create(1, 0.5, 1),
 }
 local function GetSpellColor(school)
-    if not school then
-        return SpellColors[_G.SCHOOL_MASK_NONE]
+    if school then
+        if SpellColors[school] then
+            return SpellColors[school]
+        else
+            _G.print("Missing spell color", school)
+        end
     end
 
-    return SpellColors[school] or SpellColors[_G.SCHOOL_MASK_NONE]
+
+    return SpellColors[_G.SCHOOL_MASK_NONE]
 end
 
 local eventPrefix = {}
@@ -39,6 +47,7 @@ private.eventPrefix = eventPrefix
 
 function eventPrefix.SWING(eventInfo, ...)
     eventInfo.icon = 132223 -- Ability_MeleeDamage
+    eventInfo.spellSchool = _G.SCHOOL_MASK_PHYSICAL
     if eventSuffix[eventInfo.eventType](eventInfo, ...) then
         private.AddEvent(eventInfo)
     end
@@ -88,9 +97,88 @@ function eventPrefix.SPELL_BUILDING(eventInfo, ...)
     end
 end
 
+local partialEffects = {
+    resist = _G.RESIST_TRAILER:gsub("%%d", "%%s"),
+    block = _G.BLOCK_TRAILER:gsub("%%d", "%%s"),
+    absorb = _G.ABSORB_TRAILER:gsub("%%d", "%%s"),
+    glancing = _G.GLANCING_TRAILER,
+    crushing = _G.CRUSHING_TRAILER,
+    overheal = _G.TEXT_MODE_A_STRING_RESULT_OVERHEALING:lower(),
+    overkill = _G.TEXT_MODE_A_STRING_RESULT_OVERKILLING :lower(),
+    overenergize = _G.TEXT_MODE_A_STRING_RESULT_OVERENERGIZE:lower(),
+}
+local function GetResultString(resisted, blocked, absorbed, glancing, crushing, overhealing, overkill, overenergize)
+    local resultStr
+    if resisted then
+        if resisted < 0 then    --Its really a vulnerability
+            -- I don't think this is a thing anymore
+            _G.print("Vulnerable!!!", resisted)
+        else
+            resultStr = partialEffects.resist:format(RealUI.ReadableNumber(resisted))
+        end
+    end
+
+    if blocked then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.block:format(RealUI.ReadableNumber(blocked))
+        else
+            resultStr = partialEffects.block:format(RealUI.ReadableNumber(blocked))
+        end
+    end
+
+    if absorbed and absorbed > 0 then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.absorb:format(RealUI.ReadableNumber(absorbed))
+        else
+            resultStr = partialEffects.absorb:format(RealUI.ReadableNumber(absorbed))
+        end
+    end
+
+    if glancing then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.glancing
+        else
+            resultStr = partialEffects.glancing
+        end
+    end
+
+    if crushing then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.crushing
+        else
+            resultStr = partialEffects.crushing
+        end
+    end
+
+    if overhealing and overhealing > 0 then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.overheal:format(RealUI.ReadableNumber(overhealing))
+        else
+            resultStr = partialEffects.overheal:format(RealUI.ReadableNumber(overhealing))
+        end
+    end
+
+    if overkill and overkill > 0 then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.overkill:format(RealUI.ReadableNumber(overkill))
+        else
+            resultStr = partialEffects.overkill:format(RealUI.ReadableNumber(overkill))
+        end
+    end
+
+    if overenergize then
+        if resultStr then
+            resultStr = resultStr.." "..partialEffects.overenergize:format(RealUI.ReadableNumber(overenergize))
+        else
+            resultStr = partialEffects.overenergize:format(RealUI.ReadableNumber(overenergize))
+        end
+    end
+
+    return resultStr
+end
 
 local event = {
-    format = "%s %d %s",
+    format = "%s %s %s",
     data = {
         "text",
         "amount",
@@ -100,20 +188,21 @@ local event = {
 function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr = _G.CombatLog_String_DamageResultString(resisted, blocked, absorbed, critical, glancing, crushing, nil, nil, eventInfo.spellID, overkill)
+    local resultStr = GetResultString(resisted, blocked, absorbed, glancing, crushing, nil, overkill)
     eventInfo.resultStr = resultStr or ""
 
     if overkill > 0 then
         amount = amount - overkill
     end
 
-    eventInfo.amount = amount
+    eventInfo.amount = RealUI.ReadableNumber(amount)
     eventInfo.isSticky = critical
 
     eventInfo.data = event.data
     eventInfo.eventFormat = GetSpellColor(school):WrapTextInColorCode(event.format)
     return true
 end
+
 
 local MISSED = {
     format = "%s %s",
@@ -125,18 +214,8 @@ local MISSED = {
 function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critical)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr
-    if missType == "ABSORB" then
-        resultStr = _G.CombatLog_String_DamageResultString(nil, nil, amountMissed, critical, nil, nil, nil, nil, eventInfo.spellID)
-    elseif missType == "RESIST" or missType == "BLOCK" then
-        if amountMissed ~= 0 then
-            resultStr = _G["TEXT_MODE_A_STRING_RESULT_"..missType]:format(amountMissed)
-        end
-    else
-        resultStr = _G["ACTION_"..eventInfo.eventBase.."_MISSED_"..missType]
-    end
-
-    eventInfo.amount = amountMissed or 0
+    local resultStr = _G[missType]
+    eventInfo.amount = RealUI.ReadableNumber(amountMissed or 0)
     eventInfo.resultStr = resultStr
     eventInfo.isSticky = critical
 
@@ -153,24 +232,24 @@ end
 function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, absorbed, critical, nil, nil, overhealing, nil, eventInfo.spellID)
+    local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
     eventInfo.resultStr = resultStr or ""
 
-    eventInfo.amount = amount
+    eventInfo.amount = RealUI.ReadableNumber(amount)
     eventInfo.isSticky = critical
 
     eventInfo.data = event.data
-    eventInfo.eventFormat = event.format
+    eventInfo.eventFormat = Color.green:WrapTextInColorCode(event.format)
     return true
 end
 
 function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, alternatePowerType)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    local resultStr = _G.CombatLog_String_DamageResultString(nil, nil, nil, nil, nil, nil, nil, nil, eventInfo.spellID, nil, overEnergize)
+    local resultStr = GetResultString(nil, nil, nil, nil, nil, nil, nil, overEnergize)
     eventInfo.resultStr = resultStr or ""
 
-    eventInfo.amount = amount
+    eventInfo.amount = RealUI.ReadableNumber(amount)
 
     eventInfo.data = event.data
     eventInfo.eventFormat = event.format
@@ -179,7 +258,7 @@ end
 function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternatePowerType)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    eventInfo.amount = amount
+    eventInfo.amount = RealUI.ReadableNumber(amount)
 
     eventInfo.data = event.data
     eventInfo.eventFormat = event.format
@@ -188,9 +267,9 @@ end
 
 
 
+
 local eventSpecial = {}
 private.eventSpecial = eventSpecial
-
 local PARTY_KILL = "%s %s %s"
 function eventSpecial.PARTY_KILL(eventInfo, ...)
     local _, unconsciousOnDeath = ...
@@ -243,7 +322,7 @@ function eventSpecial.UNIT_DIED(eventInfo, ...)
 end
 
 local ENVIRONMENTAL_DAMAGE = {
-    format = "%d %s %s",
+    format = "%s %s %s",
     data = {
         "amount",
         "text",
