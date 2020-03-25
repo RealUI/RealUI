@@ -10,9 +10,39 @@ local CombatText = private.CombatText
 local function ScrollLineFactory(pool)
     local scrollLine = _G.CreateFrame("Frame", nil, _G.UIParent)
     _G.Mixin(scrollLine, pool.mixin)
-    scrollLine.pool = pool
-    scrollLine:OnLoad()
+    scrollLine:SetSize(100, 16)
 
+    local text = scrollLine:CreateFontString(nil, "BACKGROUND", nil, 0)
+    scrollLine.text = text
+
+    local icon = scrollLine:CreateTexture(nil, "BACKGROUND", nil, 0)
+    icon:SetTexture([[Interface\Icons\INV_Misc_QuestionMark]])
+    icon.bg = Base.CropIcon(icon, scrollLine)
+    scrollLine.icon = icon
+
+    local scrollAnim = scrollLine:CreateAnimationGroup()
+    scrollAnim:SetScript("OnFinished", function(anim, requested)
+        pool:Release(scrollLine)
+    end)
+    scrollLine.scrollAnim = scrollAnim
+
+    local alphaIn = scrollAnim:CreateAnimation("Alpha")
+    alphaIn:SetFromAlpha(0)
+    alphaIn:SetToAlpha(1)
+    scrollLine.alphaIn = alphaIn
+
+    local alphaOut = scrollAnim:CreateAnimation("Alpha")
+    alphaOut:SetFromAlpha(1)
+    alphaOut:SetToAlpha(0)
+    scrollLine.alphaOut = alphaOut
+
+    local translate = scrollAnim:CreateAnimation("Translation")
+    translate:SetScript("OnPlay", function(trans)
+        translate:SetOffset(0, translate.offset)
+    end)
+    scrollLine.translate = translate
+
+    scrollLine:OnLoad()
     return scrollLine
 end
 local function ScrollLineReset(scrollLinePool, scrollLine)
@@ -20,47 +50,22 @@ local function ScrollLineReset(scrollLinePool, scrollLine)
 end
 
 
-local animDuration = 2
 local ScrollLineMixin = {}
 function ScrollLineMixin:OnLoad()
-    self:SetSize(100, 16)
-
+    self:SetOptions()
+end
+function ScrollLineMixin:SetOptions()
     local font = CombatText.db.global.fonts.normal
-    local text = self:CreateFontString(nil, "BACKGROUND", nil, 0)
-    text:SetFont(LSM:Fetch("font", font.name), font.size, font.flags)
-    self.text = text
+    self.text:SetFont(LSM:Fetch("font", font.name), font.size, font.flags)
+    self.icon:SetSize(font.size, font.size)
 
-    local icon = self:CreateTexture(nil, "BACKGROUND", nil, 0)
-    icon:SetTexture([[Interface\Icons\INV_Misc_QuestionMark]])
-    icon:SetSize(font.size, font.size)
-    icon.bg = Base.CropIcon(icon, self)
-    self.icon = icon
+    local animDuration = CombatText.db.global.scrollDuration
+    self.alphaIn:SetDuration(animDuration * 0.2)
 
-    local scrollAnim = self:CreateAnimationGroup()
-    scrollAnim:SetScript("OnFinished", function(anim, requested)
-        self.pool:Release(self)
-    end)
-    self.scrollAnim = scrollAnim
+    self.alphaOut:SetDuration(animDuration * 0.2)
+    self.alphaOut:SetStartDelay(animDuration * 0.8)
 
-    local alphaIn = scrollAnim:CreateAnimation("Alpha")
-    alphaIn:SetDuration(animDuration * 0.2)
-    alphaIn:SetFromAlpha(0)
-    alphaIn:SetToAlpha(1)
-    self.alphaIn = alphaIn
-
-    local alphaOut = scrollAnim:CreateAnimation("Alpha")
-    alphaOut:SetDuration(animDuration * 0.2)
-    alphaOut:SetStartDelay(animDuration * 0.8)
-    alphaOut:SetFromAlpha(1)
-    alphaOut:SetToAlpha(0)
-    self.alphaOut = alphaOut
-
-    local translate = scrollAnim:CreateAnimation("Translation")
-    translate:SetDuration(animDuration)
-    translate:SetScript("OnPlay", function(trans)
-        translate:SetOffset(0, translate.offset)
-    end)
-    self.translate = translate
+    self.translate:SetDuration(animDuration)
 end
 function ScrollLineMixin:AddToScrollArea(scrollArea)
     self.scrollArea = scrollArea
@@ -99,20 +104,28 @@ end
 
 local StickyLineMixin = _G.CreateFromMixins(ScrollLineMixin)
 function StickyLineMixin:OnLoad()
-    ScrollLineMixin.OnLoad(self)
-
-    local font = CombatText.db.global.fonts.sticky
-    self.text:SetFont(LSM:Fetch("font", font.name), font.size, font.flags)
-
     local scale = self.scrollAnim:CreateAnimation("Scale")
-    scale:SetDuration(animDuration * 0.2)
     scale:SetFromScale(3, 3)
     scale:SetToScale(1, 1)
     self.scale = scale
 
-    local translate = self.translate
-    translate:SetDuration(animDuration * 0.8)
-    translate:SetStartDelay(animDuration * 0.4)
+    self:SetOptions()
+end
+function StickyLineMixin:SetOptions()
+    local font = CombatText.db.global.fonts.sticky
+    self.text:SetFont(LSM:Fetch("font", font.name), font.size, font.flags)
+    self.icon:SetSize(font.size, font.size)
+
+    local animDuration = CombatText.db.global.scrollDuration
+    self.alphaIn:SetDuration(animDuration * 0.2)
+
+    self.alphaOut:SetDuration(animDuration * 0.2)
+    self.alphaOut:SetStartDelay(animDuration * 0.8)
+
+    self.translate:SetDuration(animDuration * 0.8)
+    self.translate:SetStartDelay(animDuration * 0.4)
+
+    self.scale:SetDuration(animDuration * 0.2)
 end
 function StickyLineMixin:AddToScrollArea(scrollArea)
     ScrollLineMixin.AddToScrollArea(self, scrollArea)
@@ -132,17 +145,13 @@ normalLines.mixin = ScrollLineMixin
 local stickyLines = _G.CreateObjectPool(ScrollLineFactory, ScrollLineReset)
 stickyLines.mixin = StickyLineMixin
 
-function CombatText:UpdateFonts()
-    local normal = CombatText.db.global.fonts.normal
-    for line in normalLines:EnumerateActive() do
-        line.text:SetFont(LSM:Fetch("font", normal.name), normal.size, normal.flags)
-        line.icon:SetSize(normal.size, normal.size)
+function CombatText:UpdateLineOptions()
+    for _, line in normalLines:EnumerateInactive() do
+        line:SetOptions()
     end
 
-    local sticky = CombatText.db.global.fonts.sticky
-    for line in stickyLines:EnumerateActive() do
-        line.text:SetFont(LSM:Fetch("font", sticky.name), sticky.size, sticky.flags)
-        line.icon:SetSize(sticky.size, sticky.size)
+    for _, line in stickyLines:EnumerateInactive() do
+        line:SetOptions()
     end
 end
 function private.GetScrollLine(scrollType, isSticky)

@@ -60,6 +60,7 @@ local defaults = {
                 point = "CENTER"
             }
         },
+        scrollDuration = 2,
         ignore = {}
     }
 }

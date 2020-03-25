@@ -421,26 +421,48 @@ local combatText do
 
     local args
     local CombatText = RealUI:GetModule("CombatText", true)
-    --[=[
     local function appGet(info)
         return CombatText.db.global[info[#info]]
     end
     local function appSet(info, value)
         CombatText.db.global[info[#info]] = value
+        CombatText:UpdateLineOptions()
     end
-    ]=]
 
     local function fontGet(info)
         return CombatText.db.global.fonts[info[#info-1]][info[#info]]
     end
     local function fontSet(info, value)
         CombatText.db.global.fonts[info[#info-1]][info[#info]] = value
-        CombatText:UpdateFonts()
+        CombatText:UpdateLineOptions()
     end
 
     debug("Module", CombatText)
     if CombatText then
         args = {
+            lock = {
+                name = L["General_Lock"],
+                desc = L["General_LockDesc"],
+                type = "toggle",
+                get = function(info) return FramePoint:IsModLocked(CombatText) end,
+                set = function(info, value)
+                    if value then
+                        FramePoint:LockMod(CombatText)
+                    else
+                        FramePoint:UnlockMod(CombatText)
+                    end
+                end,
+                order = 0,
+            },
+            scrollDuration = {
+                name = L.CombatText_ScrollDuration,
+                desc = L.CombatText_ScrollDurationDesc,
+                type = "range",
+                min = 1, max = 5, step = 0.5,
+                get = appGet,
+                set = appSet,
+                order = 1,
+            },
             normal = {
                 name = L.Fonts_Normal,
                 type = "group",
@@ -490,21 +512,6 @@ local combatText do
                         order = 2,
                     },
                 }
-            },
-            lock = {
-                name = L["General_Lock"],
-                desc = L["General_LockDesc"],
-                type = "toggle",
-                width = "full",
-                get = function(info) return FramePoint:IsModLocked(CombatText) end,
-                set = function(info, value)
-                    if value then
-                        FramePoint:LockMod(CombatText)
-                    else
-                        FramePoint:UnlockMod(CombatText)
-                    end
-                end,
-                order = 0,
             },
         }
     end
