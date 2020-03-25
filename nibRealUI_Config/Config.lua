@@ -377,37 +377,36 @@ local function InitializeOptions()
     Scale.Size(hudConfig, #tabs * width, height)
 end
 
-function RealUI.ToggleConfig(app, section, ...)
-    debug("Toggle", app, section, ...)
+function RealUI.ToggleConfig(app, ...)
+    debug("Toggle", app, ...)
     if not initialized then InitializeOptions() end
 
     if ACD.OpenFrames[app] then
         ACD:Close(app)
     elseif app == "HuD" then
         if not isHuDShown then
-            hudToggle(section)
+            hudToggle(...)
         end
-        if section then
-            debug("Highlight", section, #tabs)
+
+        if ... then
+            debug("Highlight", #tabs, ...)
             for i = 1, #tabs do
                 local tab = tabs[i]
-                if tab.slug == section then
+                if tab.slug == ... then
                     tab.button:GetScript("OnClick")(tab.button)
                     hudConfig.highlight.hover = i
                     hudConfig.highlight:SetAllPoints(tab.button)
                     hudConfig.highlight:Show()
                 end
             end
-        end
 
-        ACD:Open(app, section)
-        if ... then
-            ACD:SelectGroup(app, section, ...)
+            ACD:Open(app, ...)
+            ACD:SelectGroup(app, ...)
         end
     else
         ACD:Open(app)
-        if section then
-            ACD:SelectGroup(app, section, ...)
+        if ... then
+            ACD:SelectGroup(app, ...)
         end
     end
 end
