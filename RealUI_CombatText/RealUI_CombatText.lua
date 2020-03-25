@@ -102,22 +102,61 @@ local IGNORE_EVENT = {
     SPELL_ABSORBED = true,
 }
 
-local playerGUID = _G.UnitGUID("player")
+local COMBATLOG_FILTER_MINE = _G.COMBATLOG_FILTER_MINE
+local COMBATLOG_FILTER_MY_PET = _G.COMBATLOG_FILTER_MY_PET
+local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
+local cachedGUIDs = {
+    [_G.UnitGUID("player")] = "player"
+}
+--local playerGUID = _G.UnitGUID("player")
+local function DoesEventAffectPlayer(eventInfo)
+    local sourceUnit = cachedGUIDs[eventInfo.sourceGUID]
+    if not sourceUnit then
+        if CombatLog_Object_IsA(eventInfo.sourceFlags, COMBATLOG_FILTER_MINE) then
+            sourceUnit = "player"
+        elseif CombatLog_Object_IsA(eventInfo.sourceFlags, COMBATLOG_FILTER_MY_PET) then
+            sourceUnit = "pet"
+        else
+            sourceUnit = "external"
+        end
+        cachedGUIDs[eventInfo.sourceGUID] = sourceUnit
+    end
+
+    local destUnit = cachedGUIDs[eventInfo.destGUID]
+    if not destUnit then
+        if CombatLog_Object_IsA(eventInfo.destFlags, COMBATLOG_FILTER_MINE) then
+            destUnit = "player"
+        elseif CombatLog_Object_IsA(eventInfo.destFlags, COMBATLOG_FILTER_MY_PET) then
+            destUnit = "pet"
+        else
+            destUnit = "external"
+        end
+        cachedGUIDs[eventInfo.destGUID] = destUnit
+    end
+
+    local scrollType
+    if sourceUnit == "player" or sourceUnit == "pet" then
+        scrollType = "outgoing"
+    elseif destUnit == "player" or destUnit == "pet" then
+        scrollType = "incoming"
+    end
+
+    if scrollType then
+        eventInfo.sourceUnit = sourceUnit
+        eventInfo.destUnit = destUnit
+        eventInfo.scrollType = scrollType
+        return true
+    end
+end
+
+
 local function FilterEvent(eventInfo, ...)
     DebugEvent(eventInfo, ...)
     if IGNORE_EVENT[eventInfo.event] then
         return
     end
 
-    local scrollType
-    if eventInfo.destGUID == playerGUID then
-        scrollType = "incoming"
-    elseif eventInfo.sourceGUID == playerGUID then
-        scrollType = "outgoing"
-    end
-
-    if scrollType then
-        eventInfo.scrollType = scrollType
+    if DoesEventAffectPlayer(eventInfo) then
         eventInfo.data = {}
         if private.eventSpecial[eventInfo.event] then
             return private.eventSpecial[eventInfo.event](eventInfo, ...)

@@ -33,8 +33,8 @@ local function GetSpellColor(school)
     if school then
         if SpellColors[school] then
             return SpellColors[school]
-        else
-            _G.print("Missing spell color", school)
+        --else
+            --_G.print("Missing spell color", school)
         end
     end
 
@@ -47,7 +47,9 @@ private.eventPrefix = eventPrefix
 
 function eventPrefix.SWING(eventInfo, ...)
     eventInfo.icon = 132223 -- Ability_MeleeDamage
-    eventInfo.spellSchool = _G.SCHOOL_MASK_PHYSICAL
+    if eventInfo.sourceUnit == "pet" then
+        eventInfo.spellName = _G.PET
+    end
     if eventSuffix[eventInfo.eventType](eventInfo, ...) then
         private.AddEvent(eventInfo)
     end
