@@ -3,7 +3,10 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals tremove tinsert wipe
 
-local L = _G.RealUI.L
+-- RealUI --
+local RealUI = _G.RealUI
+
+local L = RealUI.L
 local CombatText = private.CombatText
 
 local scrollAreas = {}
@@ -30,7 +33,7 @@ end
 local function DisplayEvent(eventInfo, text)
     local scrollArea = scrollAreas[eventInfo.scrollType]
     if not eventInfo.icon then
-        print("no icon", text)
+        _G.print("no icon", text)
     end
 
     local scrollLine = private.GetScrollLine(eventInfo.scrollType, eventInfo.isSticky)
@@ -45,6 +48,8 @@ _G.C_Timer.NewTicker(0.1, function( ... )
         if eventInfo.string then
             DisplayEvent(eventInfo, eventInfo.string)
         else
+            eventInfo.amount = RealUI.ReadableNumber(eventInfo.amount)
+
             local data = eventInfo.data
             local eventStr = eventInfo.eventFormat:format(eventInfo[data[1]], eventInfo[data[2]], eventInfo[data[3]])
             DisplayEvent(eventInfo, eventStr)

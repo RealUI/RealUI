@@ -195,7 +195,7 @@ function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, block
         amount = amount - overkill
     end
 
-    eventInfo.amount = RealUI.ReadableNumber(amount)
+    eventInfo.amount = amount
     eventInfo.isSticky = critical
 
     eventInfo.data = event.data
@@ -215,7 +215,7 @@ function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critic
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
     local resultStr = _G[missType]
-    eventInfo.amount = RealUI.ReadableNumber(amountMissed or 0)
+    eventInfo.amount = amountMissed or 0
     eventInfo.resultStr = resultStr
     eventInfo.isSticky = critical
 
@@ -235,7 +235,7 @@ function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
     eventInfo.resultStr = resultStr or ""
 
-    eventInfo.amount = RealUI.ReadableNumber(amount)
+    eventInfo.amount = amount
     eventInfo.isSticky = critical
 
     eventInfo.data = event.data
@@ -249,7 +249,7 @@ function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, altern
     local resultStr = GetResultString(nil, nil, nil, nil, nil, nil, nil, overEnergize)
     eventInfo.resultStr = resultStr or ""
 
-    eventInfo.amount = RealUI.ReadableNumber(amount)
+    eventInfo.amount = amount
 
     eventInfo.data = event.data
     eventInfo.eventFormat = event.format
@@ -258,7 +258,7 @@ end
 function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternatePowerType)
     eventInfo.text = eventInfo.spellName or _G["ACTION_"..eventInfo.eventBase]
 
-    eventInfo.amount = RealUI.ReadableNumber(amount)
+    eventInfo.amount = amount
 
     eventInfo.data = event.data
     eventInfo.eventFormat = event.format
