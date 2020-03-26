@@ -39,6 +39,7 @@ function ScreenSaver:CreateFrames()
     self.frame = frame
 
     frame:SetScript("OnUpdate", function(this, elapsed)
+        self:debug("OnUpdate", db.afkStart)
         if db.afkStart then
             local timeStr = _G.SecondsToClock(_G.GetServerTime() - db.afkStart)
             this.time:SetFormattedText(_G.MARKED_AFK_MESSAGE, timeStr)
