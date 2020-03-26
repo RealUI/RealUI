@@ -62,10 +62,10 @@ function ScrollLineMixin:SetOptions()
     local animDuration = CombatText.db.global.scrollDuration
     self.alphaIn:SetDuration(animDuration * 0.2)
 
+    self.translate:SetDuration(animDuration)
+
     self.alphaOut:SetDuration(animDuration * 0.2)
     self.alphaOut:SetStartDelay(animDuration * 0.8)
-
-    self.translate:SetDuration(animDuration)
 end
 function ScrollLineMixin:AddToScrollArea(scrollArea)
     self.scrollArea = scrollArea
@@ -118,14 +118,13 @@ function StickyLineMixin:SetOptions()
 
     local animDuration = CombatText.db.global.scrollDuration
     self.alphaIn:SetDuration(animDuration * 0.2)
+    self.scale:SetDuration(animDuration * 0.2)
+
+    self.translate:SetDuration(animDuration * 0.5)
+    self.translate:SetStartDelay(animDuration * 0.4)
 
     self.alphaOut:SetDuration(animDuration * 0.2)
     self.alphaOut:SetStartDelay(animDuration * 0.8)
-
-    self.translate:SetDuration(animDuration * 0.8)
-    self.translate:SetStartDelay(animDuration * 0.4)
-
-    self.scale:SetDuration(animDuration * 0.2)
 end
 function StickyLineMixin:AddToScrollArea(scrollArea)
     ScrollLineMixin.AddToScrollArea(self, scrollArea)
