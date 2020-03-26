@@ -15,6 +15,7 @@ Locale.lua
 RealUI_Skins.lua
 
 FrameXML\ColorPickerFrame.lua
+FrameXML\FriendsFrame.lua
 FrameXML\LFGFrame.lua
 FrameXML\MailFrame.lua
 FrameXML\PaperDollFrame.lua
