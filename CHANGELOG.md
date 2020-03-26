@@ -1,4 +1,4 @@
-## [Unreleased] ##
+﻿## [2.1.8] - 2020-03-26 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -497,6 +497,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.8]: https://github.com/RealUI/RealUI/compare/2.1.7...2.1.8
 [2.1.7]: https://github.com/RealUI/RealUI/compare/2.1.6...2.1.7
 [2.1.6]: https://github.com/RealUI/RealUI/compare/2.1.5...2.1.6
 [2.1.5]: https://github.com/RealUI/RealUI/compare/2.1.4...2.1.5
