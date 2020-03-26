@@ -223,7 +223,7 @@ function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, block
 end
 
 function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critical)
-    eventInfo.amount = amountMissed
+    eventInfo.amount = amountMissed or 0
     eventInfo.resultStr = _G[missType]
     eventInfo.isSticky = critical
 
