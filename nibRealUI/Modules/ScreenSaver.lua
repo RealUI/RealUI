@@ -13,6 +13,7 @@ local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 -- Update AFK status
 function ScreenSaver:UpdateTimer(...)
+    self:debug("UpdateTimer", _G.UnitIsAFK("player"))
     if _G.UnitIsAFK("player") then
         if not db.afkStart then
             db.afkStart = _G.GetServerTime()
