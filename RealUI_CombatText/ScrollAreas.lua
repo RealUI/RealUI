@@ -44,7 +44,10 @@ _G.C_Timer.NewTicker(0.1, function( ... )
         if eventInfo.string then
             DisplayEvent(eventInfo, eventInfo.string)
         else
-            local text = eventInfo.amount and RealUI.ReadableNumber(eventInfo.amount) or ""
+            local text = ""
+            if eventInfo.amount > 0 then
+                text = RealUI.ReadableNumber(eventInfo.amount)
+            end
             if eventInfo.sourceUnit == "pet" and not eventInfo.text then
                 eventInfo.text = _G.PET
             end
