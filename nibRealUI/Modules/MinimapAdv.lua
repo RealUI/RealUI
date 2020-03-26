@@ -683,6 +683,8 @@ function MinimapAdv:UpdatePOIVisibility(event, ...)
 end
 
 function MinimapAdv:RemoveAllPOIs()
+    if not poiTable then return end
+
     for _, poiType in next, poiTable do
         for _, poiButton in next, poiType do
             poiButton:Remove()

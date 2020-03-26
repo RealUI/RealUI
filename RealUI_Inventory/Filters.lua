@@ -13,10 +13,10 @@ local menu do
     local list = {}
     local menuFrame = _G.LibStub("LibDropDown"):NewMenu(menu, "RealUI_InventoryDropDown")
     menuFrame:SetStyle("REALUI")
-    menuFrame:AddLine({
+    local title = {
         text = "Choose bag",
         isTitle = true,
-    })
+    }
 
     local function SetToFilter(filterButton, button, args)
         if filterButton.checked() then
@@ -28,33 +28,29 @@ local menu do
     end
     function menu:AddFilter(filter)
         local tag = filter.tag
-        local index = filter:GetIndex()
 
-        -- Filters might be added out of order, so we need to tweak the
-        --     insert index if it's outside the current list.
-        if index > (#list + 1) then
-            index = #list + 1
-        end
-
-        tinsert(list, index, {
+        list[tag] = {
             text = filter.name,
             func = SetToFilter,
             args = {tag},
             checked = function(...)
                 return Inventory.db.global.assignedFilters[menu.item:GetItemID()] == tag
             end
-        })
+        }
 
         if menu.doUpdate then
             menu:UpdateLines()
         end
     end
     function menu:RemoveFilter(filter)
-        tremove(list, filter:GetIndex())
+        list[filter.tag] = nil
     end
     function menu:UpdateLines()
         menuFrame:ClearLines()
-        menuFrame:AddLines(unpack(list))
+        menuFrame:AddLine(title)
+        for i, tag in ipairs(Inventory.db.global.filters) do
+            menuFrame:AddLine(list[tag])
+        end
 
         menu.doUpdate = false
     end
@@ -79,6 +75,17 @@ do
             end
         end
     end
+    function FilterMixin:SetIndex(newIndex)
+        local oldIndex = self:GetIndex()
+        if oldIndex == newIndex then return end
+        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
+
+        tremove(Inventory.db.global.filters, oldIndex)
+        tinsert(Inventory.db.global.filters, newIndex, self.tag)
+
+        menu:UpdateLines()
+        private.Update()
+    end
     function FilterMixin:DoesMatchSlot(slot)
         if self.filter then
             return self.filter(slot)
@@ -86,15 +93,13 @@ do
     end
     function FilterMixin:HasPriority(filterTag)
         -- Lower ranks have priority
-        return filters[filterTag].rank > self.rank
+        return self.rank < filters[filterTag].rank
     end
     function FilterMixin:Delete()
-        menu:RemoveFilter(self)
-        menu:UpdateLines()
-
         filters[self.tag] = nil
         Inventory.db.global.customFilters[self.tag] = nil
         tremove(Inventory.db.global.filters, self:GetIndex())
+        menu:UpdateLines()
 
         for itemID, tag in next, Inventory.db.global.assignedFilters do
             if tag == self.tag then
@@ -135,7 +140,7 @@ private.filterList = {}
 tinsert(private.filterList, {
     tag = "new",
     name = _G.NEW,
-    rank = 0,
+    rank = 1,
     filter = function(slot)
         return _G.C_NewItems.IsNewItem(slot:GetBagAndSlot())
     end,
@@ -144,7 +149,7 @@ tinsert(private.filterList, {
 tinsert(private.filterList, {
     tag = "junk",
     name = _G.BAG_FILTER_JUNK,
-    rank = -1,
+    rank = 0,
     filter = function(slot)
         local _, _, _, quality, _, _, _, _, noValue = _G.GetContainerItemInfo(slot:GetBagAndSlot())
         return quality == _G.LE_ITEM_QUALITY_POOR and not noValue
@@ -154,7 +159,7 @@ tinsert(private.filterList, {
 tinsert(private.filterList, {
     tag = "consumables",
     name = _G.AUCTION_CATEGORY_CONSUMABLES,
-    rank = 1,
+    rank = 10,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == _G.LE_ITEM_CLASS_CONSUMABLE
@@ -164,7 +169,7 @@ tinsert(private.filterList, {
 tinsert(private.filterList, {
     tag = "equipment",
     name = _G.BAG_FILTER_EQUIPMENT,
-    rank = 2,
+    rank = 21,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == _G.LE_ITEM_CLASS_ARMOR or typeID == _G.LE_ITEM_CLASS_WEAPON
@@ -174,7 +179,7 @@ tinsert(private.filterList, {
 tinsert(private.filterList, {
     tag = "sets",
     name = (":"):split(_G.EQUIPMENT_SETS),
-    rank = 1,
+    rank = 20,
     filter = function(slot)
         return _G.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
     end,
@@ -183,7 +188,7 @@ tinsert(private.filterList, {
 tinsert(private.filterList, {
     tag = "questitems",
     name = _G.AUCTION_CATEGORY_QUEST_ITEMS,
-    rank = 0,
+    rank = 3,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == _G.LE_ITEM_CLASS_QUESTITEM
@@ -198,7 +203,7 @@ for i = 1, #tradegoods do
     tinsert(private.filterList, {
         tag = "tradegoods_"..subClassID,
         name = prefix:format(name),
-        rank = 2,
+        rank = 30,
         filter = function(slot)
             local _, _, _, _, _, typeID, subTypeID = _G.GetItemInfoInstant(slot.item:GetItemID())
             return typeID == _G.LE_ITEM_CLASS_TRADEGOODS and subTypeID == subClassID
@@ -210,7 +215,7 @@ local travel = private.travel
 tinsert(private.filterList, {
     tag = "travel",
     name = _G.TUTORIAL_TITLE35,
-    rank = 0,
+    rank = 2,
     filter = function(slot)
         return travel[slot.item:GetItemID()]
     end,

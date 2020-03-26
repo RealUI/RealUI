@@ -14,3 +14,6 @@ indent_size = 2
 [*.sh]
 indent_style = tab
 end_of_line = lf
+
+[.git/**]
+end_of_line = lf

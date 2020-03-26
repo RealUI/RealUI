@@ -3,51 +3,66 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals tremove tinsert wipe
 
-local L = _G.RealUI.L
+-- RealUI --
+local RealUI = _G.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
+
+local L = RealUI.L
 local CombatText = private.CombatText
 
 local scrollAreas = {}
 local function CreateScrollArea(scrollType)
     local scrollSettings = CombatText.db.global[scrollType]
 
-    local scrollArea = _G.CreateFrame("Frame", nil, _G.UIParent)
+    local scrollArea = _G.CreateFrame("Frame", "CombatText_"..scrollType, _G.UIParent)
     scrollArea:SetSize(scrollSettings.size.x, scrollSettings.size.y)
-
-    local position = scrollSettings.position
-    scrollArea:SetPoint(position.point, position.x, position.y)
+    FramePoint:PositionFrame(CombatText, scrollArea, {"global", scrollType, "position"})
+    scrollArea.scrollType = scrollType
 
     scrollAreas[scrollType] = scrollArea
     return scrollArea
 end
 
 function private.CreateScrollAreas()
-    CreateScrollArea("incoming")
-    CreateScrollArea("outgoing")
+    CreateScrollArea("incoming").direction = "down"
+    CreateScrollArea("outgoing").direction = "up"
+    CreateScrollArea("notification")
 end
 
-local function DisplayEvent(scrollType, isSticky, text)
-    local scrollArea = scrollAreas[scrollType]
+local function DisplayEvent(eventInfo, text)
+    local scrollArea = scrollAreas[eventInfo.scrollType]
 
-    local scrollLines = private.scrollLines.normal
-    if isSticky then
-        scrollLines = private.scrollLines.sticky
-    end
-
-    local scrollLine = scrollLines:Acquire()
+    local scrollLine = private.GetScrollLine(eventInfo.scrollType, eventInfo.isSticky)
     scrollLine:AddToScrollArea(scrollArea)
-    scrollLine:DisplayText(text)
+    scrollLine:DisplayText(text, eventInfo.icon)
 end
 
-local eventQueue = {}
+local eventQueue, eventFormat = {}, "%s %s"
 _G.C_Timer.NewTicker(0.1, function( ... )
     if #eventQueue > 0 then
         local eventInfo = tremove(eventQueue, 1)
         if eventInfo.string then
-            DisplayEvent(eventInfo.scrollType, eventInfo.isSticky, eventInfo.string)
+            DisplayEvent(eventInfo, eventInfo.string)
         else
-            local data = eventInfo.data
-            local eventStr = eventInfo.eventFormat:format(eventInfo[data[1]], eventInfo[data[2]], eventInfo[data[3]])
-            DisplayEvent(eventInfo.scrollType, eventInfo.isSticky, eventStr)
+            local text = ""
+            if eventInfo.amount > 0 then
+                text = RealUI.ReadableNumber(eventInfo.amount)
+            end
+            if eventInfo.sourceUnit == "pet" and not eventInfo.text then
+                eventInfo.text = _G.PET
+            end
+
+            if eventInfo.text then
+                text = eventFormat:format(eventInfo.text, text)
+            end
+            if eventInfo.resultStr then
+                text = eventFormat:format(text, eventInfo.resultStr)
+            end
+            if eventInfo.color then
+                text = eventInfo.color:WrapTextInColorCode(text)
+            end
+
+            DisplayEvent(eventInfo, text)
         end
     end
 end)

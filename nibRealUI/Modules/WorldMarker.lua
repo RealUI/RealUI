@@ -25,6 +25,18 @@ local MARKER_COLORS = {
     Color.orange, -- Icon 2 - Circle
     Color.yellow, -- Icon 1 - Star
 }
+local MARKER_ORDER = {
+    -- from WORLD_RAID_MARKER_ORDER in Blizzard_CompactRaidFrameManager.lua
+    8,
+    4,
+    1,
+    7,
+    2,
+    3,
+    6,
+    5,
+}
+
 
 local function UpdateUsed()
     if not WorldMarker.frame:IsShown() then return end
@@ -127,7 +139,7 @@ function WorldMarker:OnInitialize()
     self.frame = frame
 
     for index = 1, #MARKER_COLORS do
-        local button = CreateButton(index, _G.WORLD_RAID_MARKER_ORDER[index])
+        local button = CreateButton(index, MARKER_ORDER[index])
 
         if index == 1 then
             button:SetPoint("TOPLEFT")

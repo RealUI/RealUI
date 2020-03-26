@@ -4,6 +4,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Infobar\Bar.lua"/>
     <Script file="Infobar\Blocks.lua"/>
 
+    <Script file="Modules\InterfaceTweaks.lua"/>
     <Script file="Modules\ActionBars.lua"/>
     <Script file="Modules\AddonListAdv.lua"/>
     <Script file="Modules\AlertFrameMove.lua"/>
@@ -14,7 +15,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Modules\EventNotifier.lua"/>
     <Script file="Modules\FrameMover.lua"/>
     <Script file="Modules\GridLayout.lua"/>
-    <Script file="Modules\InterfaceTweaks.lua"/>
     <Script file="Modules\Loot.lua"/>
     <Script file="Modules\MinimapAdv.lua"/>
     <Script file="Modules\MirrorBar.lua"/>

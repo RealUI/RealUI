@@ -1,4 +1,30 @@
-﻿## [2.1.7] - 2020-03-11 ##
+﻿## [2.1.8] - 2020-03-26 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Added ###
+
+  * New option in UI Tweaks to disable dragging UI frames
+
+### Changed ###
+
+  * Most unit frame texts now have an outline
+  * The friends list now shows character names in class colors
+
+### Fixed ###
+
+  * Minimap error when POIs are disabled
+  * Worldmarker error when the Blizz raid frames are disabled
+  * AFK timer would not show sometimes
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.1.7] - 2020-03-11 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -471,6 +497,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.8]: https://github.com/RealUI/RealUI/compare/2.1.7...2.1.8
 [2.1.7]: https://github.com/RealUI/RealUI/compare/2.1.6...2.1.7
 [2.1.6]: https://github.com/RealUI/RealUI/compare/2.1.5...2.1.6
 [2.1.5]: https://github.com/RealUI/RealUI/compare/2.1.4...2.1.5

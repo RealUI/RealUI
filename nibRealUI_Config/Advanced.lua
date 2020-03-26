@@ -6,6 +6,7 @@ local _, private = ...
 
 -- Libs --
 local ACR = _G.LibStub("AceConfigRegistry-3.0")
+local LSM = _G.LibStub("LibSharedMedia-3.0")
 
 -- RealUI --
 local RealUI = _G.RealUI
@@ -414,6 +415,111 @@ local core do
         },
     }
 end
+local combatText do
+    debug("CombatText")
+    order = order + 1
+
+    local args
+    local CombatText = RealUI:GetModule("CombatText", true)
+    local function appGet(info)
+        return CombatText.db.global[info[#info]]
+    end
+    local function appSet(info, value)
+        CombatText.db.global[info[#info]] = value
+        CombatText:UpdateLineOptions()
+    end
+
+    local function fontGet(info)
+        return CombatText.db.global.fonts[info[#info-1]][info[#info]]
+    end
+    local function fontSet(info, value)
+        CombatText.db.global.fonts[info[#info-1]][info[#info]] = value
+        CombatText:UpdateLineOptions()
+    end
+
+    debug("Module", CombatText)
+    if CombatText then
+        args = {
+            lock = {
+                name = L["General_Lock"],
+                desc = L["General_LockDesc"],
+                type = "toggle",
+                get = function(info) return FramePoint:IsModLocked(CombatText) end,
+                set = function(info, value)
+                    if value then
+                        FramePoint:LockMod(CombatText)
+                    else
+                        FramePoint:UnlockMod(CombatText)
+                    end
+                end,
+                order = 0,
+            },
+            scrollDuration = {
+                name = L.CombatText_ScrollDuration,
+                desc = L.CombatText_ScrollDurationDesc,
+                type = "range",
+                min = 1, max = 5, step = 0.5,
+                get = appGet,
+                set = appSet,
+                order = 1,
+            },
+            normal = {
+                name = L.Fonts_Normal,
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                    name = {
+                        name = "",
+                        type = "select",
+                        dialogControl = "LSM30_Font",
+                        values = _G.AceGUIWidgetLSMlists.font,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 1,
+                    },
+                    size = {
+                        name = "",
+                        type = "range",
+                        min = 8, max = 24, step = 1,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 2,
+                    },
+                }
+            },
+            sticky = {
+                name = L.Fonts_Crit,
+                type = "group",
+                inline = true,
+                order = 20,
+                args = {
+                    name = {
+                        name = "",
+                        type = "select",
+                        dialogControl = "LSM30_Font",
+                        values = _G.AceGUIWidgetLSMlists.font,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 1,
+                    },
+                    size = {
+                        name = "",
+                        type = "range",
+                        min = 8, max = 24, step = 1,
+                        get = fontGet,
+                        set = fontSet,
+                        order = 2,
+                    },
+                }
+            },
+        }
+    end
+
+
+    debug("CombatText create")
+    combatText = CreateAddonSection("CombatText", args)
+end
 local inventory do
     debug("Inventory")
     order = order + 1
@@ -425,18 +531,9 @@ local inventory do
     end
     local function appSet(info, value)
         Inventory.db.global[info[#info]] = value
-        Inventory.Update()
+        Inventory:Update()
     end
 
-    local function SetIndex(tag, oldIndex, newIndex)
-        if oldIndex == newIndex then return end
-        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
-
-        tremove(Inventory.db.global.filters, oldIndex)
-        tinsert(Inventory.db.global.filters, newIndex, tag)
-        ACR:NotifyChange("RealUI")
-        Inventory.Update()
-    end
     local function AddFilter(tag)
         debug("AddFilter", tag)
         local filter = Inventory:GetFilter(tag)
@@ -447,7 +544,7 @@ local inventory do
             width = "half",
             get = function() return tostring(filter:GetIndex()) end,
             set = function(_, value)
-                SetIndex(tag, filter:GetIndex(), tonumber(value))
+                filter:SetIndex(tonumber(value))
             end,
             order = function()
                 return filter:GetIndex() * 10
@@ -458,8 +555,7 @@ local inventory do
             type = "execute",
             width = filter.isCustom and 1.05 or 1.3,
             func = function()
-                local index = filter:GetIndex()
-                SetIndex(tag, index, index - 1)
+                filter:SetIndex(filter:GetIndex() - 1)
             end,
             order = function()
                 return (filter:GetIndex() * 10) + 1
@@ -470,8 +566,7 @@ local inventory do
             type = "execute",
             width = filter.isCustom and 1.05 or 1.3,
             func = function()
-                local index = filter:GetIndex()
-                SetIndex(tag, index, index + 1)
+                filter:SetIndex(filter:GetIndex() + 1)
             end,
             order = function()
                 return (filter:GetIndex() * 10) + 2
@@ -563,7 +658,6 @@ local skins do
         RealUI:UpdateFrameStyle()
     end
 
-    local LSM = _G.LibStub("LibSharedMedia-3.0")
     local function fontGet(info)
         return SkinsDB.profile.fonts[info[#info]].name
     end
@@ -2923,14 +3017,17 @@ local uiTweaks do
 
     local InterfaceTweaks = RealUI:GetModule("InterfaceTweaks")
     local tweaks = InterfaceTweaks:GetTweaks()
-    for tag, name in next, tweaks do
+    for tag, info in next, tweaks do
         uiTweaks.args[tag] = {
-            name = L[name],
-            desc = L[name.."Desc"],
+            name = L[info.name],
+            desc = L[info.name.."Desc"],
             type = "toggle",
             get = function() return InterfaceTweaks.db.global[tag] end,
-            set = function(info, value)
+            set = function(_, value)
                 InterfaceTweaks.db.global[tag] = value
+                if info.setEnabled then
+                    info.setEnabled(value)
+                end
             end
         }
     end
@@ -2956,9 +3053,10 @@ options.RealUI = {
     type = "group",
     args = {
         core = core,
+        combatText = combatText,
+        inventory = inventory,
         skins = skins,
         tooltips = tooltips,
-        inventory = inventory,
         uiTweaks = uiTweaks,
         profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }

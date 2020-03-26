@@ -3,28 +3,29 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals next tinsert ceil tostring tostringall
 
--- Libs --
-local LSM = _G.LibStub("LibSharedMedia-3.0")
-
 -- RealUI --
 local RealUI = _G.RealUI
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local CombatText = RealUI:NewModule("CombatText", "AceEvent-3.0")
 private.CombatText = CombatText
 
 local defaults = {
     global = {
-        fontNormal = {
-            path = LSM:Fetch("font", "Roboto"),
-            size = 16,
-            flags = "OUTLINE"
-        },
-        fontSticky = {
-            path = LSM:Fetch("font", "Roboto Bold-Italic"),
-            size = 20,
-            flags = "OUTLINE"
+        fonts = {
+            normal = {
+                name = "Roboto",
+                size = 10,
+                flags = "OUTLINE"
+            },
+            sticky = {
+                name = "Roboto Bold-Italic",
+                size = 14,
+                flags = "OUTLINE"
+            },
         },
         incoming = {
+            justify = "RIGHT",
             size = {
                 x = 100,
                 y = 300,
@@ -36,6 +37,7 @@ local defaults = {
             }
         },
         outgoing = {
+            justify = "LEFT",
             size = {
                 x = 100,
                 y = 300,
@@ -46,6 +48,19 @@ local defaults = {
                 point = "CENTER"
             }
         },
+        notification = {
+            justify = "CENTER",
+            size = {
+                x = 200,
+                y = 50,
+            },
+            position = {
+                x = 0,
+                y = 200,
+                point = "CENTER"
+            }
+        },
+        scrollDuration = 2,
         ignore = {}
     }
 }
@@ -84,24 +99,64 @@ local IGNORE_EVENT = {
 
     ENCHANT_APPLIED = true,
     ENCHANT_REMOVED = true,
+
+    SPELL_ABSORBED = true,
 }
 
-local playerGUID = _G.UnitGUID("player")
+local COMBATLOG_FILTER_MINE = _G.COMBATLOG_FILTER_MINE
+local COMBATLOG_FILTER_MY_PET = _G.COMBATLOG_FILTER_MY_PET
+local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
+local cachedGUIDs = {
+    [_G.UnitGUID("player")] = "player"
+}
+local function DoesEventAffectPlayer(eventInfo)
+    local sourceUnit = cachedGUIDs[eventInfo.sourceGUID]
+    if not sourceUnit then
+        if CombatLog_Object_IsA(eventInfo.sourceFlags, COMBATLOG_FILTER_MINE) then
+            sourceUnit = "player"
+        elseif CombatLog_Object_IsA(eventInfo.sourceFlags, COMBATLOG_FILTER_MY_PET) then
+            sourceUnit = "pet"
+        else
+            sourceUnit = "external"
+        end
+        cachedGUIDs[eventInfo.sourceGUID] = sourceUnit
+    end
+
+    local destUnit = cachedGUIDs[eventInfo.destGUID]
+    if not destUnit then
+        if CombatLog_Object_IsA(eventInfo.destFlags, COMBATLOG_FILTER_MINE) then
+            destUnit = "player"
+        elseif CombatLog_Object_IsA(eventInfo.destFlags, COMBATLOG_FILTER_MY_PET) then
+            destUnit = "pet"
+        else
+            destUnit = "external"
+        end
+        cachedGUIDs[eventInfo.destGUID] = destUnit
+    end
+
+    local scrollType
+    if destUnit == "player" or destUnit == "pet" then
+        scrollType = "incoming"
+    elseif sourceUnit == "player" or sourceUnit == "pet" then
+        scrollType = "outgoing"
+    end
+
+    if scrollType then
+        eventInfo.sourceUnit = sourceUnit
+        eventInfo.destUnit = destUnit
+        eventInfo.scrollType = scrollType
+        return true
+    end
+end
+
+
 local function FilterEvent(eventInfo, ...)
     DebugEvent(eventInfo, ...)
     if IGNORE_EVENT[eventInfo.event] then
         return
     end
 
-    local scrollType
-    if eventInfo.destGUID == playerGUID then
-        scrollType = "incoming"
-    elseif eventInfo.sourceGUID == playerGUID then
-        scrollType = "outgoing"
-    end
-
-    if scrollType then
-        eventInfo.scrollType = scrollType
+    if DoesEventAffectPlayer(eventInfo) then
         eventInfo.data = {}
         if private.eventSpecial[eventInfo.event] then
             return private.eventSpecial[eventInfo.event](eventInfo, ...)
@@ -146,37 +201,53 @@ function CombatText:COMBAT_LOG_EVENT_UNFILTERED()
     FilterEvent(FormatEventInfo(_G.CombatLogGetCurrentEventInfo()))
 end
 
+function CombatText:PLAYER_REGEN_ENABLED()
+    local eventInfo = {
+        string = _G.LEAVING_COMBAT,
+        scrollType = "notification",
+    }
+    private.AddEvent(eventInfo)
+end
+function CombatText:PLAYER_REGEN_DISABLED()
+    local eventInfo = {
+        string = _G.ENTERING_COMBAT,
+        scrollType = "notification",
+    }
+    private.AddEvent(eventInfo)
+end
+
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
+    FramePoint:RegisterMod(self)
 
     for event in next, self.db.global.ignore do
         IGNORE_EVENT[event] = true
     end
 
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
     private.CreateScrollAreas()
 
 
-    --[[
     local LibSink = _G.LibStub("LibSink-2.0")
     if LibSink then
+        local textFormat = "|c%s%s|r"
         local function sink(addon, text, r, g, b, font, size, outline, sticky, location, icon)
-            local storage = LibSink.storageForAddon[addon]
-            if storage then
-                location = storage.sink20ScrollArea or location or "Notification"
-                sticky = storage.sink20Sticky or sticky
-            end
-            self:ShowMessage(text, location, sticky, r, g, b, font, size, outline, icon)
-        end
-        local function getScrollAreasChoices()
-            local tmp = {}
-            for k, v in next, self:GetScrollAreasChoices() do
-                tmp[#tmp+1] = v
-            end
-            return tmp
+            local eventInfo = {
+                string = textFormat:format(RealUI.GetColorString(r, g, b), text),
+                icon = icon,
+                scrollType = location or "notification",
+                isSticky = sticky,
+            }
+            private.AddEvent(eventInfo)
         end
 
-        LibSink:RegisterSink("RealUI_CombatText", "RealUI_CombatText", nil, sink, getScrollAreasChoices, true)
+        local scrollAreas = {"incoming", "outgoing", "notification"}
+        local function getScrollAreasChoices()
+            return scrollAreas
+        end
+
+        LibSink:RegisterSink("CombatText", "RealUI CombatText", nil, sink, getScrollAreasChoices, true)
     end
-    ]]
 end

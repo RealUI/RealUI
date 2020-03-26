@@ -9,7 +9,7 @@ local Base = Aurora.Base
 local Skin = Aurora.Skin
 
 -- RealUI --
---local Inventory = private.Inventory
+local Inventory = private.Inventory
 
 local function SlotFactory(pool)
     local numActive = pool:GetNumActive()
@@ -47,6 +47,14 @@ function ItemSlotMixin:Update()
     _G.SetItemButtonQuality(self, quality, item:GetItemLink())
     _G.SetItemButtonCount(self, itemCount)
     _G.SetItemButtonDesaturated(self, item:IsItemLocked())
+
+    if Inventory.main.bags.equipment.filter:DoesMatchSlot(self) then
+        self.Count:SetText(self.item:GetCurrentItemLevel())
+        if quality and quality > _G.LE_ITEM_QUALITY_POOR then
+            self.Count:SetTextColor(_G.BAG_ITEM_QUALITY_COLORS[quality]:GetRGB())
+        end
+        self.Count:Show()
+    end
 
     local questTexture = self.IconQuestTexture
     if questId then

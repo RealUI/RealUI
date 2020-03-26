@@ -13,6 +13,7 @@ local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 -- Update AFK status
 function ScreenSaver:UpdateTimer(...)
+    self:debug("UpdateTimer", _G.UnitIsAFK("player"))
     if _G.UnitIsAFK("player") then
         if not db.afkStart then
             db.afkStart = _G.GetServerTime()
@@ -38,6 +39,7 @@ function ScreenSaver:CreateFrames()
     self.frame = frame
 
     frame:SetScript("OnUpdate", function(this, elapsed)
+        self:debug("OnUpdate", db.afkStart)
         if db.afkStart then
             local timeStr = _G.SecondsToClock(_G.GetServerTime() - db.afkStart)
             this.time:SetFormattedText(_G.MARKED_AFK_MESSAGE, timeStr)
@@ -58,7 +60,7 @@ function ScreenSaver:CreateFrames()
     frame.alphaIn = alphaIn
 
     local alphaOut = frame:CreateAnimationGroup()
-    alphaIn:SetScript("OnPlay", function(this)
+    alphaOut:SetScript("OnPlay", function(this)
         frame.time:SetText("")
     end)
     alphaOut:SetScript("OnFinished", function(this)
