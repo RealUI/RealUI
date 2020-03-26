@@ -201,6 +201,21 @@ function CombatText:COMBAT_LOG_EVENT_UNFILTERED()
     FilterEvent(FormatEventInfo(_G.CombatLogGetCurrentEventInfo()))
 end
 
+function CombatText:PLAYER_REGEN_ENABLED()
+    local eventInfo = {
+        string = _G.LEAVING_COMBAT,
+        scrollType = "notification",
+    }
+    private.AddEvent(eventInfo)
+end
+function CombatText:PLAYER_REGEN_DISABLED()
+    local eventInfo = {
+        string = _G.ENTERING_COMBAT,
+        scrollType = "notification",
+    }
+    private.AddEvent(eventInfo)
+end
+
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
     FramePoint:RegisterMod(self)
@@ -210,6 +225,8 @@ function CombatText:OnInitialize()
     end
 
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
     private.CreateScrollAreas()
 
 

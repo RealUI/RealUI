@@ -31,9 +31,6 @@ end
 
 local function DisplayEvent(eventInfo, text)
     local scrollArea = scrollAreas[eventInfo.scrollType]
-    if not eventInfo.icon then
-        _G.print("no icon", text)
-    end
 
     local scrollLine = private.GetScrollLine(eventInfo.scrollType, eventInfo.isSticky)
     scrollLine:AddToScrollArea(scrollArea)
