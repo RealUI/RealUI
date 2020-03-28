@@ -6,8 +6,6 @@
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_InventoryDB
 
-Libs\Libs.xml
-
 RealUI_Inventory.lua
 Blizz.lua
 FilterData.lua

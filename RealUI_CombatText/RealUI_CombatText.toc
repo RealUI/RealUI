@@ -6,8 +6,6 @@
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_CombatTextDB
 
-Libs\Libs.xml
-
 RealUI_CombatText.lua
 Events.lua
 ScrollAreas.lua
