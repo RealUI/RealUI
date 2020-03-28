@@ -1,9 +1,6 @@
 :: Run luacheck
 call luacheck . -q || pause && EXIT
 
-:: Increment version
-powershell .\utils\update.ps1
-
 :: Run packager
 :: Usage: release.sh [-cdelLosuz] [-t topdir] [-r releasedir] [-p curse-id] [-w wowi-id] [-g game-version]
 ::   -c               Skip copying files into the package directory.
