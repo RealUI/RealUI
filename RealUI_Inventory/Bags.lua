@@ -212,7 +212,7 @@ function private.AddSlotToBag(slot, bagID)
     main:AddContinuable(slot.item)
 end
 
-local HEADER_SPACE = 27
+local HEADER_SPACE = 20
 local BAG_MARGIN = 5
 local function SetupBag(bag)
     Base.SetBackdrop(bag)
@@ -244,7 +244,7 @@ end
 
 local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     local button = _G.CreateFrame("Button", nil, bag)
-    button:SetPoint("TOPLEFT", 7, -7)
+    button:SetPoint("TOPLEFT", 5, -5)
     button:SetSize(16, 16)
 
     if fa[atlas] then
@@ -555,7 +555,7 @@ local function CreateBag(bagType)
                 self:SetText("")
                 self:SetHitRectInsets(-5, -5, -5, -5)
 
-                bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 1)
+                bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
                 for k, bagID in private.IterateBagIDs(bagType) do
                     bagSlots[bagID]:Update()
                 end
@@ -580,6 +580,7 @@ local function CreateBag(bagType)
     close:SetPoint("TOPRIGHT", 5, 5)
     Skin.UIPanelCloseButton(close)
     main.close = close
+    main.offsetTop = main.offsetTop + 7
 
     if bagType == "main" then
         local settingsButton = CreateFeatureButton(main, nil, "cog",

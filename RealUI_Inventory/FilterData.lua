@@ -142,4 +142,5 @@ private.travel = {
     [151652] = true,     -- Wormhole Generator: Argus
     [48933] = true,      -- Wormhole Generator: Northrend
     [87215] = true,      -- Wormhole Generator: Pandaria
+    [172924] = true,     -- Wormhole Generator: Shadowlands
 }
