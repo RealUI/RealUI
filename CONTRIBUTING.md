@@ -65,6 +65,9 @@ These can be downloaded from Curse:
 This one is currently only available on Github:
   * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)
 
+
+In addition to those libraries, it may be usful to clone the Aurora repository as well, as there may occationally be commits to RealUI that are dependant on earlier commits to Aurora.
+
 ## Packaging ##
 
 RealUI uses a [customized fork of the BigWigsMods packager.](https://github.com/RealUI/packager/tree/RealUI_edits) This is a shell script that can be run on Windows 10 if [WSL is installed](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), in addition to Linux or Mac. In order for this script to run properly you must have the following commands available:
