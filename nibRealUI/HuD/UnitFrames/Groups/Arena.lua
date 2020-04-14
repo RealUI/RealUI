@@ -75,7 +75,7 @@ local function CreateHealthBar(parent)
         end
     end
 
-    function parent.Health:PostUpdateArenaPreparation(specID)
+    function parent.Health:PostUpdateArenaPreparation(event, specID)
         local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
         parent.Trinket.icon:SetTexture(specIcon)
     end
