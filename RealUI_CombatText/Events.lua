@@ -140,7 +140,7 @@ local partialEffects = {
 }
 local function GetResultString(resisted, blocked, absorbed, glancing, crushing, overhealing, overkill, overenergize)
     local resultStr
-    if resisted then
+    if resisted and resisted ~= 0 then
         if resisted < 0 then    --Its really a vulnerability
             -- I don't think this is a thing anymore
             _G.print("Vulnerable!!!", resisted)
@@ -149,7 +149,7 @@ local function GetResultString(resisted, blocked, absorbed, glancing, crushing, 
         end
     end
 
-    if blocked then
+    if blocked and blocked > 0 then
         if resultStr then
             resultStr = resultStr.." "..partialEffects.block:format(RealUI.ReadableNumber(blocked))
         else

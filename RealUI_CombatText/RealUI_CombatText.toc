@@ -10,3 +10,5 @@ RealUI_CombatText.lua
 Events.lua
 ScrollAreas.lua
 ScrollLines.lua
+
+TestMode.lua

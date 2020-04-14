@@ -103,11 +103,20 @@ local IGNORE_EVENT = {
     SPELL_ABSORBED = true,
 }
 
+private.player = {
+    guid = _G.UnitGUID("player"),
+    name = _G.UnitName("player")
+}
+private.other = {
+    guid = "Player-1234-1234ABCD",
+    name = "Other"
+}
+
 local COMBATLOG_FILTER_MINE = _G.COMBATLOG_FILTER_MINE
 local COMBATLOG_FILTER_MY_PET = _G.COMBATLOG_FILTER_MY_PET
 local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
 local cachedGUIDs = {
-    [_G.UnitGUID("player")] = "player"
+    [private.player.guid] = "player"
 }
 local function DoesEventAffectPlayer(eventInfo)
     local sourceUnit = cachedGUIDs[eventInfo.sourceGUID]
@@ -150,13 +159,34 @@ local function DoesEventAffectPlayer(eventInfo)
 end
 
 
-local function FilterEvent(eventInfo, ...)
-    DebugEvent(eventInfo, ...)
-    if IGNORE_EVENT[eventInfo.event] then
-        return
-    end
+local function FormatEventInfo(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
+    local eventInfo = {
+        timestamp = timestamp,
+        event = event,
+        hideCaster = hideCaster,
+        sourceGUID = sourceGUID,
+        sourceName = sourceName,
+        sourceFlags = sourceFlags,
+        sourceRaidFlags = sourceRaidFlags,
+        destGUID = destGUID,
+        destName = destName,
+        destFlags = destFlags,
+        destRaidFlags = destRaidFlags,
 
+        canMerge = true,
+    }
+    return eventInfo, ...
+end
+local function Dispatch(eventInfo, ...)
+    DebugEvent(eventInfo, ...)
     if DoesEventAffectPlayer(eventInfo) then
+        if private.player.guid == eventInfo.sourceGUID then
+            private.player.flags = eventInfo.sourceFlags
+            private.player.raidFlags = eventInfo.sourceRaidFlags
+            private.other.flags = eventInfo.sourceFlags
+            private.other.raidFlags = eventInfo.sourceRaidFlags
+        end
+
         eventInfo.data = {}
         if private.eventSpecial[eventInfo.event] then
             return private.eventSpecial[eventInfo.event](eventInfo, ...)
@@ -179,26 +209,16 @@ local function FilterEvent(eventInfo, ...)
     end
 end
 
-local function FormatEventInfo(timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, ...)
-    local eventInfo = {
-        timestamp = timestamp,
-        event = event,
-        hideCaster = hideCaster,
-        sourceGUID = sourceGUID,
-        sourceName = sourceName,
-        sourceFlags = sourceFlags,
-        sourceRaidFlags = sourceRaidFlags,
-        destGUID = destGUID,
-        destName = destName,
-        destFlags = destFlags,
-        destRaidFlags = destRaidFlags,
+local function FilterEvent(timestamp, event, ...)
+    if IGNORE_EVENT[event] then
+        return
+    end
 
-        canMerge = true,
-    }
-    return eventInfo, ...
+    Dispatch(FormatEventInfo(timestamp, event, ...))
 end
+private.FilterEvent = FilterEvent
 function CombatText:COMBAT_LOG_EVENT_UNFILTERED()
-    FilterEvent(FormatEventInfo(_G.CombatLogGetCurrentEventInfo()))
+    FilterEvent(_G.CombatLogGetCurrentEventInfo())
 end
 
 function CombatText:PLAYER_REGEN_ENABLED()
@@ -230,7 +250,7 @@ function CombatText:OnInitialize()
     private.CreateScrollAreas()
 
 
-    local LibSink = _G.LibStub("LibSink-2.0")
+    local LibSink = _G.LibStub("LibSink-2.0", true)
     if LibSink then
         local textFormat = "|c%s%s|r"
         local function sink(addon, text, r, g, b, font, size, outline, sticky, location, icon)

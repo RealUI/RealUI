@@ -463,6 +463,14 @@ local combatText do
                 set = appSet,
                 order = 1,
             },
+            test = {
+                name = _G.PREVIEW,
+                type = "execute",
+                func = function()
+                    CombatText:ToggleTest()
+                end,
+                order = 2,
+            },
             normal = {
                 name = L.Fonts_Normal,
                 type = "group",
