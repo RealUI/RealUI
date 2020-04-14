@@ -132,7 +132,7 @@ do
         setEnabled = function(enabled)
             if enabled then
                 ticker = _G.C_Timer.NewTicker(pollingRate, UpdateTrail)
-            else
+            elseif ticker then
                 ticker:Cancel()
             end
         end,
