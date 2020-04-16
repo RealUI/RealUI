@@ -4,6 +4,7 @@ local _, private = ...
 -- luacheck: globals tinsert tremove next ipairs unpack
 
 -- RealUI --
+local RealUI = _G.RealUI
 local Inventory = private.Inventory
 
 local menu do
@@ -152,7 +153,7 @@ tinsert(private.filterList, {
     rank = 0,
     filter = function(slot)
         local _, _, _, quality, _, _, _, _, noValue = _G.GetContainerItemInfo(slot:GetBagAndSlot())
-        return quality == _G.LE_ITEM_QUALITY_POOR and not noValue
+        return quality == RealUI.Enum.ItemQuality.Poor and not noValue
     end,
 })
 

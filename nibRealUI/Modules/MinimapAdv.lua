@@ -393,16 +393,18 @@ function MinimapAdv:UpdateMinimapPosition()
     _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
     _G.GarrisonLandingPageMinimapButton:SetPoint(Gpoint, isLeft and 2 or -2, isTop and 2 or -2)
 
-    _G.GarrisonLandingPageTutorialBox:ClearAllPoints()
-    _G.GarrisonLandingPageTutorialBox.Arrow:ClearAllPoints()
-    if isTop then
-        _G.GarrisonLandingPageTutorialBox:SetPoint("TOP", _G.GarrisonLandingPageMinimapButton, "BOTTOM", 0, -20)
-        _G.GarrisonLandingPageTutorialBox.Arrow:SetPoint("BOTTOM", _G.GarrisonLandingPageTutorialBox, "TOP", 0, -3)
-        _G.SetClampedTextureRotation(_G.GarrisonLandingPageTutorialBox.Arrow, 180)
-    else
-        _G.GarrisonLandingPageTutorialBox:SetPoint("BOTTOM", _G.GarrisonLandingPageMinimapButton, "TOP", 0, 20)
-        _G.GarrisonLandingPageTutorialBox.Arrow:SetPoint("TOP", _G.GarrisonLandingPageTutorialBox, "BOTTOM", 0, 3)
-        _G.SetClampedTextureRotation(_G.GarrisonLandingPageTutorialBox.Arrow, 0)
+    if not RealUI.isPatch then
+        _G.GarrisonLandingPageTutorialBox:ClearAllPoints()
+        _G.GarrisonLandingPageTutorialBox.Arrow:ClearAllPoints()
+        if isTop then
+            _G.GarrisonLandingPageTutorialBox:SetPoint("TOP", _G.GarrisonLandingPageMinimapButton, "BOTTOM", 0, -20)
+            _G.GarrisonLandingPageTutorialBox.Arrow:SetPoint("BOTTOM", _G.GarrisonLandingPageTutorialBox, "TOP", 0, -3)
+            _G.SetClampedTextureRotation(_G.GarrisonLandingPageTutorialBox.Arrow, 180)
+        else
+            _G.GarrisonLandingPageTutorialBox:SetPoint("BOTTOM", _G.GarrisonLandingPageMinimapButton, "TOP", 0, 20)
+            _G.GarrisonLandingPageTutorialBox.Arrow:SetPoint("TOP", _G.GarrisonLandingPageTutorialBox, "BOTTOM", 0, 3)
+            _G.SetClampedTextureRotation(_G.GarrisonLandingPageTutorialBox.Arrow, 0)
+        end
     end
 
     _G.ButtonCollectFrame:ClearAllPoints()
@@ -558,7 +560,13 @@ function MinimapPOIMixin:UpdateAlpha()
     else
         self:SetAlpha(db.poi.icons.opacity)
 
-        if _G.IsQuestComplete(self.questID) then
+        local isComplete
+        if RealUI.isPatch then
+            isComplete = _G.C_QuestLog.IsComplete(self.questID)
+        else
+            isComplete = _G.IsQuestComplete(self.questID)
+        end
+        if isComplete then
             self:Hide()
         end
     end
@@ -576,13 +584,17 @@ function MinimapPOIMixin:UpdateScale()
         self.PushedTexture:SetSize(size32, size32)
     else
         self.Glow:SetSize(size50, size50)
+        local icon = RealUI.isPatch and self.Display.Icon or self.Icon
+
         if self.style == "waypoint" then
-            self.Icon:SetSize(13 * scale, 17 * scale)
+            icon:SetSize(13 * scale, 17 * scale)
         else
-            self.Icon:SetSize(24 * scale, 24 * scale)
+            icon:SetSize(24 * scale, 24 * scale)
         end
-        self.FullHighlightTexture:SetSize(size32, size32)
-        self.IconHighlightTexture:SetSize(size32, size32)
+        if not RealUI.isPatch then
+            self.FullHighlightTexture:SetSize(size32, size32)
+            self.IconHighlightTexture:SetSize(size32, size32)
+        end
         self.NormalTexture:SetSize(size32, size32)
         self.PushedTexture:SetSize(size32, size32)
     end
@@ -603,10 +615,19 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
 
     for _, questInfo in next, quests do
         local questID = questInfo.questID
-        local questLogIndex = _G.GetQuestLogIndexByID(questID)
-        local _, _, _, _, _, _, _, _, _, _, _, hasLocalPOI, _, _, _, isHidden = _G.GetQuestLogTitle(questLogIndex)
+        local questLogIndex, hasLocalPOI, isHidden, isSuperTracked, _
+        if RealUI.isPatch then
+            questLogIndex = _G.C_QuestLog.GetLogIndexForQuestID(questID)
+            local questLogInfo = _G.C_QuestLog.GetInfo(questLogIndex)
+            hasLocalPOI = questLogInfo.hasLocalPOI
+            isHidden = questLogInfo.isHidden
+            isSuperTracked = _G.C_SuperTrack.GetSuperTrackedQuestID() == questID
+        else
+            questLogIndex = _G.GetQuestLogIndexByID(questID)
+            _, _, _, _, _, _, _, _, _, _, _, hasLocalPOI, _, _, _, isHidden = _G.GetQuestLogTitle(questLogIndex)
+            isSuperTracked = _G.GetSuperTrackedQuestID() == questID
+        end
 
-        local isSuperTracked = _G.GetSuperTrackedQuestID() == questID
         if (not isHidden and hasLocalPOI) or isSuperTracked then
             MinimapAdv:debug("Add POI", questID, questInfo.x, questInfo.y, zoneInfo.mapID)
             local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(questInfo.x, questInfo.y, zoneInfo.mapID)
@@ -614,7 +635,14 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 -- Check if there's already a POI for this quest.
                 local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
                 if not poiButton then
-                    if _G.IsQuestComplete(questID) then
+                    local isComplete
+                    if RealUI.isPatch then
+                        isComplete = _G.C_QuestLog.IsComplete(questID)
+                    else
+                        isComplete = _G.IsQuestComplete(questID)
+                    end
+
+                    if isComplete then
                         poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "normal")
                     else
                         numNumericQuests = numNumericQuests + 1
@@ -622,7 +650,13 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                     end
                 end
 
-                if _G.IsQuestWatched(questLogIndex) or not db.poi.watchedOnly then
+                local isWatched
+                if RealUI.isPatch then
+                    isWatched = _G.QuestUtils_IsQuestWatched(questID)
+                else
+                    isWatched = _G.IsQuestWatched(questLogIndex)
+                end
+                if isWatched or not db.poi.watchedOnly then
                     poiButton:Add(xCoord, yCoord, instanceID)
                     if isSuperTracked then
                         _G.QuestPOI_SelectButton(poiButton)
@@ -714,14 +748,22 @@ function MinimapAdv:UpdatePOIEnabled()
 
         self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
-        self:RegisterEvent("SUPER_TRACKED_QUEST_CHANGED", "POIUpdate")
         self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
+        if RealUI.isPatch then
+            self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
+        else
+            self:RegisterEvent("SUPER_TRACKED_QUEST_CHANGED", "POIUpdate")
+        end
     else
         self:RemoveAllPOIs()
         self:UnregisterEvent("QUEST_POI_UPDATE")
         self:UnregisterEvent("QUEST_LOG_UPDATE")
-        self:UnregisterEvent("SUPER_TRACKED_QUEST_CHANGED")
         self:UnregisterEvent("QUEST_WATCH_LIST_CHANGED")
+        if RealUI.isPatch then
+            self:UnregisterEvent("SUPER_TRACKING_CHANGED")
+        else
+            self:UnregisterEvent("SUPER_TRACKED_QUEST_CHANGED")
+        end
     end
 end
 
@@ -1228,17 +1270,19 @@ local isPulseEvent = {
     SHIPMENT_UPDATE = true,
 }
 
-local currencyId = _G.C_Garrison.GetCurrencyTypes(_G.LE_GARRISON_TYPE_7_0)
+local WoDGarrison = RealUI.isPatch and _G.Enum.GarrisonType.Type_7_0 or _G.LE_GARRISON_TYPE_7_0
+local WoDFollower = RealUI.isPatch and _G.Enum.GarrisonFollowerType.FollowerType_7_0 or _G.LE_FOLLOWER_TYPE_GARRISON_7_0
+local currencyId = _G.C_Garrison.GetCurrencyTypes(WoDGarrison)
 local categoryInfo = {}
 do -- by nebula
     local frame = _G.CreateFrame("Frame")
     frame:SetScript("OnEvent", function(self, event)
-        if _G.C_Garrison.GetLandingPageGarrisonType() ~= _G.LE_GARRISON_TYPE_7_0 then return end
+        if _G.C_Garrison.GetLandingPageGarrisonType() ~= WoDGarrison then return end
 
         if event == "GARRISON_FOLLOWER_CATEGORIES_UPDATED" then
-            categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
+            categoryInfo = _G.C_Garrison.GetClassSpecCategoryInfo(WoDFollower)
         else
-            _G.C_Garrison.RequestClassSpecCategoryInfo(_G.LE_FOLLOWER_TYPE_GARRISON_7_0)
+            _G.C_Garrison.RequestClassSpecCategoryInfo(WoDFollower)
         end
     end)
     frame:RegisterEvent("GARRISON_FOLLOWER_CATEGORIES_UPDATED")
@@ -1283,7 +1327,7 @@ local function Garrison_OnEnter(self)
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
     _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
-    if _G.C_Garrison.GetLandingPageGarrisonType() == _G.LE_GARRISON_TYPE_7_0 then
+    if _G.C_Garrison.GetLandingPageGarrisonType() == WoDGarrison then
         _G.GameTooltip:AddLine(" ")
 
         local currency, amount = _G.GetCurrencyInfo(currencyId)
@@ -1723,7 +1767,9 @@ local function SetUpMinimapFrame()
     _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
     _G.QueueStatusMinimapButtonBorder:Hide()
 
-    _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
+    if not RealUI.isPatch then
+        _G.GarrisonLandingPageTutorialBox:SetParent(_G.Minimap)
+    end
     local GLPButton = _G.GarrisonLandingPageMinimapButton
     GLPButton:SetParent(_G.Minimap)
     GLPButton:SetAlpha(0)

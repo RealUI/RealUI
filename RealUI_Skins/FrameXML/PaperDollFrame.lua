@@ -26,7 +26,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
             if type(canEnchant) == "number" then
                 canEnchant = _G.GetEffectivePlayerMaxLevel() == canEnchant
             end
-            return canEnchant and quality ~= _G.LE_ITEM_QUALITY_ARTIFACT
+            return canEnchant and quality ~= RealUI.Enum.ItemQuality.Artifact
         end
 
         local scanningTooltip = _G.RealUIScanningTooltip

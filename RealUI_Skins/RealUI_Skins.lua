@@ -202,7 +202,7 @@ function private.OnLoad()
     C.media.checked = [[Interface\AddOns\RealUI_Skins\Aurora\media\CheckButtonHilight]]
     C.media.roleIcons = [[Interface\AddOns\RealUI_Skins\Aurora\media\UI-LFG-ICON-ROLES]]
 
-    function Hook.GameTooltip_SetBackdropStyle(self, style)
+    function Hook.SharedTooltip_SetBackdropStyle(self, style)
         if not self.IsEmbedded then
             Base.SetBackdrop(self, Color.frame, frameColor.a)
             if self._setQualityColors then
@@ -255,8 +255,13 @@ function private.OnLoad()
 
 
     -- Hide default UI Scale slider and replace with RealUI button
-    _G["Advanced_UseUIScale"]:Hide()
-    _G["Advanced_UIScaleSlider"]:Hide()
+    if private.isPatch then
+        _G["Display_UseUIScale"]:Hide()
+        _G["Display_UIScaleSlider"]:Hide()
+    else
+        _G["Advanced_UseUIScale"]:Hide()
+        _G["Advanced_UIScaleSlider"]:Hide()
+    end
 
     local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
     scaleBtn:SetSize(200, 24)

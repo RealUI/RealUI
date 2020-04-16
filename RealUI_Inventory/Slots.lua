@@ -9,6 +9,7 @@ local Base = Aurora.Base
 local Skin = Aurora.Skin
 
 -- RealUI --
+local RealUI = _G.RealUI
 local Inventory = private.Inventory
 
 local function SlotFactory(pool)
@@ -50,7 +51,7 @@ function ItemSlotMixin:Update()
 
     if Inventory.main.bags.equipment.filter:DoesMatchSlot(self) then
         self.Count:SetText(self.item:GetCurrentItemLevel())
-        if quality and quality > _G.LE_ITEM_QUALITY_POOR then
+        if quality and quality > RealUI.Enum.ItemQuality.Poor then
             self.Count:SetTextColor(_G.BAG_ITEM_QUALITY_COLORS[quality]:GetRGB())
         end
         self.Count:Show()
