@@ -71,7 +71,11 @@ local function GetPower(powerType, alternatePowerType)
         power = PowerColors[alternatePowerType]
     end
 
-    return power[1], power[2]
+    if power then
+        return power[1], power[2]
+    else
+        return Color.white, _G.GetUnitPowerBarStringsByID(alternatePowerType)
+    end
 end
 
 local eventPrefix = {}
