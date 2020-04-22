@@ -40,14 +40,14 @@ If you would like to contribute code, a [pull request](https://help.github.com/a
 
 ### Getting Started ###
 
-Given the file structure of this project, it's recommended to setup symbolic links between the addons in the repo and your AddOns folder for the game. To facilitate this, [a script is available](https://gist.github.com/Gethe/aa3325ed88b2a92d23ec276c7383e034) to perform this setup. Be sure to update the file path to suit your own install directories. The script was written in Powershell, but it should be fairly simple to convert into another language if desired.
+Given the file structure of this project, it's recommended to setup symbolic links between the addons in the repo and your AddOns folder for the game. To facilitate this, [a script is available](https://gist.github.com/Gethe/aa3325ed88b2a92d23ec276c7383e034) to perform this setup. Be sure to update the file paths in the script for your local file structure. The script was written in PowerShell, but it should be fairly simple to convert into another language if desired.
 
-Most of the libraries used are not included in the repo since they will get brought in when a new release is packaged. These libraries will need to be installed separately to ensure RealUI works properly.
+Most of the libraries RealUI uses are not included in the repo. Instead, they are downloaded as part of the packaging process to ensure that only the most recent versions are used. These libraries will need to be installed separately to ensure RealUI works properly.
 
-These can be downloaded from Curse:
+Most can be downloaded from Curse:
   * [Ace3](https://www.curseforge.com/wow/addons/ace3)
   * [AceGUI-3.0-SharedMediaWidets](https://www.curseforge.com/wow/addons/ace-gui-3-0-shared-media-widgets)
-  * [Aurora](https://www.curseforge.com/wow/addons/aurora)
+  * [Aurora](https://www.curseforge.com/wow/addons/aurora) - Use the alpha version
   * [HereBeDragons](https://www.curseforge.com/wow/addons/herebedragons)
   * [LibChatAnims](https://www.curseforge.com/wow/addons/libchatanims)
   * [LibDualSpec-1.0](https://www.curseforge.com/wow/addons/libdualspec-1-0)
@@ -59,11 +59,10 @@ These can be downloaded from Curse:
   * [LibSharedMedia-3.0](https://www.curseforge.com/wow/addons/libsharedmedia-3-0)
   * [LibTextDump-1.0](https://www.curseforge.com/wow/addons/libtextdump-1-0)
   * [LibWindow-1.1](https://www.curseforge.com/wow/addons/libwindow-1-1)
-  * [oUF](https://www.curseforge.com/wow/addons/ouf)
   * [UTF8](https://www.curseforge.com/wow/addons/utf8)
 
 
-In addition to those libraries, it may be usful to clone the Aurora repository as well, as there may occationally be commits to RealUI that are dependant on earlier commits to Aurora.
+In addition to those libraries, you will also need to clone the [RealUI branch of oUF](https://github.com/Gethe/oUF/tree/RealUI). The script linked above will also create a symlink for oUF.
 
 ## Packaging ##
 
