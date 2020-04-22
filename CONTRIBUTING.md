@@ -62,9 +62,6 @@ These can be downloaded from Curse:
   * [oUF](https://www.curseforge.com/wow/addons/ouf)
   * [UTF8](https://www.curseforge.com/wow/addons/utf8)
 
-This one is currently only available on Github:
-  * [LibDropDown](https://github.com/p3lim-wow/LibDropDown)
-
 
 In addition to those libraries, it may be usful to clone the Aurora repository as well, as there may occationally be commits to RealUI that are dependant on earlier commits to Aurora.
 

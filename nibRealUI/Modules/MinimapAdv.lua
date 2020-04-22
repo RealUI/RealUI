@@ -12,12 +12,12 @@ local RealUI = private.RealUI
 local db
 
 -- Libs --
-local LDD = _G.LibStub("LibDropDown")
 local HBD = _G.LibStub("HereBeDragons-2.0", true)
 local HBDP = _G.LibStub("HereBeDragons-Pins-2.0", true)
 
 local MODNAME = "MinimapAdv"
 local MinimapAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
+local MenuFrame = RealUI:GetModule("MenuFrame")
 
 _G.RealUIMinimap = MinimapAdv
 _G.BINDING_HEADER_REALUIMINIMAP = "RealUI Minimap"
@@ -1041,7 +1041,7 @@ function MinimapAdv:FadeButtons()
     local scale = mapPoints.scale
 
     if _G.Minimap:IsVisible() then
-        if _G.Minimap.mouseover or MMFrames.tracking.dropdown:IsVisible() or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
+        if _G.Minimap.mouseover or MenuFrame:IsMenuOpen(MMFrames.tracking) or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
 
             if not isInFarmMode then
@@ -1080,7 +1080,6 @@ local function Toggle_OnMouseDown()
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
         MinimapAdv:Toggle(true)
     end
-    LDD:CloseAll()
 end
 
 function MinimapAdv:ToggleBind()
@@ -1115,7 +1114,6 @@ end
 local function Config_OnMouseDown()
     RealUI.Debug("Config", "Minimap")
     RealUI.LoadConfig("RealUI", "uiTweaks", "minimap")
-    LDD:CloseAll()
 end
 
 local function Config_OnEnter()
@@ -1149,7 +1147,7 @@ end
 
 ---- Tracking Button ----
 local function Tracking_OnMouseDown()
-    MMFrames.tracking.dropdown:Toggle()
+    MenuFrame:Open(MMFrames.tracking, "BOTTOMLEFT", MMFrames.tracking.menuList)
 end
 
 local function Tracking_OnEnter()
@@ -1202,7 +1200,6 @@ local function Farm_OnMouseDown()
         MMFrames.farm.icon:SetTexture(Textures.Collapse)
         _G.PlaySound(_G.SOUNDKIT.IG_MINIMAP_OPEN)
     end
-    LDD:CloseAll()
 
     MinimapAdv:ToggleGatherer()
     MinimapAdv:UpdateMinimapPosition()
@@ -1610,11 +1607,6 @@ local function CreateFrames()
     MMFrames.tracking:SetScript("OnLeave", Tracking_OnLeave)
     MMFrames.tracking:SetScript("OnMouseDown", Tracking_OnMouseDown)
 
-    local menu = LDD:NewMenu(MMFrames.tracking, "RealUIMinimapTrackingDropDown")
-    menu:SetAnchor("TOPLEFT", MMFrames.tracking, "BOTTOMLEFT", 5, -5)
-    menu:SetStyle("REALUI")
-    MMFrames.tracking.dropdown = menu
-
     local menuList = {
         {text = _G.MINIMAP_TRACKING_NONE,
             checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive,
@@ -1639,7 +1631,7 @@ local function CreateFrames()
             if numTracking > 1 then
                 hunterTracking = {
                     text = _G.HUNTER_TRACKING_TEXT,
-                    menu = {}
+                    menuList = {}
                 }
                 tinsert(menuList, hunterTracking)
             end
@@ -1647,7 +1639,7 @@ local function CreateFrames()
 
         local townsfolk = {
             text = _G.TOWNSFOLK_TRACKING_TEXT,
-            menu = {}
+            menuList = {}
         }
         tinsert(menuList, townsfolk)
 
@@ -1660,10 +1652,8 @@ local function CreateFrames()
                     local _, _, active = _G.GetTrackingInfo(id)
                     return active
                 end,
-                func = function(self)
-                    local state = not self:GetCheckedState()
-                    self:SetCheckedState(state)
-                    _G.SetTracking(id, state)
+                func = function(self, arg1, arg2, isChecked)
+                    _G.SetTracking(id, isChecked)
                 end,
                 keepShown = true
             }
@@ -1679,13 +1669,13 @@ local function CreateFrames()
                     (numTracking == 1 and category == "spell")) then -- this is a hunter tracking ability, but you only have one
                 tinsert(menuList, info)
             elseif nested == _G.TOWNSFOLK then
-                tinsert(townsfolk.menu, info)
+                tinsert(townsfolk.menuList, info)
             elseif nested == _G.HUNTER_TRACKING and classToken == "HUNTER" then
-                tinsert(hunterTracking.menu, info)
+                tinsert(hunterTracking.menuList, info)
             end
         end
     end
-    menu:AddLines(unpack(menuList))
+    MMFrames.tracking.menuList = menuList
 
     -- Farm Button
     MMFrames.farm = CreateButton("MinimapAdv_Farm", Textures.Expand, 4)

@@ -6,7 +6,6 @@ local _, private = ...
 -- luacheck: globals next date strsplit type
 
 -- Libs --
-local LDD = _G.LibStub("LibDropDown")
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 
@@ -25,6 +24,7 @@ local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
+local MenuFrame = RealUI:GetModule("MenuFrame")
 
 local testCell = _G.UIParent:CreateFontString()
 Scale.Point(testCell, "CENTER")
@@ -551,12 +551,14 @@ function Infobar:CreateBlocks()
             {isSpacer = true},
             {text = _G.CHARACTER_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleCharacter", "PaperDollFrame"},
+                arg1 = "ToggleCharacter",
+                arg2 = "PaperDollFrame",
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
                 func = ToggleUI,
                     -- ToggleSpellBook causes taint
-                args = {"ToggleFrame", _G.SpellBookFrame},
+                arg1 = "ToggleFrame",
+                arg2 = _G.SpellBookFrame,
             },
             {text = _G.TALENTS_BUTTON,
                 func = function()
@@ -566,7 +568,12 @@ function Infobar:CreateBlocks()
                         _G.TalentFrame_LoadUI()
                     end
 
-                    _G.ShowUIPanel(_G.PlayerTalentFrame)
+                    if _G.PlayerTalentFrame:IsShown() then
+                        _G.HideUIPanel(_G.PlayerTalentFrame)
+                    else
+                        _G.ShowUIPanel(_G.PlayerTalentFrame)
+                    end
+
                 end,
                 disabled = function( ... )
                     if RealUI.isPatch then
@@ -578,24 +585,25 @@ function Infobar:CreateBlocks()
             },
             {text = _G.ACHIEVEMENT_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleAchievementFrame"},
+                arg1 = "ToggleAchievementFrame",
             },
             {text = _G.QUESTLOG_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleQuestLog"},
+                arg1 = "ToggleQuestLog",
             },
             {text = guildText,
                 func = ToggleUI,
-                args = {"ToggleGuildFrame"},
+                arg1 = "ToggleGuildFrame",
                 disabled = _G.IsCommunitiesUIDisabledByTrialAccount,
             },
             {text = _G.SOCIAL_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleFriendsFrame", 1},
+                arg1 = "ToggleFriendsFrame",
+                arg2 = 1,
             },
             {text = _G.DUNGEONS_BUTTON,
                 func = ToggleUI,
-                args = {"PVEFrame_ToggleFrame"},
+                arg1 = "PVEFrame_ToggleFrame",
                 disabled = function( ... )
                     if RealUI.isPatch then
                         return not ((_G.C_LFGInfo.CanPlayerUseLFD() or _G.C_LFGInfo.CanPlayerUsePVP()) and RealUI.charInfo.faction ~= "Neutral")
@@ -606,28 +614,31 @@ function Infobar:CreateBlocks()
             },
             {text = _G.COLLECTIONS,
                 func = ToggleUI,
-                args = {"ToggleCollectionsJournal"},
+                arg1 = "ToggleCollectionsJournal",
             },
             {text = _G.ADVENTURE_JOURNAL,
                 func = ToggleUI,
-                args = {"ToggleEncounterJournal"},
+                arg1 = "ToggleEncounterJournal",
             },
             {text = _G.BLIZZARD_STORE,
                 func = ToggleUI,
-                args = {"ToggleStoreUI"},
+                arg1 = "ToggleStoreUI",
+                disabled = function( ... )
+                    return not _G.C_StorePublic.IsEnabled()
+                end
             },
             {text = _G.HELP_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleHelpFrame"},
+                arg1 = "ToggleHelpFrame",
             },
             {isSpacer = true},
             {text = _G.CANCEL,
-                func = function() LDD:CloseAll() end,
+                func = function() MenuFrame:CloseAll() end,
             },
         }
 
         local errors
-        local function ShowBugIcon(menu, callback, errorObject)
+        local function ShowBugIcon(block, callback, errorObject)
             --[[errorObject = {
                 message = sanitizedMessage,
                 stack = table.concat(tmp, "\n"),
@@ -637,8 +648,7 @@ function Infobar:CreateBlocks()
                 counter = 1,
             }]]
 
-            if not menu.dataObj.value then
-                menu:ClearLines()
+            if not block.dataObj.value then
                 Infobar:debug("insert error line", #menuList)
                 tinsert(menuList, 3, {
                     text = _G.SHOW_LUA_ERRORS,
@@ -646,12 +656,11 @@ function Infobar:CreateBlocks()
                 })
 
                 Infobar:debug("add lines", #menuList)
-                menu:AddLines(unpack(menuList))
-                menu.dataObj.icon = fa["bug"]
-                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = Color.red:GetRGB()
+                block.dataObj.icon = fa["bug"]
+                block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = Color.red:GetRGB()
             end
 
-            menu.dataObj.value = #errors
+            block.dataObj.value = #errors
         end
 
         LDB:NewDataObject("start", {
@@ -660,26 +669,15 @@ function Infobar:CreateBlocks()
             icon = fa["bars"],
             iconFont = iconFont,
             OnEnable = function(block)
-                local menu = LDD:NewMenu(block, "RealUIStartDropDown")
-                menu:SetAnchor("BOTTOMLEFT", Infobar.frame, "TOPLEFT")
-                menu:SetStyle("REALUI")
-                menu:AddLines(unpack(menuList))
-                if RealUI.GetOptions("Skins").profile.isHighRes then
-                    menu:SetScale(Scale.GetUIScale())
-                end
-                _G.BugGrabber.RegisterCallback(menu, "BugGrabber_BugGrabbed", ShowBugIcon, menu)
-
-                block.menu = menu
-                menu.dataObj = block.dataObj
-
                 errors = _G.BugGrabber:GetDB()
                 if #errors > 0 then
-                    ShowBugIcon(menu, "OnEnable", errors[#errors])
+                    ShowBugIcon(block, "OnEnable", errors[#errors])
                 end
+
+                _G.BugGrabber.RegisterCallback(block, "BugGrabber_BugGrabbed", ShowBugIcon, block)
             end,
             OnEnter = function(block, ...)
-                Infobar:debug("Start: OnEnter", block.side, ...)
-                block.menu:Toggle()
+                MenuFrame:Open(block, "TOPLEFT", menuList)
             end,
         })
     end

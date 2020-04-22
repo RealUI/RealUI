@@ -1,65 +1,55 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals tinsert tremove next ipairs unpack
+-- luacheck: globals tinsert tremove next ipairs unpack wipe
 
 -- RealUI --
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
 
 local menu do
-    menu = _G.CreateFrame("Frame", nil, _G.UIParent)
-    menu:SetFrameStrata("DIALOG")
+    local MenuFrame = RealUI:GetModule("MenuFrame")
+    menu = {}
 
-    local list = {}
-    local menuFrame = _G.LibStub("LibDropDown"):NewMenu(menu, "RealUI_InventoryDropDown")
-    menuFrame:SetStyle("REALUI")
+    local menuList = {}
     local title = {
         text = "Choose bag",
         isTitle = true,
     }
 
-    local function SetToFilter(filterButton, button, args)
-        if filterButton.checked() then
+    local function SetToFilter(filterButton, arg1, arg2, isChecked)
+        if isChecked then
             Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
         else
-            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = args
+            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = arg1
         end
         private.Update()
     end
     function menu:AddFilter(filter)
         local tag = filter.tag
-
-        list[tag] = {
+        tinsert(menuList, filter:GetIndex(), {
             text = filter.name,
             func = SetToFilter,
-            args = {tag},
+            arg1 = tag,
             checked = function(...)
-                return Inventory.db.global.assignedFilters[menu.item:GetItemID()] == tag
+                return Inventory.db.global.assignedFilters[self.item:GetItemID()] == tag
             end
-        }
-
-        if menu.doUpdate then
-            menu:UpdateLines()
-        end
+        })
     end
     function menu:RemoveFilter(filter)
-        list[filter.tag] = nil
+        tremove(menuList, filter:GetIndex())
     end
     function menu:UpdateLines()
-        menuFrame:ClearLines()
-        menuFrame:AddLine(title)
-        for i, tag in ipairs(Inventory.db.global.filters) do
-            menuFrame:AddLine(list[tag])
+        wipe(menuList)
+        for i, filter in Inventory:IndexedFilters() do
+            self:AddFilter(filter)
         end
-
-        menu.doUpdate = false
+        tinsert(menuList, 1, title)
     end
     function menu:Open(slot)
         if slot.item then
-            menu.item = slot.item
-            menuFrame:SetAnchor("BOTTOMLEFT", slot, "TOPLEFT")
-            menuFrame:Toggle()
+            self.item = slot.item
+            MenuFrame:Open(slot, "BOTTOMRIGHT", menuList)
         end
     end
     private.menu = menu
@@ -117,13 +107,11 @@ do
         private.CreateFilterBag(Inventory.reagent, filter)
 
         filters[filter.tag] = filter
-        menu:AddFilter(filter)
     end
     function Inventory:CreateCustomFilter(tag, name)
         if not Inventory.db.global.customFilters[tag] then
             Inventory.db.global.customFilters[tag] = name
             tinsert(Inventory.db.global.filters, 1, tag)
-            menu.doUpdate = true
         end
 
         Inventory:CreateFilter({
@@ -131,6 +119,20 @@ do
             name = name,
             isCustom = true,
         })
+    end
+
+
+    local function iPairsFilter(filterTable, index)
+        index = index + 1
+        local tag = filterTable[index]
+        if tag ~= nil then
+            return index, filters[tag]
+        else
+            return nil
+        end
+    end
+    function Inventory:IndexedFilters()
+        return iPairsFilter, Inventory.db.global.filters, 0
     end
     function Inventory:GetFilter(tag)
         return filters[tag]

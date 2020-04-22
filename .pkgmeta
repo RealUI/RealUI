@@ -35,8 +35,6 @@ externals:
     nibRealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
-    nibRealUI/Libs/LibDropDown:
-        url: https://github.com/p3lim-wow/LibDropDown.git
     nibRealUI/Libs/LibDualSpec-1.0:
         url: https://repos.wowace.com/wow/libdualspec-1-0
         tag: latest

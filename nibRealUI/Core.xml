@@ -12,5 +12,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>
     <Script file="Core\FramePoint.lua"/>
+    <Script file="Core\MenuFrame.lua"/>
     <Script file="Core\Currency.lua"/>
 </Ui>
