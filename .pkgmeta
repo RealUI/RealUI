@@ -51,8 +51,8 @@ externals:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
     nibRealUI/Libs/oUF:
-        url: https://github.com/oUF-wow/oUF.git
-        tag: latest
+        url: https://github.com/Gethe/oUF.git
+        branch: RealUI
     nibRealUI/Libs/UTF8:
         url: https://repos.wowace.com/wow/utf8/trunk
         tag: latest

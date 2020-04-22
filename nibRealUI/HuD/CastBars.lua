@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
-local next = _G.next
+-- luacheck: globals assert next
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -14,8 +14,10 @@ local MODNAME = "CastBars"
 local CastBars = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 
 local Aurora = _G.Aurora
-local uninterruptible = Aurora.Color.Create(0.5, 0.0, 0.0)
-local interruptible = Aurora.Color.Create(0.5, 1.0, 1.0)
+local Color = Aurora.Color
+
+local uninterruptible = Color.Create(0.5, 0.0, 0.0)
+local interruptible = Color.Create(0.5, 1.0, 1.0)
 
 local castbarSizes = {
     player = {
@@ -37,17 +39,14 @@ local castbarSizes = {
 
 local ChannelingTicks = {}
 do
+    local spellNotFound = "The spell for ID %d no longer exists."
     local function RegisterSpellName(spellID, numticks, isInstant)
-        local name = _G.GetSpellInfo(spellID)
-        if name then
-            ChannelingTicks[name] = {
-                id = spellID,
-                ticks = numticks,
-                isInstant = isInstant
-            }
-        else
-            _G.print("The spell for ID", spellID, "no longer exists.")
-        end
+        assert(_G.GetSpellInfo(spellID), spellNotFound:format(spellID))
+
+        ChannelingTicks[spellID] = {
+            ticks = numticks,
+            isInstant = isInstant
+        }
     end
 
     -- RegisterSpellName(spellID, (duration / interval), isInstant)
@@ -189,8 +188,26 @@ function CastBars:UpdateSettings(unit)
     end
 end
 
-local function PostCastStart(self, unit, name)
-    CastBars:debug("PostCastStart", unit, name)
+local function PlayFlash(anim)
+    CastBars:debug("flashAnim:PlayFlash")
+    anim.bar.Time:SetText("")
+    anim.bar.Text:SetTextColor(anim.color:GetRGB())
+    anim.bar:SetStatusBarColor(anim.color:GetRGB())
+
+    anim.flash:SetFromAlpha(anim.bar:GetAlpha())
+    anim.flash:SetToAlpha(0)
+end
+local function EndFlash(anim, ...)
+    CastBars:debug("flashAnim:EndFlash", ...)
+    anim.color = nil
+    anim.bar:SetAlpha(1)
+    anim.bar.Text:SetTextColor(1, 1, 1, 1)
+    anim.bar:SetStatusBarColor(uninterruptible:GetRGB())
+    anim.bar:Hide()
+end
+
+local function PostCastStart(self, unit)
+    CastBars:debug("PostCastStart", unit)
     if self.flashAnim:IsPlaying() then
         self.flashAnim:Stop()
     end
@@ -203,154 +220,37 @@ local function PostCastStart(self, unit, name)
 
     if self.tickPool then
         self.tickPool:ReleaseAll()
+
+        if self.channeling then
+            self:SetBarTicks(ChannelingTicks[self.spellID])
+        end
     end
 end
---[==[
-local function PostCastFailed(self, unit)
-    CastBars:debug("PostCastFailed", unit)
+--local function PostCastUpdate(self, unit)
+--    CastBars:debug("PostCastUpdate", unit)
+--end
+local function PostCastStop(self, unit, spellID)
+    CastBars:debug("PostCastStop", unit, spellID)
+    self.holdTime = self.timeToHold
+    self.Text:SetText(_G.SUCCESS)
+    self:Show()
+    self.flashAnim.color = Color.green
+    self.flashAnim:Play()
 end
-]==]
-local function PostCastInterrupted(self, unit)
-    CastBars:debug("PostCastInterrupted", unit)
-    self.castid = nil
-    if not self.flashAnim:IsPlaying() then
-        CastBars:debug("PlayFlash")
-        self.Time:SetText("")
-        self.Text:SetText(_G.SPELL_FAILED_INTERRUPTED)
-        self.Text:SetTextColor(1, 0, 0, 1)
-        self:SetStatusBarColor(1, 0, 0, 1)
-        self:Show()
-        self.flash:SetFromAlpha(self:GetAlpha())
-        self.flash:SetToAlpha(0)
-        self.flashAnim:Play()
-    end
+local function PostCastFail(self, unit, spellID)
+    CastBars:debug("PostCastFail", unit, spellID)
+    self.flashAnim.color = Color.red
+    self.flashAnim:Play()
 end
 local function PostCastInterruptible(self, unit)
     CastBars:debug("PostCastInterruptible", unit)
-    self:SetStatusBarColor(interruptible:GetRGB())
-end
-local function PostCastNotInterruptible(self, unit)
-    CastBars:debug("PostCastNotInterruptible", unit)
-    self:SetStatusBarColor(uninterruptible:GetRGB())
-end
---[==[
-local function PostCastDelayed(self, unit, name)
-    CastBars:debug("PostCastDelayed", unit, name)
-end
-local function PostCastStop(self, unit, name)
-    CastBars:debug("PostCastStop", unit, name)
-end
-]==]
-
-local function PostChannelStart(self, unit, name)
-    CastBars:debug("PostChannelStart", unit, name)
-    if self.SetBarTicks then
-        self.tickPool:ReleaseAll()
-        self:SetBarTicks(ChannelingTicks[name])
-    end
-end
---[==[
-local function PostChannelUpdate(self, unit, name)
-    CastBars:debug("PostChannelUpdate", unit, name)
-end
-local function PostChannelStop(self, unit, name)
-    CastBars:debug("PostChannelStop", unit, name)
-end
-]==]
-
-local function CustomDelayText(self, duration)
-    CastBars:debug("CustomDelayText", duration)
-    self.Time:SetFormattedText("%.1f", duration)
-end
-local function CustomTimeText(self, duration)
-    CastBars:debug("CustomTimeText", duration)
-    self.Time:SetFormattedText("%.1f", duration)
-end
-
-local function OnUpdate(self, elapsed)
-    CastBars:debug("OnUpdate", self.__owner.unit, elapsed)
-    CastBars:debug("Cast status", self.casting, self.channeling, self.config)
-    if (self.casting or self.config) then
-        local duration = self.duration + elapsed
-        if (duration >= self.max) then
-            CastBars:debug("Duration", duration, self.max)
-            if self.config then
-                duration = 0
-            else
-                self.casting = nil
-                self:Hide()
-
-                if (self.PostCastStop) then self:PostCastStop(self.__owner.unit) end
-                return
-            end
-        end
-
-        if (self.Time) then
-            if(self.delay ~= 0) then
-                if(self.CustomDelayText) then
-                    self:CustomDelayText(duration)
-                else
-                    self.Time:SetFormattedText("%.1f|cffff0000-%.1f|r", duration, self.delay)
-                end
-            else
-                if(self.CustomTimeText) then
-                    self:CustomTimeText(duration)
-                else
-                    self.Time:SetFormattedText("%.1f", duration)
-                end
-            end
-        end
-
-        self.duration = duration
-        self:SetValue(duration)
-
-        if (self.Spark) then
-            self.Spark:SetPoint("CENTER", self, "LEFT", (duration / self.max) * self:GetWidth(), 0)
-        end
-    elseif (self.channeling) then
-        local duration = self.duration - elapsed
-
-        if (duration <= 0) then
-            self.channeling = nil
-            self:Hide()
-
-            if (self.PostChannelStop) then self:PostChannelStop(self.__owner.unit) end
-            return
-        end
-
-        if (self.Time) then
-            if (self.delay ~= 0) then
-                if (self.CustomDelayText) then
-                    self:CustomDelayText(duration)
-                else
-                    self.Time:SetFormattedText("%.1f|cffff0000-%.1f|r", duration, self.delay)
-                end
-            else
-                if (self.CustomTimeText) then
-                    self:CustomTimeText(duration)
-                else
-                    self.Time:SetFormattedText("%.1f", duration)
-                end
-            end
-        end
-
-        self.duration = duration
-        self:SetValue(duration)
-        if(self.Spark) then
-            self.Spark:SetPoint("CENTER", self, "LEFT", (duration / self.max) * self:GetWidth(), 0)
-        end
-    elseif (self.flashAnim:IsPlaying()) then
-        self:SetValue(self.max)
+    if self.notInterruptible then
+        self:SetStatusBarColor(uninterruptible:GetRGB())
     else
-        self.unitName = nil
-        self.casting = nil
-        self.castid = nil
-        self.channeling = nil
-
-        self:SetValue(1)
-        self:Hide()
+        self:SetStatusBarColor(interruptible:GetRGB())
     end
 end
+
 
 function CastBars:CreateCastBars(unitFrame, unit, unitData)
     self:debug("CreateCastBars", unit)
@@ -388,39 +288,24 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
         Castbar.SetBarTicks = CastBars.SetBarTicks
     end
 
+    Castbar.timeToHold = 1
     local flashAnim = Castbar:CreateAnimationGroup()
+    flashAnim:SetScript("OnPlay", PlayFlash)
+    flashAnim:SetScript("OnFinished", EndFlash)
+    flashAnim:SetScript("OnStop", EndFlash)
+    flashAnim.bar = Castbar
     Castbar.flashAnim = flashAnim
-    local function PostFlash(anim, ...)
-        CastBars:debug("flashAnim:OnFinished", ...)
-        Castbar:SetAlpha(1)
-        Castbar.Text:SetTextColor(1, 1, 1, 1)
-        Castbar:SetStatusBarColor(uninterruptible:GetRGB())
-        Castbar:Hide()
-    end
-    flashAnim:SetScript("OnFinished", PostFlash)
-    flashAnim:SetScript("OnStop", PostFlash)
 
     local flash = flashAnim:CreateAnimation("Alpha")
-    Castbar.flash = flash
-    flash:SetDuration(1)
+    flash:SetDuration(Castbar.timeToHold)
     flash:SetSmoothing("OUT")
+    flashAnim.flash = flash
 
     Castbar.PostCastStart = PostCastStart
-    --Castbar.PostCastFailed = PostCastFailed
-    Castbar.PostCastInterrupted = PostCastInterrupted
+    --Castbar.PostCastUpdate = PostCastUpdate
+    Castbar.PostCastStop = PostCastStop
+    Castbar.PostCastFail = PostCastFail
     Castbar.PostCastInterruptible = PostCastInterruptible
-    Castbar.PostCastNotInterruptible = PostCastNotInterruptible
-    --Castbar.PostCastDelayed = PostCastDelayed
-    --Castbar.PostCastStop = PostCastStop
-
-    Castbar.PostChannelStart = PostChannelStart
-    --Castbar.PostChannelUpdate = PostChannelUpdate
-    --Castbar.PostChannelStop = PostChannelStop
-
-    Castbar.CustomDelayText = CustomDelayText
-    Castbar.CustomTimeText = CustomTimeText
-
-    Castbar.OnUpdate = OnUpdate
 
     unitFrame.Castbar = Castbar
     self[unit] = Castbar
