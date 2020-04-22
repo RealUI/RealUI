@@ -289,7 +289,8 @@ end
 
 local SPELL_INSTAKILL = "%s %s %s"
 function eventSpecial.SPELL_INSTAKILL(eventInfo, ...)
-    local _, unconsciousOnDeath = ...
+    local _, unconsciousOnDeath
+    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool, _, unconsciousOnDeath = ...
     eventInfo.scrollType = "notification"
 
     local resultStr = _G.ACTION_SPELL_INSTAKILL
@@ -300,7 +301,7 @@ function eventSpecial.SPELL_INSTAKILL(eventInfo, ...)
 
     eventInfo.canMerge = false
     eventInfo.isSticky = true
-    eventInfo.string = SPELL_INSTAKILL:format(eventInfo.sourceName, resultStr, eventInfo.destName)
+    eventInfo.string = SPELL_INSTAKILL:format(eventInfo.spellName, resultStr, eventInfo.destName)
     private.AddEvent(eventInfo)
 end
 
