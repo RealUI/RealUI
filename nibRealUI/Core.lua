@@ -488,9 +488,6 @@ function RealUI:OnEnable()
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
-    if _G.GetCVar("scriptProfile") == "1" then
-         _G.print(L["Slash_Profile"])
-    end
     if _G.GetCVar("taintLog") ~= "0" then
          _G.print(L["Slash_Taint"])
     end

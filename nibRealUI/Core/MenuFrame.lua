@@ -240,7 +240,6 @@ end
 function MenuFrameMixin:Update(menuList)
     local width = 0
     for index, menuItemInfo in ipairs(menuList) do
-        print("Update", index, menuItemInfo.text)
         local menuItem = menuItems:Acquire()
         menuItem:SetParent(self)
         menuItem:Update(menuItemInfo)
@@ -302,7 +301,6 @@ function MenuFrame:IsMenuOpen(button)
 end
 function MenuFrame:Open(button, point, menuList, level)
     if openMenus[button] then return end
-    print("Open", menuList and #menuList)
 
     local menu = menuFrames:Acquire()
     menu.level = level or 1
