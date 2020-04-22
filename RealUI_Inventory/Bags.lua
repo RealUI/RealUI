@@ -148,8 +148,8 @@ local function SetupSlots(main)
     columnHeight, columnBase = UpdateBagSize(main, columnHeight, columnBase)
 
     local numSkipped = 0
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        local bag = main.bags[tag]
+    for i, filter in Inventory:IndexedFilters() do
+        local bag = main.bags[filter.tag]
         if #bag.slots <= 0 then
             numSkipped = numSkipped + 1
         else
@@ -190,15 +190,14 @@ function private.AddSlotToBag(slot, bagID)
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
     if not Inventory:GetFilter(assignedTag) then
-        for i, tag in ipairs(Inventory.db.global.filters) do
-            local filter = Inventory:GetFilter(tag)
+        for i, filter in Inventory:IndexedFilters() do
             if filter:DoesMatchSlot(slot) then
                 if assignedTag then
                     if filter:HasPriority(assignedTag) then
-                        assignedTag = tag
+                        assignedTag = filter.tag
                     end
                 else
-                    assignedTag = tag
+                    assignedTag = filter.tag
                 end
             end
         end

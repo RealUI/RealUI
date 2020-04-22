@@ -542,9 +542,9 @@ local inventory do
         Inventory:Update()
     end
 
-    local function AddFilter(tag)
-        debug("AddFilter", tag)
-        local filter = Inventory:GetFilter(tag)
+    local function AddFilter(filter)
+        debug("AddFilter", filter.tag)
+        local tag = filter.tag
 
         args.filters.args[tag.."Index"] = {
             name = filter.name,
@@ -644,8 +644,8 @@ local inventory do
             }
         }
 
-        for i, tag in ipairs(Inventory.db.global.filters) do
-            AddFilter(tag)
+        for i, filter in Inventory:IndexedFilters() do
+            AddFilter(filter)
         end
     end
 
