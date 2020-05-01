@@ -29,10 +29,11 @@ local function ResetState()
     end
 end
 function ObjectivesAdv:UpdateState()
+    ResetState()
+
     local _, instanceType = _G.GetInstanceInfo()
     if not db.hidden.enabled or instanceType == "none" then return end
     if _G.C_Garrison.IsOnGarrisonMap() then return end
-    ResetState()
 
     local hide = db.hidden.hide[instanceType] or false
     local collapse = db.hidden.collapse[instanceType] or false
