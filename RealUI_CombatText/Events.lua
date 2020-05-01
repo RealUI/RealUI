@@ -11,7 +11,7 @@ local Color = Aurora.Color
 local RealUI = _G.RealUI
 
 local function MissingEvent(eventInfo, ...)
-    _G.print("Missing combat event", eventInfo.eventBase, eventInfo.eventType)
+    _G.print("Missing combat event", eventInfo.eventBase, eventInfo.eventType, eventInfo.spellName, eventInfo.spellID, ...)
 end
 
 local eventSuffix = _G.setmetatable({}, {
