@@ -5,20 +5,14 @@
   * nibRealUI_Config
   * RealUI_Skins
 
-### Added ###
-
-  * New option in UI Tweaks to disable dragging UI frames
-
 ### Changed ###
 
-  * Most unit frame texts now have an outline
-  * The friends list now shows character names in class colors
+  * Improve RealUI generated dropdown menus
 
 ### Fixed ###
 
-  * Minimap error when POIs are disabled
-  * Worldmarker error when the Blizz raid frames are disabled
-  * AFK timer would not show sometimes
+  * Error if the mouse trail tweak is disabled
+  * Error preventing the arena prep frames from showing
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
