@@ -122,13 +122,12 @@ local function InitTest()
         RANGE_DAMAGE = function()
             local amount = GetAmount()
             local resisted, blocked, absorbed = GetPartialEffects(amount, 3)
-            local spellSchool = GetSpellSchool()
 
-            --    spellID,          spellName,           spellSchool,      amount, overkill,     school,       resisted, blocked, absorbed, critical, glancing, crushing, isOffHand
-            return spell1ID, spell1Name, spellSchool, amount, 0, spellSchool, resisted, blocked, absorbed, IsCrit(), false, false, false
+            --    spellID,    spellName,        spellSchool,      amount, overkill,     school,       resisted, blocked, absorbed, critical, glancing, crushing, isOffHand
+            return spell1ID, spell1Name, _G.SCHOOL_MASK_PHYSICAL, amount, 0, _G.SCHOOL_MASK_PHYSICAL, resisted, blocked, absorbed, IsCrit(), false, false, false
         end,
         RANGE_MISSED = function()
-            --    spellID,          spellName,               spellSchool,     missType, isOffHand, amountMissed, critical
+            --    spellID,    spellName,     spellSchool,     missType, isOffHand, amountMissed, critical
             return spell1ID, spell1Name, GetSpellSchool(), GetMissType(), false, GetAmount(), false
         end,
 
@@ -155,7 +154,6 @@ local function InitTest()
             local amount = GetAmount()
             local overEnergize = GetPartialEffects(amount, 1)
             local powerType, alternatePowerType = GetPowerType()
-            print("SPELL_ENERGIZE", powerType, alternatePowerType)
 
             --    spellID,          spellName,              spellSchool,     amount, overEnergize, powerType, alternatePowerType
             return spell3ID, spell3Name, GetSpellSchool(), amount, overEnergize, powerType, alternatePowerType
