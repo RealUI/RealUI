@@ -13,6 +13,7 @@
 
   * Error if the mouse trail tweak is disabled
   * Error preventing the arena prep frames from showing
+  * Objective tracker visibility option did not recognize scenarios
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
