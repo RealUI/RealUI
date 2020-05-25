@@ -225,7 +225,6 @@ function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, block
     eventInfo.color = GetSpellColor(school)
     return true
 end
-
 function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critical)
     eventInfo.amount = amountMissed or 0
     eventInfo.resultStr = _G[missType]
@@ -233,7 +232,6 @@ function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critic
 
     return true
 end
-
 function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
     eventInfo.resultStr = resultStr or ""
@@ -266,6 +264,24 @@ function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternateP
         _G.print("DRAIN extraAmount", eventInfo.text, extraAmount)
     end
 
+    return true
+end
+function eventSuffix.LEECH(eventInfo, amount, powerType, extraAmount, alternatePowerType)
+    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
+    eventInfo.amount = amount
+
+    if extraAmount then
+        _G.print("LEECH extraAmount", eventInfo.text, extraAmount)
+    end
+
+    return true
+end
+
+function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
+    eventInfo.string = _G.ACTION_SPELL_INTERRUPT .. extraSpellName
+
+    eventInfo.canMerge = false
+    eventInfo.isSticky = true
     return true
 end
 
