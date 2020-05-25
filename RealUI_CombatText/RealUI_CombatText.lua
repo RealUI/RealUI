@@ -101,6 +101,7 @@ local IGNORE_EVENT = {
     ENCHANT_REMOVED = true,
 
     SPELL_ABSORBED = true,
+    SPELL_RESURRECT = true,
 }
 
 private.player = {
