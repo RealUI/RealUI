@@ -103,8 +103,8 @@ local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
         tinsert(bag.slots, bag.dropTarget)
     end
 
-    local slotWidth, slotHeight = private.ArrangeSlots(bag, bag.offsetTop)
-    bag:SetSize(slotWidth + bag.baseWidth, slotHeight + (bag.offsetTop + bag.offsetBottom))
+    local slotWidth, slotHeight = private.ArrangeSlots(bag)
+    bag:SetSize(slotWidth + (bag.marginSide * 2), slotHeight + (bag.marginTop + bag.marginBottom))
 
     local _, screenHeight = RealUI.GetInterfaceSize()
     local maxHeight = screenHeight * Inventory.db.global.maxHeight
@@ -148,8 +148,8 @@ local function SetupSlots(main)
     columnHeight, columnBase = UpdateBagSize(main, columnHeight, columnBase)
 
     local numSkipped = 0
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        local bag = main.bags[tag]
+    for i, filter in Inventory:IndexedFilters() do
+        local bag = main.bags[filter.tag]
         if #bag.slots <= 0 then
             numSkipped = numSkipped + 1
         else
@@ -190,15 +190,14 @@ function private.AddSlotToBag(slot, bagID)
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
     if not Inventory:GetFilter(assignedTag) then
-        for i, tag in ipairs(Inventory.db.global.filters) do
-            local filter = Inventory:GetFilter(tag)
+        for i, filter in Inventory:IndexedFilters() do
             if filter:DoesMatchSlot(slot) then
                 if assignedTag then
                     if filter:HasPriority(assignedTag) then
-                        assignedTag = tag
+                        assignedTag = filter.tag
                     end
                 else
-                    assignedTag = tag
+                    assignedTag = filter.tag
                 end
             end
         end
@@ -212,16 +211,16 @@ function private.AddSlotToBag(slot, bagID)
     main:AddContinuable(slot.item)
 end
 
-local HEADER_SPACE = 27
+local HEADER_SPACE = 20
 local BAG_MARGIN = 5
 local function SetupBag(bag)
     Base.SetBackdrop(bag)
     bag:EnableMouse(true)
     bag.slots = {}
 
-    bag.offsetTop = BAG_MARGIN + HEADER_SPACE
-    bag.offsetBottom = 0
-    bag.baseWidth = BAG_MARGIN
+    bag.marginTop = HEADER_SPACE
+    bag.marginBottom = BAG_MARGIN
+    bag.marginSide = BAG_MARGIN
 end
 
 local ContinuableContainer = _G.CreateFromMixins(_G.ContinuableContainer)
@@ -244,7 +243,6 @@ end
 
 local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     local button = _G.CreateFrame("Button", nil, bag)
-    button:SetPoint("TOPLEFT", 7, -7)
     button:SetSize(16, 16)
 
     if fa[atlas] then
@@ -319,11 +317,14 @@ function private.CreateFilterBag(main, filter)
 
             UpdateBag(main)
         end)
+
+        bag.resetNew:SetPoint("TOPLEFT", 5, -2)
     end
 
     if tag == "junk" then
         bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
         bag.sellJunk:Hide()
+        bag.sellJunk:SetPoint("TOPLEFT", 5, -2)
     end
 
     main.bags[tag] = bag
@@ -508,6 +509,8 @@ local function CreateBag(bagType)
             end
             _G.GameTooltip:Show()
         end)
+
+        deposit:SetPoint("TOPLEFT", 5, -5)
         main.deposit = deposit
     else
         local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
@@ -538,6 +541,8 @@ local function CreateBag(bagType)
                 end
             end
         end)
+
+        showBags:SetPoint("TOPLEFT", 5, -5)
         function showBags:ToggleBags(show)
             if show == nil then
                 show = not self.isShowing
@@ -555,7 +560,7 @@ local function CreateBag(bagType)
                 self:SetText("")
                 self:SetHitRectInsets(-5, -5, -5, -5)
 
-                bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 1)
+                bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
                 for k, bagID in private.IterateBagIDs(bagType) do
                     bagSlots[bagID]:Update()
                 end
@@ -580,6 +585,7 @@ local function CreateBag(bagType)
     close:SetPoint("TOPRIGHT", 5, 5)
     Skin.UIPanelCloseButton(close)
     main.close = close
+    main.marginTop = main.marginTop + 10
 
     if bagType == "main" then
         local settingsButton = CreateFeatureButton(main, nil, "cog",
@@ -592,7 +598,7 @@ local function CreateBag(bagType)
 
             _G.GameTooltip:Show()
         end)
-        settingsButton:ClearAllPoints()
+
         settingsButton:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
         main.settingsButton = settingsButton
     else
@@ -625,7 +631,6 @@ local function CreateBag(bagType)
             end)
         end
 
-        reagents:ClearAllPoints()
         reagents:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
         main.reagents = reagents
     end
@@ -658,7 +663,7 @@ local function CreateBag(bagType)
     local moneyFrame = _G.CreateFrame("Frame", "$parentMoney", main, "SmallMoneyFrameTemplate")
     moneyFrame:SetPoint("BOTTOMRIGHT", 8, 8)
     main.moneyFrame = moneyFrame
-    main.offsetBottom = main.offsetBottom + 25
+    main.marginBottom = main.marginBottom + 25
 
     local dropTarget = _G.CreateFrame("Button", "$parentEmptySlot", main)
     dropTarget:SetSize(37, 37)

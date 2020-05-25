@@ -2,20 +2,18 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next unpack table wipe
-
--- Libs --
-local LDD = _G.LibStub("LibDropDown")
+-- luacheck: globals next unpack table wipe tinsert
 
 -- RealUI --
 local RealUI = private.RealUI
+local MenuFrame = RealUI:GetModule("MenuFrame")
 local dbc, dbk, dbg
 
 local MODNAME = "AddonListAdv"
 local AddonListAdv = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local LoggedIn = false
-local classInfo
+local classInfo = RealUI.charInfo.class
 
 local function OnSaveAs(self)
     local popup;
@@ -33,7 +31,7 @@ local function OnSaveAs(self)
 end
 
 _G.StaticPopupDialogs["ALA_SaveAs"] = {
-    text = "Enter the name for this set.",
+    text = _G.GEARSETS_POPUP_TEXT,
     button1 = _G.YES,
     button2 = _G.CANCEL,
     OnAccept = OnSaveAs,
@@ -46,6 +44,7 @@ _G.StaticPopupDialogs["ALA_SaveAs"] = {
     exclusive = 1,
     whileDead = 1,
     hasEditBox = 1,
+    maxLetters = 16,
     preferredIndex = 3,
 }
 
@@ -207,16 +206,9 @@ setsButton:SetSize(100, 22)
 setsButton:SetText(_G.WARDROBE_SETS)
 setsButton:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
 setsButton:SetScript("OnClick", function(self)
-    self.menu:ClearLines()
-    self.menu:GetMenuList()
-    self.menu:Toggle()
+    MenuFrame:Open(self, "BOTTOMRIGHT", self:GetMenu())
 end)
 
-local setsMenu = LDD:NewMenu(setsButton, "RealUIAddonListDropDown")
-setsMenu:SetAnchor("TOPLEFT", setsButton, "BOTTOMLEFT", 5, -5)
-setsButton.menu = setsMenu
-
-local info = {}
 local function GetSetOptions(setName)
     local menu = {
         {text = setName,
@@ -251,86 +243,85 @@ local function GetSetOptions(setName)
             func = function()
                 AddonListAdv.savingSet = setName
                 _G.StaticPopup_Show("ALA_SaveAs", setName)
-                LDD:CloseAll()
             end
         })
     end
     return menu
 end
-function setsMenu:GetMenuList()
-    --[[ Account Sets ]]--
-    wipe(info)
-    info.isTitle = true
-    info.text = "Account Sets"
-    setsMenu:AddLine(info)
 
+local accountTitle = {
+    text = "Account Sets",
+    isTitle = true,
+}
+local setRealUI = {
+    text = ("%s (%d)"):format(RealUISet.name, #RealUISet),
+    menuList = GetSetOptions(RealUISet.name)
+}
+local setClass = {
+    text = classInfo.locale,
+    menuList = GetSetOptions(classInfo.locale)
+}
+local characterTitle = {
+    text = ("%s %s"):format(RealUI.charInfo.name, _G.WARDROBE_SETS),
+    isTitle = true,
+}
+local setNew = {
+    text = _G.PAPERDOLL_NEWEQUIPMENTSET,
+    func = function()
+        _G.StaticPopup_Show("ALA_SaveAs")
+    end,
+}
 
-    -- RealUI --
-    wipe(info)
-    local count = #RealUISet
-    info.text = ("%s (%d)"):format(RealUISet.name, count)
-    info.menu = GetSetOptions(RealUISet.name)
-    setsMenu:AddLine(info)
+local menuList = {}
+function setsButton:GetMenu()
+    wipe(menuList)
 
+    tinsert(menuList, accountTitle)
+    tinsert(menuList, setRealUI)
 
     -- Class --
-    wipe(info)
+    local count
     if dbk and dbk[1] then
         count = #dbk[1]
     else
         count = 0
     end
-
-    info.text = ("%s (%d)"):format(classInfo.locale, count)
-    info.value = classInfo.locale
-    info.menu = GetSetOptions(classInfo.locale)
-    setsMenu:AddLine(info)
+    setClass.text = ("%s (%d)"):format(classInfo.locale, count)
+    tinsert(menuList, setClass)
 
     -- Global --
     for i = 1, #dbg do
-        --print("SetDropDown_Populate", i, dbg[i])
-
         if dbg and dbg[i] then
             count = #dbg[i]
         else
             count = 0
         end
 
-        info.text = ("%s (%d)"):format(dbg[i].name, count)
-        info.value = dbg[i].name
-        setsMenu:AddLine(info)
+        tinsert(menuList, {
+            text = ("%s (%d)"):format(dbg[i].name, count),
+            menuList = GetSetOptions(dbg[i].name)
+        })
     end
 
 
     --[[ Character Sets ]]--
-    wipe(info)
-    info.text = "Character Sets"
-    info.isTitle = true
-    setsMenu:AddLine(info)
-
+    tinsert(menuList, characterTitle)
     for i = 1, #dbc do
-        wipe(info)
-       --print("SetDropDown_Populate", i, dbc[i])
         if dbc and dbc[i] then
             count = #dbc[i]
         else
             count = 0
         end
 
-        info.text = ("%s (%d)"):format(dbc[i].name, count)
-        info.value = dbc[i].name
-        info.menu = GetSetOptions(dbc[i].name)
-        setsMenu:AddLine(info)
+        tinsert(menuList, {
+            text = ("%s (%d)"):format(dbc[i].name, count),
+            menuList = GetSetOptions(dbc[i].name)
+        })
     end
 
+    tinsert(menuList, setNew)
 
-    -- New Set --
-    wipe(info)
-    info.text = "Create a new set"
-    info.func = function()
-        _G.StaticPopup_Show("ALA_SaveAs")
-    end
-    setsMenu:AddLine(info)
+    return menuList
 end
 
 
@@ -366,8 +357,6 @@ function AddonListAdv:OnInitialize()
         dbg[1] = nil
     end
 
-    classInfo = RealUI.charInfo.class
-
     if RealUI.isDev then
         local function AddOptDeps(optDeps)
             for i = 1, #optDeps do
@@ -390,7 +379,6 @@ function AddonListAdv:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     _G.UIDropDownMenu_SetSelectedValue(_G.AddonCharacterDropDown, RealUI.charInfo.name)
 
-    setsMenu:SetStyle("REALUI")
     if LoggedIn then self:RefreshMod() end
 end
 

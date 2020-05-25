@@ -11,7 +11,7 @@ local Color = Aurora.Color
 local RealUI = _G.RealUI
 
 local function MissingEvent(eventInfo, ...)
-    _G.print("Missing combat event", eventInfo.eventBase, eventInfo.eventType)
+    _G.print("Missing combat event", eventInfo.eventBase, eventInfo.eventType, eventInfo.spellName, eventInfo.spellID, ...)
 end
 
 local eventSuffix = _G.setmetatable({}, {
@@ -71,7 +71,11 @@ local function GetPower(powerType, alternatePowerType)
         power = PowerColors[alternatePowerType]
     end
 
-    return power[1], power[2]
+    if power then
+        return power[1], power[2]
+    else
+        return Color.white, _G.GetUnitPowerBarStringsByID(alternatePowerType)
+    end
 end
 
 local eventPrefix = {}
@@ -140,7 +144,7 @@ local partialEffects = {
 }
 local function GetResultString(resisted, blocked, absorbed, glancing, crushing, overhealing, overkill, overenergize)
     local resultStr
-    if resisted then
+    if resisted and resisted ~= 0 then
         if resisted < 0 then    --Its really a vulnerability
             -- I don't think this is a thing anymore
             _G.print("Vulnerable!!!", resisted)
@@ -149,7 +153,7 @@ local function GetResultString(resisted, blocked, absorbed, glancing, crushing, 
         end
     end
 
-    if blocked then
+    if blocked and blocked > 0 then
         if resultStr then
             resultStr = resultStr.." "..partialEffects.block:format(RealUI.ReadableNumber(blocked))
         else
@@ -221,7 +225,6 @@ function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, block
     eventInfo.color = GetSpellColor(school)
     return true
 end
-
 function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critical)
     eventInfo.amount = amountMissed or 0
     eventInfo.resultStr = _G[missType]
@@ -229,7 +232,6 @@ function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critic
 
     return true
 end
-
 function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
     eventInfo.resultStr = resultStr or ""
@@ -264,6 +266,24 @@ function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternateP
 
     return true
 end
+function eventSuffix.LEECH(eventInfo, amount, powerType, extraAmount, alternatePowerType)
+    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
+    eventInfo.amount = amount
+
+    if extraAmount then
+        _G.print("LEECH extraAmount", eventInfo.text, extraAmount)
+    end
+
+    return true
+end
+
+function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
+    eventInfo.string = _G.ACTION_SPELL_INTERRUPT .. extraSpellName
+
+    eventInfo.canMerge = false
+    eventInfo.isSticky = true
+    return true
+end
 
 
 
@@ -289,7 +309,8 @@ end
 
 local SPELL_INSTAKILL = "%s %s %s"
 function eventSpecial.SPELL_INSTAKILL(eventInfo, ...)
-    local _, unconsciousOnDeath = ...
+    local _, unconsciousOnDeath
+    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool, _, unconsciousOnDeath = ...
     eventInfo.scrollType = "notification"
 
     local resultStr = _G.ACTION_SPELL_INSTAKILL
@@ -300,7 +321,7 @@ function eventSpecial.SPELL_INSTAKILL(eventInfo, ...)
 
     eventInfo.canMerge = false
     eventInfo.isSticky = true
-    eventInfo.string = SPELL_INSTAKILL:format(eventInfo.sourceName, resultStr, eventInfo.destName)
+    eventInfo.string = SPELL_INSTAKILL:format(eventInfo.spellName, resultStr, eventInfo.destName)
     private.AddEvent(eventInfo)
 end
 

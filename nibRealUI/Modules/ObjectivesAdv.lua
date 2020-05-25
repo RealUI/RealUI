@@ -11,64 +11,41 @@ local CombatFader = RealUI:GetModule("CombatFader")
 ---------------------
 -- Collapse / Hide --
 ---------------------
--- Hide Quest Tracker based on zone
-function ObjectivesAdv:UpdateHideState()
-    local Hide = false
-    local _, instanceType = _G.GetInstanceInfo()
-
-    if db.hidden.enabled and (instanceType ~= "none") and RealUI:GetModuleEnabled(MODNAME) then
-        Hide = db.hidden.hide[instanceType]
-    end
-    if Hide then
-        self.hidden = true
-        _G.ObjectiveTrackerFrame.realUIHidden = true
-        _G.ObjectiveTrackerFrame:Hide()
-    else
-        local oldHidden = self.hidden
-        self.hidden = false
+local function ResetState()
+    if ObjectivesAdv.hidden and _G.ObjectiveTrackerFrame.realUIHidden then
+        ObjectivesAdv.hidden = false
         _G.ObjectiveTrackerFrame.realUIHidden = false
         _G.ObjectiveTrackerFrame:Show()
 
         -- Refresh fade, since fade won't update while hidden
-        local CF = RealUI:GetModule("CombatFader", 1)
-        if oldHidden and RealUI:GetModuleEnabled("CombatFader") and CF then
-            CF:UpdateStatus(true)
-        end
-    end
-end
-
--- Collapse Quest Tracker based on zone
-function ObjectivesAdv:UpdateCollapseState()
-    local Collapsed = false
-    local instanceName, instanceType = _G.GetInstanceInfo()
-    local isInGarrison = instanceName:find("Garrison")
-
-    if db.hidden.enabled and (instanceType ~= "none") and RealUI:GetModuleEnabled(MODNAME) then
-        if (instanceType == "pvp" and db.hidden.collapse.pvp) then          -- Battlegrounds
-            Collapsed = true
-        elseif (instanceType == "arena" and db.hidden.collapse.arena) then  -- Arena
-            Collapsed = true
-        elseif (((instanceType == "party" and not isInGarrison) or (instanceType == "scenario")) and db.hidden.collapse.party) then -- 5 Man Dungeons
-            Collapsed = true
-        elseif (instanceType == "raid" and db.hidden.collapse.raid) then    -- Raid Dungeons
-            Collapsed = true
+        if RealUI:GetModuleEnabled("CombatFader") then
+            CombatFader:UpdateStatus(true)
         end
     end
 
-    if Collapsed then
-        self.collapsed = true
-        _G.ObjectiveTrackerFrame.userCollapsed = true
-        _G.ObjectiveTracker_Collapse()
-    else
-        self.collapsed = false
-        _G.ObjectiveTrackerFrame.userCollapsed = false
+    if ObjectivesAdv.collapsed and _G.ObjectiveTrackerFrame.userCollapsed then
+        ObjectivesAdv.collapsed = false
         _G.ObjectiveTracker_Expand()
     end
 end
+function ObjectivesAdv:UpdateState()
+    ResetState()
 
-function ObjectivesAdv:UpdatePlayerLocation()
-    self:UpdateCollapseState()
-    self:UpdateHideState()
+    local _, instanceType = _G.GetInstanceInfo()
+    if not db.hidden.enabled or instanceType == "none" then return end
+    if _G.C_Garrison.IsOnGarrisonMap() then return end
+
+    local hide = db.hidden.hide[instanceType] or false
+    local collapse = db.hidden.collapse[instanceType] or false
+    if hide then
+        self.hidden = true
+        _G.ObjectiveTrackerFrame.realUIHidden = true
+        _G.ObjectiveTrackerFrame:Hide()
+    elseif collapse then
+        self.collapsed = true
+        _G.ObjectiveTrackerFrame.userCollapsed = true
+        _G.ObjectiveTracker_Collapse()
+    end
 end
 
 ------------------
@@ -93,7 +70,8 @@ function ObjectivesAdv:UI_SCALE_CHANGED()
 end
 
 function ObjectivesAdv:PLAYER_ENTERING_WORLD()
-    ObjectivesAdv:UpdatePlayerLocation()
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
+    self:UpdateState()
 end
 
 function ObjectivesAdv:ADDON_LOADED()

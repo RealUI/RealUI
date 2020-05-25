@@ -6,7 +6,6 @@ local _, private = ...
 -- luacheck: globals next date strsplit type
 
 -- Libs --
-local LDD = _G.LibStub("LibDropDown")
 local LDB = _G.LibStub("LibDataBroker-1.1")
 local qTip = _G.LibStub("LibQTip-1.0")
 
@@ -25,6 +24,7 @@ local L = RealUI.L
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:GetModule(MODNAME)
+local MenuFrame = RealUI:GetModule("MenuFrame")
 
 local testCell = _G.UIParent:CreateFontString()
 Scale.Point(testCell, "CENTER")
@@ -551,12 +551,14 @@ function Infobar:CreateBlocks()
             {isSpacer = true},
             {text = _G.CHARACTER_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleCharacter", "PaperDollFrame"},
+                arg1 = "ToggleCharacter",
+                arg2 = "PaperDollFrame",
             },
             {text = _G.SPELLBOOK_ABILITIES_BUTTON,
                 func = ToggleUI,
                     -- ToggleSpellBook causes taint
-                args = {"ToggleFrame", _G.SpellBookFrame},
+                arg1 = "ToggleFrame",
+                arg2 = _G.SpellBookFrame,
             },
             {text = _G.TALENTS_BUTTON,
                 func = function()
@@ -566,56 +568,77 @@ function Infobar:CreateBlocks()
                         _G.TalentFrame_LoadUI()
                     end
 
-                    _G.ShowUIPanel(_G.PlayerTalentFrame)
+                    if _G.PlayerTalentFrame:IsShown() then
+                        _G.HideUIPanel(_G.PlayerTalentFrame)
+                    else
+                        _G.ShowUIPanel(_G.PlayerTalentFrame)
+                    end
+
                 end,
-                disabled = _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL,
+                disabled = function( ... )
+                    if RealUI.isPatch then
+                        return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
+                    else
+                        return _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL
+                    end
+                end
             },
             {text = _G.ACHIEVEMENT_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleAchievementFrame"},
+                arg1 = "ToggleAchievementFrame",
             },
             {text = _G.QUESTLOG_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleQuestLog"},
+                arg1 = "ToggleQuestLog",
             },
             {text = guildText,
                 func = ToggleUI,
-                args = {"ToggleGuildFrame"},
-                disabled = _G.IsCommunitiesUIDisabledByTrialAccount(),
+                arg1 = "ToggleGuildFrame",
+                disabled = _G.IsCommunitiesUIDisabledByTrialAccount,
             },
             {text = _G.SOCIAL_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleFriendsFrame", 1},
+                arg1 = "ToggleFriendsFrame",
+                arg2 = 1,
             },
             {text = _G.DUNGEONS_BUTTON,
                 func = ToggleUI,
-                args = {"PVEFrame_ToggleFrame"},
-                disabled = _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL),
+                arg1 = "PVEFrame_ToggleFrame",
+                disabled = function( ... )
+                    if RealUI.isPatch then
+                        return not ((_G.C_LFGInfo.CanPlayerUseLFD() or _G.C_LFGInfo.CanPlayerUsePVP()) and RealUI.charInfo.faction ~= "Neutral")
+                    else
+                        return _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL)
+                    end
+                end
             },
             {text = _G.COLLECTIONS,
                 func = ToggleUI,
-                args = {"ToggleCollectionsJournal"},
+                arg1 = "ToggleCollectionsJournal",
             },
             {text = _G.ADVENTURE_JOURNAL,
                 func = ToggleUI,
-                args = {"ToggleEncounterJournal"},
+                arg1 = "ToggleEncounterJournal",
             },
             {text = _G.BLIZZARD_STORE,
                 func = ToggleUI,
-                args = {"ToggleStoreUI"},
+                arg1 = "ToggleStoreUI",
+                disabled = function( ... )
+                    return not _G.C_StorePublic.IsEnabled()
+                end
             },
             {text = _G.HELP_BUTTON,
                 func = ToggleUI,
-                args = {"ToggleHelpFrame"},
+                arg1 = "ToggleHelpFrame",
             },
             {isSpacer = true},
             {text = _G.CANCEL,
-                func = function() LDD:CloseAll() end,
+                func = function() MenuFrame:CloseAll() end,
             },
         }
 
         local errors
-        local function ShowBugIcon(menu, callback, errorObject)
+        local function ShowBugIcon(block, callback, errorObject)
             --[[errorObject = {
                 message = sanitizedMessage,
                 stack = table.concat(tmp, "\n"),
@@ -625,8 +648,7 @@ function Infobar:CreateBlocks()
                 counter = 1,
             }]]
 
-            if not menu.dataObj.value then
-                menu:ClearLines()
+            if not block.dataObj.value then
                 Infobar:debug("insert error line", #menuList)
                 tinsert(menuList, 3, {
                     text = _G.SHOW_LUA_ERRORS,
@@ -634,12 +656,11 @@ function Infobar:CreateBlocks()
                 })
 
                 Infobar:debug("add lines", #menuList)
-                menu:AddLines(unpack(menuList))
-                menu.dataObj.icon = fa["bug"]
-                menu.dataObj.iconR, menu.dataObj.iconG, menu.dataObj.iconB = Color.red:GetRGB()
+                block.dataObj.icon = fa["bug"]
+                block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = Color.red:GetRGB()
             end
 
-            menu.dataObj.value = #errors
+            block.dataObj.value = #errors
         end
 
         LDB:NewDataObject("start", {
@@ -648,26 +669,15 @@ function Infobar:CreateBlocks()
             icon = fa["bars"],
             iconFont = iconFont,
             OnEnable = function(block)
-                local menu = LDD:NewMenu(block, "RealUIStartDropDown")
-                menu:SetAnchor("BOTTOMLEFT", Infobar.frame, "TOPLEFT")
-                menu:SetStyle("REALUI")
-                menu:AddLines(unpack(menuList))
-                if RealUI.GetOptions("Skins").profile.isHighRes then
-                    menu:SetScale(Scale.GetUIScale())
-                end
-                _G.BugGrabber.RegisterCallback(menu, "BugGrabber_BugGrabbed", ShowBugIcon, menu)
-
-                block.menu = menu
-                menu.dataObj = block.dataObj
-
                 errors = _G.BugGrabber:GetDB()
                 if #errors > 0 then
-                    ShowBugIcon(menu, "OnEnable", errors[#errors])
+                    ShowBugIcon(block, "OnEnable", errors[#errors])
                 end
+
+                _G.BugGrabber.RegisterCallback(block, "BugGrabber_BugGrabbed", ShowBugIcon, block)
             end,
             OnEnter = function(block, ...)
-                Infobar:debug("Start: OnEnter", block.side, ...)
-                block.menu:Toggle()
+                MenuFrame:Open(block, "TOPLEFT", menuList)
             end,
         })
     end
@@ -715,18 +725,16 @@ function Infobar:CreateBlocks()
                 _G.hooksecurefunc("TimeManager_ToggleLocalTime", setTimeOptions)
                 setTimeOptions(block)
 
-                local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                Scale.Point(alert, "BOTTOMRIGHT", block, "TOPRIGHT", 0, 18)
-                Scale.Point(alert.Arrow, "TOPRIGHT", alert, "BOTTOMRIGHT", -30, 4)
-                alert.CloseButton:SetScript("OnClick", function(btn)
-                    alert:Hide()
-                    alert.isHidden = true
-                end)
-                alert.Text:SetText(_G.GAMETIME_TOOLTIP_CALENDAR_INVITES)
-                Scale.Width(alert.Text, 145)
-
-                Scale.Size(alert, 177, alert.Text:GetStringHeight() + 42)
-                block.alert = alert
+                block.helpTipInfo = {
+                    text = _G.GAMETIME_TOOLTIP_CALENDAR_INVITES,
+                    buttonStyle = _G.HelpTip.ButtonStyle.Close,
+                    targetPoint = _G.HelpTip.Point.TopEdgeCenter,
+                    alignment = _G.HelpTip.Alignment.Right,
+                    autoHorizontalSlide = true,
+                    onHideCallback = function( ... )
+                        block.alertHidden = true
+                    end
+                }
 
                 Infobar:ScheduleRepeatingTimer(function()
                     local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, block.isLocal)
@@ -803,13 +811,11 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 --Infobar:debug("Clock: OnEvent", event, ...)
-                local alert = block.alert
                 block.invites = _G.C_Calendar.GetNumPendingInvites()
-                if block.invites > 0 and not alert.isHidden then
-                    alert:Show()
-                    alert.isHidden = false
+                if block.invites > 0 and not block.alertHidden then
+                    block.alertHidden = not _G.HelpTip:Show(block, block.helpTipInfo)
                 else
-                    alert:Hide()
+                    _G.HelpTip:Hide(block, block.helpTipInfo.text)
                 end
             end,
             events = {
@@ -1016,7 +1022,7 @@ function Infobar:CreateBlocks()
                     UpdateRanks()
                 else
                     if event == "GUILD_ROSTER_UPDATE" then
-                        local canRequestRosterUpdate = ...;
+                        local canRequestRosterUpdate = ...
                         if canRequestRosterUpdate then
                             _G.C_GuildInfo.GuildRoster()
                         end
@@ -1321,18 +1327,16 @@ function Infobar:CreateBlocks()
             iconFont = iconFont,
             text = 1,
             OnEnable = function(block)
-                local alert = _G.CreateFrame("Frame", nil, block, "MicroButtonAlertTemplate")
-                Aurora.Skin.MicroButtonAlertTemplate(alert)
-                alert.CloseButton:SetScript("OnClick", function(btn)
-                    alert:Hide()
-                    alert.isHidden = true
-                end)
-
-                Scale.Point(alert, "BOTTOM", block, "TOP", 0, 18)
-                Scale.Point(alert.Arrow, "TOP", alert, "BOTTOM", 0, 0)
-                Scale.Width(alert, 100)
-
-                block.alert= alert
+                block.helpTipInfo = {
+                    text = _G.TUTORIAL36:match("(.-%p)"),
+                    buttonStyle = _G.HelpTip.ButtonStyle.Close,
+                    targetPoint = _G.HelpTip.Point.TopEdgeCenter,
+                    alignment = _G.HelpTip.Alignment.Left,
+                    autoHorizontalSlide = true,
+                    onHideCallback = function( ... )
+                        block.alertHidden = true
+                    end
+                }
             end,
             OnClick = function(block, ...)
                 Infobar:debug("Durability: OnClick", block.side, ...)
@@ -1385,13 +1389,10 @@ function Infobar:CreateBlocks()
                 end
                 itemSlots.lowSlot = lowSlot
 
-                local alert = block.alert
-                if lowDur < 0.1 and not alert.isHidden then
-                    alert.Text:SetFormattedText("%s %d%%", _G.DURABILITY, round(lowDur * 100))
-                    alert:Show()
-                    alert.isHidden = false
+                if lowDur < 0.1 and not block.alertHidden then
+                    block.alertHidden = not _G.HelpTip:Show(block, block.helpTipInfo)
                 else
-                    alert:Hide()
+                    _G.HelpTip:Hide(block, block.helpTipInfo.text)
                 end
                 block.dataObj.text = round(lowDur * 100) .. "%"
                 block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax):GetRGB()
@@ -2213,17 +2214,35 @@ function Infobar:CreateBlocks()
         local function UpdateTrackedCurrency(block)
             if not RealUI.realmInfo.realmNormalized then return end
             local changeIndex
-            for i = 1, _G.MAX_WATCHED_TOKENS do
-                local token = currencyStates["token"..i]
-                local name, _, icon, currencyID = _G.GetBackpackCurrencyInfo(token.index)
-                if token.id ~= currencyID and not changeIndex then
-                    changeIndex = i
-                end
 
-                token.name = name
-                token.icon = icon
-                token.id = currencyID
-                currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyID
+            if RealUI.isPatch then
+                for i = 1, _G.MAX_WATCHED_TOKENS do
+                    local token = currencyStates["token"..i]
+                    local currencyInfo = _G.C_CurrencyInfo.GetBackpackCurrencyInfo(token.index)
+                    if currencyInfo then
+                        if token.id ~= currencyInfo.currencyTypesID and not changeIndex then
+                            changeIndex = i
+                        end
+
+                        token.name = currencyInfo.name
+                        token.icon = currencyInfo.iconFileID
+                        token.id = currencyInfo.currencyTypesID
+                        currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyInfo.currencyTypesID
+                    end
+                end
+            else
+                for i = 1, _G.MAX_WATCHED_TOKENS do
+                    local token = currencyStates["token"..i]
+                    local name, _, icon, currencyID = _G.GetBackpackCurrencyInfo(token.index)
+                    if token.id ~= currencyID and not changeIndex then
+                        changeIndex = i
+                    end
+
+                    token.name = name
+                    token.icon = icon
+                    token.id = currencyID
+                    currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyID
+                end
             end
             return changeIndex
         end
@@ -2296,16 +2315,16 @@ function Infobar:CreateBlocks()
                 Infobar:debug("currency: OnEnable", block.side)
                 if RealUI.realmInfo.realmNormalized then
                     currencyDB = RealUI.db.global.currency
-                    _G.hooksecurefunc("SetCurrencyBackpack", function(index, flag)
+                    local function UpdateTracked(index, backpack)
                         local trackedIndex, trackedName = currencyStates[dbc.currencyState].index, currencyStates[dbc.currencyState].name
                         local changeIndex = UpdateTrackedCurrency(block)
                         if changeIndex and trackedIndex then
                             if changeIndex < trackedIndex then
-                                if flag == 0 and trackedName == currencyStates["token"..trackedIndex-1].name then
+                                if backpack == 0 and trackedName == currencyStates["token"..trackedIndex-1].name then
                                     dbc.currencyState = "token"..trackedIndex-1
                                 end
                             elseif changeIndex == trackedIndex then
-                                if flag == 1 and trackedName == currencyStates["token"..trackedIndex+1].name then
+                                if backpack == 1 and trackedName == currencyStates["token"..trackedIndex+1].name then
                                     dbc.currencyState = "token"..trackedIndex+1
                                 end
                             end
@@ -2318,7 +2337,13 @@ function Infobar:CreateBlocks()
                                 end
                             end
                         end
-                    end)
+                    end
+
+                    if RealUI.isPatch then
+                        _G.hooksecurefunc(_G.C_CurrencyInfo, "SetCurrencyBackpack", UpdateTracked)
+                    else
+                        _G.hooksecurefunc("SetCurrencyBackpack", UpdateTracked)
+                    end
 
                     if not currencyStates[dbc.currencyState]:IsValid() then
                         UpdateState(block)
@@ -2373,7 +2398,14 @@ function Infobar:CreateBlocks()
                                 wipe(tokens)
                                 for i = 1, _G.MAX_WATCHED_TOKENS do
                                     if data["token"..i] then
-                                        local tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                        local tokenName, _, texture
+                                        if RealUI.isPatch then
+                                            local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(data["token"..i])
+                                            tokenName = currencyInfo.name
+                                            texture = currencyInfo.iconFileID
+                                        else
+                                            tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
+                                        end
                                         local amount = data[data["token"..i]] or 0
                                         tokens[i] = TOKEN_STRING:format(texture, amount)
                                         tokens[i+3] = tokenName

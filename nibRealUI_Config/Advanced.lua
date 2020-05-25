@@ -463,6 +463,14 @@ local combatText do
                 set = appSet,
                 order = 1,
             },
+            test = {
+                name = _G.PREVIEW,
+                type = "execute",
+                func = function()
+                    CombatText:ToggleTest()
+                end,
+                order = 2,
+            },
             normal = {
                 name = L.Fonts_Normal,
                 type = "group",
@@ -534,9 +542,9 @@ local inventory do
         Inventory:Update()
     end
 
-    local function AddFilter(tag)
-        debug("AddFilter", tag)
-        local filter = Inventory:GetFilter(tag)
+    local function AddFilter(filter)
+        debug("AddFilter", filter.tag)
+        local tag = filter.tag
 
         args.filters.args[tag.."Index"] = {
             name = filter.name,
@@ -636,8 +644,8 @@ local inventory do
             }
         }
 
-        for i, tag in ipairs(Inventory.db.global.filters) do
-            AddFilter(tag)
+        for i, filter in Inventory:IndexedFilters() do
+            AddFilter(filter)
         end
     end
 
@@ -2682,6 +2690,22 @@ local uiTweaks do
     local objectives do
         local MODNAME = "Objectives Adv."
         local ObjectivesAdv = RealUI:GetModule(MODNAME)
+        local function collapseGet(info)
+            return ObjectivesAdv.db.profile.hidden.collapse[info[#info]]
+        end
+        local function collapseSet(info, value)
+            ObjectivesAdv.db.profile.hidden.collapse[info[#info]] = value
+            ObjectivesAdv:UpdateState()
+        end
+
+        local function hideGet(info)
+            return ObjectivesAdv.db.profile.hidden.hide[info[#info]]
+        end
+        local function hideSet(info, value)
+            ObjectivesAdv.db.profile.hidden.hide[info[#info]] = value
+            ObjectivesAdv:UpdateState()
+        end
+
         objectives = {
             name = "Objectives Adv.",
             desc = "Reposition the Objective Tracker.",
@@ -2853,7 +2877,7 @@ local uiTweaks do
                             get = function(info) return ObjectivesAdv.db.profile.hidden.enabled end,
                             set = function(info, value)
                                 ObjectivesAdv.db.profile.hidden.enabled = value
-                                ObjectivesAdv:UpdateCollapseState()
+                                ObjectivesAdv:UpdateState()
                             end,
                             order = 20,
                         },
@@ -2872,51 +2896,36 @@ local uiTweaks do
                                 arena = {
                                     name = _G.ARENA_BATTLES,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.arena end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.arena = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
+                                    get = collapseGet,
+                                    set = collapseSet,
                                     order = 10,
                                 },
                                 pvp = {
                                     name = _G.BATTLEGROUNDS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.pvp end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.pvp = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
+                                    get = collapseGet,
+                                    set = collapseSet,
                                     order = 20,
                                 },
                                 party = {
                                     name = _G.DUNGEONS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.party = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
+                                    get = collapseGet,
+                                    set = collapseSet,
                                     order = 30,
                                 },
                                 scenario = {
                                     name = _G.SCENARIOS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.party = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
+                                    get = collapseGet,
+                                    set = collapseSet,
                                     order = 40,
                                 },
                                 raid = {
                                     name = _G.RAIDS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.collapse.raid end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.collapse.raid = value
-                                        ObjectivesAdv:UpdateCollapseState()
-                                    end,
+                                    get = collapseGet,
+                                    set = collapseSet,
                                     order = 50,
                                 },
                             },
@@ -2936,51 +2945,36 @@ local uiTweaks do
                                 arena = {
                                     name = _G.ARENA_BATTLES,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.arena end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.arena = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
+                                    get = hideGet,
+                                    set = hideSet,
                                     order = 10,
                                 },
                                 pvp = {
                                     name = _G.BATTLEGROUNDS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.pvp end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.pvp = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
+                                    get = hideGet,
+                                    set = hideSet,
                                     order = 20,
                                 },
                                 party = {
                                     name = _G.DUNGEONS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.party = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
+                                    get = hideGet,
+                                    set = hideSet,
                                     order = 30,
                                 },
                                 scenario = {
                                     name = _G.SCENARIOS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.party end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.party = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
+                                    get = hideGet,
+                                    set = hideSet,
                                     order = 40,
                                 },
                                 raid = {
                                     name = _G.RAIDS,
                                     type = "toggle",
-                                    get = function(info) return ObjectivesAdv.db.profile.hidden.hide.raid end,
-                                    set = function(info, value)
-                                        ObjectivesAdv.db.profile.hidden.hide.raid = value
-                                        ObjectivesAdv:UpdateHideState()
-                                    end,
+                                    get = hideGet,
+                                    set = hideSet,
                                     order = 50,
                                 },
                             },

@@ -67,7 +67,6 @@ local function CreateHealthBar(parent)
     parent.Health:SetStatusBarTexture(RealUI.textures.plain)
     local color = parent.colors.health
     parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
-    parent.Health.frequentUpdates = true
     if not(RealUI.db.profile.settings.reverseUnitFrameBars) then
         parent.Health:SetReverseFill(true)
         parent.Health.PostUpdate = function(self, unit, cur, max)
@@ -75,7 +74,7 @@ local function CreateHealthBar(parent)
         end
     end
 
-    function parent.Health:PostUpdateArenaPreparation(specID)
+    function parent.Health:PostUpdateArenaPreparation(event, specID)
         local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
         parent.Trinket.icon:SetTexture(specIcon)
     end

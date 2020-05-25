@@ -128,7 +128,6 @@ local function CreateHealthBar(parent, info)
     Health.colorTapping = true
     Health.colorDisconnected = true
     Health.colorHealth = true
-    Health.frequentUpdates = true
 
     Health.PositionSteps = PositionSteps
     Health.PostUpdate = UpdateSteps
@@ -300,7 +299,6 @@ local CreateHealthPredictBar do
 
         parent.HealthPrediction = {
             absorbBar = absorbBar,
-            frequentUpdates = true,
             Override = PredictOverride,
         }
     end

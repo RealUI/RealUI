@@ -13,6 +13,24 @@ end
 
 
 ----====####$$$$%%%%%$$$$####====----
+--          Compatibility          --
+----====####$$$$%%%%%$$$$####====----
+local Enum = {}
+Enum.ItemQuality = {
+    Poor = _G.LE_ITEM_QUALITY_POOR or _G.Enum.ItemQuality.Poor,
+    Standard = _G.LE_ITEM_QUALITY_COMMON or _G.Enum.ItemQuality.Standard,
+    Good = _G.LE_ITEM_QUALITY_UNCOMMON or _G.Enum.ItemQuality.Good,
+    Superior = _G.LE_ITEM_QUALITY_RARE or _G.Enum.ItemQuality.Superior,
+    Epic = _G.LE_ITEM_QUALITY_EPIC or _G.Enum.ItemQuality.Epic,
+    Legendary = _G.LE_ITEM_QUALITY_LEGENDARY or _G.Enum.ItemQuality.Legendary,
+    Artifact = _G.LE_ITEM_QUALITY_ARTIFACT or _G.Enum.ItemQuality.Artifact,
+    Heirloom = _G.LE_ITEM_QUALITY_HEIRLOOM or _G.Enum.ItemQuality.Heirloom,
+    WoWToken = _G.LE_ITEM_QUALITY_WOW_TOKEN or _G.Enum.ItemQuality.WoWToken,
+}
+RealUI.Enum = Enum
+
+
+----====####$$$$%%%%%$$$$####====----
 --             Numbers             --
 ----====####$$$$%%%%%$$$$####====----
 function RealUI.Round(value, places)

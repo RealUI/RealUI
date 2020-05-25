@@ -1,4 +1,25 @@
-﻿## [2.1.8] - 2020-03-26 ##
+## [2.1.9] - 2020-05-25 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Changed ###
+
+  * Improve RealUI generated dropdown menus
+
+### Fixed ###
+
+  * Error if the mouse trail tweak is disabled
+  * Error preventing the arena prep frames from showing
+  * Objective tracker visibility option did not recognize scenarios
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+
+## [2.1.8] - 2020-03-26 ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -497,6 +518,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.9]: https://github.com/RealUI/RealUI/compare/2.1.8...2.1.9
 [2.1.8]: https://github.com/RealUI/RealUI/compare/2.1.7...2.1.8
 [2.1.7]: https://github.com/RealUI/RealUI/compare/2.1.6...2.1.7
 [2.1.6]: https://github.com/RealUI/RealUI/compare/2.1.5...2.1.6

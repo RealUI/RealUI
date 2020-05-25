@@ -408,7 +408,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                     if link then
                         local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
                         if rarity and subTypeID then
-                            if rarity ~= _G.LE_ITEM_QUALITY_ARTIFACT then
+                            if rarity ~= RealUI.Enum.ItemQuality.Artifact then
                                 ilvl = _G.RealUI.GetItemLevel(link)
                             end
 
@@ -419,7 +419,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                             end
 
                             if slot == "MainHand" or slot == "SecondaryHand" then
-                                if rarity == _G.LE_ITEM_QUALITY_ARTIFACT then
+                                if rarity == RealUI.Enum.ItemQuality.Artifact then
                                     if slot == "MainHand" then
                                         mainArtifact = ilvl
                                     elseif slot == "SecondaryHand" then

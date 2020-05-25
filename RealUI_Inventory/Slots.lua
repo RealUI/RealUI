@@ -9,6 +9,7 @@ local Base = Aurora.Base
 local Skin = Aurora.Skin
 
 -- RealUI --
+local RealUI = _G.RealUI
 local Inventory = private.Inventory
 
 local function SlotFactory(pool)
@@ -50,7 +51,7 @@ function ItemSlotMixin:Update()
 
     if Inventory.main.bags.equipment.filter:DoesMatchSlot(self) then
         self.Count:SetText(self.item:GetCurrentItemLevel())
-        if quality and quality > _G.LE_ITEM_QUALITY_POOR then
+        if quality and quality > RealUI.Enum.ItemQuality.Poor then
             self.Count:SetTextColor(_G.BAG_ITEM_QUALITY_COLORS[quality]:GetRGB())
         end
         self.Count:Show()
@@ -144,8 +145,8 @@ function private.UpdateSlots(bagID)
     end
 end
 
-local rowSize, gap = 6, 5
-function private.ArrangeSlots(bag, offsetTop)
+local rowSize, gap = 6, 3
+function private.ArrangeSlots(bag)
     local numSlots, numRows = 0, 0
     local previousButton, cornerButton
     local slotSize = 0
@@ -153,7 +154,7 @@ function private.ArrangeSlots(bag, offsetTop)
         numSlots = numSlots + 1
         slot:ClearAllPoints() -- The template has anchors
         if not previousButton then
-            slot:SetPoint("TOPLEFT", bag, gap, -offsetTop)
+            slot:SetPoint("TOPLEFT", bag, bag.marginSide, -bag.marginTop)
             previousButton = slot
             cornerButton = slot
 
@@ -173,8 +174,9 @@ function private.ArrangeSlots(bag, offsetTop)
         end
     end
 
-    slotSize = slotSize + gap
-    return slotSize * rowSize, slotSize * numRows
+    local gapOffsetH = gap * (rowSize - 1)
+    local gapOffsetV = gap * (numRows - 1)
+    return (slotSize * rowSize) + gapOffsetH, (slotSize * numRows) + gapOffsetV
 end
 
 function private.GetSlot(bagID, slotIndex)

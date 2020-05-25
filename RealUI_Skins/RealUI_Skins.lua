@@ -202,7 +202,7 @@ function private.OnLoad()
     C.media.checked = [[Interface\AddOns\RealUI_Skins\Aurora\media\CheckButtonHilight]]
     C.media.roleIcons = [[Interface\AddOns\RealUI_Skins\Aurora\media\UI-LFG-ICON-ROLES]]
 
-    function Hook.GameTooltip_SetBackdropStyle(self, style)
+    function Hook.SharedTooltip_SetBackdropStyle(self, style)
         if not self.IsEmbedded then
             Base.SetBackdrop(self, Color.frame, frameColor.a)
             if self._setQualityColors then
@@ -255,8 +255,13 @@ function private.OnLoad()
 
 
     -- Hide default UI Scale slider and replace with RealUI button
-    _G["Advanced_UseUIScale"]:Hide()
-    _G["Advanced_UIScaleSlider"]:Hide()
+    if private.isPatch then
+        _G["Display_UseUIScale"]:Hide()
+        _G["Display_UIScaleSlider"]:Hide()
+    else
+        _G["Advanced_UseUIScale"]:Hide()
+        _G["Advanced_UIScaleSlider"]:Hide()
+    end
 
     local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
     scaleBtn:SetSize(200, 24)
@@ -276,19 +281,6 @@ function private.OnLoad()
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end
-
-        local LDD = _G.LibStub("LibDropDown")
-        LDD:RegisterStyle("REALUI", {
-            padding = 10,
-            spacing = 1,
-            backdrop = {
-                bgFile = RealUI.textures.plain,
-                edgeFile = RealUI.textures.plain,
-                edgeSize = 1,
-            },
-            backdropColor = _G.CreateColor(frameColor.r, frameColor.g, frameColor.b, frameColor.a),
-            backdropBorderColor = Color.black,
-        })
 
         -- Since we load Blizzard_WorldMap before RealUI_Skins, this frame is created before we
         -- get to hook the creation functions. As such, we need to run this to finish it's skin.
