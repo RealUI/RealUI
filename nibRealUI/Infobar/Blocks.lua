@@ -528,10 +528,10 @@ function Infobar:CreateBlocks()
             guildText = _G.LOOKINGFORGUILD
         end
 
-        local function ToggleUI(this, button, func, arg)
+        local function ToggleUI(this, arg1, arg2, isChecked)
             if _G.InCombatLockdown() then return end
 
-            _G[func](arg)
+            _G[arg1](arg2)
         end
 
         local menuList = {
