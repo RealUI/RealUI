@@ -262,6 +262,11 @@ function MenuFrameMixin:Update(menuList)
 
     self:SetSize(width + (MENU_MARGIN * 2), (MENU_ITEM_HEIGHT * #self.items) + (MENU_HEADER * 2))
 end
+function MenuFrameMixin:HasMouse()
+    if self:IsShown() and self:IsMouseOver() then
+        return true
+    end
+end
 function MenuFrameMixin:Clear()
     for index, menuItem in ipairs(self.items) do
         menuItems:Release(menuItem)
@@ -312,15 +317,17 @@ function MenuFrame:Open(button, point, menuList, level)
     openMenus[button] = menu
 end
 
-function MenuFrame:Close(button)
+function MenuFrame:Close(button, force)
     local menu = openMenus[button]
-    openMenus[button] = nil
-    menuFrames:Release(menu)
+    if not menu:HasMouse() or force then
+        openMenus[button] = nil
+        menuFrames:Release(menu)
+    end
 end
 
 local function ContainsMouse()
     for button, menu in next, openMenus do
-        if menu:IsShown() and menu:IsMouseOver() then
+        if menu:HasMouse() then
             return true
         end
     end
