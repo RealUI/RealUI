@@ -1,3 +1,23 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Added ###
+
+  * The keybinding frame has a new visual reminder of the actions that keyboard keys are bound to
+
+### Changed ###
+
+  * Start menu items now have keybind hints
+
+### Fixed ###
+
+  * Error when clicking a button on the start menu
+  * Broken DBM options skin from recent update
+
+
+
 ## [2.1.9] - 2020-05-25 ##
 ### Modified AddOns ###
 
