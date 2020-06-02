@@ -545,7 +545,6 @@ local function CreateKeyButton(index, info)
     end
 
     if fa[binding.text] then
-        print("font", fa.path, binding.text)
         fontStr = button:CreateFontString(nil, "ARTWORK")
         fontStr:SetFont(fa.path, 12)
         binding.text = fa[binding.text]
@@ -575,8 +574,6 @@ local function UpdateFrame()
 end
 
 local function CreateKeys()
-    print("CreateKeys")
-
     bindingsFrame = _G.CreateFrame("Frame", nil, _G.KeyBindingFrame)
     bindingsFrame:SetPoint("TOPLEFT", _G.KeyBindingFrame, "BOTTOMLEFT", 100, 0)
     bindingsFrame:SetSize(614, 186)
@@ -604,8 +601,6 @@ end
 
 local actionFormat = "|cFFFFFFFF%s:|r %s"
 local function UpdateBindings()
-    print("UpdateBindings")
-
     wipe(bindings)
     for index = 1, #keys do
         local key, text = ("|"):split(qwerty[index])
@@ -644,6 +639,8 @@ local function UpdateBindings()
         UpdateFrame()
     end
 end
+
+
 RealUI:GetModule("InterfaceTweaks"):AddTweak("bindings", {
     name = "Bindings Reminder",
     addon = "Blizzard_BindingUI",
