@@ -38,6 +38,8 @@ function MenuItemMixin:OnLoad()
     self:SetNormalFontObject("GameFontHighlightSmallLeft")
     self:SetDisabledFontObject("GameFontDisableSmallLeft")
     self:SetScript("OnClick", self.OnClick)
+    self:SetScript("OnEnter", self.OnEnter)
+    self:SetScript("OnLeave", self.OnLeave)
 
     local highlight = self:CreateTexture(nil, "HIGHLIGHT")
     highlight:SetPoint("LEFT", 1, 0)
@@ -97,7 +99,6 @@ function MenuItemMixin:Update(menuItemInfo)
         self:SetText(menuItemInfo.text)
 
         if menuItemInfo.menuList then
-            menuItemInfo.func = self.OpenSubMenu
             menuItemInfo.keepShown = true
             self.arrow:Show()
         end
@@ -200,6 +201,28 @@ function MenuItemMixin:OnClick(mouseButton, ...)
         MenuFrame:CloseAll()
     end
 end
+function MenuItemMixin:OnEnter(mouseButton, ...)
+    if self.arrow:IsShown() then
+        self:OpenSubMenu()
+    else
+        MenuFrame:CloseAll(self:GetParent().level + 1)
+    end
+
+    local menuItemInfo = self.info
+    if menuItemInfo.tooltipTitle and not menuItemInfo.noTooltipWhileEnabled then
+        if menuItemInfo.tooltipOnButton then
+            _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+            _G.GameTooltip_SetTitle(_G.GameTooltip, menuItemInfo.tooltipTitle);
+            if menuItemInfo.tooltipText then
+                _G.GameTooltip_AddNormalLine(_G.GameTooltip, menuItemInfo.tooltipText, true);
+            end
+            _G.GameTooltip:Show();
+        end
+    end
+end
+function MenuItemMixin:OnLeave(mouseButton, ...)
+    _G.GameTooltip:Hide()
+end
 function MenuItemMixin:Clear()
     self:SetDisabledFontObject("GameFontDisableSmallLeft")
 
@@ -262,6 +285,9 @@ function MenuFrameMixin:Update(menuList)
 
     self:SetSize(width + (MENU_MARGIN * 2), (MENU_ITEM_HEIGHT * #self.items) + (MENU_HEADER * 2))
 end
+function MenuFrameMixin:HasMouse()
+    return self:IsShown() and self:IsMouseOver()
+end
 function MenuFrameMixin:Clear()
     for index, menuItem in ipairs(self.items) do
         menuItems:Release(menuItem)
@@ -312,15 +338,17 @@ function MenuFrame:Open(button, point, menuList, level)
     openMenus[button] = menu
 end
 
-function MenuFrame:Close(button)
+function MenuFrame:Close(button, force)
     local menu = openMenus[button]
-    openMenus[button] = nil
-    menuFrames:Release(menu)
+    if not menu:HasMouse() or force then
+        openMenus[button] = nil
+        menuFrames:Release(menu)
+    end
 end
 
 local function ContainsMouse()
     for button, menu in next, openMenus do
-        if menu:IsShown() and menu:IsMouseOver() then
+        if menu:HasMouse() then
             return true
         end
     end

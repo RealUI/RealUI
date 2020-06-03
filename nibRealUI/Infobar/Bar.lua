@@ -17,6 +17,8 @@ local db, ndb
 
 local MODNAME = "Infobar"
 local Infobar = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local MenuFrame = RealUI:GetModule("MenuFrame")
+
 Infobar.LDB = LDB
 Infobar.locked = true
 
@@ -58,6 +60,7 @@ function BlockMixin:OnEnter()
     if IsCombatBlocked() then return end
     local dataObj  = self.dataObj
 
+    MenuFrame:CloseAll()
     if dataObj.tooltip then
         PrepareTooltip(dataObj.tooltip, self)
         if dataObj.tooltiptext then

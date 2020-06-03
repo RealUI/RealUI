@@ -10,8 +10,25 @@ local MODNAME = "InterfaceTweaks"
 local InterfaceTweaks = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local modules, moduleEvents = {}, {}
+local moduleAddons = {
+    nibRealUI = {
+        function()
+            for tag, info in next, modules do
+                if info.setEnabled then
+                    info.setEnabled(InterfaceTweaks.db.global[tag])
+                end
+            end
+        end
+    }
+}
 local function AddTweak(tag, info)
     modules[tag] = info
+    if info.addon then
+        if not moduleAddons[info.addon] then
+            moduleAddons[info.addon] = {}
+        end
+        tinsert(moduleAddons[info.addon], info.onLoad)
+    end
     if info.event then
         if not moduleEvents[info.event] then
             moduleEvents[info.event] = {}
@@ -24,8 +41,13 @@ end
 
 
 function InterfaceTweaks:AddTweak(tag, info, enabled)
+    if self.db then
+        self.db.global[tag] = enabled
+    else
+        info.isEnabled = enabled
+    end
+
     AddTweak(tag, info)
-    self.db.global[tag] = enabled
 end
 function InterfaceTweaks:GetTweaks()
     return RealUI.ShallowCopy(modules)
@@ -33,12 +55,10 @@ end
 
 function InterfaceTweaks:OnEvent(event, ...)
     if event == "ADDON_LOADED" then
-        if ... == "nibRealUI" then
-            self:UnregisterEvent("ADDON_LOADED")
-            for tag, info in next, modules do
-                if info.setEnabled then
-                    info.setEnabled(self.db.global[tag])
-                end
+        local addon = ...
+        if moduleAddons[addon] then
+            for _, func in ipairs(moduleAddons[addon]) do
+                func()
             end
         end
     else
@@ -55,7 +75,7 @@ end
 AddTweak("achShots", {
     name = "Tweaks_Achievements",
     event = "ACHIEVEMENT_EARNED",
-    func = function(self, event, achievementID, alreadyEarned)
+    func = function(achievementID, alreadyEarned)
         if not InterfaceTweaks.db.global.achShots then return end
 
         _G.C_Timer.After(1, function()
@@ -148,4 +168,11 @@ function InterfaceTweaks:OnInitialize()
             ["**"] = false
         },
     })
+
+    for tag, info in next, modules do
+        if info.isEnabled ~= nil then
+            self.db.global[tag] = info.isEnabled
+            info.isEnabled = nil
+        end
+    end
 end

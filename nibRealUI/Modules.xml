@@ -5,10 +5,12 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Infobar\Blocks.lua"/>
 
     <Script file="Modules\InterfaceTweaks.lua"/>
+
     <Script file="Modules\ActionBars.lua"/>
     <Script file="Modules\AddonListAdv.lua"/>
     <Script file="Modules\AlertFrameMove.lua"/>
     <Script file="Modules\AltPowerBar.lua"/>
+    <Script file="Modules\Bindings.lua"/>
     <Script file="Modules\CooldownCount.lua"/>
     <Script file="Modules\CopyChat.lua"/>
     <Script file="Modules\DragEmAll.lua"/>

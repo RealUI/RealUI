@@ -1,3 +1,23 @@
+﻿## [2.1.10] - 2020-06-01 ##
+### Modified AddOns ###
+
+  * nibRealUI
+
+### Added ###
+
+  * The keybinding frame has a new visual reminder of the actions that keyboard keys are bound to
+
+### Changed ###
+
+  * Start menu items now have keybind hints
+
+### Fixed ###
+
+  * Error when clicking a button on the start menu
+  * Broken DBM options skin from recent update
+
+
+
 ## [2.1.9] - 2020-05-25 ##
 ### Modified AddOns ###
 
@@ -518,6 +538,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.1.10]: https://github.com/RealUI/RealUI/compare/2.1.9...2.1.10
 [2.1.9]: https://github.com/RealUI/RealUI/compare/2.1.8...2.1.9
 [2.1.8]: https://github.com/RealUI/RealUI/compare/2.1.7...2.1.8
 [2.1.7]: https://github.com/RealUI/RealUI/compare/2.1.6...2.1.7

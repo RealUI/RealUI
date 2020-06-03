@@ -528,10 +528,10 @@ function Infobar:CreateBlocks()
             guildText = _G.LOOKINGFORGUILD
         end
 
-        local function ToggleUI(this, button, func, arg)
+        local function ToggleUI(this, arg1, arg2, isChecked)
             if _G.InCombatLockdown() then return end
 
-            _G[func](arg)
+            _G[arg1](arg2)
         end
 
         local menuList = {
@@ -549,18 +549,18 @@ function Infobar:CreateBlocks()
                 checked = function() return Infobar.locked end,
             },
             {isSpacer = true},
-            {text = _G.CHARACTER_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.CHARACTER_BUTTON, "TOGGLECHARACTER0"),
                 func = ToggleUI,
                 arg1 = "ToggleCharacter",
                 arg2 = "PaperDollFrame",
             },
-            {text = _G.SPELLBOOK_ABILITIES_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"),
                 func = ToggleUI,
                     -- ToggleSpellBook causes taint
                 arg1 = "ToggleFrame",
                 arg2 = _G.SpellBookFrame,
             },
-            {text = _G.TALENTS_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.TALENTS_BUTTON, "TOGGLETALENTS"),
                 func = function()
                     if _G.InCombatLockdown() then return end
 
@@ -581,27 +581,27 @@ function Infobar:CreateBlocks()
                     else
                         return _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL
                     end
-                end
+                end,
             },
-            {text = _G.ACHIEVEMENT_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.ACHIEVEMENT_BUTTON, "TOGGLEACHIEVEMENT"),
                 func = ToggleUI,
                 arg1 = "ToggleAchievementFrame",
             },
-            {text = _G.QUESTLOG_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.QUESTLOG_BUTTON, "TOGGLEQUESTLOG"),
                 func = ToggleUI,
                 arg1 = "ToggleQuestLog",
             },
-            {text = guildText,
+            {text = _G.MicroButtonTooltipText(guildText, "TOGGLEGUILDTAB"),
                 func = ToggleUI,
                 arg1 = "ToggleGuildFrame",
                 disabled = _G.IsCommunitiesUIDisabledByTrialAccount,
             },
-            {text = _G.SOCIAL_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.SOCIAL_BUTTON, "TOGGLESOCIAL"),
                 func = ToggleUI,
                 arg1 = "ToggleFriendsFrame",
                 arg2 = 1,
             },
-            {text = _G.DUNGEONS_BUTTON,
+            {text = _G.MicroButtonTooltipText(_G.DUNGEONS_BUTTON, "TOGGLEGROUPFINDER"),
                 func = ToggleUI,
                 arg1 = "PVEFrame_ToggleFrame",
                 disabled = function( ... )
@@ -610,13 +610,13 @@ function Infobar:CreateBlocks()
                     else
                         return _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL)
                     end
-                end
+                end,
             },
-            {text = _G.COLLECTIONS,
+            {text = _G.MicroButtonTooltipText(_G.COLLECTIONS, "TOGGLECOLLECTIONS"),
                 func = ToggleUI,
                 arg1 = "ToggleCollectionsJournal",
             },
-            {text = _G.ADVENTURE_JOURNAL,
+            {text = _G.MicroButtonTooltipText(_G.ADVENTURE_JOURNAL, "TOGGLEENCOUNTERJOURNAL"),
                 func = ToggleUI,
                 arg1 = "ToggleEncounterJournal",
             },
@@ -625,7 +625,7 @@ function Infobar:CreateBlocks()
                 arg1 = "ToggleStoreUI",
                 disabled = function( ... )
                     return not _G.C_StorePublic.IsEnabled()
-                end
+                end,
             },
             {text = _G.HELP_BUTTON,
                 func = ToggleUI,
@@ -678,6 +678,9 @@ function Infobar:CreateBlocks()
             end,
             OnEnter = function(block, ...)
                 MenuFrame:Open(block, "TOPLEFT", menuList)
+            end,
+            OnLeave = function(block, ...)
+                MenuFrame:Close(block)
             end,
         })
     end
