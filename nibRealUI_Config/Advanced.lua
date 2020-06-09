@@ -40,6 +40,18 @@ local uiTweaks do
     }
 end
 ]]
+options.RealUI = {
+    name = "|cffffffffRealUI|r "..RealUI:GetVerString(true),
+    type = "group",
+    args = {
+        profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
+    }
+}
+
+local optArgs = options.RealUI.args
+_G.LibStub("LibDualSpec-1.0"):EnhanceOptions(optArgs.profiles, RealUI.db)
+
+
 
 local nameFormat = _G.ENABLE .. " %s"
 local function CreateAddonSection(name, args)
@@ -77,7 +89,7 @@ local function CreateAddonSection(name, args)
     }
 end
 
-local core do
+do -- RealUI
     debug("Adv Core")
     local infobar do
         local MODNAME = "Infobar"
@@ -404,7 +416,7 @@ local core do
             },
         }
     end
-    core = {
+    optArgs.core = {
         name = "Core",
         desc = "Core RealUI modules.",
         type = "group",
@@ -415,7 +427,7 @@ local core do
         },
     }
 end
-local combatText do
+do -- CombatText
     debug("CombatText")
     order = order + 1
 
@@ -526,9 +538,9 @@ local combatText do
 
 
     debug("CombatText create")
-    combatText = CreateAddonSection("CombatText", args)
+    optArgs.combatText = CreateAddonSection("CombatText", args)
 end
-local inventory do
+do -- Inventory
     debug("Inventory")
     order = order + 1
 
@@ -651,9 +663,9 @@ local inventory do
 
 
     debug("Inventory create")
-    inventory = CreateAddonSection("Inventory", args)
+    optArgs.inventory = CreateAddonSection("Inventory", args)
 end
-local skins do
+do -- Skins
     debug("Adv Skins")
     order = order + 1
 
@@ -701,7 +713,7 @@ local skins do
     end
     local minScale, maxScale = 0.48, 1
     local addons do
-        local addonSkins = _G.Aurora.Base.GetSkinList()
+        local addonSkins = _G.Aurora.Base.GetAddonSkins()
         addons = {
             name = _G.ADDONS,
             type = "group",
@@ -724,7 +736,7 @@ local skins do
             end
         end
     end
-    skins = {
+    optArgs.skins = {
         name = L.Appearance_Skins,
         type = "group",
         order = order,
@@ -884,7 +896,7 @@ local skins do
         }
     }
 end
-local tooltips do
+do -- Tooltips
     debug("Adv Tooltips")
     order = order + 1
 
@@ -1007,9 +1019,9 @@ local tooltips do
         }
     end
 
-    tooltips = CreateAddonSection("Tooltips", args)
+    optArgs.tooltips = CreateAddonSection("Tooltips", args)
 end
-local uiTweaks do
+do -- UI Tweaks
     debug("Adv UITweaks")
     order = order + 1
     local altPowerBar do
@@ -2986,7 +2998,7 @@ local uiTweaks do
         CombatFader:AddFadeConfig(MODNAME, objectives, 50)
     end
 
-    uiTweaks = {
+    optArgs.uiTweaks = {
         name = L["Tweaks_UITweaks"],
         desc = L["Tweaks_UITweaksDesc"],
         type = "group",
@@ -3012,7 +3024,8 @@ local uiTweaks do
     local InterfaceTweaks = RealUI:GetModule("InterfaceTweaks")
     local tweaks = InterfaceTweaks:GetTweaks()
     for tag, info in next, tweaks do
-        uiTweaks.args[tag] = {
+        print("tag", tag)
+        optArgs.uiTweaks.args[tag] = {
             name = L[info.name],
             desc = L[info.name.."Desc"],
             type = "toggle",
@@ -3040,19 +3053,3 @@ local core do
     }
 end
 ]]
-
-debug("Adv Options")
-options.RealUI = {
-    name = "|cffffffffRealUI|r "..RealUI:GetVerString(true),
-    type = "group",
-    args = {
-        core = core,
-        combatText = combatText,
-        inventory = inventory,
-        skins = skins,
-        tooltips = tooltips,
-        uiTweaks = uiTweaks,
-        profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
-    }
-}
-_G.LibStub("LibDualSpec-1.0"):EnhanceOptions(options.RealUI.args.profiles, RealUI.db)

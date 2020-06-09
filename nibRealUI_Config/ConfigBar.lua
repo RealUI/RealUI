@@ -21,11 +21,36 @@ local CloseHuDWindow = private.CloseHuDWindow
 local options = private.options
 local debug = private.debug
 
-local other do
+
+options.HuD = {
+    type = "group",
+    args = {
+        toggle = { -- This is for button creation
+            name = L["HuD_ShowElements"],
+            type = "group",
+            order = 0,
+            args = {
+            },
+        },
+        close = { -- This is for button creation
+            name = _G.CLOSE,
+            icon = "close",
+            type = "group",
+            order = -1,
+            args = {
+            },
+        },
+    }
+}
+
+local optArgs = options.HuD.args
+
+
+do -- Other
     debug("HuD Other")
     local MODNAME = "ActionBars"
     local ActionBars = RealUI:GetModule(MODNAME)
-    other = {
+    optArgs.other = {
         name = _G.BINDING_HEADER_OTHER,
         icon = "sliders",
         type = "group",
@@ -307,11 +332,11 @@ local other do
         }
     }
 end
-local unitframes do
+do -- UnitFrames
     debug("HuD UnitFrames")
     local MODNAME = "UnitFrames"
     local UnitFrames = RealUI:GetModule(MODNAME)
-    unitframes = {
+    optArgs.unitframes = {
         name = _G.UNITFRAME_LABEL,
         icon = "th",
         type = "group",
@@ -607,10 +632,12 @@ local unitframes do
             },
         },
     }
-    CombatFader:AddFadeConfig("UnitFrames", unitframes.args.general, 50, true)
+
+    local ufArgs = optArgs.unitframes.args
+    CombatFader:AddFadeConfig("UnitFrames", ufArgs.general, 50, true)
     do -- import hideRaidFilters from minimap
         local MinimapAdv = RealUI:GetModule("MinimapAdv")
-        unitframes.args.groups.args.raid.args.hideRaidFilters = {
+        ufArgs.groups.args.raid.args.hideRaidFilters = {
             type = "toggle",
             name = L["Raid_HideRaidFilter"],
             desc = L["Raid_HideRaidFilterDesc"],
@@ -621,7 +648,7 @@ local unitframes do
             order = 50,
         }
     end
-    local units = unitframes.args.units.args
+    local units = ufArgs.units.args
     for unitSlug, unit in next, units do
         unit.args.x = {
             name = L["General_XOffset"],
@@ -729,7 +756,7 @@ local unitframes do
             },
         --]]
     end
-    local groups = unitframes.args.groups.args
+    local groups = ufArgs.groups.args
     for groupSlug, group in next, groups do
         if groupSlug == "boss" or groupSlug == "arena" then
             local args = groupSlug == "boss" and group.args or group.args.options.args
@@ -775,7 +802,7 @@ local unitframes do
         end
     end
 end
-local castbars do
+do -- CastBars
     debug("HuD CastBars")
     local MODNAME = "CastBars"
     local CastBars = RealUI:GetModule(MODNAME)
@@ -865,7 +892,7 @@ local castbars do
         }
     end
 
-    castbars = {
+    optArgs.castbars = {
         name = L[MODNAME],
         icon = "bolt",
         type = "group",
@@ -904,7 +931,7 @@ local castbars do
         }
     }
 end
-local classresource do
+do -- ClassResource
     debug("HuD ClassResource")
     local MODNAME = "ClassResource"
     local ClassResource = RealUI:GetModule(MODNAME)
@@ -1110,7 +1137,7 @@ local classresource do
             CombatFader:AddFadeConfig("ClassResource", pointOptions, 50, true)
         end
 
-        classresource = {
+        optArgs.classresource = {
             name = L["Resource"],
             icon = "cogs",
             type = "group",
@@ -1153,27 +1180,3 @@ local classresource do
 end
 
 debug("HuD Options")
-options.HuD = {
-    type = "group",
-    args = {
-        toggle = { -- This is for button creation
-            name = L["HuD_ShowElements"],
-            type = "group",
-            order = 0,
-            args = {
-            },
-        },
-        other = other,
-        unitframes = unitframes,
-        castbars = castbars,
-        classresource = classresource,
-        close = { -- This is for button creation
-            name = _G.CLOSE,
-            icon = "close",
-            type = "group",
-            order = -1,
-            args = {
-            },
-        },
-    }
-}
