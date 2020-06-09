@@ -642,7 +642,7 @@ end
 
 
 RealUI:GetModule("InterfaceTweaks"):AddTweak("bindings", {
-    name = "Bindings Reminder",
+    name = "BindingsReminder",
     addon = "Blizzard_BindingUI",
     onLoad = function( ... )
         UpdateBindings()
