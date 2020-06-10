@@ -333,6 +333,20 @@ function DragEmAll:OnEnable()
         end
     end
 
+    -- Making the ColorPickerFrame itself draggable makes interacting with the
+    -- color picker widgets difficult, so we need to do something different to
+    -- make it movable.
+    local ColorPickerFrame = _G.ColorPickerFrame
+    ColorPickerFrame:RegisterForDrag()
+
+    local Header = ColorPickerFrame.Header
+    Header:HookScript("OnMouseDown", function(this)
+        FramePoint.OnDragStart(ColorPickerFrame)
+    end)
+    Header:HookScript("OnMouseUp", function(this)
+        FramePoint.OnDragStop(ColorPickerFrame)
+    end)
+
     _G.hooksecurefunc("ShowUIPanel", UpdateFrames)
     _G.hooksecurefunc("HideUIPanel", UpdateFrames)
     _G.hooksecurefunc("UpdateUIPanelPositions", UpdateFrames)

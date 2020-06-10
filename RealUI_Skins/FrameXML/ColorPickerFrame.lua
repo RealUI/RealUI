@@ -132,6 +132,14 @@ _G.hooksecurefunc(private.FrameXML, "ColorPickerFrame", function()
     ColorPickerFrame:HookScript("OnColorSelect", Hook.ColorPickerFrame_OnColorSelect)
     local bg = ColorPickerFrame.Border:GetBackdropTexture("bg")
 
+    local Header = ColorPickerFrame.Header
+    Header:ClearAllPoints()
+    Header:SetPoint("TOPLEFT", bg)
+    Header:SetPoint("BOTTOMRIGHT", bg, "TOPRIGHT", 0, -private.FRAME_TITLE_HEIGHT)
+    Header.Text:SetAllPoints()
+
+    _G.ColorPickerWheel:SetPoint("TOPLEFT", bg, 16, -(private.FRAME_TITLE_HEIGHT + 5))
+
     local ColorValue = ColorPickerFrame:GetColorValueTexture()
     ColorValue:SetPoint("LEFT", _G.ColorPickerWheel, "RIGHT", 13, 0)
 
