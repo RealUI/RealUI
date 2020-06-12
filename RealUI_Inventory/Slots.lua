@@ -87,6 +87,9 @@ function ItemSlotMixin:OnClick(button)
         private.menu:Open(self)
     end
 end
+function ItemSlotMixin:GetBagType()
+    return private.GetBagTypeForBagID(self:GetBagAndSlot())
+end
 
 
 local InventorySlotMixin = _G.CreateFromMixins(ItemSlotMixin)

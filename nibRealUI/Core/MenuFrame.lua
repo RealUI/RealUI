@@ -198,7 +198,7 @@ function MenuItemMixin:OnClick(mouseButton, ...)
 end
 function MenuItemMixin:OnEnter(mouseButton, ...)
     if self.arrow:IsShown() then
-        MenuFrame:Open(self, "TOPRIGHT", self.info.menuList, self.menu.level + 1)
+        MenuFrame:Open(self, nil, self.info.menuList, self.menu.level + 1)
     else
         MenuFrame:CloseAll(self.menu.level + 1)
     end
@@ -253,6 +253,7 @@ end
 local MenuFrameMixin = {}
 function MenuFrameMixin:OnLoad()
     self:SetFrameStrata("TOOLTIP")
+    self:SetClampedToScreen(true)
     self.items = {}
 end
 function MenuFrameMixin:Update(menuList)
@@ -296,24 +297,42 @@ local menuFrames = _G.CreateObjectPool(MenuFactory, MenuReset)
 menuFrames.mixin = MenuFrameMixin
 
 
-local function GetMenuAnchor(button, menu)
+local function GetMenuAnchor(button, relPoint)
     local point
-    local rx, ry = button:GetCenter()
-    local ux, uy = _G.UIParent:GetCenter()
+    if relPoint then
+        local rx, ry = button:GetCenter()
+        local ux, uy = _G.UIParent:GetCenter()
 
-    if ry >= uy then
-        point = "TOP"
+        if relPoint:find("TOP") then
+            point = "BOTTOM"
+        elseif relPoint:find("BOTTOM") then
+            point = "TOP"
+        else
+            if ry >= uy then
+                point = "TOP"
+            else
+                point = "BOTTOM"
+            end
+        end
+
+        if relPoint:find("LEFT") then
+            point = point .. "LEFT"
+        elseif relPoint:find("RIGHT") then
+            point = point .. "RIGHT"
+        else
+            if rx >= ux then
+                point = point .. "RIGHT"
+            else
+                point = point .. "LEFT"
+            end
+        end
     else
-        point = "BOTTOM"
+        point = "TOPLEFT"
+        relPoint = "TOPRIGHT"
     end
 
-    if rx >= ux then
-        point = point .. "RIGHT"
-    else
-        point = point .. "LEFT"
-    end
 
-    return point
+    return point, button, relPoint
 end
 
 local openMenus = {}
@@ -340,7 +359,7 @@ function MenuFrame:Open(button, point, menuList, level)
     menu.button = button
 
     menu:Update(menuList)
-    menu:SetPoint(GetMenuAnchor(button, menu), button, point)
+    menu:SetPoint(GetMenuAnchor(button, point))
     menu:Show()
 
     if level > #openMenus then
