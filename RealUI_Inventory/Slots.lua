@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals tinsert ipairs next
+-- luacheck: globals tinsert ipairs next type
 
 -- Libs --
 local Aurora = _G.Aurora
@@ -72,7 +72,6 @@ function ItemSlotMixin:Update()
     end
 
     self:UpdateItemCooldown()
-    self:UpdateItemUpgradeIcon()
     self.readable = readable
 
     if self == _G.GameTooltip:GetOwner() then
@@ -84,9 +83,6 @@ end
 function ItemSlotMixin:UpdateItemCooldown()
     _G[self:GetName().."Cooldown"]:Hide()
     _G.ContainerFrame_UpdateCooldown((self:GetBagAndSlot()), self)
-end
-function ItemSlotMixin:UpdateItemUpgradeIcon()
-    _G.ContainerFrameItemButton_UpdateItemUpgradeIcon(self)
 end
 function ItemSlotMixin:UpdateItemContext()
     local _, _, _, _, _, _, _, isFiltered = _G.GetContainerItemInfo(self:GetBagAndSlot())
@@ -112,9 +108,11 @@ end
 function InventorySlotMixin:Update()
     ItemSlotMixin.Update(self)
 
-    _G.ContainerFrameItemButton_UpdateItemUpgradeIcon(self)
-
+    self:UpdateItemUpgradeIcon()
     self.BattlepayItemTexture:SetShown(_G.IsBattlePayItem(self:GetBagAndSlot()))
+end
+function InventorySlotMixin:UpdateItemUpgradeIcon()
+    _G.ContainerFrameItemButton_UpdateItemUpgradeIcon(self)
 end
 local inventorySlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 inventorySlots.frameTemplate = "ContainerFrameItemButtonTemplate"
@@ -138,7 +136,7 @@ local ReagentSlotMixin = _G.CreateFromMixins(ItemSlotMixin)
 function ReagentSlotMixin:Update()
     ItemSlotMixin.Update(self)
 
-    _G.ReagentFrameItemButton_UpdateLocked(self)
+    _G.BankFrameItemButton_UpdateLocked(self)
 end
 local reagentSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 reagentSlots.frameTemplate = "ReagentBankItemButtonGenericTemplate"
@@ -159,47 +157,8 @@ function private.UpdateSlots(bagID)
     end
 end
 
-local rowSize, gap = 6, 3
-function private.ArrangeSlots(bag)
-    local numSlots, numRows = 0, 0
-    local previousButton, cornerButton
-    local slotSize = 0
-    for _, slot in ipairs(bag.slots) do
-        numSlots = numSlots + 1
-        slot:ClearAllPoints() -- The template has anchors
-        if not previousButton then
-            slot:SetPoint("TOPLEFT", bag, bag.marginSide, -bag.marginTop)
-            previousButton = slot
-            cornerButton = slot
-
-            slotSize = slot:GetWidth()
-            numRows = numRows + 1
-        else
-            if numSlots % rowSize == 1 then -- new row
-                slot:SetPoint("TOPLEFT", cornerButton, "BOTTOMLEFT", 0, -gap)
-                cornerButton = slot
-
-                numRows = numRows + 1
-            else
-                slot:SetPoint("TOPLEFT", previousButton, "TOPRIGHT", gap, 0)
-            end
-
-            previousButton = slot
-        end
-    end
-
-    local gapOffsetH = gap * (rowSize - 1)
-    local gapOffsetV = gap * (numRows - 1)
-    return (slotSize * rowSize) + gapOffsetH, (slotSize * numRows) + gapOffsetV
-end
-
 function private.GetSlot(bagID, slotIndex)
-    local slots = inventorySlots
-    if bagID == _G.BANK_CONTAINER then
-        slots = bankSlots
-    elseif bagID == _G.REAGENTBANK_CONTAINER then
-        slots = reagentSlots
-    end
+    local slots = private.GetSlotTypeForBag(bagID)
 
     for slot in slots:EnumerateActive() do
         if slot:IsEqualToBagAndSlot(bagID, slotIndex) then
@@ -232,18 +191,7 @@ function private.GetSlot(bagID, slotIndex)
     end
 end
 
-function private.GetNumFreeSlots(bag)
-    local totalFree, freeSlots, bagFamily = 0
-    for k, bagID in private.IterateBagIDs(bag.bagType) do
-        freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
-        if bagFamily == 0 then
-            totalFree = totalFree + freeSlots
-        end
-    end
-
-    return totalFree
-end
-local function GetFirstFreeSlot(bagID)
+function private.GetFirstFreeSlot(bagID)
     if _G.GetContainerNumFreeSlots(bagID) > 0 then
         local numSlots = _G.GetContainerNumSlots(bagID)
         for slotIndex = 1, numSlots do
@@ -253,24 +201,31 @@ local function GetFirstFreeSlot(bagID)
         end
     end
 end
-function private.GetFirstFreeSlot(bagType)
-    for k, bagID in private.IterateBagIDs(bagType) do
-        local slotIndex = GetFirstFreeSlot(bagID)
-        if slotIndex then
-            return bagID, slotIndex
+
+function private.GetSlotTypeForBag(bagIDorBagType)
+    local slots = inventorySlots
+
+    if type(bagIDorBagType) == "number" then
+        if bagIDorBagType == _G.BANK_CONTAINER then
+            slots = bankSlots
+        elseif bagIDorBagType == _G.REAGENTBANK_CONTAINER then
+            slots = reagentSlots
+        end
+    else
+        if bagIDorBagType == "bank" then
+            slots = bankSlots
+        elseif bagIDorBagType == "reagent" then
+            slots = reagentSlots
         end
     end
 
-    return false
+    return slots
 end
 
 --[[ Bag Slots ]]--
 local searchBags = {}
 local function SearchItemsForBag(bagType)
-    local slots = inventorySlots
-    if bagType == "bank" then
-        slots = bankSlots
-    end
+    local slots = private.GetSlotTypeForBag(bagType)
 
     for slot in slots:EnumerateActive() do
         slot:SetMatchesSearch(searchBags[(slot:GetBagAndSlot())])
@@ -407,13 +362,13 @@ function BagSlotMixin:OnReceiveDrag()
 end
 
 private.bagSlots = {}
-function private.CreateBagSlots(bag)
-    local bagSlots, bagType = private.bagSlots, bag.bagType
+function private.CreateBagSlots(main)
+    local bagSlots, bagType = private.bagSlots, main.bagType
     bagSlots[bagType] = {}
 
     local bagSlot, previousButton
-    for k, bagID in private.IterateBagIDs(bagType) do
-        bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag"..bagID, bag)
+    for k, bagID in main:IterateBagIDs() do
+        bagSlot = _G.CreateFrame("ItemButton", "$parent_Bag"..bagID, main)
         _G.Mixin(bagSlot, BagSlotMixin)
         bagSlot:Init(bagID)
 

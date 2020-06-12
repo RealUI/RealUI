@@ -14,164 +14,185 @@ local Color = Aurora.Color
 
 -- RealUI --
 local RealUI = _G.RealUI
-
 local Inventory = private.Inventory
 
-local InventoryType = _G.Enum.InventoryType
-local invTypes = {
-    [InventoryType.IndexHeadType] = 1,
-    [InventoryType.IndexNeckType] = 2,
-    [InventoryType.IndexShoulderType] = 3,
-    [InventoryType.IndexCloakType] = 4,
-    [InventoryType.IndexChestType] = 5,
-    [InventoryType.IndexRobeType] = 5, -- Holiday chest
-    [InventoryType.IndexBodyType] = 6, -- Shirt
-    [InventoryType.IndexTabardType] = 7,
-    [InventoryType.IndexWristType] = 8,
-    [InventoryType.IndexHandType] = 9,
-    [InventoryType.IndexWaistType] = 10,
-    [InventoryType.IndexLegsType] = 11,
-    [InventoryType.IndexFeetType] = 12,
-    [InventoryType.IndexFingerType] = 13,
-    [InventoryType.IndexTrinketType] = 14,
+local BagMixin do
+    local HEADER_SPACE = 20
+    local BAG_MARGIN = 5
 
-    [InventoryType.Index2HweaponType] = 15,
-    [InventoryType.IndexRangedType] = 16, -- Bows
-    [InventoryType.IndexRangedrightType] = 16, -- Wands, Guns, and Crossbows
+    local SLOT_SPACING = 3
+    local SLOTS_PER_ROW = 6
 
-    [InventoryType.IndexWeaponType] = 17, -- One-Hand
-    [InventoryType.IndexWeaponmainhandType] = 18,
-    [InventoryType.IndexWeaponoffhandType] = 19,
-    [InventoryType.IndexShieldType] = 20,
+    local InventoryType = _G.Enum.InventoryType
+    local invTypes = {
+        [InventoryType.IndexHeadType] = 1,
+        [InventoryType.IndexNeckType] = 2,
+        [InventoryType.IndexShoulderType] = 3,
+        [InventoryType.IndexCloakType] = 4,
+        [InventoryType.IndexChestType] = 5,
+        [InventoryType.IndexRobeType] = 5, -- Holiday chest
+        [InventoryType.IndexBodyType] = 6, -- Shirt
+        [InventoryType.IndexTabardType] = 7,
+        [InventoryType.IndexWristType] = 8,
+        [InventoryType.IndexHandType] = 9,
+        [InventoryType.IndexWaistType] = 10,
+        [InventoryType.IndexLegsType] = 11,
+        [InventoryType.IndexFeetType] = 12,
+        [InventoryType.IndexFingerType] = 13,
+        [InventoryType.IndexTrinketType] = 14,
 
-    [InventoryType.IndexHoldableType] = 21,
-    [InventoryType.IndexRelicType] = 21,
+        [InventoryType.Index2HweaponType] = 15,
+        [InventoryType.IndexRangedType] = 16, -- Bows
+        [InventoryType.IndexRangedrightType] = 16, -- Wands, Guns, and Crossbows
 
-    [InventoryType.IndexAmmoType] = 22,
-    [InventoryType.IndexThrownType] = 22,
+        [InventoryType.IndexWeaponType] = 17, -- One-Hand
+        [InventoryType.IndexWeaponmainhandType] = 18,
+        [InventoryType.IndexWeaponoffhandType] = 19,
+        [InventoryType.IndexShieldType] = 20,
 
-    [InventoryType.IndexBagType] = 25,
-    [InventoryType.IndexQuiverType] = 25,
+        [InventoryType.IndexHoldableType] = 21,
+        [InventoryType.IndexRelicType] = 21,
 
-    [InventoryType.IndexNonEquipType] = 30,
-}
-local function SortSlots(a, b)
-    local qualityA = a.item:GetItemQuality()
-    local qualityB = b.item:GetItemQuality()
-    if qualityA ~= qualityB then
-        if qualityA and qualityB then
-            return qualityA > qualityB
-        elseif (qualityA == nil) or (qualityB == nil) then
-            return not not qualityA
-        else
-            return false
+        [InventoryType.IndexAmmoType] = 22,
+        [InventoryType.IndexThrownType] = 22,
+
+        [InventoryType.IndexBagType] = 25,
+        [InventoryType.IndexQuiverType] = 25,
+
+        [InventoryType.IndexNonEquipType] = 30,
+    }
+    local function SortSlots(a, b)
+        local qualityA = a.item:GetItemQuality()
+        local qualityB = b.item:GetItemQuality()
+        if qualityA ~= qualityB then
+            if qualityA and qualityB then
+                return qualityA > qualityB
+            elseif (qualityA == nil) or (qualityB == nil) then
+                return not not qualityA
+            else
+                return false
+            end
+        end
+
+
+        local invTypeA = a.item:GetInventoryType()
+        local invTypeB = b.item:GetInventoryType()
+        if invTypes[invTypeA] ~= invTypes[invTypeB] then
+            return invTypes[invTypeA] < invTypes[invTypeB]
+        end
+
+
+        local ilvlA = a.item:GetCurrentItemLevel()
+        local ilvlB = b.item:GetCurrentItemLevel()
+        if ilvlA ~= ilvlB then
+            return ilvlA > ilvlB
+        end
+
+
+        local nameA = a.item:GetItemName()
+        local nameB = b.item:GetItemName()
+        if nameA ~= nameB then
+            return nameA < nameB
+        end
+
+
+        local stackA = _G.C_Item.GetStackCount(a)
+        local stackB = _G.C_Item.GetStackCount(b)
+        if stackA ~= stackB then
+            return stackA > stackB
         end
     end
 
+    BagMixin = {}
+    function BagMixin:Init()
+        Base.SetBackdrop(self)
+        self:EnableMouse(true)
+        self.slots = {}
 
-    local invTypeA = a.item:GetInventoryType()
-    local invTypeB = b.item:GetInventoryType()
-    if invTypes[invTypeA] ~= invTypes[invTypeB] then
-        return invTypes[invTypeA] < invTypes[invTypeB]
+        self.marginTop = HEADER_SPACE
+        self.marginBottom = BAG_MARGIN
+        self.marginSide = BAG_MARGIN
     end
+    function BagMixin:ArrangeSlots()
+        Inventory:debug("private.ArrangeSlots", self.bagType or self.filter.tag)
+        local numSlots, numRows = 0, 0
+        local previousButton, cornerButton
+        local slotSize = 0
+        for _, slot in ipairs(self.slots) do
+            numSlots = numSlots + 1
+            slot:ClearAllPoints() -- The template has anchors
+            if not previousButton then
+                slot:SetPoint("TOPLEFT", self, self.marginSide, -self.marginTop)
+                previousButton = slot
+                cornerButton = slot
 
-
-    local ilvlA = a.item:GetCurrentItemLevel()
-    local ilvlB = b.item:GetCurrentItemLevel()
-    if ilvlA ~= ilvlB then
-        return ilvlA > ilvlB
-    end
-
-
-    local nameA = a.item:GetItemName()
-    local nameB = b.item:GetItemName()
-    if nameA ~= nameB then
-        return nameA < nameB
-    end
-
-
-    local stackA = _G.C_Item.GetStackCount(a)
-    local stackB = _G.C_Item.GetStackCount(b)
-    if stackA ~= stackB then
-        return stackA > stackB
-    end
-end
-local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
-    sort(bag.slots, SortSlots)
-
-    if bag.isPrimary then
-        tinsert(bag.slots, bag.dropTarget)
-    end
-
-    local slotWidth, slotHeight = private.ArrangeSlots(bag)
-    bag:SetSize(slotWidth + (bag.marginSide * 2), slotHeight + (bag.marginTop + bag.marginBottom))
-
-    local _, screenHeight = RealUI.GetInterfaceSize()
-    local maxHeight = screenHeight * Inventory.db.global.maxHeight
-
-    local height = bag:GetHeight()
-    if bag.isPrimary then
-        columnHeight = columnHeight + height + 5
-    else
-        local parent = bag.parent
-        bag:ClearAllPoints()
-
-        if columnHeight + height >= maxHeight then
-            if parent.bagType == "main" then
-                bag:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
+                slotSize = slot:GetWidth()
+                numRows = numRows + 1
             else
-                bag:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
+                if numSlots % SLOTS_PER_ROW == 1 then -- new row
+                    slot:SetPoint("TOPLEFT", cornerButton, "BOTTOMLEFT", 0, -SLOT_SPACING)
+                    cornerButton = slot
+
+                    numRows = numRows + 1
+                else
+                    slot:SetPoint("TOPLEFT", previousButton, "TOPRIGHT", SLOT_SPACING, 0)
+                end
+
+                previousButton = slot
             end
-            columnBase = bag.filter.tag
-            columnHeight = height + 5
-        else
+        end
+
+        local gapOffsetH = SLOT_SPACING * (SLOTS_PER_ROW - 1)
+        local gapOffsetV = SLOT_SPACING * (numRows - 1)
+        return (slotSize * SLOTS_PER_ROW) + gapOffsetH, (slotSize * numRows) + gapOffsetV
+    end
+    function BagMixin:UpdateSize(columnHeight, columnBase, numSkipped)
+        sort(self.slots, SortSlots)
+
+        if self.isPrimary then
+            tinsert(self.slots, self.dropTarget)
+        end
+
+        local slotWidth, slotHeight = self:ArrangeSlots()
+        self:SetSize(slotWidth + (self.marginSide * 2), slotHeight + (self.marginTop + self.marginBottom))
+
+        local _, screenHeight = RealUI.GetInterfaceSize()
+        local maxHeight = screenHeight * Inventory.db.global.maxHeight
+
+        local height = self:GetHeight()
+        if self.isPrimary then
             columnHeight = columnHeight + height + 5
-
-            local anchor = "main"
-            local index = bag.filter:GetIndex()
-            if index > 1 then
-                anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
-            end
-
-            if parent.bagType == "main" then
-                bag:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
-            else
-                bag:SetPoint("TOPLEFT", parent.bags[anchor] or parent, "BOTTOMLEFT", 0, -5)
-            end
-        end
-    end
-
-    return columnHeight, columnBase
-end
-local function SetupSlots(main)
-    local columnHeight, columnBase = 0, "main"
-    columnHeight, columnBase = UpdateBagSize(main, columnHeight, columnBase)
-
-    local numSkipped = 0
-    for i, filter in Inventory:IndexedFilters() do
-        local bag = main.bags[filter.tag]
-        if #bag.slots <= 0 then
-            numSkipped = numSkipped + 1
         else
-            columnHeight, columnBase = UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
-            bag:Show()
-            numSkipped = 0
+            local parent = self.parent
+            self:ClearAllPoints()
+
+            if columnHeight + height >= maxHeight then
+                if parent.bagType == "main" then
+                    self:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
+                else
+                    self:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
+                end
+                columnBase = self.filter.tag
+                columnHeight = height + 5
+            else
+                columnHeight = columnHeight + height + 5
+
+                local anchor = "main"
+                local index = self.filter:GetIndex()
+                if index > 1 then
+                    anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
+                end
+
+                if parent.bagType == "main" then
+                    self:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
+                else
+                    self:SetPoint("TOPLEFT", parent.bags[anchor] or parent, "BOTTOMLEFT", 0, -5)
+                end
+            end
         end
+
+        return columnHeight, columnBase
     end
-end
-
-local HEADER_SPACE = 20
-local BAG_MARGIN = 5
-
-local BagMixin = {}
-function BagMixin:Init()
-    Base.SetBackdrop(self)
-    self:EnableMouse(true)
-    self.slots = {}
-
-    self.marginTop = HEADER_SPACE
-    self.marginBottom = BAG_MARGIN
-    self.marginSide = BAG_MARGIN
 end
 
 local FilterBagMixin = _G.CreateFromMixins(BagMixin)
@@ -209,14 +230,55 @@ function MainBagMixin:Update()
         wipe(bag.slots)
     end
 
-    for k, bagID in private.IterateBagIDs(self.bagType) do
+    for k, bagID in self:IterateBagIDs() do
         private.UpdateSlots(bagID)
     end
 
-    self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
+    self.dropTarget.count:SetText(self:GetNumFreeSlots())
     self:ContinueOnLoad(function()
-        SetupSlots(self)
+        self:UpdateSlots()
     end)
+end
+function MainBagMixin:UpdateSlots()
+    local columnHeight, columnBase = 0, "main"
+    columnHeight, columnBase = self:UpdateSize(columnHeight, columnBase)
+
+    local numSkipped = 0
+    for i, filter in Inventory:IndexedFilters() do
+        local bag = self.bags[filter.tag]
+        print("UpdateSlots", i, filter.tag, #bag.slots)
+        if #bag.slots <= 0 then
+            numSkipped = numSkipped + 1
+        else
+            columnHeight, columnBase = bag:UpdateSize(columnHeight, columnBase, numSkipped)
+            bag:Show()
+            numSkipped = 0
+        end
+    end
+end
+function MainBagMixin:GetNumFreeSlots()
+    local totalFree, freeSlots, bagFamily = 0
+    for k, bagID in self:IterateBagIDs() do
+        freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
+        if bagFamily == 0 then
+            totalFree = totalFree + freeSlots
+        end
+    end
+
+    return totalFree
+end
+function MainBagMixin:GetFirstFreeSlot()
+    for k, bagID in self:IterateBagIDs() do
+        local slotIndex = private.GetFirstFreeSlot(bagID)
+        if slotIndex then
+            return bagID, slotIndex
+        end
+    end
+
+    return false
+end
+function MainBagMixin:IterateBagIDs()
+    return ipairs(self.bagIDs)
 end
 function MainBagMixin:RecheckEvictableContinuables() -- from ContinuableContainer
     local areAllLoaded = true
@@ -257,7 +319,7 @@ function MainBagMixin:OnEvent(event, ...)
         end
     else
         local now = _G.debugprofilestop()
-        if now - self.time > 1000 then
+        if (now - self.time) > 1000 then
             self.time = now
             self:Update()
         end
@@ -293,7 +355,7 @@ function InventoryBagMixin:Init()
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
 end
 function InventoryBagMixin:OnEvent(event, ...)
-    if event == "UNIT_INVENTORY_CHANGED" then
+    if event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
         for tag, bag in next, self.bags do
             for _, slot in ipairs(bag.slots) do
                 slot:UpdateItemUpgradeIcon()
@@ -442,7 +504,7 @@ function private.CreateFilterBag(main, filter)
 
     local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     name:SetPoint("TOPLEFT")
-    name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
+    name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -bag.marginTop)
     name:SetText(filter.name)
     name:SetJustifyV("MIDDLE")
 
@@ -475,15 +537,18 @@ end
 local bagInfo = {
     main = {
         name = "RealUIInventory",
-        mixin = InventoryBagMixin
+        mixin = InventoryBagMixin,
+        bagIDs = {0, 1, 2, 3, 4}, -- BACKPACK_CONTAINER through NUM_BAG_SLOTS
     },
     bank = {
         name = "RealUIBank",
-        mixin = BankBagMixin
+        mixin = BankBagMixin,
+        bagIDs = {-1, 5, 6, 7, 8, 9, 10, 11}, -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
     },
     reagent = {
         name = "RealUIReagent",
-        mixin = ReagentBagMixin
+        mixin = ReagentBagMixin,
+        bagIDs = {-3} -- REAGENTBANK_CONTAINER
     },
 }
 local function CreateBag(bagType)
@@ -493,6 +558,7 @@ local function CreateBag(bagType)
     _G.Mixin(main, info.mixin)
     main:Init()
     main.bagType = bagType
+    main.bagIDs = info.bagIDs
     Inventory[bagType] = main
 
     if bagType == "reagent" then
@@ -575,7 +641,7 @@ local function CreateBag(bagType)
                 self:SetHitRectInsets(-5, -5, -5, -5)
 
                 bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
-                for k, bagID in private.IterateBagIDs(bagType) do
+                for k, bagID in main:IterateBagIDs() do
                     bagSlots[bagID]:Update()
                 end
             else
@@ -583,7 +649,7 @@ local function CreateBag(bagType)
                 self:SetHitRectInsets(-5, -50, -5, -5)
 
                 bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
-                for k, bagID in private.IterateBagIDs(bagType) do
+                for k, bagID in main:IterateBagIDs() do
                     bagSlots[bagID]:Update()
                 end
 
@@ -695,7 +761,7 @@ local function CreateBag(bagType)
     dropTarget:SetBackdropColor(1, 1, 1, 0.75)
     dropTarget:SetBackdropBorderColor(Color.frame:GetRGB())
     function dropTarget:FindSlot()
-        local bagID, slotIndex = private.GetFirstFreeSlot(bagType)
+        local bagID, slotIndex = main:GetFirstFreeSlot()
         if bagID then
             _G.PickupContainerItem(bagID, slotIndex)
         end
@@ -707,7 +773,7 @@ local function CreateBag(bagType)
     local count = dropTarget:CreateFontString(nil, "ARTWORK")
     count:SetFontObject("NumberFontNormal")
     count:SetPoint("BOTTOMRIGHT", 0, 2)
-    count:SetText(private.GetNumFreeSlots(main))
+    count:SetText(main:GetNumFreeSlots())
     dropTarget.count = count
 
     main.bags = {}
