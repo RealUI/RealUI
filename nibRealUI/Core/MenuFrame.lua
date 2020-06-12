@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals ipairs type unpack wipe tinsert next
+-- luacheck: globals ipairs type unpack wipe tinsert tremove
 
 -- Libs --
 local Aurora = _G.Aurora
@@ -184,11 +184,6 @@ function MenuItemMixin:GetButtonWidth()
 
     return width
 end
-function MenuItemMixin:OpenSubMenu()
-    local newLevel = self.menu.level + 1
-    MenuFrame:CloseAll(newLevel)
-    MenuFrame:Open(self, "TOPRIGHT", self.info.menuList, newLevel)
-end
 function MenuItemMixin:OnClick(mouseButton, ...)
     local menuItemInfo = self.info
     local isChecked = self:SetCheckedState(menuItemInfo.checked, true)
@@ -203,9 +198,9 @@ function MenuItemMixin:OnClick(mouseButton, ...)
 end
 function MenuItemMixin:OnEnter(mouseButton, ...)
     if self.arrow:IsShown() then
-        self:OpenSubMenu()
+        MenuFrame:Open(self, "TOPRIGHT", self.info.menuList, self.menu.level + 1)
     else
-        MenuFrame:CloseAll(self:GetParent().level + 1)
+        MenuFrame:CloseAll(self.menu.level + 1)
     end
 
     local menuItemInfo = self.info
@@ -323,32 +318,47 @@ end
 
 local openMenus = {}
 function MenuFrame:IsMenuOpen(button)
-    return not not openMenus[button]
+    for level = 1, #openMenus do
+        if openMenus[level].button == button then
+            return true
+        end
+    end
+
+    return false
 end
 function MenuFrame:Open(button, point, menuList, level)
-    if openMenus[button] then return end
+    level = level or 1
 
-    local menu = menuFrames:Acquire()
-    menu.level = level or 1
+    local menu = openMenus[level]
+    if menu then
+        menu:Clear()
+    else
+        menu = menuFrames:Acquire()
+    end
+
+    menu.level = level
+    menu.button = button
 
     menu:Update(menuList)
     menu:SetPoint(GetMenuAnchor(button, menu), button, point)
     menu:Show()
 
-    openMenus[button] = menu
+    if level > #openMenus then
+        tinsert(openMenus, menu)
+    end
 end
 
-function MenuFrame:Close(button, force)
-    local menu = openMenus[button]
+function MenuFrame:Close(level, force)
+    local menu = openMenus[level]
     if not menu:HasMouse() or force then
-        openMenus[button] = nil
+        tremove(openMenus, level)
         menuFrames:Release(menu)
     end
 end
 
-local function ContainsMouse()
-    for button, menu in next, openMenus do
-        if menu:HasMouse() then
+function MenuFrame:ContainsMouse()
+    for level = 1, #openMenus do
+        if openMenus[level]:HasMouse() then
             return true
         end
     end
@@ -358,15 +368,13 @@ function MenuFrame:CloseAll(level)
         level = 1
     end
 
-    for button, menu in next, openMenus do
-        if menu.level >= level then
-            MenuFrame:Close(button)
-        end
+    for l = #openMenus, level, -1 do
+        MenuFrame:Close(l)
     end
 end
 
 _G.hooksecurefunc("CloseDropDownMenus", function(level)
-    if not ContainsMouse() then
+    if not MenuFrame:ContainsMouse() then
         MenuFrame:CloseAll(level)
     end
 end)

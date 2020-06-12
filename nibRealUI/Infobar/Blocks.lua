@@ -680,7 +680,7 @@ function Infobar:CreateBlocks()
                 MenuFrame:Open(block, "TOPLEFT", menuList)
             end,
             OnLeave = function(block, ...)
-                MenuFrame:Close(block)
+                MenuFrame:CloseAll()
             end,
         })
     end
