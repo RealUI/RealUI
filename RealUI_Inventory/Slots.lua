@@ -132,7 +132,7 @@ end
 local reagentSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 reagentSlots.frameTemplate = "ReagentBankItemButtonGenericTemplate"
 reagentSlots.parent = "RealUIReagent"
-reagentSlots.mixin = BankSlotMixin
+reagentSlots.mixin = ReagentSlotMixin
 
 
 function private.UpdateSlots(bagID)
