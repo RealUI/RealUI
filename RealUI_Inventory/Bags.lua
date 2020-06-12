@@ -160,30 +160,199 @@ local function SetupSlots(main)
     end
 end
 
-local function UpdateBag(main)
-    if main:AreAnyLoadsOutstanding() or main.isUpdating then return end
-    main.isUpdating = true
+local HEADER_SPACE = 20
+local BAG_MARGIN = 5
 
-    wipe(main.slots)
-    for tag, bag in next, main.bags do
+local BagMixin = {}
+function BagMixin:Init()
+    Base.SetBackdrop(self)
+    self:EnableMouse(true)
+    self.slots = {}
+
+    self.marginTop = HEADER_SPACE
+    self.marginBottom = BAG_MARGIN
+    self.marginSide = BAG_MARGIN
+end
+
+local FilterBagMixin = _G.CreateFromMixins(BagMixin)
+function FilterBagMixin:Update()
+    -- body
+end
+
+local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
+local BasicEvents = {
+    "BAG_UPDATE",
+    "BAG_UPDATE_COOLDOWN",
+    "INVENTORY_SEARCH_UPDATE",
+    "ITEM_LOCK_CHANGED",
+}
+
+local MainBagMixin = _G.CreateFromMixins(_G.ContinuableContainer, BagMixin)
+function MainBagMixin:Init()
+    BagMixin.Init(self)
+    self.time = _G.GetTime()
+
+    RealUI.MakeFrameDraggable(self)
+    self:SetToplevel(true)
+    self.isPrimary = true
+
+    self:SetScript("OnEvent", self.OnEvent)
+    self:SetScript("OnShow", self.OnShow)
+    self:SetScript("OnHide", self.OnHide)
+end
+function MainBagMixin:Update()
+    if self:AreAnyLoadsOutstanding() or self.isUpdating then return end
+    self.isUpdating = true
+
+    wipe(self.slots)
+    for tag, bag in next, self.bags do
         bag:Hide()
         wipe(bag.slots)
     end
 
-    for k, bagID in private.IterateBagIDs(main.bagType) do
+    for k, bagID in private.IterateBagIDs(self.bagType) do
         private.UpdateSlots(bagID)
     end
 
-    main.dropTarget.count:SetText(private.GetNumFreeSlots(main))
-    main:ContinueOnLoad(function()
-        SetupSlots(main)
+    self.dropTarget.count:SetText(private.GetNumFreeSlots(self))
+    self:ContinueOnLoad(function()
+        SetupSlots(self)
     end)
-    main.isUpdating = false
+    self.isUpdating = false
 end
+function MainBagMixin:RecheckEvictableContinuables() -- from ContinuableContainer
+    local areAllLoaded = true
+    if self.evictableObjects then
+        for i, evictableObject in ipairs(self.evictableObjects) do
+            if not evictableObject:IsItemDataCached() then
+                areAllLoaded = false
+
+                self.numOutstanding = self.numOutstanding + 1
+
+                -- The version of this in FrameXML uses `continuable` instead of `evictableObject`
+                tinsert(self.continuables, evictableObject:ContinueWithCancelOnItemLoad(self.onContinuableLoadedCallback))
+            end
+        end
+    end
+    return areAllLoaded
+end
+function MainBagMixin:OnEvent(event, ...)
+    if event == "ITEM_LOCK_CHANGED" then
+        local bagID, slotIndex = ...
+        if bagID and slotIndex then
+            local slot = private.GetSlot(bagID, slotIndex)
+            if slot then
+                _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
+            end
+        end
+    elseif event == "BAG_UPDATE_COOLDOWN" then
+        for tag, bag in next, self.bags do
+            for _, slot in ipairs(bag.slots) do
+                slot:UpdateItemCooldown()
+            end
+        end
+    elseif event == "INVENTORY_SEARCH_UPDATE" then
+        for tag, bag in next, self.bags do
+            for _, slot in ipairs(bag.slots) do
+                slot:UpdateItemContext()
+            end
+        end
+    else
+        local now = _G.GetTime()
+        if now - self.time > 1 then
+            self.time = now
+            self:Update()
+        end
+    end
+end
+function MainBagMixin:OnShow()
+    _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
+    _G.FrameUtil.RegisterFrameForEvents(self, self.events)
+    self:Update()
+end
+function MainBagMixin:OnHide()
+    _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
+    _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
+    self:Cancel()
+
+    if self.showBags then
+        self.showBags:ToggleBags(false)
+    end
+end
+
+
+local InventoryBagMixin = _G.CreateFromMixins(MainBagMixin)
+function InventoryBagMixin:Init()
+    MainBagMixin.Init(self)
+    self.events = {
+        "UNIT_INVENTORY_CHANGED",
+        "PLAYER_SPECIALIZATION_CHANGED",
+        "BAG_NEW_ITEMS_UPDATED",
+    }
+
+    self:SetPoint("BOTTOMRIGHT", -100, 100)
+    self:RegisterEvent("QUEST_ACCEPTED")
+    self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+end
+function InventoryBagMixin:OnEvent(event, ...)
+    if event == "UNIT_INVENTORY_CHANGED" then
+        for tag, bag in next, self.bags do
+            for _, slot in ipairs(bag.slots) do
+                slot:UpdateItemUpgradeIcon()
+            end
+        end
+    else
+        MainBagMixin.OnEvent(self, event, ...)
+    end
+end
+
+local BankBagMixin = _G.CreateFromMixins(MainBagMixin)
+function BankBagMixin:Init()
+    MainBagMixin.Init(self)
+    self.events = {
+        "PLAYERBANKSLOTS_CHANGED",
+        "PLAYERBANKBAGSLOTS_CHANGED",
+    }
+
+    self:SetPoint("TOPLEFT", 100, -100)
+    self:RegisterEvent("BANKFRAME_OPENED")
+    self:RegisterEvent("BANKFRAME_CLOSED")
+    self:HookScript("OnDragStop", function()
+        Inventory.reagent:SetPoint("TOPLEFT", self)
+    end)
+end
+function BankBagMixin:OnEvent(event, ...)
+    if event == "BANKFRAME_OPENED" then
+        Inventory.showBank = true
+        private.Toggle(true)
+    elseif event == "BANKFRAME_CLOSED" then
+        Inventory.showBank = false
+        private.Toggle(false)
+    else
+        MainBagMixin.OnEvent(self, event, ...)
+    end
+end
+
+local ReagentBagMixin = _G.CreateFromMixins(MainBagMixin)
+function ReagentBagMixin:Init()
+    MainBagMixin.Init(self)
+    self.events = {
+        "PLAYERREAGENTBANKSLOTS_CHANGED",
+        "REAGENTBANK_PURCHASED",
+    }
+
+    self:SetPoint("TOPLEFT", 100, -100)
+    self:HookScript("OnDragStop", function()
+        local _, anchor = self:GetPoint()
+        Inventory.bank:ClearAllPoints()
+        Inventory.bank:SetPoint("TOPLEFT", anchor, self:GetLeft(), -self:GetTop())
+    end)
+end
+
 function private.UpdateBags()
-    UpdateBag(Inventory.main)
+    Inventory.main:Update()
     if Inventory.showBank then
-        UpdateBag(Inventory.bank)
+        Inventory.bank:Update()
     end
 end
 
@@ -211,36 +380,6 @@ function private.AddSlotToBag(slot, bagID)
     slot:SetParent(private.bagSlots[main.bagType][bagID])
 
     main:AddContinuable(slot.item)
-end
-
-local HEADER_SPACE = 20
-local BAG_MARGIN = 5
-local function SetupBag(bag)
-    Base.SetBackdrop(bag)
-    bag:EnableMouse(true)
-    bag.slots = {}
-
-    bag.marginTop = HEADER_SPACE
-    bag.marginBottom = BAG_MARGIN
-    bag.marginSide = BAG_MARGIN
-end
-
-local ContinuableContainer = _G.CreateFromMixins(_G.ContinuableContainer)
-function ContinuableContainer:RecheckEvictableContinuables()
-    local areAllLoaded = true
-    if self.evictableObjects then
-        for i, evictableObject in ipairs(self.evictableObjects) do
-            if not evictableObject:IsItemDataCached() then
-                areAllLoaded = false
-
-                self.numOutstanding = self.numOutstanding + 1
-
-                -- The version of this in FrameXML uses `continuable` instead of `evictableObject`
-                tinsert(self.continuables, evictableObject:ContinueWithCancelOnItemLoad(self.onContinuableLoadedCallback))
-            end
-        end
-    end
-    return areAllLoaded
 end
 
 local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
@@ -300,7 +439,8 @@ end
 function private.CreateFilterBag(main, filter)
     local tag = filter.tag
     local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
-    SetupBag(bag)
+    _G.Mixin(bag, FilterBagMixin)
+    bag:Init()
 
     local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     name:SetPoint("TOPLEFT")
@@ -317,7 +457,7 @@ function private.CreateFilterBag(main, filter)
                 _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
             end
 
-            UpdateBag(main)
+            main:Update()
         end)
 
         bag.resetNew:SetPoint("TOPLEFT", 5, -2)
@@ -334,172 +474,28 @@ function private.CreateFilterBag(main, filter)
     return bag
 end
 
-local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
-local BasicEvents = {
-    "BAG_UPDATE",
-    "BAG_UPDATE_COOLDOWN",
-    "INVENTORY_SEARCH_UPDATE",
-    "ITEM_LOCK_CHANGED",
-}
-
 local bagInfo = {
     main = {
         name = "RealUIInventory",
-        OnEvent = function(self, event, ...)
-            if event == "ITEM_LOCK_CHANGED" then
-                local bagID, slotIndex = ...
-                if bagID and slotIndex then
-                    local slot = private.GetSlot(bagID, slotIndex)
-                    if slot then
-                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                    end
-                end
-            elseif event == "BAG_UPDATE_COOLDOWN" then
-                for tag, bag in next, self.bags do
-                    for _, slot in ipairs(bag.slots) do
-                        slot:UpdateItemCooldown()
-                    end
-                end
-            elseif event == "UNIT_INVENTORY_CHANGED" then
-                for tag, bag in next, self.bags do
-                    for _, slot in ipairs(bag.slots) do
-                        slot:UpdateItemUpgradeIcon()
-                    end
-                end
-            elseif event == "INVENTORY_SEARCH_UPDATE" then
-                for tag, bag in next, self.bags do
-                    for _, slot in ipairs(bag.slots) do
-                        slot:UpdateItemContext()
-                    end
-                end
-            else
-                UpdateBag(self)
-            end
-        end,
-        OnShow = function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
-            UpdateBag(self)
-        end,
-        OnHide = function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
-            self.showBags:ToggleBags(false)
-            self:Cancel()
-        end,
-        Setup = function(self)
-            self:SetPoint("BOTTOMRIGHT", -100, 100)
-            self:RegisterEvent("QUEST_ACCEPTED")
-            self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-        end,
-        events = {
-            "UNIT_INVENTORY_CHANGED",
-            "PLAYER_SPECIALIZATION_CHANGED",
-            "BAG_NEW_ITEMS_UPDATED",
-        }
+        mixin = InventoryBagMixin
     },
     bank = {
         name = "RealUIBank",
-        OnEvent = function(self, event, ...)
-            if event == "BANKFRAME_OPENED" then
-                Inventory.showBank = true
-                private.Toggle(true)
-            elseif event == "BANKFRAME_CLOSED" then
-                Inventory.showBank = false
-                private.Toggle(false)
-            elseif event == "ITEM_LOCK_CHANGED" then
-                local bagID, slotIndex = ...
-                if bagID and slotIndex then
-                    local slot = private.GetSlot(bagID, slotIndex)
-                    if slot then
-                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                    end
-                end
-            else
-                UpdateBag(self)
-            end
-        end,
-        OnShow = function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
-            UpdateBag(self)
-        end,
-        OnHide = function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
-            self.showBags:ToggleBags(false)
-            self:Cancel()
-        end,
-        Setup = function(self)
-            self:SetPoint("TOPLEFT", 100, -100)
-            self:RegisterEvent("BANKFRAME_OPENED")
-            self:RegisterEvent("BANKFRAME_CLOSED")
-            self:HookScript("OnDragStop", function()
-                Inventory.reagent:SetPoint("TOPLEFT", self)
-            end)
-        end,
-        events = {
-            "PLAYERBANKSLOTS_CHANGED",
-            "PLAYERBANKBAGSLOTS_CHANGED",
-        }
+        mixin = BankBagMixin
     },
     reagent = {
         name = "RealUIReagent",
-        OnEvent = function(self, event, ...)
-            if event == "ITEM_LOCK_CHANGED" then
-                local bagID, slotIndex = ...
-                if bagID and slotIndex then
-                    local slot = private.GetSlot(bagID, slotIndex)
-                    if slot then
-                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                    end
-                end
-            else
-                UpdateBag(self)
-            end
-        end,
-        OnShow = function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
-            UpdateBag(self)
-        end,
-        OnHide = function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
-            self:Cancel()
-        end,
-        Setup = function(self)
-            self:SetPoint("TOPLEFT", 100, -100)
-            self:HookScript("OnDragStop", function()
-                local _, anchor = self:GetPoint()
-                Inventory.bank:ClearAllPoints()
-                Inventory.bank:SetPoint("TOPLEFT", anchor, self:GetLeft(), -self:GetTop())
-            end)
-        end,
-        events = {
-            "PLAYERREAGENTBANKSLOTS_CHANGED",
-            "REAGENTBANK_PURCHASED",
-        }
+        mixin = ReagentBagMixin
     },
 }
 local function CreateBag(bagType)
     local info = bagInfo[bagType]
 
     local main = _G.CreateFrame("Frame", info.name, _G.UIParent)
-    main:SetScript("OnEvent", info.OnEvent)
-    main:SetScript("OnShow", info.OnShow)
-    main:SetScript("OnHide", info.OnHide)
-
-    _G.Mixin(main, ContinuableContainer)
-    RealUI.MakeFrameDraggable(main)
-    main:SetToplevel(true)
-    main.isPrimary = true
+    _G.Mixin(main, info.mixin)
+    main:Init()
     main.bagType = bagType
-    main.events = info.events
-
     Inventory[bagType] = main
-    SetupBag(main)
-    info.Setup(main)
 
     if bagType == "reagent" then
         local deposit = CreateFeatureButton(main, _G.BAGSLOTTEXT, "download",
