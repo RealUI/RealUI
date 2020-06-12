@@ -201,8 +201,7 @@ function MainBagMixin:Init()
     self:SetScript("OnHide", self.OnHide)
 end
 function MainBagMixin:Update()
-    if self:AreAnyLoadsOutstanding() or self.isUpdating then return end
-    self.isUpdating = true
+    if self:AreAnyLoadsOutstanding() then return end
 
     wipe(self.slots)
     for tag, bag in next, self.bags do
@@ -218,7 +217,6 @@ function MainBagMixin:Update()
     self:ContinueOnLoad(function()
         SetupSlots(self)
     end)
-    self.isUpdating = false
 end
 function MainBagMixin:RecheckEvictableContinuables() -- from ContinuableContainer
     local areAllLoaded = true
@@ -258,8 +256,8 @@ function MainBagMixin:OnEvent(event, ...)
             end
         end
     else
-        local now = _G.GetTime()
-        if now - self.time > 1 then
+        local now = _G.debugprofilestop()
+        if now - self.time > 1000 then
             self.time = now
             self:Update()
         end
