@@ -161,7 +161,8 @@ local function SetupSlots(main)
 end
 
 local function UpdateBag(main)
-    if main:AreAnyLoadsOutstanding() then return end
+    if main:AreAnyLoadsOutstanding() or main.isUpdating then return end
+    main.isUpdating = true
 
     wipe(main.slots)
     for tag, bag in next, main.bags do
@@ -177,6 +178,7 @@ local function UpdateBag(main)
     main:ContinueOnLoad(function()
         SetupSlots(main)
     end)
+    main.isUpdating = false
 end
 function private.UpdateBags()
     UpdateBag(Inventory.main)
@@ -350,6 +352,24 @@ local bagInfo = {
                     local slot = private.GetSlot(bagID, slotIndex)
                     if slot then
                         _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
+                    end
+                end
+            elseif event == "BAG_UPDATE_COOLDOWN" then
+                for tag, bag in next, self.bags do
+                    for _, slot in ipairs(bag.slots) do
+                        slot:UpdateItemCooldown()
+                    end
+                end
+            elseif event == "UNIT_INVENTORY_CHANGED" then
+                for tag, bag in next, self.bags do
+                    for _, slot in ipairs(bag.slots) do
+                        slot:UpdateItemUpgradeIcon()
+                    end
+                end
+            elseif event == "INVENTORY_SEARCH_UPDATE" then
+                for tag, bag in next, self.bags do
+                    for _, slot in ipairs(bag.slots) do
+                        slot:UpdateItemContext()
                     end
                 end
             else

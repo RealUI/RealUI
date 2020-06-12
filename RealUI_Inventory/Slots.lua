@@ -39,7 +39,7 @@ function ItemSlotMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
     local item = self.item
 
-    local _, itemCount, _, _, readable, _, _, isFiltered = _G.GetContainerItemInfo(bagID, slotIndex)
+    local _, itemCount, _, _, readable = _G.GetContainerItemInfo(bagID, slotIndex)
     local isQuestItem, questId, isActive = _G.GetContainerItemQuestInfo(bagID, slotIndex)
 
     local icon = item:GetItemIcon()
@@ -71,24 +71,35 @@ function ItemSlotMixin:Update()
         questTexture:Hide()
     end
 
-    _G[self:GetName().."Cooldown"]:Hide()
-    _G.ContainerFrame_UpdateCooldown(bagID, self)
+    self:UpdateItemCooldown()
+    self:UpdateItemUpgradeIcon()
     self.readable = readable
 
     if self == _G.GameTooltip:GetOwner() then
         self:UpdateTooltip()
     end
 
+    self:UpdateItemContext()
+end
+function ItemSlotMixin:UpdateItemCooldown()
+    _G[self:GetName().."Cooldown"]:Hide()
+    _G.ContainerFrame_UpdateCooldown((self:GetBagAndSlot()), self)
+end
+function ItemSlotMixin:UpdateItemUpgradeIcon()
+    _G.ContainerFrameItemButton_UpdateItemUpgradeIcon(self)
+end
+function ItemSlotMixin:UpdateItemContext()
+    local _, _, _, _, _, _, _, isFiltered = _G.GetContainerItemInfo(self:GetBagAndSlot())
     self:UpdateItemContextMatching()
     self:SetMatchesSearch(not isFiltered)
+end
+function ItemSlotMixin:GetBagType()
+    return private.GetBagTypeForBagID(self:GetBagAndSlot())
 end
 function ItemSlotMixin:OnClick(button)
     if button == "RightButton" and _G.IsAltKeyDown() and _G.IsControlKeyDown() then
         private.menu:Open(self)
     end
-end
-function ItemSlotMixin:GetBagType()
-    return private.GetBagTypeForBagID(self:GetBagAndSlot())
 end
 
 
