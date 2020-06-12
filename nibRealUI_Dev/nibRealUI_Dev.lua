@@ -251,12 +251,12 @@ local auroraAddons = {
 }
 
 local realuiAddons = {
-    "cargBags_Nivaya",
     "EasyMail",
     "nibRealUI",
     "nibRealUI_Dev",
     "nibRealUI_Config",
     "RealUI_Bugs",
+    "RealUI_Inventory",
     "RealUI_Skins",
     "RealUI_Tooltips",
 }
