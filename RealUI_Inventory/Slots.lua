@@ -145,6 +145,7 @@ reagentSlots.mixin = ReagentSlotMixin
 
 
 function private.UpdateSlots(bagID)
+    Inventory:debug("private.UpdateSlots", bagID)
     for slotIndex = 1, _G.GetContainerNumSlots(bagID) do
         local slot = private.GetSlot(bagID, slotIndex)
         if slot then
@@ -158,6 +159,7 @@ function private.UpdateSlots(bagID)
 end
 
 function private.GetSlot(bagID, slotIndex)
+    --Inventory:debug("private.GetSlot", bagID, slotIndex)
     local slots = private.GetSlotTypeForBag(bagID)
 
     for slot in slots:EnumerateActive() do
@@ -363,6 +365,7 @@ end
 
 private.bagSlots = {}
 function private.CreateBagSlots(main)
+    Inventory:debug("private.CreateBagSlots", main.bagType)
     local bagSlots, bagType = private.bagSlots, main.bagType
     bagSlots[bagType] = {}
 

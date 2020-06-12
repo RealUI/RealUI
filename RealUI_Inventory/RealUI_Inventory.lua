@@ -20,9 +20,11 @@ local defaults = {
 }
 
 function private.Update()
+    Inventory:debug("private.Update")
     private.UpdateBags()
 end
 function private.Toggle(show)
+    Inventory:debug("private.Toggle", show)
     local main = Inventory.main
     if show == nil then
         show = not main:IsShown()

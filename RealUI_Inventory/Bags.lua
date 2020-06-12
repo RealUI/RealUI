@@ -410,6 +410,7 @@ function ReagentBagMixin:Init()
 end
 
 function private.UpdateBags()
+    Inventory:debug("private.UpdateBags")
     Inventory.main:Update()
     if Inventory.showBank then
         Inventory.bank:Update()
@@ -417,6 +418,7 @@ function private.UpdateBags()
 end
 
 function private.AddSlotToBag(slot, bagID)
+    --Inventory:debug("private.AddSlotToBag", slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
@@ -497,6 +499,7 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     return button
 end
 function private.CreateFilterBag(main, filter)
+    Inventory:debug("private.CreateFilterBag", main.bagType, filter.tag)
     local tag = filter.tag
     local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
     _G.Mixin(bag, FilterBagMixin)
@@ -784,6 +787,7 @@ end
 
 
 function private.CreateBags()
+    Inventory:debug("private.CreateBags")
     CreateBag("main")
     CreateBag("bank")
     CreateBag("reagent")
