@@ -246,7 +246,6 @@ function MainBagMixin:UpdateSlots()
     local numSkipped = 0
     for i, filter in Inventory:IndexedFilters() do
         local bag = self.bags[filter.tag]
-        print("UpdateSlots", i, filter.tag, #bag.slots)
         if #bag.slots <= 0 then
             numSkipped = numSkipped + 1
         else
@@ -403,9 +402,7 @@ function ReagentBagMixin:Init()
 
     self:SetPoint("TOPLEFT", 100, -100)
     self:HookScript("OnDragStop", function()
-        local _, anchor = self:GetPoint()
-        Inventory.bank:ClearAllPoints()
-        Inventory.bank:SetPoint("TOPLEFT", anchor, self:GetLeft(), -self:GetTop())
+        Inventory.bank:SetPoint("TOPLEFT", self)
     end)
 end
 
