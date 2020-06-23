@@ -1,4 +1,4 @@
-## [Unrelesed] ##
+## [2.2.0] - 2020-06-23 ##
 ### Modified AddOns ###
 
   * cargBags_Nivaya has been replaced with RealUI_Inventory
@@ -558,6 +558,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.2.0]: https://github.com/RealUI/RealUI/compare/2.1.10...2.2.0
 [2.1.10]: https://github.com/RealUI/RealUI/compare/2.1.9...2.1.10
 [2.1.9]: https://github.com/RealUI/RealUI/compare/2.1.8...2.1.9
 [2.1.8]: https://github.com/RealUI/RealUI/compare/2.1.7...2.1.8
