@@ -3024,7 +3024,6 @@ do -- UI Tweaks
     local InterfaceTweaks = RealUI:GetModule("InterfaceTweaks")
     local tweaks = InterfaceTweaks:GetTweaks()
     for tag, info in next, tweaks do
-        print("tag", tag)
         optArgs.uiTweaks.args[tag] = {
             name = L[info.name],
             desc = L[info.name.."Desc"],
