@@ -6,14 +6,6 @@ RealUI
 RealUI is a minimalistic UI designed to be functional, yet also efficient and elegant.
 
 
-Addon Update Exclusions
------------------------
-The following addons have been modified to suit RealUI and should not be updated:
-
-  - cargBags_Nivaya
-
-
-
 Installation
 ------------
 

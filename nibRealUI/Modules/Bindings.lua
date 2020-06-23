@@ -11,7 +11,9 @@ local Base = Aurora.Base
 local Skin = Aurora.Skin
 
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
-fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
+local icons = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")
+local arrows = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "DejaVu Sans")
+local normal = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Roboto")
 
 local keySize = 24
 local gapSmall = RealUI.Round(keySize * 0.1)
@@ -495,12 +497,37 @@ local keys = {
 }
 local modKeys = {"ALT","CTRL","SHIFT","ALT-CTRL","ALT-SHIFT","CTRL-SHIFT","ALT-CTRL-SHIFT"}
 local qwerty = {
-    "ESCAPE|Esc", "F1","F2","F3","F4", "F5","F6","F7","F8", "F9","F10","F11","F12", "PRINTSCREEN|Prt","SCROLLLOCK|SL","PAUSE|Pau",
-    "`","1","2","3","4","5","6","7","8","9","0","-","=","BACKSPACE|long-arrow-left", "INSERT|Ins", "HOME|HM", "PAGEUP|UP", "NUMLOCK|NL", "NUMPADDIVIDE|/", "NUMPADMULTIPLY|*", "NUMPADMINUS|-",
-    "TAB","Q","W","E","R","T","Y","U","I","O","P","[","]","\\","DELETE|Del","END","PAGEDOWN|DN","NUMPAD7|7","NUMPAD8|8","NUMPAD9|9","NUMPADPLUS|+",
-    _G.CAPSLOCK_KEY_TEXT,"A","S","D","F","G","H","J","K","L",";","'","ENTER","NUMPAD4|4","NUMPAD5|5","NUMPAD6|6",
-    _G.SHIFT_KEY_TEXT,"Z","X","C","V","B","N","M",",",".","/",_G.SHIFT_KEY_TEXT,"UP|arrow-up","NUMPAD1|1","NUMPAD2|2","NUMPAD3|3","ENTER|↵",
-    _G.CTRL_KEY_TEXT,"OS",_G.ALT_KEY_TEXT,"SPACE",_G.ALT_KEY_TEXT,"OS","App",_G.CTRL_KEY_TEXT,"LEFT|arrow-left","DOWN|arrow-down","RIGHT|arrow-right","NUMPAD0|0","NUMPADDECIMAL|.",
+    "ESCAPE|Esc", "F1","F2","F3","F4", "F5","F6","F7","F8", "F9","F10","F11","F12", "PRINTSCREEN|print","SCROLLLOCK|⇳","PAUSE|pause",
+    "`","1","2","3","4","5","6","7","8","9","0","-","=","BACKSPACE|←", "INSERT|terminal", "HOME|⇤", "PAGEUP|↑", "NUMLOCK|⇫", "NUMPADDIVIDE|/", "NUMPADMULTIPLY|*", "NUMPADMINUS|-",
+    "TAB|↹","Q","W","E","R","T","Y","U","I","O","P","[","]","\\","DELETE|→","END|⇥","PAGEDOWN|↓","NUMPAD7|7","NUMPAD8|8","NUMPAD9|9","NUMPADPLUS|+",
+    "CAPSLOCK_KEY_TEXT|⇪","A","S","D","F","G","H","J","K","L",";","'","ENTER|↵","NUMPAD4|4","NUMPAD5|5","NUMPAD6|6",
+    "hidden|SHIFT","Z","X","C","V","B","N","M",",",".","/","hidden|SHIFT","UP|▴","NUMPAD1|1","NUMPAD2|2","NUMPAD3|3","ENTER|↲",
+    "hidden|CTRL","hidden|OS","hidden|ALT","SPACE","hidden|ALT","hidden|OS","hidden|App","hidden|CTRL","LEFT|◂","DOWN|▾","RIGHT|▸","NUMPAD0|0","NUMPADDECIMAL|.",
+}
+
+local keyIcons = {
+    PRINTSCREEN = 12,
+    SCROLLLOCK = 16,
+    PAUSE = 12,
+
+    BACKSPACE = 20,
+    INSERT = 12,
+    HOME = 20,
+    PAGEUP = 20,
+    NUMLOCK = 18,
+
+    TAB = 16,
+    DELETE = 20,
+    END = 20,
+    PAGEDOWN = 20,
+
+    CAPSLOCK_KEY_TEXT = 20,
+    UP = 16,
+    ENTER = 20,
+
+    LEFT = 16,
+    DOWN = 16,
+    RIGHT = 16,
 }
 
 -- GetBindingKey("BONUSACTIONBUTTON1")
@@ -533,28 +560,33 @@ local function CreateKeyButton(index, info)
     button:SetScript("OnEnter", KeyOnEnter)
     button:SetScript("OnLeave", KeyOnLeave)
 
+    local font, size = normal, 12
     local binding, fontStr = bindings[index]
-    if binding.text == "OS" then
-        if _G.IsWindowsClient() then
-            binding.text = "windows"
-        elseif _G.IsMacClient() then
-            binding.text = "apple"
+    if keyIcons[binding.key] then
+        if fa[binding.text] then
+            font = icons
+            binding.text = fa[binding.text]
         else
-            binding.text = "linux"
+            font = arrows
         end
+
+        size = keyIcons[binding.key]
     end
 
-    if fa[binding.text] then
-        fontStr = button:CreateFontString(nil, "ARTWORK")
-        fontStr:SetFont(fa.path, 12)
-        binding.text = fa[binding.text]
-    else
-        fontStr = button:CreateFontString(nil, "ARTWORK", "SystemFont_Shadow_Med1")
-    end
-
+    fontStr = button:CreateFontString(nil, "ARTWORK")
+    fontStr:SetFont(font, size)
+    fontStr:SetShadowColor(0, 0, 0)
+    fontStr:SetShadowOffset(1, -1)
     fontStr:SetAllPoints()
-    button:SetFontString(fontStr)
-    button:SetText(binding.text)
+    button.text = fontStr
+
+    _G.C_Timer.After(0, function()
+        fontStr:SetText(binding.text)
+    end)
+
+    if binding.key == "hidden" then
+        button:Hide()
+    end
 
     button.index = index
     bindingsFrame[index] = button
@@ -599,12 +631,21 @@ local function CreateKeys()
     UpdateFrame()
 end
 
+local function GetKeyText(key)
+    local bindText = _G.GetBindingText(key)
+    if bindText == key and _G[key] then
+        bindText = _G[key]
+    end
+
+    return bindText
+end
+
 local actionFormat = "|cFFFFFFFF%s:|r %s"
 local function UpdateBindings()
     wipe(bindings)
     for index = 1, #keys do
         local key, text = ("|"):split(qwerty[index])
-        local bindText = _G.GetBindingText(key)
+        local bindText = GetKeyText(key)
 
         local binding = {
             key = key,
@@ -625,7 +666,7 @@ local function UpdateBindings()
             local modKey = modKeys[i].."-"..key
             action = _G.GetBindingAction(modKey)
             if (action and action ~= "") then
-                bindText = _G.GetBindingText(modKey)
+                bindText = GetKeyText(modKey)
                 binding[modKeys[i]] = actionFormat:format(bindText, _G["BINDING_NAME_"..action])
                 hasAction =  true
             end
@@ -642,7 +683,7 @@ end
 
 
 RealUI:GetModule("InterfaceTweaks"):AddTweak("bindings", {
-    name = "Bindings Reminder",
+    name = "BindingsReminder",
     addon = "Blizzard_BindingUI",
     onLoad = function( ... )
         UpdateBindings()

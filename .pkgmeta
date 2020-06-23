@@ -8,7 +8,6 @@ ignore:
     - nibRealUI_Dev
     - RealUI_Chat
     - RealUI_CombatText
-    - RealUI_Inventory
 
 externals:
     nibRealUI/Libs/AceAddon-3.0:
@@ -102,9 +101,9 @@ manual-changelog:
     markup-type: markdown
 
 move-folders:
-    nibRealUI/cargBags_Nivaya: cargBags_Nivaya
     nibRealUI/nibRealUI: nibRealUI
     nibRealUI/nibRealUI_Config: nibRealUI_Config
     nibRealUI/RealUI_Bugs: RealUI_Bugs
+    nibRealUI/RealUI_Inventory: RealUI_Inventory
     nibRealUI/RealUI_Skins: RealUI_Skins
     nibRealUI/RealUI_Tooltips: RealUI_Tooltips

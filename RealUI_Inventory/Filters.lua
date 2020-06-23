@@ -49,7 +49,11 @@ local menu do
     function menu:Open(slot)
         if slot.item then
             self.item = slot.item
-            MenuFrame:Open(slot, "BOTTOMRIGHT", menuList)
+            if slot:GetBagType() == "main" then
+                MenuFrame:Open(slot, "TOPLEFT", menuList)
+            else
+                MenuFrame:Open(slot, "BOTTOMLEFT", menuList)
+            end
         end
     end
     private.menu = menu

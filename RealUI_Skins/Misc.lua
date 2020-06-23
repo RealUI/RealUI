@@ -26,8 +26,9 @@ LSM:Register("font", "pixel_numbers", [[Interface\AddOns\RealUI_Skins\Media\pixe
 LSM:Register("font", "pixel_cooldown", [[Interface\AddOns\RealUI_Skins\Media\pixel_cooldown.ttf]], LOCALE_MASK)
 LSM:Register("font", "pixel_crits", [[Interface\AddOns\RealUI_Skins\Media\pixel_crits.ttf]])
 
--- Icon Font
+-- Misc Fonts
 LSM:Register("font", "Font Awesome", [[Interface\AddOns\RealUI_Skins\Media\fontawesome-webfont.ttf]], LOCALE_MASK)
+LSM:Register("font", "DejaVu Sans", [[Interface\AddOns\RealUI_Skins\Media\DejaVuSans.ttf]], LOCALE_MASK)
 
 LSM.DefaultMedia.font = "Roboto"
 private.fontNames = {

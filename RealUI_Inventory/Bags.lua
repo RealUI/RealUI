@@ -14,178 +14,408 @@ local Color = Aurora.Color
 
 -- RealUI --
 local RealUI = _G.RealUI
-
 local Inventory = private.Inventory
 
-local InventoryType = _G.Enum.InventoryType
-local invTypes = {
-    [InventoryType.IndexHeadType] = 1,
-    [InventoryType.IndexNeckType] = 2,
-    [InventoryType.IndexShoulderType] = 3,
-    [InventoryType.IndexCloakType] = 4,
-    [InventoryType.IndexChestType] = 5,
-    [InventoryType.IndexRobeType] = 5, -- Holiday chest
-    [InventoryType.IndexBodyType] = 6, -- Shirt
-    [InventoryType.IndexTabardType] = 7,
-    [InventoryType.IndexWristType] = 8,
-    [InventoryType.IndexHandType] = 9,
-    [InventoryType.IndexWaistType] = 10,
-    [InventoryType.IndexLegsType] = 11,
-    [InventoryType.IndexFeetType] = 12,
-    [InventoryType.IndexFingerType] = 13,
-    [InventoryType.IndexTrinketType] = 14,
+local BagMixin do
+    local HEADER_SPACE = 20
+    local BAG_MARGIN = 5
 
-    [InventoryType.Index2HweaponType] = 15,
-    [InventoryType.IndexRangedType] = 16, -- Bows
-    [InventoryType.IndexRangedrightType] = 16, -- Wands, Guns, and Crossbows
+    local SLOT_SPACING = 3
+    local SLOTS_PER_ROW = 6
 
-    [InventoryType.IndexWeaponType] = 17, -- One-Hand
-    [InventoryType.IndexWeaponmainhandType] = 18,
-    [InventoryType.IndexWeaponoffhandType] = 19,
-    [InventoryType.IndexShieldType] = 20,
+    local InventoryType = _G.Enum.InventoryType
+    local invTypes = {
+        [InventoryType.IndexHeadType] = 1,
+        [InventoryType.IndexNeckType] = 2,
+        [InventoryType.IndexShoulderType] = 3,
+        [InventoryType.IndexCloakType] = 4,
+        [InventoryType.IndexChestType] = 5,
+        [InventoryType.IndexRobeType] = 5, -- Holiday chest
+        [InventoryType.IndexBodyType] = 6, -- Shirt
+        [InventoryType.IndexTabardType] = 7,
+        [InventoryType.IndexWristType] = 8,
+        [InventoryType.IndexHandType] = 9,
+        [InventoryType.IndexWaistType] = 10,
+        [InventoryType.IndexLegsType] = 11,
+        [InventoryType.IndexFeetType] = 12,
+        [InventoryType.IndexFingerType] = 13,
+        [InventoryType.IndexTrinketType] = 14,
 
-    [InventoryType.IndexHoldableType] = 21,
-    [InventoryType.IndexRelicType] = 21,
+        [InventoryType.Index2HweaponType] = 15,
+        [InventoryType.IndexRangedType] = 16, -- Bows
+        [InventoryType.IndexRangedrightType] = 16, -- Wands, Guns, and Crossbows
 
-    [InventoryType.IndexAmmoType] = 22,
-    [InventoryType.IndexThrownType] = 22,
+        [InventoryType.IndexWeaponType] = 17, -- One-Hand
+        [InventoryType.IndexWeaponmainhandType] = 18,
+        [InventoryType.IndexWeaponoffhandType] = 19,
+        [InventoryType.IndexShieldType] = 20,
 
-    [InventoryType.IndexBagType] = 25,
-    [InventoryType.IndexQuiverType] = 25,
+        [InventoryType.IndexHoldableType] = 21,
+        [InventoryType.IndexRelicType] = 21,
 
-    [InventoryType.IndexNonEquipType] = 30,
-}
-local function SortSlots(a, b)
-    local qualityA = a.item:GetItemQuality()
-    local qualityB = b.item:GetItemQuality()
-    if qualityA ~= qualityB then
-        if qualityA and qualityB then
-            return qualityA > qualityB
-        elseif (qualityA == nil) or (qualityB == nil) then
-            return not not qualityA
-        else
-            return false
+        [InventoryType.IndexAmmoType] = 22,
+        [InventoryType.IndexThrownType] = 22,
+
+        [InventoryType.IndexBagType] = 25,
+        [InventoryType.IndexQuiverType] = 25,
+
+        [InventoryType.IndexNonEquipType] = 30,
+    }
+    local function SortSlots(a, b)
+        local qualityA = a.item:GetItemQuality()
+        local qualityB = b.item:GetItemQuality()
+        if qualityA ~= qualityB then
+            if qualityA and qualityB then
+                return qualityA > qualityB
+            elseif (qualityA == nil) or (qualityB == nil) then
+                return not not qualityA
+            else
+                return false
+            end
+        end
+
+
+        local invTypeA = a.item:GetInventoryType()
+        local invTypeB = b.item:GetInventoryType()
+        if invTypes[invTypeA] ~= invTypes[invTypeB] then
+            return invTypes[invTypeA] < invTypes[invTypeB]
+        end
+
+
+        local ilvlA = a.item:GetCurrentItemLevel()
+        local ilvlB = b.item:GetCurrentItemLevel()
+        if ilvlA ~= ilvlB then
+            return ilvlA > ilvlB
+        end
+
+
+        local nameA = a.item:GetItemName()
+        local nameB = b.item:GetItemName()
+        if nameA ~= nameB then
+            return nameA < nameB
+        end
+
+
+        local stackA = _G.C_Item.GetStackCount(a)
+        local stackB = _G.C_Item.GetStackCount(b)
+        if stackA ~= stackB then
+            return stackA > stackB
         end
     end
 
+    BagMixin = {}
+    function BagMixin:Init()
+        Base.SetBackdrop(self)
+        self:EnableMouse(true)
+        self.slots = {}
 
-    local invTypeA = a.item:GetInventoryType()
-    local invTypeB = b.item:GetInventoryType()
-    if invTypes[invTypeA] ~= invTypes[invTypeB] then
-        return invTypes[invTypeA] < invTypes[invTypeB]
+        self.marginTop = HEADER_SPACE
+        self.marginBottom = BAG_MARGIN
+        self.marginSide = BAG_MARGIN
     end
+    function BagMixin:ArrangeSlots()
+        Inventory:debug("private.ArrangeSlots", self.bagType or self.filter.tag)
+        local numSlots, numRows = 0, 0
+        local previousButton, cornerButton
+        local slotSize = 0
+        for _, slot in ipairs(self.slots) do
+            numSlots = numSlots + 1
+            slot:ClearAllPoints() -- The template has anchors
+            if not previousButton then
+                slot:SetPoint("TOPLEFT", self, self.marginSide, -self.marginTop)
+                previousButton = slot
+                cornerButton = slot
 
-
-    local ilvlA = a.item:GetCurrentItemLevel()
-    local ilvlB = b.item:GetCurrentItemLevel()
-    if ilvlA ~= ilvlB then
-        return ilvlA > ilvlB
-    end
-
-
-    local nameA = a.item:GetItemName()
-    local nameB = b.item:GetItemName()
-    if nameA ~= nameB then
-        return nameA < nameB
-    end
-
-
-    local stackA = _G.C_Item.GetStackCount(a)
-    local stackB = _G.C_Item.GetStackCount(b)
-    if stackA ~= stackB then
-        return stackA > stackB
-    end
-end
-local function UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
-    sort(bag.slots, SortSlots)
-
-    if bag.isPrimary then
-        tinsert(bag.slots, bag.dropTarget)
-    end
-
-    local slotWidth, slotHeight = private.ArrangeSlots(bag)
-    bag:SetSize(slotWidth + (bag.marginSide * 2), slotHeight + (bag.marginTop + bag.marginBottom))
-
-    local _, screenHeight = RealUI.GetInterfaceSize()
-    local maxHeight = screenHeight * Inventory.db.global.maxHeight
-
-    local height = bag:GetHeight()
-    if bag.isPrimary then
-        columnHeight = columnHeight + height + 5
-    else
-        local parent = bag.parent
-        bag:ClearAllPoints()
-
-        if columnHeight + height >= maxHeight then
-            if parent.bagType == "main" then
-                bag:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
+                slotSize = slot:GetWidth()
+                numRows = numRows + 1
             else
-                bag:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
+                if numSlots % SLOTS_PER_ROW == 1 then -- new row
+                    slot:SetPoint("TOPLEFT", cornerButton, "BOTTOMLEFT", 0, -SLOT_SPACING)
+                    cornerButton = slot
+
+                    numRows = numRows + 1
+                else
+                    slot:SetPoint("TOPLEFT", previousButton, "TOPRIGHT", SLOT_SPACING, 0)
+                end
+
+                previousButton = slot
             end
-            columnBase = bag.filter.tag
-            columnHeight = height + 5
-        else
+        end
+
+        local gapOffsetH = SLOT_SPACING * (SLOTS_PER_ROW - 1)
+        local gapOffsetV = SLOT_SPACING * (numRows - 1)
+        return (slotSize * SLOTS_PER_ROW) + gapOffsetH, (slotSize * numRows) + gapOffsetV
+    end
+    function BagMixin:UpdateSize(columnHeight, columnBase, numSkipped)
+        sort(self.slots, SortSlots)
+
+        if self.isPrimary then
+            tinsert(self.slots, self.dropTarget)
+        end
+
+        local slotWidth, slotHeight = self:ArrangeSlots()
+        self:SetSize(slotWidth + (self.marginSide * 2), slotHeight + (self.marginTop + self.marginBottom))
+
+        local _, screenHeight = RealUI.GetInterfaceSize()
+        local maxHeight = screenHeight * Inventory.db.global.maxHeight
+
+        local height = self:GetHeight()
+        if self.isPrimary then
             columnHeight = columnHeight + height + 5
+        else
+            local parent = self.parent
+            self:ClearAllPoints()
 
-            local anchor = "main"
-            local index = bag.filter:GetIndex()
-            if index > 1 then
-                anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
-            end
-
-            if parent.bagType == "main" then
-                bag:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
+            if columnHeight + height >= maxHeight then
+                if parent.bagType == "main" then
+                    self:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
+                else
+                    self:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
+                end
+                columnBase = self.filter.tag
+                columnHeight = height + 5
             else
-                bag:SetPoint("TOPLEFT", parent.bags[anchor] or parent, "BOTTOMLEFT", 0, -5)
+                columnHeight = columnHeight + height + 5
+
+                local anchor = "main"
+                local index = self.filter:GetIndex()
+                if index > 1 then
+                    anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
+                end
+
+                if parent.bagType == "main" then
+                    self:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
+                else
+                    self:SetPoint("TOPLEFT", parent.bags[anchor] or parent, "BOTTOMLEFT", 0, -5)
+                end
             end
         end
+
+        return columnHeight, columnBase
+    end
+end
+
+local FilterBagMixin = _G.CreateFromMixins(BagMixin)
+function FilterBagMixin:Update()
+    -- body
+end
+
+local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
+local BasicEvents = {
+    "BAG_UPDATE",
+    "BAG_UPDATE_COOLDOWN",
+    "INVENTORY_SEARCH_UPDATE",
+    "ITEM_LOCK_CHANGED",
+}
+
+local MainBagMixin = _G.CreateFromMixins(_G.ContinuableContainer, BagMixin)
+function MainBagMixin:Init()
+    BagMixin.Init(self)
+    self.time = _G.GetTime()
+
+    RealUI.MakeFrameDraggable(self)
+    self:SetToplevel(true)
+    self.isPrimary = true
+
+    self:SetScript("OnEvent", self.OnEvent)
+    self:SetScript("OnShow", self.OnShow)
+    self:SetScript("OnHide", self.OnHide)
+end
+function MainBagMixin:Update()
+    if self:AreAnyLoadsOutstanding() then return end
+
+    wipe(self.slots)
+    for tag, bag in next, self.bags do
+        bag:Hide()
+        wipe(bag.slots)
     end
 
-    return columnHeight, columnBase
+    for k, bagID in self:IterateBagIDs() do
+        private.UpdateSlots(bagID)
+    end
+
+    self.dropTarget.count:SetText(self:GetNumFreeSlots())
+    self:ContinueOnLoad(function()
+        self:UpdateSlots()
+    end)
 end
-local function SetupSlots(main)
+function MainBagMixin:UpdateSlots()
     local columnHeight, columnBase = 0, "main"
-    columnHeight, columnBase = UpdateBagSize(main, columnHeight, columnBase)
+    columnHeight, columnBase = self:UpdateSize(columnHeight, columnBase)
 
     local numSkipped = 0
     for i, filter in Inventory:IndexedFilters() do
-        local bag = main.bags[filter.tag]
+        local bag = self.bags[filter.tag]
         if #bag.slots <= 0 then
             numSkipped = numSkipped + 1
         else
-            columnHeight, columnBase = UpdateBagSize(bag, columnHeight, columnBase, numSkipped)
+            columnHeight, columnBase = bag:UpdateSize(columnHeight, columnBase, numSkipped)
             bag:Show()
             numSkipped = 0
         end
     end
 end
-
-local function UpdateBag(main)
-    if main:AreAnyLoadsOutstanding() then return end
-
-    wipe(main.slots)
-    for tag, bag in next, main.bags do
-        bag:Hide()
-        wipe(bag.slots)
+function MainBagMixin:GetNumFreeSlots()
+    local totalFree, freeSlots, bagFamily = 0
+    for k, bagID in self:IterateBagIDs() do
+        freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
+        if bagFamily == 0 then
+            totalFree = totalFree + freeSlots
+        end
     end
 
-    for k, bagID in private.IterateBagIDs(main.bagType) do
-        private.UpdateSlots(bagID)
+    return totalFree
+end
+function MainBagMixin:GetFirstFreeSlot()
+    for k, bagID in self:IterateBagIDs() do
+        local slotIndex = private.GetFirstFreeSlot(bagID)
+        if slotIndex then
+            return bagID, slotIndex
+        end
     end
 
-    main.dropTarget.count:SetText(private.GetNumFreeSlots(main))
-    main:ContinueOnLoad(function()
-        SetupSlots(main)
+    return false
+end
+function MainBagMixin:IterateBagIDs()
+    return ipairs(self.bagIDs)
+end
+function MainBagMixin:RecheckEvictableContinuables() -- from ContinuableContainer
+    local areAllLoaded = true
+    if self.evictableObjects then
+        for i, evictableObject in ipairs(self.evictableObjects) do
+            if not evictableObject:IsItemDataCached() then
+                areAllLoaded = false
+
+                self.numOutstanding = self.numOutstanding + 1
+
+                -- The version of this in FrameXML uses `continuable` instead of `evictableObject`
+                tinsert(self.continuables, evictableObject:ContinueWithCancelOnItemLoad(self.onContinuableLoadedCallback))
+            end
+        end
+    end
+    return areAllLoaded
+end
+function MainBagMixin:OnEvent(event, ...)
+    if event == "ITEM_LOCK_CHANGED" then
+        local bagID, slotIndex = ...
+        if bagID and slotIndex then
+            local slot = private.GetSlot(bagID, slotIndex)
+            if slot then
+                _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
+            end
+        end
+    elseif event == "BAG_UPDATE_COOLDOWN" then
+        for tag, bag in next, self.bags do
+            for _, slot in ipairs(bag.slots) do
+                slot:UpdateItemCooldown()
+            end
+        end
+    elseif event == "INVENTORY_SEARCH_UPDATE" then
+        for tag, bag in next, self.bags do
+            for _, slot in ipairs(bag.slots) do
+                slot:UpdateItemContext()
+            end
+        end
+    else
+        local now = _G.debugprofilestop()
+        if (now - self.time) > 1000 then
+            self.time = now
+            self:Update()
+        end
+    end
+end
+function MainBagMixin:OnShow()
+    _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
+    _G.FrameUtil.RegisterFrameForEvents(self, self.events)
+    self:Update()
+end
+function MainBagMixin:OnHide()
+    _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
+    _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
+    self:Cancel()
+
+    if self.showBags then
+        self.showBags:ToggleBags(false)
+    end
+end
+
+
+local InventoryBagMixin = _G.CreateFromMixins(MainBagMixin)
+function InventoryBagMixin:Init()
+    MainBagMixin.Init(self)
+    self.events = {
+        "UNIT_INVENTORY_CHANGED",
+        "PLAYER_SPECIALIZATION_CHANGED",
+        "BAG_NEW_ITEMS_UPDATED",
+    }
+
+    self:SetPoint("BOTTOMRIGHT", -100, 100)
+    self:RegisterEvent("QUEST_ACCEPTED")
+    self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+end
+function InventoryBagMixin:OnEvent(event, ...)
+    if event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+        for tag, bag in next, self.bags do
+            for _, slot in ipairs(bag.slots) do
+                slot:UpdateItemUpgradeIcon()
+            end
+        end
+    else
+        MainBagMixin.OnEvent(self, event, ...)
+    end
+end
+
+local BankBagMixin = _G.CreateFromMixins(MainBagMixin)
+function BankBagMixin:Init()
+    MainBagMixin.Init(self)
+    self.events = {
+        "PLAYERBANKSLOTS_CHANGED",
+        "PLAYERBANKBAGSLOTS_CHANGED",
+    }
+
+    self:SetPoint("TOPLEFT", 100, -100)
+    self:RegisterEvent("BANKFRAME_OPENED")
+    self:RegisterEvent("BANKFRAME_CLOSED")
+    self:HookScript("OnDragStop", function()
+        Inventory.reagent:SetPoint("TOPLEFT", self)
     end)
 end
+function BankBagMixin:OnEvent(event, ...)
+    if event == "BANKFRAME_OPENED" then
+        Inventory.showBank = true
+        private.Toggle(true)
+    elseif event == "BANKFRAME_CLOSED" then
+        Inventory.showBank = false
+        private.Toggle(false)
+    else
+        MainBagMixin.OnEvent(self, event, ...)
+    end
+end
+
+local ReagentBagMixin = _G.CreateFromMixins(MainBagMixin)
+function ReagentBagMixin:Init()
+    MainBagMixin.Init(self)
+    self.events = {
+        "PLAYERREAGENTBANKSLOTS_CHANGED",
+        "REAGENTBANK_PURCHASED",
+    }
+
+    self:SetPoint("TOPLEFT", 100, -100)
+    self:HookScript("OnDragStop", function()
+        Inventory.bank:SetPoint("TOPLEFT", self)
+    end)
+end
+
 function private.UpdateBags()
-    UpdateBag(Inventory.main)
+    Inventory:debug("private.UpdateBags")
+    Inventory.main:Update()
     if Inventory.showBank then
-        UpdateBag(Inventory.bank)
+        Inventory.bank:Update()
     end
 end
 
 function private.AddSlotToBag(slot, bagID)
+    --Inventory:debug("private.AddSlotToBag", slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
@@ -209,36 +439,6 @@ function private.AddSlotToBag(slot, bagID)
     slot:SetParent(private.bagSlots[main.bagType][bagID])
 
     main:AddContinuable(slot.item)
-end
-
-local HEADER_SPACE = 20
-local BAG_MARGIN = 5
-local function SetupBag(bag)
-    Base.SetBackdrop(bag)
-    bag:EnableMouse(true)
-    bag.slots = {}
-
-    bag.marginTop = HEADER_SPACE
-    bag.marginBottom = BAG_MARGIN
-    bag.marginSide = BAG_MARGIN
-end
-
-local ContinuableContainer = _G.CreateFromMixins(_G.ContinuableContainer)
-function ContinuableContainer:RecheckEvictableContinuables()
-    local areAllLoaded = true
-    if self.evictableObjects then
-        for i, evictableObject in ipairs(self.evictableObjects) do
-            if not evictableObject:IsItemDataCached() then
-                areAllLoaded = false
-
-                self.numOutstanding = self.numOutstanding + 1
-
-                -- The version of this in FrameXML uses `continuable` instead of `evictableObject`
-                tinsert(self.continuables, evictableObject:ContinueWithCancelOnItemLoad(self.onContinuableLoadedCallback))
-            end
-        end
-    end
-    return areAllLoaded
 end
 
 local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
@@ -296,13 +496,15 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
     return button
 end
 function private.CreateFilterBag(main, filter)
+    Inventory:debug("private.CreateFilterBag", main.bagType, filter.tag)
     local tag = filter.tag
     local bag = _G.CreateFrame("Frame", "$parent_"..tag, main)
-    SetupBag(bag)
+    _G.Mixin(bag, FilterBagMixin)
+    bag:Init()
 
     local name = bag:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     name:SetPoint("TOPLEFT")
-    name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -HEADER_SPACE)
+    name:SetPoint("BOTTOMRIGHT", bag, "TOPRIGHT", 0, -bag.marginTop)
     name:SetText(filter.name)
     name:SetJustifyV("MIDDLE")
 
@@ -315,7 +517,7 @@ function private.CreateFilterBag(main, filter)
                 _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
             end
 
-            UpdateBag(main)
+            main:Update()
         end)
 
         bag.resetNew:SetPoint("TOPLEFT", 5, -2)
@@ -332,154 +534,32 @@ function private.CreateFilterBag(main, filter)
     return bag
 end
 
-local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
-local BasicEvents = {
-    "BAG_UPDATE",
-    "BAG_UPDATE_COOLDOWN",
-    "INVENTORY_SEARCH_UPDATE",
-    "ITEM_LOCK_CHANGED",
-}
-
 local bagInfo = {
     main = {
         name = "RealUIInventory",
-        OnEvent = function(self, event, ...)
-            if event == "ITEM_LOCK_CHANGED" then
-                local bagID, slotIndex = ...
-                if bagID and slotIndex then
-                    local slot = private.GetSlot(bagID, slotIndex)
-                    if slot then
-                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                    end
-                end
-            else
-                UpdateBag(self)
-            end
-        end,
-        OnShow = function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
-            UpdateBag(self)
-        end,
-        OnHide = function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
-            self.showBags:ToggleBags(false)
-            self:Cancel()
-        end,
-        Setup = function(self)
-            self:SetPoint("BOTTOMRIGHT", -100, 100)
-            self:RegisterEvent("QUEST_ACCEPTED")
-            self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-        end,
-        events = {
-            "UNIT_INVENTORY_CHANGED",
-            "PLAYER_SPECIALIZATION_CHANGED",
-            "BAG_NEW_ITEMS_UPDATED",
-        }
+        mixin = InventoryBagMixin,
+        bagIDs = {0, 1, 2, 3, 4}, -- BACKPACK_CONTAINER through NUM_BAG_SLOTS
     },
     bank = {
         name = "RealUIBank",
-        OnEvent = function(self, event, ...)
-            if event == "BANKFRAME_OPENED" then
-                Inventory.showBank = true
-                private.Toggle(true)
-            elseif event == "BANKFRAME_CLOSED" then
-                Inventory.showBank = false
-                private.Toggle(false)
-            elseif event == "ITEM_LOCK_CHANGED" then
-                local bagID, slotIndex = ...
-                if bagID and slotIndex then
-                    local slot = private.GetSlot(bagID, slotIndex)
-                    if slot then
-                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                    end
-                end
-            else
-                UpdateBag(self)
-            end
-        end,
-        OnShow = function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
-            UpdateBag(self)
-        end,
-        OnHide = function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
-            self.showBags:ToggleBags(false)
-            self:Cancel()
-        end,
-        Setup = function(self)
-            self:SetPoint("TOPLEFT", 100, -100)
-            self:RegisterEvent("BANKFRAME_OPENED")
-            self:RegisterEvent("BANKFRAME_CLOSED")
-            self:HookScript("OnDragStop", function()
-                Inventory.reagent:SetPoint("TOPLEFT", self)
-            end)
-        end,
-        events = {
-            "PLAYERBANKSLOTS_CHANGED",
-            "PLAYERBANKBAGSLOTS_CHANGED",
-        }
+        mixin = BankBagMixin,
+        bagIDs = {-1, 5, 6, 7, 8, 9, 10, 11}, -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
     },
     reagent = {
         name = "RealUIReagent",
-        OnEvent = function(self, event, ...)
-            if event == "ITEM_LOCK_CHANGED" then
-                local bagID, slotIndex = ...
-                if bagID and slotIndex then
-                    local slot = private.GetSlot(bagID, slotIndex)
-                    if slot then
-                        _G.SetItemButtonDesaturated(slot, slot.item:IsItemLocked())
-                    end
-                end
-            else
-                UpdateBag(self)
-            end
-        end,
-        OnShow = function(self)
-            _G.FrameUtil.RegisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.RegisterFrameForEvents(self, self.events)
-            UpdateBag(self)
-        end,
-        OnHide = function(self)
-            _G.FrameUtil.UnregisterFrameForEvents(self, BasicEvents)
-            _G.FrameUtil.UnregisterFrameForEvents(self, self.events)
-            self:Cancel()
-        end,
-        Setup = function(self)
-            self:SetPoint("TOPLEFT", 100, -100)
-            self:HookScript("OnDragStop", function()
-                local _, anchor = self:GetPoint()
-                Inventory.bank:ClearAllPoints()
-                Inventory.bank:SetPoint("TOPLEFT", anchor, self:GetLeft(), -self:GetTop())
-            end)
-        end,
-        events = {
-            "PLAYERREAGENTBANKSLOTS_CHANGED",
-            "REAGENTBANK_PURCHASED",
-        }
+        mixin = ReagentBagMixin,
+        bagIDs = {-3} -- REAGENTBANK_CONTAINER
     },
 }
 local function CreateBag(bagType)
     local info = bagInfo[bagType]
 
     local main = _G.CreateFrame("Frame", info.name, _G.UIParent)
-    main:SetScript("OnEvent", info.OnEvent)
-    main:SetScript("OnShow", info.OnShow)
-    main:SetScript("OnHide", info.OnHide)
-
-    _G.Mixin(main, ContinuableContainer)
-    RealUI.MakeFrameDraggable(main)
-    main:SetToplevel(true)
-    main.isPrimary = true
+    _G.Mixin(main, info.mixin)
+    main:Init()
     main.bagType = bagType
-    main.events = info.events
-
+    main.bagIDs = info.bagIDs
     Inventory[bagType] = main
-    SetupBag(main)
-    info.Setup(main)
 
     if bagType == "reagent" then
         local deposit = CreateFeatureButton(main, _G.BAGSLOTTEXT, "download",
@@ -561,7 +641,7 @@ local function CreateBag(bagType)
                 self:SetHitRectInsets(-5, -5, -5, -5)
 
                 bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
-                for k, bagID in private.IterateBagIDs(bagType) do
+                for k, bagID in main:IterateBagIDs() do
                     bagSlots[bagID]:Update()
                 end
             else
@@ -569,7 +649,7 @@ local function CreateBag(bagType)
                 self:SetHitRectInsets(-5, -50, -5, -5)
 
                 bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
-                for k, bagID in private.IterateBagIDs(bagType) do
+                for k, bagID in main:IterateBagIDs() do
                     bagSlots[bagID]:Update()
                 end
 
@@ -681,7 +761,7 @@ local function CreateBag(bagType)
     dropTarget:SetBackdropColor(1, 1, 1, 0.75)
     dropTarget:SetBackdropBorderColor(Color.frame:GetRGB())
     function dropTarget:FindSlot()
-        local bagID, slotIndex = private.GetFirstFreeSlot(bagType)
+        local bagID, slotIndex = main:GetFirstFreeSlot()
         if bagID then
             _G.PickupContainerItem(bagID, slotIndex)
         end
@@ -693,7 +773,7 @@ local function CreateBag(bagType)
     local count = dropTarget:CreateFontString(nil, "ARTWORK")
     count:SetFontObject("NumberFontNormal")
     count:SetPoint("BOTTOMRIGHT", 0, 2)
-    count:SetText(private.GetNumFreeSlots(main))
+    count:SetText(main:GetNumFreeSlots())
     dropTarget.count = count
 
     main.bags = {}
@@ -704,6 +784,7 @@ end
 
 
 function private.CreateBags()
+    Inventory:debug("private.CreateBags")
     CreateBag("main")
     CreateBag("bank")
     CreateBag("reagent")

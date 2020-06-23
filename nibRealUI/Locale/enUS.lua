@@ -2,7 +2,15 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
-local L = {}
+
+local message = [[Missing locale entry for "%s"]]
+local L = setmetatable({}, {
+    __index = function(self, key) -- requesting totally unknown entries: fire off a nonbreaking error and return key
+        rawset(self, key, key)      -- only need to see the warning once, really
+        geterrorhandler()(message:format(tostring(key)))
+        return key
+    end
+})
 
 RealUI.locale = _G.GAME_LOCALE or _G.GetLocale()
 
@@ -37,6 +45,8 @@ L["Appearance_PixelDesc"] = "Sets the scale of the UI so that an in-game pixel m
 L["Appearance_StripeOpacity"] = "Stripe Opacity"
 L["Appearance_UIScale"] = "Custom UI Scale"
 L["Appearance_UIScaleDesc"] = "Set a custom UI scale (%.2f - %.2f). Note: UI elements may lose their sharp appearance."
+L["BindingsReminder"] = "Bindings Reminder"
+L["BindingsReminderDesc"] = "Shows a visual reminder of what actions are bound to each key."
 L["CastBars"] = "Cast Bars"
 L["CastBars_Bottom"] = "Bottom"
 L["CastBars_BottomDesc"] = "Name and duration are displayed below the cast bars."
