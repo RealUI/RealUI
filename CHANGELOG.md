@@ -1,4 +1,24 @@
-﻿## [2.1.10] - 2020-06-01 ##
+## [Unrelesed] ##
+### Modified AddOns ###
+
+  * cargBags_Nivaya has been replaced with RealUI_Inventory
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+
+### Changed ###
+
+  * Options frame is now more fault tolerant
+  * Minor tweaks to the bindings reminder
+
+### Fixed ###
+
+  * Error when opening the options frame
+  * Color picker was not usable
+
+
+
+## [2.1.10] - 2020-06-01 ##
 ### Modified AddOns ###
 
   * nibRealUI
