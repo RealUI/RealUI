@@ -99,10 +99,10 @@ for specIndex = 1, _G.GetNumSpecializationsForClassID(classID) do
     end
 end
 
--- Disable FreebTip
-local enabled = _G.GetAddOnEnableState(RealUI.charInfo.name, "RealUI_Tooltips")
+-- Disable cargBags
+local enabled = _G.GetAddOnEnableState(RealUI.charInfo.name, "RealUI_Inventory")
 if enabled > 0 then
-    _G.DisableAddOn("FreebTip", true)
+    _G.DisableAddOn("cargBags_Nivaya", true)
 end
 
 RealUI.globals = {
