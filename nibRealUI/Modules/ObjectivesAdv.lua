@@ -81,7 +81,6 @@ function ObjectivesAdv:ADDON_LOADED()
         self:UnregisterEvent("ADDON_LOADED")
 
         _G.hooksecurefunc(_G.ObjectiveTrackerFrame, "SetPoint", UpdatePosition)
-        CombatFader:RegisterModForFade(MODNAME, "profile", "hidden", "combatfade")
         CombatFader:RegisterFrameForFade(MODNAME, _G.ObjectiveTrackerFrame)
 
         self:RefreshMod()
@@ -141,6 +140,8 @@ function ObjectivesAdv:OnInitialize()
 end
 
 function ObjectivesAdv:OnEnable()
+    CombatFader:RegisterModForFade(MODNAME, "profile", "hidden", "combatfade")
+
     if not _G.ObjectiveTrackerFrame then
         self:RegisterEvent("ADDON_LOADED")
     else
