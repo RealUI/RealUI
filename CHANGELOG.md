@@ -1,3 +1,19 @@
+## [2.2.1] - 2020-07-27 ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_Skins
+  * RealUI_Inventory
+
+### Fixed ###
+
+  * Error with bindings reminder
+  * Assigning an item to another bag didn't work
+  * Potential error with Objectives Adv. when opening config
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
 ## [2.2.0] - 2020-06-23 ##
 ### Modified AddOns ###
 
@@ -252,6 +268,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.2.1]: https://github.com/RealUI/RealUI/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/RealUI/RealUI/compare/2.1.10...2.2.0
 [2.1.10]: https://github.com/RealUI/RealUI/compare/2.1.9...2.1.10
 [2.1.9]: https://github.com/RealUI/RealUI/compare/2.1.8...2.1.9

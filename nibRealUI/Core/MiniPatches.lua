@@ -5,9 +5,10 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
-local debug = RealUI.GetDebug("MiniPatch")
+--local debug = RealUI.GetDebug("MiniPatch")
 
 RealUI.minipatches = {
+    --[[
     [1] = function()
         debug("patch 1")
         for profileName, profile in next, _G.nibRealUIDB.profiles do
@@ -19,7 +20,6 @@ RealUI.minipatches = {
             end
         end
     end,
-    --[[
     [0] = function()
         debug("patch 0")
         for profileName, profile in next, _G.nibRealUIDB.profiles do
