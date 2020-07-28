@@ -657,7 +657,7 @@ local function UpdateBindings()
         local hasAction = false
         local action = _G.GetBindingAction(key)
         if action and action ~= "" then
-            binding.primary = actionFormat:format(bindText, _G["BINDING_NAME_"..action])
+            binding.primary = actionFormat:format(bindText, _G.GetBindingName(action))
             hasAction =  true
         else
             binding.primary = actionFormat:format(bindText, _G.NOT_BOUND)
@@ -667,7 +667,7 @@ local function UpdateBindings()
             action = _G.GetBindingAction(modKey)
             if (action and action ~= "") then
                 bindText = GetKeyText(modKey)
-                binding[modKeys[i]] = actionFormat:format(bindText, _G["BINDING_NAME_"..action])
+                binding[modKeys[i]] = actionFormat:format(bindText, _G.GetBindingName(action))
                 hasAction =  true
             end
         end

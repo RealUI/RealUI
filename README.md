@@ -1,5 +1,5 @@
 RealUI
-[![Build Status](https://travis-ci.org/RealUI/RealUI.svg?branch=master)](https://travis-ci.org/RealUI/RealUI)
+[![Build Status](https://github.com/RealUI/RealUI/workflows/CI/badge.svg)](https://github.com/RealUI/RealUI/actions?query=workflow%3ACI)
 [![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)](https://discord.gg/0fn0FPyQGIXpuoKO)
 ======
 

@@ -896,10 +896,10 @@ function Infobar:GetBlockInfo(dataobjectname)
     end
 
     if dataObj.type == "RealUI" then
-        self:debug("RealUI object")
+        self:debug("RealUI object", name)
         return db.blocks.realui[name]
     elseif dataObj.type == "data source" then
-        self:debug("Other object")
+        self:debug("Other object", name)
         for k, v in LDB:pairs(dataObj) do
             self:debug(k, v)
         end

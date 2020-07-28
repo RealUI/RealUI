@@ -19,9 +19,9 @@ local menu do
 
     local function SetToFilter(filterButton, arg1, arg2, isChecked)
         if isChecked then
-            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
-        else
             Inventory.db.global.assignedFilters[menu.item:GetItemID()] = arg1
+        else
+            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
         end
         private.Update()
     end
