@@ -110,6 +110,7 @@ function CastBars:SetBarTicks(tickInfo)
             xOfs = _G.floor((size.x * db.player.scale) * ((i - 1) / numTicks))
         end
         local tick = self.tickPool:Acquire()
+        tick:SetSize(2, size.y * db.player.scale)
         tick:SetPoint("TOPRIGHT", -xOfs, 0)
         tick:Show()
     end
@@ -255,7 +256,6 @@ end
 function CastBars:CreateCastBars(unitFrame, unit, unitData)
     self:debug("CreateCastBars", unit)
     local info, unitDB = unitData.power or unitData.health, db[unit]
-    local size = castbarSizes[unit]
 
     unitFrame.Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
     local Castbar = unitFrame.Castbar
@@ -279,7 +279,6 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
         Castbar.tickPool = _G.CreateObjectPool(function(pool)
             local tick = unitFrame:CreateAngle("Texture", nil, Castbar)
             tick:SetColorTexture(1, 1, 1, 0.5)
-            tick:SetSize(2, size.y * unitDB.scale)
             return tick
         end, function(pool, tick)
             tick:ClearAllPoints()
