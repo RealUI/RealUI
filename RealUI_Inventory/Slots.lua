@@ -178,15 +178,6 @@ function private.GetSlot(bagID, slotIndex)
     if slot:IsValid() then
         slot:SetID(slotIndex)
         slot.item = _G.Item:CreateFromItemLocation(slot)
-        function slot.item:IsItemInPlayersControl()
-            local itemLocation = self:GetItemLocation()
-            if itemLocation and itemLocation:HasAnyLocation() then
-                return itemLocation and _G.C_Item.DoesItemExist(itemLocation)
-            else
-                _G.print("IsItemInPlayersControl", itemLocation)
-                _G.print("BagAndSlot", itemLocation and itemLocation:GetBagAndSlot())
-            end
-        end
         return slot
     else
         slots:Release(slot)
