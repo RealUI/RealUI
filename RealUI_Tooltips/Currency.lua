@@ -75,13 +75,20 @@ local function AddTooltipInfo(tooltip, currencyID, includePlayer)
     end
 end
 
+local function GetCurrencyIDByIndex(index)
+    if RealUI.isPatch then
+        return tonumber(_G.C_CurrencyInfo.GetCurrencyListLink(index):match("currency:(%d+)"))
+    else
+        return Currency:GetCurrencyID(_G.GetCurrencyListInfo(index))
+    end
+end
+
 local function SetUpHooks()
     private.AddHook("SetCurrencyByID", function(self, currencyID, quantity)
         AddTooltipInfo(self, currencyID, not _G.MerchantMoneyInset:IsMouseOver())
     end)
     private.AddHook("SetCurrencyToken", function(self, index)
-        local name = _G.GetCurrencyListInfo(index)
-        AddTooltipInfo(self, Currency:GetCurrencyID(name), not _G.TokenFrame:IsMouseOver())
+        AddTooltipInfo(self, GetCurrencyIDByIndex(index), not _G.TokenFrame:IsMouseOver())
     end)
     private.AddHook("SetCurrencyTokenByID", function(self, currencyID)
         AddTooltipInfo(self, currencyID, not _G.TokenFrame:IsMouseOver())
