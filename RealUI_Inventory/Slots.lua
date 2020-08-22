@@ -49,12 +49,16 @@ function ItemSlotMixin:Update()
     _G.SetItemButtonCount(self, itemCount)
     _G.SetItemButtonDesaturated(self, item:IsItemLocked())
 
-    if Inventory.main.bags.equipment.filter:DoesMatchSlot(self) then
+    if self.assignedTag == "equipment" then
         self.Count:SetText(self.item:GetCurrentItemLevel())
         if quality and quality > RealUI.Enum.ItemQuality.Poor then
             self.Count:SetTextColor(_G.BAG_ITEM_QUALITY_COLORS[quality]:GetRGB())
         end
         self.Count:Show()
+    end
+
+    if self.assignedTag ~= "junk" then
+        self.JunkIcon:Hide()
     end
 
     local questTexture = self.IconQuestTexture
@@ -150,8 +154,8 @@ function private.UpdateSlots(bagID)
         local slot = private.GetSlot(bagID, slotIndex)
         if slot then
             slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
-                slot:Update()
                 private.AddSlotToBag(slot, bagID)
+                slot:Update()
             end)
             slot:Show()
         end

@@ -24,6 +24,7 @@ local menu do
             Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
         end
         private.Update()
+        MenuFrame:Close(1, true)
     end
     function menu:AddFilter(filter)
         local tag = filter.tag

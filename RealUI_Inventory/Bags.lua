@@ -433,6 +433,7 @@ function private.AddSlotToBag(slot, bagID)
         end
     end
 
+    slot.assignedTag = assignedTag or "main"
     local bag = main.bags[assignedTag] or main
 
     tinsert(bag.slots, slot)
@@ -524,7 +525,13 @@ function private.CreateFilterBag(main, filter)
     end
 
     if tag == "junk" then
-        bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
+        bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk,
+        function(self)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+            _G.GameTooltip_SetTitle(_G.GameTooltip, _G.GetMoneyString(bag.profit, true), nil, true)
+
+            _G.GameTooltip:Show()
+        end)
         bag.sellJunk:Hide()
         bag.sellJunk:SetPoint("TOPLEFT", 5, -2)
     end

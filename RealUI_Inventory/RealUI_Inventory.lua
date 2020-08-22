@@ -22,6 +22,7 @@ local defaults = {
 function private.Update()
     Inventory:debug("private.Update")
     private.UpdateBags()
+    private.CalculateJunkProfit(_G.MerchantFrame:IsShown())
 end
 function private.Toggle(show)
     Inventory:debug("private.Toggle", show)
@@ -44,42 +45,48 @@ function private.GetBagTypeForBagID(bagID)
 end
 
 function private.SellJunk()
-    local bag, profit = Inventory.main.bags.junk, 0
+    local bag = Inventory.main.bags.junk
 
     for _, slot in ipairs(bag.slots) do
-        local bagID, slotIndex = slot:GetBagAndSlot()
         if slot.sellPrice then
-            local _, itemCount = _G.GetContainerItemInfo(bagID, slotIndex)
-            profit = profit + (slot.sellPrice * itemCount)
-
             slot.sellPrice = nil
             slot.JunkIcon:Hide()
-            _G.UseContainerItem(bagID, slotIndex)
+            _G.UseContainerItem(slot:GetBagAndSlot())
         end
     end
 
-    local money = _G.GetMoneyString(profit, true)
+    local money = _G.GetMoneyString(bag.profit, true)
     _G.print(_G.AMOUNT_RECEIVED_COLON, money)
+end
+function private.CalculateJunkProfit(isAtMerchant)
+    local bag = Inventory.main.bags.junk
+
+    local profit = 0
+    for _, slot in ipairs(bag.slots) do
+        local _, _, _, _, _, _, _, _, _, _, sellPrice = _G.GetItemInfo(slot.item:GetItemLink())
+        if sellPrice > 0 then
+            local _, itemCount = _G.GetContainerItemInfo(slot:GetBagAndSlot())
+            profit = profit + (sellPrice * itemCount)
+
+            slot.JunkIcon:SetShown(isAtMerchant)
+            slot.sellPrice = sellPrice
+        end
+    end
+    bag.profit = profit
 end
 local function MERCHANT_SHOW(event, ...)
     local bag = Inventory.main.bags.junk
+    if not bag:IsShown() then return end
+    if #bag.slots == 0 then
+        -- items aren't updated yet, wait a frame.
+        return _G.C_Timer.After(0, MERCHANT_SHOW)
+    end
 
+    private.CalculateJunkProfit(true)
     if Inventory.db.global.sellJunk then
-        if #bag.slots == 0 then
-            -- items aren't updated yet, wait a frame.
-            return _G.C_Timer.After(0, private.SellJunk)
-        end
         private.SellJunk()
     else
         bag.sellJunk:Show()
-        bag.profit = 0
-        for _, slot in ipairs(bag.slots) do
-            local _, _, _, _, _, _, _, _, _, _, sellPrice = _G.GetItemInfo(slot.item:GetItemID())
-            if sellPrice > 0 then
-                slot.JunkIcon:Show()
-                slot.sellPrice = sellPrice
-            end
-        end
     end
 end
 local function MERCHANT_CLOSED(event, ...)
