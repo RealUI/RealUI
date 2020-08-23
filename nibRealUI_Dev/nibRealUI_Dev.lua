@@ -7,6 +7,10 @@ local ADDON_NAME, ns = ...
 local debug = _G.RealUI.GetDebug("Dev")
 _G.RealUI.isDev = true
 
+if _G.IsTestBuild() then
+    _G.DisableAddOn("Blizzard_Deprecated")
+end
+
 ns.debug = debug
 ns.commands = {}
 

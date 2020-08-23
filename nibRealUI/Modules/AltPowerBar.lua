@@ -19,6 +19,9 @@ local UpdateInterval = 0
         EK, Hillsbrad: Quest > Peacebloom vs. Scourge -- uses vehicle
         ToT, Lei Shen: Uses the bar on boss units
 
+    ALT_POWER_TYPE_VERTICAL:
+        ?????
+
     ALT_POWER_TYPE_CIRCULAR:
         BWD, Atramedes:
 
@@ -30,7 +33,7 @@ local UpdateInterval = 0
 ]]
 -- Events
 function AltPowerBar:PowerUpdate()
-    if _G.UnitAlternatePowerInfo("player") then
+    if _G.GetUnitPowerBarInfo("player") then
         self.bar:Show()
     else
         self.bar:Hide()
