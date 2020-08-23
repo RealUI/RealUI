@@ -16,6 +16,9 @@ local defaults = {
         filters = {},
         assignedFilters = {},
         customFilters = {}
+    },
+    char = {
+        junk = {},
     }
 }
 
@@ -51,6 +54,9 @@ function private.SellJunk()
         if slot.sellPrice then
             slot.sellPrice = nil
             slot.JunkIcon:Hide()
+
+            local bagID, slotIndex = slot:GetBagAndSlot()
+            Inventory.db.char.junk[bagID][slotIndex] = nil
             _G.UseContainerItem(slot:GetBagAndSlot())
         end
     end

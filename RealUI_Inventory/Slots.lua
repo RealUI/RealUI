@@ -27,6 +27,11 @@ local function SlotReset(pool, slot)
         slot.cancel()
     end
     slot.item = nil
+
+    local bagID, slotIndex = slot:GetBagAndSlot()
+    if Inventory.db.char.junk[bagID] then
+        Inventory.db.char.junk[bagID][slotIndex] = nil
+    end
     slot:Clear()
 end
 

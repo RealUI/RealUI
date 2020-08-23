@@ -419,6 +419,10 @@ function private.AddSlotToBag(slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
+    local _, slotIndex = slot:GetBagAndSlot()
+    if Inventory.db.char.junk[bagID] and Inventory.db.char.junk[bagID][slotIndex] then
+        assignedTag = "junk"
+    end
     if not Inventory:GetFilter(assignedTag) then
         for i, filter in Inventory:IndexedFilters() do
             if filter:DoesMatchSlot(slot) then

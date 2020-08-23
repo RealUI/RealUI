@@ -19,9 +19,27 @@ local menu do
 
     local function SetToFilter(filterButton, arg1, arg2, isChecked)
         if isChecked then
-            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = arg1
+            if arg1 == "junk" then
+                local bagID, slotIndex = menu.slot:GetBagAndSlot()
+                if not Inventory.db.char.junk[bagID] then
+                    Inventory.db.char.junk[bagID] = {}
+                end
+
+                Inventory.db.char.junk[bagID][slotIndex] = true
+            else
+                Inventory.db.global.assignedFilters[menu.slot.item:GetItemID()] = arg1
+            end
         else
-            Inventory.db.global.assignedFilters[menu.item:GetItemID()] = nil
+            if arg1 == "junk" then
+                local bagID, slotIndex = menu.slot:GetBagAndSlot()
+                if not Inventory.db.char.junk[bagID] then
+                    Inventory.db.char.junk[bagID] = {}
+                end
+
+                Inventory.db.char.junk[bagID][slotIndex] = nil
+            else
+                Inventory.db.global.assignedFilters[menu.slot.item:GetItemID()] = nil
+            end
         end
         private.Update()
         MenuFrame:Close(1, true)
@@ -33,7 +51,16 @@ local menu do
             func = SetToFilter,
             arg1 = tag,
             checked = function(...)
-                return Inventory.db.global.assignedFilters[self.item:GetItemID()] == tag
+                if tag == "junk" then
+                    local bagID, slotIndex = menu.slot:GetBagAndSlot()
+                    if Inventory.db.char.junk[bagID] then
+                        return Inventory.db.char.junk[bagID][slotIndex] or false
+                    end
+
+                    return false
+                else
+                    return Inventory.db.global.assignedFilters[self.slot.item:GetItemID()] == tag
+                end
             end
         })
     end
@@ -49,7 +76,7 @@ local menu do
     end
     function menu:Open(slot)
         if slot.item then
-            self.item = slot.item
+            self.slot = slot
             if slot:GetBagType() == "main" then
                 MenuFrame:Open(slot, "TOPLEFT", menuList)
             else
