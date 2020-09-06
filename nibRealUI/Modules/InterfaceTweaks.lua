@@ -143,8 +143,7 @@ do
         return sqrt((dx * dx) + (dy * dy))
     end
     local function UpdateTrail()
-        local scale = _G.UIParent:GetEffectiveScale()
-        local startX, startY = _G.GetCursorPosition()
+        local startX, startY = _G.GetScaledCursorPosition()
 
         for i = 1, numLines do
             local info = lines[i]
@@ -154,8 +153,8 @@ do
                 info.line:Hide()
             else
                 info.line:Show()
-                info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX / scale, startY / scale)
-                info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX / scale, endY / scale)
+                info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX, startY)
+                info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX, endY)
             end
 
             info.x, info.y = startX, startY

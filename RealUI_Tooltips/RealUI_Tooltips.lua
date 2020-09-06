@@ -318,13 +318,10 @@ local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIPare
 tooltipAnchor:SetSize(50, 50)
 local pollingRate, tooltipTicker = 0.05
 local function UpdateAnchor()
-    local scale = _G.UIParent:GetEffectiveScale()
-    local cursorX, cursorY = _G.GetCursorPosition()
+    local x, y = _G.GetScaledCursorPosition()
     local uiX, uiY = RealUI.GetInterfaceSize()
 
     local point = Tooltips.db.global.position.point
-    local x, y = cursorX / scale, cursorY / scale
-    print("cursorX", cursorX, x)
     if point:find("RIGHT") then
         x = x - uiX
     elseif not point:find("LEFT") then
