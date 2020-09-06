@@ -1581,7 +1581,11 @@ function Infobar:CreateBlocks()
                 return _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                return C_AzeriteItem.HasActiveAzeriteItem() and not C_AzeriteItem.IsAzeriteItemAtMaxLevel()
+                local isMaxLevel = C_AzeriteItem.IsAzeriteItemAtMaxLevel();
+                if isMaxLevel then
+                    return false;
+                end
+                return azeriteItemLocation and azeriteItemLocation:IsEquipmentSlot() and C_AzeriteItem.IsAzeriteItemEnabled(azeriteItemLocation)
             end,
             SetTooltip = function(Art, tooltip)
                 local xp, totalLevelXP, name, currentLevel = Art:GetStats()
