@@ -52,9 +52,6 @@ externals:
     nibRealUI/Libs/oUF:
         url: https://github.com/Gethe/oUF.git
         branch: RealUI
-    nibRealUI/Libs/UTF8:
-        url: https://repos.wowace.com/wow/utf8/trunk
-        tag: latest
 
     nibRealUI_Config/Libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0

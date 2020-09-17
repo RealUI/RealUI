@@ -1,5 +1,8 @@
 local _, private = ...
 
+-- Lua Globals --
+-- luacheck: globals ceil
+
 -- Libs --
 local oUF = private.oUF
 
@@ -518,7 +521,7 @@ local function Shared(self, unit)
     local sizeMod = UnitFrames.layoutSize == 1 and 0.85 or 1
 
     local width, height = round(unitDB.size.x * sizeMod), round(unitDB.size.y * sizeMod)
-    unitData.nameLength = width / 10
+    unitData.nameLength = ceil(width / 10)
 
     self:SetSize(width, height)
     CreateHealthBar(self, unitData.health)
