@@ -78,7 +78,7 @@ end
 ------ Tags ------
 ------------------
 -- Name
-tags.Methods["realui:name"] = function(unit)
+tags.Methods["realui:name"] = function(unit, realUnit)
     local isDead = false
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         isDead = true
@@ -96,29 +96,20 @@ tags.Methods["realui:name"] = function(unit)
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
-        nameColor = _G.CUSTOM_CLASS_COLORS[class or "PRIEST"].colorStr
+        nameColor = _G.CUSTOM_CLASS_COLORS[class].colorStr
     end
     return ("|c%s%s|r"):format(nameColor, name)
 end
 tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 
 -- Level
-tags.Methods["realui:level"] = function(unit)
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return end
-
-    local level, levelColor
-    if (_G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit)) then
-        level = _G.UnitBattlePetLevel(unit)
+tags.Methods["realui:level"] = function(unit, realUnit)
+    local level = tags.Methods.level(unit, realUnit)
+    if level == "??" then
+        return ("|c%s%s|r"):format(RealUI.GetColorString(_G.QuestDifficultyColors.impossible), level)
     else
-        level = _G.UnitLevel(unit)
+        return ("|c%s%s|r"):format(RealUI.GetColorString(_G.GetQuestDifficultyColor(level)), level)
     end
-    if level <= 0 then
-        level = "??"
-        levelColor = _G.QuestDifficultyColors.impossible
-    else
-        levelColor = _G.GetQuestDifficultyColor(level)
-    end
-    return ("|c%s%s|r"):format(RealUI.GetColorString(levelColor), level)
 end
 tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
 
@@ -147,7 +138,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         percent = 0
     else
-        percent = _G.UnitHealth(unit) / _G.UnitHealthMax(unit) * 100
+        percent = tags.Methods.perhp(unit)
     end
 
     UnitFrames:debug("realui:healthPercent", percent)
@@ -184,7 +175,7 @@ tags.Methods["realui:powerPercent"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         percent = 0
     else
-        percent = _G.UnitPower(unit) / _G.UnitPowerMax(unit) * 100
+        percent = tags.Methods.perpp(unit)
     end
 
     local _, ptoken = _G.UnitPowerType(unit)
@@ -213,7 +204,7 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
-    local color = tags.Methods['threatcolor'](unit)
+    local color = tags.Methods["threatcolor"](unit)
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
     if percentage and not _G.UnitIsDeadOrGhost(unit) then
