@@ -222,7 +222,8 @@ function private.OnLoad()
     end)
     _G.hooksecurefunc(Base, "SetBackdrop", function(Frame, color, alpha)
         if not color and not alpha then
-            local r, g, b, a = Frame:GetBackdropColor()
+            local _, _, _, a = Frame:GetBackdropColor()
+            local r, g, b = Frame:GetBackdropBorderColor()
             Frame:SetBackdropColor(r, g, b, frameColor.a)
 
             if not RealUI:IsFrameSkinned(Frame) then
@@ -235,7 +236,6 @@ function private.OnLoad()
                 stripes:SetVertTile(true)
                 stripes:SetBlendMode("ADD")
 
-                r, g, b = Frame:GetBackdropBorderColor()
                 if Color.frame:IsEqualTo(r, g, b, a) then
                     color = Color.frame
                 else
@@ -256,17 +256,17 @@ function private.OnLoad()
 
     -- Hide default UI Scale slider and replace with RealUI button
     if private.isPatch then
-        _G["Display_UseUIScale"]:Hide()
-        _G["Display_UIScaleSlider"]:Hide()
+        _G.Display_UseUIScale:Hide()
+        _G.Display_UIScaleSlider:Hide()
     else
-        _G["Advanced_UseUIScale"]:Hide()
-        _G["Advanced_UIScaleSlider"]:Hide()
+        _G.Advanced_UseUIScale:Hide()
+        _G.Advanced_UIScaleSlider:Hide()
     end
 
     local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
     scaleBtn:SetSize(200, 24)
     scaleBtn:SetText("RealUI UI Scaler")
-    scaleBtn:SetPoint("TOPLEFT", _G.Advanced_UIScaleSlider, 20, 0)
+    scaleBtn:SetPoint("TOPLEFT", _G.Display_UIScaleSlider or _G.Advanced_UIScaleSlider, 20, 0)
     scaleBtn:SetScript("OnClick", function()
         private.debug("UI Scale from Blizz")
         RealUI.LoadConfig("RealUI", "skins")
