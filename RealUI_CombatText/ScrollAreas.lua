@@ -39,31 +39,31 @@ end
 
 local eventQueue, eventFormat = {}, "%s %s"
 _G.C_Timer.NewTicker(0.1, function( ... )
-    if #eventQueue > 0 then
-        local eventInfo = tremove(eventQueue, 1)
-        if eventInfo.string then
-            DisplayEvent(eventInfo, eventInfo.string)
-        else
-            local text = ""
-            if eventInfo.amount > 0 then
-                text = RealUI.ReadableNumber(eventInfo.amount)
-            end
-            if eventInfo.sourceUnit == "pet" and not eventInfo.text then
-                eventInfo.text = _G.PET
-            end
+    if #eventQueue == 0 then return end
 
-            if eventInfo.text then
-                text = eventFormat:format(eventInfo.text, text)
-            end
-            if eventInfo.resultStr then
-                text = eventFormat:format(text, eventInfo.resultStr)
-            end
-            if eventInfo.color then
-                text = eventInfo.color:WrapTextInColorCode(text)
-            end
-
-            DisplayEvent(eventInfo, text)
+    local eventInfo = tremove(eventQueue, 1)
+    if eventInfo.string then
+        DisplayEvent(eventInfo, eventInfo.string)
+    else
+        local text = ""
+        if eventInfo.amount > 0 then
+            text = RealUI.ReadableNumber(eventInfo.amount)
         end
+        if eventInfo.sourceUnit == "pet" and not eventInfo.text then
+            eventInfo.text = _G.PET
+        end
+
+        if eventInfo.text then
+            text = eventFormat:format(eventInfo.text, text)
+        end
+        if eventInfo.resultStr then
+            text = eventFormat:format(text, eventInfo.resultStr)
+        end
+        if eventInfo.color then
+            text = eventInfo.color:WrapTextInColorCode(text)
+        end
+
+        DisplayEvent(eventInfo, text)
     end
 end)
 
