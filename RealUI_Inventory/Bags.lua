@@ -204,6 +204,7 @@ local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COST
 local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
+    "BAG_UPDATE_DELAYED",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
 }
@@ -318,7 +319,7 @@ function MainBagMixin:OnEvent(event, ...)
         end
     else
         local now = _G.debugprofilestop()
-        if (now - self.time) > 1000 then
+        if (now - self.time) > 1000 or event == "BAG_UPDATE_DELAYED" then
             self.time = now
             self:Update()
         end
