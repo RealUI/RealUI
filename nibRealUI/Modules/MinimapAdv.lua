@@ -463,7 +463,7 @@ do -- ButtonCollectFrame
     }
 
     local buttonFrame = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
-    Aurora.Base.SetBackdrop(buttonFrame, Color.frame:GetRGBA())
+    Aurora.Base.SetBackdrop(buttonFrame, Color.frame)
     buttonFrame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
     buttonFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
     buttonFrame:SetHeight(32)

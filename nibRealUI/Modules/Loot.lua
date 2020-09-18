@@ -316,7 +316,7 @@ local createSlot = function(id)
     frame:SetScript("OnUpdate", LootOnUpdate)
 
     Base.SetBackdrop(frame, Color.button)
-    Base.SetHighlight(frame, "backdrop")
+    Base.SetHighlight(frame)
 
     local iconFrame = _G.CreateFrame("Frame", nil, frame)
     iconFrame:SetHeight(LootIconSize)

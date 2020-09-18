@@ -24,13 +24,13 @@ local function SkinAceConfig()
         popup.accept:SetPushedTexture("")
         popup.accept:SetHighlightTexture("")
         Base.SetBackdrop(popup.accept, Color.button)
-        Base.SetHighlight(popup.accept, "backdrop")
+        Base.SetHighlight(popup.accept)
 
         popup.cancel:SetNormalTexture("")
         popup.cancel:SetPushedTexture("")
         popup.cancel:SetHighlightTexture("")
         Base.SetBackdrop(popup.cancel, Color.button)
-        Base.SetHighlight(popup.cancel, "backdrop")
+        Base.SetHighlight(popup.cancel)
     end
 end
 local function SkinAceGUI()
@@ -243,7 +243,7 @@ local function SkinAceGUI()
                 bg:SetScript("OnMouseDown", widget.frame:GetScript("OnMouseDown"))
                 bg:SetScript("OnMouseUp", widget.frame:GetScript("OnMouseUp"))
                 Base.SetBackdrop(bg, Color.button, 0.3)
-                Base.SetHighlight(bg, "backdrop")
+                Base.SetHighlight(bg)
 
                 widget.checkbg:SetTexture("")
                 widget.highlight:SetTexture("")
@@ -417,15 +417,15 @@ local function SkinAceGUI()
                 local disabled = button:GetDisabledTexture()
                 disabled:SetColorTexture(0, 0, 0, .3)
                 disabled:SetDrawLayer("OVERLAY")
-                Base.SetBackdrop(button, Aurora.Color.button)
 
                 local arrow = button:CreateTexture(nil, "ARTWORK")
                 arrow:SetPoint("TOPLEFT", 4, -7)
                 arrow:SetPoint("BOTTOMRIGHT", -5, 6)
                 Base.SetTexture(arrow, "arrowDown")
+                button._auroraTextures = {arrow}
 
-                button._auroraHighlight = {arrow}
-                Base.SetHighlight(button, "texture")
+                Base.SetBackdrop(button, Aurora.Color.button)
+                Base.SetHighlight(button)
 
                 local bg = _G.CreateFrame("Frame", nil, frame)
                 bg:SetPoint("BOTTOMRIGHT", button, "BOTTOMLEFT", 1, 0)

@@ -362,7 +362,7 @@ local function createTextButton(name, parent)
     btn:SetFrameLevel(50)
     btn:SetSize(110, 50)
     Base.SetBackdrop(btn, Color.button)
-    Base.SetHighlight(btn, "backdrop")
+    Base.SetHighlight(btn)
     return btn
 end
 
