@@ -1593,7 +1593,7 @@ local function CreateFrames()
     MMFrames.buttonframe:SetSize(66, 17)
     MMFrames.buttonframe:SetFrameStrata("MEDIUM")
     MMFrames.buttonframe:SetFrameLevel(5)
-    Aurora.Base.SetBackdrop(MMFrames.buttonframe)
+    Aurora.Skin.FrameTypeFrame(MMFrames.buttonframe)
 
     MMFrames.buttonframe.edge = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
     MMFrames.buttonframe.edge:SetColorTexture(1, 1, 1, 1)

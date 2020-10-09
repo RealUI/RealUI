@@ -51,7 +51,7 @@ local function SkinAceGUI()
             Base.SetBackdrop(widget.border, frameColor)
         end,
         Frame = function(widget)
-            Base.SetBackdrop(widget.frame)
+            Skin.FrameTypeFrame(widget.frame)
 
             -- Regions
             local regions = {widget.frame:GetRegions()}
@@ -119,7 +119,7 @@ local function SkinAceGUI()
         end,
         Window = function(widget)
             -- /run LibStub("AceGUI-3.0"):Create("Window")
-            Base.SetBackdrop(widget.frame)
+            Skin.FrameTypeFrame(widget.frame)
 
             -- Regions
             local regions = {widget.frame:GetRegions()}
@@ -317,7 +317,7 @@ local function SkinAceGUI()
                 widgets["Dropdown-Item"](widget)
             end,
             ["Dropdown-Pullout"] = function(widget)
-                Base.SetBackdrop(widget.frame)
+                Skin.FrameTypeFrame(widget.frame)
 
                 local scrollFrame = widget.scrollFrame
                 scrollFrame:SetPoint("TOPLEFT", widget.frame, "TOPLEFT", 1, -12)

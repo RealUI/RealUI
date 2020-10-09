@@ -132,7 +132,7 @@ local function CreateFS(parent, justify, size)
 end
 local function CreateWindow(name, width, height)
     local f = _G.CreateFrame("Frame", name, _G.UIParent)
-    Aurora.Base.SetBackdrop(f)
+    Aurora.Skin.FrameTypeFrame(f)
     f:SetPoint("CENTER", _G.UIParent, "CENTER", 0, 0)
     f:SetSize(width, height)
     f:SetFrameStrata("DIALOG")

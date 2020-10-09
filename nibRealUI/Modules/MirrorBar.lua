@@ -157,7 +157,7 @@ function MirrorBar:CreateFrames()
     -- BG + Border
     MBFrames.bg = _G.CreateFrame("Frame", "RealUI_MirrorBar", _G.UIParent)
     MBFrames.bg:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
-    Aurora.Base.SetBackdrop(MBFrames.bg)
+    Aurora.Skin.FrameTypeFrame(MBFrames.bg)
 
     -- Bar + Text
     MBFrames.bar = _G.CreateFrame("StatusBar", nil, MBFrames.bg)

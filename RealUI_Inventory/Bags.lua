@@ -105,7 +105,7 @@ local BagMixin do
 
     BagMixin = {}
     function BagMixin:Init()
-        Base.SetBackdrop(self)
+        Skin.FrameTypeFrame(self)
         self:EnableMouse(true)
         self.slots = {}
 

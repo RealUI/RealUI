@@ -762,14 +762,8 @@ function Infobar:CreateBar()
     -- Stripes
     Base.SetBackdrop(frame, Aurora.Color.frame, db.bgAlpha)
     frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
-    local tex = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
-    tex:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-    tex:SetAlpha(db.bgAlpha * 0.6)
-    tex:SetAllPoints()
-    tex:SetHorizTile(true)
-    tex:SetVertTile(true)
-    tex:SetBlendMode("ADD")
-    frame.tex = tex
+    RealUI:AddFrameStripes(frame)
+    frame._stripes:SetAlpha(db.bgAlpha)
 
     -- Watch bars
     local watch = {}
@@ -865,7 +859,7 @@ function Infobar:SettingsUpdate(setting, block)
     elseif setting == "bgAlpha" then
         self.frame:SetBackdropColor(Aurora.Color.frame, db.bgAlpha)
         self.frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
-        self.frame.tex:SetAlpha(db.bgAlpha * 0.6)
+        self.frame._stripes:SetAlpha(db.bgAlpha)
         self.frame.watch:UpdateColors()
 
         local outline = self:GetFontOutline()

@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Libs --
 local Aurora = _G.Aurora
-local Base = Aurora.Base
+local Skin = Aurora.Skin
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -35,7 +35,7 @@ function ScreenSaver:CreateFrames()
     frame:SetPoint("TOPLEFT", 0, -300)
     frame:SetPoint("TOPRIGHT", 0, -300)
     frame:SetHeight(21)
-    Base.SetBackdrop(frame)
+    Skin.FrameTypeFrame(frame)
     self.frame = frame
 
     frame:SetScript("OnUpdate", function(this, elapsed)

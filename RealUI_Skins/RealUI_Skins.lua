@@ -143,6 +143,17 @@ function RealUI:UpdateFrameStyle()
         end
     end
 end
+function RealUI:AddFrameStripes(Frame)
+    local bg = Frame:GetBackdropTexture("bg")
+    local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
+    stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+    stripes:SetAlpha(private.skinsDB.stripeAlpha)
+    stripes:SetAllPoints(bg)
+    stripes:SetHorizTile(true)
+    stripes:SetVertTile(true)
+    stripes:SetBlendMode("ADD")
+    Frame._stripes = stripes
+end
 
 function private.OnLoad()
     --print("OnLoad Aurora", Aurora, private.Aurora)
@@ -171,7 +182,7 @@ function private.OnLoad()
     end
 
     local Base = Aurora.Base
-    local Hook, Skin = Aurora.Hook, Aurora.Skin
+    local Skin = Aurora.Skin
     local Color = Aurora.Color
 
     -- Initialize custom colors
@@ -202,48 +213,20 @@ function private.OnLoad()
     C.media.checked = [[Interface\AddOns\RealUI_Skins\Aurora\media\CheckButtonHilight]]
     C.media.roleIcons = [[Interface\AddOns\RealUI_Skins\Aurora\media\UI-LFG-ICON-ROLES]]
 
-    function Hook.SharedTooltip_SetBackdropStyle(self, style)
-        if not self.IsEmbedded then
-            Base.SetBackdrop(self, Color.frame, frameColor.a)
-            if self._setQualityColors then
-                local _, itemLink = self:GetItem()
-                if itemLink then
-                    local quality = _G.C_Item.GetItemQualityByID(itemLink)
-                    if quality then
-                        self:SetBackdropBorderColor(_G.GetItemQualityColor(quality))
-                    end
-                end
-            end
+    _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
+        Frame.BorderFrame.NineSlice._stripes:SetParent(Frame)
+    end)
+    function Skin.FrameTypeFrame(Frame)
+        Base.SetBackdrop(Frame, Color.frame, frameColor.a)
+
+        if not Frame._stripes then
+            RealUI:AddFrameStripes(Frame)
         end
     end
 
-    _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
-        skinnedFrames[Frame.BorderFrame.NineSlice].stripes:SetParent(Frame)
-    end)
-    _G.hooksecurefunc(Base, "SetBackdrop", function(Frame, color, alpha)
-        if not color and not alpha then
-            local _, _, _, a = Frame:GetBackdropColor()
-            local r, g, b = Frame:GetBackdropBorderColor()
-            Frame:SetBackdropColor(r, g, b, frameColor.a)
-
-            if not RealUI:IsFrameSkinned(Frame) then
-                local bg = Frame:GetBackdropTexture("bg")
-                local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
-                stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
-                stripes:SetAlpha(private.skinsDB.stripeAlpha)
-                stripes:SetAllPoints(bg)
-                stripes:SetHorizTile(true)
-                stripes:SetVertTile(true)
-                stripes:SetBlendMode("ADD")
-
-                if Color.frame:IsEqualTo(r, g, b, a) then
-                    color = Color.frame
-                else
-                    color = Color.button
-                end
-                RealUI:RegisterSkinnedFrame(Frame, color, stripes)
-            end
-        end
+    _G.hooksecurefunc(Skin, "CharacterFrameTabButtonTemplate", function(Button)
+        Button:SetButtonColor(Color.frame, frameColor.a, false)
+        RealUI:AddFrameStripes(Button)
     end)
 
     -- Disable user selected addon skins
