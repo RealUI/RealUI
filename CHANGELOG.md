@@ -1,3 +1,29 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * RealUI_Inventory
+
+### Added ###
+
+  * Support for 9.0 Shadowlands
+  * Option to show tooltips at the mouse cursor
+
+### Changed ###
+
+  * You can now assign a partial stack to the junk bag, and it will only auto sell the assigned amount
+
+### Fixed ###
+
+  * Auto-sell junk didn't work
+  * Bags may not update if they were already open
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
 ## [2.2.1] - 2020-07-27 ##
 ### Modified AddOns ###
 
