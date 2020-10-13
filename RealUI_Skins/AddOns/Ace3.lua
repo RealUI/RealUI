@@ -264,7 +264,9 @@ local function SkinAceGUI()
                     self.g = g
                     self.b = b
                     self.a = a or 1
-                    bg:SetBackdropColor(r, g, b, a)
+                    if r then
+                        bg:SetBackdropColor(r, g, b, a)
+                    end
                 end
                 function widget:SetDisabled(disabled)
                     self.disabled = disabled
