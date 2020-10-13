@@ -7,7 +7,6 @@ local _, private = ...
 local RealUI = private.RealUI
 
 local Aurora = _G.Aurora
-local Base = Aurora.Base
 local Skin = Aurora.Skin
 
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
@@ -609,7 +608,7 @@ local function CreateKeys()
     bindingsFrame = _G.CreateFrame("Frame", nil, _G.KeyBindingFrame)
     bindingsFrame:SetPoint("TOPLEFT", _G.KeyBindingFrame, "BOTTOMLEFT", 100, 0)
     bindingsFrame:SetSize(614, 186)
-    Base.SetBackdrop(bindingsFrame)
+    Skin.FrameTypeFrame(bindingsFrame)
 
     local lastRow = 1
     for index = 1, #keys do

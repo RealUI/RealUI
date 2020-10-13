@@ -59,7 +59,6 @@ Most can be downloaded from Curse:
   * [LibSharedMedia-3.0](https://www.curseforge.com/wow/addons/libsharedmedia-3-0)
   * [LibTextDump-1.0](https://www.curseforge.com/wow/addons/libtextdump-1-0)
   * [LibWindow-1.1](https://www.curseforge.com/wow/addons/libwindow-1-1)
-  * [UTF8](https://www.curseforge.com/wow/addons/utf8)
 
 
 In addition to those libraries, you will also need to clone the [RealUI branch of oUF](https://github.com/Gethe/oUF/tree/RealUI). The script linked above will also create a symlink for oUF.

@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals tinsert ipairs next
+-- luacheck: globals tinsert ipairs next sqrt
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -130,16 +130,32 @@ do
         lines[i] = {line = line, x = 0, y = 0}
     end
 
+    local function GetLength(startX, startY, endX, endY)
+        -- Determine dimensions
+        local dx, dy = endX - startX, endY - startY
+
+        -- Normalize direction if necessary
+        if dx < 0 then
+            dx, dy = -dx, -dy
+        end
+
+        -- Calculate actual length of line
+        return sqrt((dx * dx) + (dy * dy))
+    end
     local function UpdateTrail()
-        local scale = _G.UIParent:GetEffectiveScale()
-        local startX, startY = _G.GetCursorPosition()
+        local startX, startY = _G.GetScaledCursorPosition()
 
         for i = 1, numLines do
             local info = lines[i]
 
             local endX, endY = info.x, info.y
-            info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX / scale, startY / scale)
-            info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX / scale, endY / scale)
+            if GetLength(startX, startY, endX, endY) < 0.1 then
+                info.line:Hide()
+            else
+                info.line:Show()
+                info.line:SetStartPoint("BOTTOMLEFT", _G.UIParent, startX, startY)
+                info.line:SetEndPoint("BOTTOMLEFT", _G.UIParent, endX, endY)
+            end
 
             info.x, info.y = startX, startY
             startX, startY = endX, endY

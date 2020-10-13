@@ -1,5 +1,8 @@
 local _, private = ...
 
+-- Lua Globals --
+-- luacheck: globals strlenutf8
+
 -- Libs --
 local oUF = private.oUF
 local tags = oUF.Tags
@@ -11,26 +14,62 @@ local RealUI = private.RealUI
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
 
-local utf8len, utf8sub = _G.string.utf8len, _G.string.utf8sub
+local ES_PADDING = {
+    ["||"] = -1,
+    ["|c"] = 9,
+    ["|C"] = 9,
+    ["|r"] = 1,
+    ["|R"] = 1,
+}
+
+local function utf8shorten(str, length)
+    if strlenutf8(str) <= length then
+        return str
+    end
+
+    local index, output, z, y = 1, "", "" -- y and z are next-to-last and last seen characters
+    for char in str:gmatch(".[\128-\191]*") do
+        if char == "|" then
+            length = length + 1 -- we want to peak at the next character
+        end
+
+        y = z
+        z = char
+        length = length + (ES_PADDING[y .. z] or 0)
+
+        if index <= length then
+            output = output .. char
+            index = index + 1
+        end
+
+        if index > length then
+            break
+        end
+    end
+
+    return output
+end
 local function AbbreviateName(name, maxLength)
     if not name then return "" end
     local maxNameLength = maxLength or 12
 
+    local length = strlenutf8(name)
     local words, newName = {_G.strsplit(" ", name)}
-    if #words > 2 and utf8len(name) > maxNameLength then
-        local i = 1
+    if #words > 2 and strlenutf8(name) > maxNameLength then
+        local i = 2
         repeat
-            words[i] = utf8sub(words[i], 1, 1) .. "."
+            length = length - (strlenutf8(words[i]) - 2)
+            words[i] = utf8shorten(words[i], 1) .. "."
             i = i + 1
-        until i == #words
+        until length <= maxNameLength or i > #words
 
         newName = _G.strjoin(" ", _G.unpack(words))
     else
         newName = name
     end
 
-    if utf8len(newName) > maxNameLength then
-        newName = utf8sub(newName, 1, maxNameLength)..".."
+    if strlenutf8(newName) > maxNameLength then
+        newName = utf8shorten(newName, (maxNameLength + 2))..".."
     end
     return newName
 end
@@ -39,7 +78,7 @@ end
 ------ Tags ------
 ------------------
 -- Name
-tags.Methods["realui:name"] = function(unit)
+tags.Methods["realui:name"] = function(unit, realUnit)
     local isDead = false
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         isDead = true
@@ -57,29 +96,20 @@ tags.Methods["realui:name"] = function(unit)
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
         local _, class = _G.UnitClass(unit)
-        nameColor = _G.CUSTOM_CLASS_COLORS[class or "PRIEST"].colorStr
+        nameColor = _G.CUSTOM_CLASS_COLORS[class].colorStr
     end
     return ("|c%s%s|r"):format(nameColor, name)
 end
 tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 
 -- Level
-tags.Methods["realui:level"] = function(unit)
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return end
-
-    local level, levelColor
-    if (_G.UnitIsWildBattlePet(unit) or _G.UnitIsBattlePetCompanion(unit)) then
-        level = _G.UnitBattlePetLevel(unit)
+tags.Methods["realui:level"] = function(unit, realUnit)
+    local level = tags.Methods.level(unit, realUnit)
+    if level == "??" then
+        return ("|c%s%s|r"):format(RealUI.GetColorString(_G.QuestDifficultyColors.impossible), level)
     else
-        level = _G.UnitLevel(unit)
+        return ("|c%s%s|r"):format(RealUI.GetColorString(_G.GetQuestDifficultyColor(level)), level)
     end
-    if level <= 0 then
-        level = "??"
-        levelColor = _G.QuestDifficultyColors.impossible
-    else
-        levelColor = _G.GetQuestDifficultyColor(level)
-    end
-    return ("|c%s%s|r"):format(RealUI.GetColorString(levelColor), level)
 end
 tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
 
@@ -108,7 +138,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         percent = 0
     else
-        percent = _G.UnitHealth(unit) / _G.UnitHealthMax(unit) * 100
+        percent = tags.Methods.perhp(unit)
     end
 
     UnitFrames:debug("realui:healthPercent", percent)
@@ -145,7 +175,7 @@ tags.Methods["realui:powerPercent"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         percent = 0
     else
-        percent = _G.UnitPower(unit) / _G.UnitPowerMax(unit) * 100
+        percent = tags.Methods.perpp(unit)
     end
 
     local _, ptoken = _G.UnitPowerType(unit)
@@ -174,7 +204,7 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
-    local color = tags.Methods['threatcolor'](unit)
+    local color = tags.Methods["threatcolor"](unit)
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
     if percentage and not _G.UnitIsDeadOrGhost(unit) then

@@ -246,6 +246,10 @@ function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
     return true
 end
 
+function eventSuffix.HEAL_ABSORBED(eventInfo, extraGUID, extraName, extraFlags, extraRaidFlags, extraSpellID, extraSpellName, extraSchool, amount)
+    return eventSuffix.HEAL(eventInfo, 0, 0, amount, false)
+end
+
 function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, alternatePowerType)
     eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
 

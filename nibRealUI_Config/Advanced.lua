@@ -962,7 +962,6 @@ do -- Tooltips
                         name = L["General_Lock"],
                         desc = L["General_LockDesc"],
                         type = "toggle",
-                        width = "full",
                         get = function(info) return FramePoint:IsModLocked(Tooltips) end,
                         set = function(info, value)
                             if value then
@@ -972,6 +971,18 @@ do -- Tooltips
                             end
                         end,
                         order = 0,
+                    },
+                    cursor = {
+                        name = L.Tooltips_AtCursor,
+                        desc = L.Tooltips_AtCursorDesc,
+                        type = "toggle",
+                        width = "double",
+                        get = function(info) return Tooltips.db.global.position.atCursor end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.atCursor = value
+                            Tooltips:PositionAnchor()
+                        end,
+                        order = 1,
                     },
                     point = {
                         name = L["General_AnchorPoint"],
@@ -984,7 +995,7 @@ do -- Tooltips
                         end,
                         set = function(info, value)
                             Tooltips.db.global.position.point = RealUI.globals.anchorPoints[value]
-                            FramePoint:RestorePosition(Tooltips)
+                            Tooltips:PositionAnchor()
                         end,
                         order = 10,
                     },
@@ -993,12 +1004,13 @@ do -- Tooltips
                         desc = L["General_XOffsetDesc"],
                         type = "input",
                         dialogControl = "NumberEditBox",
+                        disabled = function(info) return Tooltips.db.global.position.atCursor end,
                         get = function(info)
                             return _G.tostring(Tooltips.db.global.position.x)
                         end,
                         set = function(info, value)
                             Tooltips.db.global.position.x = round(_G.tonumber(value), 1)
-                            FramePoint:RestorePosition(Tooltips)
+                            Tooltips:PositionAnchor()
                         end,
                         order = 11,
                     },
@@ -1007,10 +1019,11 @@ do -- Tooltips
                         desc = L["General_YOffsetDesc"],
                         type = "input",
                         dialogControl = "NumberEditBox",
+                        disabled = function(info) return Tooltips.db.global.position.atCursor end,
                         get = function(info) return _G.tostring(Tooltips.db.global.position.y) end,
                         set = function(info, value)
                             Tooltips.db.global.position.y = round(_G.tonumber(value), 1)
-                            FramePoint:RestorePosition(Tooltips)
+                            Tooltips:PositionAnchor()
                         end,
                         order = 12,
                     },

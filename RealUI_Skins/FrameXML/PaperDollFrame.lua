@@ -14,17 +14,20 @@ local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 do --[[ FrameXML\PaperDollFrame.lua ]]
     local ShouldHaveEnchant, GetNumSockets do
         local enchantSlots = {
-            [2] = 110, -- Neck
-            [15] = 110, -- Cloak
+            [5] = 8, -- Chest
+            [8] = 8, -- Boots
+            [9] = 8, -- Bracers
+            [10] = 8, -- Gloves
             [11] = true, -- Ring 1
             [12] = true, -- Ring 2
-            [16] = 120, -- Main Hand
-            [17] = 120, -- Off Hand
+            [15] = 8,  -- Cloak
+            [16] = true, -- Main Hand
+            [17] = true, -- Off Hand
         }
         function ShouldHaveEnchant(slotID, quality)
             local canEnchant = enchantSlots[slotID]
             if type(canEnchant) == "number" then
-                canEnchant = _G.GetEffectivePlayerMaxLevel() == canEnchant
+                canEnchant = _G.GetClientDisplayExpansionLevel() == canEnchant
             end
             return canEnchant and quality ~= RealUI.Enum.ItemQuality.Artifact
         end

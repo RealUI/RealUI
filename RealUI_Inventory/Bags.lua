@@ -105,7 +105,7 @@ local BagMixin do
 
     BagMixin = {}
     function BagMixin:Init()
-        Base.SetBackdrop(self)
+        Skin.FrameTypeFrame(self)
         self:EnableMouse(true)
         self.slots = {}
 
@@ -204,6 +204,7 @@ local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COST
 local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
+    "BAG_UPDATE_DELAYED",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
 }
@@ -318,7 +319,7 @@ function MainBagMixin:OnEvent(event, ...)
         end
     else
         local now = _G.debugprofilestop()
-        if (now - self.time) > 1000 then
+        if (now - self.time) > 1000 or event == "BAG_UPDATE_DELAYED" then
             self.time = now
             self:Update()
         end
@@ -419,6 +420,10 @@ function private.AddSlotToBag(slot, bagID)
     local main = Inventory[private.GetBagTypeForBagID(bagID)]
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
+    local _, slotIndex = slot:GetBagAndSlot()
+    if Inventory.db.char.junk[bagID] and Inventory.db.char.junk[bagID][slotIndex] then
+        assignedTag = "junk"
+    end
     if not Inventory:GetFilter(assignedTag) then
         for i, filter in Inventory:IndexedFilters() do
             if filter:DoesMatchSlot(slot) then
@@ -433,6 +438,7 @@ function private.AddSlotToBag(slot, bagID)
         end
     end
 
+    slot.assignedTag = assignedTag or "main"
     local bag = main.bags[assignedTag] or main
 
     tinsert(bag.slots, slot)
@@ -524,7 +530,13 @@ function private.CreateFilterBag(main, filter)
     end
 
     if tag == "junk" then
-        bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk)
+        bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk,
+        function(self)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+            _G.GameTooltip_SetTitle(_G.GameTooltip, _G.GetMoneyString(bag.profit, true), nil, true)
+
+            _G.GameTooltip:Show()
+        end)
         bag.sellJunk:Hide()
         bag.sellJunk:SetPoint("TOPLEFT", 5, -2)
     end

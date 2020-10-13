@@ -67,6 +67,8 @@ end
 function FramePoint:RestorePosition(mod)
     local module = modules[mod]
     for frame, meta in next, module.frames do
+        frame:ClearAllPoints()
+        frame:SetPoint("CENTER", meta.dragFrame)
         LibWin.RestorePosition(meta.dragFrame)
     end
 end

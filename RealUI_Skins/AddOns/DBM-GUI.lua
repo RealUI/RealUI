@@ -129,7 +129,7 @@ private.AddOns["DBM-GUI"] = function()
     ----====####$$$$%%%%$$$$####====----
     Util.Mixin(_G.DBM_GUI_OptionsFrame, Hook.DBM_GUI_OptionsFrame)
 
-    Base.SetBackdrop(_G.DBM_GUI_OptionsFrame)
+    Skin.FrameTypeFrame(_G.DBM_GUI_OptionsFrame)
     _G.DBM_GUI_OptionsFrameHeader:SetTexture("")
 
     Skin.UIPanelButtonTemplate(_G.DBM_GUI_OptionsFrameOkay)

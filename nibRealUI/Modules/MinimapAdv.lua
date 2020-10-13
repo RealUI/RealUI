@@ -329,6 +329,33 @@ function MinimapAdv:UpdateButtonsPosition()
     self:FadeButtons()
 end
 
+local SLGarrison = RealUI.isPatch and _G.Enum.GarrisonType.Type_9_0 or nil
+local function UpdateGarrisonButton(isTop, isLeft)
+    local garrisonType = _G.C_Garrison.GetLandingPageGarrisonType()
+
+    local x, y = 2, 2
+    if garrisonType == SLGarrison then
+        x, y = 15, 15
+    end
+
+    local point
+    if isTop then
+        point = "TOP"
+    else
+        y = -y
+        point = "BOTTOM"
+    end
+    if isLeft then
+        point = point .. "RIGHT"
+    else
+        x = -x
+        point = point .. "LEFT"
+    end
+
+    _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
+    _G.GarrisonLandingPageMinimapButton:SetPoint(point, x, y)
+end
+
 -- Set Minimap position
 function MinimapAdv:UpdateMinimapPosition()
     self:debug("UpdateMinimapPosition")
@@ -356,28 +383,24 @@ function MinimapAdv:UpdateMinimapPosition()
     _G.Minimap:SetUserPlaced(true)
 
     -- Kinda dirty, but it works
-    local LFDrpoint, LFDpoint, Qpoint, Gpoint
+    local LFDrpoint, LFDpoint, Qpoint
     if isTop then
         LFDpoint = "TOP"
         LFDrpoint = "TOP"
         Qpoint = "BOTTOM"
-        Gpoint = "TOP"
     else
         LFDpoint = "BOTTOM"
         LFDrpoint = "BOTTOM"
         Qpoint = "TOP"
-        Gpoint = "BOTTOM"
     end
     if isLeft then
         LFDpoint = LFDpoint .. "LEFT"
         LFDrpoint = LFDrpoint .. "RIGHT"
         Qpoint = Qpoint .. "RIGHT"
-        Gpoint = Gpoint .. "RIGHT"
     else
         LFDpoint = LFDpoint .. "RIGHT"
         LFDrpoint = LFDrpoint .. "LEFT"
         Qpoint = Qpoint .. "LEFT"
-        Gpoint = Gpoint .. "LEFT"
     end
 
     -- Queue Status
@@ -390,8 +413,7 @@ function MinimapAdv:UpdateMinimapPosition()
     _G.QueueStatusFrame:SetClampedToScreen(true)
 
     -- Garrisons
-    _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
-    _G.GarrisonLandingPageMinimapButton:SetPoint(Gpoint, isLeft and 2 or -2, isTop and 2 or -2)
+    UpdateGarrisonButton(isTop, isLeft)
 
     if not RealUI.isPatch then
         _G.GarrisonLandingPageTutorialBox:ClearAllPoints()
@@ -441,7 +463,7 @@ do -- ButtonCollectFrame
     }
 
     local buttonFrame = _G.CreateFrame("Frame", "ButtonCollectFrame", _G.UIParent)
-    Aurora.Base.SetBackdrop(buttonFrame, Color.frame:GetRGBA())
+    Aurora.Base.SetBackdrop(buttonFrame, Color.frame)
     buttonFrame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
     buttonFrame:SetPoint("TOPRIGHT", _G.Minimap, "BOTTOMRIGHT", 1, -5)
     buttonFrame:SetHeight(32)
@@ -1306,6 +1328,9 @@ local function Garrison_OnEvent(self, event, ...)
             MinimapAdv:debug("notLandingPage")
             self.shouldShow = self.MinimapLoopPulseAnim:IsPlaying()
         end
+
+        local mapPoints = GetPositionData()
+        UpdateGarrisonButton(mapPoints.isTop, mapPoints.isLeft)
     elseif isPulseEvent[event] then
         ShowGarrisonPulse(self)
     end
@@ -1568,7 +1593,7 @@ local function CreateFrames()
     MMFrames.buttonframe:SetSize(66, 17)
     MMFrames.buttonframe:SetFrameStrata("MEDIUM")
     MMFrames.buttonframe:SetFrameLevel(5)
-    Aurora.Base.SetBackdrop(MMFrames.buttonframe)
+    Aurora.Skin.FrameTypeFrame(MMFrames.buttonframe)
 
     MMFrames.buttonframe.edge = MMFrames.buttonframe:CreateTexture(nil, "ARTWORK")
     MMFrames.buttonframe.edge:SetColorTexture(1, 1, 1, 1)

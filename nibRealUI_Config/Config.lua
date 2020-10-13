@@ -236,7 +236,7 @@ local hudConfig, hudToggle do
         end
     end
 
-    Base.SetBackdrop(hudConfig)
+    Skin.FrameTypeFrame(hudConfig)
     Scale.Point(_G.RealUIUINotifications, "TOP", hudConfig, "BOTTOM")
     RealUI.RegisterModdedFrame(hudConfig)
 end

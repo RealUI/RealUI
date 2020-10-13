@@ -24,6 +24,7 @@ local defaults = {
         multiTip = true,
         currency = {},
         position = {
+            atCursor = true,
             x = -100,
             y = 130,
             point = "BOTTOMRIGHT"
@@ -315,6 +316,42 @@ end, true)
 
 local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
 tooltipAnchor:SetSize(50, 50)
+local pollingRate, tooltipTicker = 0.05
+local function UpdateAnchor()
+    local x, y = _G.GetScaledCursorPosition()
+    local uiX, uiY = RealUI.GetInterfaceSize()
+
+    local point = Tooltips.db.global.position.point
+    if point:find("RIGHT") then
+        x = x - uiX
+    elseif not point:find("LEFT") then
+        x = x - (uiX / 2)
+    end
+
+    if point:find("TOP") then
+        y = y - uiY
+    elseif not point:find("BOTTOM") then
+        y = y - (uiY / 2)
+    end
+
+    tooltipAnchor:ClearAllPoints()
+    tooltipAnchor:SetPoint(point, _G.UIParent, x, y)
+end
+function Tooltips:PositionAnchor()
+    if Tooltips.db.global.position.atCursor then
+        if not tooltipTicker then
+            tooltipTicker = _G.C_Timer.NewTicker(pollingRate, UpdateAnchor)
+        end
+    elseif tooltipTicker then
+        tooltipTicker:Cancel()
+        tooltipTicker = nil
+    end
+
+    if not tooltipTicker then
+        FramePoint:RestorePosition(Tooltips)
+    end
+end
+
 _G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
     tooltip:ClearAllPoints()
     tooltip:SetPoint(Tooltips.db.global.position.point, tooltipAnchor)
@@ -648,13 +685,12 @@ do -- AddDynamicInfo, ClearDynamicInfo
 end
 
 
-
-
 function Tooltips:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
 
     FramePoint:RegisterMod(self)
     FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
+    Tooltips:PositionAnchor()
 
     if RealUI.realmInfo.realmNormalized then
         private.SetupCurrency()

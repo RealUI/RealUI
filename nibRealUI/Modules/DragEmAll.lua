@@ -62,7 +62,9 @@ local addonFrames = {
     Blizzard_AchievementUI = {
          AchievementFrame = {"AchievementFrameHeader", "AchievementFrameCategoriesContainer"},
     },
-    --Blizzard_AlliedRacesUI = {},
+    Blizzard_AlliedRacesUI = {
+        AlliedRacesFrame = {}
+    },
     Blizzard_ArchaeologyUI = {
         ArchaeologyFrame = {}
     },
@@ -109,6 +111,9 @@ local addonFrames = {
     },
     --Blizzard_CompactRaidFrames = {},
     --Blizzard_Contribution = {},
+    Blizzard_CovenantPreviewUI = {
+        CovenantPreviewFrame = {}
+    },
     --Blizzard_DeathRecap = {},
     --Blizzard_DebugTools = {},
     Blizzard_EncounterJournal = {
@@ -153,12 +158,18 @@ local addonFrames = {
     Blizzard_MacroUI = {
         MacroFrame = {}
     },
+    Blizzard_NewPlayerExperienceGuide = {
+        GuideFrame = {}
+    },
     --Blizzard_ObjectiveTracker = {},
     Blizzard_ObliterumUI = {},
     Blizzard_OrderHallUI = {
         OrderHallTalentFrame = {}
     },
     --Blizzard_PartyPoseUI = {},
+    Blizzard_PlayerChoiceUI = {
+        PlayerChoiceFrame = {}
+    },
     --Blizzard_PVPMatch = {},
     --Blizzard_PVPUI = {},
     Blizzard_QuestChoice = {
@@ -166,6 +177,9 @@ local addonFrames = {
     },
     --Blizzard_RaidUI = {},
     Blizzard_ScrappingMachineUI = {},
+    Blizzard_Soulbinds = {
+        SoulbindViewer = {}
+    },
     --Blizzard_SocialUI = {},
     --Blizzard_StoreUI = {},
     Blizzard_TalentUI = {
