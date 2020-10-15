@@ -41,7 +41,7 @@ externals:
         url: https://github.com/Gethe/LibIconFonts.git
         tag: latest
     nibRealUI/Libs/LibQTip-1.0:
-        url: https://repos.wowace.com/wow/libqtip-1-0/trunk
+        url: https://repos.wowace.com/wow/libqtip-1-0
         tag: latest
     nibRealUI/Libs/LibRangeCheck-2.0:
         url: https://repos.wowace.com/wow/librangecheck-2-0/trunk/LibRangeCheck-2.0
@@ -75,9 +75,6 @@ externals:
     RealUI_Bugs/Libs/LibTextDump-1.0:
         url: https://repos.wowace.com/wow/libtextdump-1-0
 
-    RealUI_Skins/Aurora:
-        url: https://github.com/Haleth/Aurora.git
-        tag: latest
     RealUI_Skins/Libs/AceDB-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
         tag: latest
@@ -104,3 +101,4 @@ move-folders:
     nibRealUI/RealUI_Inventory: RealUI_Inventory
     nibRealUI/RealUI_Skins: RealUI_Skins
     nibRealUI/RealUI_Tooltips: RealUI_Tooltips
+    Aurora: RealUI_Skins/Aurora
