@@ -1,4 +1,21 @@
-﻿## [2.2.2] - 2020-10-12 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Changed ###
+
+  * The cursor tooltip option now defaults to off
+
+### Fixed ###
+
+  * Barber shop was cut off
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+## [2.2.2] - 2020-10-12 ##
 ### Modified AddOns ###
 
   * nibRealUI
