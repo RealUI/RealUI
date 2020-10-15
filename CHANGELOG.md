@@ -3,14 +3,13 @@
 
   * RealUI_Skins
   * RealUI_Tooltips
-
-### Changed ###
-
-  * The cursor tooltip option now defaults to off
+  * RealUI_Inventory
 
 ### Fixed ###
 
   * Barber shop was cut off
+  * The tooltip was placed at the cursor by default
+  * Error when viewing the bank
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
