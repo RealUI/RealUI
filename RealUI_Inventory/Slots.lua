@@ -62,10 +62,6 @@ function ItemSlotMixin:Update()
         self.Count:Show()
     end
 
-    if self.assignedTag ~= "junk" then
-        self.JunkIcon:Hide()
-    end
-
     local questTexture = self.IconQuestTexture
     if questId then
         self._auroraIconBorder:SetBackdropBorderColor(1, 1, 0)
@@ -116,6 +112,10 @@ function InventorySlotMixin:OnLoad()
 end
 function InventorySlotMixin:Update()
     ItemSlotMixin.Update(self)
+
+    if self.assignedTag ~= "junk" then
+        self.JunkIcon:Hide()
+    end
 
     self:UpdateItemUpgradeIcon()
     self.BattlepayItemTexture:SetShown(_G.IsBattlePayItem(self:GetBagAndSlot()))

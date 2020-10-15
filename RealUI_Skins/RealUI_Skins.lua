@@ -229,6 +229,17 @@ function private.OnLoad()
         RealUI:AddFrameStripes(Button)
     end)
 
+    _G.hooksecurefunc(private.AddOns, "Blizzard_BarbershopUI", function()
+        local BarberShopFrame = _G.BarberShopFrame
+        local CharCustomizeFrame = _G.CharCustomizeFrame
+
+        BarberShopFrame.Sexes:SetPoint("TOP", CharCustomizeFrame, 0, -27)
+        BarberShopFrame.CancelButton:SetPoint("BOTTOMLEFT", CharCustomizeFrame, 30, 15)
+        -- BarberShopFrame.ResetButton - Anchored to CancelButton
+        BarberShopFrame.AcceptButton:SetPoint("BOTTOMRIGHT", CharCustomizeFrame, -30, 15)
+        -- BarberShopFrame.PriceFrame - Anchored to AcceptButton
+    end)
+
     -- Disable user selected addon skins
     for name, enabled in next, private.skinsDB.addons do
         if not name:find("RealUI") and not enabled then
