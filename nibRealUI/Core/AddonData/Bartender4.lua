@@ -206,26 +206,6 @@ function private.AddOns.Bartender4()
         ["enabled"] = false,
     }
 
-    local ZoneAbilityBar = namespaces.ZoneAbilityBar.profiles
-    ZoneAbilityBar["RealUI"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = -157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
-    ZoneAbilityBar["RealUI-Healing"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = -157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
-
     local BagBar = namespaces.BagBar.profiles
     BagBar["RealUI"] = {
         ["enabled"] = false,
