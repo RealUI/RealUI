@@ -576,11 +576,7 @@ function Infobar:CreateBlocks()
 
                 end,
                 disabled = function( ... )
-                    if RealUI.isPatch then
-                        return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
-                    else
-                        return _G.UnitLevel("player") < _G.SHOW_SPEC_LEVEL
-                    end
+                    return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
                 end,
             },
             {text = _G.MicroButtonTooltipText(_G.ACHIEVEMENT_BUTTON, "TOGGLEACHIEVEMENT"),
@@ -605,11 +601,7 @@ function Infobar:CreateBlocks()
                 func = ToggleUI,
                 arg1 = "PVEFrame_ToggleFrame",
                 disabled = function( ... )
-                    if RealUI.isPatch then
-                        return not ((_G.C_LFGInfo.CanPlayerUseLFD() or _G.C_LFGInfo.CanPlayerUsePVP()) and RealUI.charInfo.faction ~= "Neutral")
-                    else
-                        return _G.UnitLevel("player") < min(_G.SHOW_LFD_LEVEL, _G.SHOW_PVP_LEVEL)
-                    end
+                    return not (_G.C_LFGInfo.CanPlayerUseGroupFinder() and RealUI.charInfo.faction ~= "Neutral")
                 end,
             },
             {text = _G.MicroButtonTooltipText(_G.COLLECTIONS, "TOGGLECOLLECTIONS"),
@@ -1587,11 +1579,7 @@ function Infobar:CreateBlocks()
                 end
 
                 azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem()
-                if RealUI.isPatch then
-                    return azeriteItemLocation and azeriteItemLocation:IsEquipmentSlot() and C_AzeriteItem.IsAzeriteItemEnabled(azeriteItemLocation)
-                else
-                    return azeriteItemLocation and azeriteItemLocation:IsEquipmentSlot()
-                end
+                return azeriteItemLocation and azeriteItemLocation:IsEquipmentSlot() and C_AzeriteItem.IsAzeriteItemEnabled(azeriteItemLocation)
             end,
             SetTooltip = function(Art, tooltip)
                 local xp, totalLevelXP, name, currentLevel = Art:GetStats()
@@ -2228,35 +2216,21 @@ function Infobar:CreateBlocks()
             if not RealUI.realmInfo.realmNormalized then return end
             local changeIndex
 
-            if RealUI.isPatch then
-                for i = 1, _G.MAX_WATCHED_TOKENS do
-                    local token = currencyStates["token"..i]
-                    local currencyInfo = _G.C_CurrencyInfo.GetBackpackCurrencyInfo(token.index)
-                    if currencyInfo then
-                        if token.id ~= currencyInfo.currencyTypesID and not changeIndex then
-                            changeIndex = i
-                        end
-
-                        token.name = currencyInfo.name
-                        token.icon = currencyInfo.iconFileID
-                        token.id = currencyInfo.currencyTypesID
-                        currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyInfo.currencyTypesID
-                    end
-                end
-            else
-                for i = 1, _G.MAX_WATCHED_TOKENS do
-                    local token = currencyStates["token"..i]
-                    local name, _, icon, currencyID = _G.GetBackpackCurrencyInfo(token.index)
-                    if token.id ~= currencyID and not changeIndex then
+            for i = 1, _G.MAX_WATCHED_TOKENS do
+                local token = currencyStates["token"..i]
+                local currencyInfo = _G.C_CurrencyInfo.GetBackpackCurrencyInfo(token.index)
+                if currencyInfo then
+                    if token.id ~= currencyInfo.currencyTypesID and not changeIndex then
                         changeIndex = i
                     end
 
-                    token.name = name
-                    token.icon = icon
-                    token.id = currencyID
-                    currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyID
+                    token.name = currencyInfo.name
+                    token.icon = currencyInfo.iconFileID
+                    token.id = currencyInfo.currencyTypesID
+                    currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name]["token"..i] = currencyInfo.currencyTypesID
                 end
             end
+
             return changeIndex
         end
 
@@ -2352,11 +2326,7 @@ function Infobar:CreateBlocks()
                         end
                     end
 
-                    if RealUI.isPatch then
-                        _G.hooksecurefunc(_G.C_CurrencyInfo, "SetCurrencyBackpack", UpdateTracked)
-                    else
-                        _G.hooksecurefunc("SetCurrencyBackpack", UpdateTracked)
-                    end
+                    _G.hooksecurefunc(_G.C_CurrencyInfo, "SetCurrencyBackpack", UpdateTracked)
 
                     if not currencyStates[dbc.currencyState]:IsValid() then
                         UpdateState(block)
@@ -2411,17 +2381,11 @@ function Infobar:CreateBlocks()
                                 wipe(tokens)
                                 for i = 1, _G.MAX_WATCHED_TOKENS do
                                     if data["token"..i] then
-                                        local tokenName, _, texture
-                                        if RealUI.isPatch then
-                                            local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(data["token"..i])
-                                            tokenName = currencyInfo.name
-                                            texture = currencyInfo.iconFileID
-                                        else
-                                            tokenName, _, texture = _G.GetCurrencyInfo(data["token"..i])
-                                        end
+                                        local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(data["token"..i])
+
                                         local amount = data[data["token"..i]] or 0
-                                        tokens[i] = TOKEN_STRING:format(texture, amount)
-                                        tokens[i+3] = tokenName
+                                        tokens[i] = TOKEN_STRING:format(currencyInfo.iconFileID, amount)
+                                        tokens[i+3] = currencyInfo.name
                                     else
                                         tokens[i] = "---"
                                     end

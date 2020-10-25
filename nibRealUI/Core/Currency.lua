@@ -24,66 +24,34 @@ local function UpdateCurrency()
     local currencyDB = RealUI.db.global.currency
     local charDB = currencyDB[RealUI.realmInfo.realmNormalized][characterInfo.faction][characterInfo.name]
 
-    if RealUI.isPatch then
-        local i, limit = 1, _G.C_CurrencyInfo.GetCurrencyListSize()
-        while i <= limit do
-            local currencyInfo = _G.C_CurrencyInfo.GetCurrencyListInfo(i)
-            if currencyInfo.isHeader then
-                if not currencyInfo.isHeaderExpanded then
-                    collapsed[currencyInfo.name] = true
-                    _G.C_CurrencyInfo.ExpandCurrencyList(i, true)
-                    limit = _G.C_CurrencyInfo.GetCurrencyListSize()
-                end
+    local i, limit = 1, _G.C_CurrencyInfo.GetCurrencyListSize()
+    while i <= limit do
+        local currencyInfo = _G.C_CurrencyInfo.GetCurrencyListInfo(i)
+        if currencyInfo.isHeader then
+            if not currencyInfo.isHeaderExpanded then
+                collapsed[currencyInfo.name] = true
+                _G.C_CurrencyInfo.ExpandCurrencyList(i, true)
+                limit = _G.C_CurrencyInfo.GetCurrencyListSize()
+            end
+        else
+            local link = _G.C_CurrencyInfo.GetCurrencyListLink(i)
+            local id = tonumber(link:match("currency:(%d+)"))
+            currencyNameToID[currencyInfo.name] = id
+            if currencyInfo.quantity > 0 then
+                charDB[id] = currencyInfo.quantity
             else
-                local link = _G.C_CurrencyInfo.GetCurrencyListLink(i)
-                local id = tonumber(link:match("currency:(%d+)"))
-                currencyNameToID[currencyInfo.name] = id
-                if currencyInfo.quantity > 0 then
-                    charDB[id] = currencyInfo.quantity
-                else
-                    charDB[id] = nil
-                end
+                charDB[id] = nil
             end
-            i = i + 1
         end
+        i = i + 1
+    end
 
-        while i > 0 do
-            local currencyInfo = _G.C_CurrencyInfo.GetCurrencyListInfo(i)
-            if currencyInfo and currencyInfo.isHeader and currencyInfo.isHeaderExpanded and collapsed[currencyInfo.name] then
-                _G.C_CurrencyInfo.ExpandCurrencyList(i, false)
-            end
-            i = i - 1
+    while i > 0 do
+        local currencyInfo = _G.C_CurrencyInfo.GetCurrencyListInfo(i)
+        if currencyInfo and currencyInfo.isHeader and currencyInfo.isHeaderExpanded and collapsed[currencyInfo.name] then
+            _G.C_CurrencyInfo.ExpandCurrencyList(i, false)
         end
-    else
-        local i, limit = 1, _G.GetCurrencyListSize()
-        while i <= limit do
-            local name, isHeader, isExpanded, _, _, count = _G.GetCurrencyListInfo(i)
-            if isHeader then
-                if not isExpanded then
-                    collapsed[name] = true
-                    _G.ExpandCurrencyList(i, 1)
-                    limit = _G.GetCurrencyListSize()
-                end
-            else
-                local link = _G.GetCurrencyListLink(i)
-                local id = tonumber(link:match("currency:(%d+)"))
-                currencyNameToID[name] = id
-                if count > 0 then
-                    charDB[id] = count
-                else
-                    charDB[id] = nil
-                end
-            end
-            i = i + 1
-        end
-
-        while i > 0 do
-            local name, isHeader, isExpanded = _G.GetCurrencyListInfo(i)
-            if isHeader and isExpanded and collapsed[name] then
-                _G.ExpandCurrencyList(i, 0)
-            end
-            i = i - 1
-        end
+        i = i - 1
     end
 
     wipe(collapsed)

@@ -249,13 +249,8 @@ function private.OnLoad()
 
 
     -- Hide default UI Scale slider and replace with RealUI button
-    if private.isPatch then
-        _G.Display_UseUIScale:Hide()
-        _G.Display_UIScaleSlider:Hide()
-    else
-        _G.Advanced_UseUIScale:Hide()
-        _G.Advanced_UIScaleSlider:Hide()
-    end
+    _G.Display_UseUIScale:Hide()
+    _G.Display_UIScaleSlider:Hide()
 
     local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
     scaleBtn:SetSize(200, 24)

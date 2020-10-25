@@ -112,36 +112,20 @@ function RealUI:HuDTestMode(isConfigMode)
 
     -- Zone Ability Button
     local ZAFFrame = _G.ZoneAbilityFrame
-    local hasZoneAbility
-    if RealUI.isPatch then
-        local zoneAbilities = _G.C_ZoneAbility.GetActiveAbilities()
-        hasZoneAbility = #zoneAbilities > 0
-        for i, spellButton in ZAFFrame.SpellButtonContainer.contentFramePool:EnumerateInactive() do
-            if isConfigMode then
-                spellButton:Disable()
-                spellButton.Icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
-            else
-                spellButton:Enable()
-            end
-        end
-
-        if not hasZoneAbility then
-            ZAFFrame:SetShown(isConfigMode)
-        end
-    else
-        if not _G.HasZoneAbility() then
-            if isConfigMode then
-                ZAFFrame:Show()
-                ZAFFrame.SpellButton:Disable()
-                ZAFFrame._show = true
-                ZAFFrame.SpellButton.Icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
-            else
-                ZAFFrame._show = false
-                ZAFFrame.SpellButton:Enable()
-                ZAFFrame:Hide()
-            end
+    local zoneAbilities = _G.C_ZoneAbility.GetActiveAbilities()
+    for i, spellButton in ZAFFrame.SpellButtonContainer.contentFramePool:EnumerateInactive() do
+        if isConfigMode then
+            spellButton:Disable()
+            spellButton.Icon:SetTexture([[Interface\ICONS\ABILITY_SEAL]])
+        else
+            spellButton:Enable()
         end
     end
+
+    if #zoneAbilities == 0 then
+        ZAFFrame:SetShown(isConfigMode)
+    end
+
     self.isConfigMode = isConfigMode
 end
 
