@@ -506,7 +506,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                         totalILvl = totalILvl + artifactILvl
                     end
 
-                    if artifactILvl < 152 then
+                    if artifactILvl < 70 then
                         totalILvl = nil
                     end
                 end
