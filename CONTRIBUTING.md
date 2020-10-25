@@ -38,41 +38,7 @@ If you would like to contribute code, a [pull request](https://help.github.com/a
   * Code and commits must follow the [Lua](#lua-styleguide) and [Git](#git-commit-messages) styleguides respectively.
   * Pull requests must pass luacheck in order to be considered for acceptance.
 
-### Getting Started ###
-
-Given the file structure of this project, it's recommended to setup symbolic links between the addons in the repo and your AddOns folder for the game. To facilitate this, [a script is available](https://gist.github.com/Gethe/aa3325ed88b2a92d23ec276c7383e034) to perform this setup. Be sure to update the file paths in the script for your local file structure. The script was written in PowerShell, but it should be fairly simple to convert into another language if desired.
-
-Most of the libraries RealUI uses are not included in the repo. Instead, they are downloaded as part of the packaging process to ensure that only the most recent versions are used. These libraries will need to be installed separately to ensure RealUI works properly.
-
-Most can be downloaded from Curse:
-  * [Ace3](https://www.curseforge.com/wow/addons/ace3)
-  * [AceGUI-3.0-SharedMediaWidets](https://www.curseforge.com/wow/addons/ace-gui-3-0-shared-media-widgets)
-  * [Aurora](https://www.curseforge.com/wow/addons/aurora) - Use the alpha version
-  * [HereBeDragons](https://www.curseforge.com/wow/addons/herebedragons)
-  * [LibChatAnims](https://www.curseforge.com/wow/addons/libchatanims)
-  * [LibDualSpec-1.0](https://www.curseforge.com/wow/addons/libdualspec-1-0)
-  * [LibIconFonts](https://www.curseforge.com/wow/addons/libiconfonts)
-  * [LibItemUpgradeInfo-1.0](https://www.curseforge.com/wow/addons/libitemupgradeinfo-1-0)
-  * [LibObjectiveProgress](https://www.curseforge.com/wow/addons/libobjectiveprogress-1-0)
-  * [LibQTip-1.0](https://www.curseforge.com/wow/addons/libqtip-1-0)
-  * [LibRangeCheck-2.0](https://www.curseforge.com/wow/addons/librangecheck-2-0)
-  * [LibSharedMedia-3.0](https://www.curseforge.com/wow/addons/libsharedmedia-3-0)
-  * [LibTextDump-1.0](https://www.curseforge.com/wow/addons/libtextdump-1-0)
-  * [LibWindow-1.1](https://www.curseforge.com/wow/addons/libwindow-1-1)
-
-
-In addition to those libraries, you will also need to clone the [RealUI branch of oUF](https://github.com/Gethe/oUF/tree/RealUI). The script linked above will also create a symlink for oUF.
-
-## Packaging ##
-
-RealUI uses a [customized fork of the BigWigsMods packager.](https://github.com/RealUI/packager/tree/RealUI_edits) This is a shell script that can be run on Windows 10 if [WSL is installed](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide), in addition to Linux or Mac. In order for this script to run properly you must have the following commands available:
-
-  * [git](http://packages.ubuntu.com/xenial/git) and [svn](http://packages.ubuntu.com/xenial/subversion) - to retrieve externals
-  * [pandoc](http://packages.ubuntu.com/xenial/pandoc) - to create a bbcode changelog for WoWI
-  * [zip and unzip](http://packages.ubuntu.com/xenial/zip) - to unpack externals and create final package
-  * [jq](http://packages.ubuntu.com/xenial/jq) - to upload the package to WoWI and create a GitHub release
-
-**Note:** While this script *can* be run locally, it's not necessary to do so as the script will be run as part of the Travis CI build. That said, a `package.bat` file is available for testing purposes.
+Check out [the wiki](https://github.com/RealUI/RealUI/wiki/Setting-up-RealUI-Dev) on how to set up a testing environment.
 
 
 ## Styleguides ##
