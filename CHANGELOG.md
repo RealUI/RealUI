@@ -1,4 +1,21 @@
-﻿## [2.2.3] - 2020-10-14 ##
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * RealUI_Inventory
+  * nibRealUI
+  * nibRealUI_Config
+
+### Fixed ###
+
+  * Item levels weren't shown on items in the Equipment Set bag
+  * Error when getting the ilvl of a player with a Legion artifact
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+## [2.2.3] - 2020-10-14 ##
 ### Modified AddOns ###
 
   * RealUI_Skins
