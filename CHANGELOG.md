@@ -9,6 +9,7 @@
 
 ### Fixed ###
 
+  * Changing skin colors wouldn't update the preview frames
   * Item levels weren't shown on items in the Equipment Set bag
   * Error when getting the ilvl of a player with a Legion artifact
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)

@@ -407,6 +407,11 @@ function RealUI.ToggleConfig(app, ...)
         end
     else
         ACD:Open(app)
+        if not RealUI:IsFrameSkinned(ACD.OpenFrames[app]) then
+            RealUI:RegisterSkinnedFrame(ACD.OpenFrames[app].frame, Color.frame)
+            RealUI:RegisterSkinnedFrame(ACD.OpenFrames[app].frame:GetChildren(), Color.button)
+        end
+
         if ... then
             ACD:SelectGroup(app, ...)
         end
