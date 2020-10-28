@@ -1,4 +1,4 @@
-﻿## [2.2.4] - 2020-10-25 ##
+## [2.2.4] - 2020-10-25 ##
 ### Modified AddOns ###
 
   * RealUI_Skins
@@ -9,6 +9,7 @@
 
 ### Fixed ###
 
+  * Error when logging into a new character
   * Changing skin colors wouldn't update the preview frames
   * Item levels weren't shown on items in the Equipment Set bag
   * Error when getting the ilvl of a player with a Legion artifact

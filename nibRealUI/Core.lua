@@ -192,6 +192,8 @@ function RealUI:UpdateLayout(layout)
 end
 
 local function UpdateSpec(...)
+    if _G.IsPlayerInitialSpec() then return end
+
     local specInfo = RealUI.charInfo.specs
     local new = _G.GetSpecialization()
     if specInfo.current.index ~= new then
