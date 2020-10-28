@@ -266,6 +266,7 @@ local realuiAddons = {
     "RealUI_Tooltips",
 
     "HereBeDragons",
+    "Grid2RaidDebuffs",
     "Kui_Nameplates",
     "Kui_Nameplates_Core",
 }
