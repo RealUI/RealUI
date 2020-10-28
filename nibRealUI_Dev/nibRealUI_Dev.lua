@@ -255,14 +255,19 @@ local auroraAddons = {
 }
 
 local realuiAddons = {
-    "EasyMail",
     "nibRealUI",
-    "nibRealUI_Dev",
     "nibRealUI_Config",
+    "nibRealUI_Dev",
     "RealUI_Bugs",
+    "RealUI_Chat",
+    "RealUI_CombatText",
     "RealUI_Inventory",
     "RealUI_Skins",
     "RealUI_Tooltips",
+
+    "HereBeDragons",
+    "Kui_Nameplates",
+    "Kui_Nameplates_Core",
 }
 
 local function AddOptDeps(list, optDeps)
