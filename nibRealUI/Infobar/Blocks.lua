@@ -631,6 +631,8 @@ function Infobar:CreateBlocks()
 
         local errors
         local function ShowBugIcon(block, callback, errorObject)
+            if not errorObject then return end
+
             --[[errorObject = {
                 message = sanitizedMessage,
                 stack = table.concat(tmp, "\n"),
@@ -647,11 +649,9 @@ function Infobar:CreateBlocks()
                     func = function() _G.RealUI_ErrorFrame:ShowError() end,
                 })
 
-                Infobar:debug("add lines", #menuList)
                 block.dataObj.icon = fa["bug"]
                 block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = Color.red:GetRGB()
             end
-
             block.dataObj.value = #errors
         end
 
@@ -662,9 +662,7 @@ function Infobar:CreateBlocks()
             iconFont = iconFont,
             OnEnable = function(block)
                 errors = _G.BugGrabber:GetDB()
-                if #errors > 0 then
-                    ShowBugIcon(block, "OnEnable", errors[#errors])
-                end
+                ShowBugIcon(block, "OnEnable", errors[#errors])
 
                 _G.BugGrabber.RegisterCallback(block, "BugGrabber_BugGrabbed", ShowBugIcon, block)
             end,

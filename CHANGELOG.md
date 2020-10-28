@@ -14,6 +14,7 @@
 
 ### Fixed ###
 
+  * Newly created characters wouldn't have profiles set correctly
   * Error when logging into a new character
   * Changing skin colors wouldn't update the preview frames
   * Item levels weren't shown on items in the Equipment Set bag
