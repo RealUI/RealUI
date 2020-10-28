@@ -2348,7 +2348,7 @@ function Infobar:CreateBlocks()
                         UpdateBlock(block)
                     end
                 else
-                    self:RegisterMessage("NormalizedRealmReceived", block.dataObj.OnEnable, block)
+                    self:RegisterMessage("CurrencyDBInitialized", block.dataObj.OnEnable, block)
                 end
             end,
             OnClick = function(block, ...)

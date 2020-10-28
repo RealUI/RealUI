@@ -695,7 +695,7 @@ function Tooltips:OnInitialize()
     if RealUI.realmInfo.realmNormalized then
         private.SetupCurrency()
     else
-        self:RegisterMessage("NormalizedRealmReceived", private.SetupCurrency)
+        self:RegisterMessage("CurrencyDBInitialized", private.SetupCurrency)
     end
 
     if self.db.global.showIDs then
