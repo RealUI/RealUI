@@ -2008,8 +2008,15 @@ function Infobar:CreateBlocks()
             text = "",
             OnEnable = function(block)
                 Infobar:debug("spec: OnEnable", block.side)
-                UpdateGearSets()
-                UpdateBlock(block)
+                if _G.IsPlayerInitialSpec() then
+                    if block:IsVisible() then
+                        local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                        Infobar:HideBlock(block.name, block.dataObj, info)
+                    end
+                else
+                    UpdateGearSets()
+                    UpdateBlock(block)
+                end
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
@@ -2053,9 +2060,15 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("spec: OnEvent", block.side, event, ...)
+                if _G.IsPlayerInitialSpec() then return end
+
                 if event == "EQUIPMENT_SETS_CHANGED" then
                     UpdateGearSets()
                 elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
+                    if not block:IsVisible() then
+                        local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                        Infobar:ShowBlock(block.name, block.dataObj, info)
+                    end
                     UpdateBlock(block)
 
                     if equipmentNeedsUpdate then

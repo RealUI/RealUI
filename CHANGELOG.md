@@ -7,6 +7,11 @@
   * nibRealUI
   * nibRealUI_Config
 
+### Changed ###
+
+  * The spec infobar block is now hidden for characters that have not chosen a spec
+
+
 ### Fixed ###
 
   * Error when logging into a new character
