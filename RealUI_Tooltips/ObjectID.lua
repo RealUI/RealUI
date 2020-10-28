@@ -130,7 +130,7 @@ local function SetupCurrencyTooltips()
 
     private.AddHook("SetHyperlink", setCurrencyTooltipFunction)
     private.AddHook("SetCurrencyToken", function(self, index)
-        setCurrencyTooltipFunction(self, _G.GetCurrencyListLink(index))
+        setCurrencyTooltipFunction(self, _G.C_CurrencyInfo.GetCurrencyListLink(index))
     end)
 end
 
