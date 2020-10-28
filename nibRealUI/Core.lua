@@ -9,6 +9,8 @@ local L = RealUI.L
 local db, dbc, dbg
 local debug = RealUI.GetDebug("Core")
 
+local LDS = _G.LibStub("LibDualSpec-1.0")
+
 local version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
 RealUI.verinfo = {strsplit(".", version)}
 for i = 1, 3 do
@@ -192,7 +194,15 @@ function RealUI:UpdateLayout(layout)
 end
 
 local function UpdateSpec(...)
-    if _G.IsPlayerInitialSpec() then return end
+    if _G.IsPlayerInitialSpec() then
+        LDS.currentSpec = RealUI.charInfo.specs.current.index
+
+        for addonDB, addonName in LDS:IterateDatabases() do
+            addonDB:CheckDualSpecState()
+        end
+
+        return
+    end
 
     local specInfo = RealUI.charInfo.specs
     local new = _G.GetSpecialization()
@@ -298,7 +308,7 @@ end
 
 function RealUI:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, private.layoutToProfile[1])
-    _G.LibStub("LibDualSpec-1.0"):EnhanceDatabase(self.db, "RealUI")
+    LDS:EnhanceDatabase(self.db, "RealUI")
 
     self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
     for specIndex = 1, #RealUI.charInfo.specs do
