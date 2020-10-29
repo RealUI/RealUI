@@ -91,7 +91,7 @@ local function InitTest()
         "SPELL_ENERGIZE",
     }
 
-    local specID = _G.GetSpecializationInfo(_G.GetSpecialization())
+    local specID = _G.RealUI.charInfo.specs.current.id
     local spells = _G.C_SpecializationInfo.GetSpellsDisplay(specID)
 
     local spell1ID = spells[1]

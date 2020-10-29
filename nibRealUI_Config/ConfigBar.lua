@@ -92,7 +92,7 @@ do -- Other
                             return RealUI.db.char.layout.current
                         end,
                         set = function(info, value)
-                            RealUI.db.char.layout.spec[_G.GetSpecialization()] = value
+                            RealUI.db.char.layout.spec[RealUI.charInfo.specs.current.index] = value
                             RealUI:UpdateLayout(value)
                         end,
                         order = 10,

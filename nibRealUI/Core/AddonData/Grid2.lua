@@ -1568,13 +1568,8 @@ function private.Profiles.Grid2()
         db[specIndex] = profile
     end
 
-    if _G.Grid2.ReloadProfile then
-        _G.Grid2:ReloadProfile()
-    else
-        -- print("do hack")
-        local pro = db[_G.GetSpecialization() or 0] or db
-        if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
-            _G.Grid2.db:SetProfile(pro)
-        end
+    local pro = db[RealUI.charInfo.specs.current.index] or db
+    if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
+        _G.Grid2.db:SetProfile(pro)
     end
 end
