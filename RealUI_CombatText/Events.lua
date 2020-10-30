@@ -355,3 +355,8 @@ function eventSpecial.ENVIRONMENTAL_DAMAGE(eventInfo, ...)
     eventInfo.color = GetSpellColor(school)
     private.AddEvent(eventInfo)
 end
+
+function eventSpecial.DAMAGE_SPLIT(eventInfo, ...)
+    eventInfo.eventType = "DAMAGE"
+    return eventPrefix.SPELL(eventInfo, ...)
+end
