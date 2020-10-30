@@ -326,7 +326,7 @@ function private.Profiles.Bartender4()
         db:SetDualSpecProfile(profile, specIndex)
     end
 
-    local pro = db[_G.GetSpecialization() or 0] or db
+    local pro = db[RealUI.charInfo.specs.current.index] or db
     if type(pro) == "string" and pro ~= _G.Bartender4.db:GetCurrentProfile() then
         _G.Bartender4.db:SetProfile(pro)
     end

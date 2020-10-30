@@ -103,6 +103,8 @@ local function SetupCurrency()
     end
 
     currencyDB[realm][faction][player].lastSeen = now
+
+    RealUI:SendMessage("CurrencyDBInitialized")
 end
 
 function Currency:NormalizedRealmReceived()

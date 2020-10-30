@@ -631,6 +631,8 @@ function Infobar:CreateBlocks()
 
         local errors
         local function ShowBugIcon(block, callback, errorObject)
+            if not errorObject then return end
+
             --[[errorObject = {
                 message = sanitizedMessage,
                 stack = table.concat(tmp, "\n"),
@@ -647,11 +649,9 @@ function Infobar:CreateBlocks()
                     func = function() _G.RealUI_ErrorFrame:ShowError() end,
                 })
 
-                Infobar:debug("add lines", #menuList)
                 block.dataObj.icon = fa["bug"]
                 block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = Color.red:GetRGB()
             end
-
             block.dataObj.value = #errors
         end
 
@@ -662,9 +662,7 @@ function Infobar:CreateBlocks()
             iconFont = iconFont,
             OnEnable = function(block)
                 errors = _G.BugGrabber:GetDB()
-                if #errors > 0 then
-                    ShowBugIcon(block, "OnEnable", errors[#errors])
-                end
+                ShowBugIcon(block, "OnEnable", errors[#errors])
 
                 _G.BugGrabber.RegisterCallback(block, "BugGrabber_BugGrabbed", ShowBugIcon, block)
             end,
@@ -1691,8 +1689,10 @@ function Infobar:CreateBlocks()
 
                 if type(otherValue) == "number" then
                     local restedOfs = max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                    Scale.Point(main.rested, "BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
+                    main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
+                else
+                    main.rested:Hide()
                 end
 
                 local nextState = watchStates[dbc.progressState]:GetNext()
@@ -2008,8 +2008,15 @@ function Infobar:CreateBlocks()
             text = "",
             OnEnable = function(block)
                 Infobar:debug("spec: OnEnable", block.side)
-                UpdateGearSets()
-                UpdateBlock(block)
+                if _G.IsPlayerInitialSpec() then
+                    if block:IsVisible() then
+                        local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                        Infobar:HideBlock(block.name, block.dataObj, info)
+                    end
+                else
+                    UpdateGearSets()
+                    UpdateBlock(block)
+                end
             end,
             OnEnter = function(block, ...)
                 if qTip:IsAcquired(block) then return end
@@ -2053,9 +2060,15 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("spec: OnEvent", block.side, event, ...)
+                if _G.IsPlayerInitialSpec() then return end
+
                 if event == "EQUIPMENT_SETS_CHANGED" then
                     UpdateGearSets()
                 elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
+                    if not block:IsVisible() then
+                        local info = Infobar:GetBlockInfo(block.name, block.dataObj)
+                        Infobar:ShowBlock(block.name, block.dataObj, info)
+                    end
                     UpdateBlock(block)
 
                     if equipmentNeedsUpdate then
@@ -2335,7 +2348,7 @@ function Infobar:CreateBlocks()
                         UpdateBlock(block)
                     end
                 else
-                    self:RegisterMessage("NormalizedRealmReceived", block.dataObj.OnEnable, block)
+                    self:RegisterMessage("CurrencyDBInitialized", block.dataObj.OnEnable, block)
                 end
             end,
             OnClick = function(block, ...)
