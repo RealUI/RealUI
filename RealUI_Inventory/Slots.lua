@@ -54,7 +54,7 @@ function ItemSlotMixin:Update()
     _G.SetItemButtonCount(self, itemCount)
     _G.SetItemButtonDesaturated(self, item:IsItemLocked())
 
-    if self.assignedTag == "equipment" then
+    if self:GetItemType() == "equipment" then
         self.Count:SetText(self.item:GetCurrentItemLevel())
         if quality and quality > RealUI.Enum.ItemQuality.Poor then
             self.Count:SetTextColor(_G.BAG_ITEM_QUALITY_COLORS[quality]:GetRGB())
@@ -93,6 +93,20 @@ function ItemSlotMixin:UpdateItemContext()
     local _, _, _, _, _, _, _, isFiltered = _G.GetContainerItemInfo(self:GetBagAndSlot())
     self:UpdateItemContextMatching()
     self:SetMatchesSearch(not isFiltered)
+end
+function ItemSlotMixin:GetItemType()
+    if not self.item then return end
+
+    local invType = self.item:GetInventoryType()
+    if invType then
+        if invType == _G.Enum.InventoryType.IndexBagType or invType == _G.Enum.InventoryType.IndexQuiverType then
+            return "bag"
+        elseif invType == _G.Enum.InventoryType.IndexNonEquipType then
+            return "other"
+        else
+            return "equipment"
+        end
+    end
 end
 function ItemSlotMixin:GetBagType()
     return private.GetBagTypeForBagID(self:GetBagAndSlot())

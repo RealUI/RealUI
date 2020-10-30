@@ -1,8 +1,8 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: RealUI Skins
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe
-## Version: 2.2.3
+## Version: 2.2.4
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibItemUpgradeInfo-1.0, LibSharedMedia-3.0, Masque, nibRealUI_Dev, RealUI_AsianFonts

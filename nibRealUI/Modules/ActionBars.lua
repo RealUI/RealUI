@@ -289,20 +289,6 @@ function ActionBars:ApplyABSettings(tag)
         end
         local BT4EAB = BT4:GetModule("ExtraActionBar", true)
         if BT4EAB then BT4EAB:ApplyConfig() end
-
-        local profileZAB = BT4DB["namespaces"]["ZoneAbilityBar"]["profiles"][prof]
-        if profileZAB then
-            profileZAB["position"] = {
-                ["y"] = eabY,
-                ["x"] = -(eabX + 64),
-                ["point"] = "BOTTOM",
-                ["scale"] = 0.985,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-        end
-        local BT4ZAB = BT4:GetModule("ZoneAbilityBar", true)
-        if BT4ZAB then BT4ZAB:ApplyConfig() end
     end
 
     -- Stance Bar

@@ -55,9 +55,9 @@ local function SkinAceGUI()
 
             -- Regions
             local regions = {widget.frame:GetRegions()}
-            regions[1]:SetTexture("") -- titlebg
-            regions[2]:SetTexture("") -- titlebg_l
-            regions[3]:SetTexture("") -- titlebg_r
+            regions[10]:SetTexture("") -- titlebg
+            regions[11]:SetTexture("") -- titlebg_l
+            regions[12]:SetTexture("") -- titlebg_r
 
             -- Children
             local children = {widget.frame:GetChildren()}

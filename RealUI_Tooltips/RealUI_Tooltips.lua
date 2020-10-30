@@ -506,7 +506,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                         totalILvl = totalILvl + artifactILvl
                     end
 
-                    if artifactILvl < 152 then
+                    if artifactILvl < 70 then
                         totalILvl = nil
                     end
                 end
@@ -695,7 +695,7 @@ function Tooltips:OnInitialize()
     if RealUI.realmInfo.realmNormalized then
         private.SetupCurrency()
     else
-        self:RegisterMessage("NormalizedRealmReceived", private.SetupCurrency)
+        self:RegisterMessage("CurrencyDBInitialized", private.SetupCurrency)
     end
 
     if self.db.global.showIDs then

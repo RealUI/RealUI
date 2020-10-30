@@ -206,8 +206,7 @@ tinsert(private.filterList, {
     name = _G.BAG_FILTER_EQUIPMENT,
     rank = 21,
     filter = function(slot)
-        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-        return typeID == _G.LE_ITEM_CLASS_ARMOR or typeID == _G.LE_ITEM_CLASS_WEAPON
+        return slot:GetItemType() == "equipment"
     end,
 })
 

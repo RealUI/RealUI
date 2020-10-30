@@ -206,26 +206,6 @@ function private.AddOns.Bartender4()
         ["enabled"] = false,
     }
 
-    local ZoneAbilityBar = namespaces.ZoneAbilityBar.profiles
-    ZoneAbilityBar["RealUI"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = -157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
-    ZoneAbilityBar["RealUI-Healing"] = {
-        ["version"] = 3,
-        ["position"] = {
-            ["point"] = "BOTTOM",
-            ["x"] = -157.5,
-            ["y"] = 86,
-            ["scale"] = 0.985,
-        },
-    }
-
     local BagBar = namespaces.BagBar.profiles
     BagBar["RealUI"] = {
         ["enabled"] = false,
@@ -346,7 +326,7 @@ function private.Profiles.Bartender4()
         db:SetDualSpecProfile(profile, specIndex)
     end
 
-    local pro = db[_G.GetSpecialization() or 0] or db
+    local pro = db[RealUI.charInfo.specs.current.index] or db
     if type(pro) == "string" and pro ~= _G.Bartender4.db:GetCurrentProfile() then
         _G.Bartender4.db:SetProfile(pro)
     end

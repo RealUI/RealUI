@@ -76,11 +76,7 @@ local function AddTooltipInfo(tooltip, currencyID, includePlayer)
 end
 
 local function GetCurrencyIDByIndex(index)
-    if RealUI.isPatch then
-        return tonumber(_G.C_CurrencyInfo.GetCurrencyListLink(index):match("currency:(%d+)"))
-    else
-        return Currency:GetCurrencyID(_G.GetCurrencyListInfo(index))
-    end
+    return tonumber(_G.C_CurrencyInfo.GetCurrencyListLink(index):match("currency:(%d+)"))
 end
 
 local function SetUpHooks()

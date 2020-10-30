@@ -127,19 +127,16 @@ local skinnedFrames = {}
 function RealUI:IsFrameSkinned(frame)
     return not not skinnedFrames[frame]
 end
-function RealUI:RegisterSkinnedFrame(frame, color, stripes)
-    skinnedFrames[frame] = {
-        color = color,
-        stripes = stripes
-    }
+function RealUI:RegisterSkinnedFrame(frame, color)
+    skinnedFrames[frame] = color
 end
 function RealUI:UpdateFrameStyle()
-    for frame, style in next, skinnedFrames do
-        if style.stripes then
-            Aurora.Base.SetBackdropColor(frame, style.color, private.skinsDB.frameColor.a)
-            style.stripes:SetAlpha(private.skinsDB.stripeAlpha)
+    for frame, color in next, skinnedFrames do
+        if frame._stripes then
+            Aurora.Base.SetBackdropColor(frame, color, private.skinsDB.frameColor.a)
+            frame._stripes:SetAlpha(private.skinsDB.stripeAlpha)
         else
-            Aurora.Base.SetBackdropColor(frame, style.color)
+            Aurora.Base.SetBackdropColor(frame, color)
         end
     end
 end
@@ -249,13 +246,8 @@ function private.OnLoad()
 
 
     -- Hide default UI Scale slider and replace with RealUI button
-    if private.isPatch then
-        _G.Display_UseUIScale:Hide()
-        _G.Display_UIScaleSlider:Hide()
-    else
-        _G.Advanced_UseUIScale:Hide()
-        _G.Advanced_UIScaleSlider:Hide()
-    end
+    _G.Display_UseUIScale:Hide()
+    _G.Display_UIScaleSlider:Hide()
 
     local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Advanced_, "UIPanelButtonTemplate")
     scaleBtn:SetSize(200, 24)
