@@ -1689,8 +1689,10 @@ function Infobar:CreateBlocks()
 
                 if type(otherValue) == "number" then
                     local restedOfs = max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
-                    Scale.Point(main.rested, "BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
+                    main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
+                else
+                    main.rested:Hide()
                 end
 
                 local nextState = watchStates[dbc.progressState]:GetNext()

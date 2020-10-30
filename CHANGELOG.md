@@ -14,6 +14,7 @@
 
 ### Fixed ###
 
+  * The rested XP bar would still be shown after rested XP is gone
   * Newly created characters wouldn't have profiles set correctly
   * Error when logging into a new character
   * Changing skin colors wouldn't update the preview frames
