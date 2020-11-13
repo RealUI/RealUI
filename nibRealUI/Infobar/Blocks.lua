@@ -886,7 +886,7 @@ function Infobar:CreateBlocks()
             if not name then return end
 
             if _G.IsAltKeyDown() then
-                _G.InviteToGroup(name)
+                C_PartyInfo.InviteUnit(name)
             else
                 _G.SetItemRef("player:"..name, "|Hplayer:"..name.."|h["..name.."|h", "LeftButton")
             end
@@ -1094,7 +1094,7 @@ function Infobar:CreateBlocks()
             if not name[1] then return end
 
             if _G.IsAltKeyDown() then
-                _G.InviteToGroup(name[1])
+                C_PartyInfo.InviteUnit(name[1])
             elseif name[3] then
                 _G.SetItemRef("BNplayer:"..name[2]..":"..name[3], "|HBNplayer:"..name[2].."|h["..name[2].."|h", "LeftButton")
             else
