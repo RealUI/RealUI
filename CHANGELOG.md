@@ -9,6 +9,7 @@
 ### Changed ###
 
   * The spec infobar block is now hidden for characters that have not chosen a spec
+  * RealUI cooldown counts should now only show on action buttons
 
 
 ### Fixed ###
