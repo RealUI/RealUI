@@ -14,6 +14,7 @@ local excludedUIMapIDs = {
     [579] = true, -- Lunarfall: Alliance garrison
     [585] = true, -- Frostwall: Horde garrison
     [646] = true, -- Scenario: The Broken Shore
+    [1543] = true, -- The Maw
 }
 local SOUND_TIMEOUT = 20
 
