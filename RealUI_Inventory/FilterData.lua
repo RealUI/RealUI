@@ -45,6 +45,7 @@ private.travel = {
     [29796] = true,      -- Socrethar's Teleportation Stone
     [147870] = true,     -- Strange Dimensional Shard
     [167075] = true,     -- Ultrasafe Transporter: Mechagon
+    [180817] = true,     -- Cypher of Relocation
 
     -- Weapons/Armor
     [46874] = true,      -- Argent Crusader's Tabard
