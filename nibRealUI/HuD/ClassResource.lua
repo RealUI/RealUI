@@ -145,11 +145,18 @@ function ClassResource:CreateClassPower(unitFrame, unit)
         ClassPower:SetPoint("CENTER", -160, -40.5)
     end
 
-    function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType)
+    function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType, chargedIndex)
         self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
         for i = 1, max or 0 do -- max is nil for classes without a secondary power
             local icon, isUnused = element[i], i > cur
             self:debug("Icon", i, isUnused)
+
+            if chargedIndex and i == chargedIndex then
+                icon.bg:Hide()
+            else
+                icon.bg:Show()
+            end
+
             if isUnused then
                 if not pointDB.hideempty or self.configMode then
                     icon:Show()
@@ -220,17 +227,22 @@ function ClassResource:CreateStagger(unitFrame, unit)
 
     FramePoint:PositionFrame(self, Stagger, {"class", "bar", "position"})
 
+    function Stagger.PostUpdateColor(element, r, g, b)
+        self:debug("Stagger:PostUpdateColor", r, g, b)
+        if self.configMode then
+            local color = unitFrame.colors.power[_G.BREWMASTER_POWER_BAR_NAME][2]
+            r, g, b = color[1], color[2], color[3]
+        end
+        element:SetStatusBarColor(RealUI.ColorDarken(0.5, r, g, b))
+    end
     function Stagger.PostUpdate(element, cur, max)
         local r, g, b = element:GetStatusBarColor()
         self:debug("Stagger:PostUpdate", cur, max, r, g, b)
         if self.configMode then
             cur = max * 0.3
             element:SetValue(cur)
-            local color = unitFrame.colors.power[_G.BREWMASTER_POWER_BAR_NAME][2]
-            r, g, b = color[1], color[2], color[3]
         end
         element:SetShown(cur > 0)
-        element:SetStatusBarColor(RealUI.ColorDarken(0.5, r, g, b))
     end
 
     return Stagger
