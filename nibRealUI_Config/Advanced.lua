@@ -640,9 +640,7 @@ do -- Inventory
                 get = function() return _G.FILTER_NAME end,
                 set = function(_, value)
                     local tag = value:lower()
-
-                    Inventory:CreateCustomFilter(tag, value)
-                    AddFilter(tag)
+                    AddFilter(Inventory:CreateCustomFilter(tag, value, true))
                 end,
                 order = 3,
             },

@@ -2,7 +2,6 @@
 ### Modified AddOns ###
 
   * RealUI_Skins
-  * RealUI_Tooltips
   * RealUI_Inventory
   * nibRealUI
   * nibRealUI_Config
@@ -14,6 +13,7 @@
 
 ### Fixed ###
 
+  * Error when creating a new filter bag
   * Error when tracking a Shadowlands campaign quest
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 

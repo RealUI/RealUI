@@ -46,7 +46,7 @@ local menu do
     end
     function menu:AddFilter(filter)
         local tag = filter.tag
-        tinsert(menuList, filter:GetIndex(), {
+        tinsert(menuList, filter:GetIndex() + 1, {
             text = filter.name,
             func = SetToFilter,
             arg1 = tag,
@@ -65,14 +65,14 @@ local menu do
         })
     end
     function menu:RemoveFilter(filter)
-        tremove(menuList, filter:GetIndex())
+        tremove(menuList, filter:GetIndex() + 1)
     end
     function menu:UpdateLines()
         wipe(menuList)
+        tinsert(menuList, 1, title)
         for i, filter in Inventory:IndexedFilters() do
             self:AddFilter(filter)
         end
-        tinsert(menuList, 1, title)
     end
     function menu:Open(slot)
         if slot.item then
@@ -119,10 +119,10 @@ do
         return self.rank < filters[filterTag].rank
     end
     function FilterMixin:Delete()
+        menu:RemoveFilter(self)
         filters[self.tag] = nil
         Inventory.db.global.customFilters[self.tag] = nil
         tremove(Inventory.db.global.filters, self:GetIndex())
-        menu:UpdateLines()
 
         for itemID, tag in next, Inventory.db.global.assignedFilters do
             if tag == self.tag then
@@ -139,18 +139,25 @@ do
         private.CreateFilterBag(Inventory.reagent, filter)
 
         filters[filter.tag] = filter
+        return filter
     end
-    function Inventory:CreateCustomFilter(tag, name)
+    function Inventory:CreateCustomFilter(tag, name, fromConfig)
         if not Inventory.db.global.customFilters[tag] then
             Inventory.db.global.customFilters[tag] = name
             tinsert(Inventory.db.global.filters, 1, tag)
         end
 
-        Inventory:CreateFilter({
+        local filter = Inventory:CreateFilter({
             tag = tag,
             name = name,
             isCustom = true,
         })
+
+        if fromConfig then
+            menu:AddFilter(filter)
+        end
+
+        return filter
     end
 
 
