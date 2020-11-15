@@ -14,6 +14,27 @@
 
 ### Fixed ###
 
+  * Error when tracking a Shadowlands campaign quest
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+## [2.2.4] - 2020-10-29 ##
+### Modified AddOns ###
+
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * RealUI_Inventory
+  * nibRealUI
+  * nibRealUI_Config
+
+### Changed ###
+
+  * The spec infobar block is now hidden for characters that have not chosen a spec
+
+
+### Fixed ###
+
   * The rested XP bar would still be shown after rested XP is gone
   * Newly created characters wouldn't have profiles set correctly
   * Error when logging into a new character
