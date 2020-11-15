@@ -6,6 +6,8 @@ local ADDON_NAME, ns = ...
 -- RealUI --
 local debug = _G.RealUI.GetDebug("Dev")
 _G.RealUI.isDev = true
+ns.isClassic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
+ns.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 
 if _G.IsTestBuild() then
     _G.DisableAddOn("Blizzard_Deprecated")
