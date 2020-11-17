@@ -14,6 +14,7 @@
 
 ### Fixed ###
 
+  * Addon control was not always updated
   * Error when creating a new filter bag
   * Error when tracking a Shadowlands campaign quest
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
