@@ -59,7 +59,7 @@ UnitFrames.player = {
         bg:SetAllPoints(AdditionalPower)
         bg:SetColorTexture(.2, .2, 1)
 
-        function AdditionalPower.PostUpdate(this, unit, cur, max)
+        function AdditionalPower.PostUpdate(this, cur, max)
             if cur == max then
                 if this:IsVisible() then
                     this:Hide()

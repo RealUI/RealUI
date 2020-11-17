@@ -613,32 +613,34 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
 
     for _, questInfo in next, quests do
         local questID = questInfo.questID
-        local questLogInfo = _G.C_QuestLog.GetInfo(_G.C_QuestLog.GetLogIndexForQuestID(questID))
-        local isSuperTracked = _G.C_SuperTrack.GetSuperTrackedQuestID() == questID
+        if not _G.C_QuestLog.IsQuestCalling(questID) then
+            local questLogInfo = _G.C_QuestLog.GetInfo(_G.C_QuestLog.GetLogIndexForQuestID(questID))
+            local isSuperTracked = _G.C_SuperTrack.GetSuperTrackedQuestID() == questID
 
-        if (not questLogInfo.isHidden and questLogInfo.hasLocalPOI) or isSuperTracked then
-            MinimapAdv:debug("Add POI", questID, questInfo.x, questInfo.y, zoneInfo.mapID)
-            local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(questInfo.x, questInfo.y, zoneInfo.mapID)
-            if xCoord and yCoord and instanceID then
-                -- Check if there's already a POI for this quest.
-                local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
-                if not poiButton then
-                    if _G.C_QuestLog.IsComplete(questID) then
-                        poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "normal")
-                    else
-                        numNumericQuests = numNumericQuests + 1
-                        poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "numeric", numNumericQuests)
+            if (not questLogInfo.isHidden and questLogInfo.hasLocalPOI) or isSuperTracked then
+                MinimapAdv:debug("Add POI", questID, questInfo.x, questInfo.y, zoneInfo.mapID)
+                local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(questInfo.x, questInfo.y, zoneInfo.mapID)
+                if xCoord and yCoord and instanceID then
+                    -- Check if there's already a POI for this quest.
+                    local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
+                    if not poiButton then
+                        if _G.C_QuestLog.IsComplete(questID) then
+                            poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "normal")
+                        else
+                            numNumericQuests = numNumericQuests + 1
+                            poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "numeric", numNumericQuests)
+                        end
                     end
-                end
 
-                if _G.QuestUtils_IsQuestWatched(questID) or not db.poi.watchedOnly then
-                    poiButton:Add(xCoord, yCoord, instanceID)
-                    if isSuperTracked then
-                        _G.QuestPOI_SelectButton(poiButton)
+                    if _G.QuestUtils_IsQuestWatched(questID) or not db.poi.watchedOnly then
+                        poiButton:Add(xCoord, yCoord, instanceID)
+                        if isSuperTracked then
+                            _G.QuestPOI_SelectButton(poiButton)
+                        end
                     end
+                elseif RealUI.isDev then
+                    _G.print("Could not place POI", questID, xCoord, yCoord, instanceID)
                 end
-            elseif RealUI.isDev then
-                _G.print("Could not place POI", questID, xCoord, yCoord, instanceID)
             end
         end
     end

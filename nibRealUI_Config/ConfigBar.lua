@@ -178,7 +178,7 @@ do -- Other
                 }
             },
             actionbars = {
-                name = _G.ACTIONBARS_LABEL:sub(67), -- cut out the "new feature icon"
+                name = _G.ACTIONBARS_LABEL,
                 desc = L["ActionBars_ActionBarsDesc"],
                 type = "group",
                 args = {

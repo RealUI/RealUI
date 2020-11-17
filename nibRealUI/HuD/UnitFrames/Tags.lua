@@ -84,21 +84,24 @@ tags.Methods["realui:name"] = function(unit, realUnit)
         isDead = true
     end
 
+
     local unitTag = unit:match("^(%w-)%d") or unit
 
     --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
     local name = _G.UnitName(unit) or ""
     name = AbbreviateName(name, UnitFrames[unitTag].nameLength)
 
-    local nameColor = "ffffffff"
+    local nameColor = "|cffffffff"
     if isDead then
-        nameColor = "ff3f3f3f"
+        nameColor = "|cff3f3f3f"
     elseif UnitFrames.db.profile.overlay.classColorNames then
         --print("Class color names", unit)
-        local _, class = _G.UnitClass(unit)
-        nameColor = _G.CUSTOM_CLASS_COLORS[class].colorStr
+        local raidcolor = tags.Methods.raidcolor(unit)
+        if raidcolor then
+            nameColor = raidcolor
+        end
     end
-    return ("|c%s%s|r"):format(nameColor, name)
+    return ("%s%s|r"):format(nameColor, name)
 end
 tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 
@@ -130,7 +133,7 @@ tags.Methods["realui:healthValue"] = function(unit)
 
     return RealUI.ReadableNumber(_G.UnitHealth(unit))
 end
-tags.Events["realui:healthValue"] = "UNIT_HEALTH_FREQUENT UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
+tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
 -- Health %
 tags.Methods["realui:healthPercent"] = function(unit)

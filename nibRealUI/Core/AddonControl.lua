@@ -234,7 +234,6 @@ function AddonControl:CreateOptionsFrame()
             else
                 cbBase[cnt]:SetPoint("TOPLEFT", prevCBBase, "BOTTOMLEFT", 0, 5)
             end
-            cbBase[cnt]:SetChecked(db.addonControl[addon].profiles.base.use)
             cbBase[cnt]:SetScript("OnClick", function(checkBtn)
                 db.addonControl[checkBtn.addon].profiles.base.use = checkBtn:GetChecked() and true or false
                 cbPosition[checkBtn.id]:SetShown(PositionAddOns[checkBtn.addon] and checkBtn:GetChecked())
@@ -252,7 +251,6 @@ function AddonControl:CreateOptionsFrame()
                 cbPosition[cnt]:SetPoint("TOPLEFT", prevCBPosition, "BOTTOMLEFT", 0, 5)
             end
             if not(PositionAddOns[addon]) or not(db.addonControl[addon].profiles.base.use) then cbPosition[cnt]:Hide() end
-            cbPosition[cnt]:SetChecked(db.addonControl[addon].control.position)
             cbPosition[cnt]:SetScript("OnClick", function(checkBtn)
                 db.addonControl[checkBtn.addon].control.position = checkBtn:GetChecked() and true or false
             end)
@@ -285,6 +283,16 @@ function AddonControl:CreateOptionsFrame()
             prevReset = bReset[cnt]
         end
     end
+
+    acO:SetScript("OnShow", function()
+        local addon
+        for i = 1, cnt do
+            addon = cbPosition[i].addon
+
+            cbPosition[i]:SetChecked(db.addonControl[addon].control.position)
+            cbBase[i]:SetChecked(db.addonControl[addon].profiles.base.use)
+        end
+    end)
     acO:SetHeight(84 + (cnt * 19.25))
     acO:Show()
 end

@@ -144,6 +144,23 @@ local function CreateTimer(cd)
     return timer
 end
 
+local ignore = {}
+local function ShouldHaveTimer(cd)
+    if ignore[cd] then return end
+
+    if cd:IsForbidden() or cd.noCooldownCount then
+        ignore[cd] = true
+        return
+    end
+
+    local parent = cd:GetParent()
+    if parent.AutoCastShine then
+        return true
+    else
+        ignore[cd] = true
+    end
+end
+
 ----------
 function CooldownCount:RefreshMod()
     db = self.db.profile
@@ -171,11 +188,11 @@ function CooldownCount:OnEnable()
     }
 
     _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
-        if not cd:IsForbidden() and not cd.noCooldownCount then
-            if not cd.timer then
-                cd.timer = CreateTimer(cd)
+        if ShouldHaveTimer(cd) then
+            if not cd._timer then
+                cd._timer = CreateTimer(cd)
             end
-            cd.timer:Start(start, duration, modRate)
+            cd._timer:Start(start, duration, modRate)
         end
     end)
     _G.SetCVar("countdownForCooldowns", 0)
