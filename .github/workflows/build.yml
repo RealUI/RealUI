@@ -14,11 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Install and run Luacheck
-      run: |
-        sudo apt-get install luarocks
-        luarocks install --local luacheck
-        /home/runner/.luarocks/bin/luacheck . --no-color -q
+    - name: Run Luacheck
+      uses: nebularg/actions-luacheck@v1
+      with:
+        args: --no-color -q
+        annotate: warning
         
     - name: Create Package
       env:
