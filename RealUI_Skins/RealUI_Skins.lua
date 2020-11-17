@@ -235,6 +235,7 @@ function private.OnLoad()
         -- BarberShopFrame.ResetButton - Anchored to CancelButton
         BarberShopFrame.AcceptButton:SetPoint("BOTTOMRIGHT", CharCustomizeFrame, -30, 15)
         -- BarberShopFrame.PriceFrame - Anchored to AcceptButton
+        CharCustomizeFrame.Options.spacing = 5
     end)
 
     -- Disable user selected addon skins
