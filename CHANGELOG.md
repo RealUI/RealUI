@@ -1,4 +1,4 @@
-## [2.2.4] - 2020-10-29 ##
+## [2.2.5] - 2020-11-16 ##
 ### Modified AddOns ###
 
   * RealUI_Skins
@@ -359,6 +359,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[2.2.5]: https://github.com/RealUI/RealUI/compare/2.2.4...2.2.5
 [2.2.4]: https://github.com/RealUI/RealUI/compare/2.2.3...2.2.4
 [2.2.3]: https://github.com/RealUI/RealUI/compare/2.2.2...2.2.3
 [2.2.2]: https://github.com/RealUI/RealUI/compare/2.2.1...2.2.2
