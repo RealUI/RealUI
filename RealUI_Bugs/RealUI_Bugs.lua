@@ -114,7 +114,7 @@ local errorFrame do
 end
 
 
-local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Herror:%s|h[%s: %s]|h|r]=]
+local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Hgarrmission:error:%s|h[%s: %s]|h|r]=]
 local REALUI_ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
 |cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
@@ -312,14 +312,13 @@ errorFrame:SetScript("OnShow", function(self)
     self:Update()
 end)
 
-local oldOnHyperlinkShow = _G.ChatFrame_OnHyperlinkShow
-function _G.ChatFrame_OnHyperlinkShow(frame, link, ...)
-    local linkType, errorID =  _G.strsplit(":", link)
-    if linkType == "error" then
+_G.hooksecurefunc("SetItemRef", function(link, _, _, frame)
+    local _, option, errorID = _G.strsplit(":", link)
+    if option == "error" then
         return errorFrame:ShowError(errorID)
     end
-    return oldOnHyperlinkShow(frame, link, ...)
-end
+end)
+
 
 _G.SLASH_ERROR1 = '/error'
 function _G.SlashCmdList.ERROR(str)
