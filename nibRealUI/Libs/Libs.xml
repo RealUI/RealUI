@@ -25,5 +25,5 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="Fixes\BlizzBugsSuck.lua"/>
     <Script file="Fixes\InspectFix.lua"/>
     <Script file="Fixes\LibStrataFix.lua"/>
-    <Script file="Fixes\Taint.lua"/>
+    <Include file="Fixes\Taintless.xml"/>
 </Ui>
