@@ -1,3 +1,21 @@
+## [Unreleased] ##
+### Modified AddOns ###
+
+  * RealUI_Skins
+  * RealUI_Inventory
+  * nibRealUI
+  * nibRealUI_Config
+
+### Added ###
+
+  * Support for the Kyrian ability for Rogues
+
+### Fixed ###
+
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
 ## [2.2.5] - 2020-11-16 ##
 ### Modified AddOns ###
 
@@ -10,7 +28,6 @@
 
   * The spec infobar block is now hidden for characters that have not chosen a spec
   * RealUI cooldown counts should now only show on action buttons
-
 
 ### Fixed ###
 
@@ -33,7 +50,6 @@
 ### Changed ###
 
   * The spec infobar block is now hidden for characters that have not chosen a spec
-
 
 ### Fixed ###
 

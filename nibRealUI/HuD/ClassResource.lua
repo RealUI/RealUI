@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next
+-- luacheck: globals next max
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -145,20 +145,37 @@ function ClassResource:CreateClassPower(unitFrame, unit)
         ClassPower:SetPoint("CENTER", -160, -40.5)
     end
 
-    function ClassPower.PostUpdate(element, cur, max, hasMaxChanged, powerType, chargedIndex)
-        self:debug("ClassPower:PostUpdate", cur, max, hasMaxChanged, powerType)
-        for i = 1, max or 0 do -- max is nil for classes without a secondary power
-            local icon, isUnused = element[i], i > cur
+    local lastChargedIndex
+    function ClassPower.PostUpdate(element, curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
+        self:debug("ClassPower:PostUpdate", curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
+        local showUnused = not pointDB.hideempty or self.configMode
+        local hasChargedPoint = chargedIndex and chargedIndex <= curPoints
+
+        local color = element.__owner.colors.power[powerType]
+        local r, g, b = color[1], color[2], color[3]
+        local mu = element[1].bg.multiplier
+
+        if lastChargedIndex and lastChargedIndex ~= chargedIndex then
+            element[lastChargedIndex].bg:SetVertexColor(r * mu, g * mu, b * mu)
+            element[lastChargedIndex]:SetStatusBarColor(r, g, b)
+        end
+        lastChargedIndex = chargedIndex
+
+        for i = 1, maxPoints or 0 do
+            local icon, isUnused = element[i], i > curPoints
             self:debug("Icon", i, isUnused)
 
-            if chargedIndex and i == chargedIndex then
-                icon.bg:Hide()
-            else
-                icon.bg:Show()
+
+            if i == chargedIndex then
+                if hasChargedPoint then
+                    r, g, b = 0.25, 0.75, 1
+                    icon.bg:SetVertexColor(r * mu, g * mu, b * mu)
+                    icon:SetStatusBarColor(r, g, b)
+                end
             end
 
             if isUnused then
-                if not pointDB.hideempty or self.configMode then
+                if showUnused or (chargedIndex and i <= chargedIndex) then
                     icon:Show()
                 else
                     icon:Hide()
