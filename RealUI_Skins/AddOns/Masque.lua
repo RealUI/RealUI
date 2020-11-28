@@ -5,7 +5,7 @@ function private.AddOns.Masque()
     MSQ:AddSkin("RealUI", {
         Template = "Default",
         Shape = "Square",
-        Masque_Version = 80200,
+        API_VERSION = 90002,
 
         Author = "Gethe",
         Version = 2,
