@@ -273,8 +273,8 @@ function ActionBars:ApplyABSettings(tag)
         local eabX, eabY
 
         -- Calculate X, Y
-        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 4
-        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 61
+        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 35
+        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 96
 
         local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
         if profileEAB then
@@ -282,7 +282,7 @@ function ActionBars:ApplyABSettings(tag)
                 ["y"] = eabY,
                 ["x"] = eabX,
                 ["point"] = "BOTTOM",
-                ["scale"] = 0.985,
+                ["scale"] = 0.98,
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }

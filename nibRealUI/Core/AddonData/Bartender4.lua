@@ -181,19 +181,21 @@ function private.AddOns.Bartender4()
     local ExtraActionBar = namespaces.ExtraActionBar.profiles
     ExtraActionBar["RealUI"] = {
         ["version"] = 3,
+        ["hideArtwork"] = true,
         ["position"] = {
             ["point"] = "BOTTOM",
-            ["x"] = 157.5,
-            ["y"] = 86,
+            ["x"] = 126.5,
+            ["y"] = 120,
             ["scale"] = 0.985,
         },
     }
     ExtraActionBar["RealUI-Healing"] = {
         ["version"] = 3,
+        ["hideArtwork"] = true,
         ["position"] = {
             ["point"] = "BOTTOM",
-            ["x"] = 157.5,
-            ["y"] = 86,
+            ["x"] = 126.5,
+            ["y"] = 120,
             ["scale"] = 0.985,
         },
     }
