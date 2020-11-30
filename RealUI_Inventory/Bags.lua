@@ -572,6 +572,7 @@ local function CreateBag(bagType)
     main.bagType = bagType
     main.bagIDs = info.bagIDs
     Inventory[bagType] = main
+    tinsert(_G.UISpecialFrames, info.name)
 
     if bagType == "reagent" then
         local deposit = CreateFeatureButton(main, _G.BAGSLOTTEXT, "download",
