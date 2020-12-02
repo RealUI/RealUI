@@ -135,8 +135,11 @@ do
         local filter = _G.Mixin(info, FilterMixin)
 
         private.CreateFilterBag(Inventory.main, filter)
-        private.CreateFilterBag(Inventory.bank, filter)
-        private.CreateFilterBag(Inventory.reagent, filter)
+
+        if filter.tag ~= "new" then
+            private.CreateFilterBag(Inventory.bank, filter)
+            private.CreateFilterBag(Inventory.reagent, filter)
+        end
 
         filters[filter.tag] = filter
         return filter
@@ -184,7 +187,10 @@ tinsert(private.filterList, {
     name = _G.NEW,
     rank = 1,
     filter = function(slot)
-        return _G.C_NewItems.IsNewItem(slot:GetBagAndSlot())
+        local bagID, slotIndex = slot:GetBagAndSlot()
+        if Inventory.main.new[bagID] then
+            return Inventory.main.new[bagID][slotIndex]
+        end
     end,
 })
 

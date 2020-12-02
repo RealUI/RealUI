@@ -12,6 +12,7 @@
 
 ### Changed ###
 
+  * The "New Items" filter bag will now retain it items until the reset button is clicked
   * The default positions of the zone ability and extra action have been updated
 
 ### Fixed ###

@@ -347,12 +347,13 @@ function InventoryBagMixin:Init()
     self.events = {
         "UNIT_INVENTORY_CHANGED",
         "PLAYER_SPECIALIZATION_CHANGED",
-        "BAG_NEW_ITEMS_UPDATED",
     }
 
+    self.new = {}
     self:SetPoint("BOTTOMRIGHT", -100, 100)
     self:RegisterEvent("QUEST_ACCEPTED")
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+    self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
 end
 function InventoryBagMixin:OnEvent(event, ...)
     if event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
@@ -417,13 +418,22 @@ end
 
 function private.AddSlotToBag(slot, bagID)
     --Inventory:debug("private.AddSlotToBag", slot, bagID)
-    local main = Inventory[private.GetBagTypeForBagID(bagID)]
+    local bagType = private.GetBagTypeForBagID(bagID)
+    local main = Inventory[bagType]
+
+    local _, slotIndex = slot:GetBagAndSlot()
+    if bagType == "main" and _G.C_NewItems.IsNewItem(bagID, slotIndex) then
+        if not main.new[bagID] then
+            main.new[bagID] = {}
+        end
+        main.new[bagID][slotIndex] = true
+    end
 
     local assignedTag = Inventory.db.global.assignedFilters[slot.item:GetItemID()]
-    local _, slotIndex = slot:GetBagAndSlot()
     if Inventory.db.char.junk[bagID] and Inventory.db.char.junk[bagID][slotIndex] then
         assignedTag = "junk"
     end
+
     if not Inventory:GetFilter(assignedTag) then
         for i, filter in Inventory:IndexedFilters() do
             if filter:DoesMatchSlot(slot) then
@@ -519,10 +529,13 @@ function private.CreateFilterBag(main, filter)
 
     if tag == "new" then
         bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(self)
-            for _, slot in ipairs(bag.slots) do
-                _G.C_NewItems.RemoveNewItem(slot:GetBagAndSlot())
+            for bagID, items in next, main.new do
+                for slotIndex in next, items do
+                    _G.C_NewItems.RemoveNewItem(bagID, slotIndex)
+                end
             end
 
+            wipe(bag.new)
             main:Update()
         end)
 
