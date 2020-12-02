@@ -11,29 +11,38 @@ local L = RealUI.L
 local CombatText = private.CombatText
 
 local scrollAreas = {}
-local function CreateScrollArea(scrollType)
+local function CreateScrollArea(scrollType, scrollDirection)
     local scrollSettings = CombatText.db.global[scrollType]
 
     local scrollArea = _G.CreateFrame("Frame", "CombatText_"..scrollType, _G.UIParent)
     scrollArea:SetSize(scrollSettings.size.x, scrollSettings.size.y)
     FramePoint:PositionFrame(CombatText, scrollArea, {"global", scrollType, "position"})
     scrollArea.scrollType = scrollType
+    scrollArea.direction = scrollDirection
+    if scrollDirection == "alt" then
+        scrollArea.state = true
+    end
 
     scrollAreas[scrollType] = scrollArea
     return scrollArea
 end
 
 function private.CreateScrollAreas()
-    CreateScrollArea("incoming").direction = "down"
-    CreateScrollArea("outgoing").direction = "up"
-    CreateScrollArea("notification")
+    CreateScrollArea("incoming", "down")
+    CreateScrollArea("outgoing", "up")
+    CreateScrollArea("notification", "alt")
 end
 
 local function DisplayEvent(eventInfo, text)
     local scrollArea = scrollAreas[eventInfo.scrollType]
+    local scrollDirection = scrollArea.direction
+    if scrollDirection == "alt" then
+        scrollDirection = scrollArea.state and "up" or "down"
+        scrollArea.state = not scrollArea.state
+    end
 
     local scrollLine = private.GetScrollLine(eventInfo.scrollType, eventInfo.isSticky)
-    scrollLine:AddToScrollArea(scrollArea)
+    scrollLine:AddToScrollArea(scrollArea, scrollDirection)
     scrollLine:DisplayText(text, eventInfo.icon)
 end
 

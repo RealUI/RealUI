@@ -27,20 +27,23 @@ local function ScrollLineFactory(pool)
     scrollLine.scrollAnim = scrollAnim
 
     local alphaIn = scrollAnim:CreateAnimation("Alpha")
+    alphaIn:SetOrder(1)
     alphaIn:SetFromAlpha(0)
     alphaIn:SetToAlpha(1)
     scrollLine.alphaIn = alphaIn
 
+    local translate = scrollAnim:CreateAnimation("Translation")
+    translate:SetOrder(2)
+    translate:SetScript("OnPlay", function(trans)
+        trans:SetOffset(0, trans.offset)
+    end)
+    scrollLine.translate = translate
+
     local alphaOut = scrollAnim:CreateAnimation("Alpha")
+    alphaOut:SetOrder(3)
     alphaOut:SetFromAlpha(1)
     alphaOut:SetToAlpha(0)
     scrollLine.alphaOut = alphaOut
-
-    local translate = scrollAnim:CreateAnimation("Translation")
-    translate:SetScript("OnPlay", function(trans)
-        translate:SetOffset(0, translate.offset)
-    end)
-    scrollLine.translate = translate
 
     scrollLine:OnLoad()
     return scrollLine
@@ -52,6 +55,7 @@ end
 
 local ScrollLineMixin = {}
 function ScrollLineMixin:OnLoad()
+    self.type = "normal"
     self:SetOptions()
 end
 function ScrollLineMixin:SetOptions()
@@ -61,21 +65,25 @@ function ScrollLineMixin:SetOptions()
 
     local animDuration = CombatText.db.global.scrollDuration
     self.alphaIn:SetDuration(animDuration * 0.2)
-
     self.translate:SetDuration(animDuration)
-
     self.alphaOut:SetDuration(animDuration * 0.2)
-    self.alphaOut:SetStartDelay(animDuration * 0.8)
 end
-function ScrollLineMixin:AddToScrollArea(scrollArea)
+function ScrollLineMixin:AddToScrollArea(scrollArea, scrollDirection)
     self.scrollArea = scrollArea
 
-    if scrollArea.direction == "up" then
+    local prevLine = scrollArea.prevLine
+    if prevLine and prevLine.type == self.type then
+        if not prevLine.translate:IsPlaying() then
+            prevLine.translate:Play()
+        end
+    end
+
+    self.translate.offset = scrollArea:GetHeight()
+    if scrollDirection == "up" then
         self:SetPoint("BOTTOM", scrollArea)
-        self.translate.offset = scrollArea:GetHeight()
-    elseif scrollArea.direction == "down" then
+    elseif scrollDirection == "down" then
         self:SetPoint("TOP", scrollArea)
-        self.translate.offset = -scrollArea:GetHeight()
+        self.translate.offset = -self.translate.offset
     end
 
     local scrollSettings = CombatText.db.global[scrollArea.scrollType]
@@ -85,6 +93,8 @@ function ScrollLineMixin:AddToScrollArea(scrollArea)
     else
         self.icon:SetPoint("RIGHT", self.text, "LEFT", -2, 0)
     end
+
+    scrollArea.prevLine = self
 end
 function ScrollLineMixin:DisplayText(text, icon)
     self.text:SetText(text)
@@ -104,7 +114,10 @@ end
 
 local StickyLineMixin = _G.CreateFromMixins(ScrollLineMixin)
 function StickyLineMixin:OnLoad()
+    self.type = "sticky"
+
     local scale = self.scrollAnim:CreateAnimation("Scale")
+    scale:SetOrder(1)
     scale:SetFromScale(3, 3)
     scale:SetToScale(1, 1)
     self.scale = scale
@@ -124,17 +137,14 @@ function StickyLineMixin:SetOptions()
     self.translate:SetStartDelay(animDuration * 0.4)
 
     self.alphaOut:SetDuration(animDuration * 0.2)
-    self.alphaOut:SetStartDelay(animDuration * 0.8)
 end
-function StickyLineMixin:AddToScrollArea(scrollArea)
-    ScrollLineMixin.AddToScrollArea(self, scrollArea)
+function StickyLineMixin:AddToScrollArea(scrollArea, scrollDirection)
+    ScrollLineMixin.AddToScrollArea(self, scrollArea, scrollDirection)
 
     self:ClearAllPoints()
     self:SetPoint("CENTER", scrollArea)
-    if scrollArea.direction then
+    if scrollDirection then
         self.translate.offset = self.translate.offset / 2
-    else
-        self.translate.offset = 0
     end
 end
 
