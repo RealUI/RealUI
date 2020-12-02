@@ -1419,8 +1419,9 @@ function Infobar:CreateBlocks()
             GetStats = function(XP)
                 return _G.UnitXP("player"), _G.UnitXPMax("player"), _G.GetXPExhaustion()
             end,
-            GetColor = function(XP, isRested)
-                if isRested then
+            GetColor = function(XP)
+                local exhaustionStateID = _G.GetRestState()
+                if exhaustionStateID == 1 then
                     return 0.0, 0.39, 0.88
                 else
                     return 0.58, 0.0, 0.5
@@ -1622,12 +1623,8 @@ function Infobar:CreateBlocks()
             GetStats = function(Honor)
                 return _G.UnitHonor("player"), _G.UnitHonorMax("player")
             end,
-            GetColor = function(Honor, isRested)
-                if isRested then
-                    return 1.0, 0.71, 0
-                else
-                    return 1.0, 0.24, 0
-                end
+            GetColor = function(Honor)
+                return 1.0, 0.24, 0
             end,
             IsValid = function(Honor)
                 return true
@@ -1654,9 +1651,7 @@ function Infobar:CreateBlocks()
             local main = self.main
             local r, g, b = watchStates[dbc.progressState]:GetColor()
             main:SetStatusBarColor(r, g, b, alpha)
-
-            r, g, b = watchStates[dbc.progressState]:GetColor(true)
-            main.rested:SetColorTexture(r, g, b, alpha)
+            main.rested:SetColorTexture(r, g, b, alpha * 0.3)
 
             local nextState = watchStates[dbc.progressState]:GetNext()
             for i = 1, 2 do
@@ -1691,8 +1686,10 @@ function Infobar:CreateBlocks()
                     local restedOfs = max(((curValue + otherValue) / maxValue) * main:GetWidth(), 0)
                     main.rested:SetPoint("BOTTOMRIGHT", main, "BOTTOMLEFT", restedOfs, 0)
                     main.rested:Show()
+                    main.restedTick:Show()
                 else
                     main.rested:Hide()
+                    main.restedTick:Hide()
                 end
 
                 local nextState = watchStates[dbc.progressState]:GetNext()

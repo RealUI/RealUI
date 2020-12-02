@@ -776,6 +776,13 @@ function Infobar:CreateBar()
     watch.main.rested = watch.main:CreateTexture(nil, "ARTWORK")
     Scale.Point(watch.main.rested, "TOPLEFT", mainBar, "TOPRIGHT")
     watch.main.rested:Hide()
+
+    watch.main.restedTick = watch.main:CreateTexture(nil, "ARTWORK")
+    watch.main.restedTick:SetColorTexture(1, 1, 1, 0.5)
+    Scale.Point(watch.main.restedTick, "TOPLEFT", watch.main.rested, "TOPRIGHT")
+    Scale.Point(watch.main.restedTick, "BOTTOMRIGHT", watch.main.rested, "BOTTOMRIGHT", 1, 0)
+    watch.main.restedTick:Hide()
+
     for i = 1, 2 do
         local bar = _G.CreateFrame("StatusBar", nil, frame)
         bar:SetStatusBarTexture(RealUI.textures.plain)
