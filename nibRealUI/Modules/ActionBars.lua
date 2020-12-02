@@ -273,14 +273,20 @@ function ActionBars:ApplyABSettings(tag)
         local eabX, eabY
 
         -- Calculate X, Y
-        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 - 35
-        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 96
+        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 + 5.5
+        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 6
+
+        _G.ExtraActionButton1:ClearAllPoints()
+        _G.ExtraActionButton1:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOM", eabX - 1, eabY)
+
+        _G.ZoneAbilityFrame.SpellButtonContainer:ClearAllPoints()
+        _G.ZoneAbilityFrame.SpellButtonContainer:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOM", -eabX, eabY)
 
         local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
         if profileEAB then
             profileEAB["position"] = {
-                ["y"] = eabY,
-                ["x"] = eabX,
+                ["y"] = 200,
+                ["x"] = 0,
                 ["point"] = "BOTTOM",
                 ["scale"] = 0.98,
                 ["growHorizontal"] = "RIGHT",

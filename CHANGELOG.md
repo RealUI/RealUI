@@ -10,6 +10,10 @@
 
   * Support for the Kyrian ability for Rogues
 
+### Changed ###
+
+  * The default positions of the zone ability and extra action have been updated
+
 ### Fixed ###
 
   * Bags would not always close when hitting the Escape key
