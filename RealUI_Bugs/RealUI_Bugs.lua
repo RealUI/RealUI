@@ -1,4 +1,4 @@
-local ADDON_NAME = ...
+local ADDON_NAME, private = ...
 
 -- Lua Globals --
 -- luacheck: globals select tostring next
@@ -294,6 +294,10 @@ function errorFrame.ADDON_LOADED(addon)
     if addon == "nibRealUI" then
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
+    end
+
+    if addon == "Blizzard_DebugTools" then
+        _G.FrameStackTooltip:HookScript("OnTooltipSetFramestack", private.SetFramestack)
     end
 end
 

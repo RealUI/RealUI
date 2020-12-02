@@ -11,3 +11,4 @@ Init.lua
 
 Libs\Libs.xml
 RealUI_Bugs.lua
+RegionInfo.lua
