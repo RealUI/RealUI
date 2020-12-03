@@ -535,7 +535,7 @@ function private.CreateFilterBag(main, filter)
                 end
             end
 
-            wipe(bag.new)
+            wipe(main.new)
             main:Update()
         end)
 
