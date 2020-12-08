@@ -282,22 +282,7 @@ end
 function MainBagMixin:IterateBagIDs()
     return ipairs(self.bagIDs)
 end
-function MainBagMixin:RecheckEvictableContinuables() -- from ContinuableContainer
-    local areAllLoaded = true
-    if self.evictableObjects then
-        for i, evictableObject in ipairs(self.evictableObjects) do
-            if not evictableObject:IsItemDataCached() then
-                areAllLoaded = false
 
-                self.numOutstanding = self.numOutstanding + 1
-
-                -- The version of this in FrameXML uses `continuable` instead of `evictableObject`
-                tinsert(self.continuables, evictableObject:ContinueWithCancelOnItemLoad(self.onContinuableLoadedCallback))
-            end
-        end
-    end
-    return areAllLoaded
-end
 function MainBagMixin:OnEvent(event, ...)
     if event == "ITEM_LOCK_CHANGED" then
         local bagID, slotIndex = ...
