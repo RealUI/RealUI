@@ -90,8 +90,17 @@ function ItemSlotMixin:Update()
     self:UpdateItemContext()
 end
 function ItemSlotMixin:UpdateItemCooldown()
+    local cooldown = _G[self:GetName().."Cooldown"]
     _G[self:GetName().."Cooldown"]:Hide()
-    _G.ContainerFrame_UpdateCooldown((self:GetBagAndSlot()), self)
+
+    local start, duration, enable = _G.GetContainerItemCooldown(self:GetBagAndSlot())
+    _G.CooldownFrame_Set(cooldown, start, duration, enable)
+
+    if duration > 0 and enable == 0 then
+        _G.SetItemButtonTextureVertexColor(self, 0.4, 0.4, 0.4)
+    else
+        _G.SetItemButtonTextureVertexColor(self, 1, 1, 1)
+    end
 end
 function ItemSlotMixin:UpdateItemContext()
     local _, _, _, _, _, _, _, isFiltered = _G.GetContainerItemInfo(self:GetBagAndSlot())
