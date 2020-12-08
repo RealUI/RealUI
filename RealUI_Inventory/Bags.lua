@@ -247,12 +247,14 @@ function MainBagMixin:UpdateSlots()
     local numSkipped = 0
     for i, filter in Inventory:IndexedFilters() do
         local bag = self.bags[filter.tag]
-        if #bag.slots <= 0 then
-            numSkipped = numSkipped + 1
-        else
-            columnHeight, columnBase = bag:UpdateSize(columnHeight, columnBase, numSkipped)
-            bag:Show()
-            numSkipped = 0
+        if bag then
+            if #bag.slots <= 0 then
+                numSkipped = numSkipped + 1
+            else
+                columnHeight, columnBase = bag:UpdateSize(columnHeight, columnBase, numSkipped)
+                bag:Show()
+                numSkipped = 0
+            end
         end
     end
 end
