@@ -21,6 +21,9 @@ function _G.ToggleAllBags()
     private.Toggle()
 end
 
+--local oldOpenAllBagsMatchingContext = _G.OpenAllBagsMatchingContext
+_G.OpenAllBagsMatchingContext = _G.OpenAllBags
+
 --local oldToggleBackpack = _G.ToggleBackpack
 _G.ToggleBackpack = _G.ToggleAllBags
 
