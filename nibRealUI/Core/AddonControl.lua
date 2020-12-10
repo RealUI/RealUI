@@ -24,12 +24,10 @@ local RealUIAddOns = {
 
     ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
     ["Kui_Nameplates_Core"] =    {isAce = false, db = "KuiNameplatesCoreCharacterSaved", profKey = "profile"},
-    ["mikScrollingBattleText"] = {isAce = false, db = "MSBTProfiles_SavedVarsPerChar", profKey = "currentProfileName"},
 }
 local RealUIAddOnsOrder = {
     "DBM",
     "Masque",
-    "mikScrollingBattleText",
     "Bartender4",
     "Raven",
     "Skada",
@@ -202,7 +200,6 @@ function AddonControl:CreateOptionsFrame()
         ["DBM"] = true,
         ["Bartender4"] = true,
         ["Raven"] = true,
-        ["mikScrollingBattleText"] = true,
     }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
@@ -363,16 +360,6 @@ function AddonControl:OnInitialize()
                     },
                 },
                 ["Raven"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI"},
-                        layout =        {use = false,   key = "Healing"},
-                    },
-                    control = {
-                        position = true,
-                        style = false,
-                    },
-                },
-                ["mikScrollingBattleText"] = {
                     profiles = {
                         base =          {use = true,    key = "RealUI"},
                         layout =        {use = false,   key = "Healing"},

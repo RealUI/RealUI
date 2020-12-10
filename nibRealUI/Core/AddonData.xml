@@ -7,7 +7,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <Script file="AddonData\Grid2.lua"/>
     <Script file="AddonData\Kui_Nameplates.lua"/>
     <Script file="AddonData\Masque.lua"/>
-    <Script file="AddonData\mikScrollingBattleText.lua"/>
     <Script file="AddonData\Raven.lua"/>
     <Script file="AddonData\Skada.lua"/>
 </Ui>

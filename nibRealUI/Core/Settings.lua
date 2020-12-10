@@ -71,7 +71,7 @@ local characterCVars = {
 -- CVars
 local function SetDefaultCVars()
     debug("SetDefaultCVars")
-    if _G.IsAddOnLoaded("MikScrollingBattleText") then
+    if _G.IsAddOnLoaded("RealUI_CombatText") then
         accountCVars["enableFloatingCombatText"] = 0   -- Turn off Combat Text
     end
 

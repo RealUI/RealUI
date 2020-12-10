@@ -61,8 +61,6 @@ local RealUISet = {
     "Kui_Nameplates",
     "Kui_Nameplates_Core",
     "Masque",
-    "MikScrollingBattleText",
-    "MSBTOptions",
     "nibRealUI",
     "nibRealUI_Config",
     "Raven",
