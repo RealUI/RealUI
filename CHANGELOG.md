@@ -18,6 +18,7 @@
 
 ### Fixed ###
 
+  * The UI scale button was in the wrong place
   * Bags would not always close when hitting the Escape key
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
