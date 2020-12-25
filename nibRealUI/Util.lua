@@ -387,8 +387,10 @@ function RealUI.TryInCombat(func, alert, ...)
 
         args[func] = {...}
 
-        if not alertShown or alert == false then
-            RealUI:Notification(RealUI.L["Alert_CombatLockdown"], true, alert or RealUI.L["Alert_WaitCombatLockdown"], nil, [[Interface\DialogFrame\UI-Dialog-Icon-AlertNew]])
+        if not alertShown then
+            if alert ~= false then
+                RealUI:Notification(RealUI.L["Alert_CombatLockdown"], true, alert or RealUI.L["Alert_WaitCombatLockdown"], nil, [[Interface\DialogFrame\UI-Dialog-Icon-AlertNew]])
+            end
             alertShown = true
         end
     else
