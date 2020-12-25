@@ -3,6 +3,7 @@
 
   * RealUI_Skins
   * RealUI_Inventory
+  * RealUI_Tooltips
   * nibRealUI
   * nibRealUI_Config
 
@@ -19,6 +20,7 @@
 
 ### Fixed ###
 
+  * Error when mousing over characters with low level artifact weapons
   * The UI scale button was in the wrong place
   * Bags would not always close when hitting the Escape key
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)

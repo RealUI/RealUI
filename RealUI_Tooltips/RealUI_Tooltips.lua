@@ -506,7 +506,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                         totalILvl = totalILvl + artifactILvl
                     end
 
-                    if artifactILvl < 70 then
+                    if artifactILvl < 20 then
                         totalILvl = nil
                     end
                 end
@@ -516,7 +516,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                     numItems = 16
                 end
 
-                if hasTwoHander and not isDualWield then
+                if totalILvl and (hasTwoHander and not isDualWield) then
                     -- Two handers are counted twice
                     totalILvl = totalILvl + hasTwoHander
                 end
