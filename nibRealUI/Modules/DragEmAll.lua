@@ -265,7 +265,7 @@ local function _UpdateFrames()
     end
 end
 local function UpdateFrames()
-    RealUI.TryInCombat(_UpdateFrames)
+    RealUI.TryInCombat(_UpdateFrames, false)
 end
 
 local function ResetFrames()
@@ -367,7 +367,7 @@ function DragEmAll:OnEnable()
 
     self:RegisterEvent("ADDON_LOADED")
     RealUI:RegisterChatCommand("resetFrames", function()
-        RealUI.TryInCombat(ResetFrames)
+        RealUI.TryInCombat(ResetFrames, false)
     end)
 end
 

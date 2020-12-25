@@ -12,6 +12,7 @@
 
 ### Changed ###
 
+  * There is no longer an in-combat alert when opening moved frames
   * Tweaked xp bar colors when rested
   * The "New Items" filter bag will now retain items until it's explicitly reset or a UI reload
   * The default positions of the zone ability and extra action have been updated
