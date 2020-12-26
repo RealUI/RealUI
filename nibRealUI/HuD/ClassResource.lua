@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next max
+-- luacheck: globals next max floor ceil
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -148,10 +148,12 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     local lastChargedIndex
     function ClassPower.PostUpdate(element, curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
         if not powerType then return end
-
         self:debug("ClassPower:PostUpdate", curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
+
         local showUnused = not pointDB.hideempty or self.configMode
+        local hasPartial = (curPoints - floor(curPoints)) > 0
         local hasChargedPoint = chargedIndex and chargedIndex <= curPoints
+        self:debug("data", showUnused, hasPartial, hasChargedPoint)
 
         local color = element.__owner.colors.power[powerType]
         local r, g, b = color[1], color[2], color[3]
@@ -164,9 +166,10 @@ function ClassResource:CreateClassPower(unitFrame, unit)
         lastChargedIndex = chargedIndex
 
         for i = 1, maxPoints or 0 do
-            local icon, isUnused = element[i], i > curPoints
-            self:debug("Icon", i, isUnused)
-
+            local icon = element[i]
+            local isPartial = hasPartial and ceil(curPoints) == i
+            local isUnused = i > ceil(curPoints)
+            self:debug("Icon", i, isPartial, isUnused)
 
             if i == chargedIndex then
                 if hasChargedPoint then
@@ -174,6 +177,12 @@ function ClassResource:CreateClassPower(unitFrame, unit)
                     icon.bg:SetVertexColor(r * mu, g * mu, b * mu)
                     icon:SetStatusBarColor(r, g, b)
                 end
+            end
+
+            if hasPartial and isPartial then
+                icon:SetAlpha(0.5)
+            else
+                icon:SetAlpha(1)
             end
 
             if isUnused then
