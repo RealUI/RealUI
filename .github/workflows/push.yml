@@ -1,9 +1,9 @@
-name: Pull Request
+name: Push
 
-on: pull_request
+on: push
 
 jobs:
-  pull_request:
+  push:
     runs-on: ubuntu-latest
 
     steps:
