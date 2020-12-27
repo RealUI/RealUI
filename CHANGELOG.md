@@ -1,4 +1,4 @@
-﻿## [2.2.6] ##
+## [2.2.6] ##
 ### Modified AddOns ###
 
   * RealUI_Skins
@@ -20,6 +20,7 @@
 
 ### Fixed ###
 
+  * Error when opening config bar
   * Barber Shop options were out of place for some
   * Partial Soul Shards were not shown for Destro Locks
   * Error when mousing over characters with low level artifact weapons

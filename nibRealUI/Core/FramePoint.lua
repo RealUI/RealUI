@@ -43,6 +43,9 @@ function FramePoint:UnlockMod(mod)
 end
 
 function FramePoint:IsModLocked(mod)
+    if not modules[mod] then
+        return true
+    end
     return modules[mod].isLocked
 end
 
@@ -106,10 +109,6 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
         optionPath = optionPath,
         dragFrame = dragFrame,
     }
-end
-
-function FramePoint:IsModLocked(mod)
-    return modules[mod].isLocked
 end
 
 function FramePoint:RefreshMod()
