@@ -20,6 +20,7 @@
 
 ### Fixed ###
 
+  * Barber Shop options were out of place for some
   * Partial Soul Shards were not shown for Destro Locks
   * Error when mousing over characters with low level artifact weapons
   * The UI scale button was in the wrong place
