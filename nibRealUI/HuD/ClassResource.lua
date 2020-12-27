@@ -147,7 +147,7 @@ function ClassResource:CreateClassPower(unitFrame, unit)
 
     local lastChargedIndex
     function ClassPower.PostUpdate(element, curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
-        if not powerType then return end
+        if not curPoints or not powerType then return end
         self:debug("ClassPower:PostUpdate", curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
 
         local showUnused = not pointDB.hideempty or self.configMode
