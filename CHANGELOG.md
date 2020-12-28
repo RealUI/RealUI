@@ -22,6 +22,7 @@
 
 ### Fixed ###
 
+  * Minimap in Torghast was black
   * Error when opening config bar
   * Barber Shop options were out of place for some
   * Partial Soul Shards were not shown for Destro Locks

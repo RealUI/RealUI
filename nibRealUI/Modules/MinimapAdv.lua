@@ -370,9 +370,6 @@ function MinimapAdv:UpdateMinimapPosition()
     local isLeft = mapPoints.isLeft
 
     -- Set new size and position
-    _G.Minimap:SetFrameStrata("LOW")
-    _G.Minimap:SetFrameLevel(1)
-
     _G.Minimap:SetSize(db.position.size, db.position.size)
     _G.Minimap:SetScale(scale)
     _G.Minimap:SetAlpha(opacity)
@@ -1325,6 +1322,11 @@ local function Minimap_OnLeave()
     MinimapAdv:FadeButtons()
 end
 
+---- Hybrid Minimap
+local function SetupHybridMinimap()
+    _G.HybridMinimap.MapCanvas:SetUseMaskTexture(false)
+end
+
 ------------
 -- EVENTS --
 ------------
@@ -1408,6 +1410,8 @@ function MinimapAdv:ADDON_LOADED(event, ...)
         _G.C_Timer.After(0.1, HideCommandBar)
         _G.OrderHallCommandBar.SetShown = HideCommandBar
         _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
+    elseif addon == "Blizzard_HybridMinimap" then
+        SetupHybridMinimap()
     end
 
     self:UpdateButtonCollection()
@@ -1760,10 +1764,25 @@ local function SetUpMinimapFrame()
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
 
     -- Create New Border
-    local bg = _G.Minimap:CreateTexture(nil, "BACKGROUND")
-    bg:SetPoint("TOPLEFT", -1, 1)
-    bg:SetPoint("BOTTOMRIGHT", 1, -1)
-    bg:SetColorTexture(0, 0, 0)
+    local top = _G.Minimap:CreateTexture(nil, "BACKGROUND")
+    top:SetPoint("TOPLEFT", -1, 1)
+    top:SetPoint("BOTTOMRIGHT", _G.Minimap, "TOPRIGHT", 1, 0)
+    top:SetColorTexture(0, 0, 0)
+
+    local bottom = _G.Minimap:CreateTexture(nil, "BACKGROUND")
+    bottom:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, 0)
+    bottom:SetPoint("BOTTOMRIGHT", 1, -1)
+    bottom:SetColorTexture(0, 0, 0)
+
+    local left = _G.Minimap:CreateTexture(nil, "BACKGROUND")
+    left:SetPoint("TOPLEFT", -1, 1)
+    left:SetPoint("BOTTOMRIGHT", _G.Minimap, "BOTTOMLEFT", 0, -1)
+    left:SetColorTexture(0, 0, 0)
+
+    local right = _G.Minimap:CreateTexture(nil, "BACKGROUND")
+    right:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 0, 1)
+    right:SetPoint("BOTTOMRIGHT", 1, -1)
+    right:SetColorTexture(0, 0, 0)
 
     -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
@@ -1841,6 +1860,10 @@ function MinimapAdv:OnEnable()
         _G.LoadAddOn("HereBeDragons")
         HBD = _G.LibStub("HereBeDragons-2.0")
         HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
+    end
+
+    if _G.HybridMinimap then
+        SetupHybridMinimap()
     end
 
     -- Create frames, register events, begin the Minimap
