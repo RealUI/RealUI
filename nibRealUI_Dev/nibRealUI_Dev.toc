@@ -1,8 +1,9 @@
 ## Interface: 90001
 ## Title: nibRealUI Dev
 ## Notes: Development assistant for RealUI
-## RequiredDeps: RealUI_Bugs
+## Version: 2.2.6
 ## LoadWith: RealUI_Bugs
+## RequiredDeps: RealUI_Bugs
 
 nibRealUI_Dev.lua
 test.lua

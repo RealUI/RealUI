@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals select tostring next
@@ -113,14 +113,19 @@ local errorFrame do
     errorFrame.NextError = nextError
 end
 
+local coreVersion
+local versions = {
+    nibRealUI_Config = "RealUI_Config-",
+    nibRealUI_Dev = "RealUI_Dev-",
+    RealUI_Bugs = "RealUI_Bugs-",
+    RealUI_Chat = "RealUI_Chat-",
+    RealUI_CombatText = "RealUI_CombatText-",
+    RealUI_Inventory = "RealUI_Inventory-",
+    RealUI_Skins = "RealUI_Skins-",
+    RealUI_Tooltips = "RealUI_Tooltips-",
+}
 
 local CHAT_ERROR_FORMAT = [=[|cFFFF2020|Hgarrmission:error:%s|h[%s: %s]|h|r]=]
-local REALUI_ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
-|cFFFFD200Stack:|r|cFFFFFFFF %s|r
-|cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
-|cFFFFD200RealUI Version:|r %s
-|cFFFFD200Locals:|r
-|cFFFFFFFF%s|r]]
 local ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFD200Stack:|r|cFFFFFFFF %s|r
 |cFFFFD200Time:|r|cFFFFFFFF %s|r |cFFFFD200Index:|r|cFFFFFFFF %d/%d|r
@@ -150,9 +155,20 @@ local FormatError do
     local STRING_TEMPLATE = c.GRAY .. "%1[string |r" .. c.BLUE .. "\"%2\"|r" .. c.GRAY .. "]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
     local NAME_TEMPLATE   = c.PINK .. "'%1'|r"
 
+    local function FindRealUI(msg)
+        for name, version in next, versions do
+            msg = msg:gsub(name, version)
+        end
+        return msg:gsub("nibRealUI", coreVersion)
+    end
+
     function FormatError(msg)
         msg = msg and _G.tostring(msg)
         if not msg then return "None" end
+
+        if coreVersion then
+            msg = FindRealUI(msg)
+        end
 
         msg = msg:gsub("%.%.%.[IA]?[nd]?[td]?[eO]?[rn]?[fs]?a?c?e?\\", "")
         msg = msg:gsub("Interface\\", "")
@@ -225,8 +241,6 @@ local function GetNavigationButtonEnabledStates(count, index)
     return false, false;
 end
 
-local _, _, _, _, reason = _G.GetAddOnInfo("nibRealUI")
-local hasRealUI, RealUI_Version = reason ~= "MISSING", _G.GetAddOnMetadata(ADDON_NAME, "Version")
 function errorFrame:Update()
     local errors = _G.BugGrabber:GetDB()
     local numErrors = #errors
@@ -246,11 +260,7 @@ function errorFrame:Update()
         local editbox = self.ScrollFrame.Text
         local msg, stack, locals = FormatError(err.message), FormatError(err.stack), FormatError(err.locals)
 
-        if hasRealUI then
-            editbox:SetText(REALUI_ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, RealUI_Version, locals))
-        else
-            editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
-        end
+        editbox:SetText(ERROR_FORMAT:format(err.counter, msg, stack, err.time, self.index, numErrors, locals))
         editbox:HighlightText(0, 0)
         editbox:SetCursorPosition(0)
     end
@@ -291,7 +301,14 @@ function errorFrame.ADDON_LOADED(addon)
         _G.RealUI_Debug = {}
     end
 
+    if versions[addon] then
+        local version = _G.GetAddOnMetadata(addon, "Version")
+        versions[addon] = versions[addon]..version
+    end
+
     if addon == "nibRealUI" then
+        coreVersion = _G.GetAddOnMetadata(addon, "Version")
+        coreVersion = "RealUI_Core-"..coreVersion
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
     end

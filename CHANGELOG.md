@@ -1,8 +1,9 @@
 ## [2.2.6] ##
 ### Modified AddOns ###
 
-  * RealUI_Skins
+  * RealUI_Bugs
   * RealUI_Inventory
+  * RealUI_Skins
   * RealUI_Tooltips
   * nibRealUI
   * nibRealUI_Config
@@ -13,6 +14,7 @@
 
 ### Changed ###
 
+  * RealUI addons will now show their individual version in error messages
   * There is no longer an in-combat alert when opening moved frames
   * Tweaked xp bar colors when rested
   * The "New Items" filter bag will now retain items until it's explicitly reset or a UI reload
