@@ -1,9 +1,9 @@
-name: Push
+name: Luacheck
 
-on: push
+on: [push, pull_request]
 
 jobs:
-  push:
+  pull_request:
     runs-on: ubuntu-latest
 
     steps:

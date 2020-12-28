@@ -1,0 +1,37 @@
+name: Monthly Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * 6'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: What day it it?
+      id: date
+      run: |
+        echo "::set-output name=day::$(date +%d)"
+
+    - name: Check
+      run: |
+        echo ${{ steps.date.outputs.day }}
+        echo ${{ github.event }}
+        echo ${{ github.event_name }}
+        echo ${{ github.event_path }}
+        echo ${{ github.ref }}
+
+    - name: Set release
+      id: release
+      if: (steps.date.outputs.day <= 7) || (github.event_name == 'workflow_dispatch')
+      uses: onemedical/action-general-autotag@main
+      with:
+        GITHUB_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
+        source_file: "nibRealUI/nibRealUI.toc"
+        extraction_regex: "\\s*##\\s*Version\\s*:\\s*(\\d+\\.\\d+\\.\\d+)"
+        tag_format: "{version}"
+        tag_message: "release"

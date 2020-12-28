@@ -1,0 +1,28 @@
+name: Create Release Package
+
+on:
+  create:
+
+jobs:
+  package:
+    if: contains(github.ref, 'beta') != true
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Check
+      run: |
+        echo ${{ github.event }}
+        echo ${{ github.event_name }}
+        echo ${{ github.event_path }}
+        echo ${{ github.ref }}
+
+    - name: Create Release Package
+      env:
+        CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+        GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -s https://raw.githubusercontent.com/Gethe/packager/RealUI/release.sh -o release.sh
+        bash release.sh -L -p 88269 -w 16068
