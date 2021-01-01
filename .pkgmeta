@@ -86,8 +86,7 @@ externals:
         tag: latest
 
     RealUI_Tooltips/Libs/LibObjectiveProgress-1.0:
-        url: https://repos.curseforge.com/wow/libobjectiveprogress-1-0
-        type: hg
+        url: https://github.com/MMOSimca/LibObjectiveProgress-1.0.git
         tag: latest
 
 manual-changelog:
