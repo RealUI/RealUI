@@ -71,7 +71,9 @@ local menu do
         wipe(menuList)
         tinsert(menuList, 1, title)
         for i, filter in Inventory:IndexedFilters() do
-            self:AddFilter(filter)
+            if filter:IsEnabled() then
+                self:AddFilter(filter)
+            end
         end
     end
     function menu:Open(slot)
@@ -110,6 +112,7 @@ do
         private.Update()
     end
     function FilterMixin:DoesMatchSlot(slot)
+        if not self:IsEnabled() then return false end
         if self.filter then
             return self.filter(slot)
         end
@@ -129,6 +132,15 @@ do
                 Inventory.db.global.assignedFilters[itemID] = nil
             end
         end
+    end
+    function FilterMixin:SetEnabled(enabled)
+        Inventory.db.global.disabledFilters[self.tag] = not enabled
+        menu:UpdateLines()
+    end
+    function FilterMixin:IsEnabled()
+        if self.isCustom then return true end
+        --print("FilterMixin:IsEnabled", self.tag, not Inventory.db.global.disabledFilters[self.tag])
+        return not Inventory.db.global.disabledFilters[self.tag]
     end
 
     function Inventory:CreateFilter(info)

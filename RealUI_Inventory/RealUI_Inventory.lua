@@ -15,7 +15,8 @@ local defaults = {
         sellJunk = true,
         filters = {},
         assignedFilters = {},
-        customFilters = {}
+        customFilters = {},
+        disabledFilters = {}
     },
     char = {
         junk = {},

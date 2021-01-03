@@ -561,7 +561,9 @@ do -- Inventory
         args.filters.args[tag.."Index"] = {
             name = filter.name,
             type = "input",
-            width = "half",
+            disabled = function()
+                return not filter:IsEnabled()
+            end,
             get = function() return tostring(filter:GetIndex()) end,
             set = function(_, value)
                 filter:SetIndex(tonumber(value))
@@ -573,7 +575,11 @@ do -- Inventory
         args.filters.args[tag.."Up"] = {
             name = _G.TRACKER_SORT_MANUAL_UP,
             type = "execute",
-            width = filter.isCustom and 1.05 or 1.3,
+            disabled = function()
+                --print("Up:disabled", tag, filter:IsEnabled())
+                return not filter:IsEnabled()
+            end,
+            width = 0.8,
             func = function()
                 filter:SetIndex(filter:GetIndex() - 1)
             end,
@@ -584,7 +590,10 @@ do -- Inventory
         args.filters.args[tag.."Down"] = {
             name = _G.TRACKER_SORT_MANUAL_DOWN,
             type = "execute",
-            width = filter.isCustom and 1.05 or 1.3,
+            disabled = function()
+                return not filter:IsEnabled()
+            end,
+            width = 0.8,
             func = function()
                 filter:SetIndex(filter:GetIndex() + 1)
             end,
@@ -605,6 +614,40 @@ do -- Inventory
                 args.filters.args[tag.."Down"] = nil
                 args.filters.args[tag.."Delete"] = nil
 
+                ACR:NotifyChange("RealUI")
+                Inventory.Update()
+            end,
+            order = function()
+                return (filter:GetIndex() * 10) + 3
+            end,
+        }
+        args.filters.args[tag.."Disable"] = {
+            name = _G.DISABLE,
+            type = "execute",
+            hidden = function()
+                if filter.isCustom then return true end
+                return not filter:IsEnabled()
+            end,
+            width = "half",
+            func = function()
+                filter:SetEnabled(false)
+                ACR:NotifyChange("RealUI")
+                Inventory.Update()
+            end,
+            order = function()
+                return (filter:GetIndex() * 10) + 3
+            end,
+        }
+        args.filters.args[tag.."Enable"] = {
+            name = _G.ENABLE,
+            type = "execute",
+            hidden = function()
+                if filter.isCustom then return true end
+                return filter:IsEnabled()
+            end,
+            width = "half",
+            func = function()
+                filter:SetEnabled(true)
                 ACR:NotifyChange("RealUI")
                 Inventory.Update()
             end,
@@ -651,7 +694,7 @@ do -- Inventory
                 order = 10,
                 args = {
                 }
-            }
+            },
         }
 
         for i, filter in Inventory:IndexedFilters() do

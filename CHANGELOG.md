@@ -3,6 +3,10 @@
 
   * RealUI_Inventory
 
+### Added ###
+
+  * Built-in filter bags can now be disabled
+
 ### Fixed ###
 
   * Bags would overlap in some situations
