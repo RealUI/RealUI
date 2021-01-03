@@ -256,7 +256,7 @@ tinsert(private.filterList, {
 
 local prefix = _G.BAG_FILTER_TRADE_GOODS .. ": %s"
 local tradegoods = _G.C_AuctionHouse.GetAuctionItemSubClasses(_G.LE_ITEM_CLASS_TRADEGOODS)
-for i = 1, #tradegoods do
+for i = 1, (#tradegoods - 1) do
     local subClassID = tradegoods[i]
     local name = _G.GetItemSubClassInfo(_G.LE_ITEM_CLASS_TRADEGOODS, subClassID)
     tinsert(private.filterList, {
@@ -269,6 +269,16 @@ for i = 1, #tradegoods do
         end,
     })
 end
+
+tinsert(private.filterList, {
+    tag = "tradegoods",
+    name = _G.BAG_FILTER_TRADE_GOODS,
+    rank = 31,
+    filter = function(slot)
+        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+        return typeID == _G.LE_ITEM_CLASS_TRADEGOODS
+    end,
+})
 
 local travel = private.travel
 tinsert(private.filterList, {

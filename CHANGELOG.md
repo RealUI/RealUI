@@ -7,6 +7,10 @@
 
   * Built-in filter bags can now be disabled
 
+### Changed ###
+
+  * The "Trade Goods: Other" filter is now a catch all trade goods filter
+
 ### Fixed ###
 
   * Bags would overlap in some situations
