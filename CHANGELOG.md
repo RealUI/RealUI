@@ -1,4 +1,12 @@
-﻿## [2.2.7] ##
+## [2.2.7] ##
+### Modified AddOns ###
+
+  * RealUI_Inventory
+
+### Fixed ###
+
+  * Bags would overlap in some situations
+
 
 
 ## [2.2.6] ##

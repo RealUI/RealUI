@@ -146,7 +146,7 @@ local BagMixin do
         local gapOffsetV = SLOT_SPACING * (numRows - 1)
         return (slotSize * SLOTS_PER_ROW) + gapOffsetH, (slotSize * numRows) + gapOffsetV
     end
-    function BagMixin:UpdateSize(columnHeight, columnBase, numSkipped)
+    function BagMixin:UpdateSize(columnHeight, columnBase, prevBag)
         sort(self.slots, SortSlots)
 
         if self.isPrimary then
@@ -158,40 +158,36 @@ local BagMixin do
 
         local _, screenHeight = RealUI.GetInterfaceSize()
         local maxHeight = screenHeight * Inventory.db.global.maxHeight
-
         local height = self:GetHeight()
+
+        local newColumnHeight = columnHeight + height + 5
+
         if self.isPrimary then
-            columnHeight = columnHeight + height + 5
+            return newColumnHeight, self, self
         else
             local parent = self.parent
             self:ClearAllPoints()
 
-            if columnHeight + height >= maxHeight then
+            if newColumnHeight >= maxHeight then
                 if parent.bagType == "main" then
-                    self:SetPoint("BOTTOMRIGHT", parent.bags[columnBase] or parent, "BOTTOMLEFT", -5, 0)
+                    self:SetPoint("BOTTOMRIGHT", columnBase, "BOTTOMLEFT", -5, 0)
                 else
-                    self:SetPoint("TOPLEFT", parent.bags[columnBase] or parent, "TOPRIGHT", 5, 0)
+                    self:SetPoint("TOPLEFT", columnBase, "TOPRIGHT", 5, 0)
                 end
-                columnBase = self.filter.tag
-                columnHeight = height + 5
+
+                columnHeight, columnBase = height, self
             else
-                columnHeight = columnHeight + height + 5
-
-                local anchor = "main"
-                local index = self.filter:GetIndex()
-                if index > 1 then
-                    anchor = Inventory.db.global.filters[index - (1 + numSkipped)]
-                end
-
                 if parent.bagType == "main" then
-                    self:SetPoint("BOTTOMRIGHT", parent.bags[anchor] or parent, "TOPRIGHT", 0, 5)
+                    self:SetPoint("BOTTOMRIGHT", prevBag, "TOPRIGHT", 0, 5)
                 else
-                    self:SetPoint("TOPLEFT", parent.bags[anchor] or parent, "BOTTOMLEFT", 0, -5)
+                    self:SetPoint("TOPLEFT", prevBag, "BOTTOMLEFT", 0, -5)
                 end
-            end
-        end
 
-        return columnHeight, columnBase
+                columnHeight = newColumnHeight
+            end
+
+            return columnHeight, columnBase, self
+        end
     end
 end
 
@@ -241,8 +237,8 @@ function MainBagMixin:Update()
     end)
 end
 function MainBagMixin:UpdateSlots()
-    local columnHeight, columnBase = 0, "main"
-    columnHeight, columnBase = self:UpdateSize(columnHeight, columnBase)
+    local columnHeight, columnBase, prevBag = 0, "main"
+    columnHeight, columnBase, prevBag = self:UpdateSize(columnHeight, columnBase)
 
     local numSkipped = 0
     for i, filter in Inventory:IndexedFilters() do
@@ -251,7 +247,7 @@ function MainBagMixin:UpdateSlots()
             if #bag.slots <= 0 then
                 numSkipped = numSkipped + 1
             else
-                columnHeight, columnBase = bag:UpdateSize(columnHeight, columnBase, numSkipped)
+                columnHeight, columnBase, prevBag = bag:UpdateSize(columnHeight, columnBase, prevBag)
                 bag:Show()
                 numSkipped = 0
             end
