@@ -1,7 +1,7 @@
-## Interface: 90001
+## Interface: 90002
 ## Title: nibRealUI Dev
 ## Notes: Development assistant for RealUI
-## Version: 2.2.6
+## Version: 2.2.7
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs
 

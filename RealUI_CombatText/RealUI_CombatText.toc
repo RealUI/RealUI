@@ -1,8 +1,8 @@
-## Interface: 90001
+## Interface: 90002
 ## Title: RealUI Combat Text
 ## Notes: Scrolling combat text designed for RealUI
 ## Author: Gethe
-## Version: 2.2.6
+## Version: 2.2.7
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_CombatTextDB
 
