@@ -46,7 +46,7 @@ local menu do
     end
     function menu:AddFilter(filter)
         local tag = filter.tag
-        tinsert(menuList, filter:GetIndex() + 1, {
+        tinsert(menuList, {
             text = filter.name,
             func = SetToFilter,
             arg1 = tag,
@@ -63,9 +63,6 @@ local menu do
                 end
             end
         })
-    end
-    function menu:RemoveFilter(filter)
-        tremove(menuList, filter:GetIndex() + 1)
     end
     function menu:UpdateLines()
         wipe(menuList)
@@ -122,10 +119,10 @@ do
         return self.rank < filters[filterTag].rank
     end
     function FilterMixin:Delete()
-        menu:RemoveFilter(self)
         filters[self.tag] = nil
         Inventory.db.global.customFilters[self.tag] = nil
         tremove(Inventory.db.global.filters, self:GetIndex())
+        menu:UpdateLines()
 
         for itemID, tag in next, Inventory.db.global.assignedFilters do
             if tag == self.tag then
