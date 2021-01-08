@@ -277,6 +277,15 @@ tinsert(private.filterList, {
     end,
 })
 
+tinsert(private.filterList, {
+    tag = "anima",
+    name = _G.ANIMA,
+    rank = 50,
+    filter = function(slot)
+        return _G.C_Item.IsAnimaItemByID(slot.item:GetItemID())
+    end,
+})
+
 local travel = private.travel
 tinsert(private.filterList, {
     tag = "travel",
