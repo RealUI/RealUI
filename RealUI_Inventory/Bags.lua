@@ -392,6 +392,7 @@ end
 function BankBagMixin:OnHide()
     MainBagMixin.OnHide(self)
     _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_CLOSE)
+    _G.CloseBankFrame()
 end
 
 local ReagentBagMixin = _G.CreateFromMixins(MainBagMixin)

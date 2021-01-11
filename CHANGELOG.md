@@ -17,6 +17,7 @@
 
   * Taint errors when using item slots created in combat
   * Bags would overlap in some situations
+  * Bank was not technically closed when closing the UI
 
 
 
