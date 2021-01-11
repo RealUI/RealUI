@@ -15,6 +15,7 @@ local Color = Aurora.Color
 -- RealUI --
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
+local L = RealUI.L
 
 local BagMixin do
     local HEADER_SPACE = 20
@@ -166,7 +167,7 @@ local BagMixin do
             return newColumnHeight, self, self
         else
             local parent = self.parent
-            self:ClearAllPoints()
+            self:ClearAllPoints() --Fix bags overlapping sometimes
 
             if newColumnHeight >= maxHeight then
                 if parent.bagType == "main" then
@@ -690,6 +691,21 @@ local function CreateBag(bagType)
 
         settingsButton:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
         main.settingsButton = settingsButton
+
+        local restackButton = CreateFeatureButton(main, nil, "repeat",
+        function(self)
+            _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
+            _G.SortBags()
+        end,
+        function(self)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+            _G.GameTooltip_SetTitle(_G.GameTooltip, L.Inventory_Restack, nil, true)
+
+            _G.GameTooltip:Show()
+        end)
+
+        restackButton:SetPoint("TOPRIGHT", settingsButton, "TOPLEFT", -5, 0)
+        main.restackButton = restackButton
     else
         local reagents
         if bagType == "bank" then
@@ -722,6 +738,22 @@ local function CreateBag(bagType)
 
         reagents:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
         main.reagents = reagents
+
+        local restackButton = CreateFeatureButton(main, nil, "repeat",
+        function(self)
+            _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
+            _G.SortBankBags()
+            _G.SortReagentBankBags()
+        end,
+        function(self)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+            _G.GameTooltip_SetTitle(_G.GameTooltip, L.Inventory_Restack, nil, true)
+
+            _G.GameTooltip:Show()
+        end)
+
+        restackButton:SetPoint("TOPRIGHT", reagents, "TOPLEFT", -5, 0)
+        main.restackButton = restackButton
     end
 
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
