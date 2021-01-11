@@ -115,5 +115,8 @@ function Inventory:OnInitialize()
     private.CreateBags()
     private.CreateFilters()
 
+    -- Preload slots out of combat to prevent taint
+    private.Update()
+
     self.Update = private.Update
 end

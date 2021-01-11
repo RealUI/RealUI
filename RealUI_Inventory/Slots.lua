@@ -13,6 +13,8 @@ local RealUI = _G.RealUI
 local Inventory = private.Inventory
 
 local function SlotFactory(pool)
+    if _G.InCombatLockdown() then return end
+
     local numActive = pool:GetNumActive()
     local slot = _G.CreateFrame("ItemButton", "$parent_Slot"..numActive, _G[pool.parent], pool.frameTemplate)
     _G.Mixin(slot, pool.mixin)
@@ -210,13 +212,15 @@ function private.GetSlot(bagID, slotIndex)
     end
 
     local slot = slots:Acquire()
-    slot:SetBagAndSlot(bagID, slotIndex)
-    if slot:IsValid() then
-        slot:SetID(slotIndex)
-        slot.item = _G.Item:CreateFromItemLocation(slot)
-        return slot
-    else
-        slots:Release(slot)
+    if slot then
+        slot:SetBagAndSlot(bagID, slotIndex)
+        if slot:IsValid() then
+            slot:SetID(slotIndex)
+            slot.item = _G.Item:CreateFromItemLocation(slot)
+            return slot
+        else
+            slots:Release(slot)
+        end
     end
 end
 

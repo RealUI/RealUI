@@ -14,6 +14,7 @@
 
 ### Fixed ###
 
+  * Taint errors when using item slots created in combat
   * Bags would overlap in some situations
 
 
