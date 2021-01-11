@@ -350,6 +350,14 @@ function InventoryBagMixin:OnEvent(event, ...)
         MainBagMixin.OnEvent(self, event, ...)
     end
 end
+function InventoryBagMixin:OnShow()
+    MainBagMixin.OnShow(self)
+    _G.PlaySound(_G.SOUNDKIT.IG_BACKPACK_OPEN)
+end
+function InventoryBagMixin:OnHide()
+    MainBagMixin.OnHide(self)
+    _G.PlaySound(_G.SOUNDKIT.IG_BACKPACK_CLOSE)
+end
 
 local BankBagMixin = _G.CreateFromMixins(MainBagMixin)
 function BankBagMixin:Init()
@@ -376,6 +384,14 @@ function BankBagMixin:OnEvent(event, ...)
     else
         MainBagMixin.OnEvent(self, event, ...)
     end
+end
+function BankBagMixin:OnShow()
+    MainBagMixin.OnShow(self)
+    _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPEN)
+end
+function BankBagMixin:OnHide()
+    MainBagMixin.OnHide(self)
+    _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_CLOSE)
 end
 
 local ReagentBagMixin = _G.CreateFromMixins(MainBagMixin)
