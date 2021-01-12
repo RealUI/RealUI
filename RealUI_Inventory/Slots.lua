@@ -13,11 +13,14 @@ local RealUI = _G.RealUI
 local Inventory = private.Inventory
 
 local function SlotFactory(pool)
-    if _G.InCombatLockdown() then return end
-
     local numActive = pool:GetNumActive()
     local slot = _G.CreateFrame("ItemButton", "$parent_Slot"..numActive, _G[pool.parent], pool.frameTemplate)
     _G.Mixin(slot, pool.mixin)
+
+    if _G.InCombatLockdown() then
+        slot.isTainted = true
+    end
+
     slot:OnLoad()
     return slot
 end
@@ -44,7 +47,11 @@ end
 --[[ Item Slots ]]--
 local ItemSlotMixin = _G.CreateFromMixins(_G.ItemLocationMixin)
 function ItemSlotMixin:OnLoad()
-    self:HookScript("OnClick", self.OnClick)
+    if self.isTainted then
+        self:SetScript("OnClick", nil)
+    else
+        self:HookScript("OnClick", self.OnClick)
+    end
 end
 function ItemSlotMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
@@ -203,6 +210,13 @@ function private.GetSlot(bagID, slotIndex)
     for slot in slots:EnumerateActive() do
         if slot:IsEqualToBagAndSlot(bagID, slotIndex) then
             if slot:IsValid() then
+                if slot.isTainted and not _G.InCombatLockdown() then
+                    -- We're out of combat, excise tainted slot and create a new one
+                    slots.numActiveObjects = slots.numActiveObjects - 1
+                    slots.activeObjects[slot] = nil
+                    slots.resetterFunc(slots, slot)
+                    break
+                end
                 return slot
             else
                 slots:Release(slot)
