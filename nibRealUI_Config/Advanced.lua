@@ -601,60 +601,62 @@ do -- Inventory
                 return (filter:GetIndex() * 10) + 2
             end,
         }
-        args.filters.args[tag.."Delete"] = {
-            name = _G.DELETE,
-            type = "execute",
-            hidden = not filter.isCustom,
-            width = "half",
-            func = function()
-                filter:Delete()
 
-                args.filters.args[tag.."Index"] = nil
-                args.filters.args[tag.."Up"] = nil
-                args.filters.args[tag.."Down"] = nil
-                args.filters.args[tag.."Delete"] = nil
+        if filter.isCustom then
+            args.filters.args[tag.."Delete"] = {
+                name = _G.DELETE,
+                type = "execute",
+                hidden = not filter.isCustom,
+                width = "half",
+                func = function()
+                    filter:Delete()
 
-                ACR:NotifyChange("RealUI")
-                Inventory.Update()
-            end,
-            order = function()
-                return (filter:GetIndex() * 10) + 3
-            end,
-        }
-        args.filters.args[tag.."Disable"] = {
-            name = _G.DISABLE,
-            type = "execute",
-            hidden = function()
-                if filter.isCustom then return true end
-                return not filter:IsEnabled()
-            end,
-            width = "half",
-            func = function()
-                filter:SetEnabled(false)
-                ACR:NotifyChange("RealUI")
-                Inventory.Update()
-            end,
-            order = function()
-                return (filter:GetIndex() * 10) + 3
-            end,
-        }
-        args.filters.args[tag.."Enable"] = {
-            name = _G.ENABLE,
-            type = "execute",
-            hidden = function()
-                if filter.isCustom then return true end
-                return filter:IsEnabled()
-            end,
-            width = "half",
-            func = function()
-                filter:SetEnabled(true)
-                ACR:NotifyChange("RealUI")
-                Inventory.Update()
-            end,
-            order = function()
-                return (filter:GetIndex() * 10) + 3
-            end,
-        }
+                    args.filters.args[tag.."Index"] = nil
+                    args.filters.args[tag.."Up"] = nil
+                    args.filters.args[tag.."Down"] = nil
+                    args.filters.args[tag.."Delete"] = nil
+
+                    ACR:NotifyChange("RealUI")
+                    Inventory.Update()
+                end,
+                order = function()
+                    return (filter:GetIndex() * 10) + 3
+                end,
+            }
+        else
+            args.filters.args[tag.."Disable"] = {
+                name = _G.DISABLE,
+                type = "execute",
+                hidden = function()
+                    return not filter:IsEnabled()
+                end,
+                width = "half",
+                func = function()
+                    filter:SetEnabled(false)
+                    ACR:NotifyChange("RealUI")
+                    Inventory.Update()
+                end,
+                order = function()
+                    return (filter:GetIndex() * 10) + 3
+                end,
+            }
+            args.filters.args[tag.."Enable"] = {
+                name = _G.ENABLE,
+                type = "execute",
+                hidden = function()
+                    return filter:IsEnabled()
+                end,
+                width = "half",
+                func = function()
+                    filter:SetEnabled(true)
+                    ACR:NotifyChange("RealUI")
+                    Inventory.Update()
+                end,
+                order = function()
+                    return (filter:GetIndex() * 10) + 3
+                end,
+            }
+        end
     end
 
     debug("Module", Inventory)

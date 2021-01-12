@@ -2,6 +2,7 @@
 ### Modified AddOns ###
 
   * RealUI_Inventory
+  * nibRealUI_Config
 
 ### Added ###
 
