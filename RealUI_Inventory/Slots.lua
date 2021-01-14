@@ -14,6 +14,7 @@ local Inventory = private.Inventory
 
 local function SlotFactory(pool)
     local numActive = pool:GetNumActive()
+    --print("CreateSlot", numActive, pool.parent, pool.parent:GetDebugName(), pool.parent:GetName())
     local slot = _G.CreateFrame("ItemButton", "$parent_Slot"..numActive, _G[pool.parent], pool.frameTemplate)
     _G.Mixin(slot, pool.mixin)
 
@@ -171,22 +172,22 @@ function BankSlotMixin:Update()
 
     _G.BankFrameItemButton_UpdateLocked(self)
 end
+function BankSlotMixin:GetInventorySlot()
+    local bagID, slotIndex = self:GetBagAndSlot()
+    if bagID == _G.REAGENTBANK_CONTAINER then
+        return _G.ReagentBankButtonIDToInvSlotID(slotIndex)
+    else
+        return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
+    end
+end
+function BankSlotMixin:SplitStack(button, split)
+    local bagID, slotIndex = self:GetBagAndSlot()
+    _G.SplitContainerItem(bagID, slotIndex, split);
+end
 local bankSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "BankItemButtonGenericTemplate"
 bankSlots.parent = "RealUIBank"
 bankSlots.mixin = BankSlotMixin
-
-
-local ReagentSlotMixin = _G.CreateFromMixins(ItemSlotMixin)
-function ReagentSlotMixin:Update()
-    ItemSlotMixin.Update(self)
-
-    _G.BankFrameItemButton_UpdateLocked(self)
-end
-local reagentSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
-reagentSlots.frameTemplate = "ReagentBankItemButtonGenericTemplate"
-reagentSlots.parent = "RealUIReagent"
-reagentSlots.mixin = ReagentSlotMixin
 
 
 function private.UpdateSlots(bagID)
@@ -249,30 +250,18 @@ function private.GetFirstFreeSlot(bagID)
     end
 end
 
-function private.GetSlotTypeForBag(bagIDorBagType)
-    local slots = inventorySlots
-
-    if type(bagIDorBagType) == "number" then
-        if bagIDorBagType == _G.BANK_CONTAINER then
-            slots = bankSlots
-        elseif bagIDorBagType == _G.REAGENTBANK_CONTAINER then
-            slots = reagentSlots
-        end
+function private.GetSlotTypeForBag(bagID)
+    if bagID >= _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
+        return inventorySlots
     else
-        if bagIDorBagType == "bank" then
-            slots = bankSlots
-        elseif bagIDorBagType == "reagent" then
-            slots = reagentSlots
-        end
+        return bankSlots
     end
-
-    return slots
 end
 
 --[[ Bag Slots ]]--
 local searchBags = {}
-local function SearchItemsForBag(bagType)
-    local slots = private.GetSlotTypeForBag(bagType)
+local function SearchItemsForBag(bagID)
+    local slots = private.GetSlotTypeForBag(bagID)
 
     for slot in slots:EnumerateActive() do
         slot:SetMatchesSearch(searchBags[(slot:GetBagAndSlot())])
@@ -396,7 +385,7 @@ function BagSlotMixin:OnClick(button)
             self.highlight:Show()
         end
 
-        SearchItemsForBag(self.bagType)
+        SearchItemsForBag(self:GetID())
     end
 end
 function BagSlotMixin:OnDragStart()

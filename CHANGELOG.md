@@ -13,6 +13,7 @@
 ### Changed ###
 
   * The "Trade Goods: Other" filter is now a catch all trade goods filter
+  * The bank and reagent bank have been combined
 
 ### Fixed ###
 

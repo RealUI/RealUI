@@ -365,14 +365,13 @@ function BankBagMixin:Init()
     self.events = {
         "PLAYERBANKSLOTS_CHANGED",
         "PLAYERBANKBAGSLOTS_CHANGED",
+        "PLAYERREAGENTBANKSLOTS_CHANGED",
+        "REAGENTBANK_PURCHASED",
     }
 
     self:SetPoint("TOPLEFT", 100, -100)
     self:RegisterEvent("BANKFRAME_OPENED")
     self:RegisterEvent("BANKFRAME_CLOSED")
-    self:HookScript("OnDragStop", function()
-        Inventory.reagent:SetPoint("TOPLEFT", self)
-    end)
 end
 function BankBagMixin:OnEvent(event, ...)
     if event == "BANKFRAME_OPENED" then
@@ -395,20 +394,6 @@ function BankBagMixin:OnHide()
     _G.CloseBankFrame()
 end
 
-local ReagentBagMixin = _G.CreateFromMixins(MainBagMixin)
-function ReagentBagMixin:Init()
-    MainBagMixin.Init(self)
-    self.events = {
-        "PLAYERREAGENTBANKSLOTS_CHANGED",
-        "REAGENTBANK_PURCHASED",
-    }
-
-    self:SetPoint("TOPLEFT", 100, -100)
-    self:HookScript("OnDragStop", function()
-        Inventory.bank:SetPoint("TOPLEFT", self)
-    end)
-end
-
 function private.UpdateBags()
     Inventory:debug("private.UpdateBags")
     Inventory.main:Update()
@@ -418,7 +403,7 @@ function private.UpdateBags()
 end
 
 function private.AddSlotToBag(slot, bagID)
-    --Inventory:debug("private.AddSlotToBag", slot, bagID)
+    Inventory:debug("private.AddSlotToBag", slot, bagID)
     local bagType = private.GetBagTypeForBagID(bagID)
     local main = Inventory[bagType]
 
@@ -569,12 +554,7 @@ local bagInfo = {
     bank = {
         name = "RealUIBank",
         mixin = BankBagMixin,
-        bagIDs = {-1, 5, 6, 7, 8, 9, 10, 11}, -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS)
-    },
-    reagent = {
-        name = "RealUIReagent",
-        mixin = ReagentBagMixin,
-        bagIDs = {-3} -- REAGENTBANK_CONTAINER
+        bagIDs = {-1, 5, 6, 7, 8, 9, 10, 11, -3}, -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
     },
 }
 local function CreateBag(bagType)
@@ -588,23 +568,21 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     tinsert(_G.UISpecialFrames, info.name)
 
-    if bagType == "reagent" then
-        local deposit = CreateFeatureButton(main, _G.BAGSLOTTEXT, "download",
-        function(self, button)
-            if _G.IsReagentBankUnlocked() then
-                _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
-                _G.DepositReagentBank()
-            else
-                _G.StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
-            end
-        end,
-        function(self)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-            if _G.IsReagentBankUnlocked() then
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
-            else
-                local cost = _G.GetReagentBankCost()
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_PURCHASE_TEXT, nil, true)
+    local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
+    function(self, button)
+        if bagType == "bank" and button == "RightButton" then
+            _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
+        else
+            self:ToggleBags()
+        end
+    end,
+    function(self)
+        if bagType == "bank" then
+            local numSlots, full = _G.GetNumBankSlots()
+            if not full then
+                local cost = _G.GetBankSlotCost(numSlots)
+                _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
                 _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
 
                 local text = bagCost .. _G.GetMoneyString(cost)
@@ -613,80 +591,47 @@ local function CreateBag(bagType)
                 else
                     _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
                 end
+
+                _G.GameTooltip:Show()
             end
-            _G.GameTooltip:Show()
-        end)
-
-        deposit:SetPoint("TOPLEFT", 5, -5)
-        main.deposit = deposit
-    else
-        local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
-        function(self, button)
-            if bagType == "bank" and button == "RightButton" then
-                _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
-            else
-                self:ToggleBags()
-            end
-        end,
-        function(self)
-            if bagType == "bank" then
-                local numSlots, full = _G.GetNumBankSlots()
-                if not full then
-                    local cost = _G.GetBankSlotCost(numSlots)
-                    _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-                    _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
-                    _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
-
-                    local text = bagCost .. _G.GetMoneyString(cost)
-                    if _G.GetMoney() >= cost then
-                        _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
-                    else
-                        _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
-                    end
-
-                    _G.GameTooltip:Show()
-                end
-            end
-        end)
-
-        showBags:SetPoint("TOPLEFT", 5, -5)
-        function showBags:ToggleBags(show)
-            if show == nil then
-                show = not self.isShowing
-            end
-
-            local firstBag = _G.BACKPACK_CONTAINER
-            if bagType == "bank" then
-                firstBag = _G.BANK_CONTAINER
-            elseif bagType == "reagent" then
-                firstBag = _G.REAGENTBANK_CONTAINER
-            end
-
-            local bagSlots = private.bagSlots[bagType]
-            if show then
-                self:SetText("")
-                self:SetHitRectInsets(-5, -5, -5, -5)
-
-                bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
-                for k, bagID in main:IterateBagIDs() do
-                    bagSlots[bagID]:Update()
-                end
-            else
-                self:SetText(_G.BAGSLOTTEXT)
-                self:SetHitRectInsets(-5, -50, -5, -5)
-
-                bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
-                for k, bagID in main:IterateBagIDs() do
-                    bagSlots[bagID]:Update()
-                end
-
-                private.SearchItemsForBag(bagType)
-            end
-
-            self.isShowing = show
         end
-        main.showBags = showBags
+    end)
+
+    showBags:SetPoint("TOPLEFT", 5, -5)
+    function showBags:ToggleBags(show)
+        if show == nil then
+            show = not self.isShowing
+        end
+
+        local firstBag = _G.BACKPACK_CONTAINER
+        if bagType == "bank" then
+            firstBag = _G.BANK_CONTAINER
+        end
+
+        local bagSlots = private.bagSlots[bagType]
+        if show then
+            self:SetText("")
+            self:SetHitRectInsets(-5, -5, -5, -5)
+
+            bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
+            for k, bagID in main:IterateBagIDs() do
+                bagSlots[bagID]:Update()
+            end
+        else
+            self:SetText(_G.BAGSLOTTEXT)
+            self:SetHitRectInsets(-5, -50, -5, -5)
+
+            bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
+            for k, bagID in main:IterateBagIDs() do
+                bagSlots[bagID]:Update()
+            end
+
+            private.SearchItemsForBag(firstBag)
+        end
+
+        self.isShowing = show
     end
+    main.showBags = showBags
 
     local close = _G.CreateFrame("Button", "$parentClose", main, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", 5, 5)
@@ -724,37 +669,44 @@ local function CreateBag(bagType)
         restackButton:SetPoint("TOPRIGHT", settingsButton, "TOPLEFT", -5, 0)
         main.restackButton = restackButton
     else
-        local reagents
-        if bagType == "bank" then
-            reagents = CreateFeatureButton(main, nil, "archive",
-            function(self)
-                Inventory.reagent:Show()
-                Inventory.bank:Hide()
-            end,
-            function(self)
-                _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BROWSE .. " " .. _G.REAGENT_BANK, nil, true)
-                _G.GameTooltip_AddNormalLine(_G.GameTooltip, _G.REAGENT_BANK_HELP)
+        local deposit = CreateFeatureButton(main, nil, "download",
+        function(self, button)
+            if _G.IsReagentBankUnlocked() then
+                _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
+                _G.DepositReagentBank()
+            else
+                _G.StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
+            end
+        end,
+        function(self)
+            _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+            if _G.IsReagentBankUnlocked() then
+                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
+                local freeSlots = _G.GetContainerNumFreeSlots(_G.REAGENTBANK_CONTAINER)
 
-                _G.GameTooltip:Show()
-            end)
-        elseif bagType == "reagent" then
-            reagents = CreateFeatureButton(main, nil, "bank",
-            function(self)
-                Inventory.bank:Show()
-                Inventory.reagent:Hide()
-            end,
-            function(self)
-                _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BROWSE .. " " .. _G.BANK, nil, true)
-                _G.GameTooltip_AddNormalLine(_G.GameTooltip, _G.REAGENT_BANK_HELP)
+                local text = _G.NUM_FREE_SLOTS:format(freeSlots)
+                if freeSlots == 0 then
+                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+                else
+                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+                end
+            else
+                local cost = _G.GetReagentBankCost()
+                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_PURCHASE_TEXT, nil, true)
+                _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
 
-                _G.GameTooltip:Show()
-            end)
-        end
+                local text = bagCost .. _G.GetMoneyString(cost)
+                if _G.GetMoney() >= cost then
+                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+                else
+                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+                end
+            end
+            _G.GameTooltip:Show()
+        end)
 
-        reagents:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
-        main.reagents = reagents
+        deposit:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
+        main.deposit = deposit
 
         local restackButton = CreateFeatureButton(main, nil, "repeat",
         function(self)
@@ -769,7 +721,7 @@ local function CreateBag(bagType)
             _G.GameTooltip:Show()
         end)
 
-        restackButton:SetPoint("TOPRIGHT", reagents, "TOPLEFT", -5, 0)
+        restackButton:SetPoint("TOPRIGHT", deposit, "TOPLEFT", -5, 0)
         main.restackButton = restackButton
     end
 
@@ -845,5 +797,4 @@ function private.CreateBags()
     Inventory:debug("private.CreateBags")
     CreateBag("main")
     CreateBag("bank")
-    CreateBag("reagent")
 end

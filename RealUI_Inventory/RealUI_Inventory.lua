@@ -41,8 +41,6 @@ end
 function private.GetBagTypeForBagID(bagID)
     if bagID >= _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
         return "main"
-    elseif bagID == _G.REAGENTBANK_CONTAINER then
-        return "reagent"
     else
         return "bank"
     end

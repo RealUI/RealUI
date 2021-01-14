@@ -147,7 +147,6 @@ do
 
         if filter.tag ~= "new" then
             private.CreateFilterBag(Inventory.bank, filter)
-            private.CreateFilterBag(Inventory.reagent, filter)
         end
 
         filters[filter.tag] = filter
