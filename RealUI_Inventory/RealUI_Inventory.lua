@@ -113,7 +113,13 @@ function Inventory:OnInitialize()
             oldTag = i
         end
     end
-    tremove(Inventory.db.global.filters, oldTag)
+    if oldTag then
+        tremove(Inventory.db.global.filters, oldTag)
+    end
+
+    if Inventory.db.global.customFilters.anima then
+        Inventory.db.global.customFilters.anima = nil
+    end
 
     Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
     Inventory:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)

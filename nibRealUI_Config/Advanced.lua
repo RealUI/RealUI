@@ -606,7 +606,6 @@ do -- Inventory
             args.filters.args[tag.."Delete"] = {
                 name = _G.DELETE,
                 type = "execute",
-                hidden = not filter.isCustom,
                 width = "half",
                 func = function()
                     filter:Delete()

@@ -434,6 +434,12 @@ function private.AddSlotToBag(slot, bagID)
         end
     end
 
+    --[[
+    if slot.item:GetItemID() == 98091 then
+        print("Found item", bagID, slotIndex, assignedTag)
+    end
+    ]]
+
     slot.assignedTag = assignedTag or "main"
     local bag = main.bags[assignedTag] or main
 
