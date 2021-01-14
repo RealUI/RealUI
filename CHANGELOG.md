@@ -9,6 +9,7 @@
   * Built-in filter bags can now be disabled
   * New filter bag for Anima items
   * New "Restack Items" button
+  * Bag button tooltips now show remaining free slots
 
 ### Changed ###
 

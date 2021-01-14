@@ -367,6 +367,14 @@ function BagSlotMixin:OnEnter()
         _G.GameTooltip:SetText(self.tooltipText, 1.0, 1.0, 1.0)
     end
 
+    local freeSlots = _G.GetContainerNumFreeSlots(self:GetID())
+    local text = _G.NUM_FREE_SLOTS:format(freeSlots)
+    if freeSlots == 0 then
+        _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+    else
+        _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+    end
+
     _G.GameTooltip:Show()
 end
 function BagSlotMixin:OnLeave()
