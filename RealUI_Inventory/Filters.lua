@@ -119,16 +119,9 @@ do
         return self.rank < filters[filterTag].rank
     end
     function FilterMixin:Delete()
+        Inventory:RemoveFilter(self.tag, true)
         filters[self.tag] = nil
-        Inventory.db.global.customFilters[self.tag] = nil
-        tremove(Inventory.db.global.filters, self:GetIndex())
         menu:UpdateLines()
-
-        for itemID, tag in next, Inventory.db.global.assignedFilters do
-            if tag == self.tag then
-                Inventory.db.global.assignedFilters[itemID] = nil
-            end
-        end
     end
     function FilterMixin:SetEnabled(enabled)
         Inventory.db.global.disabledFilters[self.tag] = not enabled
@@ -140,11 +133,30 @@ do
         return not Inventory.db.global.disabledFilters[self.tag]
     end
 
+    function Inventory:RemoveFilter(tag, removeIndex)
+        if removeIndex then
+            local index
+            for i, filterTag in ipairs(Inventory.db.global.filters) do
+                if filterTag == tag then
+                    index = i
+                end
+            end
+            if index then
+                tremove(Inventory.db.global.filters, index)
+            end
+        end
+
+        Inventory.db.global.customFilters[tag] = nil
+        for itemID, assignedTag in next, Inventory.db.global.assignedFilters do
+            if assignedTag == tag then
+                Inventory.db.global.assignedFilters[itemID] = nil
+            end
+        end
+    end
     function Inventory:CreateFilter(info)
         local filter = _G.Mixin(info, FilterMixin)
 
         private.CreateFilterBag(Inventory.main, filter)
-
         if filter.tag ~= "new" then
             private.CreateFilterBag(Inventory.bank, filter)
         end
@@ -301,7 +313,10 @@ function private.CreateFilters()
     end
 
     for i, info in ipairs(private.filterList) do
-        Inventory:CreateFilter(info)
+        local filter = Inventory:CreateFilter(info)
+        if not filter:GetIndex() then
+            tinsert(Inventory.db.global.filters, i, filter.tag)
+        end
     end
 
     menu:UpdateLines()

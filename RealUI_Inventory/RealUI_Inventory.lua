@@ -101,24 +101,19 @@ local function MERCHANT_CLOSED(event, ...)
     end
 end
 
+local oldTags = {
+    tradegoods_11 = true,
+    anima = false,
+}
+
 function Inventory:OnInitialize()
     for i, info in ipairs(private.filterList) do
         defaults.global.filters[i] = info.tag
     end
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
-    local oldTag
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        if tag == "tradegoods_11" then
-            oldTag = i
-        end
-    end
-    if oldTag then
-        tremove(Inventory.db.global.filters, oldTag)
-    end
-
-    if Inventory.db.global.customFilters.anima then
-        Inventory.db.global.customFilters.anima = nil
+    for tag, removeIndex in next, oldTags do
+        Inventory:RemoveFilter(tag, removeIndex)
     end
 
     Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
