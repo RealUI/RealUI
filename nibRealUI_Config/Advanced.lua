@@ -679,12 +679,21 @@ do -- Inventory
                 order = 2,
             },
             addFilter = {
-                name = _G.ADD_FILTER,
+                name = L.Inventory_AddFilter,
+                desc = L.Inventory_AddFilterDesc,
                 type = "input",
-                get = function() return _G.FILTER_NAME end,
                 set = function(_, value)
                     local tag = value:lower()
                     AddFilter(Inventory:CreateCustomFilter(tag, value, true))
+                end,
+                validate = function(_, value)
+                    local tag = value:lower()
+                    for i, filter in Inventory:IndexedFilters() do
+                        if filter.tag == tag then
+                            return L.Inventory_Duplicate
+                        end
+                    end
+                    return true
                 end,
                 order = 3,
             },
