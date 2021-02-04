@@ -689,7 +689,7 @@ do -- Inventory
                 validate = function(_, value)
                     local tag = value:lower()
                     for i, filter in Inventory:IndexedFilters() do
-                        if filter.tag == tag then
+                        if filter.tag == tag or filter.name == value then
                             return L.Inventory_Duplicate
                         end
                     end
