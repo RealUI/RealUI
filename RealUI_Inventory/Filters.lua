@@ -133,25 +133,20 @@ do
         return not Inventory.db.global.disabledFilters[self.tag]
     end
 
-    function Inventory:RemoveFilter(tag, removeIndex)
-        if removeIndex then
-            local index
-            for i, filterTag in ipairs(Inventory.db.global.filters) do
-                if filterTag == tag then
-                    index = i
+    function Inventory:RemoveFilter(tag, index)
+        if index then
+            tremove(Inventory.db.global.filters, index)
+
+            if Inventory.db.global.customFilters[tag] then
+                for itemID, assignedTag in next, Inventory.db.global.assignedFilters do
+                    if assignedTag == tag then
+                        Inventory.db.global.assignedFilters[itemID] = nil
+                    end
                 end
-            end
-            if index then
-                tremove(Inventory.db.global.filters, index)
             end
         end
 
         Inventory.db.global.customFilters[tag] = nil
-        for itemID, assignedTag in next, Inventory.db.global.assignedFilters do
-            if assignedTag == tag then
-                Inventory.db.global.assignedFilters[itemID] = nil
-            end
-        end
     end
     function Inventory:CreateFilter(info)
         local filter = _G.Mixin(info, FilterMixin)

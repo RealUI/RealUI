@@ -11,6 +11,7 @@ private.Inventory = Inventory
 
 local defaults = {
     global = {
+        version = 1,
         maxHeight = 0.5,
         sellJunk = true,
         filters = {},
@@ -101,10 +102,40 @@ local function MERCHANT_CLOSED(event, ...)
     end
 end
 
-local oldTags = {
-    tradegoods_11 = true,
-    anima = false,
+local settingsVersion, oldTags = 2, {
+    tradegoods_11 = false,
 }
+function private.SanitizeSavedVars()
+    -- Remove custom filters with the same name as our default filters
+    for i, info in ipairs(private.filterList) do
+        if Inventory.db.global.customFilters[info.tag] then
+            Inventory.db.global.customFilters[info.tag] = nil
+        end
+    end
+
+    local tagHash = {}
+    for i, tag in ipairs(Inventory.db.global.filters) do
+        -- Check for old filters
+        if oldTags[tag] == false then
+            oldTags[tag] = i
+        else
+            -- Check for duplicates
+            if not tagHash[tag] then
+                tagHash[tag] = true
+            else
+                oldTags[tag] = i
+            end
+        end
+    end
+
+    for tag, index in next, oldTags do
+        if index then
+            Inventory:RemoveFilter(tag, index)
+        end
+    end
+
+    Inventory.db.global.version = settingsVersion
+end
 
 function Inventory:OnInitialize()
     for i, info in ipairs(private.filterList) do
@@ -112,12 +143,12 @@ function Inventory:OnInitialize()
     end
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
-    for tag, removeIndex in next, oldTags do
-        Inventory:RemoveFilter(tag, removeIndex)
+    if self.db.global.version < settingsVersion then
+        private.SanitizeSavedVars()
     end
 
-    Inventory:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
-    Inventory:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)
+    self:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
+    self:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)
 
     private.CreateBags()
     private.CreateFilters()
