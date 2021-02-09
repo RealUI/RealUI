@@ -1,10 +1,20 @@
-﻿## [2.2.8] ##
+## [2.2.8] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+
+### Fixed ###
+
+  * Error due to a change in Grid2
+
 
 
 ## [2.2.7] ##
 ### Modified AddOns ###
 
   * RealUI_Inventory
+  * nibRealUI
   * nibRealUI_Config
 
 ### Added ###

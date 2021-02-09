@@ -134,22 +134,6 @@ end
 
 --------------------------------------------------------
 
--- Toggle Grid2's "Test Layout"
-function RealUI:ToggleGridTestMode(show)
-    if not _G.Grid2 then return end
-    if show then
-        if _G.RealUIGridConfiguring then return end
-        if _G.Grid2:LoadGrid2Options() then
-            _G.RealUIGridConfiguring = _G.Grid2Options.LayoutTestEnable(_G.Grid2Options, "By Group", nil, nil, 20)
-        end
-    else
-        if _G.Grid2Options then
-            _G.RealUIGridConfiguring = _G.Grid2Options.LayoutTestEnable(_G.Grid2Options)
-        end
-    end
-    return _G.RealUIGridConfiguring
-end
-
 -- Move HuD Up if using a Low Resolution display
 function RealUI:SetLowResOptimizations(...)
     local dbp, dp = db.positions, self.defaultPositions
@@ -186,7 +170,7 @@ function RealUI:UpdateLayout(layout)
     self.cLayout = layout
     self.ncLayout = layout == 1 and 2 or 1
 
-    if _G.RealUIGridConfiguring then
+    if self.isConfigMode and _G.Grid2Options then
         self:ScheduleTimer(function()
             self:ToggleGridTestMode(false)
             self:ToggleGridTestMode(true)

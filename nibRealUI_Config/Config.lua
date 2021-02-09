@@ -37,6 +37,23 @@ _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
         self:Show()
     end
 end)
+function RealUI:ToggleGridTestMode(show)
+    if not _G.Grid2Options then
+        _G.LoadAddOn("Grid2Options")
+    end
+    if not _G.Grid2Options then return end
+
+    if show then
+        if not _G.RealUIGridConfiguring then
+            _G.RealUIGridConfiguring = _G.Grid2Options:LayoutTestEnable("By Group", nil, nil, 20)
+        end
+    else
+        _G.RealUIGridConfiguring = _G.Grid2Options:LayoutTestEnable()
+    end
+
+    return _G.RealUIGridConfiguring
+end
+
 function RealUI:HuDTestMode(isConfigMode)
     FramePoint:ToggleAll(not isConfigMode)
 
