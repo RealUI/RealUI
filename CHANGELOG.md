@@ -1,6 +1,7 @@
 ## [2.2.8] ##
 ### Modified AddOns ###
 
+  * RealUI_Skins
   * nibRealUI
   * nibRealUI_Config
 
@@ -8,6 +9,7 @@
 
   * Conflict with Addon Control Panel
   * Error due to a change in Grid2
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
 
@@ -431,7 +433,9 @@
 
 
 
-[Unreleased]: https://github.com/RealUI/RealUI/compare/master...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
+[2.2.8]: https://github.com/RealUI/RealUI/compare/2.2.7...2.2.8
+[2.2.7]: https://github.com/RealUI/RealUI/compare/2.2.6...2.2.7
 [2.2.6]: https://github.com/RealUI/RealUI/compare/2.2.5...2.2.6
 [2.2.5]: https://github.com/RealUI/RealUI/compare/2.2.4...2.2.5
 [2.2.4]: https://github.com/RealUI/RealUI/compare/2.2.3...2.2.4
