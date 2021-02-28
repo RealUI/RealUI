@@ -6,6 +6,7 @@
 
 ### Fixed ###
 
+  * Conflict with Addon Control Panel
   * Error due to a change in Grid2
 
 

@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals wipe tinsert
+-- luacheck: globals wipe tinsert type
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -632,7 +632,7 @@ end
 
 local function GetKeyText(key)
     local bindText = _G.GetBindingText(key)
-    if bindText == key and _G[key] then
+    if bindText == key and type(_G[key]) == "string" then
         bindText = _G[key]
     end
 
