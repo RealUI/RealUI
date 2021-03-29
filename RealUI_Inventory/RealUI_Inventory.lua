@@ -102,10 +102,14 @@ local function MERCHANT_CLOSED(event, ...)
     end
 end
 
-local settingsVersion, oldTags = 2, {
+local settingsVersion, oldTags = 3, {
     tradegoods_11 = false,
 }
-function private.SanitizeSavedVars()
+function private.SanitizeSavedVars(oldVer)
+    if oldVer < 3 then
+        Inventory:ClearAssignedItems("anima")
+    end
+
     -- Remove custom filters with the same name as our default filters
     for i, info in ipairs(private.filterList) do
         if Inventory.db.global.customFilters[info.tag] then
@@ -129,9 +133,7 @@ function private.SanitizeSavedVars()
     end
 
     for tag, index in next, oldTags do
-        if index then
-            Inventory:RemoveFilter(tag, index)
-        end
+        Inventory:RemoveFilter(tag, index, true)
     end
 
     Inventory.db.global.version = settingsVersion
@@ -144,7 +146,7 @@ function Inventory:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 
     if self.db.global.version < settingsVersion then
-        private.SanitizeSavedVars()
+        private.SanitizeSavedVars(self.db.global.version)
     end
 
     self:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)

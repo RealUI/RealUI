@@ -1,3 +1,10 @@
+## [2.2.9] ##
+### Fixed ###
+
+  * Error when attempting to use a filter bag that no longer exists
+
+
+
 ## [2.2.8] ##
 ### Modified AddOns ###
 

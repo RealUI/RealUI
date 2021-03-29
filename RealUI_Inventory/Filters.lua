@@ -6,6 +6,7 @@ local _, private = ...
 -- RealUI --
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
+local L = RealUI.L
 
 local menu do
     local MenuFrame = RealUI:GetModule("MenuFrame")
@@ -115,6 +116,11 @@ do
         end
     end
     function FilterMixin:HasPriority(filterTag)
+        if not filters[filterTag] then
+            _G.print(L.Inventory_UnknownFilter, filterTag)
+            return true
+        end
+
         -- Lower ranks have priority
         return self.rank < filters[filterTag].rank
     end
@@ -133,19 +139,21 @@ do
         return not Inventory.db.global.disabledFilters[self.tag]
     end
 
-    function Inventory:RemoveFilter(tag, index)
-        if index then
-            tremove(Inventory.db.global.filters, index)
-
-            if Inventory.db.global.customFilters[tag] then
-                for itemID, assignedTag in next, Inventory.db.global.assignedFilters do
-                    if assignedTag == tag then
-                        Inventory.db.global.assignedFilters[itemID] = nil
-                    end
-                end
+    function Inventory:ClearAssignedItems(tag)
+        for itemID, assignedTag in next, Inventory.db.global.assignedFilters do
+            if assignedTag == tag then
+                Inventory.db.global.assignedFilters[itemID] = nil
             end
         end
+    end
+    function Inventory:RemoveFilter(tag, index, clearItems)
+        if index then
+            tremove(Inventory.db.global.filters, index)
+        end
 
+        if Inventory.db.global.customFilters[tag] or clearItems then
+            Inventory:ClearAssignedItems(tag)
+        end
         Inventory.db.global.customFilters[tag] = nil
     end
     function Inventory:CreateFilter(info)
