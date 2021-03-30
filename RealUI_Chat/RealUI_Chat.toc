@@ -1,8 +1,8 @@
-## Interface: 90002
+## Interface: 90005
 ## Title: RealUI Chat
 ## Notes: Useful chat mods
 ## Author: Gethe
-## Version: 2.2.8
+## Version: 2.2.9
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_ChatDB
 
