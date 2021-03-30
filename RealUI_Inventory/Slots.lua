@@ -251,11 +251,11 @@ function private.GetFirstFreeSlot(bagID)
 end
 
 function private.GetSlotTypeForBag(bagID)
-    if bagID >= _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
-        return inventorySlots
-    else
+    if bagID == _G.BANK_CONTAINER or bagID == _G.REAGENTBANK_CONTAINER then
         return bankSlots
     end
+
+    return inventorySlots
 end
 
 --[[ Bag Slots ]]--
