@@ -134,6 +134,10 @@ end
 function ItemSlotMixin:GetBagType()
     return private.GetBagTypeForBagID(self:GetBagAndSlot())
 end
+function ItemSlotMixin:SplitStack(split)
+    local bagID, slotIndex = self:GetBagAndSlot()
+    _G.SplitContainerItem(bagID, slotIndex, split)
+end
 function ItemSlotMixin:OnClick(button)
     if button == "RightButton" and _G.IsAltKeyDown() and _G.IsControlKeyDown() then
         private.menu:Open(self)
@@ -179,10 +183,6 @@ function BankSlotMixin:GetInventorySlot()
     else
         return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
     end
-end
-function BankSlotMixin:SplitStack(button, split)
-    local bagID, slotIndex = self:GetBagAndSlot()
-    _G.SplitContainerItem(bagID, slotIndex, split);
 end
 local bankSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "BankItemButtonGenericTemplate"

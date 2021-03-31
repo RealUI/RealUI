@@ -3,6 +3,7 @@
 
   * Error when attempting to use a filter bag that no longer exists
   * Some bank items would show the wrong tooltip
+  * Error when splitting stacks in the bank
 
 
 
