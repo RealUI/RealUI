@@ -16,17 +16,74 @@ end
 --          Compatibility          --
 ----====####$$$$%%%%%$$$$####====----
 local Enum = {}
-Enum.ItemQuality = {
-    Poor = _G.LE_ITEM_QUALITY_POOR or _G.Enum.ItemQuality.Poor,
-    Standard = _G.LE_ITEM_QUALITY_COMMON or _G.Enum.ItemQuality.Standard,
-    Good = _G.LE_ITEM_QUALITY_UNCOMMON or _G.Enum.ItemQuality.Good,
-    Superior = _G.LE_ITEM_QUALITY_RARE or _G.Enum.ItemQuality.Superior,
-    Epic = _G.LE_ITEM_QUALITY_EPIC or _G.Enum.ItemQuality.Epic,
-    Legendary = _G.LE_ITEM_QUALITY_LEGENDARY or _G.Enum.ItemQuality.Legendary,
-    Artifact = _G.LE_ITEM_QUALITY_ARTIFACT or _G.Enum.ItemQuality.Artifact,
-    Heirloom = _G.LE_ITEM_QUALITY_HEIRLOOM or _G.Enum.ItemQuality.Heirloom,
-    WoWToken = _G.LE_ITEM_QUALITY_WOW_TOKEN or _G.Enum.ItemQuality.WoWToken,
+Enum.ItemClass = {
+    Consumable = _G.LE_ITEM_CLASS_CONSUMABLE or _G.Enum.ItemClass.Consumable,
+    Container = _G.LE_ITEM_CLASS_CONTAINER or _G.Enum.ItemClass.Container,
+    Weapon = _G.LE_ITEM_CLASS_WEAPON or _G.Enum.ItemClass.Weapon,
+    Gem = _G.LE_ITEM_CLASS_GEM or _G.Enum.ItemClass.Gem,
+    Armor = _G.LE_ITEM_CLASS_ARMOR or _G.Enum.ItemClass.Armor,
+    Reagent = _G.LE_ITEM_CLASS_REAGENT or _G.Enum.ItemClass.Reagent,
+    Projectile = _G.LE_ITEM_CLASS_PROJECTILE or _G.Enum.ItemClass.Projectile,
+    Tradegoods = _G.LE_ITEM_CLASS_TRADEGOODS or _G.Enum.ItemClass.Tradegoods,
+    ItemEnhancement = _G.LE_ITEM_CLASS_ITEM_ENHANCEMENT or _G.Enum.ItemClass.ItemEnhancement,
+    Recipe = _G.LE_ITEM_CLASS_RECIPE or _G.Enum.ItemClass.Recipe,
+    Quiver = _G.LE_ITEM_CLASS_QUIVER or _G.Enum.ItemClass.Quiver,
+    Questitem = _G.LE_ITEM_CLASS_QUESTITEM or _G.Enum.ItemClass.Questitem,
+    Key = _G.LE_ITEM_CLASS_KEY or _G.Enum.ItemClass.Key,
+    Miscellaneous = _G.LE_ITEM_CLASS_MISCELLANEOUS or _G.Enum.ItemClass.Miscellaneous,
+    Glyph = _G.LE_ITEM_CLASS_GLYPH or _G.Enum.ItemClass.Glyph,
+    Battlepet = _G.LE_ITEM_CLASS_BATTLEPET or _G.Enum.ItemClass.Battlepet,
+    WoWToken = _G.LE_ITEM_CLASS_WOW_TOKEN or _G.Enum.ItemClass.WoWToken,
 }
+Enum.ItemWeaponSubclass = {
+    Axe1H = _G.LE_ITEM_WEAPON_AXE1H or _G.Enum.ItemWeaponSubclass.Axe1H,
+    Axe2H = _G.LE_ITEM_WEAPON_AXE2H or _G.Enum.ItemWeaponSubclass.Axe2H,
+    Bows = _G.LE_ITEM_WEAPON_BOWS or _G.Enum.ItemWeaponSubclass.Bows,
+    Guns = _G.LE_ITEM_WEAPON_GUNS or _G.Enum.ItemWeaponSubclass.Guns,
+    Mace1H = _G.LE_ITEM_WEAPON_MACE1H or _G.Enum.ItemWeaponSubclass.Mace1H,
+    Mace2H = _G.LE_ITEM_WEAPON_MACE2H or _G.Enum.ItemWeaponSubclass.Mace2H,
+    Polearm = _G.LE_ITEM_WEAPON_POLEARM or _G.Enum.ItemWeaponSubclass.Polearm,
+    Sword1H = _G.LE_ITEM_WEAPON_SWORD1H or _G.Enum.ItemWeaponSubclass.Sword1H,
+    Sword2H = _G.LE_ITEM_WEAPON_SWORD2H or _G.Enum.ItemWeaponSubclass.Sword2H,
+    Warglaive = _G.LE_ITEM_WEAPON_WARGLAIVE or _G.Enum.ItemWeaponSubclass.Warglaive,
+    Staff = _G.LE_ITEM_WEAPON_STAFF or _G.Enum.ItemWeaponSubclass.Staff,
+    Bearclaw = _G.LE_ITEM_WEAPON_BEARCLAW or _G.Enum.ItemWeaponSubclass.Bearclaw,
+    Catclaw = _G.LE_ITEM_WEAPON_CATCLAW or _G.Enum.ItemWeaponSubclass.Catclaw,
+    Unarmed = _G.LE_ITEM_WEAPON_UNARMED or _G.Enum.ItemWeaponSubclass.Unarmed,
+    Generic = _G.LE_ITEM_WEAPON_GENERIC or _G.Enum.ItemWeaponSubclass.Generic,
+    Dagger = _G.LE_ITEM_WEAPON_DAGGER or _G.Enum.ItemWeaponSubclass.Dagger,
+    Thrown = _G.LE_ITEM_WEAPON_THROWN or _G.Enum.ItemWeaponSubclass.Thrown,
+    Obsolete3 = _G.LE_ITEM_WEAPON_OBSOLETE3 or 17,
+    Crossbow = _G.LE_ITEM_WEAPON_CROSSBOW or _G.Enum.ItemWeaponSubclass.Crossbow,
+    Wand = _G.LE_ITEM_WEAPON_WAND or _G.Enum.ItemWeaponSubclass.Wand,
+    Fishingpole = _G.LE_ITEM_WEAPON_FISHINGPOLE or _G.Enum.ItemWeaponSubclass.Fishingpole,
+}
+Enum.ItemArmorSubclass = {
+    Generic = _G.LE_ITEM_ARMOR_GENERIC or _G.Enum.ItemArmorSubclass.Generic,
+    Cloth = _G.LE_ITEM_ARMOR_CLOTH or _G.Enum.ItemArmorSubclass.Cloth,
+    Leather = _G.LE_ITEM_ARMOR_LEATHER or _G.Enum.ItemArmorSubclass.Leather,
+    Mail = _G.LE_ITEM_ARMOR_MAIL or _G.Enum.ItemArmorSubclass.Mail,
+    Plate = _G.LE_ITEM_ARMOR_PLATE or _G.Enum.ItemArmorSubclass.Plate,
+    Cosmetic = _G.LE_ITEM_ARMOR_COSMETIC or _G.Enum.ItemArmorSubclass.Cosmetic,
+    Shield = _G.LE_ITEM_ARMOR_SHIELD or _G.Enum.ItemArmorSubclass.Shield,
+    Libram = _G.LE_ITEM_ARMOR_LIBRAM or _G.Enum.ItemArmorSubclass.Libram,
+    Idol = _G.LE_ITEM_ARMOR_IDOL or _G.Enum.ItemArmorSubclass.Idol,
+    Totem = _G.LE_ITEM_ARMOR_TOTEM or _G.Enum.ItemArmorSubclass.Totem,
+    Sigil = _G.LE_ITEM_ARMOR_SIGIL or _G.Enum.ItemArmorSubclass.Sigil,
+    Relic = _G.LE_ITEM_ARMOR_RELIC or _G.Enum.ItemArmorSubclass.Relic,
+}
+
+Enum.Damageclass = {
+    MaskNone = _G.SCHOOL_MASK_NONE or _G.Enum.Damageclass.MaskNone,
+    MaskPhysical = _G.SCHOOL_MASK_PHYSICAL or _G.Enum.Damageclass.MaskPhysical,
+    MaskHoly = _G.SCHOOL_MASK_HOLY or _G.Enum.Damageclass.MaskHoly,
+    MaskFire = _G.SCHOOL_MASK_FIRE or _G.Enum.Damageclass.MaskFire,
+    MaskNature = _G.SCHOOL_MASK_NATURE or _G.Enum.Damageclass.MaskNature,
+    MaskFrost = _G.SCHOOL_MASK_FROST or _G.Enum.Damageclass.MaskFrost,
+    MaskShadow = _G.SCHOOL_MASK_SHADOW or _G.Enum.Damageclass.MaskShadow,
+    MaskArcane = _G.SCHOOL_MASK_ARCANE or _G.Enum.Damageclass.MaskArcane,
+}
+
 RealUI.Enum = Enum
 
 

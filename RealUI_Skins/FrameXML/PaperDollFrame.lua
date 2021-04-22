@@ -29,7 +29,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
             if type(canEnchant) == "number" then
                 canEnchant = _G.GetClientDisplayExpansionLevel() == canEnchant
             end
-            return canEnchant and quality ~= RealUI.Enum.ItemQuality.Artifact
+            return canEnchant and quality ~= _G.Enum.ItemQuality.Artifact
         end
 
         local scanningTooltip = _G.RealUIScanningTooltip

@@ -359,6 +359,8 @@ end)
 
 do -- AddDynamicInfo, ClearDynamicInfo
     local maxAge, quickRefresh = 600, 10
+    local ItemWeaponSubclass = RealUI.Enum.ItemWeaponSubclass
+    local ItemArmorSubclass = RealUI.Enum.ItemArmorSubclass
     local cache = {}
 
     local function IsCacheFresh(guid)
@@ -387,29 +389,29 @@ do -- AddDynamicInfo, ClearDynamicInfo
         "SecondaryHand",
     }
     local TwoHanders = {
-        [_G.LE_ITEM_WEAPON_AXE2H] = true,
-        [_G.LE_ITEM_WEAPON_MACE2H] = true,
-        [_G.LE_ITEM_WEAPON_SWORD2H] = true,
+        [ItemWeaponSubclass.Axe2H] = true,
+        [ItemWeaponSubclass.Mace2H] = true,
+        [ItemWeaponSubclass.Sword2H] = true,
 
-        [_G.LE_ITEM_WEAPON_POLEARM] = true,
-        [_G.LE_ITEM_WEAPON_STAFF] = true,
+        [ItemWeaponSubclass.Polearm] = true,
+        [ItemWeaponSubclass.Staff] = true,
 
-        [_G.LE_ITEM_WEAPON_BOWS] = true,
-        [_G.LE_ITEM_WEAPON_CROSSBOW] = true,
-        [_G.LE_ITEM_WEAPON_GUNS] = true,
+        [ItemWeaponSubclass.Bows] = true,
+        [ItemWeaponSubclass.Crossbow] = true,
+        [ItemWeaponSubclass.Guns] = true,
 
-        [_G.LE_ITEM_WEAPON_FISHINGPOLE] = true
+        [ItemWeaponSubclass.Fishingpole] = true
     }
     local DualWield = {
-        [_G.LE_ITEM_WEAPON_AXE1H] = true,
-        [_G.LE_ITEM_WEAPON_MACE1H] = true,
-        [_G.LE_ITEM_WEAPON_SWORD1H] = true,
+        [ItemWeaponSubclass.Axe1H] = true,
+        [ItemWeaponSubclass.Mace1H] = true,
+        [ItemWeaponSubclass.Sword1H] = true,
 
-        [_G.LE_ITEM_WEAPON_WARGLAIVE] = true,
-        [_G.LE_ITEM_WEAPON_DAGGER] = true,
+        [ItemWeaponSubclass.Warglaive] = true,
+        [ItemWeaponSubclass.Dagger] = true,
 
-        [_G.LE_ITEM_WEAPON_GENERIC] = true,
-        [_G.LE_ITEM_ARMOR_SHIELD] = true,
+        [ItemWeaponSubclass.Generic] = true,
+        [ItemArmorSubclass.Shield] = true,
     }
 
     local frame = _G.CreateFrame("Frame")
@@ -445,7 +447,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                     if link then
                         local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
                         if rarity and subTypeID then
-                            if rarity ~= RealUI.Enum.ItemQuality.Artifact then
+                            if rarity ~= _G.Enum.ItemQuality.Artifact then
                                 ilvl = _G.RealUI.GetItemLevel(link)
                             end
 
@@ -456,7 +458,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                             end
 
                             if slot == "MainHand" or slot == "SecondaryHand" then
-                                if rarity == RealUI.Enum.ItemQuality.Artifact then
+                                if rarity == _G.Enum.ItemQuality.Artifact then
                                     if slot == "MainHand" then
                                         mainArtifact = ilvl
                                     elseif slot == "SecondaryHand" then

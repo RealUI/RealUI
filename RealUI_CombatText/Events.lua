@@ -21,16 +21,17 @@ local eventSuffix = _G.setmetatable({}, {
 })
 
 
-local defaultSchool = _G.SCHOOL_MASK_NONE
+local Damageclass = RealUI.Enum.Damageclass
+local defaultSchool = Damageclass.MaskNone
 local SpellColors = {
-    [_G.SCHOOL_MASK_NONE] = Color.Create(1, 1, 1),
-    [_G.SCHOOL_MASK_PHYSICAL] = Color.Create(1, 1, 0),
-    [_G.SCHOOL_MASK_HOLY] = Color.Create(1, 0.9, 0.5),
-    [_G.SCHOOL_MASK_FIRE] = Color.Create(1, 0.5, 0),
-    [_G.SCHOOL_MASK_NATURE] = Color.Create(0.3, 1, 0.3),
-    [_G.SCHOOL_MASK_FROST] = Color.Create(0.5, 1, 1),
-    [_G.SCHOOL_MASK_SHADOW] = Color.Create(0.5, 0.5, 1),
-    [_G.SCHOOL_MASK_ARCANE] = Color.Create(1, 0.5, 1),
+    [Damageclass.MaskNone] = Color.Create(1, 1, 1),
+    [Damageclass.MaskPhysical] = Color.Create(1, 1, 0),
+    [Damageclass.MaskHoly] = Color.Create(1, 0.9, 0.5),
+    [Damageclass.MaskFire] = Color.Create(1, 0.5, 0),
+    [Damageclass.MaskNature] = Color.Create(0.3, 1, 0.3),
+    [Damageclass.MaskFrost] = Color.Create(0.5, 1, 1),
+    [Damageclass.MaskShadow] = Color.Create(0.5, 0.5, 1),
+    [Damageclass.MaskArcane] = Color.Create(1, 0.5, 1),
 }
 local function GetSpellColor(school)
     if school then

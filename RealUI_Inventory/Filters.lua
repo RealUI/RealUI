@@ -204,6 +204,8 @@ do
     end
 end
 
+local ItemClass = RealUI.Enum.ItemClass
+
 private.filterList = {}
 tinsert(private.filterList, {
     tag = "new",
@@ -223,7 +225,7 @@ tinsert(private.filterList, {
     rank = 0,
     filter = function(slot)
         local _, _, _, quality, _, _, _, _, noValue = _G.GetContainerItemInfo(slot:GetBagAndSlot())
-        return quality == RealUI.Enum.ItemQuality.Poor and not noValue
+        return quality == _G.Enum.ItemQuality.Poor and not noValue
     end,
 })
 
@@ -233,7 +235,7 @@ tinsert(private.filterList, {
     rank = 10,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-        return typeID == _G.LE_ITEM_CLASS_CONSUMABLE
+        return typeID == ItemClass.Consumable
     end,
 })
 
@@ -261,22 +263,22 @@ tinsert(private.filterList, {
     rank = 3,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-        return typeID == _G.LE_ITEM_CLASS_QUESTITEM
+        return typeID == ItemClass.Questitem
     end,
 })
 
 local prefix = _G.BAG_FILTER_TRADE_GOODS .. ": %s"
-local tradegoods = _G.C_AuctionHouse.GetAuctionItemSubClasses(_G.LE_ITEM_CLASS_TRADEGOODS)
+local tradegoods = _G.C_AuctionHouse.GetAuctionItemSubClasses(ItemClass.Tradegoods)
 for i = 1, (#tradegoods - 1) do
     local subClassID = tradegoods[i]
-    local name = _G.GetItemSubClassInfo(_G.LE_ITEM_CLASS_TRADEGOODS, subClassID)
+    local name = _G.GetItemSubClassInfo(ItemClass.Tradegoods, subClassID)
     tinsert(private.filterList, {
         tag = "tradegoods_"..subClassID,
         name = prefix:format(name),
         rank = 30,
         filter = function(slot)
             local _, _, _, _, _, typeID, subTypeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-            return typeID == _G.LE_ITEM_CLASS_TRADEGOODS and subTypeID == subClassID
+            return typeID == ItemClass.Tradegoods and subTypeID == subClassID
         end,
     })
 end
@@ -287,7 +289,7 @@ tinsert(private.filterList, {
     rank = 31,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
-        return typeID == _G.LE_ITEM_CLASS_TRADEGOODS
+        return typeID == ItemClass.Tradegoods
     end,
 })
 
