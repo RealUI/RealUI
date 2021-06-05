@@ -1,4 +1,15 @@
-## [2.2.10] ##
+## [2.3.0] ##
+### Modified AddOns ###
+
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * nibRealUI
+
+### Added ###
+
+  * RealUI_CombatText is now officially included
+
 ### Changed ###
 
   * Druid mana is now also shown in bear and cat forms
@@ -12,6 +23,11 @@
 
 
 ## [2.2.9] ##
+### Modified AddOns ###
+
+  * RealUI_Inventory
+  * nibRealUI
+
 ### Fixed ###
 
   * Error when attempting to use a filter bag that no longer exists
@@ -456,7 +472,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
-[2.2.10]: https://github.com/RealUI/RealUI/compare/2.2.9...2.2.10
+[2.3.0]: https://github.com/RealUI/RealUI/compare/2.2.9...2.3.0
 [2.2.9]: https://github.com/RealUI/RealUI/compare/2.2.8...2.2.9
 [2.2.8]: https://github.com/RealUI/RealUI/compare/2.2.7...2.2.8
 [2.2.7]: https://github.com/RealUI/RealUI/compare/2.2.6...2.2.7

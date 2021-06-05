@@ -7,7 +7,6 @@ ignore:
     - package.bat
     - nibRealUI_Dev
     - RealUI_Chat
-    - RealUI_CombatText
 
 externals:
     nibRealUI/Libs/AceAddon-3.0:
