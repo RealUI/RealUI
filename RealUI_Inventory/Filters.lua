@@ -295,7 +295,7 @@ tinsert(private.filterList, {
 
 tinsert(private.filterList, {
     tag = "anima",
-    name = _G.ANIMA,
+    name = _G.POWER_TYPE_ANIMA,
     rank = 50,
     filter = function(slot)
         return _G.C_Item.IsAnimaItemByID(slot.item:GetItemID())
