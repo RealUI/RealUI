@@ -6,6 +6,8 @@
 ### Fixed ###
 
   * Hover tooltips did not show for looted currency
+  * Errors due to changes in 9.1
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
 
