@@ -1,10 +1,11 @@
 local _, private = ...
 
 local CombatText = private.CombatText
+local Damageclass = _G.RealUI.Enum.Damageclass
 
 local GetEvent, isSpamming
 local function InitTest()
-    local random = _G.random
+    local random = _G.math.random
     local player = private.player
     local other = private.other
 
@@ -33,12 +34,12 @@ local function InitTest()
     end
 
     local spellSchools = {
-        _G.SCHOOL_MASK_HOLY,
-        _G.SCHOOL_MASK_FIRE,
-        _G.SCHOOL_MASK_NATURE,
-        _G.SCHOOL_MASK_FROST,
-        _G.SCHOOL_MASK_SHADOW,
-        _G.SCHOOL_MASK_ARCANE,
+        Damageclass.MaskHoly,
+        Damageclass.MaskFire,
+        Damageclass.MaskNature,
+        Damageclass.MaskFrost,
+        Damageclass.MaskShadow,
+        Damageclass.MaskArcane,
     }
     local function GetSpellSchool()
         return spellSchools[random(1, #spellSchools)]
@@ -193,11 +194,11 @@ local function InitTest()
             end
 
             if random(1, 2) == 1 then
-                sourceGUID, sourceName, sourceFlags, sourceRaidFlags = player.guid, player.name, player.flags, player.raidFlags
-                destGUID, destName, destFlags, destRaidFlags = other.guid, other.name, other.flags, other.raidFlags
+                sourceGUID, sourceName, sourceFlags, sourceRaidFlags = player.guid, player.name, player.flags or "nil", player.raidFlags or "nil"
+                destGUID, destName, destFlags, destRaidFlags = other.guid, other.name, other.flags or "nil", other.raidFlags or "nil"
             else
-                sourceGUID, sourceName, sourceFlags, sourceRaidFlags = other.guid, other.name, other.flags, other.raidFlags
-                destGUID, destName, destFlags, destRaidFlags = player.guid, player.name, player.flags, player.raidFlags
+                sourceGUID, sourceName, sourceFlags, sourceRaidFlags = other.guid, other.name, other.flags or "nil", other.raidFlags or "nil"
+                destGUID, destName, destFlags, destRaidFlags = player.guid, player.name, player.flags or "nil", player.raidFlags or "nil"
             end
 
             timestamp = _G.GetTime()

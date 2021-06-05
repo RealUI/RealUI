@@ -108,11 +108,15 @@ local IGNORE_EVENT = {
 
 private.player = {
     guid = _G.UnitGUID("player"),
-    name = _G.UnitName("player")
+    name = _G.UnitName("player"),
+    flags = 0x00000400,
+    raidFlags = 0x01
 }
 private.other = {
     guid = "Player-1234-1234ABCD",
-    name = "Other"
+    name = "Other",
+    flags = 0x10A48,
+    raidFlags = 0x20
 }
 
 local COMBATLOG_FILTER_MINE = _G.COMBATLOG_FILTER_MINE
