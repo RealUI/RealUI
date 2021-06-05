@@ -1,4 +1,8 @@
 ## [2.2.10] ##
+### Fixed ###
+
+  * Hover tooltips did not show for looted currency
+
 
 
 ## [2.2.9] ##

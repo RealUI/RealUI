@@ -256,27 +256,27 @@ RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
 RealUILootFrame.slots = {}
 
 local function LootOnEnter(self)
-    --print("LootOnEnter: ")
     local slot = self:GetID()
-    --print("GetLootSlotType Enter: "..tostring(GetLootSlotType(slot)))
-    --print("GetLootSlotType(slot) == 1 is "..tostring((GetLootSlotType(slot) == 1)))
-    if(_G.GetLootSlotType(slot) == 1) then
+    local slotType = _G.GetLootSlotType(slot)
+    if slotType == _G.LOOT_SLOT_ITEM then
         _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         _G.GameTooltip:SetLootItem(slot)
         _G.CursorUpdate(self)
     end
+    if slotType == _G.LOOT_SLOT_CURRENCY then
+        _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+        _G.GameTooltip:SetLootCurrency(slot);
+        _G.CursorUpdate(self);
+    end
 end
 
-local LootOnLeave = function(self)
-    --print("LootOnLeave: ")
+local function LootOnLeave(self)
     _G.GameTooltip:Hide()
     _G.ResetCursor()
 end
 
-local LootOnClick = function(self)
-    --print("LootOnClick: ")
-    --print("IsModifiedClick: "..tostring(IsModifiedClick()))
-    if(_G.IsModifiedClick()) then
+local function LootOnClick(self)
+    if _G.IsModifiedClick() then
         _G.HandleModifiedItemClick(_G.GetLootSlotLink(self:GetID()))
     else
         _G.StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")
@@ -290,16 +290,14 @@ local LootOnClick = function(self)
     end
 end
 
-local LootOnUpdate = function(self)
-    --print("LootOnUpdate: ")
-    if(_G.GameTooltip:IsOwned(self)) then
-        _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        _G.GameTooltip:SetLootItem(self:GetID())
-        _G.CursorOnUpdate(self)
+local function LootOnUpdate(self)
+    if _G.GameTooltip:IsOwned(self) then
+        LootOnEnter(self)
     end
+    _G.CursorOnUpdate(self)
 end
 
-local createSlot = function(id)
+local function createSlot(id)
     local frame = _G.CreateFrame("Button", "ButsuSlot"..id, RealUILootFrame)
     frame:SetPoint("TOP", RealUILootFrame, 0, -((id-1)*(LootIconSize+1)))
     frame:SetPoint("RIGHT")
@@ -348,7 +346,7 @@ local createSlot = function(id)
     return frame
 end
 
-local anchorSlots = function(self)
+local function anchorSlots(self)
     local shownSlots = 0
     for i=1, #self.slots do
         local frame = self.slots[i]
