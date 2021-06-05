@@ -1,4 +1,8 @@
 ## [2.2.10] ##
+### Changed ###
+
+  * Druid mana is now also shown in bear and cat forms
+
 ### Fixed ###
 
   * Hover tooltips did not show for looted currency

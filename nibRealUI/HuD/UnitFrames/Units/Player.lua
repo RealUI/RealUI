@@ -72,6 +72,19 @@ UnitFrames.player = {
         end
 
         AdditionalPower.colorPower = true
+        AdditionalPower.displayPairs = {
+            DRUID = {
+                [_G.Enum.PowerType.LunarPower] = true,
+                [_G.Enum.PowerType.Rage] = true,
+                [_G.Enum.PowerType.Energy] = true,
+            },
+            PRIEST = {
+                [_G.Enum.PowerType.Insanity] = true,
+            },
+            SHAMAN = {
+                [_G.Enum.PowerType.Maelstrom] = true,
+            },
+        }
 
         self.AdditionalPower = AdditionalPower
         self.AdditionalPower.bg = bg
