@@ -1,4 +1,4 @@
-## Interface: 90005
+## Interface: 90105
 ## Title: RealUI Inventory
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe

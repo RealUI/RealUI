@@ -1,4 +1,4 @@
-## Interface: 90005
+## Interface: 90105
 ## Title: RealUI Tooltips
 ## Notes: Useful tooltip mods
 ## Author: Gethe
