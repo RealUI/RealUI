@@ -37,18 +37,31 @@ _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
         self:Show()
     end
 end)
+
 function RealUI:ToggleGridTestMode(show)
     if not _G.Grid2Options then
         _G.LoadAddOn("Grid2Options")
     end
     if not _G.Grid2Options then return end
+    if not _G.Grid2 then
+        _G.LoadAddOn("Grid2")
+    end
+    if not _G.Grid2 then return end
+
+    local theme = _G.Grid2Options.editedTheme
+    local layouts, layoutName, maxPlayers = theme.layout.layouts
+
+    maxPlayers = "20"
+    layoutName = layouts["raid"]
+    local enabled = (not _G.Grid2.testMaxPlayers) or (theme.index~=_G.Grid2.testThemeIndex or layoutName~=_G.Grid2Layout.testLayoutName or maxPlayers~=_G.Grid2.testMaxPlayers)
+
 
     if show then
         if not _G.RealUIGridConfiguring then
-            _G.RealUIGridConfiguring = _G.Grid2Options:LayoutTestEnable("By Group", nil, nil, 20)
+            _G.RealUIGridConfiguring = _G.Grid2Layout:SetTestMode( enabled, theme.index, layoutName, maxPlayers)
         end
     else
-        _G.RealUIGridConfiguring = _G.Grid2Options:LayoutTestEnable()
+            _G.RealUIGridConfiguring = _G.Grid2Layout:SetTestMode()
     end
 
     return _G.RealUIGridConfiguring
