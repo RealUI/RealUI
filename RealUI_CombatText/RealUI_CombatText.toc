@@ -1,4 +1,4 @@
-## Interface: 90005
+## Interface: 90105
 ## Title: RealUI Combat Text
 ## Notes: Scrolling combat text designed for RealUI
 ## Author: Gethe
