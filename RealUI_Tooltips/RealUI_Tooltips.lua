@@ -309,8 +309,8 @@ private.AddHook("OnTooltipCleared", function(self)
 
     ClearDynamicInfo()
     self._id = nil
+    self.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
 
-    self:SetBackdropBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end, true)
 
 
