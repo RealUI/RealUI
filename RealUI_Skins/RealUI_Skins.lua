@@ -197,11 +197,11 @@ function private.OnLoad()
         Color.button:SetRGB(buttonColor.r, buttonColor.g, buttonColor.b)
     end
 
-    local classColors = private.skinsDB.classColors
-    if not classColors[private.charClass.token] then
-        private.classColorsReset(classColors, _G.RAID_CLASS_COLORS)
-    end
-    private.setColorCache(classColors)
+    -- local classColors = private.skinsDB.classColors
+    -- if not classColors[private.charClass.token] then
+    --     private.classColorsReset(classColors, _G.RAID_CLASS_COLORS)
+    -- end
+    -- private.setColorCache(classColors)
 
     -- Set overrides and hooks
     local C = Aurora[2]

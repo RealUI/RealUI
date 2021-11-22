@@ -37,35 +37,35 @@ do --[[ FrameXML\FriendsFrame.lua ]]
         return nameText, nameColor
     end
 
-    _G.hooksecurefunc(Hook, "FriendsFrame_UpdateFriendButton", function(button)
-        local nameText, nameColor, isFavoriteFriend
-        if button.buttonType == _G.FRIENDS_BUTTON_TYPE_WOW then
-            local info = _G.C_FriendList.GetFriendInfoByIndex(button.id)
-            if info.connected then
-                local classToken = _G.CUSTOM_CLASS_COLORS:GetClassToken(info.className)
-                nameText = wowFormat:format(info.name, info.level)
-                nameColor = _G.CUSTOM_CLASS_COLORS[classToken]
-            end
-        elseif button.buttonType == _G.FRIENDS_BUTTON_TYPE_BNET then
-            local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(button.id)
-            local gameAccountInfo = accountInfo.gameAccountInfo
-            if accountInfo and gameAccountInfo.isOnline then
-                if gameAccountInfo.characterName then
-                    nameText, nameColor = GetBNetAccountNameAndStatus(accountInfo)
-                    isFavoriteFriend = accountInfo.isFavorite
-                end
-            end
-        end
+    -- _G.hooksecurefunc(Hook, "FriendsFrame_UpdateFriendButton", function(button)
+    --     local nameText, nameColor, isFavoriteFriend
+    --     if button.buttonType == _G.FRIENDS_BUTTON_TYPE_WOW then
+    --         local info = _G.C_FriendList.GetFriendInfoByIndex(button.id)
+    --         if info.connected then
+    --             local classToken = _G.CUSTOM_CLASS_COLORS:GetClassToken(info.className)
+    --             nameText = wowFormat:format(info.name, info.level)
+    --             nameColor = _G.CUSTOM_CLASS_COLORS[classToken]
+    --         end
+    --     elseif button.buttonType == _G.FRIENDS_BUTTON_TYPE_BNET then
+    --         local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(button.id)
+    --         local gameAccountInfo = accountInfo.gameAccountInfo
+    --         if accountInfo and gameAccountInfo.isOnline then
+    --             if gameAccountInfo.characterName then
+    --                 nameText, nameColor = GetBNetAccountNameAndStatus(accountInfo)
+    --                 isFavoriteFriend = accountInfo.isFavorite
+    --             end
+    --         end
+    --     end
 
-        if nameText then
-            button.name:SetText(nameText)
-            button.name:SetTextColor(nameColor:GetRGB())
+    --     if nameText then
+    --         button.name:SetText(nameText)
+    --         button.name:SetTextColor(nameColor:GetRGB())
 
-            if isFavoriteFriend then
-                button.Favorite:SetPoint("TOPLEFT", button.name, "TOPLEFT", button.name:GetStringWidth(), 0)
-            end
-        end
-    end)
+    --         if isFavoriteFriend then
+    --             button.Favorite:SetPoint("TOPLEFT", button.name, "TOPLEFT", button.name:GetStringWidth(), 0)
+    --         end
+    --     end
+    -- end)
 end
 
 -- do --[[ FrameXML\FriendsFrame.xml ]]
