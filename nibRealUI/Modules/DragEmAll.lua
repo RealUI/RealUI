@@ -103,9 +103,9 @@ local addonFrames = {
         ChannelFrame = {}
     },
     --Blizzard_ClassTrial = {},
-    Blizzard_Collections = {
-        CollectionsJournal = {}
-    },
+    -- Blizzard_Collections = {
+    --     CollectionsJournal = {}
+    -- },
     Blizzard_Communities = {
         CommunitiesFrame = {"CommunitiesGuildLogFrame"}
     },
