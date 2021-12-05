@@ -117,7 +117,7 @@ local addonFrames = {
     --Blizzard_DeathRecap = {},
     --Blizzard_DebugTools = {},
     Blizzard_EncounterJournal = {
-        EncounterJournal = {}
+        EncounterJournal = {"EncounterJournal.NineSlice"}
     },
     Blizzard_FlightMap = {
         FlightMapFrame = {}
