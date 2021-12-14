@@ -180,7 +180,7 @@ function private.OnLoad()
 
     local Base = Aurora.Base
     local Skin = Aurora.Skin
-    local Color = Aurora.Color
+    local Color, Util = Aurora.Color, Aurora.Util
 
     -- Initialize custom colors
     local frameColor = private.skinsDB.frameColor
@@ -189,6 +189,7 @@ function private.OnLoad()
     else
         Color.frame:SetRGBA(frameColor.r, frameColor.g, frameColor.b, Color.frame.a)
     end
+    Util.SetFrameAlpha(frameColor.a)
 
     local buttonColor = private.skinsDB.buttonColor
     if not buttonColor.r then
@@ -213,14 +214,12 @@ function private.OnLoad()
     _G.hooksecurefunc(Skin, "AzeriteEmpoweredItemUITemplate", function(Frame)
         Frame.BorderFrame.NineSlice._stripes:SetParent(Frame)
     end)
-    function Skin.FrameTypeFrame(Frame)
-        Base.SetBackdrop(Frame, Color.frame, frameColor.a)
 
+    _G.hooksecurefunc(Skin, "FrameTypeFrame", function(Frame)
         if not Frame._stripes then
             RealUI:AddFrameStripes(Frame)
         end
-    end
-
+    end)
     _G.hooksecurefunc(Skin, "CharacterFrameTabButtonTemplate", function(Button)
         Button:SetButtonColor(Color.frame, frameColor.a, false)
         RealUI:AddFrameStripes(Button)

@@ -207,7 +207,7 @@ local autorunScripts = {
 }
 
 local autorunAddon = {
-    combatEvents = "Blizzard_DebugTools",
+    combatEvents = "Blizzard_EventTrace",
 }
 local eventFrame = _G.CreateFrame("Frame")
 eventFrame:RegisterAllEvents()
@@ -346,18 +346,13 @@ function ns.commands:nudgeFrame()
 end
 
 function ns.commands:combatEvents()
-    local function addArgs(args, index, ...)
-        for i = 1, select("#", ...) do
-            if not args[i] then
-                args[i] = {}
-            end
-            args[i][index] = select(i, ...)
-        end
-    end
+    local originalOnEvent = _G.EventTrace:GetScript("OnEvent")
 
-    _G.EventTraceFrame:HookScript("OnEvent", function(this, event)
-        if event == "COMBAT_LOG_EVENT_UNFILTERED" and not this.ignoredEvents[event] and this.events[this.lastIndex] == event then
-            addArgs(this.args, this.lastIndex, _G.CombatLogGetCurrentEventInfo())
+    _G.EventTrace:SetScript("OnEvent", function(this, event, ...)
+        if (event == "COMBAT_LOG_EVENT_UNFILTERED") then
+            this:LogEvent(event, _G.CombatLogGetCurrentEventInfo())
+        else
+            originalOnEvent(this, event, ...)
         end
     end)
 end

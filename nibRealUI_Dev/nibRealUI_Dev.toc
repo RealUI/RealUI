@@ -8,4 +8,4 @@
 nibRealUI_Dev.lua
 test.lua
 
-../Aurora/test.lua
+../Aurora/dev/test.lua
