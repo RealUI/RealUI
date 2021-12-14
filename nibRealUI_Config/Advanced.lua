@@ -742,6 +742,7 @@ do -- Skins
     end
 
     local Color = _G.Aurora.Color
+    local Util = _G.Aurora.Util
     local classColors do
         classColors = {
             name = _G.CLASS_COLORS,
@@ -815,6 +816,7 @@ do -- Skins
                     SkinsDB.profile.frameColor.g = g
                     SkinsDB.profile.frameColor.b = b
                     SkinsDB.profile.frameColor.a = a
+                    Util.SetFrameAlpha(a)
                     RealUI:UpdateFrameStyle()
                 end,
                 order = 1,
