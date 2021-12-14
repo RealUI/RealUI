@@ -50,6 +50,8 @@ local baseFames = {
     TutorialFrame = {},
     VideoOptionsFrame = {},
 }
+-- CollectionsJournal:GetPoint()
+--/run TradeSkillFrame:ClearAllPoints(); TradeSkillFrame:SetPoint("CENTER")
 
 local addonFrames = {
     --[[
@@ -104,7 +106,7 @@ local addonFrames = {
     },
     --Blizzard_ClassTrial = {},
     Blizzard_Collections = {
-        CollectionsJournal = {}
+        CollectionsJournalMover = {"CollectionsJournal"}
     },
     Blizzard_Communities = {
         CommunitiesFrame = {"CommunitiesGuildLogFrame"}
@@ -248,6 +250,9 @@ function DragEmAll:HookFrame(frameName, children)
     frame:HookScript("OnDragStop", FramePoint.OnDragStop)
 
     LibWin.RegisterConfig(frame, self.db.global[frameName])
+    if frameName == "CollectionsJournalMover" then
+        FramePoint.OnDragStop(frame)
+    end
     frames[frameName] = children
 end
 
@@ -346,6 +351,19 @@ function DragEmAll:OnEnable()
             self:HookFrames(frameList)
         end
     end
+
+    -- Since 9.1.5 the collections journal has been bugging out when moved, so
+    -- we set up a workaround.
+    local collectionsJournalMover = _G.CreateFrame("Frame", "CollectionsJournalMover", _G.UIParent)
+    collectionsJournalMover:SetSize(100, 100)
+    collectionsJournalMover:SetPoint("TOPLEFT")
+    collectionsJournalMover:Hide()
+
+    local bg = collectionsJournalMover:CreateTexture(nil, "BACKGROUND")
+    bg:SetColorTexture(1, 1, 1, 0.2)
+    bg:SetAllPoints(collectionsJournalMover)
+    bg:Hide()
+    collectionsJournalMover.dragBG = bg
 
     -- Making the ColorPickerFrame itself draggable makes interacting with the
     -- color picker widgets difficult, so we need to do something different to
