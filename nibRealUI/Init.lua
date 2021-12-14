@@ -34,7 +34,7 @@ end
 private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local RealUI = private.RealUI
 
-RealUI.isBeta = select(4, _G.GetBuildInfo()) >= 90002
+RealUI.isPatch = select(4, _G.GetBuildInfo()) >= 90200
 RealUI.realmInfo = {
     realm = _G.GetRealmName(),
     connectedRealms = _G.GetAutoCompleteRealms(),
