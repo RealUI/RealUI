@@ -83,8 +83,8 @@ local function FixCollectionJournal(point, anchor, relPoint, x, y)
     mover:SetWidth(CollectionsJournal:GetWidth())
     mover:SetHeight(CollectionsJournal:GetHeight())
     mover:Show()
-
-    print("FixCollectionJournal", point, anchor and anchor:GetDebugName(), relPoint, x, y)
+    -- Debug code
+    -- print("FixCollectionJournal", point, anchor and anchor:GetDebugName(), relPoint, x, y)
     CollectionsJournal:SetParent(mover)
     CollectionsJournal:ClearAllPoints()
     CollectionsJournal:SetPoint(point, _G.UIParent, relPoint, x, y)
