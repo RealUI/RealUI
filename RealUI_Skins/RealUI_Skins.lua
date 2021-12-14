@@ -133,10 +133,10 @@ end
 function RealUI:UpdateFrameStyle()
     for frame, color in next, skinnedFrames do
         if frame._stripes then
-            Aurora.Base.SetBackdropColor(frame, color, private.skinsDB.frameColor.a)
+            Base.SetBackdropColor(frame, color, private.skinsDB.frameColor.a)
             frame._stripes:SetAlpha(private.skinsDB.stripeAlpha)
         else
-            Aurora.Base.SetBackdropColor(frame, color)
+            Base.SetBackdropColor(frame, color)
         end
     end
 end
