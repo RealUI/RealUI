@@ -133,10 +133,10 @@ end
 function RealUI:UpdateFrameStyle()
     for frame, color in next, skinnedFrames do
         if frame._stripes then
-            Base.SetBackdropColor(frame, color, private.skinsDB.frameColor.a)
+            Aurora.Base.SetBackdropColor(frame, color, private.skinsDB.frameColor.a)
             frame._stripes:SetAlpha(private.skinsDB.stripeAlpha)
         else
-            Base.SetBackdropColor(frame, color)
+            Aurora.Base.SetBackdropColor(frame, color)
         end
     end
 end
@@ -178,7 +178,8 @@ function private.OnLoad()
         private.font[fontType] = font.path or LSM:Fetch("font", font.name)
     end
 
-    local Base = Aurora.Base
+    -- Not using local Base
+    -- local Base = Aurora.Base
     local Skin = Aurora.Skin
     local Color, Util = Aurora.Color, Aurora.Util
 
