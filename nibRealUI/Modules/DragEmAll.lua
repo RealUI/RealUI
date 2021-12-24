@@ -251,6 +251,8 @@ function DragEmAll:HookFrame(frameName, children)
 
     LibWin.RegisterConfig(frame, self.db.global[frameName])
     if frameName == "CollectionsJournalMover" then
+        frame:SetWidth(_G.CollectionsJournal:GetWidth())
+        frame:SetHeight(_G.CollectionsJournal:GetHeight())
         FramePoint.OnDragStop(frame)
     end
     frames[frameName] = children
