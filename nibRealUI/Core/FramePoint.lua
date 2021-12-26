@@ -80,16 +80,13 @@ local isTicking
 local function FixCollectionJournal(point, anchor, relPoint, x, y)
     local CollectionsJournal = _G.CollectionsJournal
     local mover = _G.CollectionsJournalMover
-    mover:SetWidth(CollectionsJournal:GetWidth())
-    mover:SetHeight(CollectionsJournal:GetHeight())
-    mover:Show()
-    -- Debug code
-    -- print("FixCollectionJournal", point, anchor and anchor:GetDebugName(), relPoint, x, y)
+
     CollectionsJournal:SetParent(mover)
     CollectionsJournal:ClearAllPoints()
     CollectionsJournal:SetPoint(point, _G.UIParent, relPoint, x, y)
     CollectionsJournal:HookScript("OnShow", function() mover:Show() end)
     CollectionsJournal:HookScript("OnHide", function() mover:Hide() end)
+    mover:Show()
 end
 
 function FramePoint.OnDragStart(frame)

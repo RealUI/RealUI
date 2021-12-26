@@ -4,8 +4,8 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
     <!-- Aurora -->
     <!--@non-debug@
     <Include file="..\Aurora\Skin\skin.xml"/>
-    <Include file="..\..\Aurora\Skin\Interface\FrameXML\FrameXML.xml"/>
-    <Include file="..\..\Aurora\Skin\Interface\AddOns\AddOns.xml"/>
+    <Include file="..\Aurora\Skin\Interface\FrameXML\FrameXML.xml"/>
+    <Include file="..\Aurora\Skin\Interface\AddOns\AddOns.xml"/>
     @end-non-debug@-->
     <!--@debug@-->
     <Include file="..\..\Aurora\Skin\skin.xml"/>
