@@ -178,7 +178,6 @@ function private.OnLoad()
         private.font[fontType] = font.path or LSM:Fetch("font", font.name)
     end
 
-    local Base = Aurora.Base
     local Skin = Aurora.Skin
     local Color, Util = Aurora.Color, Aurora.Util
 
