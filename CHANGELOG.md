@@ -1,13 +1,24 @@
 ﻿## [2.3.1] ##
+### Modified AddOns ###
 
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Fixed ###
+
+  * Errors due to changes in 9.1.5
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 ## [2.3.0] ##
 ### Modified AddOns ###
 
+  * nibRealUI
   * RealUI_Inventory
   * RealUI_Skins
   * RealUI_Tooltips
-  * nibRealUI
 
 ### Added ###
 
@@ -28,8 +39,8 @@
 ## [2.2.9] ##
 ### Modified AddOns ###
 
-  * RealUI_Inventory
   * nibRealUI
+  * RealUI_Inventory
 
 ### Fixed ###
 
@@ -42,9 +53,9 @@
 ## [2.2.8] ##
 ### Modified AddOns ###
 
-  * RealUI_Skins
   * nibRealUI
   * nibRealUI_Config
+  * RealUI_Skins
 
 ### Fixed ###
 
@@ -57,9 +68,9 @@
 ## [2.2.7] ##
 ### Modified AddOns ###
 
-  * RealUI_Inventory
   * nibRealUI
   * nibRealUI_Config
+  * RealUI_Inventory
 
 ### Added ###
 
@@ -84,12 +95,12 @@
 ## [2.2.6] ##
 ### Modified AddOns ###
 
+  * nibRealUI
+  * nibRealUI_Config
   * RealUI_Bugs
   * RealUI_Inventory
   * RealUI_Skins
   * RealUI_Tooltips
-  * nibRealUI
-  * nibRealUI_Config
 
 ### Added ###
 
@@ -119,10 +130,10 @@
 ## [2.2.5] - 2020-11-16 ##
 ### Modified AddOns ###
 
-  * RealUI_Skins
-  * RealUI_Inventory
   * nibRealUI
   * nibRealUI_Config
+  * RealUI_Skins
+  * RealUI_Inventory
 
 ### Changed ###
 
@@ -141,11 +152,11 @@
 ## [2.2.4] - 2020-10-29 ##
 ### Modified AddOns ###
 
+  * nibRealUI
+  * nibRealUI_Config
   * RealUI_Skins
   * RealUI_Tooltips
   * RealUI_Inventory
-  * nibRealUI
-  * nibRealUI_Config
 
 ### Changed ###
 
