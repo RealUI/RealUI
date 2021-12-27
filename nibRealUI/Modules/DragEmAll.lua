@@ -253,7 +253,13 @@ function DragEmAll:HookFrame(frameName, children)
     if frameName == "CollectionsJournalMover" then
         frame:SetWidth(_G.CollectionsJournal:GetWidth())
         frame:SetHeight(_G.CollectionsJournal:GetHeight())
-        FramePoint.OnDragStop(frame)
+        _G.CollectionsJournal:HookScript("OnShow", function()
+            frame:Show()
+            FramePoint.FixCollectionJournal(frame:GetPoint())
+        end)
+        _G.CollectionsJournal:HookScript("OnHide", function()
+            frame:Hide()
+        end)
     end
     frames[frameName] = children
 end
