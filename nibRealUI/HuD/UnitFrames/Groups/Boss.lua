@@ -37,103 +37,50 @@ end
 local function AttachStatusBar(icon, unit)
     --print("AttachStatusBar")
     local sBar = _G.CreateFrame("StatusBar", nil, icon)
-    sBar:SetValue(0)
     sBar:SetMinMaxValues(0, 1)
     sBar:SetStatusBarTexture(RealUI.textures.plain)
     sBar:SetStatusBarColor(1,1,1,1)
 
-    sBar:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", 1, 1)
-    sBar:SetPoint("TOPRIGHT", icon, "BOTTOMRIGHT", -1, 3)
+    sBar:SetPoint("TOPLEFT", icon, "BOTTOMLEFT", 0, 2)
+    sBar:SetPoint("BOTTOMRIGHT", icon)
     sBar:SetFrameLevel(icon:GetFrameLevel() + 2)
 
-    local sBarBG = _G.CreateFrame("Frame", nil, sBar)
-    sBarBG:SetPoint("TOPLEFT", sBar, -1, 1)
-    sBarBG:SetPoint("BOTTOMRIGHT", sBar, 1, -1)
-    sBarBG:SetFrameLevel(icon:GetFrameLevel() + 1)
-    Base.SetBackdrop(sBarBG, Color.black, 0.7)
+    Base.SetBackdrop(sBar, Color.black, 0.7)
+    sBar:SetBackdropOption("offsets", {
+        left = -1,
+        right = -1,
+        top = -1,
+        bottom = -1,
+    })
 
     local timeStr = icon:CreateFontString(nil, "OVERLAY")
     timeStr:SetFontObject("NumberFont_Outline_Med")
-    timeStr:SetPoint("BOTTOMLEFT", icon, "BOTTOMLEFT", (unit == "pet") and 0.5 or 1.5, (unit == "pet") and 5 or 4)
+    timeStr:SetPoint("CENTER", icon, 0, 0)
     timeStr:SetJustifyH("LEFT")
 
     return sBar, timeStr
 end
 
 --[[ Parts ]]--
-local function CreateHealthBar(parent)
-    parent.Health = _G.CreateFrame("StatusBar", nil, parent)
-    parent.Health:SetPoint("BOTTOMLEFT", 1, 4)
-    parent.Health:SetPoint("TOPRIGHT", -1, -1)
-    parent.Health:SetStatusBarTexture(RealUI.textures.plain)
-    local color = parent.colors.health
-    parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
-    if not(RealUI.db.profile.settings.reverseUnitFrameBars) then
-        parent.Health:SetReverseFill(true)
-        parent.Health.PostUpdate = function(self, unit, cur, max)
-            self:SetValue(max - self:GetValue())
-        end
-    end
-
-end
-
-local function CreateTags(parent)
-    parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.HealthValue:SetPoint("LEFT", parent.Health, 1, 0)
-    parent.HealthValue:SetFontObject("SystemFont_Shadow_Med1")
-    parent.HealthValue:SetJustifyH("LEFT")
-    parent:Tag(parent.HealthValue, "[realui:healthPercent]")
-
-    parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.Name:SetPoint("RIGHT", parent.Health, -1, 0)
-    parent.Name:SetFontObject("SystemFont_Shadow_Med1")
-    parent.Name:SetJustifyH("RIGHT")
-    parent:Tag(parent.Name, "[realui:name]")
-end
-
-local function CreatePowerBar(parent)
-    local power = _G.CreateFrame("StatusBar", nil, parent)
-    power:SetFrameStrata("MEDIUM")
-    power:SetFrameLevel(6)
-    power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 1)
-    power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 3)
-    power:SetStatusBarTexture(RealUI.textures.plain)
-    power.colorPower = true
-    power.PostUpdate = function(bar, unit, cur, min, max)
-        bar:SetShown(max > 0)
-    end
-
-    parent.Power = power
-end
-
-local function CreateAltPowerBar(parent)
-    local altPowerBar = _G.CreateFrame("StatusBar", nil, parent)
-    altPowerBar:SetFrameStrata("MEDIUM")
-    altPowerBar:SetFrameLevel(6)
-    altPowerBar:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 4)
-    altPowerBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 6)
-    altPowerBar:SetStatusBarTexture(RealUI.textures.plain)
-    altPowerBar.colorPower = true
-    -- altPowerBar.PostUpdate = function(bar, unit, cur, min, max)
-    -- 	bar:SetShown(max > 0)
-    -- end
-
-    parent.AltPowerBar = altPowerBar
-end
-
 local function CreateAuras(parent)
     local bossDB = UnitFrames.db.profile.boss
+    local iconSize = parent:GetHeight()
+    local frameWidth = iconSize * (bossDB.buffCount + bossDB.debuffCount)
+
     UnitFrames:debug("Boss:CreateAuras")
     local auras = _G.CreateFrame("Frame", nil, parent)
-    auras:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", (22) * ((bossDB.buffCount + bossDB.debuffCount) - 1) + 4, 1)
-    auras:SetWidth((23) * (bossDB.buffCount + bossDB.debuffCount))
-    auras:SetHeight(22)
-    auras.size = parent:GetHeight() - 2
+    auras:SetPoint("TOPRIGHT", parent, "TOPLEFT", -3, 0)
+    auras:SetSize(frameWidth, iconSize)
+
+    auras.disableCooldown = true
+    auras.size = iconSize
     auras.spacing = 3
+    auras["growth-x"] = "LEFT"
+    auras.initialAnchor = "TOPRIGHT"
+
     auras.numBuffs = bossDB.buffCount
     auras.numDebuffs = bossDB.debuffCount
-    auras["growth-x"] = "LEFT"
-    auras.disableCooldown = true
+
     auras.CustomFilter = function(self, unit, button, ...)
         --    name, texture, count, debuffType, duration, expiration, caster
         local _, _, _, _, duration, expiration, caster = ...
@@ -209,59 +156,39 @@ local function CreateAuras(parent)
     parent.Auras = auras
 end
 
-local function CreateBoss(self)
-    self:SetSize(135, 24)
-    Base.SetBackdrop(self, Color.black, 0.7)
-
-    CreateHealthBar(self)
-    CreateTags(self)
-    CreatePowerBar(self)
-    CreateAltPowerBar(self)
-    CreateAuras(self)
-
-    self.RaidIcon = self:CreateTexture(nil, 'OVERLAY')
-    self.RaidIcon:SetSize(21, 21)
-    self.RaidIcon:SetPoint("LEFT", self, "RIGHT", 1, 1)
-
-    self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
-    self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
-end
-
 UnitFrames.boss = {
-    nameLength = 135 / 10
+    create = function(self)
+        CreateAuras(self)
+        self.Health.text:SetPoint("LEFT", self.Health, 1, 0)
+        self.Power.displayAltPower = true
+
+        self.Name = self.Health:CreateFontString(nil, "OVERLAY")
+        self.Name:SetPoint("RIGHT", self.Health, -1, 0)
+        self.Name:SetFontObject("SystemFont_Shadow_Med1")
+        self.Name:SetJustifyH("RIGHT")
+        self:Tag(self.Name, "[realui:name]")
+
+        self.RaidTargetIndicator = self:CreateTexture(nil, 'OVERLAY')
+        self.RaidTargetIndicator:SetSize(20, 20)
+        self.RaidTargetIndicator:SetPoint("CENTER", self)
+    end,
+    health = {
+        text = "[realui:healthPercent]",
+    },
+    power = {
+    },
 }
 
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
-    oUF:RegisterStyle("RealUI:boss", CreateBoss)
-    oUF:SetActiveStyle("RealUI:boss")
+    local db = UnitFrames.db.profile
+
     for i = 1, _G.MAX_BOSS_FRAMES do
         local boss = oUF:Spawn("boss" .. i, "RealUIBossFrame" .. i)
         if (i == 1) then
-            boss:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.x, UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.y)
+            boss:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
         else
-            boss:SetPoint("TOP", _G["RealUIBossFrame" .. i - 1], "BOTTOM", 0, -UnitFrames.db.profile.boss.gap)
+            boss:SetPoint("TOP", _G["RealUIBossFrame" .. i - 1], "BOTTOM", 0, -db.boss.gap)
         end
     end
 end)
-
-function RealUI:BossConfig(toggle)
-    for i = 1, _G.MAX_BOSS_FRAMES do
-        local f = _G["RealUIArenaFrame" .. i]
-        if toggle then
-            if not f.__realunit then
-                f.__realunit = f:GetAttribute("unit") or f.unit
-                f:SetAttribute("unit", "player")
-                f.unit = "player"
-                f:Show()
-            end
-        else
-            if f.__realunit then
-                f:SetAttribute("unit", f.__realunit)
-                f.unit = f.__realunit
-                f.__realunit = nil
-                f:Hide()
-            end
-        end
-    end
-end

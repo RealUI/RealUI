@@ -60,59 +60,12 @@ local function UpdateCC(self, event, unit)
 end
 
 --[[ Parts ]]--
-local function CreateHealthBar(parent)
-    parent.Health = _G.CreateFrame("StatusBar", nil, parent)
-    parent.Health:SetPoint("BOTTOMLEFT", 1, 4)
-    parent.Health:SetPoint("TOPRIGHT", -1, -1)
-    parent.Health:SetStatusBarTexture(RealUI.textures.plain)
-    local color = parent.colors.health
-    parent.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
-    if not(RealUI.db.profile.settings.reverseUnitFrameBars) then
-        parent.Health:SetReverseFill(true)
-        parent.Health.PostUpdate = function(self, unit, cur, max)
-            self:SetValue(max - self:GetValue())
-        end
-    end
-
-    function parent.Health:PostUpdateArenaPreparation(event, specID)
-        local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
-        parent.Trinket.icon:SetTexture(specIcon)
-    end
-end
-
-local function CreateTags(parent)
-    parent.HealthValue = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.HealthValue:SetPoint("TOPLEFT", 2.5, -6.5)
-    parent.HealthValue:SetFontObject("SystemFont_Shadow_Med1")
-    parent.HealthValue:SetJustifyH("LEFT")
-    parent:Tag(parent.HealthValue, "[realui:healthPercent]")
-
-    parent.Name = parent.Health:CreateFontString(nil, "OVERLAY")
-    parent.Name:SetPoint("TOPRIGHT", -0.5, -6.5)
-    parent.Name:SetFontObject("SystemFont_Shadow_Med1")
-    parent.Name:SetJustifyH("RIGHT")
-    parent:Tag(parent.Name, "[realui:name]")
-end
-
-local function CreatePowerBar(parent)
-    local power = _G.CreateFrame("StatusBar", nil, parent)
-    power:SetFrameStrata("MEDIUM")
-    power:SetFrameLevel(6)
-    power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -1, 1)
-    power:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 1, 3)
-    power:SetStatusBarTexture(RealUI.textures.plain)
-    power.colorPower = true
-    power.PostUpdate = function(bar, unit, cur, min, max)
-        bar:SetShown(max > 0)
-    end
-
-    parent.Power = power
-end
-
 local function CreateTrinket(parent)
+    local iconSize = parent:GetHeight()
+
     local trinket = _G.CreateFrame("Frame", nil, parent)
-    trinket:SetSize(22, 22)
-    trinket:SetPoint("BOTTOMRIGHT", parent, "BOTTOMLEFT", -3, 0)
+    trinket:SetSize(iconSize, iconSize)
+    trinket:SetPoint("TOPRIGHT", parent, "TOPLEFT", -3, 0)
     trinket:SetScript("OnUpdate", function(self, elapsed)
         self.elapsed = self.elapsed + elapsed
         if self.elapsed >= self.interval then
@@ -142,19 +95,27 @@ local function CreateTrinket(parent)
     trinket.icon:SetTexture([[Interface\Icons\PVPCurrency-Conquest-Horde]])
     Base.CropIcon(trinket.icon, trinket)
 
-    trinket.timer = _G.CreateFrame("StatusBar", nil, trinket)
-    trinket.timer:SetMinMaxValues(0, 1)
-    trinket.timer:SetStatusBarTexture(RealUI.textures.plain)
-    trinket.timer:SetStatusBarColor(1,1,1,1)
+    local timer = _G.CreateFrame("StatusBar", nil, trinket)
+    timer:SetMinMaxValues(0, 1)
+    timer:SetStatusBarTexture(RealUI.textures.plain)
+    timer:SetStatusBarColor(1,1,1,1)
+    trinket.timer = timer
 
-    trinket.timer:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1, 1)
-    trinket.timer:SetPoint("TOPRIGHT", trinket, "BOTTOMRIGHT", -1, 3)
-    trinket.timer:SetFrameLevel(trinket:GetFrameLevel() + 2)
-    Base.SetBackdrop(trinket.timer, Color.frame)
+    timer:SetPoint("TOPLEFT", trinket, "BOTTOMLEFT", 0, 2)
+    timer:SetPoint("BOTTOMRIGHT", trinket)
+    timer:SetFrameLevel(trinket:GetFrameLevel() + 2)
+
+    Base.SetBackdrop(timer, Color.black, 0.7)
+    timer:SetBackdropOption("offsets", {
+        left = -1,
+        right = -1,
+        top = -1,
+        bottom = -1,
+    })
 
     trinket.text = trinket:CreateFontString(nil, "OVERLAY")
     trinket.text:SetFontObject("NumberFont_Outline_Med")
-    trinket.text:SetPoint("BOTTOMLEFT", trinket, "BOTTOMLEFT", 1.5, 4)
+    trinket.text:SetPoint("CENTER", trinket, 0, 0)
     trinket.text:SetJustifyH("LEFT")
 
     function trinket:SetCooldown(startTime, duration)
@@ -171,42 +132,50 @@ local function CreateTrinket(parent)
     parent.Trinket = trinket
 end
 
-local function CreateArena(self)
-    --print("CreateArena", self.unit)
-    self:SetSize(135, 22)
-    Base.SetBackdrop(self, Color.frame, 0.7)
-
-    CreateHealthBar(self)
-    CreateTags(self)
-    CreatePowerBar(self)
-    CreateTrinket(self)
-
-    self.RaidIcon = self:CreateTexture(nil, 'OVERLAY')
-    self.RaidIcon:SetSize(21, 21)
-    self.RaidIcon:SetPoint("CENTER", self)
-
-    self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
-    self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
-    self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
-end
-
 UnitFrames.arena = {
-    nameLength = 135 / 10
+    create = function(self)
+        --print("CreateArena", self.unit)
+        CreateTrinket(self)
+
+        local color = self.colors.health
+        self.Health.text:SetPoint("LEFT", self.Health, 1, 0)
+        self.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
+        function self.Health.PostUpdateArenaPreparation(this, event, specID)
+            local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
+            this.Trinket.icon:SetTexture(specIcon)
+        end
+
+        self.Name = self.Health:CreateFontString(nil, "OVERLAY")
+        self.Name:SetPoint("RIGHT", self.Health, -1, 0)
+        self.Name:SetFontObject("SystemFont_Shadow_Med1")
+        self.Name:SetJustifyH("RIGHT")
+        self:Tag(self.Name, "[realui:name]")
+
+        self.RaidTargetIndicator = self:CreateTexture(nil, 'OVERLAY')
+        self.RaidTargetIndicator:SetSize(20, 20)
+        self.RaidTargetIndicator:SetPoint("CENTER", self)
+
+        self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
+    end,
+    health = {
+        text = "[realui:healthPercent]",
+    },
+    power = {
+    },
 }
 
 -- Init
 _G.tinsert(UnitFrames.units, function(...)
-    if not UnitFrames.db.profile.arena.enabled then return end
+    local db = UnitFrames.db.profile
+    if not db.arena.enabled then return end
 
-    oUF:RegisterStyle("RealUI:arena", CreateArena)
-    oUF:SetActiveStyle("RealUI:arena")
     -- Bosses and arenas are mutually excusive, so we'll just use some boss stuff for both for now.
     for i = 1, _G.MAX_BOSS_FRAMES do
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
         if i == 1 then
-            arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.x, UnitFrames.db.profile.positions[UnitFrames.layoutSize].boss.y)
+            arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
         else
-            arena:SetPoint("TOP", "RealUIArenaFrame"..(i-1), "BOTTOM", 0, -UnitFrames.db.profile.boss.gap)
+            arena:SetPoint("TOP", "RealUIArenaFrame"..(i-1), "BOTTOM", 0, -db.boss.gap)
         end
     end
 end)

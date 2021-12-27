@@ -145,7 +145,7 @@ tags.Methods["realui:healthPercent"] = function(unit)
     end
 
     UnitFrames:debug("realui:healthPercent", percent)
-    return ("%.1f|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
+    return ("%d|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
 end
 tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]
 
@@ -182,7 +182,7 @@ tags.Methods["realui:powerPercent"] = function(unit)
     end
 
     local _, ptoken = _G.UnitPowerType(unit)
-    return ("%.1f|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))
+    return ("%d|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))
 end
 tags.Events["realui:powerPercent"] = tags.Events["realui:powerValue"]
 

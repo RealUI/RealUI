@@ -103,8 +103,9 @@ function RealUI:HuDTestMode(isConfigMode)
         _G.ObjectiveTrackerFrame:SetShown(not isConfigMode)
     end
 
-    -- Boss Frames
-    RealUI:BossConfig(isConfigMode)
+    -- Arena/Boss Frames
+    RealUI:DemoUnitGroup("Arena", isConfigMode)
+    RealUI:DemoUnitGroup("Boss", isConfigMode)
 
     -- Spell Alerts
     local sAlert = {
