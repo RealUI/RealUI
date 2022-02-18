@@ -48,9 +48,9 @@ do --[[ FrameXML\FriendsFrame.lua ]]
             end
         elseif button.buttonType == _G.FRIENDS_BUTTON_TYPE_BNET then
             local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(button.id)
-            local gameAccountInfo = accountInfo.gameAccountInfo
-            if accountInfo and gameAccountInfo.isOnline then
-                if gameAccountInfo.characterName then
+            if accountInfo then
+                local gameAccountInfo = accountInfo.gameAccountInfo
+                if gameAccountInfo.isOnline and gameAccountInfo.characterName then
                     nameText, nameColor = GetBNetAccountNameAndStatus(accountInfo)
                     isFavoriteFriend = accountInfo.isFavorite
                 end
