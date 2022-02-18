@@ -55,6 +55,32 @@ UnitFrames.steppoints = {
     },
 }
 
+local unitGroups = {
+    Arena = 5,
+    Boss = 5
+}
+function RealUI:DemoUnitGroup(unitType, toggle)
+    local baseName = "RealUI" .. unitType .. "Frame"
+    for i = 1, unitGroups[unitType] do
+        local frame = _G[baseName .. i]
+        if toggle then
+            if not frame.__realunit then
+                frame.__realunit = frame:GetAttribute("unit") or frame.unit
+                frame:SetAttribute("unit", "player")
+                frame.unit = "player"
+                frame:Show()
+            end
+        else
+            if frame.__realunit then
+                frame:SetAttribute("unit", frame.__realunit)
+                frame.unit = frame.__realunit
+                frame.__realunit = nil
+                frame:Hide()
+            end
+        end
+    end
+end
+
 ----------------------------
 ------ Initialization ------
 ----------------------------
@@ -113,6 +139,18 @@ function UnitFrames:OnInitialize()
                 },
                 pet = {
                     size = {x = 126, y = 10},
+                    position = {x = 0, y = 0},
+                },
+                arena = {
+                    size = {x = 135, y = 22},
+                    position = {x = 0, y = 0},
+                },
+                boss = {
+                    size = {x = 135, y = 22},
+                    position = {x = 0, y = 0},
+                },
+                party = {
+                    size = {x = 100, y = 50},
                     position = {x = 0, y = 0},
                 },
             },

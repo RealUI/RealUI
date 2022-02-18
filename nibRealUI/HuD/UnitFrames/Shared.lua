@@ -5,6 +5,8 @@ local _, private = ...
 
 -- Libs --
 local oUF = private.oUF
+local Base = _G.Aurora.Base
+local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -106,34 +108,64 @@ local function UpdateSteps(self, unit, cur, max)
     end
 end
 
-local function CreateHealthBar(parent, info)
-    local width, height = parent:GetWidth(), parent:GetHeight()
-    if db.units[parent.unit].healthHeight then
-        height = round((height - 3) * db.units[parent.unit].healthHeight)
+local function CreateHealthBar(parent, info, isAngled)
+    local Health
+    if isAngled then
+        local width, height = parent:GetWidth(), parent:GetHeight()
+        if db.units[parent.unit].healthHeight then
+            height = round((height - 3) * db.units[parent.unit].healthHeight)
+        end
+
+        Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
+        Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+        Health:SetAngleVertex(info.leftVertex, info.rightVertex)
+        Health:SetSize(width, height)
+        Health:SetPoint("TOP"..info.point, parent)
+        Health:SetReverseFill(info.point == "RIGHT")
+
+        Health.step, Health.warn = CreateSteps(parent, height, info)
+        Health.PositionSteps = PositionSteps
+        Health.PostUpdate = UpdateSteps
+    else
+        Health = _G.CreateFrame("StatusBar", nil, parent.overlay)
+        Health:SetPoint("TOPLEFT", parent)
+        Health:SetPoint("BOTTOMRIGHT", parent, 0, 3)
+        Health:SetStatusBarTexture(RealUI.textures.plain)
+
+        Base.SetBackdrop(Health, Color.black, 1)
+        Health:SetBackdropOption("offsets", {
+            left = -1,
+            right = -1,
+            top = -1,
+            bottom = -1,
+        })
+
+        if not (ndb.settings.reverseUnitFrameBars) then
+            Health:SetReverseFill(true)
+            Health.PostUpdate = function(self, unit, cur, max)
+                self:SetValue(max * 0.75)
+                self:SetValue(max - self:GetValue())
+            end
+        end
     end
-    local Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
-    Health:SetSize(width, height)
-    Health:SetPoint("TOP"..info.point, parent)
-    Health:SetReverseFill(info.point == "RIGHT")
-    Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
-    Health:SetAngleVertex(info.leftVertex, info.rightVertex)
 
     if info.text then
         Health.text = Health:CreateFontString(nil, "OVERLAY")
-        Health.text:SetPoint("BOTTOM"..info.point, Health, "TOP"..info.point, 2, 2)
-        Health.text:SetFontObject("SystemFont_Shadow_Med1_Outline")
-        parent:Tag(Health.text, "[realui:health]")
+        if info.point then
+            Health.text:SetPoint("BOTTOM"..info.point, Health, "TOP"..info.point, 2, 2)
+        else
+            Health.text:SetPoint("CENTER")
+        end
+        Health.text:SetFontObject("SystemFont_Shadow_Med1")
+        parent:Tag(Health.text, info.text)
     end
 
-    Health.step, Health.warn = CreateSteps(parent, height, info)
     Health.barType = "health"
     Health.colorClass = db.overlay.classColor
     Health.colorTapping = true
     Health.colorDisconnected = true
     Health.colorHealth = true
 
-    Health.PositionSteps = PositionSteps
-    Health.PostUpdate = UpdateSteps
     parent.Health = Health
 end
 local CreateHealthStatus do
@@ -162,27 +194,34 @@ local CreateHealthStatus do
         self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
-    function CreateHealthStatus(parent, info)
-        local leftVertex, rightVertex = GetVertices(info)
-        local width, height = 4, _G.ceil(parent.Health:GetHeight() * 0.65)
-        local PvPIndicator = parent:CreateAngle("Frame", nil, parent.Health)
-        PvPIndicator:SetSize(width, height)
-        PvPIndicator:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -8 or 8, 0)
-        PvPIndicator:SetAngleVertex(leftVertex, rightVertex)
+    function CreateHealthStatus(parent, info, isAngled)
+        local PvPIndicator
+        if isAngled then
+            local leftVertex, rightVertex = GetVertices(info)
+            local width, height = 4, _G.ceil(parent.Health:GetHeight() * 0.65)
+            PvPIndicator = parent:CreateAngle("Frame", nil, parent.Health)
+            PvPIndicator:SetSize(width, height)
+            PvPIndicator:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -8 or 8, 0)
+            PvPIndicator:SetAngleVertex(leftVertex, rightVertex)
 
-        PvPIndicator.Override = UpdatePvP
-        parent.PvP = PvPIndicator
+            PvPIndicator.Override = UpdatePvP
 
-        if not (parent.unit == "player" or parent.unit == "pet") then
-            local class = parent:CreateAngle("Frame", nil, parent.Health)
-            class:SetSize(width, height)
-            class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
-            class:SetAngleVertex(leftVertex, rightVertex)
+            if not (parent.unit == "player" or parent.unit == "pet") then
+                local class = parent:CreateAngle("Frame", nil, parent.Health)
+                class:SetSize(width, height)
+                class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
+                class:SetAngleVertex(leftVertex, rightVertex)
 
-            class.Update = UpdateClassification
-            parent.Classification = class
-            parent:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", UpdateClassification)
+                class.Update = UpdateClassification
+                parent.Classification = class
+                parent:RegisterEvent("UNIT_CLASSIFICATION_CHANGED", UpdateClassification)
+            end
+        else
+            PvPIndicator = parent.overlay:CreateTexture(nil, 'ARTWORK', nil, 1)
+            PvPIndicator:SetSize(16, 16)
+            PvPIndicator:SetPoint('RIGHT', parent.overlay, 'LEFT')
         end
+        parent.PvPIndicator = PvPIndicator
     end
 end
 
@@ -289,16 +328,19 @@ local CreateHealthPredictBar do
             hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
         end
     end
-    function CreateHealthPredictBar(parent, info)
+    function CreateHealthPredictBar(parent, info, isAngled)
+        local absorbBar
         local width, height = parent.Health:GetSize()
-        local absorbBar = parent:CreateAngle("StatusBar", nil, parent.Health)
-        absorbBar:SetSize(width, height)
-        absorbBar:SetBackgroundColor(0, 0, 0, 0)
-        absorbBar:SetBackgroundBorderColor(0, 0, 0, 0)
-        absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-        absorbBar:SetAngleVertex(info.leftVertex, info.rightVertex)
-        absorbBar:SetReverseFill(parent.Health:GetReverseFill())
-        absorbBar:SetFrameLevel(parent.Health:GetFrameLevel())
+        if isAngled then
+            absorbBar = parent:CreateAngle("StatusBar", nil, parent.Health)
+            absorbBar:SetSize(width, height)
+            absorbBar:SetBackgroundColor(0, 0, 0, 0)
+            absorbBar:SetBackgroundBorderColor(0, 0, 0, 0)
+            absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
+            absorbBar:SetAngleVertex(info.leftVertex, info.rightVertex)
+            absorbBar:SetReverseFill(parent.Health:GetReverseFill())
+            absorbBar:SetFrameLevel(parent.Health:GetFrameLevel())
+        end
 
         parent.HealthPrediction = {
             absorbBar = absorbBar,
@@ -307,43 +349,62 @@ local CreateHealthPredictBar do
     end
 end
 
-local function CreatePowerBar(parent, info)
-    local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
-    local xOffset = parent.Health:GetHeight() - height
+local function CreatePowerBar(parent, info, isAngled)
+    local Power
+    if isAngled then
+        local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
+        local xOffset = parent.Health:GetHeight() - height
 
-    local Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
-    Power:SetSize(width, height)
-    Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
-    Power:SetAngleVertex(info.leftVertex, info.rightVertex)
-    Power:SetReverseFill(info.point == "RIGHT")
+        Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
+        Power:SetSize(width, height)
+        Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
+        Power:SetAngleVertex(info.leftVertex, info.rightVertex)
+        Power:SetReverseFill(info.point == "RIGHT")
 
-    Power.text = Power:CreateFontString(nil, "OVERLAY")
-    Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
-    Power.text:SetFontObject("SystemFont_Shadow_Med1_Outline")
-    parent:Tag(Power.text, "[realui:power]")
+        Power.step, Power.warn = CreateSteps(parent, height, info)
+        local powerType
+        function Power:UpdateReverse()
+            if ndb.settings.reverseUnitFrameBars then
+                Power:SetReversePercent(RealUI.ReversePowers[powerType])
+            else
+                Power:SetReversePercent(not RealUI.ReversePowers[powerType])
+            end
+        end
+        Power.PositionSteps = PositionSteps
+        function Power:PostUpdate(unit, cur, min, max)
+            UpdateSteps(self, unit, cur, max)
+            local _, pType = _G.UnitPowerType(parent.unit)
+            if pType ~= powerType then
+                powerType = pType
+                Power:UpdateReverse()
+            end
+        end
+    else
+        Power = _G.CreateFrame("StatusBar", nil, parent.overlay)
+        Power:SetPoint("TOPLEFT", parent.Health, "BOTTOMLEFT", 0, -1)
+        Power:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", 0, 0)
+        Power:SetStatusBarTexture(RealUI.textures.plain)
 
-    Power.step, Power.warn = CreateSteps(parent, height, info)
+        Base.SetBackdrop(Power, Color.black, 1)
+        Power:SetBackdropOption("offsets", {
+            left = -1,
+            right = -1,
+            top = -1,
+            bottom = -1,
+        })
+    end
+
+    if info.text then
+        Power.text = Power:CreateFontString(nil, "OVERLAY")
+        Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
+        Power.text:SetFontObject("SystemFont_Shadow_Med1")
+        parent:Tag(Power.text, "[realui:power]")
+    end
+
     Power.barType = "power"
     Power.colorPower = true
     Power.frequentUpdates = true
 
-    local powerType
-    function Power:UpdateReverse(setReverse)
-        if setReverse then
-            Power:SetReversePercent(RealUI.ReversePowers[powerType])
-        else
-            Power:SetReversePercent(not RealUI.ReversePowers[powerType])
-        end
-    end
-    Power.PositionSteps = PositionSteps
-    function Power:PostUpdate(unit, cur, min, max)
-        UpdateSteps(self, unit, cur, max)
-        local _, pType = _G.UnitPowerType(parent.unit)
-        if pType ~= powerType then
-            powerType = pType
-            Power:UpdateReverse()
-        end
-    end
     parent.Power = Power
 end
 local CreatePowerStatus do
@@ -493,6 +554,7 @@ end
 
 -- Init
 local function Shared(self, unit)
+    unit = unit:match("(%a+)%d*")
     UnitFrames:debug("Shared", self, self.unit, unit)
 
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
@@ -521,17 +583,32 @@ local function Shared(self, unit)
     local sizeMod = UnitFrames.layoutSize == 1 and 0.85 or 1
 
     local width, height = round(unitDB.size.x * sizeMod), round(unitDB.size.y * sizeMod)
+    local isAngled = unitData.health and unitData.health.leftVertex and unitData.health.rightVertex
+
+    if isAngled then
+        self:SetSize(width, height)
+    else
+        -- Account for backdrop borders
+        self:SetSize(width - 2, height - 2)
+    end
     unitData.nameLength = ceil(width / 10)
 
-    self:SetSize(width, height)
-    CreateHealthBar(self, unitData.health)
-    CreateHealthStatus(self, unitData.health)
-    if unitData.isBig then
-        CreateHealthPredictBar(self, unitData.health)
-        CreatePowerBar(self, unitData.power)
+    if unitData.health then
+        CreateHealthBar(self, unitData.health, isAngled)
+        CreateHealthStatus(self, unitData.health, isAngled)
+        if unitData.health.predict then
+            CreateHealthPredictBar(self, unitData.health, isAngled)
+        end
     end
-    CreatePowerStatus(self, unitData)
-    CreateEndBox(self, unitData)
+
+    if unitData.power then
+        CreatePowerBar(self, unitData.power, isAngled)
+    end
+
+    if isAngled then
+        CreatePowerStatus(self, unitData)
+        CreateEndBox(self, unitData)
+    end
 
     unitData.create(self)
 
@@ -539,28 +616,34 @@ local function Shared(self, unit)
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit, unitData)
     end
 
-
     function self.PreUpdate(frame, event)
-        frame.Health:SetSmooth(false)
-        if frame.Power then
-            frame.Power:SetSmooth(false)
+        --print("isAngled", isAngled, unit)
+        if isAngled then
+            frame.Health:SetSmooth(false)
+            if frame.Power then
+                frame.Power:SetSmooth(false)
+            end
         end
+
         if unitData.PreUpdate then
             unitData.PreUpdate(frame, event)
         end
     end
 
     function self.PostUpdate(frame, event)
-        frame.Health:SetSmooth(true)
-        frame.Health:PositionSteps(unitData.issmall and "BOTTOM" or "TOP")
-        if frame.Power then
-            frame.Power:SetSmooth(true)
-            frame.Power:PositionSteps("BOTTOM")
+        if isAngled then
+            frame.Health:SetSmooth(true)
+            frame.Health:PositionSteps(unitData.issmall and "BOTTOM" or "TOP")
+            if frame.Power then
+                frame.Power:SetSmooth(true)
+                frame.Power:PositionSteps("BOTTOM")
+            end
+            frame.EndBox.Update(frame, event)
         end
+
         if frame.Classification then
             frame.Classification.Update(frame, event)
         end
-        frame.EndBox.Update(frame, event)
         if unitData.PostUpdate then
             unitData.PostUpdate(frame, event)
         end
@@ -572,10 +655,12 @@ function UnitFrames:InitializeLayout()
     ndb = RealUI.db.profile
 
     oUF:RegisterStyle("RealUI", Shared)
-    oUF:SetActiveStyle("RealUI")
+    oUF:Factory(function(...)
+        oUF:SetActiveStyle("RealUI")
 
-    for i = 1, #UnitFrames.units do
-        UnitFrames.units[i]()
-    end
+        for i = 1, #UnitFrames.units do
+            UnitFrames.units[i]()
+        end
+    end)
 end
 

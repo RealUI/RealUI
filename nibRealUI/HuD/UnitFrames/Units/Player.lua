@@ -90,7 +90,7 @@ UnitFrames.player = {
         self.AdditionalPower.bg = bg
 
         --[[ PvP Timer ]]--
-        local pvp = self.PvP
+        local pvp = self.PvPIndicator
         pvp.text = pvp:CreateFontString(nil, "OVERLAY")
         pvp.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)
         pvp.text:SetFontObject("SystemFont_Shadow_Med1_Outline")
@@ -113,12 +113,14 @@ UnitFrames.player = {
         leftVertex = 1,
         rightVertex = 4,
         point = "RIGHT",
-        text = true,
+        text = "[realui:health]",
+        predict = true,
     },
     power = {
         leftVertex = 2,
         rightVertex = 3,
         point = "RIGHT",
+        text = true,
     },
     isBig = true,
     hasCastBars = true,

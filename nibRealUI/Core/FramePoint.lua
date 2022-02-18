@@ -76,18 +76,16 @@ function FramePoint:RestorePosition(mod)
     end
 end
 
-local isTicking
 local function FixCollectionJournal(point, anchor, relPoint, x, y)
     local CollectionsJournal = _G.CollectionsJournal
     local mover = _G.CollectionsJournalMover
 
-    CollectionsJournal:SetParent(mover)
+--    CollectionsJournal:SetParent(mover)
     CollectionsJournal:ClearAllPoints()
     CollectionsJournal:SetPoint(point, _G.UIParent, relPoint, x, y)
-    CollectionsJournal:HookScript("OnShow", function() mover:Show() end)
-    CollectionsJournal:HookScript("OnHide", function() mover:Hide() end)
     mover:Show()
 end
+FramePoint.FixCollectionJournal = FixCollectionJournal
 
 function FramePoint.OnDragStart(frame)
     LibWin.OnDragStart(frame)
@@ -104,21 +102,12 @@ function FramePoint.OnDragStop(frame)
     else
         if frame:GetName() == "CollectionsJournalMover" then
             FixCollectionJournal(point, anchor, relPoint, x, y)
-            if not isTicking then
-                _G.C_Timer.After(0, function ()
-                    FramePoint.OnDragStop(frame)
-                    isTicking = false
-                end)
-                isTicking = true
-            end
         end
 
-        if x > 0 then
-            RealUI.SetPixelPoint(frame)
-            LibWin.OnDragStop(frame)
-            if frame.dragBG then
-                frame.dragBG:Hide()
-            end
+        RealUI.SetPixelPoint(frame)
+        LibWin.OnDragStop(frame)
+        if frame.dragBG then
+            frame.dragBG:Hide()
         end
     end
 
