@@ -1,8 +1,8 @@
-## Interface: 90105
+## Interface: 90200
 ## Title: RealUI Tooltips
 ## Notes: Useful tooltip mods
 ## Author: Gethe
-## Version: 2.3.1
+## Version: 2.3.2
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibObjectiveProgress-1.0
 ## SavedVariables: RealUI_TooltipsDB

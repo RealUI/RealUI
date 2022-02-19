@@ -1,7 +1,7 @@
-## Interface: 90105
+## Interface: 90200
 ## Title: nibRealUI Dev
 ## Notes: Development assistant for RealUI
-## Version: 2.3.1
+## Version: 2.3.2
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs
 

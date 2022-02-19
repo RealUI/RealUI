@@ -1,8 +1,8 @@
-## Interface: 90105
+## Interface: 90200
 ## Title: nibRealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
-## Version: 2.3.1
+## Version: 2.3.2
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI
 ## LoadOnDemand: 1

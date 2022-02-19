@@ -1,4 +1,11 @@
-﻿## [2.3.1] ##
+﻿## [2.3.2] ##
+### Fixed ###
+
+  * Possible error when opening the friends frame
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+## [2.3.1] ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -486,6 +493,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
+[2.3.2]: https://github.com/RealUI/RealUI/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/RealUI/RealUI/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/RealUI/RealUI/compare/2.2.9...2.3.0
 [2.2.9]: https://github.com/RealUI/RealUI/compare/2.2.8...2.2.9
