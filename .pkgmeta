@@ -41,7 +41,6 @@ externals:
         tag: latest
     nibRealUI/Libs/LibQTip-1.0:
         url: https://repos.wowace.com/wow/libqtip-1-0
-        tag: latest
     nibRealUI/Libs/LibRangeCheck-2.0:
         url: https://repos.wowace.com/wow/librangecheck-2-0/trunk/LibRangeCheck-2.0
         tag: latest
