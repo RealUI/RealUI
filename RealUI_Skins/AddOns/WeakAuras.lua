@@ -1,11 +1,11 @@
-local _, private = ...
+--local _, private = ...
 
 --[[ Lua Globals ]]
 -- luacheck: globals
 
 --[[ Core ]]
-local Aurora = private.Aurora
-local Skin = Aurora.Skin
+--local Aurora = private.Aurora
+--local Skin = Aurora.Skin
 
 --do --[[ AddOns\WeakAuras.lua ]]
 --end
@@ -13,10 +13,5 @@ local Skin = Aurora.Skin
 --do --[[ AddOns\WeakAuras.xml ]]
 --end
 
-function private.AddOns.WeakAuras()
-    local WeakAurasTooltipAnchor = _G.WeakAurasTooltipAnchor
-    local _, import, showCode = WeakAurasTooltipAnchor:GetChildren()
-
-    Skin.UIPanelButtonTemplate(import)
-    Skin.UIPanelButtonTemplate(showCode)
-end
+--function private.AddOns.WeakAuras()
+--end
