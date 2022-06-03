@@ -22,14 +22,14 @@ function MirrorBar:SetNextTimer()
     local nextTimer = 1
     for i = (self.currentTimer + 1), 5 do
         -- Try to find an active timer higher on the list than current timer
-        if not(i > 4) then
+        if i <= 4 then
             if self.timers[self.timerList[i]].active then
                 nextTimer = i
                 break
             end
         -- Else, find first active timer
         else
-            for k,v in ipairs(self.timerList) do
+            for k, v in ipairs(self.timerList) do
                 if self.timers[v].active then
                     nextTimer = k
                     break
