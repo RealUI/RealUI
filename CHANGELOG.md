@@ -1,8 +1,22 @@
-﻿## [2.3.2] ##
+﻿## [2.3.3] ##
+### Modified AddOns ###
+
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Fixed ###
+
+  * Error when opening WeakAuras options
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+## [2.3.2] ##
 ### Fixed ###
 
   * Possible error when opening the friends frame
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
 
 
 ## [2.3.1] ##
@@ -18,6 +32,8 @@
 
   * Errors due to changes in 9.1.5
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
 
 ## [2.3.0] ##
 ### Modified AddOns ###
@@ -493,6 +509,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
+[2.3.3]: https://github.com/RealUI/RealUI/compare/2.3.2...2.3.3
 [2.3.2]: https://github.com/RealUI/RealUI/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/RealUI/RealUI/compare/2.3.0...2.3.1
 [2.3.0]: https://github.com/RealUI/RealUI/compare/2.2.9...2.3.0
