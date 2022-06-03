@@ -274,16 +274,18 @@ end, true)
 private.AddHook("OnTooltipSetItem", function(self)
     local _, link = self:GetItem()
     if Tooltips.db.global.showTransmog and link then
-        local appearanceID, sourceID = _G.C_TransmogCollection.GetItemInfo(link)
-        if appearanceID and sourceID then
-            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(sourceID)
+        local itemAppearanceID, itemModifiedAppearanceID = _G.C_TransmogCollection.GetItemInfo(link)
+        if itemAppearanceID and itemModifiedAppearanceID then
+            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(itemModifiedAppearanceID)
             if isInfoReady then
                 if canCollect then
-                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(sourceID)
+                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID)
                     if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
                         self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
                     else
-                        local sources = _G.C_TransmogCollection.GetAppearanceSources(appearanceID)
+                        local slotID = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
+                        local transmogLocation = _G.TransmogUtil.CreateTransmogLocation(slotID, _G.Enum.TransmogType.Appearance, _G.Enum.TransmogModification.Main)
+                        local sources = _G.C_TransmogCollection.GetAppearanceSources(itemAppearanceID, sourceInfo.categoryID, transmogLocation)
                         if sources then
                             for i, source in next, sources do
                                 if source.isCollected then
