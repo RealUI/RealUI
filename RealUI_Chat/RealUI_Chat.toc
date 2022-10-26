@@ -1,8 +1,8 @@
-## Interface: 90205
+## Interface: 100000
 ## Title: RealUI Chat
 ## Notes: Useful chat mods
 ## Author: Gethe
-## Version: 2.3.3
+## Version: 2.3.4
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_ChatDB
 

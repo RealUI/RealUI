@@ -1,4 +1,20 @@
-﻿## [2.3.3] ##
+﻿## [2.3.4] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Added ###
+
+  * Updated for Dragonflight
+
+
+
+## [2.3.3] ##
 ### Modified AddOns ###
 
   * RealUI_Skins
@@ -509,6 +525,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
+[2.3.4]: https://github.com/RealUI/RealUI/compare/2.3.3...2.3.4
 [2.3.3]: https://github.com/RealUI/RealUI/compare/2.3.2...2.3.3
 [2.3.2]: https://github.com/RealUI/RealUI/compare/2.3.1...2.3.2
 [2.3.1]: https://github.com/RealUI/RealUI/compare/2.3.0...2.3.1
