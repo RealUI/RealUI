@@ -48,7 +48,7 @@ local errorFrame do
     errorFrame = _G.CreateFrame("Frame", "RealUI_ErrorFrame", _G.UIParent, "UIPanelDialogTemplate")
     errorFrame:SetClampedToScreen(true)
     errorFrame:SetMovable(true)
-    errorFrame:SetSize(500, 350)
+    errorFrame:SetSize(600, 400)
     errorFrame:SetPoint("CENTER")
     errorFrame:SetToplevel(true)
     errorFrame:Hide()

@@ -20,7 +20,7 @@ function SpellAlerts:UpdatePosition()
 end
 
 function SpellAlerts:UpdateAppearance()
-    _G.SpellActivationOverlayFrame:SetAlpha(_G.GetCVar("spellActivationOverlayOpacity"))
+    --_G.SpellActivationOverlayFrame:SetAlpha(_G.GetCVar("spellActivationOverlayOpacity"))
 end
 
 function SpellAlerts:PLAYER_LOGIN()

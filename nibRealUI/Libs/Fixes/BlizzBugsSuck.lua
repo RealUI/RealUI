@@ -1,5 +1,6 @@
 local wow_version, wow_build, wow_data, tocversion = GetBuildInfo()
 wow_build = tonumber(wow_build)
+local isPatch = tocversion >= 100000
 
 -- Fix incorrect translations in the German localization
 if GetLocale() == "deDE" then
@@ -37,7 +38,7 @@ end
 -- Interface Options > Names panel if the current setting isn't listed.
 -- Happens if the user had previously selected the Spreading Nameplates
 -- option, which was removed from the game in 7.0.
-do
+if not isPatch then
 	local OnEnter = InterfaceOptionsNamesPanelUnitNameplatesMotionDropDown:GetScript("OnEnter")
 	InterfaceOptionsNamesPanelUnitNameplatesMotionDropDown:SetScript("OnEnter", function(self)
 		if self.tooltip then
@@ -76,7 +77,7 @@ end
 
 -- Fix InterfaceOptionsFrame_OpenToCategory not actually opening the category (and not even scrolling to it)
 -- Confirmed still broken in 6.2.2.20490 (6.2.2a)
-do
+if not isPatch then
 	local function get_panel_name(panel)
 		local tp = type(panel)
 		local cat = INTERFACEOPTIONS_ADDONCATEGORIES

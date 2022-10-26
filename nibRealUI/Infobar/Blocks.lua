@@ -1399,6 +1399,27 @@ function Infobar:CreateBlocks()
     end
 
     do -- Progress Watch
+        local function GetFriendshipReputation(factionID)
+            if RealUI.isPatch then
+                return _G.C_GossipInfo.GetFriendshipReputation(factionID)
+            else
+                local friendshipID, friendRep, _, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = _G.GetFriendshipReputation(factionID)
+                return {
+                    friendshipFactionID = friendshipID,
+                    standing = friendRep,
+                    maxRep = friendshipID,
+                    name = friendshipID,
+                    text = friendTextLevel,
+                    texture = friendshipID,
+                    reaction = friendshipID,
+                    reactionThreshold = friendThreshold,
+                    nextThreshold = nextFriendThreshold,
+                    reversedColor = friendshipID,
+                    overrideColor = friendshipID,
+                }
+            end
+        end
+
         local C_AzeriteItem = _G.C_AzeriteItem
         local azeriteItem, azeriteItemLocation
         local watchStates = {}
@@ -1470,17 +1491,16 @@ function Infobar:CreateBlocks()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
 
-                local friendshipID = _G.GetFriendshipReputation(factionID)
-                if friendshipID then
-                    local _, friendRep, _, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = _G.GetFriendshipReputation(factionID)
-                    if nextFriendThreshold then
-                        minRep, maxRep, curRep = friendThreshold, nextFriendThreshold, friendRep
+                local reputationInfo = GetFriendshipReputation(factionID)
+                if reputationInfo then
+                    if reputationInfo.nextThreshold then
+                        minRep, maxRep, curRep = reputationInfo.reactionThreshold, reputationInfo.nextThreshold, reputationInfo.standing
                     else
                         -- max rank, make it look like a full bar
                         minRep, maxRep, curRep = 0, 1, 1
                     end
                     Rep.colorIndex = 5     -- always color friendships green
-                    Rep.factionStandingtext = friendTextLevel
+                    Rep.factionStandingtext = reputationInfo.text
                 elseif _G.C_Reputation.IsFactionParagon(factionID) then
                     local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
                     maxRep = threshold
@@ -2088,6 +2108,7 @@ function Infobar:CreateBlocks()
         local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
         local COPPER_AMOUNT_STRING = "%d|cffbf734f%s|r"
         local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
+        local MAX_WATCHED_TOKENS = RealUI.isPatch and 10 or 3
         local charName = "%s |c%s%s|r"
 
         local currencyDB
@@ -2149,19 +2170,26 @@ function Infobar:CreateBlocks()
         end
 
         local currencyStates = {}
+        local function GetNextToken(index)
+            if index == MAX_WATCHED_TOKENS then
+                return "money"
+            else
+                local i = index
+                repeat
+                    if i == MAX_WATCHED_TOKENS then
+                        return "money"
+                    end
+
+                    i = i + 1
+                until currencyStates["token"..i]:IsValid()
+
+                return "token"..i
+            end
+        end
+
         currencyStates["money"] = {
             GetNext = function(Money)
-                if currencyStates["token1"]:IsValid() then
-                    return "token1"
-                elseif currencyStates["token2"]:IsValid() then
-                    return "token2"
-                elseif currencyStates["token3"]:IsValid() then
-                    return "token3"
-                elseif currencyStates["money"]:IsValid() then
-                    return "money"
-                else
-                    return nil
-                end
+                return GetNextToken(0)
             end,
             GetText = function(Money)
                 if RealUI.realmInfo.realmNormalized then
@@ -2190,19 +2218,11 @@ function Infobar:CreateBlocks()
             OnClick = function(Money)
             end
         }
-        for i = 1, _G.MAX_WATCHED_TOKENS do
+        for i = 1, MAX_WATCHED_TOKENS do
             currencyStates["token"..i] = {
                 index = i,
                 GetNext = function(token)
-                    if i == 3 then
-                        return "money"
-                    else
-                        if currencyStates["token"..i+1]:IsValid() then
-                            return "token"..i+1
-                        else
-                            return "money"
-                        end
-                    end
+                    return GetNextToken(i)
                 end,
                 GetText = function(token)
                     if token.id and RealUI.realmInfo.realmNormalized then
@@ -2226,7 +2246,7 @@ function Infobar:CreateBlocks()
             if not RealUI.realmInfo.realmNormalized then return end
             local changeIndex
 
-            for i = 1, _G.MAX_WATCHED_TOKENS do
+            for i = 1, MAX_WATCHED_TOKENS do
                 local token = currencyStates["token"..i]
                 local currencyInfo = _G.C_CurrencyInfo.GetBackpackCurrencyInfo(token.index)
                 if currencyInfo then
@@ -2288,20 +2308,7 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local tokens, tableWidth = {}, 250
-        local currencyData = {}
-        local headerData = {
-            info = {
-                _G.NAME, _G.MONEY, _G.CURRENCY.." 1", _G.CURRENCY.." 2", _G.CURRENCY.." 3", L["Currency_UpdatedAbbr"]
-            },
-            justify = {
-                "LEFT", "RIGHT", "LEFT", "LEFT", "LEFT", "LEFT"
-            },
-            size = {
-                "FILL", "FIT", "FIT", "FIT", "FIT", 0.15
-            }
-        }
-
+        local tableWidth = 250
         LDB:NewDataObject("currency", {
             name = _G.CURRENCY,
             type = "RealUI",
@@ -2368,14 +2375,9 @@ function Infobar:CreateBlocks()
                 local lineNum, colNum
 
                 tooltip:AddHeader(_G.CURRENCY)
+                local mostTrackedTokens = 0
 
-                wipe(currencyData)
-                currencyData.width = tableWidth
-                currencyData.header = headerData
-                currencyData.defaultSort = 1
-                currencyData.rowOnClick = Currency_OnClick
-                currencyData.cellGetTooltipText = Currency_GetTooltipText
-
+                local currencyData = {}
                 local realmMoneyTotal = 0
                 for index, realm in next, RealUI.realmInfo.connectedRealms do
                     local realmDB = currencyDB[realm]
@@ -2388,32 +2390,64 @@ function Infobar:CreateBlocks()
                                 local money = GetMoneyString(data.money, true)
                                 realmMoneyTotal = realmMoneyTotal + data.money
 
-                                wipe(tokens)
-                                for i = 1, _G.MAX_WATCHED_TOKENS do
+                                local currency = {
+                                    id = #currencyData + 1,
+                                    info = {
+                                        name, money
+                                    },
+                                    meta = {
+                                        realm_faction, GetMoneyString(data.money)
+                                    }
+                                }
+                                for i = 1, MAX_WATCHED_TOKENS do
                                     if data["token"..i] then
+                                        if i > mostTrackedTokens then
+                                            mostTrackedTokens = i
+                                        end
+
                                         local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(data["token"..i])
 
                                         local amount = data[data["token"..i]] or 0
-                                        tokens[i] = TOKEN_STRING:format(currencyInfo.iconFileID, amount)
-                                        tokens[i+3] = currencyInfo.name
+                                        tinsert(currency.info, TOKEN_STRING:format(currencyInfo.iconFileID, amount))
+                                        tinsert(currency.meta, currencyInfo.name)
                                     else
-                                        tokens[i] = "---"
+                                        tinsert(currency.info, "---")
                                     end
                                 end
 
-                                tinsert(currencyData, {
-                                    id = #currencyData + 1,
-                                    info = {
-                                        name, money, tokens[1], tokens[2], tokens[3], date("%b %d", data.lastSeen)
-                                    },
-                                    meta = {
-                                        realm_faction, GetMoneyString(data.money), tokens[4], tokens[5], tokens[6], ""
-                                    }
-                                })
+                                tinsert(currency.info, date("%b %d", data.lastSeen))
+                                tinsert(currency.meta, "")
+                                tinsert(currencyData, currency)
                             end
                         end
                     end
                 end
+
+                local headerData = {
+                    info = {
+                        _G.NAME, _G.MONEY
+                    },
+                    justify = {
+                        "LEFT", "RIGHT"
+                    },
+                    size = {
+                        "FILL", "FIT"
+                    }
+                }
+                for i = 1, mostTrackedTokens do
+                    tinsert(headerData.info, i)
+                    tinsert(headerData.justify, "CENTER")
+                    tinsert(headerData.size, "FIT")
+                end
+                tinsert(headerData.info, L["Currency_UpdatedAbbr"])
+                tinsert(headerData.justify, "LEFT")
+                tinsert(headerData.size, 0.15)
+
+                currencyData.width = tableWidth
+                currencyData.header = headerData
+                currencyData.defaultSort = 1
+                currencyData.rowOnClick = Currency_OnClick
+                currencyData.cellGetTooltipText = Currency_GetTooltipText
 
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, currencyData, TextTableCellProvider)
@@ -2441,6 +2475,9 @@ function Infobar:CreateBlocks()
         -- Global Upvalues
         local GetFramerate, GetNetStats = _G.GetFramerate, _G.GetNetStats
         local tinsert, tremove = _G.tinsert, _G.tremove
+
+        local PERFORMANCEBAR_LOW_LATENCY = 300;
+        local PERFORMANCEBAR_MEDIUM_LATENCY = 600;
 
         local blockText = "%d |cff%s|||r %d"
         local lagFormat = "%s |cff808080(%s)|r"
@@ -2528,9 +2565,9 @@ function Infobar:CreateBlocks()
 
                 local latency = home.cur > world.cur and home.cur or world.cur
                 local color
-                if latency > _G.PERFORMANCEBAR_MEDIUM_LATENCY then
+                if latency > PERFORMANCEBAR_MEDIUM_LATENCY then
                     color = "FF0000"
-                elseif latency > _G.PERFORMANCEBAR_LOW_LATENCY then
+                elseif latency > PERFORMANCEBAR_LOW_LATENCY then
                     color = "FFFF00"
                 else
                     color = "00FF00"

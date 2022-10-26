@@ -22,5 +22,3 @@ Core.lua
 Core.xml
 Modules.xml
 HuD.xml
-
-Bindings.xml

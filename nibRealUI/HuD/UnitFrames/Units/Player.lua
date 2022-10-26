@@ -11,35 +11,64 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 
 local function CreateTotems(parent)
     -- DestroyTotem is protected, so we hack the default
-    local totemBar = _G["TotemFrame"]
-    totemBar:SetParent(parent.overlay)
-    _G.hooksecurefunc("TotemFrame_Update", function()
-        totemBar:ClearAllPoints()
-        totemBar:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
-    end)
-    for i = 1, 4 do
-        local name = "TotemFrameTotem"..i
-        local totem = _G[name]
-        totem:SetSize(22, 22)
-        totem:ClearAllPoints()
-        totem:SetPoint("TOPLEFT", totemBar, i * (totem:GetWidth() + 3), 0)
+    local TotemFrame = _G.TotemFrame
+    TotemFrame:SetParent(parent.overlay)
+    if RealUI.isPatch then
+        _G.hooksecurefunc(TotemFrame, "Update", function()
+            TotemFrame:ClearAllPoints()
+            TotemFrame:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
+        end)
+        for totem in TotemFrame.totemPool:EnumerateActive() do
+            totem:SetSize(22, 22)
+            totem:ClearAllPoints()
+            totem:SetPoint("TOPLEFT", TotemFrame, totem.layoutIndex * (totem:GetWidth() + 3), 0)
 
-        local bg = _G[name.."Background"]
-        bg:SetPoint("TOPLEFT", -1, 1)
-        bg:SetPoint("BOTTOMRIGHT", 1, -1)
-        bg:SetColorTexture(0, 0, 0)
+            local bg = totem.Background
+            bg:SetPoint("TOPLEFT", -1, 1)
+            bg:SetPoint("BOTTOMRIGHT", 1, -1)
+            bg:SetColorTexture(0, 0, 0)
 
-        local dur = _G[name.."Duration"]
-        dur:Hide()
-        dur.Show = function() end
+            local dur = totem.duration
+            dur:Hide()
+            dur.Show = function() end
 
-        local icon = _G[name.."IconTexture"]
-        icon:SetTexCoord(.08, .92, .08, .92)
-        icon:ClearAllPoints()
-        icon:SetAllPoints()
+            local icon = totem.Icon.Texture
+            icon:SetTexCoord(.08, .92, .08, .92)
+            icon:ClearAllPoints()
+            icon:SetAllPoints()
 
-        local _, border = totem:GetChildren()
-        border:DisableDrawLayer("OVERLAY")
+            local _, border = totem:GetChildren()
+            border:DisableDrawLayer("OVERLAY")
+        end
+    else
+        _G.hooksecurefunc("TotemFrame_Update", function()
+            TotemFrame:ClearAllPoints()
+            TotemFrame:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
+        end)
+        for i = 1, 4 do
+            local name = "TotemFrameTotem"..i
+            local totem = _G[name]
+            totem:SetSize(22, 22)
+            totem:ClearAllPoints()
+            totem:SetPoint("TOPLEFT", TotemFrame, i * (totem:GetWidth() + 3), 0)
+
+            local bg = _G[name.."Background"]
+            bg:SetPoint("TOPLEFT", -1, 1)
+            bg:SetPoint("BOTTOMRIGHT", 1, -1)
+            bg:SetColorTexture(0, 0, 0)
+
+            local dur = _G[name.."Duration"]
+            dur:Hide()
+            dur.Show = function() end
+
+            local icon = _G[name.."IconTexture"]
+            icon:SetTexCoord(.08, .92, .08, .92)
+            icon:ClearAllPoints()
+            icon:SetAllPoints()
+
+            local _, border = totem:GetChildren()
+            border:DisableDrawLayer("OVERLAY")
+        end
     end
 end
 

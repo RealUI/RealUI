@@ -42,18 +42,20 @@ function private.AddOns.Masque()
             UseColor = true
         },
         HotKey = {
-            Width = 26,
-            Height = 10,
-            OffsetX = 6,
-            OffsetY = -6,
             JustifyH = "LEFT",
+            Width = 26,
+            Height = 8,
+            Point = "TOPLEFT",
+            RelPoint = "TOPLEFT",
+            OffsetX = 11,
+            OffsetY = -13,
         },
         Count = {
-            Width = 26,
-            Height = 10,
-            OffsetX = -3,
-            OffsetY = 5,
             JustifyH = "RIGHT",
+            Width = 26,
+            Height = 6,
+            OffsetX = -8,
+            OffsetY = 12,
         },
         Duration = {
             Width = 26,

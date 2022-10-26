@@ -59,7 +59,13 @@ local BagMixin do
 
         [InventoryType.IndexBagType] = 25,
         [InventoryType.IndexQuiverType] = 25,
+        [InventoryType.IndexProfessionToolType] = 25,
+        [InventoryType.IndexProfessionGearType] = 25,
 
+        [InventoryType.IndexEquipablespellOffensiveType] = 30,
+        [InventoryType.IndexEquipablespellUtilityType] = 30,
+        [InventoryType.IndexEquipablespellDefensiveType] = 30,
+        [InventoryType.IndexEquipablespellMobilityType] = 30,
         [InventoryType.IndexNonEquipType] = 30,
     }
     local function SortSlots(a, b)
@@ -115,7 +121,7 @@ local BagMixin do
         self.marginSide = BAG_MARGIN
     end
     function BagMixin:ArrangeSlots()
-        Inventory:debug("private.ArrangeSlots", self.bagType or self.filter.tag)
+        Inventory:debug("BagMixin:ArrangeSlots", self.bagType or self.filter.tag)
         local numSlots, numRows = 0, 0
         local previousButton, cornerButton
         local slotSize = 0
@@ -148,6 +154,7 @@ local BagMixin do
         return (slotSize * SLOTS_PER_ROW) + gapOffsetH, (slotSize * numRows) + gapOffsetV
     end
     function BagMixin:UpdateSize(columnHeight, columnBase, prevBag)
+        Inventory:debug("BagMixin:UpdateSize", self.bagType or self.filter.tag)
         sort(self.slots, SortSlots)
 
         if self.isPrimary then
@@ -157,13 +164,18 @@ local BagMixin do
         local slotWidth, slotHeight = self:ArrangeSlots()
         self:SetSize(slotWidth + (self.marginSide * 2), slotHeight + (self.marginTop + self.marginBottom))
 
-        local _, screenHeight = RealUI.GetInterfaceSize()
-        local maxHeight = screenHeight * Inventory.db.global.maxHeight
+        local _, screenHeight, _, scaledHieght = RealUI.GetInterfaceSize()
+        local maxHeight = (scaledHieght or screenHeight) * Inventory.db.global.maxHeight
         local height = self:GetHeight()
 
         local newColumnHeight = columnHeight + height + 5
 
         if self.isPrimary then
+            if self.debugTexture and self.bagType == "main" then
+                --print("screenHeight", screenHeight, scaledHieght, maxHeight)
+                self.debugTexture:SetPoint("BOTTOMRIGHT", 50, maxHeight)
+            end
+
             return newColumnHeight, self, self
         else
             local parent = self.parent
@@ -215,6 +227,14 @@ function MainBagMixin:Init()
     self:SetToplevel(true)
     self.isPrimary = true
 
+    local debugTexture
+    if RealUI.isDev then
+        debugTexture = self:CreateTexture("InventoryMaxHeightDebug", "OVERLAY")
+        debugTexture:SetSize(300, 2)
+        debugTexture:SetColorTexture(1, 1, 1, 0.8)
+        self.debugTexture = debugTexture
+    end
+
     self:SetScript("OnEvent", self.OnEvent)
     self:SetScript("OnShow", self.OnShow)
     self:SetScript("OnHide", self.OnHide)
@@ -238,6 +258,7 @@ function MainBagMixin:Update()
     end)
 end
 function MainBagMixin:UpdateSlots()
+    Inventory:debug("MainBagMixin:UpdateSlots", self.bagType or self.filter.tag)
     local columnHeight, columnBase, prevBag = 0, "main"
     columnHeight, columnBase, prevBag = self:UpdateSize(columnHeight, columnBase)
 
@@ -403,11 +424,11 @@ function private.UpdateBags()
 end
 
 function private.AddSlotToBag(slot, bagID)
-    Inventory:debug("private.AddSlotToBag", slot, bagID)
     local bagType = private.GetBagTypeForBagID(bagID)
     local main = Inventory[bagType]
 
     local _, slotIndex = slot:GetBagAndSlot()
+    Inventory:debug("private.AddSlotToBag", bagID, slotIndex)
     if bagType == "main" and _G.C_NewItems.IsNewItem(bagID, slotIndex) then
         if not main.new[bagID] then
             main.new[bagID] = {}
@@ -433,6 +454,7 @@ function private.AddSlotToBag(slot, bagID)
             end
         end
     end
+    Inventory:debug("assignedTag", assignedTag)
 
     --[[
     if slot.item:GetItemID() == 98091 then
@@ -640,7 +662,7 @@ local function CreateBag(bagType)
     main.showBags = showBags
 
     local close = _G.CreateFrame("Button", "$parentClose", main, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", 5, 5)
+    close:SetPoint("TOPRIGHT", -2, -2)
     Skin.UIPanelCloseButton(close)
     main.close = close
     main.marginTop = main.marginTop + 10

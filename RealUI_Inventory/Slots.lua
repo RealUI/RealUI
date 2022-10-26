@@ -161,7 +161,7 @@ function InventorySlotMixin:Update()
     self.BattlepayItemTexture:SetShown(_G.IsBattlePayItem(self:GetBagAndSlot()))
 end
 function InventorySlotMixin:UpdateItemUpgradeIcon()
-    _G.ContainerFrameItemButton_UpdateItemUpgradeIcon(self)
+    _G.ContainerFrameItemButtonMixin.UpdateItemUpgradeIcon(self)
 end
 local inventorySlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 inventorySlots.frameTemplate = "ContainerFrameItemButtonTemplate"

@@ -34,16 +34,16 @@ local function TimeFormat(t)
     return f
 end
 
-local function AttachStatusBar(icon, unit)
+local function AttachStatusBar(button)
     --print("AttachStatusBar")
-    local sBar = _G.CreateFrame("StatusBar", nil, icon)
+    local sBar = _G.CreateFrame("StatusBar", "$parentStatusBar", button)
     sBar:SetMinMaxValues(0, 1)
     sBar:SetStatusBarTexture(RealUI.textures.plain)
     sBar:SetStatusBarColor(1,1,1,1)
 
-    sBar:SetPoint("TOPLEFT", icon, "BOTTOMLEFT", 0, 2)
-    sBar:SetPoint("BOTTOMRIGHT", icon)
-    sBar:SetFrameLevel(icon:GetFrameLevel() + 2)
+    sBar:SetPoint("TOPLEFT", button, "BOTTOMLEFT", 0, 2)
+    sBar:SetPoint("BOTTOMRIGHT", button)
+    sBar:SetFrameLevel(button:GetFrameLevel() + 2)
 
     Base.SetBackdrop(sBar, Color.black, 0.7)
     sBar:SetBackdropOption("offsets", {
@@ -53,9 +53,9 @@ local function AttachStatusBar(icon, unit)
         bottom = -1,
     })
 
-    local timeStr = icon:CreateFontString(nil, "OVERLAY")
+    local timeStr = button:CreateFontString(nil, "OVERLAY")
     timeStr:SetFontObject("NumberFont_Outline_Med")
-    timeStr:SetPoint("CENTER", icon, 0, 0)
+    timeStr:SetPoint("CENTER", button, 0, 0)
     timeStr:SetJustifyH("LEFT")
 
     return sBar, timeStr
@@ -81,26 +81,19 @@ local function CreateAuras(parent)
     auras.numBuffs = bossDB.buffCount
     auras.numDebuffs = bossDB.debuffCount
 
-    auras.CustomFilter = function(self, unit, button, ...)
+    auras.FilterAura = function(self, unit, data)
         --    name, texture, count, debuffType, duration, expiration, caster
-        local _, _, _, _, duration, expiration, caster = ...
-        if not caster then return false end
-        UnitFrames:debug("Boss:CustomFilter", self, button, duration, expiration, caster)
+        local duration, expiration, sourceUnit = data.duration, data.expirationTime, data.sourceUnit
+        if not sourceUnit then return false end
+        UnitFrames:debug("Boss:FilterAura", self, unit, duration, expiration, sourceUnit)
 
-        if duration and duration > 0 then
-            button.startTime = expiration - duration
-            button.endTime = expiration
-        else
-            button.endTime = nil
-        end
-        button.needsUpdate = true
 
         -- Cast by Player
-        if button.isPlayer and UnitFrames.db.profile.boss.showPlayerAuras then return true end
+        if data.isPlayerAura and UnitFrames.db.profile.boss.showPlayerAuras then return true end
 
         -- Cast by NPC
         if UnitFrames.db.profile.boss.showNPCAuras then
-            local guid, isNPC = _G.UnitGUID(caster), false
+            local guid, isNPC = _G.UnitGUID(data.sourceUnit), false
             if guid then
                 local unitType = _G.strsplit("-", guid)
                 isNPC = (unitType == "Creature")
@@ -108,47 +101,52 @@ local function CreateAuras(parent)
             return isNPC
         end
     end
-    auras.PostCreateIcon = function(self, button)
-        UnitFrames:debug("Boss:PostCreateIcon", self, button)
-        Base.CropIcon(button.icon, button)
-        button.count:SetFontObject("NumberFont_Outline_Med")
-    end
-    auras.PostUpdateIcon = function(self, unit, icon, index)
-        UnitFrames:debug("Boss:PostUpdateIcon", self, unit, icon, index)
-        if not icon.sCooldown then
-            icon.sCooldown, icon.timeStr = AttachStatusBar(icon, unit)
+    auras.PostCreateButton = function(self, button)
+        UnitFrames:debug("Boss:PostCreateButton", self, button)
+        Base.CropIcon(button.Icon, button)
+        button.Count:SetFontObject("NumberFont_Outline_Med")
 
-            icon.elapsed = 0
-            icon.interval = 1/4
-            icon:SetScript("OnUpdate", function(ico, elapsed)
-                ico.elapsed = ico.elapsed + elapsed
-                if ico.elapsed >= ico.interval then
-                    ico.elapsed = 0
-                    if ico.startTime and ico.endTime then
-                        --print("UpdateIcon", ico.startTime, ico.endTime)
-                        if ico.needsUpdate then
-                            ico.sCooldown:Show()
-                            ico.sCooldown:SetMinMaxValues(0, ico.endTime - ico.startTime)
-                        end
+        button.sCooldown, button.timeStr = AttachStatusBar(button)
+        button.elapsed = 0
+        button.interval = 1/4
+        button:SetScript("OnUpdate", function(this, elapsed)
+            if this.endTime then
+                this.elapsed = this.elapsed + elapsed
+                if this.elapsed >= this.interval or this.needsUpdate then
+                    this.elapsed = 0
 
-                        local now = _G.GetTime()
-                        ico.sCooldown:SetValue(ico.endTime - now)
-                        ico.timeStr:SetText(TimeFormat(_G.ceil(ico.endTime - now)))
+                    local now = _G.GetTime()
+                    this.sCooldown:SetValue(this.endTime - now)
+                    this.timeStr:SetText(TimeFormat(_G.ceil(this.endTime - now)))
 
-                        local per = (ico.endTime - now) / (ico.endTime - ico.startTime)
-                        if per > 0.5 then
-                            ico.sCooldown:SetStatusBarColor(1 - ((per*2)-1), 1, 0)
-                        else
-                            ico.sCooldown:SetStatusBarColor(1, (per*2), 0)
-                        end
+                    local per = (this.endTime - now) / (this.endTime - this.startTime)
+                    if per > 0.5 then
+                        this.sCooldown:SetStatusBarColor(1 - ((per*2)-1), 1, 0)
                     else
-                        --print("HideIcon", ico.startTime, ico.endTime)
-                        ico.sCooldown:Hide()
-                        ico.timeStr:SetText()
+                        this.sCooldown:SetStatusBarColor(1, (per*2), 0)
                     end
                 end
-            end)
+            else
+                --print("HideIcon", ico.startTime, ico.endTime)
+                this.sCooldown:Hide()
+                this.timeStr:SetText()
+            end
+        end)
+    end
+    auras.PostUpdateButton = function(self, button, unit, data, position)
+        UnitFrames:debug("Boss:PostUpdateButton", self, unit, button, position)
+
+        local duration, expiration = data.duration, data.expirationTime
+        if duration and duration > 0 then
+            button.startTime = expiration - duration
+            button.endTime = expiration
+
+            button.sCooldown:Show()
+            button.sCooldown:SetMinMaxValues(0, button.endTime - button.startTime)
+        else
+            button.endTime = nil
         end
+        data.needsUpdate = true
     end
     -- auras.showType = true
     -- auras.showStealableAuras = true

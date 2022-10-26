@@ -88,23 +88,17 @@ local menu do
 end
 
 do
-    local filters = {}
-
-    local FilterMixin = {}
+    local filters, FilterMixin = {}, {}
     function FilterMixin:GetIndex()
-        for i, tag in ipairs(Inventory.db.global.filters) do
-            if tag == self.tag then
-                return i
-            end
-        end
+        return Inventory.db.global.filters[self.tag]
     end
     function FilterMixin:SetIndex(newIndex)
-        local oldIndex = self:GetIndex()
-        if oldIndex == newIndex then return end
-        if newIndex < 1 or newIndex > #Inventory.db.global.filters then return end
-
-        tremove(Inventory.db.global.filters, oldIndex)
-        tinsert(Inventory.db.global.filters, newIndex, self.tag)
+        local oldIndex = Inventory.db.global.filters[self.tag]
+        local filter = Inventory:GetFilterAtIndex(newIndex)
+        Inventory.db.global.filters[self.tag] = newIndex
+        if filter then
+            filter:SetIndex(oldIndex)
+        end
 
         menu:UpdateLines()
         private.Update()
@@ -116,17 +110,17 @@ do
         end
     end
     function FilterMixin:HasPriority(filterTag)
-        if not filters[filterTag] then
+        local filter = Inventory:GetFilter(filterTag)
+        if not filter then
             _G.print(L.Inventory_UnknownFilter, filterTag)
             return true
         end
 
         -- Lower ranks have priority
-        return self.rank < filters[filterTag].rank
+        return self.rank < filter.rank
     end
     function FilterMixin:Delete()
         Inventory:RemoveFilter(self.tag, true)
-        filters[self.tag] = nil
         menu:UpdateLines()
     end
     function FilterMixin:SetEnabled(enabled)
@@ -139,6 +133,10 @@ do
         return not Inventory.db.global.disabledFilters[self.tag]
     end
 
+    local numFilters = 0
+    function Inventory:GetNumFilters()
+        return numFilters
+    end
     function Inventory:ClearAssignedItems(tag)
         for itemID, assignedTag in next, Inventory.db.global.assignedFilters do
             if assignedTag == tag then
@@ -146,10 +144,17 @@ do
             end
         end
     end
-    function Inventory:RemoveFilter(tag, index, clearItems)
-        if index then
-            tremove(Inventory.db.global.filters, index)
+    function Inventory:AddFilter(filter)
+        numFilters = numFilters + 1
+        filters[filter.tag] = filter
+        if not Inventory.db.global.filters[filter.tag] then
+            Inventory.db.global.filters[filter.tag] = numFilters
         end
+    end
+    function Inventory:RemoveFilter(tag, clearItems)
+        numFilters = numFilters - 1
+        Inventory.db.global.filters[tag] = nil
+        filters[tag] = nil
 
         if Inventory.db.global.customFilters[tag] or clearItems then
             Inventory:ClearAssignedItems(tag)
@@ -164,13 +169,12 @@ do
             private.CreateFilterBag(Inventory.bank, filter)
         end
 
-        filters[filter.tag] = filter
+        Inventory:AddFilter(info)
         return filter
     end
     function Inventory:CreateCustomFilter(tag, name, fromConfig)
         if not Inventory.db.global.customFilters[tag] then
             Inventory.db.global.customFilters[tag] = name
-            tinsert(Inventory.db.global.filters, 1, tag)
         end
 
         local filter = Inventory:CreateFilter({
@@ -196,11 +200,29 @@ do
             return nil
         end
     end
+
+    local indexedFilters = {}
     function Inventory:IndexedFilters()
-        return iPairsFilter, Inventory.db.global.filters, 0
+        wipe(indexedFilters)
+        for i = 1, numFilters do
+            for tag, index in next, Inventory.db.global.filters do
+                if index == i then
+                    tinsert(indexedFilters, tag)
+                end
+            end
+        end
+
+        return iPairsFilter, indexedFilters, 0
     end
     function Inventory:GetFilter(tag)
         return filters[tag]
+    end
+    function Inventory:GetFilterAtIndex(index)
+        for tag, i in next, Inventory.db.global.filters do
+            if index == i then
+                return filters[tag]
+            end
+        end
     end
 end
 
@@ -318,10 +340,7 @@ function private.CreateFilters()
     end
 
     for i, info in ipairs(private.filterList) do
-        local filter = Inventory:CreateFilter(info)
-        if not filter:GetIndex() then
-            tinsert(Inventory.db.global.filters, i, filter.tag)
-        end
+        Inventory:CreateFilter(info)
     end
 
     menu:UpdateLines()

@@ -326,6 +326,8 @@ function CastBars:ToggleConfigMode(isConfigMode)
     for _, unit in next, {"player", "target", "focus"} do
         CastBars:debug("Set config cast", unit)
         local castbar = CastBars[unit]
+        if not castbar then return end
+
         castbar.config = isConfigMode
         if isConfigMode then
             CastBars:debug("Setup bar", castbar.__owner.unit, castbar.config)

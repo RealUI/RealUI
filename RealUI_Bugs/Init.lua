@@ -16,3 +16,8 @@ for i = 1, _G.GetNumAddOns() do
         end
     end
 end
+
+_G.ScriptErrorsFrame:SetSize(600, 400)
+_G.ScriptErrorsFrame:SetScale(_G.UIParent:GetScale())
+_G.ScriptErrorsFrame.ScrollFrame:SetPoint("BOTTOMRIGHT", -26, 38)
+_G.ScriptErrorsFrame.ScrollFrame.Text:SetPoint("BOTTOMRIGHT", -26, 38)

@@ -46,8 +46,10 @@ local UpdateProcessing = false
 -- Zoom Out
 local function ZoomMinimapOut()
     _G.Minimap:SetZoom(0)
-    _G.MinimapZoomIn:Enable()
-    _G.MinimapZoomOut:Disable()
+    if not RealUI.isPatch then
+        _G.MinimapZoomIn:Enable()
+        _G.MinimapZoomOut:Disable()
+    end
 end
 
 local function fadeIn(frame)
@@ -172,7 +174,7 @@ function MinimapAdv:UpdateInfoPosition()
         end
         MMFrames.info.lastFrame = prevFrame
 
-        if (_G.IsAddOnLoaded("Blizzard_CompactRaidFrames") and mapPoints.anchor == "TOPLEFT") then
+        if not RealUI.isPatch and (_G.IsAddOnLoaded("Blizzard_CompactRaidFrames") and mapPoints.anchor == "TOPLEFT") then
             self:AdjustCRFManager(_G["CompactRaidFrameManager"], mapPoints)
             if not self.hookedCRFM then
                 _G["CompactRaidFrameManager"]:SetFrameLevel(20)
@@ -352,8 +354,13 @@ local function UpdateGarrisonButton(isTop, isLeft)
         point = point .. "LEFT"
     end
 
-    _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
-    _G.GarrisonLandingPageMinimapButton:SetPoint(point, x, y)
+    if RealUI.isPatch then
+        _G.ExpansionLandingPageMinimapButton:ClearAllPoints()
+        _G.ExpansionLandingPageMinimapButton:SetPoint(point, x, y)
+    else
+        _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
+        _G.GarrisonLandingPageMinimapButton:SetPoint(point, x, y)
+    end
 end
 
 -- Set Minimap position
@@ -400,14 +407,16 @@ function MinimapAdv:UpdateMinimapPosition()
         Qpoint = Qpoint .. "LEFT"
     end
 
-    -- Queue Status
-    _G.QueueStatusMinimapButton:ClearAllPoints()
-    _G.QueueStatusMinimapButton:SetPoint(Qpoint, isLeft and 2 or -2, isTop and -2 or 2)
+    if not RealUI.isPatch then
+        -- Queue Status
+        _G.QueueStatusMinimapButton:ClearAllPoints()
+        _G.QueueStatusMinimapButton:SetPoint(Qpoint, isLeft and 2 or -2, isTop and -2 or 2)
 
-    -- LFD Button Tooltip
-    _G.QueueStatusFrame:ClearAllPoints()
-    _G.QueueStatusFrame:SetPoint(LFDpoint, "QueueStatusMinimapButton", LFDrpoint)
-    _G.QueueStatusFrame:SetClampedToScreen(true)
+        -- LFD Button Tooltip
+        _G.QueueStatusFrame:ClearAllPoints()
+        _G.QueueStatusFrame:SetPoint(LFDpoint, "QueueStatusMinimapButton", LFDrpoint)
+        _G.QueueStatusFrame:SetClampedToScreen(true)
+    end
 
     -- Garrisons
     UpdateGarrisonButton(isTop, isLeft)
@@ -431,8 +440,9 @@ end
 -- MINIMAP BUTTONS --
 ---------------------
 do -- ButtonCollectFrame
-    local BlackList = {
+    local ignoreList = {
         QueueStatusMinimapButton = true,
+        ExpansionLandingPageMinimapButton = true,
         GarrisonLandingPageMinimapButton = true,
         MiniMapTracking = true,
         MiniMapMailFrame = true,
@@ -493,7 +503,7 @@ do -- ButtonCollectFrame
     function MinimapAdv:UpdateButtonCollection()
         if not db.information.minimapbuttons then return end
         for i, child in next, {_G.Minimap:GetChildren()} do
-            if not(BlackList[child:GetName()]) and not child.questID then
+            if not(ignoreList[child:GetName()]) and not child.questID then
                 if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
                     setupButton(child)
                 end
@@ -1590,8 +1600,10 @@ local function CreateFrames()
         },
     }
     do
+        local GetTrackingInfo = RealUI.isPatch and _G.C_Minimap.GetTrackingInfo or _G.GetTrackingInfo
+
         local name, texture, category, nested, numTracking
-        local count = _G.GetNumTrackingTypes()
+        local count = RealUI.isPatch and _G.C_Minimap.GetNumTrackingTypes() or _G.GetNumTrackingTypes()
         local classToken = RealUI.charInfo.class.token
 
         local hunterTracking
@@ -1599,7 +1611,7 @@ local function CreateFrames()
             numTracking = 0
             -- make sure there are at least two options in dropdown
             for id = 1, count do
-                _, _, _, category, nested = _G.GetTrackingInfo(id)
+                _, _, _, category, nested = GetTrackingInfo(id)
                 if (nested == _G.HUNTER_TRACKING and category == "spell") then
                     numTracking = numTracking + 1
                 end
@@ -1620,12 +1632,12 @@ local function CreateFrames()
         tinsert(menuList, townsfolk)
 
         for id = 1, count do
-            name, texture, _, category, nested  = _G.GetTrackingInfo(id)
+            name, texture, _, category, nested  = GetTrackingInfo(id)
             local info = {
                 text = name,
                 icon = texture,
                 checked = function(self)
-                    local _, _, active = _G.GetTrackingInfo(id)
+                    local _, _, active = GetTrackingInfo(id)
                     return active
                 end,
                 func = function(self, arg1, arg2, isChecked)
@@ -1706,61 +1718,66 @@ end
 -------------------
 local function SetUpMinimapFrame()
     -- Establish Scroll Wheel zoom
-    _G.MinimapZoomIn:Hide()
-    _G.MinimapZoomOut:Hide()
-    _G.Minimap:EnableMouseWheel()
-    _G.Minimap:SetScript("OnMouseWheel", function(self, direction)
-        if direction > 0 then
-            _G.MinimapZoomIn:Click()
-        else
-            _G.MinimapZoomOut:Click()
-        end
-    end)
+    if RealUI.isPatch then
+        _G.MinimapCompassTexture:Hide()
+    else
+        _G.MinimapZoomIn:Hide()
+        _G.MinimapZoomOut:Hide()
+        _G.Minimap:EnableMouseWheel()
+        _G.Minimap:SetScript("OnMouseWheel", function(self, direction)
+            if direction > 0 then
+                _G.MinimapZoomIn:Click()
+            else
+                _G.MinimapZoomOut:Click()
+            end
+        end)
+
+        -- Hide/Move Minimap elements
+        _G.MiniMapTracking:Hide()
+
+        _G.MiniMapMailFrame:Hide()
+        _G.MiniMapMailFrame.Show = function() end
+
+        _G.MinimapZoneText:Hide()
+        _G.MinimapZoneTextButton:Hide()
+
+        _G.QueueStatusMinimapButton:ClearAllPoints()
+        _G.QueueStatusMinimapButton:SetParent(_G.Minimap)
+        _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
+        _G.QueueStatusMinimapButtonBorder:Hide()
+
+        _G.MinimapNorthTag:SetAlpha(0)
+
+        _G.MiniMapInstanceDifficulty:Hide()
+        _G.MiniMapInstanceDifficulty.Show = function() end
+        _G.GuildInstanceDifficulty:Hide()
+        _G.GuildInstanceDifficulty.Show = function() end
+        _G.MiniMapChallengeMode:Hide()
+        _G.MiniMapChallengeMode.Show = function() end
+
+        _G.MiniMapWorldMapButton:Hide()
+
+        _G.GameTimeFrame:Hide()
+
+        _G.MinimapBorderTop:Hide()
+        _G.MinimapBorder:SetTexture(nil)
+    end
     _G.Minimap:SetScript("OnEnter", Minimap_OnEnter)
     _G.Minimap:SetScript("OnLeave", Minimap_OnLeave)
 
-    -- Hide/Move Minimap elements
-    _G.MiniMapTracking:Hide()
 
-    _G.MiniMapMailFrame:Hide()
-    _G.MiniMapMailFrame.Show = function() end
-
-    _G.MinimapZoneText:Hide()
-    _G.MinimapZoneTextButton:Hide()
-
-    _G.QueueStatusMinimapButton:ClearAllPoints()
-    _G.QueueStatusMinimapButton:SetParent(_G.Minimap)
-    _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
-    _G.QueueStatusMinimapButtonBorder:Hide()
-
-    local GLPButton = _G.GarrisonLandingPageMinimapButton
-    GLPButton:SetParent(_G.Minimap)
-    GLPButton:SetAlpha(0)
-    GLPButton:ClearAllPoints()
-    GLPButton:SetPoint("TOPRIGHT", 2, 2)
-    GLPButton:SetSize(32, 32)
-    GLPButton:HookScript("OnEvent", Garrison_OnEvent)
-    GLPButton:HookScript("OnLeave", Garrison_OnLeave)
-    GLPButton:SetScript("OnEnter", Garrison_OnEnter)
-    GLPButton.shouldShow = false
-
-    _G.MinimapNorthTag:SetAlpha(0)
-
-    _G.MiniMapInstanceDifficulty:Hide()
-    _G.MiniMapInstanceDifficulty.Show = function() end
-    _G.GuildInstanceDifficulty:Hide()
-    _G.GuildInstanceDifficulty.Show = function() end
-    _G.MiniMapChallengeMode:Hide()
-    _G.MiniMapChallengeMode.Show = function() end
-
-    _G.MiniMapWorldMapButton:Hide()
-
-    _G.GameTimeFrame:Hide()
-
-    _G.MinimapBorderTop:Hide()
+    local landingButton = RealUI.isPatch and _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
+    landingButton:SetParent(_G.Minimap)
+    landingButton:SetAlpha(0)
+    landingButton:ClearAllPoints()
+    landingButton:SetPoint("TOPRIGHT", 2, 2)
+    landingButton:SetSize(32, 32)
+    landingButton:HookScript("OnEvent", Garrison_OnEvent)
+    landingButton:HookScript("OnLeave", Garrison_OnLeave)
+    landingButton:SetScript("OnEnter", Garrison_OnEnter)
+    landingButton.shouldShow = false
 
     -- Make it square
-    _G.MinimapBorder:SetTexture(nil)
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
 
     -- Create New Border

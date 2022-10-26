@@ -44,6 +44,8 @@ local Color = Aurora.Color
 -- RealUI --
 local RealUI = private.RealUI
 local db
+--if RealUI.isPatch then return end
+-- TODO: move this to Skins
 
 local MODNAME = "Loot"
 local Loot = RealUI:NewModule(MODNAME, "AceEvent-3.0")

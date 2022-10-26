@@ -4,6 +4,9 @@ local _, private = ...
 local RealUI = private.RealUI
 local db
 
+if RealUI.isPatch then return end
+-- TODO: move this to Aurora
+
 local Chat = RealUI:GetModule("Chat")
 
 local MODNAME = "Chat_Opacity"

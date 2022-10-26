@@ -68,10 +68,6 @@ function RealUI.RegisterModdedFrame(frame, updateFunc)
     moddedFrames[frame] = updateFunc or false
 end
 
-function RealUI.GetInterfaceSize()
-    return _G.GetPhysicalScreenSize()
-end
-
 local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
     if uiScaleChanging then return end
@@ -119,6 +115,14 @@ function RealUI.UpdateUIScale(newScale)
     private.skinsDB.customScale = newScale
     UpdateModScale()
     uiScaleChanging = false
+end
+
+function RealUI.GetInterfaceSize()
+    local width, height = _G.GetPhysicalScreenSize()
+    if private.skinsDB.isHighRes then
+        return width, height, width / 2, height / 2
+    end
+    return width, height
 end
 
 local ScaleAPI = {}
@@ -219,10 +223,20 @@ function private.OnLoad()
             RealUI:AddFrameStripes(Frame)
         end
     end)
-    _G.hooksecurefunc(Skin, "CharacterFrameTabButtonTemplate", function(Button)
-        Button:SetButtonColor(Color.frame, frameColor.a, false)
-        RealUI:AddFrameStripes(Button)
-    end)
+
+    if private.isPatch then
+        _G.hooksecurefunc(Skin, "PanelTabButtonTemplate", function(Button)
+            if not Button.isTopTab then
+                Button:SetButtonColor(Color.frame, frameColor.a, false)
+                RealUI:AddFrameStripes(Button)
+            end
+        end)
+    else
+        _G.hooksecurefunc(Skin, "CharacterFrameTabButtonTemplate", function(Button)
+            Button:SetButtonColor(Color.frame, frameColor.a, false)
+            RealUI:AddFrameStripes(Button)
+        end)
+    end
 
     _G.hooksecurefunc(private.AddOns, "Blizzard_BarbershopUI", function()
         local BarberShopFrame = _G.BarberShopFrame
@@ -251,17 +265,19 @@ function private.OnLoad()
 
 
     -- Hide default UI Scale slider and replace with RealUI button
-    _G.Display_UseUIScale:Hide()
-    _G.Display_UIScaleSlider:Hide()
-
     local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Display_, "UIPanelButtonTemplate")
-    scaleBtn:SetSize(150, 24)
-    scaleBtn:SetText("RealUI UI Scaler")
-    scaleBtn:SetPoint("TOPLEFT", _G.Display_UIScaleSlider, -35, 4)
-    scaleBtn:SetScript("OnClick", function()
-        private.debug("UI Scale from Blizz")
-        RealUI.LoadConfig("RealUI", "skins")
-    end)
+    if not private.isPatch then
+        _G.Display_UseUIScale:Hide()
+        _G.Display_UIScaleSlider:Hide()
+
+        scaleBtn:SetSize(150, 24)
+        scaleBtn:SetText("RealUI UI Scaler")
+        scaleBtn:SetPoint("TOPLEFT", _G.Display_UIScaleSlider, -35, 4)
+        scaleBtn:SetScript("OnClick", function()
+            private.debug("UI Scale from Blizz")
+            RealUI.LoadConfig("RealUI", "skins")
+        end)
+    end
 
     function private.AddOns.nibRealUI()
         local Skins = RealUI:NewModule("Skins")

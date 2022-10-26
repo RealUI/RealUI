@@ -102,10 +102,16 @@ local function MERCHANT_CLOSED(event, ...)
     end
 end
 
-local settingsVersion, oldTags = 3, {
-    tradegoods_11 = false,
-}
+local settingsVersion = 4
 function private.SanitizeSavedVars(oldVer)
+    if oldVer < 4 then
+        local indexedFilters = Inventory.db.global.filters
+        Inventory.db.global.filters = {}
+        for i, tag in ipairs(indexedFilters) do
+            Inventory.db.global.filters[tag] = i
+        end
+    end
+
     if oldVer < 3 then
         Inventory:ClearAssignedItems("anima")
     end
@@ -117,31 +123,12 @@ function private.SanitizeSavedVars(oldVer)
         end
     end
 
-    local tagHash = {}
-    for i, tag in ipairs(Inventory.db.global.filters) do
-        -- Check for old filters
-        if oldTags[tag] == false then
-            oldTags[tag] = i
-        else
-            -- Check for duplicates
-            if not tagHash[tag] then
-                tagHash[tag] = true
-            else
-                oldTags[tag] = i
-            end
-        end
-    end
-
-    for tag, index in next, oldTags do
-        Inventory:RemoveFilter(tag, index, true)
-    end
-
     Inventory.db.global.version = settingsVersion
 end
 
 function Inventory:OnInitialize()
     for i, info in ipairs(private.filterList) do
-        defaults.global.filters[i] = info.tag
+        defaults.global.filters[info.tag] = i
     end
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_InventoryDB", defaults, true)
 

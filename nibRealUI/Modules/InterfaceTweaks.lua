@@ -3,6 +3,10 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals tinsert ipairs next sqrt
 
+-- Libs --
+local Aurora = _G.Aurora
+local Color = Aurora.Color
+
 -- RealUI --
 local RealUI = private.RealUI
 
@@ -125,7 +129,11 @@ do
         line:SetColorTexture(1, 1, 1)
 
         local startA, endA = _G.Lerp(1, 0, (i - 1)/numLines), _G.Lerp(1, 0, i/numLines)
-        line:SetGradientAlpha("HORIZONTAL", 1, 1, 1, startA, 1, 1, 1, endA)
+        if RealUI.isPatch then
+            line:SetGradient("HORIZONTAL", Color.Create(1, 1, 1, startA), Color.Create(1, 1, 1, endA))
+        else
+            line:SetGradientAlpha("HORIZONTAL", 1, 1, 1, startA, 1, 1, 1, endA)
+        end
 
         lines[i] = {line = line, x = 0, y = 0}
     end
