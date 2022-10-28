@@ -1,14 +1,8 @@
 ------------------------------------------------------------------------
-r239 | funkydude | 2019-10-11 16:59:07 +0000 (Fri, 11 Oct 2019) | 1 line
+r271 | funkehdude | 2022-10-26 01:19:38 +0000 (Wed, 26 Oct 2022) | 1 line
 Changed paths:
    M /trunk/!BugGrabber.toc
 
 bump toc
-------------------------------------------------------------------------
-r238 | funkydude | 2019-09-25 01:35:39 +0000 (Wed, 25 Sep 2019) | 1 line
-Changed paths:
-   M /trunk/BugGrabber.lua
-
-Don't skip locals in combat, skip them in encounters.
 ------------------------------------------------------------------------
 

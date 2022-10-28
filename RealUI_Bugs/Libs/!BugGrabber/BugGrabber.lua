@@ -1,46 +1,7 @@
---
--- $Id: BugGrabber.lua 238 2019-09-25 01:35:39Z funkydude $
---
--- The BugSack and !BugGrabber team is:
--- Current Developer: Funkydude
--- Past Developers: Rowne, Ramble, industrial, Fritti, kergoth, ckknight, Rabbit
--- Testers: Ramble, Sariash
---
---[[
-
-!BugGrabber, World of Warcraft addon that catches errors and formats them with a debug stack.
-Copyright (C) 2015 The !BugGrabber Team
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-]]
-
------------------------------------------------------------------------
--- local-ization, mostly for use with the FindGlobals script to catch
--- misnamed variable names. We're not hugely concerned with performance.
 
 local _G = _G
-local type, table, next, tostring, tonumber, print =
-      type, table, next, tostring, tonumber, print
-local debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime =
-      debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime
--- GLOBALS: LibStub, GetLocale, GetBuildInfo, DisableAddOn, Swatter, GetAddOnInfo
--- GLOBALS: BugGrabberDB, ItemRefTooltip, date
--- GLOBALS: seterrorhandler, IsAddOnLoaded, GetAddOnMetadata
--- GLOBALS: MAX_BUGGRABBER_ERRORS, BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
--- GLOBALS: SlashCmdList, SLASH_SWATTER1, SLASH_SWATTER2
+local type, table, next, tostring, tonumber, print = type, table, next, tostring, tonumber, print
+local debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime = debuglocals, debugstack, table.wipe, IsEncounterInProgress, GetTime
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space
@@ -202,7 +163,7 @@ end
 -- Error catching
 --
 
-local findVersions = nil
+local findVersions -- Function set below
 do
 	local function scanObject(o)
 		local version, revision = nil, nil
@@ -327,7 +288,7 @@ do
 
 		-- Insert the error into the correct database if it's not there
 		-- already. If it is, just increment the counter.
-		local found = nil
+		local found
 		if db then
 			found = fetchFromDatabase(db, sanitizedMessage)
 		else
@@ -562,7 +523,7 @@ do
 			DisableAddOn("!Swatter")
 			SlashCmdList.SWATTER = nil
 			SLASH_SWATTER1, SLASH_SWATTER2 = nil, nil
-			for k, v in next, Swatter do
+			for _, v in next, Swatter do
 				if type(v) == "table" then
 					if v.UnregisterAllEvents then
 						v:UnregisterAllEvents()
@@ -609,7 +570,7 @@ real_seterrorhandler(grabError)
 function seterrorhandler() --[[ noop ]] end
 
 -- Set up slash command
-_G.SlashCmdList.BugGrabber = slashHandler
-_G.SLASH_BugGrabber1 = "/buggrabber"
-_G.BugGrabber = setmetatable({}, { __index = addon, __newindex = function() grabError("Modifications not allowed.") end, __metatable = false })
+SlashCmdList.BugGrabber = slashHandler
+SLASH_BugGrabber1 = "/buggrabber"
+BugGrabber = setmetatable({}, { __index = addon, __newindex = function() end, __metatable = false })
 
