@@ -224,19 +224,12 @@ function private.OnLoad()
         end
     end)
 
-    if private.isPatch then
-        _G.hooksecurefunc(Skin, "PanelTabButtonTemplate", function(Button)
-            if not Button.isTopTab then
-                Button:SetButtonColor(Color.frame, frameColor.a, false)
-                RealUI:AddFrameStripes(Button)
-            end
-        end)
-    else
-        _G.hooksecurefunc(Skin, "CharacterFrameTabButtonTemplate", function(Button)
+    _G.hooksecurefunc(Skin, "PanelTabButtonTemplate", function(Button)
+        if not Button.isTopTab then
             Button:SetButtonColor(Color.frame, frameColor.a, false)
             RealUI:AddFrameStripes(Button)
-        end)
-    end
+        end
+    end)
 
     _G.hooksecurefunc(private.AddOns, "Blizzard_BarbershopUI", function()
         local BarberShopFrame = _G.BarberShopFrame
@@ -264,26 +257,9 @@ function private.OnLoad()
     end
 
 
-    -- Hide default UI Scale slider and replace with RealUI button
-    local scaleBtn = _G.CreateFrame("Button", "RealUIScaleBtn", _G.Display_, "UIPanelButtonTemplate")
-    if not private.isPatch then
-        _G.Display_UseUIScale:Hide()
-        _G.Display_UIScaleSlider:Hide()
-
-        scaleBtn:SetSize(150, 24)
-        scaleBtn:SetText("RealUI UI Scaler")
-        scaleBtn:SetPoint("TOPLEFT", _G.Display_UIScaleSlider, -35, 4)
-        scaleBtn:SetScript("OnClick", function()
-            private.debug("UI Scale from Blizz")
-            RealUI.LoadConfig("RealUI", "skins")
-        end)
-    end
-
     function private.AddOns.nibRealUI()
         local Skins = RealUI:NewModule("Skins")
         Skins.db = skinsDB
-
-        Skin.UIPanelButtonTemplate(scaleBtn)
 
         if not _G.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()

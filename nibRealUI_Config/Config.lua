@@ -374,22 +374,9 @@ local function InitializeOptions()
             Scale.Point(check, "CENTER", 0, 10)
             check:SetHitRectInsets(-10, -10, -1, -21)
 
-            if RealUI.isPatch then
-                check:SetScript("OnClick", function(self)
-                    RealUI:HuDTestMode(self:GetChecked())
-                end)
-            else
-                check:SetAttribute("type1", "macro")
-                _G.SecureHandlerWrapScript(check, "OnClick", check, [[
-                    if self:GetID() == 1 then
-                        self:SetAttribute("macrotext", format("/cleartarget\n/focus\n/run RealUI:HuDTestMode(false)"))
-                        self:SetID(0)
-                    else
-                        self:SetAttribute("macrotext", format("/target player\n/focus\n/run RealUI:HuDTestMode(true)"))
-                        self:SetID(1)
-                    end
-                ]])
-            end
+            check:SetScript("OnClick", function(self)
+                RealUI:HuDTestMode(self:GetChecked())
+            end)
         else
             Scale.Point(btn, "TOPLEFT", prevFrame, "TOPRIGHT")
             btn:SetScript("OnClick", tab.onclick or tabOnClick)

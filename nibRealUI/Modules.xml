@@ -16,13 +16,10 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Modules\EventNotifier.lua"/>
     <Script file="Modules\FrameMover.lua"/>
     <Script file="Modules\GridLayout.lua"/>
-    <Script file="Modules\Loot.lua"/>
     <Script file="Modules\MinimapAdv.lua"/>
     <Script file="Modules\MirrorBar.lua"/>
     <Script file="Modules\ObjectivesAdv.lua"/>
     <Script file="Modules\ScreenSaver.lua"/>
     <Script file="Modules\SpellAlerts.lua"/>
     <Script file="Modules\WorldMarker.lua"/>
-
-    <Include file="Modules\Chat.xml"/>
 </Ui>

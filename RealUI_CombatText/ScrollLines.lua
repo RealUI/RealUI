@@ -118,13 +118,8 @@ function StickyLineMixin:OnLoad()
 
     local scale = self.scrollAnim:CreateAnimation("Scale")
     scale:SetOrder(1)
-    if CombatText.isPatch then
-        scale:SetScaleFrom(3, 3)
-        scale:SetScaleTo(1, 1)
-    else
-        scale:SetFromScale(3, 3)
-        scale:SetToScale(1, 1)
-    end
+    scale:SetScaleFrom(3, 3)
+    scale:SetScaleTo(1, 1)
     self.scale = scale
 
     self:SetOptions()

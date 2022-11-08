@@ -129,12 +129,7 @@ do
         line:SetColorTexture(1, 1, 1)
 
         local startA, endA = _G.Lerp(1, 0, (i - 1)/numLines), _G.Lerp(1, 0, i/numLines)
-        if RealUI.isPatch then
-            line:SetGradient("HORIZONTAL", Color.Create(1, 1, 1, startA), Color.Create(1, 1, 1, endA))
-        else
-            line:SetGradientAlpha("HORIZONTAL", 1, 1, 1, startA, 1, 1, 1, endA)
-        end
-
+        line:SetGradient("HORIZONTAL", Color.Create(1, 1, 1, startA), Color.Create(1, 1, 1, endA))
         lines[i] = {line = line, x = 0, y = 0}
     end
 

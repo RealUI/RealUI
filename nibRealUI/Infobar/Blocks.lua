@@ -1400,24 +1400,7 @@ function Infobar:CreateBlocks()
 
     do -- Progress Watch
         local function GetFriendshipReputation(factionID)
-            if RealUI.isPatch then
-                return _G.C_GossipInfo.GetFriendshipReputation(factionID)
-            else
-                local friendshipID, friendRep, _, _, _, _, friendTextLevel, friendThreshold, nextFriendThreshold = _G.GetFriendshipReputation(factionID)
-                return {
-                    friendshipFactionID = friendshipID,
-                    standing = friendRep,
-                    maxRep = friendshipID,
-                    name = friendshipID,
-                    text = friendTextLevel,
-                    texture = friendshipID,
-                    reaction = friendshipID,
-                    reactionThreshold = friendThreshold,
-                    nextThreshold = nextFriendThreshold,
-                    reversedColor = friendshipID,
-                    overrideColor = friendshipID,
-                }
-            end
+            return _G.C_GossipInfo.GetFriendshipReputation(factionID)
         end
 
         local C_AzeriteItem = _G.C_AzeriteItem
@@ -2108,7 +2091,7 @@ function Infobar:CreateBlocks()
         local SILVER_AMOUNT_STRING = "%d|cffbfbfbf%s|r"
         local COPPER_AMOUNT_STRING = "%d|cffbf734f%s|r"
         local TOKEN_STRING = [[|T%s:12:12:0:0:64:64:5:59:5:59|t %d]]
-        local MAX_WATCHED_TOKENS = RealUI.isPatch and 10 or 3
+        local MAX_WATCHED_TOKENS = 10
         local charName = "%s |c%s%s|r"
 
         local currencyDB

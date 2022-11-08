@@ -46,10 +46,6 @@ local UpdateProcessing = false
 -- Zoom Out
 local function ZoomMinimapOut()
     _G.Minimap:SetZoom(0)
-    if not RealUI.isPatch then
-        _G.MinimapZoomIn:Enable()
-        _G.MinimapZoomOut:Disable()
-    end
 end
 
 local function fadeIn(frame)
@@ -173,44 +169,6 @@ function MinimapAdv:UpdateInfoPosition()
             end
         end
         MMFrames.info.lastFrame = prevFrame
-
-        if not RealUI.isPatch and (_G.IsAddOnLoaded("Blizzard_CompactRaidFrames") and mapPoints.anchor == "TOPLEFT") then
-            self:AdjustCRFManager(_G["CompactRaidFrameManager"], mapPoints)
-            if not self.hookedCRFM then
-                _G["CompactRaidFrameManager"]:SetFrameLevel(20)
-                _G.hooksecurefunc("CompactRaidFrameManager_Toggle", function(CRFM)
-                    self:AdjustCRFManager(CRFM, GetPositionData())
-                end)
-                if db.information.hideRaidFilters then
-                    -- These buttons are only relevant if using the Blizzard frames
-                    _G.SetRaidProfileOption(_G.GetActiveRaidProfile(), "shown", false) _G.CompactRaidFrameManager_SetSetting("IsShown", false) -- Hide CRF
-                    _G.SetRaidProfileOption(_G.GetActiveRaidProfile(), "locked", true) _G.CompactRaidFrameManager_SetSetting("Locked", true) -- Lock CRF
-                    _G.hooksecurefunc("CompactRaidFrameManager_UpdateOptionsFlowContainer", function(CRFM)
-                        self:debug("AdjustCRFManager", _G.InCombatLockdown())
-                        if _G.InCombatLockdown() then
-                            return
-                        end
-                        local container = CRFM.displayFrame.optionsFlowContainer
-                        _G.FlowContainer_PauseUpdates(container)
-
-                        _G.FlowContainer_RemoveObject(container, CRFM.displayFrame.profileSelector)
-                        CRFM.displayFrame.profileSelector:Hide()
-                        _G.FlowContainer_RemoveObject(container, CRFM.displayFrame.filterOptions)
-                        CRFM.displayFrame.filterOptions:Hide()
-                        _G.FlowContainer_RemoveObject(container, CRFM.displayFrame.lockedModeToggle)
-                        CRFM.displayFrame.lockedModeToggle:Hide()
-                        _G.FlowContainer_RemoveObject(container, CRFM.displayFrame.hiddenModeToggle)
-                        CRFM.displayFrame.hiddenModeToggle:Hide()
-
-                        _G.FlowContainer_ResumeUpdates(container)
-
-                        local _, usedY = _G.FlowContainer_GetUsedBounds(container)
-                        CRFM:SetHeight(usedY + 40)
-                    end)
-                end
-                self.hookedCRFM = true
-            end
-        end
     else
         MMFrames.info.Location:Hide()
         MMFrames.info.Coords:Hide()
@@ -354,13 +312,8 @@ local function UpdateGarrisonButton(isTop, isLeft)
         point = point .. "LEFT"
     end
 
-    if RealUI.isPatch then
-        _G.ExpansionLandingPageMinimapButton:ClearAllPoints()
-        _G.ExpansionLandingPageMinimapButton:SetPoint(point, x, y)
-    else
-        _G.GarrisonLandingPageMinimapButton:ClearAllPoints()
-        _G.GarrisonLandingPageMinimapButton:SetPoint(point, x, y)
-    end
+    _G.ExpansionLandingPageMinimapButton:ClearAllPoints()
+    _G.ExpansionLandingPageMinimapButton:SetPoint(point, x, y)
 end
 
 -- Set Minimap position
@@ -385,38 +338,6 @@ function MinimapAdv:UpdateMinimapPosition()
     _G.Minimap:ClearAllPoints()
     _G.Minimap:SetPoint(anchor, "UIParent", anchor, xofs, yofs)
     _G.Minimap:SetUserPlaced(true)
-
-    -- Kinda dirty, but it works
-    local LFDrpoint, LFDpoint, Qpoint
-    if isTop then
-        LFDpoint = "TOP"
-        LFDrpoint = "TOP"
-        Qpoint = "BOTTOM"
-    else
-        LFDpoint = "BOTTOM"
-        LFDrpoint = "BOTTOM"
-        Qpoint = "TOP"
-    end
-    if isLeft then
-        LFDpoint = LFDpoint .. "LEFT"
-        LFDrpoint = LFDrpoint .. "RIGHT"
-        Qpoint = Qpoint .. "RIGHT"
-    else
-        LFDpoint = LFDpoint .. "RIGHT"
-        LFDrpoint = LFDrpoint .. "LEFT"
-        Qpoint = Qpoint .. "LEFT"
-    end
-
-    if not RealUI.isPatch then
-        -- Queue Status
-        _G.QueueStatusMinimapButton:ClearAllPoints()
-        _G.QueueStatusMinimapButton:SetPoint(Qpoint, isLeft and 2 or -2, isTop and -2 or 2)
-
-        -- LFD Button Tooltip
-        _G.QueueStatusFrame:ClearAllPoints()
-        _G.QueueStatusFrame:SetPoint(LFDpoint, "QueueStatusMinimapButton", LFDrpoint)
-        _G.QueueStatusFrame:SetClampedToScreen(true)
-    end
 
     -- Garrisons
     UpdateGarrisonButton(isTop, isLeft)
@@ -1600,10 +1521,10 @@ local function CreateFrames()
         },
     }
     do
-        local GetTrackingInfo = RealUI.isPatch and _G.C_Minimap.GetTrackingInfo or _G.GetTrackingInfo
+        local GetTrackingInfo = _G.C_Minimap.GetTrackingInfo
 
         local name, texture, category, nested, numTracking
-        local count = RealUI.isPatch and _G.C_Minimap.GetNumTrackingTypes() or _G.GetNumTrackingTypes()
+        local count = _G.C_Minimap.GetNumTrackingTypes()
         local classToken = RealUI.charInfo.class.token
 
         local hunterTracking
@@ -1718,55 +1639,12 @@ end
 -------------------
 local function SetUpMinimapFrame()
     -- Establish Scroll Wheel zoom
-    if RealUI.isPatch then
-        _G.MinimapCompassTexture:Hide()
-    else
-        _G.MinimapZoomIn:Hide()
-        _G.MinimapZoomOut:Hide()
-        _G.Minimap:EnableMouseWheel()
-        _G.Minimap:SetScript("OnMouseWheel", function(self, direction)
-            if direction > 0 then
-                _G.MinimapZoomIn:Click()
-            else
-                _G.MinimapZoomOut:Click()
-            end
-        end)
-
-        -- Hide/Move Minimap elements
-        _G.MiniMapTracking:Hide()
-
-        _G.MiniMapMailFrame:Hide()
-        _G.MiniMapMailFrame.Show = function() end
-
-        _G.MinimapZoneText:Hide()
-        _G.MinimapZoneTextButton:Hide()
-
-        _G.QueueStatusMinimapButton:ClearAllPoints()
-        _G.QueueStatusMinimapButton:SetParent(_G.Minimap)
-        _G.QueueStatusMinimapButton:SetPoint('BOTTOMRIGHT', 2, -2)
-        _G.QueueStatusMinimapButtonBorder:Hide()
-
-        _G.MinimapNorthTag:SetAlpha(0)
-
-        _G.MiniMapInstanceDifficulty:Hide()
-        _G.MiniMapInstanceDifficulty.Show = function() end
-        _G.GuildInstanceDifficulty:Hide()
-        _G.GuildInstanceDifficulty.Show = function() end
-        _G.MiniMapChallengeMode:Hide()
-        _G.MiniMapChallengeMode.Show = function() end
-
-        _G.MiniMapWorldMapButton:Hide()
-
-        _G.GameTimeFrame:Hide()
-
-        _G.MinimapBorderTop:Hide()
-        _G.MinimapBorder:SetTexture(nil)
-    end
+    _G.MinimapCompassTexture:Hide()
     _G.Minimap:SetScript("OnEnter", Minimap_OnEnter)
     _G.Minimap:SetScript("OnLeave", Minimap_OnLeave)
 
 
-    local landingButton = RealUI.isPatch and _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
+    local landingButton = _G.ExpansionLandingPageMinimapButton
     landingButton:SetParent(_G.Minimap)
     landingButton:SetAlpha(0)
     landingButton:ClearAllPoints()

@@ -390,39 +390,11 @@ function RealUI:OnInitialize()
     end)
 
     -- Hide store button
-    if RealUI.isPatch then
-        _G.GameMenuButtonEditMode:HookScript("OnClick", function()
-            RealUI.Debug("Config", "GameMenuFrame")
-            RealUI.LoadConfig("HuD")
-            _G.HideUIPanel(_G.GameMenuFrame)
-        end)
-    else
-        _G.GameMenuButtonStore:SetScale(0.00001)
-        _G.GameMenuButtonStore:SetAlpha(0)
-
-        -- Add RealUI Config button
-        local configBtn = _G.CreateFrame("Button", nil, _G.GameMenuFrame, "GameMenuButtonTemplate")
-        configBtn:SetText(("|cffffffffReal|r|c%sUI|r Config"):format(_G.Aurora.Color.highlight.colorStr))
-        _G.Aurora.Skin.UIPanelButtonTemplate(configBtn)
-        configBtn:SetPoint("TOP", _G.GameMenuButtonUIOptions, "BOTTOM", 0, -1)
-        configBtn:SetScript("OnMouseUp", function()
-            RealUI.Debug("Config", "GameMenuFrame")
-            RealUI.LoadConfig("HuD")
-            _G.HideUIPanel(_G.GameMenuFrame)
-        end)
-
-        _G.GameMenuButtonKeybindings:SetPoint("TOP", configBtn, "BOTTOM", 0, -1)
-        _G.hooksecurefunc("GameMenuFrame_UpdateVisibleButtons", function(menuFrame)
-            debug("GameMenuFrame_UpdateVisibleButtons")
-            local height = RealUI.isPatch and 300 or 332
-
-            if not _G.SplashFrameCanBeShown() then
-                height = height - 20
-            end
-
-            menuFrame:SetHeight(height)
-        end)
-    end
+    _G.GameMenuButtonEditMode:HookScript("OnClick", function()
+        RealUI.Debug("Config", "GameMenuFrame")
+        RealUI.LoadConfig("HuD")
+        _G.HideUIPanel(_G.GameMenuFrame)
+    end)
 
     -- Position Chat Frame
     if dbc.init.needchatmoved then
@@ -462,6 +434,9 @@ local onLoadMessages = {
         end,
     }
     ]]
+    reload = {
+        text = "When changing the position of UI frames, please be sure to reaload the UI with /rl",
+    }
 }
 function RealUI:OnEnable()
     debug("OnEnable", dbc.init.installStage)
