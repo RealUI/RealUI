@@ -1681,6 +1681,10 @@ local function SetUpMinimapFrame()
 
     -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
+    _G.MinimapCluster.BorderTop:Hide()
+    _G.MinimapCluster.ZoneTextButton:Hide()
+    _G.MinimapCluster.Tracking:Hide()
+    _G.MinimapCluster.MailFrame:ClearAllPoints()
 end
 
 ----------
