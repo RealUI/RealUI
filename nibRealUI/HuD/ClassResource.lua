@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next max floor ceil
+-- luacheck: globals next max floor ceil type
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -14,7 +14,7 @@ local MODNAME = "ClassResource"
 local ClassResource = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
 local playerClass = RealUI.charInfo.class.token
-local powerToken
+local power
 local powerTextures = {
     circle = [[Interface\Addons\nibRealUI\Media\PointTracking\Point]],
     SOUL_SHARDS = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard]],
@@ -26,10 +26,6 @@ local powerTextures = {
         [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
     }
 }
-
-local MAX_RUNES = 6
-local MAX_POINTS = 10
-local hasPoints = false
 
 function ClassResource:GetResources()
     return self.points and self.points.info, self.bar and self.bar.info
@@ -48,7 +44,7 @@ end
 local function PositionRune(rune, index)
     ClassResource:debug("PositionRune", rune, index)
     local size = pointDB.size
-    local gap, middle, mod = size.gap + 2, (MAX_RUNES / 2) + 0.5
+    local gap, middle, mod = size.gap + 2, (power.max / 2) + 0.5
     if index < middle then
         mod = index - _G.min(middle)
     else
@@ -71,24 +67,18 @@ function ClassResource:SettingsUpdate(kind, event)
     self:debug("SettingsUpdate", kind, event)
     local settings = db[kind]
     if kind == "points" then
-        if event == "gap" then
-            local frame = self.points
-            for i = 1, #frame do
-                local icon = frame[i]
-                if hasPoints then
-                    icon:ClearAllPoints()
-                    PositionIcon(icon, i, frame[i-1])
-                else
-                    PositionRune(frame[i], i)
-                end
-            end
-        elseif event == "size" then
-            local frame = self.points
-            for i = 1, #frame do
-                local icon = frame[i]
-                icon:SetSize(settings.size.width, settings.size.height)
-                if not hasPoints then
-                    PositionRune(frame[i], i)
+        local frame = self.points
+        for i = 1, #frame do
+            local point = frame[i]
+            if self.isRunes then
+                point:SetSize(settings.size.width, settings.size.height)
+                PositionRune(point, i)
+            else
+                if event == "gap" then
+                    point:ClearAllPoints()
+                    PositionIcon(point, i, frame[i-1])
+                elseif event == "size" then
+                    point:SetSize(settings.size.width, settings.size.height)
                 end
             end
         end
@@ -101,12 +91,11 @@ end
 
 function ClassResource:CreateClassPower(unitFrame, unit)
     self:debug("CreateClassPower", unit)
-    unitFrame.ClassPower = _G.CreateFrame("Frame", nil, unitFrame)
-    local ClassPower = unitFrame.ClassPower
+    local ClassPower = _G.CreateFrame("Frame", nil, unitFrame)
     ClassPower:SetSize(16, 16)
 
-    local texture, size = powerTextures[powerToken] or powerTextures.circle, pointDB.size
-    for index = 1, MAX_POINTS do
+    local texture, size = powerTextures[power.token], pointDB.size
+    for index = 1, power.max do
         local name, icon = "ClassPower"..index
         if playerClass == "WARLOCK" then
             icon = unitFrame:CreateAngle("StatusBar", name, ClassPower)
@@ -131,6 +120,9 @@ function ClassResource:CreateClassPower(unitFrame, unit)
             tex = texture
         end
 
+        if not tex then
+            tex = powerTextures.circle
+        end
         icon:SetStatusBarTexture(tex)
         icon.bg:SetTexture(tex)
         icon.bg.multiplier = 0.5
@@ -139,10 +131,10 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     end
 
     CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
-    if hasPoints then
-        FramePoint:PositionFrame(self, ClassPower, {"class", "points", "position"})
-    else
+    if self.isRunes then
         ClassPower:SetPoint("CENTER", -160, -40.5)
+    else
+        FramePoint:PositionFrame(self, ClassPower, {"class", "points", "position"})
     end
 
     local lastChargedIndex
@@ -200,13 +192,12 @@ function ClassResource:CreateClassPower(unitFrame, unit)
 end
 function ClassResource:CreateRunes(unitFrame, unit)
     self:debug("CreateRunes", unit)
-    unitFrame.Runes = _G.CreateFrame("Frame", nil, unitFrame)
-    local Runes = unitFrame.Runes
+    local Runes = _G.CreateFrame("Frame", nil, unitFrame)
     Runes:SetSize(16, 16)
     Runes.colorSpec = true
 
     local size = pointDB.size
-    for index = 1, MAX_RUNES do
+    for index = 1, power.max do
         local Rune = _G.CreateFrame("StatusBar", nil, Runes)
         Rune:SetOrientation("VERTICAL")
         Rune:SetSize(size.width, size.height)
@@ -243,12 +234,12 @@ function ClassResource:CreateRunes(unitFrame, unit)
         end
     end
 
+    unitFrame.Runes = Runes
     return Runes
 end
 function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
-    unitFrame.Stagger = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
-    local Stagger = unitFrame.Stagger
+    local Stagger = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
 
     Stagger:SetSize(barDB.size.width, barDB.size.height)
     Stagger:SetAngleVertex(1, 3)
@@ -273,29 +264,18 @@ function ClassResource:CreateStagger(unitFrame, unit)
         element:SetShown(cur > 0)
     end
 
+    unitFrame.Stagger = Stagger
     return Stagger
 end
 
-local classPowers = {
-    DEATHKNIGHT = "RUNES",
-    DRUID = "COMBO_POINTS",
-    MAGE = "ARCANE_CHARGES",
-    MONK = "CHI",
-    PALADIN = "HOLY_POWER",
-    ROGUE = "COMBO_POINTS",
-    WARLOCK = "SOUL_SHARDS",
-}
 function ClassResource:Setup(unitFrame, unit)
     -- Points
-    local points = self:CreateClassPower(unitFrame, unit)
     if playerClass == "DEATHKNIGHT" then
-        points = self:CreateRunes(unitFrame, unit)
+        self.points = self:CreateRunes(unitFrame, unit)
+    else
+        self.points = self:CreateClassPower(unitFrame, unit)
     end
-
-    if powerToken and points then
-        self.points = points
-        self.points.info = {token = powerToken, name = _G[powerToken]}
-    end
+    self.points.info = {token = power.token, name = _G[power.token]}
 
     -- Bars
     if playerClass == "MONK" then
@@ -311,14 +291,12 @@ function ClassResource:ToggleConfigMode(isConfigMode)
     if isConfigMode then
         if self.points then
             self.points:SetAlpha(1)
-            if hasPoints then
-                for i = 1, 5 do
+            for i = 1, power.max do
+                if self.isRunes then
+                    self.points[i]:SetValue(i / power.max)
+                else
                     self.points[i]:SetShown(isConfigMode)
-                end
-                self.points:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, powerToken)
-            else
-                for i = 1, MAX_RUNES do
-                    self.points[i]:SetValue(i / MAX_RUNES)
+                    self.points:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, power.type)
                 end
             end
         end
@@ -332,6 +310,24 @@ function ClassResource:ToggleConfigMode(isConfigMode)
     end
 end
 
+local classPowers = {
+    DEATHKNIGHT = {
+        type = _G.Enum.PowerType.Runes,
+        token = "RUNES",
+        max = 6
+    },
+    DRUID = {type = _G.Enum.PowerType.ComboPoints, token = "COMBO_POINTS"},
+    MAGE = {type = _G.Enum.PowerType.ArcaneCharges, token = "ARCANE_CHARGES"},
+    MONK = {type = _G.Enum.PowerType.Chi, token = "CHI"},
+    PALADIN = {
+        type = _G.Enum.PowerType.HolyPower,
+        token = "HOLY_POWER",
+        max = 5
+    },
+    ROGUE = {type = _G.Enum.PowerType.ComboPoints, token = "COMBO_POINTS"},
+    WARLOCK = {type = _G.Enum.PowerType.SoulShards, token = "SOUL_SHARDS"},
+    EVOKER = {type = _G.Enum.PowerType.Essence, token = "ESSENCE"},
+}
 function ClassResource:OnInitialize()
     self:debug("OnInitialize")
     local points do
@@ -401,23 +397,12 @@ function ClassResource:OnInitialize()
     db = self.db.class
     pointDB, barDB = db.points, db.bar
 
+    power = classPowers[playerClass] or {}
+    power.max = power.max or 10
+    self.isRunes = power.type == _G.Enum.PowerType.Runes
+    print("OnInitialize", power.type, power.max)
+
     local isEnabled = RealUI:GetModuleEnabled(MODNAME)
-
-    -- Setup resources
-    powerToken = classPowers[playerClass]
-    hasPoints = powerToken and powerToken ~= "RUNES"
-
-    if not isEnabled then
-        if powerToken then
-            self.points = {}
-            self.points.info = {token = powerToken, name = _G[powerToken]}
-        end
-        if playerClass == "MONK" then
-            self.bar = {}
-            self.bar.info = _G.GetSpellInfo(124255)
-        end
-    end
-
     self:SetEnabledState(isEnabled)
 end
 
