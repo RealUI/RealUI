@@ -309,6 +309,10 @@ function BagSlotMixin:Init(bagID)
             self.inventorySlot = "Bag"..slotID
 
             self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
+
+            if not Inventory.isPatch then
+                self.bankSlotID = slotID
+            end
         else
             local slotID = bagID - _G.NUM_BAG_SLOTS
             self.inventorySlot = "Bag"..slotID

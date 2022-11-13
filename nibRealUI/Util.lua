@@ -74,7 +74,7 @@ local C_Container = {
 
     IsBattlePayItem = _G.IsBattlePayItem,
 }
-RealUI.C_Container = _G.C_Container or C_Container
+RealUI.C_Container = RealUI.isPatch and _G.C_Container or C_Container
 
 
 ----====####$$$$%%%%%$$$$####====----
