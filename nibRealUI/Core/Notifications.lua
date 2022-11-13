@@ -54,12 +54,13 @@ local function showBanner()
     local scale
     f:SetScript("OnUpdate", function(self)
         scale = self:GetScale() + interval
-        self:SetScale(scale)
-        self:SetAlpha(scale)
         if scale >= 1 then
             self:SetScale(1)
             self:SetScript("OnUpdate", nil)
             fadeTimer()
+        else
+            self:SetScale(scale)
+            self:SetAlpha(scale)
         end
     end)
 end
