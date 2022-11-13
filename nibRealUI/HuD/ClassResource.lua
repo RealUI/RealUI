@@ -311,12 +311,12 @@ function ClassResource:ToggleConfigMode(isConfigMode)
 end
 
 local classPowers = {
+    default = {type = _G.Enum.PowerType.ComboPoints, token = "COMBO_POINTS"},
     DEATHKNIGHT = {
         type = _G.Enum.PowerType.Runes,
         token = "RUNES",
         max = 6
     },
-    DRUID = {type = _G.Enum.PowerType.ComboPoints, token = "COMBO_POINTS"},
     MAGE = {type = _G.Enum.PowerType.ArcaneCharges, token = "ARCANE_CHARGES"},
     MONK = {type = _G.Enum.PowerType.Chi, token = "CHI"},
     PALADIN = {
@@ -324,7 +324,6 @@ local classPowers = {
         token = "HOLY_POWER",
         max = 5
     },
-    ROGUE = {type = _G.Enum.PowerType.ComboPoints, token = "COMBO_POINTS"},
     WARLOCK = {type = _G.Enum.PowerType.SoulShards, token = "SOUL_SHARDS"},
     EVOKER = {type = _G.Enum.PowerType.Essence, token = "ESSENCE"},
 }
@@ -397,10 +396,9 @@ function ClassResource:OnInitialize()
     db = self.db.class
     pointDB, barDB = db.points, db.bar
 
-    power = classPowers[playerClass] or {}
+    power = classPowers[playerClass] or classPowers.default
     power.max = power.max or 10
     self.isRunes = power.type == _G.Enum.PowerType.Runes
-    print("OnInitialize", power.type, power.max)
 
     local isEnabled = RealUI:GetModuleEnabled(MODNAME)
     self:SetEnabledState(isEnabled)
