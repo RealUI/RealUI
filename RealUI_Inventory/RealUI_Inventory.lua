@@ -5,6 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = _G.RealUI
+local C_Container = RealUI.C_Container
 
 local Inventory = RealUI:NewModule("Inventory", "AceEvent-3.0")
 private.Inventory = Inventory
@@ -39,8 +40,10 @@ function private.Toggle(show)
     main:SetShown(show)
     Inventory.bank:SetShown(show and Inventory.showBank)
 end
+
+local NUM_TOTAL_BAG_FRAMES = Inventory.isPatch and 5 or _G.NUM_BAG_SLOTS
 function private.GetBagTypeForBagID(bagID)
-    if bagID >= _G.BACKPACK_CONTAINER and bagID <= _G.NUM_BAG_SLOTS then
+    if bagID >= RealUI.Enum.BagIndex.Backpack and bagID <= NUM_TOTAL_BAG_FRAMES then
         return "main"
     else
         return "bank"
@@ -69,8 +72,8 @@ function private.CalculateJunkProfit(isAtMerchant)
     for _, slot in ipairs(bag.slots) do
         local _, _, _, _, _, _, _, _, _, _, sellPrice = _G.GetItemInfo(slot.item:GetItemLink())
         if sellPrice > 0 then
-            local _, itemCount = _G.GetContainerItemInfo(slot:GetBagAndSlot())
-            profit = profit + (sellPrice * itemCount)
+            local stackCount = C_Container.GetContainerItemInfo(slot:GetBagAndSlot()).stackCount
+            profit = profit + (sellPrice * stackCount)
 
             slot.JunkIcon:SetShown(isAtMerchant)
             slot.sellPrice = sellPrice

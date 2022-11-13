@@ -21,7 +21,7 @@ local eventSuffix = _G.setmetatable({}, {
 })
 
 
-local Damageclass = RealUI.Enum.Damageclass
+local Damageclass = _G.Enum.Damageclass
 local defaultSchool = Damageclass.MaskNone
 local SpellColors = {
     [Damageclass.MaskNone] = Color.Create(1, 1, 1),

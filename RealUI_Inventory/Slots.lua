@@ -10,6 +10,8 @@ local Skin = Aurora.Skin
 
 -- RealUI --
 local Inventory = private.Inventory
+local C_Container = _G.RealUI.C_Container
+local BagIndex = _G.RealUI.Enum.BagIndex
 
 local function SlotFactory(pool)
     local numActive = pool:GetNumActive()
@@ -57,14 +59,14 @@ function ItemSlotMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
     local item = self.item
 
-    local _, itemCount, _, _, readable = _G.GetContainerItemInfo(bagID, slotIndex)
-    local isQuestItem, questId, isActive = _G.GetContainerItemQuestInfo(bagID, slotIndex)
+    local itemInfo = C_Container.GetContainerItemInfo(bagID, slotIndex)
+    local itemQuestInfo = C_Container.GetContainerItemQuestInfo(bagID, slotIndex)
 
     local icon = item:GetItemIcon()
     local quality = item:GetItemQuality()
     _G.SetItemButtonTexture(self, icon)
     _G.SetItemButtonQuality(self, quality, item:GetItemLink())
-    _G.SetItemButtonCount(self, itemCount)
+    _G.SetItemButtonCount(self, itemInfo.stackCount)
     _G.SetItemButtonDesaturated(self, item:IsItemLocked())
 
     if self:GetItemType() == "equipment" then
@@ -76,12 +78,12 @@ function ItemSlotMixin:Update()
     end
 
     local questTexture = self.IconQuestTexture
-    if questId then
+    if itemQuestInfo.questID then
         self._auroraIconBorder:SetBackdropBorderColor(1, 1, 0)
-        if not isActive then
+        if not itemQuestInfo.isActive then
             questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BANG)
             questTexture:Show()
-        elseif isQuestItem then
+        elseif itemQuestInfo.isQuestItem then
             questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BORDER)
             questTexture:Show()
         end
@@ -90,7 +92,7 @@ function ItemSlotMixin:Update()
     end
 
     self:UpdateItemCooldown()
-    self.readable = readable
+    self.readable = itemInfo.isReadable
 
     if self == _G.GameTooltip:GetOwner() then
         self:UpdateTooltip()
@@ -102,7 +104,7 @@ function ItemSlotMixin:UpdateItemCooldown()
     local cooldown = _G[self:GetName().."Cooldown"]
     _G[self:GetName().."Cooldown"]:Hide()
 
-    local start, duration, enable = _G.GetContainerItemCooldown(self:GetBagAndSlot())
+    local start, duration, enable = C_Container.GetContainerItemCooldown(self:GetBagAndSlot())
     _G.CooldownFrame_Set(cooldown, start, duration, enable)
 
     if duration > 0 and enable == 0 then
@@ -112,7 +114,7 @@ function ItemSlotMixin:UpdateItemCooldown()
     end
 end
 function ItemSlotMixin:UpdateItemContext()
-    local _, _, _, _, _, _, _, isFiltered = _G.GetContainerItemInfo(self:GetBagAndSlot())
+    local isFiltered = C_Container.GetContainerItemInfo(self:GetBagAndSlot()).isFiltered
     self:UpdateItemContextMatching()
     self:SetMatchesSearch(not isFiltered)
 end
@@ -157,11 +159,7 @@ function InventorySlotMixin:Update()
         self.JunkIcon:Hide()
     end
 
-    self:UpdateItemUpgradeIcon()
-    self.BattlepayItemTexture:SetShown(_G.IsBattlePayItem(self:GetBagAndSlot()))
-end
-function InventorySlotMixin:UpdateItemUpgradeIcon()
-    _G.ContainerFrameItemButtonMixin.UpdateItemUpgradeIcon(self)
+    self.BattlepayItemTexture:SetShown(C_Container.IsBattlePayItem(self:GetBagAndSlot()))
 end
 local inventorySlots = _G.CreateObjectPool(SlotFactory, SlotReset)
 inventorySlots.frameTemplate = "ContainerFrameItemButtonTemplate"
@@ -191,7 +189,7 @@ bankSlots.mixin = BankSlotMixin
 
 function private.UpdateSlots(bagID)
     Inventory:debug("private.UpdateSlots", bagID)
-    for slotIndex = 1, _G.GetContainerNumSlots(bagID) do
+    for slotIndex = 1, C_Container.GetContainerNumSlots(bagID) do
         local slot = private.GetSlot(bagID, slotIndex)
         if slot then
             slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
@@ -239,10 +237,10 @@ function private.GetSlot(bagID, slotIndex)
 end
 
 function private.GetFirstFreeSlot(bagID)
-    if _G.GetContainerNumFreeSlots(bagID) > 0 then
-        local numSlots = _G.GetContainerNumSlots(bagID)
+    if C_Container.GetContainerNumFreeSlots(bagID) > 0 then
+        local numSlots = C_Container.GetContainerNumSlots(bagID)
         for slotIndex = 1, numSlots do
-            if not _G.GetContainerItemLink(bagID, slotIndex) then
+            if not C_Container.GetContainerItemLink(bagID, slotIndex) then
                 return slotIndex
             end
         end
@@ -269,9 +267,9 @@ end
 private.SearchItemsForBag = SearchItemsForBag
 
 local mainBags = {
-    [_G.BACKPACK_CONTAINER] = _G.BACKPACK_TOOLTIP,
-    [_G.BANK_CONTAINER] = _G.BANK,
-    [_G.REAGENTBANK_CONTAINER] = _G.REAGENT_BANK,
+    [BagIndex.Backpack] = _G.BACKPACK_TOOLTIP,
+    [BagIndex.Bank] = _G.BANK,
+    [BagIndex.Reagentbank] = _G.REAGENT_BANK,
 }
 local BagSlotMixin = {}
 function BagSlotMixin:Init(bagID)
@@ -302,8 +300,13 @@ function BagSlotMixin:Init(bagID)
 
     Skin.FrameTypeItemButton(self)
     if self.isBag then
-        if self.bagType == "main" then
+        if bagID >= BagIndex.Backpack and bagID <= _G.NUM_BAG_SLOTS then
             self.inventorySlot = "Bag"..(bagID - 1).."Slot"
+
+            self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
+        elseif bagID == BagIndex.ReagentBag then
+            local slotID = bagID - _G.NUM_BAG_SLOTS
+            self.inventorySlot = "Bag"..slotID
 
             self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
         else
@@ -341,7 +344,7 @@ function BagSlotMixin:Update()
                 self.tooltipText = _G.BANK_BAG_PURCHASE
             end
         else
-            self.tooltipText = _G.EQUIP_CONTAINER
+            self.tooltipText = (self:GetID() == 5) and _G.EQUIP_CONTAINER_REAGENT or _G.EQUIP_CONTAINER
         end
     else
         self.tooltipText = mainBags[self:GetID()]
@@ -366,7 +369,7 @@ function BagSlotMixin:OnEnter()
         _G.GameTooltip:SetText(self.tooltipText, 1.0, 1.0, 1.0)
     end
 
-    local freeSlots = _G.GetContainerNumFreeSlots(self:GetID())
+    local freeSlots = C_Container.GetContainerNumFreeSlots(self:GetID())
     local text = _G.NUM_FREE_SLOTS:format(freeSlots)
     if freeSlots == 0 then
         _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)

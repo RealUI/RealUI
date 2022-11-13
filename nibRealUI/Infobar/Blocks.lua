@@ -1879,6 +1879,7 @@ function Infobar:CreateBlocks()
     end
 
     do -- Bag space
+        local C_Container = RealUI.C_Container
         LDB:NewDataObject("bags", {
             name = _G.BAGSLOTTEXT,
             type = "RealUI",
@@ -1895,10 +1896,10 @@ function Infobar:CreateBlocks()
                 local freeSlots, totalSlots = 0, 0
 
                 -- Cycle through bags
-                for bagID = _G.BACKPACK_CONTAINER, _G.NUM_BAG_SLOTS do
-                    local slots, slotsTotal = _G.GetContainerNumFreeSlots(bagID), _G.GetContainerNumSlots(bagID)
+                for bagID = RealUI.Enum.BagIndex.Backpack, _G.NUM_BAG_SLOTS do
+                    local slots, slotsTotal = C_Container.GetContainerNumFreeSlots(bagID), C_Container.GetContainerNumSlots(bagID)
                     if ( bagID >= 1 ) then  -- Extra bag
-                        local bagLink = _G.GetInventoryItemLink("player", _G.ContainerIDToInventoryID(bagID))
+                        local bagLink = _G.GetInventoryItemLink("player", C_Container.ContainerIDToInventoryID(bagID))
                         if bagLink then
                             freeSlots = freeSlots + slots
                             totalSlots = totalSlots + slotsTotal

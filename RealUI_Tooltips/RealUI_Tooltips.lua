@@ -361,8 +361,8 @@ end)
 
 do -- AddDynamicInfo, ClearDynamicInfo
     local maxAge, quickRefresh = 600, 10
-    local ItemWeaponSubclass = RealUI.Enum.ItemWeaponSubclass
-    local ItemArmorSubclass = RealUI.Enum.ItemArmorSubclass
+    local ItemWeaponSubclass = _G.Enum.ItemWeaponSubclass
+    local ItemArmorSubclass = _G.Enum.ItemArmorSubclass
     local cache = {}
 
     local function IsCacheFresh(guid)

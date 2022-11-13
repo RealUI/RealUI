@@ -7,6 +7,7 @@ local _, private = ...
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
 local L = RealUI.L
+local C_Container = RealUI.C_Container
 
 local menu do
     local MenuFrame = RealUI:GetModule("MenuFrame")
@@ -226,7 +227,7 @@ do
     end
 end
 
-local ItemClass = RealUI.Enum.ItemClass
+local ItemClass = _G.Enum.ItemClass
 
 private.filterList = {}
 tinsert(private.filterList, {
@@ -246,8 +247,8 @@ tinsert(private.filterList, {
     name = _G.BAG_FILTER_JUNK,
     rank = 0,
     filter = function(slot)
-        local _, _, _, quality, _, _, _, _, noValue = _G.GetContainerItemInfo(slot:GetBagAndSlot())
-        return quality == _G.Enum.ItemQuality.Poor and not noValue
+        local itemInfo = C_Container.GetContainerItemInfo(slot:GetBagAndSlot())
+        return itemInfo.quality == _G.Enum.ItemQuality.Poor and not itemInfo.hasNoValue
     end,
 })
 
@@ -275,7 +276,7 @@ tinsert(private.filterList, {
     name = (":"):split(_G.EQUIPMENT_SETS),
     rank = 20,
     filter = function(slot)
-        return _G.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
+        return C_Container.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
     end,
 })
 

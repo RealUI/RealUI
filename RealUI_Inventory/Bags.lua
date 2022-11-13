@@ -16,6 +16,7 @@ local Color = Aurora.Color
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
 local L = RealUI.L
+local C_Container = RealUI.C_Container
 
 local BagMixin do
     local HEADER_SPACE = 20
@@ -279,7 +280,7 @@ end
 function MainBagMixin:GetNumFreeSlots()
     local totalFree, freeSlots, bagFamily = 0
     for k, bagID in self:IterateBagIDs() do
-        freeSlots, bagFamily = _G.GetContainerNumFreeSlots(bagID)
+        freeSlots, bagFamily = C_Container.GetContainerNumFreeSlots(bagID)
         if bagFamily == 0 then
             totalFree = totalFree + freeSlots
         end
@@ -359,17 +360,6 @@ function InventoryBagMixin:Init()
     self:RegisterEvent("QUEST_ACCEPTED")
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
     self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
-end
-function InventoryBagMixin:OnEvent(event, ...)
-    if event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
-        for tag, bag in next, self.bags do
-            for _, slot in ipairs(bag.slots) do
-                slot:UpdateItemUpgradeIcon()
-            end
-        end
-    else
-        MainBagMixin.OnEvent(self, event, ...)
-    end
 end
 function InventoryBagMixin:OnShow()
     MainBagMixin.OnShow(self)
@@ -577,12 +567,12 @@ local bagInfo = {
     main = {
         name = "RealUIInventory",
         mixin = InventoryBagMixin,
-        bagIDs = {0, 1, 2, 3, 4}, -- BACKPACK_CONTAINER through NUM_BAG_SLOTS
+        bagIDs = {0, 1, 2, 3, 4, 5}, -- BACKPACK_CONTAINER through NUM_TOTAL_EQUIPPED_BAG_SLOTS
     },
     bank = {
         name = "RealUIBank",
         mixin = BankBagMixin,
-        bagIDs = {-1, 5, 6, 7, 8, 9, 10, 11, -3}, -- BANK_CONTAINER, (NUM_BAG_SLOTS + 1) through (NUM_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
+        bagIDs = {-1, 6, 7, 8, 9, 10, 11, -3}, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
     },
 }
 local function CreateBag(bagType)
@@ -710,7 +700,7 @@ local function CreateBag(bagType)
             _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
             if _G.IsReagentBankUnlocked() then
                 _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
-                local freeSlots = _G.GetContainerNumFreeSlots(_G.REAGENTBANK_CONTAINER)
+                local freeSlots = C_Container.GetContainerNumFreeSlots(_G.REAGENTBANK_CONTAINER)
 
                 local text = _G.NUM_FREE_SLOTS:format(freeSlots)
                 if freeSlots == 0 then

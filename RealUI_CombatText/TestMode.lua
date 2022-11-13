@@ -1,7 +1,7 @@
 local _, private = ...
 
 local CombatText = private.CombatText
-local Damageclass = _G.RealUI.Enum.Damageclass
+local Damageclass = _G.Enum.Damageclass
 
 local GetEvent, isSpamming
 local function InitTest()
