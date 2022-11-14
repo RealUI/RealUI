@@ -38,7 +38,7 @@ Enum.BagIndex = {
 }
 RealUI.Enum = Enum
 
--- C_Container added in 10.0.2
+-- C_Container expanded in 10.0.2
 local C_Container = {
     GetContainerNumFreeSlots = _G.GetContainerNumFreeSlots,
     GetContainerNumSlots = _G.GetContainerNumSlots,
@@ -74,7 +74,7 @@ local C_Container = {
 
     IsBattlePayItem = _G.IsBattlePayItem,
 }
-RealUI.C_Container = RealUI.isPatch and _G.C_Container or C_Container
+RealUI.C_Container = _G.C_Container.GetContainerNumFreeSlots and _G.C_Container or C_Container
 
 
 ----====####$$$$%%%%%$$$$####====----
