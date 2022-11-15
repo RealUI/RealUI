@@ -97,6 +97,9 @@ local IGNORE_EVENT = {
     SPELL_CAST_SUCCESS = true,
     SPELL_CAST_FAILED = true,
 
+    SPELL_EMPOWER_START = true,
+    SPELL_EMPOWER_END = true,
+
     ENCHANT_APPLIED = true,
     ENCHANT_REMOVED = true,
 

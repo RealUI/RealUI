@@ -111,6 +111,17 @@ function eventPrefix.SPELL(eventInfo, ...)
     end
 end
 
+function eventPrefix.SPELL_EMPOWER(eventInfo, ...)
+    eventInfo.spellID, eventInfo.spellName = ...
+
+    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = icon
+
+    if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
+        private.AddEvent(eventInfo)
+    end
+end
+
 function eventPrefix.SPELL_PERIODIC(eventInfo, ...)
     eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
 
