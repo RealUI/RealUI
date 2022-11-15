@@ -80,6 +80,7 @@ local function GetCurrencyIDByIndex(index)
 end
 
 local function SetUpHooks()
+    --[[
     private.AddHook("SetCurrencyByID", function(self, currencyID, quantity)
         AddTooltipInfo(self, currencyID, not _G.MerchantMoneyInset:IsMouseOver())
     end)
@@ -110,6 +111,7 @@ local function SetUpHooks()
             AddTooltipInfo(self, tonumber(id), true)
         end
     end)
+    ]]
 end
 
 

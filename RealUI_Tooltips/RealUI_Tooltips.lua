@@ -9,7 +9,7 @@ local Color = Aurora.Color
 
 -- RealUI --
 local RealUI = _G.RealUI
-local FramePoint = RealUI:GetModule("FramePoint")
+--local FramePoint = RealUI:GetModule("FramePoint")
 local round = RealUI.Round
 
 local Tooltips = RealUI:NewModule("Tooltips", "AceEvent-3.0")
@@ -55,27 +55,23 @@ local function GetUnit(self)
     return unit or "mouseover"
 end
 local function GetUnitColor(unit)
-    local r, g, b
+    local color
     if _G.UnitPlayerControlled(unit) then
         local _, class = _G.UnitClass(unit)
-        r, g, b = _G.CUSTOM_CLASS_COLORS[class]:GetRGB()
+        color = _G.CUSTOM_CLASS_COLORS[class]
     elseif _G.UnitIsTapDenied(unit) then
-        r, g, b = Color.gray:GetRGB()
+        color = Color.gray
     else
         local reaction = _G.UnitReaction(unit, "player")
         if reaction then
-            r = _G.FACTION_BAR_COLORS[reaction].r
-            g = _G.FACTION_BAR_COLORS[reaction].g
-            b = _G.FACTION_BAR_COLORS[reaction].b
+            color = _G.FACTION_BAR_COLORS[reaction]
         else
-            r = 1.0
-            g = 1.0
-            b = 1.0
+            color = Color.white
         end
     end
 
-    --print("unit color", r, g, b)
-    return r, g, b
+    --print("unit color", color:GetRGB())
+    return color
 end
 local function GetUnitName(unit)
     local unitName, server = _G.UnitName(unit)
@@ -191,88 +187,107 @@ end
 local AddDynamicInfo, ClearDynamicInfo
 local factionIcon = {
     Alliance = {
-        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
-        coords = {0.693359375, 0.748046875, 0.603515625, 0.732421875}
+        texture = "pvpqueue-sidebar-honorbar-badge-alliance",
+        width = 32,
+        height = 38,
     },
     Horde = {
-        texture = [[Interface\PVPFrame\PVP-Conquest-Misc]],
-        coords = {0.638671875, 0.693359375, 0.603515625, 0.732421875},
+        texture = "pvpqueue-sidebar-honorbar-badge-horde",
+        width = 32,
+        height = 38,
     },
     Neutral = {
-        texture = [[Interface\PVPFrame\TournamentOrganizer]],
-        coords = {0.2529296875, 0.3154296875, 0.22265625, 0.298828125},
+        texture = "UI-HUD-UnitFrame-Player-PVP-FFAIcon",
+        width = 28,
+        height = 44,
     },
 }
-private.AddHook("OnTooltipSetUnit", function(self)
-    Tooltips:debug("--- OnTooltipSetUnit ---")
-    local unit = GetUnit(self)
-    if not _G.UnitExists(unit) then return end
-    Tooltips:debug("unit:", unit)
 
-    if not self.factionIcon then
-        self.factionIcon = self:CreateTexture(nil, "BORDER")
-        self.factionIcon:SetPoint("CENTER", _G.GameTooltip, "LEFT", 0, 0)
+local follow = {
+    args = true,
+    lines = true,
+}
+local function PrintDataArgs(note, data, isRec)
+    if not isRec then
+        print(note)
+        note = "data"
     end
 
-    local faction =  _G.UnitFactionGroup(unit)
-    if _G.UnitIsPVP(unit) then
-        local icon = factionIcon[faction or "Neutral"]
-        self.factionIcon:SetTexture(icon.texture)
-        self.factionIcon:SetTexCoord(icon.coords[1], icon.coords[2], icon.coords[3], icon.coords[4])
-        self.factionIcon:SetSize(32, 38)
-        self.factionIcon:Show()
-    else
-        self.factionIcon:Hide()
-    end
-
-    _G.GameTooltipTextLeft1:SetText(GetUnitName(unit))
-    _G.GameTooltipTextLeft1:SetTextColor(GetUnitColor(unit))
-
-    if _G.UnitIsPlayer(unit) then -- guild
-        local unitGuild, unitRank = _G.GetGuildInfo(unit)
-        if unitGuild then
-            _G.GameTooltipTextLeft2:SetFormattedText("|cffffffb3<%s> |cff00E6A8%s|r", unitGuild, unitRank)
+    for k, v in next, data do
+        print("    "..note, k, v)
+        if follow[k] then
+            PrintDataArgs("    "..k, v, true)
         end
     end
+end
 
-    local previousLine = 1
-    local classification = GetUnitClassification(unit)
-    if classification then
-        for i = previousLine + 1, self:NumLines() do
-            local tiptext = _G["GameTooltipTextLeft"..i]
-            local linetext = tiptext:GetText()
+local LineTypeEnums = _G.Enum.TooltipDataLineType
+local TooltipTypeEnums = _G.Enum.TooltipDataType
 
-            if linetext and linetext:find(_G.LEVEL) then
-                tiptext:SetText(classification)
-                previousLine = i
-                break
+_G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.UnitName, function(tooltip, lineData)
+    local unitToken = lineData.unitToken
+    if unitToken then
+        lineData.leftText = GetUnitName(unitToken)
+        lineData.leftColor = GetUnitColor(unitToken)
+
+        tooltip._unitToken = unitToken
+    end
+end)
+_G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lineData)
+    --PrintDataArgs("AddTooltipPostCall:Unit", lineData)
+    if tooltip._unitToken then
+        local unitToken = tooltip._unitToken
+        if tooltip:NumLines() == 1 then
+            if _G.UnitIsPlayer(unitToken) then
+                local unitGuild, unitRank = _G.GetGuildInfo(unitToken)
+                if unitGuild then
+                    lineData.leftText = ("|cffffffb3<%s> |cff00E6A8%s|r"):format(unitGuild, unitRank)
+                end
+            end
+        end
+
+        local classification = GetUnitClassification(unitToken)
+        if classification then
+            if lineData.leftText:find(_G.LEVEL) then
+                lineData.leftText = classification
             end
         end
     end
+end)
+_G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Unit, function(tooltip, tooltipData)
+    if not tooltip.factionIcon then
+        tooltip.factionIcon = tooltip:CreateTexture(nil, "BORDER")
+        tooltip.factionIcon:SetPoint("CENTER", tooltip, "LEFT", 0, 0)
+    end
 
-    private.AddObjectiveProgress(self, unit, previousLine)
+    local unitToken = tooltip._unitToken
+    if not unitToken then return end
 
-    local unittarget = unit.."target"
-    if _G.UnitExists(unittarget) then
+    if _G.UnitIsPVP(unitToken) then
+        local icon = factionIcon[_G.UnitFactionGroup(unitToken) or "Neutral"]
+        tooltip.factionIcon:SetAtlas(icon.texture)
+        tooltip.factionIcon:SetSize(icon.width, icon.height)
+        tooltip.factionIcon:Show()
+    end
+
+    --private.AddObjectiveProgress(tooltip, unitToken, previousLine)
+
+    local unitTarget = unitToken.."target"
+    if _G.UnitExists(unitTarget) then
         local text
-        if _G.UnitIsUnit(unittarget, "player") then
+        if _G.UnitIsUnit(unitTarget, "player") then
             text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
         else
-            text = GetUnitName(unittarget)
+            text = GetUnitName(unitTarget)
         end
 
-        _G.GameTooltip:AddDoubleLine(_G.TARGET, text, normalFont.r, normalFont.g, normalFont.b, GetUnitColor(unittarget))
+        _G.GameTooltip_AddColoredDoubleLine(tooltip, _G.TARGET, text, normalFont, GetUnitColor(unitTarget))
     end
+end)
 
-    AddDynamicInfo(unit, _G.UnitIsPlayer(unit))
 
-    if _G.UnitIsDeadOrGhost(unit) then
-        _G.GameTooltipStatusBar:Hide()
-    end
-end, true)
-
-private.AddHook("OnTooltipSetItem", function(self)
-    local _, link = self:GetItem()
+_G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
+    local _, link = tooltip:GetItem()
     if Tooltips.db.global.showTransmog and link then
         local itemAppearanceID, itemModifiedAppearanceID = _G.C_TransmogCollection.GetItemInfo(link)
         if itemAppearanceID and itemModifiedAppearanceID then
@@ -281,7 +296,7 @@ private.AddHook("OnTooltipSetItem", function(self)
                 if canCollect then
                     local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID)
                     if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
-                        self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                        _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR)
                     else
                         local slotID = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
                         local transmogLocation = _G.TransmogUtil.CreateTransmogLocation(slotID, _G.Enum.TransmogType.Appearance, _G.Enum.TransmogModification.Main)
@@ -289,33 +304,53 @@ private.AddHook("OnTooltipSetItem", function(self)
                         if sources then
                             for i, source in next, sources do
                                 if source.isCollected then
-                                    self:AddLine(_G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                                    _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR)
                                     break
                                 end
                             end
                         end
                     end
                 else
-                    self:AddLine(_G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR:GetRGB())
+                    _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR)
                 end
             end
         end
     end
+end)
+
+--[[
+private.AddHook("OnTooltipSetUnit", function(self)
+    Tooltips:debug("--- OnTooltipSetUnit ---")
+    local unit = GetUnit(self)
+    if not _G.UnitExists(unit) then return end
+    Tooltips:debug("unit:", unit)
+
+
+    private.AddObjectiveProgress(self, unit, previousLine)
+
+    AddDynamicInfo(unit, _G.UnitIsPlayer(unit))
+
+    if _G.UnitIsDeadOrGhost(unit) then
+        _G.GameTooltipStatusBar:Hide()
+    end
 end, true)
 
+]]
+
 local frameColor = Aurora.Color.frame
-private.AddHook("OnTooltipCleared", function(self)
-    if self.factionIcon then
-        self.factionIcon:Hide()
+private.AddHook("OnTooltipCleared", function(tooltip)
+    tooltip._unitToken = nil
+    if tooltip.factionIcon then
+        tooltip.factionIcon:Hide()
     end
 
     ClearDynamicInfo()
-    self._id = nil
-    self.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
-
+    tooltip._id = nil
+    tooltip.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end, true)
 
 
+--[[
 local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
 tooltipAnchor:SetSize(50, 50)
 local pollingRate, tooltipTicker = 0.05
@@ -353,11 +388,7 @@ function Tooltips:PositionAnchor()
         FramePoint:RestorePosition(Tooltips)
     end
 end
-
-_G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
-    tooltip:ClearAllPoints()
-    tooltip:SetPoint(Tooltips.db.global.position.point, tooltipAnchor)
-end)
+]]
 
 do -- AddDynamicInfo, ClearDynamicInfo
     local maxAge, quickRefresh = 600, 10
@@ -692,6 +723,7 @@ end
 function Tooltips:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
 
+    --[[
     FramePoint:RegisterMod(self)
     FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
     Tooltips:PositionAnchor()
@@ -708,7 +740,7 @@ function Tooltips:OnInitialize()
     if self.db.global.multiTip then
         private.SetupMultiTip()
     end
-
+    ]]
     for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
         private.HookTooltip(tooltip)
     end
