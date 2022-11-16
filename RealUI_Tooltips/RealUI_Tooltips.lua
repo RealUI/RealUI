@@ -10,7 +10,7 @@ local Color = Aurora.Color
 -- RealUI --
 local RealUI = _G.RealUI
 --local FramePoint = RealUI:GetModule("FramePoint")
-local round = RealUI.Round
+--local round = RealUI.Round
 
 local Tooltips = RealUI:NewModule("Tooltips", "AceEvent-3.0")
 private.Tooltips = Tooltips
@@ -40,6 +40,7 @@ local classificationTypes = {
     worldboss = (" |cffFF0000%s|r"):format(_G.BOSS)
 }
 
+--[[
 local function GetUnit(self)
     Tooltips:debug("GetUnit", self and self:GetName())
     local _, unit = _G.GameTooltip:GetUnit()
@@ -54,6 +55,7 @@ local function GetUnit(self)
 
     return unit or "mouseover"
 end
+]]
 local function GetUnitColor(unit)
     local color
     if _G.UnitPlayerControlled(unit) then
@@ -184,7 +186,7 @@ function private.HookTooltip(tooltip)
     end
 end
 
-local AddDynamicInfo, ClearDynamicInfo
+--local AddDynamicInfo, ClearDynamicInfo
 local factionIcon = {
     Alliance = {
         texture = "pvpqueue-sidebar-honorbar-badge-alliance",
@@ -203,6 +205,7 @@ local factionIcon = {
     },
 }
 
+--[[
 local follow = {
     args = true,
     lines = true,
@@ -220,6 +223,7 @@ local function PrintDataArgs(note, data, isRec)
         end
     end
 end
+]]
 
 local LineTypeEnums = _G.Enum.TooltipDataLineType
 local TooltipTypeEnums = _G.Enum.TooltipDataType
@@ -344,13 +348,13 @@ private.AddHook("OnTooltipCleared", function(tooltip)
         tooltip.factionIcon:Hide()
     end
 
-    ClearDynamicInfo()
+    --ClearDynamicInfo()
     tooltip._id = nil
     tooltip.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end, true)
 
 
---[[
+--[=[
 local tooltipAnchor = _G.CreateFrame("Frame", "RealUI_TooltipsAnchor", _G.UIParent)
 tooltipAnchor:SetSize(50, 50)
 local pollingRate, tooltipTicker = 0.05
@@ -388,7 +392,6 @@ function Tooltips:PositionAnchor()
         FramePoint:RestorePosition(Tooltips)
     end
 end
-]]
 
 do -- AddDynamicInfo, ClearDynamicInfo
     local maxAge, quickRefresh = 600, 10
@@ -718,6 +721,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
         updateTime = nil
     end
 end
+]=]
 
 
 function Tooltips:OnInitialize()
