@@ -1,5 +1,5 @@
 ## Interface: 100000
-## Title: nibRealUI Config
+## Title: RealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
 ## Version: 2.3.4

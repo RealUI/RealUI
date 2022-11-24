@@ -1,5 +1,5 @@
 ## Interface: 100000
-## Title: nibRealUI Dev
+## Title: RealUI Dev
 ## Notes: Development assistant for RealUI
 ## Version: 2.3.4
 ## LoadWith: RealUI_Bugs
