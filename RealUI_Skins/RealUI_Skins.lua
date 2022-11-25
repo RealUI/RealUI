@@ -235,7 +235,7 @@ function private.OnLoad()
         local BarberShopFrame = _G.BarberShopFrame
         local CharCustomizeFrame = _G.CharCustomizeFrame
 
-        BarberShopFrame.Sexes:SetPoint("TOP", CharCustomizeFrame, 0, -27)
+        BarberShopFrame.BodyTypes:SetPoint("TOP", CharCustomizeFrame, 0, -27)
         BarberShopFrame.CancelButton:SetPoint("BOTTOMLEFT", CharCustomizeFrame, 30, 15)
         -- BarberShopFrame.ResetButton - Anchored to CancelButton
         BarberShopFrame.AcceptButton:SetPoint("BOTTOMRIGHT", CharCustomizeFrame, -30, 15)
