@@ -55,9 +55,6 @@ function ItemSlotMixin:OnLoad()
         self:SetScript("OnClick", nil)
     else
         self:HookScript("OnClick", self.OnClickHook)
-        self:HookScript("OnDragStart", function(...)
-            print("OnDragStart", ...)
-        end)
     end
 end
 function ItemSlotMixin:Update()
