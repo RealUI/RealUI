@@ -47,12 +47,14 @@ function private.SellJunk()
             slot.sellPrice = nil
             slot.JunkIcon:Hide()
 
-            _G.UseContainerItem(slot:GetBagAndSlot())
+            _G.C_Container.UseContainerItem(slot:GetBagAndSlot())
         end
     end
 
-    local money = _G.GetMoneyString(bag.profit, true)
-    _G.print(_G.AMOUNT_RECEIVED_COLON, money)
+    if bag.profit > 0 then
+        local money = _G.GetMoneyString(bag.profit, true)
+        _G.print(_G.AMOUNT_RECEIVED_COLON, money)
+    end
 end
 function private.CalculateJunkProfit(isAtMerchant)
     local bag = Inventory.main.bags.junk
