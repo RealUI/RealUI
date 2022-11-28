@@ -34,6 +34,9 @@ local function SlotReset(pool, slot)
         slot.cancel()
     end
     slot.item = nil
+    if not slot.location then
+        slot.location = _G.ItemLocation:CreateEmpty()
+    end
 
     local bagID, slotIndex = slot:GetBagAndSlot()
     if Inventory.main.new[bagID] then
@@ -43,11 +46,10 @@ local function SlotReset(pool, slot)
     if Inventory.db.char.junk[bagID] then
         Inventory.db.char.junk[bagID][slotIndex] = nil
     end
-    slot:Clear()
 end
 
 --[[ Item Slots ]]--
-local ItemSlotMixin = _G.CreateFromMixins(_G.ItemLocationMixin)
+local ItemSlotMixin = {}
 function ItemSlotMixin:OnLoad()
     if self.isTainted then
         self:SetScript("OnClick", nil)
@@ -91,7 +93,7 @@ function ItemSlotMixin:Update()
         questTexture:Hide()
     end
 
-    self:UpdateItemCooldown()
+    self:UpdateCooldown()
     self.readable = itemInfo.isReadable
 
     if self == _G.GameTooltip:GetOwner() then
@@ -100,7 +102,7 @@ function ItemSlotMixin:Update()
 
     self:UpdateItemContext()
 end
-function ItemSlotMixin:UpdateItemCooldown()
+function ItemSlotMixin:UpdateCooldown()
     local cooldown = _G[self:GetName().."Cooldown"]
     _G[self:GetName().."Cooldown"]:Hide()
 
@@ -134,6 +136,9 @@ function ItemSlotMixin:GetItemType()
 end
 function ItemSlotMixin:GetBagType()
     return private.GetBagTypeForBagID(self:GetBagAndSlot())
+end
+function ItemSlotMixin:GetBagAndSlot()
+	return self.location:GetBagAndSlot()
 end
 function ItemSlotMixin:SplitStack(split)
     local bagID, slotIndex = self:GetBagAndSlot()
@@ -206,8 +211,8 @@ function private.GetSlot(bagID, slotIndex)
     local slots = private.GetSlotTypeForBag(bagID)
 
     for slot in slots:EnumerateActive() do
-        if slot:IsEqualToBagAndSlot(bagID, slotIndex) then
-            if slot:IsValid() then
+        if slot.location:IsEqualToBagAndSlot(bagID, slotIndex) then
+            if slot.location:IsValid() then
                 if slot.isTainted and not _G.InCombatLockdown() then
                     -- We're out of combat, excise tainted slot and create a new one
                     slots.numActiveObjects = slots.numActiveObjects - 1
@@ -225,10 +230,10 @@ function private.GetSlot(bagID, slotIndex)
 
     local slot = slots:Acquire()
     if slot then
-        slot:SetBagAndSlot(bagID, slotIndex)
-        if slot:IsValid() then
+        slot.location:SetBagAndSlot(bagID, slotIndex)
+        if slot.location:IsValid() then
             slot:SetID(slotIndex)
-            slot.item = _G.Item:CreateFromItemLocation(slot)
+            slot.item = _G.Item:CreateFromItemLocation(slot.location)
             return slot
         else
             slots:Release(slot)

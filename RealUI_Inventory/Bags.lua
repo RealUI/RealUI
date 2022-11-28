@@ -104,8 +104,8 @@ local BagMixin do
         end
 
 
-        local stackA = _G.C_Item.GetStackCount(a)
-        local stackB = _G.C_Item.GetStackCount(b)
+        local stackA = _G.C_Item.GetStackCount(a.location)
+        local stackB = _G.C_Item.GetStackCount(b.location)
         if stackA ~= stackB then
             return stackA > stackB
         end
@@ -314,7 +314,7 @@ function MainBagMixin:OnEvent(event, ...)
     elseif event == "BAG_UPDATE_COOLDOWN" then
         for tag, bag in next, self.bags do
             for _, slot in ipairs(bag.slots) do
-                slot:UpdateItemCooldown()
+                slot:UpdateCooldown()
             end
         end
     elseif event == "INVENTORY_SEARCH_UPDATE" then
