@@ -7,7 +7,7 @@ local _, private = ...
 local RealUI = _G.RealUI
 local C_Container = RealUI.C_Container
 
-local Inventory = RealUI:NewModule("Inventory", "AceEvent-3.0")
+local Inventory = RealUI:NewModule("Inventory", "AceEvent-3.0", "AceHook-3.0")
 private.Inventory = Inventory
 
 local defaults = {
@@ -29,16 +29,6 @@ function private.Update()
     Inventory:debug("private.Update")
     private.UpdateBags()
     private.CalculateJunkProfit(_G.MerchantFrame:IsShown())
-end
-function private.Toggle(show)
-    Inventory:debug("private.Toggle", show)
-    local main = Inventory.main
-    if show == nil then
-        show = not main:IsShown()
-    end
-
-    main:SetShown(show)
-    Inventory.bank:SetShown(show and Inventory.showBank)
 end
 
 function private.GetBagTypeForBagID(bagID)
@@ -80,29 +70,6 @@ function private.CalculateJunkProfit(isAtMerchant)
     end
     bag.profit = profit
 end
-local function MERCHANT_SHOW(event, ...)
-    local bag = Inventory.main.bags.junk
-    if not bag:IsShown() then return end
-    if #bag.slots == 0 then
-        -- items aren't updated yet, wait a frame.
-        return _G.C_Timer.After(0, MERCHANT_SHOW)
-    end
-
-    private.CalculateJunkProfit(true)
-    if Inventory.db.global.sellJunk then
-        private.SellJunk()
-    else
-        bag.sellJunk:Show()
-    end
-end
-local function MERCHANT_CLOSED(event, ...)
-    local bag = Inventory.main.bags.junk
-
-    bag.sellJunk:Hide()
-    for _, slot in ipairs(bag.slots) do
-        slot.JunkIcon:Hide()
-    end
-end
 
 local settingsVersion = 4
 function private.SanitizeSavedVars(oldVer)
@@ -137,9 +104,6 @@ function Inventory:OnInitialize()
     if self.db.global.version < settingsVersion then
         private.SanitizeSavedVars(self.db.global.version)
     end
-
-    self:RegisterEvent("MERCHANT_SHOW", MERCHANT_SHOW)
-    self:RegisterEvent("MERCHANT_CLOSED", MERCHANT_CLOSED)
 
     private.CreateBags()
     private.CreateFilters()

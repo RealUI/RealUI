@@ -381,19 +381,6 @@ function BankBagMixin:Init()
     }
 
     self:SetPoint("TOPLEFT", 100, -100)
-    self:RegisterEvent("BANKFRAME_OPENED")
-    self:RegisterEvent("BANKFRAME_CLOSED")
-end
-function BankBagMixin:OnEvent(event, ...)
-    if event == "BANKFRAME_OPENED" then
-        Inventory.showBank = true
-        private.Toggle(true)
-    elseif event == "BANKFRAME_CLOSED" then
-        Inventory.showBank = false
-        private.Toggle(false)
-    else
-        MainBagMixin.OnEvent(self, event, ...)
-    end
 end
 function BankBagMixin:OnShow()
     MainBagMixin.OnShow(self)
@@ -408,7 +395,7 @@ end
 function private.UpdateBags()
     Inventory:debug("private.UpdateBags")
     Inventory.main:Update()
-    if Inventory.showBank then
+    if Inventory.atBank then
         Inventory.bank:Update()
     end
 end
