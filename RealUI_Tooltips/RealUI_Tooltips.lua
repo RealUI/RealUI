@@ -289,33 +289,58 @@ _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Unit, function(toolt
     end
 end)
 
-
+local TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK = "|A:common-icon-checkmark:16:16:0:-1|a ".._G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN;
 _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
-    local _, link = tooltip:GetItem()
+    if tooltip:GetOwner():GetParent() == _G.DressUpFrame.OutfitDetailsPanel then
+        return
+    end
+
+    --PrintDataArgs("AddTooltipPostCall:Item", tooltipData)
+    local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
     if Tooltips.db.global.showTransmog and link then
         local itemAppearanceID, itemModifiedAppearanceID = _G.C_TransmogCollection.GetItemInfo(link)
         if itemAppearanceID and itemModifiedAppearanceID then
-            local isInfoReady, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(itemModifiedAppearanceID)
-            if isInfoReady then
-                if canCollect then
-                    local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID)
-                    if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
-                        _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR)
-                    else
-                        local slotID = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
-                        local transmogLocation = _G.TransmogUtil.CreateTransmogLocation(slotID, _G.Enum.TransmogType.Appearance, _G.Enum.TransmogModification.Main)
-                        local sources = _G.C_TransmogCollection.GetAppearanceSources(itemAppearanceID, sourceInfo.categoryID, transmogLocation)
-                        if sources then
-                            for i, source in next, sources do
-                                if source.isCollected then
-                                    _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR)
-                                    break
-                                end
-                            end
+            local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID)
+            if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
+                _G.GameTooltip_AddColoredLine(tooltip, TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK , _G.GREEN_FONT_COLOR)
+            end
+
+            local _, canCollect =_G.CollectionWardrobeUtil.PlayerCanCollectSource(itemModifiedAppearanceID)
+            if not canCollect then
+            --[[if canCollect then
+                -- Blizz shows these tips natively, so we won't worry about them for now
+                local slotID = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
+                local transmogLocation = _G.TransmogUtil.CreateTransmogLocation(slotID, _G.Enum.TransmogType.Appearance, _G.Enum.TransmogModification.Main)
+                local sources = _G.C_TransmogCollection.GetAppearanceSources(itemAppearanceID, sourceInfo.categoryID, transmogLocation)
+                if sources then
+                    local hasSource = false
+                    for i, source in next, sources do
+                        if source.isCollected then
+                            _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR)
+                            hasSource = true
+                            break
                         end
                     end
+
+                    if not hasSource then
+                        _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN , _G.LIGHTBLUE_FONT_COLOR)
+                    end
+                end
+            else]]--
+                local invSlot = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
+
+                _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(itemModifiedAppearanceID)
+                if not canCollect and (invSlot == _G.INVSLOT_MAINHAND or invSlot == _G.INVSLOT_OFFHAND) then
+                    local pairedTransmogID = _G.C_TransmogCollection.GetPairedArtifactAppearance(itemModifiedAppearanceID);
+                    if pairedTransmogID then
+                        _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(pairedTransmogID);
+                    end
+                end
+
+                if canCollect then
+                    _G.GameTooltip_AddErrorLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNUSABLE)
                 else
-                    _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_INVALID_CANNOT_USE , _G.LIGHTBLUE_FONT_COLOR)
+                    _G.GameTooltip_AddErrorLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNCOLLECTABLE)
                 end
             end
         end
