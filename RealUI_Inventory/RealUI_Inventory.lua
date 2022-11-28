@@ -41,9 +41,8 @@ function private.Toggle(show)
     Inventory.bank:SetShown(show and Inventory.showBank)
 end
 
-local NUM_TOTAL_BAG_FRAMES = Inventory.isPatch and 5 or _G.NUM_BAG_SLOTS
 function private.GetBagTypeForBagID(bagID)
-    if bagID >= RealUI.Enum.BagIndex.Backpack and bagID <= NUM_TOTAL_BAG_FRAMES then
+    if bagID >= RealUI.Enum.BagIndex.Backpack and bagID <= _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS then
         return "main"
     else
         return "bank"
