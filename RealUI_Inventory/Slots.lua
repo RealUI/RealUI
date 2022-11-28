@@ -54,7 +54,10 @@ function ItemSlotMixin:OnLoad()
     if self.isTainted then
         self:SetScript("OnClick", nil)
     else
-        self:HookScript("OnClick", self.OnClick)
+        self:HookScript("OnClick", self.OnClickHook)
+        self:HookScript("OnDragStart", function(...)
+            print("OnDragStart", ...)
+        end)
     end
 end
 function ItemSlotMixin:Update()
@@ -103,8 +106,8 @@ function ItemSlotMixin:Update()
     self:UpdateItemContext()
 end
 function ItemSlotMixin:UpdateCooldown()
-    local cooldown = _G[self:GetName().."Cooldown"]
-    _G[self:GetName().."Cooldown"]:Hide()
+    local cooldown = self.Cooldown
+    self.Cooldown:Hide()
 
     local start, duration, enable = C_Container.GetContainerItemCooldown(self:GetBagAndSlot())
     _G.CooldownFrame_Set(cooldown, start, duration, enable)
@@ -142,9 +145,9 @@ function ItemSlotMixin:GetBagAndSlot()
 end
 function ItemSlotMixin:SplitStack(split)
     local bagID, slotIndex = self:GetBagAndSlot()
-    _G.SplitContainerItem(bagID, slotIndex, split)
+    _G.C_Container.SplitContainerItem(bagID, slotIndex, split)
 end
-function ItemSlotMixin:OnClick(button)
+function ItemSlotMixin:OnClickHook(button)
     if button == "RightButton" and _G.IsAltKeyDown() and _G.IsControlKeyDown() then
         private.menu:Open(self)
     end

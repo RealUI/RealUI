@@ -778,7 +778,7 @@ local function CreateBag(bagType)
     function dropTarget:FindSlot()
         local bagID, slotIndex = main:GetFirstFreeSlot()
         if bagID then
-            _G.PickupContainerItem(bagID, slotIndex)
+            _G.C_Container.PickupContainerItem(bagID, slotIndex)
         end
     end
     dropTarget:SetScript("OnMouseUp", dropTarget.FindSlot)
