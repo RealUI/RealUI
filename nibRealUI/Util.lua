@@ -352,6 +352,9 @@ end
 ----====####$$$$%%%%$$$$####====----
 --          Widget Utils          --
 ----====####$$$$%%%%$$$$####====----
+RealUI.UIHider = _G.CreateFrame("Frame")
+RealUI.UIHider:Hide()
+
 function RealUI.SetPixelPoint(frame)
     local point, anchor, relPoint, x, y = frame:GetPoint()
 

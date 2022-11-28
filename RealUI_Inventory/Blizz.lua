@@ -34,6 +34,9 @@ end
 function Inventory:CloseBank()
     self.bank:Hide()
 end
+_G.BankFrame:UnregisterAllEvents()
+_G.BankFrame:SetScript("OnShow", nil)
+_G.BankFrame:SetParent(_G.RealUI.UIHider)
 
 local function MERCHANT_SHOW(event, ...)
     local bag = Inventory.main.bags.junk
