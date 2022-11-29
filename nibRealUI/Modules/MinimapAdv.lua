@@ -1562,7 +1562,7 @@ local function CreateFrames()
                     return active
                 end,
                 func = function(self, arg1, arg2, isChecked)
-                    _G.SetTracking(id, isChecked)
+                    C_Minimap.SetTracking(id, isChecked)
                 end,
                 keepShown = true
             }
