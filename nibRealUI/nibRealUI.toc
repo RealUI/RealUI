@@ -1,8 +1,8 @@
-## Interface: 100000
+## Interface: 100002
 ## Title: RealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
-## Version: 2.3.4
+## Version: 2.3.5
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs Blizzard_WorldMap
 ## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-1.0, LibRangeCheck-2.0, LibWindow-1.1, oUF, Raven

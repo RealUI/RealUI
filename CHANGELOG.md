@@ -1,4 +1,41 @@
-﻿## [2.3.4] ##
+﻿## [2.3.5] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Added ###
+
+  * Support for new Empowered spell events in CombatText
+
+### Changed ###
+
+  * Transmog tips are now a bit more granular
+  * The in-game addon list entries for nibRealUI and nibRealUI_Config have been 
+      changed to RealUI and RealUI Config for better searchablility and
+      conformance. The folder names in the AddOns folder are unchanged at this
+      time.
+
+### Fixed ###
+
+  * The notification banner would scale very large when shown
+  * Some of the smaller minimap frames were still shown
+  * Taint issues when trying to use an item from Inventory
+  * Error when using the barber shop
+  * Auto-sell junk would error
+  * The default bank from would also show when opening the bank
+  * Map coords were out of place
+  * The start menu talent button opened the old talent frame
+  * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
+
+
+
+## [2.3.4] ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -525,6 +562,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
+[2.3.5]: https://github.com/RealUI/RealUI/compare/2.3.4...2.3.5
 [2.3.4]: https://github.com/RealUI/RealUI/compare/2.3.3...2.3.4
 [2.3.3]: https://github.com/RealUI/RealUI/compare/2.3.2...2.3.3
 [2.3.2]: https://github.com/RealUI/RealUI/compare/2.3.1...2.3.2
