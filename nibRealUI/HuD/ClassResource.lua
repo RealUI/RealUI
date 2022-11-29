@@ -331,7 +331,7 @@ local classPowers = {
         max = 5
     },
     WARLOCK = {type = _G.Enum.PowerType.SoulShards, token = "SOUL_SHARDS"},
-    EVOKER = {type = _G.Enum.PowerType.Essence, token = "ESSENCE"},
+    EVOKER = {type = _G.Enum.PowerType.Essence, token = "POWER_TYPE_ESSENCE"},
 }
 function ClassResource:OnInitialize()
     self:debug("OnInitialize")
