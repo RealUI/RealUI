@@ -28,7 +28,7 @@ local powerTextures = {
 }
 
 function ClassResource:GetResources()
-    return self.points and self.points.info, self.bar and self.bar.info
+    return self.points.info, self.bar and self.bar.info
 end
 
 function ClassResource:ForceUpdate()
@@ -269,17 +269,23 @@ function ClassResource:CreateStagger(unitFrame, unit)
 end
 
 function ClassResource:Setup(unitFrame, unit)
+    local isEnabled = ClassResource:IsEnabled()
+
     -- Points
-    if playerClass == "DEATHKNIGHT" then
-        self.points = self:CreateRunes(unitFrame, unit)
+    if isEnabled then
+        if playerClass == "DEATHKNIGHT" then
+            self.points = self:CreateRunes(unitFrame, unit)
+        else
+            self.points = self:CreateClassPower(unitFrame, unit)
+        end
     else
-        self.points = self:CreateClassPower(unitFrame, unit)
+        self.points = {}
     end
     self.points.info = {token = power.token, name = _G[power.token]}
 
     -- Bars
     if playerClass == "MONK" then
-        self.bar = self:CreateStagger(unitFrame, unit)
+        self.bar = isEnabled and self:CreateStagger(unitFrame, unit) or {}
         self.bar.info = _G.GetSpellInfo(124255)
     end
 end
@@ -409,4 +415,8 @@ function ClassResource:OnEnable()
 
     CombatFader:RegisterModForFade(MODNAME, "class", "combatfade")
     FramePoint:RegisterMod(self)
+end
+
+function ClassResource:OnDisable()
+    self:debug("OnEnable")
 end

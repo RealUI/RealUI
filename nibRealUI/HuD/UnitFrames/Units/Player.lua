@@ -102,10 +102,7 @@ UnitFrames.player = {
         self.RaidTargetIndicator:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
 
         --[[ Class Resource ]]--
-        local ClassResource = RealUI:GetModule("ClassResource")
-        if ClassResource:IsEnabled() then
-            ClassResource:Setup(self, self.unit)
-        end
+        RealUI:GetModule("ClassResource"):Setup(self, self.unit)
     end,
     health = {
         leftVertex = 1,
