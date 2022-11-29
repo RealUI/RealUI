@@ -564,16 +564,7 @@ function Infobar:CreateBlocks()
                 func = function()
                     if _G.InCombatLockdown() then return end
 
-                    if not _G.PlayerTalentFrame then
-                        _G.TalentFrame_LoadUI()
-                    end
-
-                    if _G.PlayerTalentFrame:IsShown() then
-                        _G.HideUIPanel(_G.PlayerTalentFrame)
-                    else
-                        _G.ShowUIPanel(_G.PlayerTalentFrame)
-                    end
-
+                    _G.ToggleTalentFrame()
                 end,
                 disabled = function( ... )
                     return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
