@@ -294,7 +294,7 @@ function ActionBars:ApplyABSettings(tag)
             }
         end
         local BT4EAB = BT4:GetModule("ExtraActionBar", true)
-        if BT4EAB then BT4EAB:ApplyConfig() end
+        if BT4EAB and BT4EAB:IsEnabled() then BT4EAB:ApplyConfig() end
     end
 
     -- Stance Bar
