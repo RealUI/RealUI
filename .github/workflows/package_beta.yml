@@ -4,19 +4,27 @@ on:
   create:
 
 jobs:
-  package:
+  is_beta:
     if: contains(github.ref, 'beta') == true
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-
     - name: Check
       run: |
         echo ${{ github.event }}
         echo ${{ github.event_name }}
         echo ${{ github.event_path }}
         echo ${{ github.ref }}
+
+    - name: Remove Changelog
+      run: rm -f CHANGELOG.md
+
+  package:
+    needs: is_beta
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
 
     - name: Create Beta Package
       env:

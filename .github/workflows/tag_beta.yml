@@ -1,29 +1,42 @@
 name: Tag Beta
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
 jobs:
-  release:
+  check:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - name: Check for release version
+      uses: actions/github-script@v5
+      id: check
+      with:
+        script: |
+          const { owner, repo } = context.repo
+          const regex = /\d+\.\d+\.\d+/g;
+          if (regex.test(`${{ github.event.head_commit.message }}`)) {
+            const run_id = "${{ github.run_id }}";
+            await github.rest.actions.cancelWorkflowRun({ owner, repo, run_id });
+          } else {
+            return "build"
+          }
+        result-encoding: string
+
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
 
     - name: Run Luacheck
       uses: nebularg/actions-luacheck@v1
       with:
         args: --no-color -q
         annotate: warning
-
-    - name: Check
-      run: |
-        echo ${{ github.event }}
-        echo ${{ github.event_name }}
-        echo ${{ github.event_path }}
-        echo ${{ github.ref }}
 
     - name: Set beta
       id: beta

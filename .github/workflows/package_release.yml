@@ -4,19 +4,24 @@ on:
   create:
 
 jobs:
-  package:
-    if: contains(github.ref, 'beta') != true
+  is_release:
+    if: contains(github.ref, 'beta') == false
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-
     - name: Check
       run: |
         echo ${{ github.event }}
         echo ${{ github.event_name }}
         echo ${{ github.event_path }}
         echo ${{ github.ref }}
+
+  package:
+    needs: is_release
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
 
     - name: Create Release Package
       env:
