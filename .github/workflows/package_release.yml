@@ -21,6 +21,7 @@ jobs:
     - name: Create Release Package
       env:
         CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        WAGO_API_KEY: ${{ secrets.WAGO_API_KEY }}
         WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
         GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
       run: |
