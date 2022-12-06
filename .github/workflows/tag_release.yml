@@ -1,4 +1,4 @@
-name: Monthly Release
+name: Tag Release
 
 on:
   workflow_dispatch:
