@@ -1156,7 +1156,8 @@ function Infobar:CreateBlocks()
                 friendsData.cellGetTooltipText = Friends_GetTooltipText
 
                 -- Battle.net Friends
-                for i = 1, _G.BNGetNumFriends() do
+                local numBNetTotal = _G.BNGetNumFriends()
+                for i = 1, numBNetTotal do
                     local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(i)
                     if accountInfo and accountInfo.gameAccountInfo.isOnline then
                         local gameAccountInfo = accountInfo.gameAccountInfo
@@ -1193,7 +1194,7 @@ function Infobar:CreateBlocks()
                         elseif accountInfo.isDND or gameAccountInfo.isGameBusy then
                             name = PlayerStatus[2] .. name
                         end
-                        name = _G.BNet_GetClientEmbeddedTexture(client, 14, 14, 0, 0) .. name
+                        name = _G.BNet_GetClientEmbeddedAtlas(client, 14, 14, 0, 0) .. name
 
                         -- Difficulty color levels
                         local lvl = tonumber(level)
