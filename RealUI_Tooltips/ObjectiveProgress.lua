@@ -7,12 +7,13 @@ local _, private = ...
 local LOP = _G.LibStub("LibObjectiveProgress-1.0")
 
 local progressFormat = "%s |cFFFFFFFF(+%s%%)|r"
-local progressInfo, challengeData = {}, {}
+local challengeData = {}
 
-function private.AddObjectiveProgress(tooltip, unit, previousLine)
-    local npcID = select(6, ("-"):split(_G.UnitGUID(unit)))
+function private.AddObjectiveProgress(tooltip, lineData)
+    local npcID = select(6, ("-"):split(_G.UnitGUID(tooltip._unitToken) or ""))
     npcID = tonumber(npcID)
-    wipe(progressInfo)
+
+    local weight
 
     local challengeMapID = _G.C_ChallengeMode.GetActiveChallengeMapID()
     if challengeMapID then
@@ -30,51 +31,39 @@ function private.AddObjectiveProgress(tooltip, unit, previousLine)
                 end
             end
 
-            local faction = _G.UnitFactionGroup(unit)
+            local faction = _G.UnitFactionGroup(tooltip._unitToken)
             local _, _, _, _, _, _, _, instanceMapID = _G.GetInstanceInfo()
             local isAlternate = challengeMapID == 234 -- Upper Karazhan
             if instanceMapID == 1822 then -- Siege of Boralus
                 isAlternate = faction == "Horde"
             end
 
-            local weight = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
-            if weight then
-                challengeData[challengeMapID][npcID] = {
-                    weight = weight,
-                    text = _G.ENEMY
-                }
-            end
+            weight = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
         end
-
-        progressInfo[challengeMapID] = challengeData[challengeMapID][npcID]
     else
-        local taskPOIs = _G.C_TaskQuest.GetQuestsForPlayerByMapID(_G.MapUtil.GetDisplayableMapForPlayer())
-        for i, poiData in next, taskPOIs do
-            local weight = LOP:GetNPCWeightByQuest(poiData.questId, npcID)
-            if poiData.inProgress and weight then
-                progressInfo[poiData.questId] = {
-                    weight = weight,
-                    text = _G.C_TaskQuest.GetQuestInfoByQuestID(poiData.questId)
-                }
+        local questID = tooltip._questID
+        weight = LOP:GetNPCWeightByQuest(questID, npcID)
+        if not weight then
+            local questCache = private.questCache
+            if not questCache[questID] then
+                questCache[questID] = {}
             end
-        end
 
-        for id, info in next, progressInfo do
-            for i = previousLine + 1, tooltip:NumLines() do
-                local line = _G["GameTooltipTextLeft" .. i]
-                if line and line:GetText() == info.text then
-                    info.line = line
-                    break
+            local progress = _G.C_TaskQuest.GetQuestProgressBarInfo(questID) or 0
+            if questCache[questID][npcID] then
+                weight = questCache[questID][npcID]
+            else
+                weight = progress - (questCache[questID].progress or progress)
+                if not questCache[questID][npcID] and weight > 0 then
+                    questCache[questID][npcID] = weight
                 end
             end
+
+            questCache[questID].progress = progress
         end
     end
 
-    for id, info in next, progressInfo do
-        if info.line then
-            info.line:SetFormattedText(progressFormat, info.line:GetText(), info.weight)
-        else
-            _G.GameTooltip:AddLine(progressFormat:format(info.text, info.weight))
-        end
+    if weight and weight > 0 then
+        lineData.leftText = progressFormat:format(lineData.leftText, weight)
     end
 end

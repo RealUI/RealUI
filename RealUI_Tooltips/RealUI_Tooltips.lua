@@ -23,6 +23,7 @@ local defaults = {
         showTransmog = true,
         multiTip = true,
         currency = {},
+        questCache = {},
         position = {
             atCursor = false,
             x = -100,
@@ -228,6 +229,16 @@ end
 local LineTypeEnums = _G.Enum.TooltipDataLineType
 local TooltipTypeEnums = _G.Enum.TooltipDataType
 
+_G.TooltipDataProcessor.AddLinePostCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
+    if tooltip._unitToken then
+        tooltip._questID = lineData.id
+    end
+end)
+_G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestObjective, function(tooltip, lineData)
+    if tooltip._unitToken and tooltip._questID then
+        private.AddObjectiveProgress(tooltip, lineData)
+    end
+end)
 _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.UnitName, function(tooltip, lineData)
     local unitToken = lineData.unitToken
     if unitToken then
@@ -238,7 +249,7 @@ _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.UnitName, function(tooltip,
     end
 end)
 _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lineData)
-    --PrintDataArgs("AddTooltipPostCall:Unit", lineData)
+    --PrintDataArgs("AddLinePreCall:None", lineData)
     if tooltip._unitToken then
         local unitToken = tooltip._unitToken
         if tooltip:NumLines() == 1 then
@@ -291,7 +302,8 @@ end)
 
 local TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK = "|A:common-icon-checkmark:16:16:0:-1|a ".._G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN;
 _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
-    if tooltip:GetOwner():GetParent() == _G.DressUpFrame.OutfitDetailsPanel then
+    local owner = tooltip:GetOwner()
+    if (owner and owner.GetParent) and owner:GetParent() == _G.DressUpFrame.OutfitDetailsPanel then
         return
     end
 
@@ -369,6 +381,7 @@ end, true)
 local frameColor = Aurora.Color.frame
 private.AddHook("OnTooltipCleared", function(tooltip)
     tooltip._unitToken = nil
+    tooltip._questID = nil
     if tooltip.factionIcon then
         tooltip.factionIcon:Hide()
     end
@@ -770,6 +783,7 @@ function Tooltips:OnInitialize()
         private.SetupMultiTip()
     end
     ]]
+    private.questCache = self.db.global.questCache
     for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
         private.HookTooltip(tooltip)
     end
