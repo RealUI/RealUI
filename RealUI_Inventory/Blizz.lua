@@ -67,6 +67,7 @@ local bagEvents = {
     [_G.Enum.PlayerInteractionType.TradePartner] = 0,
     [_G.Enum.PlayerInteractionType.Auctioneer] = 0,
     [_G.Enum.PlayerInteractionType.Banker] = 0,
+    [_G.Enum.PlayerInteractionType.Merchant] = 0,
 }
 local bankEvents = {
     [_G.Enum.PlayerInteractionType.Banker] = 0,
