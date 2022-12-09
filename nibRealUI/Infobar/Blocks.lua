@@ -1391,10 +1391,6 @@ function Infobar:CreateBlocks()
     end
 
     do -- Progress Watch
-        local function GetFriendshipReputation(factionID)
-            return _G.C_GossipInfo.GetFriendshipReputation(factionID)
-        end
-
         local C_AzeriteItem = _G.C_AzeriteItem
         local azeriteItem, azeriteItemLocation
         local watchStates = {}
@@ -1466,24 +1462,32 @@ function Infobar:CreateBlocks()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
 
-                local reputationInfo = GetFriendshipReputation(factionID)
-                if reputationInfo then
-                    if reputationInfo.nextThreshold then
-                        minRep, maxRep, curRep = reputationInfo.reactionThreshold, reputationInfo.nextThreshold, reputationInfo.standing
+                local repInfo = _G.C_GossipInfo.GetFriendshipReputation(factionID)
+                local friendshipID = repInfo.friendshipFactionID
+                local hasReward = false
+                Rep.isMajorFaction = false
+
+                if _G.C_Reputation.IsFactionParagon(factionID) then
+                    local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
+                    minRep, maxRep = 0, threshold
+                    curRep = currentValue % threshold
+                    hasReward = hasRewardPending
+                    if hasRewardPending then
+                        curRep = curRep + threshold
+                    end
+                elseif ( _G.C_Reputation.IsMajorFaction(factionID) ) then
+                    local majorFactionData = _G.C_MajorFactions.GetMajorFactionData(factionID)
+                    minRep, maxRep = 0, majorFactionData.renownLevelThreshold
+                    Rep.isMajorFaction = true
+                elseif friendshipID > 0 then
+                    if repInfo.nextThreshold then
+                        minRep, maxRep, curRep = repInfo.reactionThreshold, repInfo.nextThreshold, repInfo.standing
                     else
                         -- max rank, make it look like a full bar
                         minRep, maxRep, curRep = 0, 1, 1
                     end
                     Rep.colorIndex = 5     -- always color friendships green
-                    Rep.factionStandingtext = reputationInfo.text
-                elseif _G.C_Reputation.IsFactionParagon(factionID) then
-                    local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
-                    maxRep = threshold
-                    curRep = currentValue % threshold
-                    if hasRewardPending then
-                        curRep = curRep + threshold
-                    end
-                    return curRep, maxRep, name, hasRewardPending
+                    Rep.factionStandingtext = repInfo.text
                 else
                     if reaction == _G.MAX_REPUTATION_REACTION then
                         -- We're exalted
@@ -1494,7 +1498,7 @@ function Infobar:CreateBlocks()
                 -- Normalize values
                 maxRep = maxRep - minRep
                 curRep = curRep - minRep
-                return curRep, maxRep, name
+                return curRep, maxRep, name, hasReward
             end,
             GetColor = function(Rep)
                 local color = _G.FACTION_BAR_COLORS[Rep.colorIndex]
@@ -1567,7 +1571,7 @@ function Infobar:CreateBlocks()
                 return _G.ARTIFACT_BAR_COLOR:GetRGB()
             end,
             IsValid = function(Art)
-                local isMaxLevel = C_AzeriteItem.IsAzeriteItemAtMaxLevel();
+                local isMaxLevel = C_AzeriteItem.IsAzeriteItemAtMaxLevel()
                 if isMaxLevel then
                     return false
                 end
@@ -2452,8 +2456,8 @@ function Infobar:CreateBlocks()
         local GetFramerate, GetNetStats = _G.GetFramerate, _G.GetNetStats
         local tinsert, tremove = _G.tinsert, _G.tremove
 
-        local PERFORMANCEBAR_LOW_LATENCY = 300;
-        local PERFORMANCEBAR_MEDIUM_LATENCY = 600;
+        local PERFORMANCEBAR_LOW_LATENCY = 300
+        local PERFORMANCEBAR_MEDIUM_LATENCY = 600
 
         local blockText = "%d |cff%s|||r %d"
         local lagFormat = "%s |cff808080(%s)|r"
