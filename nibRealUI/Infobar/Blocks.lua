@@ -1461,6 +1461,7 @@ function Infobar:CreateBlocks()
                 local name, reaction, minRep, maxRep, curRep, factionID = _G.GetWatchedFactionInfo()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
+                Rep.factionID = factionID
 
                 local repInfo = _G.C_GossipInfo.GetFriendshipReputation(factionID)
                 local friendshipID = repInfo.friendshipFactionID
@@ -1528,7 +1529,21 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(" ")
             end,
             OnClick = function(Rep)
-                _G.ToggleCharacter("ReputationFrame")
+                if Rep.isMajorFaction then
+                    --_G.PlayerInteractionFrameManagerMixin:ShowFrame(_G.Enum.PlayerInteractionType.MajorFactionRenown)
+
+                    if not _G.MajorFactionRenownFrame then
+                        _G.MajorFactions_LoadUI()
+                    end
+
+                    _G.HideUIPanel(_G.MajorFactionRenownFrame)
+                    if Rep.factionID > 0 then
+                        _G.EventRegistry:TriggerEvent("MajorFactionRenownMixin.MajorFactionRenownRequest", Rep.factionID)
+                        _G.ShowUIPanel(_G.MajorFactionRenownFrame)
+                    end
+                else
+                    _G.ToggleCharacter("ReputationFrame")
+                end
             end
         }
         watchStates["artifact"] = {
