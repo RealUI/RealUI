@@ -1640,8 +1640,8 @@ end
 local function SetUpMinimapFrame()
     -- Establish Scroll Wheel zoom
     _G.MinimapCompassTexture:Hide()
-    _G.Minimap:SetScript("OnEnter", Minimap_OnEnter)
-    _G.Minimap:SetScript("OnLeave", Minimap_OnLeave)
+    _G.Minimap:HookScript("OnEnter", Minimap_OnEnter)
+    _G.Minimap:HookScript("OnLeave", Minimap_OnLeave)
 
 
     local landingButton = _G.ExpansionLandingPageMinimapButton
