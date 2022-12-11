@@ -114,4 +114,9 @@ function Inventory:OnInitialize()
     private.Update()
 
     self.Update = private.Update
+
+    _G.C_Timer.After(1, function()
+        -- Disable reagent bag tutorial3
+        _G.SetCVarBitfield("closedInfoFrames", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
+    end)
 end
