@@ -3,11 +3,15 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals select tonumber ipairs tinsert
 
+local Inventory = private.Inventory
+
 -- Libs --
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
 -- Shamelessly copied from PTRFeedback_Tooltips
+local LineTypeEnums = _G.Enum.TooltipDataLineType
+local TooltipTypeEnums = _G.Enum.TooltipDataType
 local TooltipTypes = {
     spell = "Spell",
     item = "Item",
@@ -21,15 +25,16 @@ local TooltipTypes = {
 }
 
 local formatString = "%s ID: %d"
+--local formatStringGray = Color.gray:WrapTextInColorCode(formatString)
 local function AddToTooltip(tooltip, tooltipType, tooltipID)
     if not tooltip._id then
         local tooltipText = formatString:format(tooltipType, tooltipID)
-        tooltip:AddLine(tooltipText, Color.gray.r, Color.gray.g, Color.gray.b)
+        _G.GameTooltip_AddColoredLine(tooltip, tooltipText , Color.gray)
         tooltip._id = tooltipID
-        tooltip:Show()
     end
 end
 
+--[[
 local function SetupSpellTooltips()
     local function setAuraTooltipFunction(self, unit, slotNumber, auraType)
         local id = select(10, _G.UnitAura(unit, slotNumber, auraType))
@@ -49,28 +54,21 @@ local function SetupSpellTooltips()
         end
     end, true)
 end
+]]
 
 local function SetupItemTooltips()
-    private.AddHook("OnTooltipSetItem", function(self)
-        local _, link = self:GetItem()
+    _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
+        local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
         if link then
             local id = link:match("item:(%d*)")
-            if (id == "" or id == "0") and _G.TradeSkillFrame ~= nil and _G.TradeSkillFrame:IsVisible() and _G.GetMouseFocus().reagentIndex then
-                local selectedRecipe = _G.TradeSkillFrame.RecipeList:GetSelectedRecipeID()
-                for i = 1, 8 do
-                    if _G.GetMouseFocus().reagentIndex == i then
-                        id = _G.C_TradeSkillUI.GetRecipeReagentItemLink(selectedRecipe, i):match("item:(%d+):") or nil
-                        break
-                    end
-                end
-            end
             if id then
-                AddToTooltip(self, TooltipTypes.item, id)
+                AddToTooltip(tooltip, TooltipTypes.item, id)
             end
         end
-    end, true)
+    end)
 end
 
+--[[
 local function SetupUnitTooltips()
     private.AddHook("OnTooltipSetUnit", function(self)
         if _G.C_PetBattles.IsInBattle() then
@@ -86,15 +84,31 @@ local function SetupUnitTooltips()
         end
     end, true)
 end
+]]
 
 local function SetupQuestTooltips()
-    _G.hooksecurefunc("QuestMapLogTitleButton_OnEnter", function(self)
-        if self.questID then
-            AddToTooltip(_G.GameTooltip, TooltipTypes.quest, self.questID)
+    _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
+        if tooltip._unitToken then
+            tooltip._questID = lineData.id
+        end
+
+        if tooltip._questID then
+            lineData.rightText = formatString:format(TooltipTypes.quest, tooltip._questID)
+            lineData.rightColor = Color.gray
         end
     end)
+    local function QuestTooltipHook(sender, self, questID, isGroup)
+        AddToTooltip(_G.GameTooltip, TooltipTypes.item, questID)
+        _G.GameTooltip:Show()
+    end
+
+    _G.EventRegistry:RegisterCallback("TaskPOI.TooltipShown", QuestTooltipHook, Inventory)
+    _G.EventRegistry:RegisterCallback("QuestPin.OnEnter", QuestTooltipHook, Inventory)
+    _G.EventRegistry:RegisterCallback("QuestMapLogTitleButton.OnEnter", QuestTooltipHook, Inventory)
+    _G.EventRegistry:RegisterCallback("OnQuestBlockHeader.OnEnter", QuestTooltipHook, Inventory)
 end
 
+--[[
 local function SetupAchievementTooltips()
     local frame = _G.CreateFrame("frame")
     frame:RegisterEvent("ADDON_LOADED")
@@ -141,13 +155,14 @@ local function SetupAzeriteTooltips()
         end
     end)
 end
+]]
 
 function private.SetupIDTips()
-    SetupSpellTooltips()
+    --SetupSpellTooltips()
     SetupItemTooltips()
-    SetupUnitTooltips()
+    --SetupUnitTooltips()
     SetupQuestTooltips()
-    SetupAchievementTooltips()
-    SetupCurrencyTooltips()
-    SetupAzeriteTooltips()
+    --SetupAchievementTooltips()
+    --SetupCurrencyTooltips()
+    --SetupAzeriteTooltips()
 end

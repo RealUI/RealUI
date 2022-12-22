@@ -776,13 +776,13 @@ function Tooltips:OnInitialize()
         self:RegisterMessage("CurrencyDBInitialized", private.SetupCurrency)
     end
 
-    if self.db.global.showIDs then
-        private.SetupIDTips()
-    end
     if self.db.global.multiTip then
         private.SetupMultiTip()
     end
     ]]
+    if self.db.global.showIDs then
+        private.SetupIDTips()
+    end
     private.questCache = self.db.global.questCache
     for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
         private.HookTooltip(tooltip)
