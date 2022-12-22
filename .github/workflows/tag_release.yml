@@ -40,7 +40,7 @@ jobs:
         annotate: warning
 
     - name: Set release
-      uses: onemedical/action-general-autotag@main
+      uses: onemedical/action-general-autotag@ff8cadef90081cba864a441fa70be1903cf3f101
       with:
         GITHUB_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
         source_file: "nibRealUI/nibRealUI.toc"
