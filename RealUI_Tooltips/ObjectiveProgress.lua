@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next select tonumber wipe
+-- luacheck: globals next select tonumber wipe max
 
 -- Libs --
 local LOP = _G.LibStub("LibObjectiveProgress-1.0")
@@ -49,7 +49,10 @@ function private.AddObjectiveProgress(tooltip, lineData)
                 questCache[questID] = {}
             end
 
-            local progress = _G.C_TaskQuest.GetQuestProgressBarInfo(questID) or 0
+            local questProgress = _G.GetQuestProgressBarPercent(questID) or 0
+            local taskProgress = _G.C_TaskQuest.GetQuestProgressBarInfo(questID) or 0
+
+            local progress = max(questProgress, taskProgress)
             if questCache[questID][npcID] then
                 weight = questCache[questID][npcID]
             else
