@@ -170,7 +170,7 @@ do
             private.CreateFilterBag(Inventory.bank, filter)
         end
 
-        Inventory:AddFilter(info)
+        Inventory:AddFilter(filter)
         return filter
     end
     function Inventory:CreateCustomFilter(tag, name, fromConfig)
@@ -276,7 +276,11 @@ tinsert(private.filterList, {
     name = (":"):split(_G.EQUIPMENT_SETS),
     rank = 20,
     filter = function(slot)
-        return C_Container.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
+        -- API is bugged, always returns false
+        --local isSet, setList = _G.C_Container.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
+        local bagID, slotIndex = slot:GetBagAndSlot()
+        local isSet = private.equipSetItems[bagID][slotIndex]
+        return isSet
     end,
 })
 

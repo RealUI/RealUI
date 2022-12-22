@@ -249,6 +249,7 @@ function MainBagMixin:Update()
         wipe(bag.slots)
     end
 
+    private.UpdateEquipSetItems()
     for k, bagID in self:IterateBagIDs() do
         private.UpdateSlots(bagID)
     end
