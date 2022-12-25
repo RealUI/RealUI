@@ -151,7 +151,7 @@ local partialEffects = {
     glancing = _G.GLANCING_TRAILER,
     crushing = _G.CRUSHING_TRAILER,
     overheal = _G.TEXT_MODE_A_STRING_RESULT_OVERHEALING:lower(),
-    overkill = _G.TEXT_MODE_A_STRING_RESULT_OVERKILLING :lower(),
+    overkill = _G.TEXT_MODE_A_STRING_RESULT_OVERKILLING:lower(),
     overenergize = _G.TEXT_MODE_A_STRING_RESULT_OVERENERGIZE:lower(),
 }
 local function GetResultString(resisted, blocked, absorbed, glancing, crushing, overhealing, overkill, overenergize)
@@ -293,11 +293,31 @@ function eventSuffix.LEECH(eventInfo, amount, powerType, extraAmount, alternateP
     return true
 end
 
+local eventFormat = "%s %s"
 function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
-    eventInfo.string = _G.ACTION_SPELL_INTERRUPT .. extraSpellName
+    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName)
 
     eventInfo.canMerge = false
     eventInfo.isSticky = true
+    return true
+end
+function eventSuffix.DISPEL(eventInfo, extraSpellId, extraSpellName, extraSpellSchool, auraType)
+    eventInfo.string = _G["ACTION_SPELL_INTERRUPT"..auraType] .. extraSpellName
+
+    eventInfo.canMerge = false
+    return true
+end
+function eventSuffix.DISPEL_FAILED(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
+    eventInfo.string = _G.ACTION_SPELL_DISPEL_FAILED
+
+    eventInfo.canMerge = false
+    eventInfo.isSticky = true
+    return true
+end
+function eventSuffix.STOLEN(eventInfo, extraSpellId, extraSpellName, extraSpellSchool, auraType)
+    eventInfo.string = _G["ACTION_SPELL_STOLEN"..auraType] .. extraSpellName
+
+    eventInfo.canMerge = false
     return true
 end
 
