@@ -1,4 +1,32 @@
-﻿## [2.3.5] ##
+﻿## [2.3.6] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Changed ###
+
+  * Re-enabled objective progress on tooltips
+  * Bags will now auto hide when leaving a merchant
+  * Clicking the Progress block when tracking a renown faction will now open the renown UI
+
+
+### Fixed ###
+
+  * Error when Extra Action Button is disabled in Bartender
+  * Error when changing minimap tracking
+  * Error when viewing the Friends block
+  * Renown factions always showed max rep in the infobar
+  * Tooltips would not show on some minimap blips
+  * Equip sets would be lumped into the regular Equipment filter bag
+  * Missing combat events
+
+
+
+## [2.3.5] ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -31,6 +59,7 @@
   * The default bank from would also show when opening the bank
   * Map coords were out of place
   * The start menu talent button opened the old talent frame
+  * ClassResource would disappear from options if disabled
   * [Various bugs and errors with the UI skin.](https://www.wowinterface.com/downloads/info18589-Aurora.html#changelog)
 
 
@@ -562,6 +591,7 @@
 
 
 [Unreleased]: https://github.com/RealUI/RealUI/compare/main...develop
+[2.3.6]: https://github.com/RealUI/RealUI/compare/2.3.5...2.3.6
 [2.3.5]: https://github.com/RealUI/RealUI/compare/2.3.4...2.3.5
 [2.3.4]: https://github.com/RealUI/RealUI/compare/2.3.3...2.3.4
 [2.3.3]: https://github.com/RealUI/RealUI/compare/2.3.2...2.3.3
