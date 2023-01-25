@@ -1684,7 +1684,7 @@ local function SetUpMinimapFrame()
     _G.MinimapCluster.BorderTop:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
     _G.MinimapCluster.Tracking:Hide()
-    _G.MinimapCluster.MailFrame:ClearAllPoints()
+    _G.MailFrame:ClearAllPoints()
 end
 
 ----------
