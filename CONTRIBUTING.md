@@ -35,43 +35,7 @@ If you would like to contribute code, a [pull request](https://help.github.com/a
   * Make a short but descriptive name.
   * Have a detailed description of what your PR provides and/or what it's trying to solve.
   * Include screenshots and animated GIFs in your pull request whenever applicable.
-  * Code and commits must follow the [Lua](#lua-styleguide) and [Git](#git-commit-messages) styleguides respectively.
+  * Code and commit messages should follow their respective [styleguide](https://github.com/RealUI/RealUI/wiki/Styleguide-reference).
   * Pull requests must pass luacheck in order to be considered for acceptance.
 
-Check out [the wiki](https://github.com/RealUI/RealUI/wiki/Setting-up-RealUI-Dev) on how to set up a testing environment.
-
-
-## Styleguides ##
-
-### Git Commit Messages ###
-
-Commit messages should follow [these guidelines](http://chris.beams.io/posts/git-commit/).
-
-1. [Separate subject from body with a blank line](http://chris.beams.io/posts/git-commit/#separate)
-2. [Limit the subject line to 50 characters](http://chris.beams.io/posts/git-commit/#limit-50)
-3. [Capitalize the subject line](http://chris.beams.io/posts/git-commit/#capitalize)
-4. [Do not end the subject line with a period](http://chris.beams.io/posts/git-commit/#end)
-5. [Use the imperative mood in the subject line](http://chris.beams.io/posts/git-commit/#imperative)
-6. [Wrap the body at 72 characters](http://chris.beams.io/posts/git-commit/#wrap-72)
-7. [Use the body to explain what and why vs. how](http://chris.beams.io/posts/git-commit/#why-not-how)
-
-### Lua Styleguide ###
-
-#### Whitespace ###
-
-* Use four spaces when indenting code blocks
-* Use spaces around operators
-    * `a = 1` instead of `a=1`
-* Use spaces after commas (unless separated by newlines)
-* Do not use spaces at the beginning and end of a table declaration.
-    * `{a = 1, b = 2}` instead of `{ a = 1, b = 2 }`
-* End a file with a new line
-
-### Variables ###
-
-* Use locals instead of globals whenever possible
-* Variable names should generally use [lowerCamelCase](https://en.wikipedia.org/wiki/CamelCase), though functions should be UpperCamelCase.
-* Capitalize initial-isms and acronyms, unless it's the first word, which should be lower-case:
-    * function: `GetUIScale` instead of `getUiScale`
-    * variable: `uiScale` instead of `UiScale`
-* If a variable in not expected to change (eg. a constant), consider using `ALL_CAPS` with an underscore separating each word.
+Check out [the wiki](https://github.com/RealUI/RealUI/wiki/Dev-Environment-Setup) on how to set up a testing/development environment.
