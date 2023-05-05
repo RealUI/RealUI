@@ -8,7 +8,7 @@ end
 
 -- Disable !BugGrabber displays
 for i = 1, _G.GetNumAddOns() do
-    local meta = _G.GetAddOnMetadata(i, "X-BugGrabber-Display")
+    local meta = _G.C_AddOns.GetAddOnMetadata(i, "X-BugGrabber-Display")
     if meta then
         local _, _, _, enabled = _G.GetAddOnInfo(i)
         if enabled then

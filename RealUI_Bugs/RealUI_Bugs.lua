@@ -302,12 +302,12 @@ function errorFrame.ADDON_LOADED(addon)
     end
 
     if versions[addon] then
-        local version = _G.GetAddOnMetadata(addon, "Version")
+        local version = _G.C_AddOns.GetAddOnMetadata(addon, "Version")
         versions[addon] = versions[addon]..version
     end
 
     if addon == "nibRealUI" then
-        coreVersion = _G.GetAddOnMetadata(addon, "Version")
+        coreVersion = _G.C_AddOns.GetAddOnMetadata(addon, "Version")
         coreVersion = "RealUI_Core-"..coreVersion
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
