@@ -1166,7 +1166,7 @@ local isPulseEvent = {
 
 local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0
 local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0
-local currencyId = _G.C_Garrison.GetCurrencyTypes(garrisonTypeWoD)
+
 local categoryInfo = {}
 do -- by nebula
     local frame = _G.CreateFrame("Frame")
@@ -1225,6 +1225,7 @@ local function Garrison_OnEnter(self)
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
     _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
     if _G.C_Garrison.GetLandingPageGarrisonType() == garrisonTypeWoD then
+        local currencyId = _G.C_Garrison.GetCurrencyTypes(garrisonTypeWoD)
         _G.GameTooltip:AddLine(" ")
 
         local currency, amount = _G.GetCurrencyInfo(currencyId)
