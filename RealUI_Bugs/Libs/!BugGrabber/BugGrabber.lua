@@ -60,7 +60,7 @@ local L = {
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
 for i = 1, GetNumAddOns() do
-	local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
+	local meta = C_AddOns.GetAddOnMetadata(i, "X-BugGrabber-Display")
 	if meta then
 		local _, _, _, enabled = GetAddOnInfo(i)
 		if enabled then
@@ -191,9 +191,9 @@ do
 		end
 		-- Then see if we can get some addon metadata
 		if not found and IsAddOnLoaded(object) then
-			found = GetAddOnMetadata(object, "X-Curse-Packaged-Version")
+			found = C_AddOns.GetAddOnMetadata(object, "X-Curse-Packaged-Version")
 			if not found then
-				found = GetAddOnMetadata(object, "Version")
+				found = C_AddOns.GetAddOnMetadata(object, "Version")
 			end
 		end
 		-- Perhaps it's a global object?

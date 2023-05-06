@@ -11,7 +11,7 @@ local debug = RealUI.GetDebug("Core")
 
 local LDS = _G.LibStub("LibDualSpec-1.0")
 
-local version = _G.GetAddOnMetadata(ADDON_NAME, "Version")
+local version = _G.C_AddOns.GetAddOnMetadata(ADDON_NAME, "Version")
 RealUI.verinfo = {strsplit(".", version)}
 for i = 1, 3 do
     RealUI.verinfo[i] = tonumber(RealUI.verinfo[i])
