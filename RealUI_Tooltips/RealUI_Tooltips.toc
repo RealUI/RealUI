@@ -3,6 +3,7 @@
 ## Notes: Useful tooltip mods
 ## Author: Gethe
 ## Version: 2.3.6
+## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibObjectiveProgress-1.0
 ## SavedVariables: RealUI_TooltipsDB

@@ -3,6 +3,7 @@
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe
 ## Version: 2.3.6
+## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibItemUpgradeInfo-1.0, LibSharedMedia-3.0, Masque, nibRealUI_Dev, RealUI_AsianFonts

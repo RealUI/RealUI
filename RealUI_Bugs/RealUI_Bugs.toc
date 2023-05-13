@@ -3,7 +3,7 @@
 ## Notes: Bug catcher
 ## Author: Gethe
 ## Version: 2.3.6
-## IconTexture: Interface\AddOns\RealUI\Media\Logo.blp
+## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: Blizzard_CompactRaidFrames
 ## OptionalDeps: Ace3, LibTextDump-1.0
 ## SavedVariables: RealUI_Storage, RealUI_Debug
