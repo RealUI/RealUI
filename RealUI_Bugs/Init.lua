@@ -1,3 +1,5 @@
+local GetAddOnMetadata = _G.C_AddOns and _G.C_AddOns.GetAddOnMetadata or _G.GetAddOnMetadata
+
 -- Disable other bug catchers
 for i, addon in _G.next, {"!BugGrabber", "!Swatter", "!ImprovedErrorFrame"} do
     local _, _, _, enabled = _G.GetAddOnInfo(addon)
@@ -8,7 +10,7 @@ end
 
 -- Disable !BugGrabber displays
 for i = 1, _G.GetNumAddOns() do
-    local meta = _G.C_AddOns.GetAddOnMetadata(i, "X-BugGrabber-Display")
+    local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
     if meta then
         local _, _, _, enabled = _G.GetAddOnInfo(i)
         if enabled then

@@ -1,6 +1,6 @@
-## Interface: 30400
+## Interface: 30401
 ## Title: BugGrabber
-## Version: v10.0.0
+## Version: v10.1.0
 ## Notes: Grabs bugs for the bug sack.
 ## Notes-deDE: Grabs bugs for the bug sack.
 ## Notes-ruRU: Grabs bugs for the bug sack.

@@ -2,6 +2,7 @@
 local _G = _G
 local type, table, next, tostring, tonumber, print = type, table, next, tostring, tonumber, print
 local debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime = debuglocals, debugstack, table.wipe, IsEncounterInProgress, GetTime
+local GetAddOnMetadata = _G.C_AddOns and _G.C_AddOns.GetAddOnMetadata or _G.GetAddOnMetadata
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space
@@ -60,7 +61,7 @@ local L = {
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
 for i = 1, GetNumAddOns() do
-	local meta = C_AddOns.GetAddOnMetadata(i, "X-BugGrabber-Display")
+	local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
 	if meta then
 		local _, _, _, enabled = GetAddOnInfo(i)
 		if enabled then
@@ -191,9 +192,9 @@ do
 		end
 		-- Then see if we can get some addon metadata
 		if not found and IsAddOnLoaded(object) then
-			found = C_AddOns.GetAddOnMetadata(object, "X-Curse-Packaged-Version")
+			found = GetAddOnMetadata(object, "X-Curse-Packaged-Version")
 			if not found then
-				found = C_AddOns.GetAddOnMetadata(object, "Version")
+				found = GetAddOnMetadata(object, "Version")
 			end
 		end
 		-- Perhaps it's a global object?

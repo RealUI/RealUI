@@ -2,6 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 -- luacheck: globals select tostring next
+local GetAddOnMetadata = _G.C_AddOns and _G.C_AddOns.GetAddOnMetadata or _G.GetAddOnMetadata
 
 local LTD, debugger = _G.LibStub("LibTextDump-1.0"), {}
 local function GetDebugFrame(mod)
@@ -302,12 +303,12 @@ function errorFrame.ADDON_LOADED(addon)
     end
 
     if versions[addon] then
-        local version = _G.C_AddOns.GetAddOnMetadata(addon, "Version")
+        local version = GetAddOnMetadata(addon, "Version")
         versions[addon] = versions[addon]..version
     end
 
     if addon == "nibRealUI" then
-        coreVersion = _G.C_AddOns.GetAddOnMetadata(addon, "Version")
+        coreVersion = GetAddOnMetadata(addon, "Version")
         coreVersion = "RealUI_Core-"..coreVersion
         _G.RealUI_Storage.nibRealUI = {}
         _G.RealUI_Storage.nibRealUI.nibRealUIDB = _G.nibRealUIDB
