@@ -66,7 +66,7 @@ local BagMixin do
         [InventoryType.IndexEquipablespellOffensiveType] = 30,
         [InventoryType.IndexEquipablespellUtilityType] = 30,
         [InventoryType.IndexEquipablespellDefensiveType] = 30,
-        [InventoryType.IndexEquipablespellMobilityType] = 30,
+        [InventoryType.IndexEquipablespellWeaponType] = 30,
         [InventoryType.IndexNonEquipType] = 30,
     }
     local function SortSlots(a, b)
@@ -663,7 +663,7 @@ local function CreateBag(bagType)
         local restackButton = CreateFeatureButton(main, nil, "repeat",
         function(self)
             _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
-            _G.SortBags()
+            _G.C_Container.SortBags()
         end,
         function(self)
             _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -717,8 +717,8 @@ local function CreateBag(bagType)
         local restackButton = CreateFeatureButton(main, nil, "repeat",
         function(self)
             _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
-            _G.SortBankBags()
-            _G.SortReagentBankBags()
+            _G.C_Container.SortBankBags()
+            _G.C_Container.SortReagentBankBags()
         end,
         function(self)
             _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")

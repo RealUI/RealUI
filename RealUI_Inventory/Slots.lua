@@ -362,7 +362,7 @@ end
 
 function BagSlotMixin:OnEvent(event, ...)
     if event == "INVENTORY_SEARCH_UPDATE" then
-        self:SetMatchesSearch(not _G.IsContainerFiltered(self:GetID()))
+        self:SetMatchesSearch(not _G.C_Container.IsContainerFiltered(self:GetID()))
     else
         self:Update()
     end
