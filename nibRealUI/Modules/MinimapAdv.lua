@@ -1164,8 +1164,8 @@ local isPulseEvent = {
     SHIPMENT_UPDATE = true,
 }
 
-local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0
-local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0
+local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0_Garrison
+local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower
 local currencyId = _G.C_Garrison.GetCurrencyTypes(garrisonTypeWoD)
 local categoryInfo = {}
 do -- by nebula
@@ -1684,7 +1684,7 @@ local function SetUpMinimapFrame()
     _G.MinimapCluster.BorderTop:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
     _G.MinimapCluster.Tracking:Hide()
-    _G.MailFrame:ClearAllPoints()
+    _G.MinimapCluster.IndicatorFrame.MailFrame:ClearAllPoints()
 end
 
 ----------
