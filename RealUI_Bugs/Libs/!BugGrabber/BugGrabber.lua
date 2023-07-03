@@ -2,7 +2,7 @@
 local _G = _G
 local type, table, next, tostring, tonumber, print = type, table, next, tostring, tonumber, print
 local debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime = debuglocals, debugstack, table.wipe, IsEncounterInProgress, GetTime
-local GetAddOnMetadata = _G.C_AddOns and _G.C_AddOns.GetAddOnMetadata or _G.GetAddOnMetadata
+local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space

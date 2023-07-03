@@ -1,8 +1,15 @@
 ------------------------------------------------------------------------
-r281 | funkehdude | 2023-05-03 05:52:30 +0000 (Wed, 03 May 2023) | 1 line
+r284 | funkehdude | 2023-06-21 00:27:08 +0000 (Wed, 21 Jun 2023) | 1 line
 Changed paths:
-   M /trunk/!BugGrabber.toc
+   M /trunk/!BugGrabber_Wrath.toc
 
 bump toc
+------------------------------------------------------------------------
+r283 | funkehdude | 2023-05-31 14:50:04 +0000 (Wed, 31 May 2023) | 1 line
+Changed paths:
+   M /trunk/.luacheckrc
+   M /trunk/BugGrabber.lua
+
+compat code for GetAddOnMetadata
 ------------------------------------------------------------------------
 
