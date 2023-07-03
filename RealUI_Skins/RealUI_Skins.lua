@@ -275,7 +275,7 @@ function private.OnLoad()
     function private.AddOns.RealUI_Bugs()
         local errorFrame = _G.RealUI_ErrorFrame
         Skin.UIPanelDialogTemplate(errorFrame)
-        Skin.UIPanelScrollFrameTemplate(errorFrame.ScrollFrame)
+        Skin.ScrollFrameTemplate(errorFrame.ScrollFrame)
         Skin.UIPanelButtonTemplate(errorFrame.Reload)
         Skin.NavButtonPrevious(errorFrame.PreviousError)
         Skin.NavButtonNext(errorFrame.NextError)
