@@ -2,16 +2,17 @@ local _, private = ...
 
 function private.AddOns.Masque()
     local MSQ = _G.LibStub("Masque")
+    local Hidden = MSQ.__Hidden
+
     MSQ:AddSkin("RealUI", {
-        Template = "Default",
+        Template = "Blizzard Modern",
         Shape = "Square",
-        API_VERSION = 90002,
+        API_VERSION = 100002,
 
         Author = "Gethe",
-        Version = 2,
+        Version = 3,
 
         Backdrop = {
-            Texture = [[Interface\PaperDoll\UI-Backpack-EmptySlot]],
             TexCoords = {0.08, 0.92, 0.08, 0.92},
             Width = 26,
             Height = 26,
@@ -21,14 +22,15 @@ function private.AddOns.Masque()
             Width = 26,
             Height = 26,
         },
-        Shadow = MSQ.__Hidden,
+        -- SlotIcon = Template.Hidden,
+        -- Shadow = Template.Hidden,
         Normal = {
             Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
             Color = {0, 0, 0, 1},
             Width = 32,
             Height = 32,
         },
-        Disabled = MSQ.__Hidden,
+        -- Disabled = Template.Hidden,
         Pushed = {
             Texture = [[Interface\Buttons\UI-Quickslot-Depress]],
             TexCoords = {0.08, 0.92, 0.08, 0.92},
@@ -68,6 +70,19 @@ function private.AddOns.Masque()
             Width = 26,
             Height = 26,
         },
+        SlotHighlight = {
+            Texture = [[Interface\Buttons\CheckButtonHilight]],
+            TexCoords = {0.08, 0.92, 0.08, 0.92},
+            Width = 26,
+            Height = 26,
+        },
+        Name = {
+            JustifyH = "LEFT",
+            Width = 26,
+            Height = 10,
+            OffsetX = 1,
+            OffsetY = 5,
+        },
         Border = {
             Texture = [[Interface\AddOns\RealUI_Skins\Media\Border]],
             Width = 32,
@@ -78,14 +93,7 @@ function private.AddOns.Masque()
             Width = 32,
             Height = 32,
         },
-        SlotHighlight = {
-            Texture = [[Interface\Buttons\CheckButtonHilight]],
-            TexCoords = {0.08, 0.92, 0.08, 0.92},
-            Width = 26,
-            Height = 26,
-        },
-        Gloss = MSQ.__Hidden,
-        IconOverlay = MSQ.__Hidden,
+        -- Gloss = Template.Hidden,
         NewAction = {
             Atlas = "bags-newitem",
             TexCoords = {0.15, 0.85, 0.15, 0.85},
@@ -104,6 +112,10 @@ function private.AddOns.Masque()
             Width = 26,
             Height = 26,
         },
+        IconOverlay = Hidden,
+        --UpgradeIcon = Template,
+        --IconOverlay2 = Template,
+        --QuestBorder = Template,
         NewItem = {
             Atlas = "bags-glow-white",
             TexCoords = {0.08, 0.92, 0.08, 0.92},
@@ -118,13 +130,7 @@ function private.AddOns.Masque()
             Width = 26,
             Height = 26,
         },
-        Name = {
-            JustifyH = "LEFT",
-            Width = 26,
-            Height = 10,
-            OffsetX = 1,
-            OffsetY = 5,
-        },
+        --JunkIcon = Template,
         Highlight = {
             Texture = [[Interface\Buttons\ButtonHilight-Square]],
             TexCoords = {0.08, 0.92, 0.08, 0.92},
