@@ -1770,7 +1770,7 @@ function MinimapAdv:OnEnable()
     CreateFrames()
     self:RegEvents()
     --self:POIUpdate("MinimapAdv:OnEnable")
-    self:UpdatePOIEnabled()
+    --self:UpdatePOIEnabled()
 
     -- Community defined API
     function _G.GetMinimapShape()
