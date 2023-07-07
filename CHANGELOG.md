@@ -1,4 +1,22 @@
-﻿## [2.3.6] ##
+﻿## [Unreleased] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_Bugs
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Changed ###
+
+  * First party RealUI addons now have a neat icon in the addons list
+
+### Fixed ###
+
+  * Various fixes for 10.1.0 and 10.1.5
+
+
+## [2.3.6] ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -44,7 +62,7 @@
 ### Changed ###
 
   * Transmog tips are now a bit more granular
-  * The in-game addon list entries for nibRealUI and nibRealUI_Config have been 
+  * The in-game addon list entries for nibRealUI and nibRealUI_Config have been
       changed to RealUI and RealUI Config for better searchablility and
       conformance. The folder names in the AddOns folder are unchanged at this
       time.
