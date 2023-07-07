@@ -11,22 +11,16 @@ ignore:
 externals:
     nibRealUI/Libs/AceAddon-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceAddon-3.0
-        tag: latest
     nibRealUI/Libs/AceBucket-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
-        tag: latest
     nibRealUI/Libs/AceConsole-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConsole-3.0
-        tag: latest
     nibRealUI/Libs/AceEvent-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
-        tag: latest
     nibRealUI/Libs/AceHook-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceHook-3.0
-        tag: latest
     nibRealUI/Libs/AceTimer-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceTimer-3.0
-        tag: latest
     nibRealUI/Libs/HereBeDragons:
         url: https://repos.wowace.com/wow/herebedragons
         tag: latest
@@ -53,29 +47,23 @@ externals:
 
     nibRealUI_Config/Libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
-        tag: latest
     nibRealUI_Config/Libs/AceDBOptions-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceDBOptions-3.0
-        tag: latest
     nibRealUI_Config/Libs/AceGUI-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceGUI-3.0
-        tag: latest
     nibRealUI_Config/Libs/AceGUI-3.0-SharedMediaWidgets:
         url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
         tag: latest
 
     RealUI_Bugs/Libs/CallbackHandler-1.0:
         url: https://repos.wowace.com/wow/ace3/trunk/CallbackHandler-1.0
-        tag: latest
     RealUI_Bugs/Libs/LibStub:
         url: https://repos.wowace.com/wow/ace3/trunk/LibStub
-        tag: latest
     RealUI_Bugs/Libs/LibTextDump-1.0:
         url: https://repos.wowace.com/wow/libtextdump-1-0
 
     RealUI_Skins/Libs/AceDB-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
-        tag: latest
     RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
         url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
         tag: latest
