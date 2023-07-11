@@ -1,8 +1,8 @@
-## Interface: 100100
+## Interface: 100105
 ## Title: RealUI Inventory
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe
-## Version: 2.3.6
+## Version: 2.3.7
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_InventoryDB
