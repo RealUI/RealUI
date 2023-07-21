@@ -232,7 +232,7 @@ local rangeColors = {
     [50] = Color.red,
     [100] = Color.red,
 }
-local rangeCheck = _G.LibStub("LibRangeCheck-2.0")
+local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
 tags.Methods["realui:range"] = function(unit)
     local _, maxRange = rangeCheck:GetRange("target")
     if maxRange and not _G.UnitIsUnit("target", "player") then
