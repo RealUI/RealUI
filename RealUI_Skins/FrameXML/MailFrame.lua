@@ -154,6 +154,9 @@ end
 
 do --[[ FrameXML\MailFrame.xml ]]
     local function OnClick(self)
+        if _G.GameLimitedMode_IsActive() then
+            return
+        end
         local mailItem = self:GetParent()
         if self:GetChecked() then
             _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
