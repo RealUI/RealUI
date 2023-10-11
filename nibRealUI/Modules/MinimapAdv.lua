@@ -1679,12 +1679,26 @@ local function SetUpMinimapFrame()
     right:SetPoint("BOTTOMRIGHT", 1, -1)
     right:SetColorTexture(0, 0, 0)
 
+    local instanceDifficulty = _G.MinimapCluster.InstanceDifficulty
+    instanceDifficulty:SetParent(_G.Minimap)
+    instanceDifficulty:ClearAllPoints()
+    instanceDifficulty:SetPoint("TOPLEFT",1,-1)
+    instanceDifficulty:SetScale(0.7)
     -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
+    --_G.MinimapCluster:Hide()
+    _G.Minimap.ZoomIn:EnableMouse(false)
+    _G.Minimap.ZoomIn:ClearAllPoints()
+    _G.Minimap.ZoomOut:EnableMouse(false)
+    _G.Minimap.ZoomOut:ClearAllPoints()
+    _G.Minimap.ZoomIn:Hide()
     _G.MinimapCluster.BorderTop:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
     _G.MinimapCluster.Tracking:Hide()
-    _G.MinimapCluster.IndicatorFrame.MailFrame:ClearAllPoints()
+    _G.AddonCompartmentFrame:Hide()
+    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-1)
+    _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
+
 end
 
 ----------
