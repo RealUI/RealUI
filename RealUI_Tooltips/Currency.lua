@@ -9,7 +9,6 @@ local Currency = RealUI:GetModule("Currency")
 local characterInfo = RealUI.charInfo
 
 local currencyDB
-local neutralTCoords = {0.140625, 0.28125, 0.5625, 0.84375}
 local function GetInlineFactionIcon(faction)
     local fIcon = {["HORDE"] = _G.QUEST_TAG_ATLAS["HORDE"],
                    ["ALLIANCE"] = _G.QUEST_TAG_ATLAS["ALLIANCE"],
