@@ -1,8 +1,8 @@
-## Interface: 100105
+## Interface: 100107
 ## Title: RealUI Chat
 ## Notes: Useful chat mods
 ## Author: Gethe
-## Version: 2.3.7
+## Version: 2.3.8.57-beta
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_ChatDB
