@@ -426,9 +426,11 @@ do -- ButtonCollectFrame
     function MinimapAdv:UpdateButtonCollection()
         if not db.information.minimapbuttons then return end
         for i, child in next, {_G.Minimap:GetChildren()} do
-            if not(ignoreList[child:GetName()]) and not child.questID then
-                if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
-                    setupButton(child)
+            if child:GetName() then
+                if not(ignoreList[child:GetName()]) and not child.questID then
+                    if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
+                        setupButton(child)
+                    end
                 end
             end
         end
