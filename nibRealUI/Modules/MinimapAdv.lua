@@ -407,6 +407,7 @@ do -- ButtonCollectFrame
         local line, row = _G.floor(buttonFrame:GetWidth() / 32), 0
         for i = 1, #buttonFrame do
             local button = buttonFrame[i]
+
             ClearAllPoints(button)
             --print("Eval", i, i + line - 1, _G.floor(row+1) * line, row)
             if i + line - 1 == _G.floor(row + 1) * line then
@@ -417,6 +418,7 @@ do -- ButtonCollectFrame
                 SetPoint(button, "TOPLEFT", buttonFrame[i - 1], "TOPRIGHT", 2, 0)
             end
             row = i / line
+            button:Show()
         end
         buttonFrame:SetHeight(_G.ceil(row) * 32)
     end
