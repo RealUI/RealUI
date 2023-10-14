@@ -1679,11 +1679,6 @@ local function SetUpMinimapFrame()
     right:SetPoint("BOTTOMRIGHT", 1, -1)
     right:SetColorTexture(0, 0, 0)
 
-    local instanceDifficulty = _G.MinimapCluster.InstanceDifficulty
-    instanceDifficulty:SetParent(_G.Minimap)
-    instanceDifficulty:ClearAllPoints()
-    instanceDifficulty:SetPoint("TOPLEFT",1,-1)
-    instanceDifficulty:SetScale(0.7)
     -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
     --_G.MinimapCluster:Hide()
@@ -1696,9 +1691,9 @@ local function SetUpMinimapFrame()
     _G.MinimapCluster.ZoneTextButton:Hide()
     _G.MinimapCluster.Tracking:Hide()
     _G.AddonCompartmentFrame:Hide()
-    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-1)
+    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-1) -- this is mail icon
     _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
-
+    _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
 end
 
 ----------
