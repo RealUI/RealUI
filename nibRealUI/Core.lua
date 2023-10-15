@@ -200,7 +200,6 @@ local function UpdateSpec(...)
     end
 end
 
-
 -- Version info retrieval
 function RealUI:GetVerString()
     return RealUI.verinfo.string
@@ -421,9 +420,12 @@ function RealUI:OnInitialize()
 
     -- Done
      _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
-    if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
+
+     if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
          _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
+    -- Check AccountStatus
+    _G.print(("Limited mode is active: %s."):format(tostring(GameLimitedMode_IsActive())))
 end
 
 local onLoadMessages = {
