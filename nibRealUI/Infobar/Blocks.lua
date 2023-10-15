@@ -2122,7 +2122,6 @@ function Infobar:CreateBlocks()
             local copper = money % _G.COPPER_PER_SILVER
             return gold, silver, copper
         end
-        local neutralTCoords = {0.140625, 0.28125, 0.5625, 0.84375}
         local function GetInlineFactionIcon(faction)
             local fIcon = {["HORDE"] = _G.QUEST_TAG_ATLAS["HORDE"],
                            ["ALLIANCE"] = _G.QUEST_TAG_ATLAS["ALLIANCE"],
