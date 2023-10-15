@@ -1648,13 +1648,13 @@ local function SetUpMinimapFrame()
     _G.Minimap:HookScript("OnEnter", Minimap_OnEnter)
     _G.Minimap:HookScript("OnLeave", Minimap_OnLeave)
 
-
-    local landingButton = _G.ExpansionLandingPageMinimapButton
+    local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
+    if not landingButton then return end
     landingButton:SetParent(_G.Minimap)
-    landingButton:SetAlpha(0)
     landingButton:ClearAllPoints()
+    landingButton:SetAlpha(0)
     landingButton:SetPoint("TOPRIGHT", 2, 2)
-    landingButton:SetSize(32, 32)
+    landingButton:SetScale(.6)
     landingButton:HookScript("OnEvent", Garrison_OnEvent)
     landingButton:HookScript("OnLeave", Garrison_OnLeave)
     landingButton:SetScript("OnEnter", Garrison_OnEnter)
