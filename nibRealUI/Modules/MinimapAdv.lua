@@ -1649,7 +1649,7 @@ local function SetUpMinimapFrame()
     _G.Minimap:HookScript("OnLeave", Minimap_OnLeave)
 
     local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
-    if not landingButton then return end
+    -- if not landingButton then return end
     landingButton:SetParent(_G.Minimap)
     landingButton:ClearAllPoints()
     landingButton:SetAlpha(0)
@@ -1659,6 +1659,13 @@ local function SetUpMinimapFrame()
     landingButton:HookScript("OnLeave", Garrison_OnLeave)
     landingButton:SetScript("OnEnter", Garrison_OnEnter)
     landingButton.shouldShow = false
+
+    local queueStatusButton = _G.QueueStatusButton
+    queueStatusButton:SetParent(_G.Minimap)
+    queueStatusButton:ClearAllPoints()
+    queueStatusButton:SetAlpha(0.7)
+    queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
+    queueStatusButton:SetScale(0.5)
 
     -- Make it square
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
