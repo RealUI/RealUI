@@ -391,6 +391,7 @@ do -- ButtonCollectFrame
 
     local function setupButton(button)
         if not button then return end
+        if not button:IsVisible() then return end
         if button._isSkinned then return end
 
         button:SetParent(buttonFrame)
@@ -426,11 +427,9 @@ do -- ButtonCollectFrame
     function MinimapAdv:UpdateButtonCollection()
         if not db.information.minimapbuttons then return end
         for i, child in next, {_G.Minimap:GetChildren()} do
-            if child:GetName() then
-                if not(ignoreList[child:GetName()]) and not child.questID then
-                    if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
-                        setupButton(child)
-                    end
+            if not(ignoreList[child:GetName()]) and not child.questID then
+                if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
+                    setupButton(child)
                 end
             end
         end
