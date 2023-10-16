@@ -13,7 +13,7 @@ local function GetInlineFactionIcon(faction)
     local fIcon = {["HORDE"] = _G.QUEST_TAG_ATLAS["HORDE"],
                    ["ALLIANCE"] = _G.QUEST_TAG_ATLAS["ALLIANCE"],
                    ["NEUTRAL"] = "BattleMaster"}
-    return CreateAtlasMarkup(fIcon[faction:upper()],16,16)
+    return _G.CreateAtlasMarkup(fIcon[faction:upper()],16,16)
 end
 local function CharSort(a, b)
     return a.name < b.name

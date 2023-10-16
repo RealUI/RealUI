@@ -2126,7 +2126,7 @@ function Infobar:CreateBlocks()
             local fIcon = {["HORDE"] = _G.QUEST_TAG_ATLAS["HORDE"],
                            ["ALLIANCE"] = _G.QUEST_TAG_ATLAS["ALLIANCE"],
                            ["NEUTRAL"] = "BattleMaster"}
-            return CreateAtlasMarkup(fIcon[faction:upper()],16,16)
+            return _G.CreateAtlasMarkup(fIcon[faction:upper()],16,16)
         end
         local function GetMoneyString(money, useFirst)
             local goldString, silverString, copperString

@@ -425,7 +425,7 @@ function RealUI:OnInitialize()
          _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
     -- Check AccountStatus
-    _G.print(("Limited mode is active: %s."):format(tostring(GameLimitedMode_IsActive())))
+    _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
 end
 
 local onLoadMessages = {
