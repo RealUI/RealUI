@@ -249,7 +249,6 @@ end
 -- Error handler
 local grabError
 do
-	local tmp = {}
 	local msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
 	local msgsAllowedLastTime = GetTime()
 	local lastWarningTime = 0
@@ -314,22 +313,23 @@ do
 				}
 			else
 				local stack = debugstack(3)
+				local tbl = {}
 
 				-- Scan for version numbers in the stack
-				for line in stack:gmatch("(.-)\n") do
-					tmp[#tmp+1] = findVersions(line)
+				if stack then
+					for line in stack:gmatch("(.-)\n") do
+						tbl[#tbl+1] = findVersions(line)
+					end
 				end
 				local inCombat = IsEncounterInProgress() -- debuglocals can be slow sometimes (200ms+)
 				errorObject = {
 					message = sanitizedMessage,
-					stack = table.concat(tmp, "\n"),
+					stack = stack and table.concat(tbl, "\n") or "Debugstack was nil.",
 					locals = inCombat and "Skipped (In Encounter)" or debuglocals(3),
 					session = addon:GetSessionId(),
 					time = date("%Y/%m/%d %H:%M:%S"),
 					counter = 1,
 				}
-
-				wipe(tmp)
 			end
 		end
 
