@@ -236,7 +236,7 @@ function MirrorBar:OnEnable()
     self:RegisterEvent("MIRROR_TIMER_PAUSE")
 
     -- Hide Default
-    _G.UIParent:UnregisterEvent("MIRROR_TIMER_START")
+    _G.MirrorTimerContainer:UnregisterEvent("MIRROR_TIMER_START")
 
     if LoggedIn then
         MirrorBar:RefreshMod()
