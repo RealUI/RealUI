@@ -10,7 +10,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="AceBucket-3.0\AceBucket-3.0.lua"/>
     <Script file="AceHook-3.0\AceHook-3.0.lua"/>
     <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
-    <Script file="LibRangeCheck-2.0\LibRangeCheck-2.0.lua"/>
+    <Script file="LibRangeCheck-3.0\LibRangeCheck-3.0\LibRangeCheck-3.0.lua"/>
     <Script file="LibWindow-1.1\LibWindow-1.1.lua"/>
     <Script file="HereBeDragons\HereBeDragons-2.0.lua"/>
     <Script file="HereBeDragons\HereBeDragons-Pins-2.0.lua"/>

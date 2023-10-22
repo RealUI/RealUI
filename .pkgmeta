@@ -35,16 +35,14 @@ externals:
         tag: latest
     nibRealUI/Libs/LibQTip-1.0:
         url: https://repos.wowace.com/wow/libqtip-1-0
-    nibRealUI/Libs/LibRangeCheck-2.0:
-        url: https://repos.wowace.com/wow/librangecheck-2-0/trunk/LibRangeCheck-2.0
+    nibRealUI/Libs/LibRangeCheck-3.0:
+        url: https://github.com/WeakAuras/LibRangeCheck-3.0.git
         tag: latest
     nibRealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
     nibRealUI/Libs/oUF:
-        url: https://github.com/Gethe/oUF.git
-        branch: RealUI
-
+        url: https://github.com/arnvid/oUF.git
     nibRealUI_Config/Libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
     nibRealUI_Config/Libs/AceDBOptions-3.0:

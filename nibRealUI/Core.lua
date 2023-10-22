@@ -200,7 +200,6 @@ local function UpdateSpec(...)
     end
 end
 
-
 -- Version info retrieval
 function RealUI:GetVerString()
     return RealUI.verinfo.string
@@ -416,13 +415,17 @@ function RealUI:OnInitialize()
         _G.SetCVar("synchronizeMacros", 1)
     end
 
-    _G.SetCVar("useCompactPartyFrames", 1)
+    -- removed in 10.1.7
+    -- _G.SetCVar("useCompactPartyFrames", 1)
 
     -- Done
      _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
-    if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
+
+     if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
          _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
+    -- Check AccountStatus
+    _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
 end
 
 local onLoadMessages = {

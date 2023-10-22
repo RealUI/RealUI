@@ -1,4 +1,31 @@
-﻿## [2.3.7] ##
+﻿## [2.3.8] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Changed ###
+  *  fix: updated fix for duplicate mirrorbar (breath/fatigue/etc) [Squishses]
+  *  update: upgrade BugGrabber from v10.1.1 to v10.1.6
+  *  add: QueueStatusButton to minimap
+  *  fix: ExpansionLandingPageMinimapButton - resized and updated
+  *  fix: updated fix for minimap buttons [Squishses]
+  *  Add: notify player if Limited Game mode is active.
+  *  fix: MiniMap selection buttons on top fix [Squishses]
+  *  fix: minimap fixes for instance difficulty, mailminimap and few others [Squishses]
+  *  fix: Removed some if GameLimitedMode IsActive.
+  *  fix: QUEST_TAG_TCOORDS error. [Squishses]
+  *  removed: useCompactPartyFrames deprecated
+  *  fix: updated paths for Aurora xml's after Gethe/Aurora@f5ac886d5640118704df9aacae4056506dc029e9
+  *  update: LibRangeCheck 2.0 to 3.0
+
+### Fixed ###
+
+  * Various fixes for 10.1.7
+
+
+## [2.3.7] ##
 ### Modified AddOns ###
 
   * nibRealUI

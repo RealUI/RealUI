@@ -2122,14 +2122,11 @@ function Infobar:CreateBlocks()
             local copper = money % _G.COPPER_PER_SILVER
             return gold, silver, copper
         end
-        local neutralTCoords = {0.140625, 0.28125, 0.5625, 0.84375}
         local function GetInlineFactionIcon(faction)
-            local coords = _G.QUEST_TAG_TCOORDS[faction:upper()] or neutralTCoords
-            return _G.CreateTextureMarkup(_G.QUEST_ICONS_FILE, _G.QUEST_ICONS_FILE_WIDTH, _G.QUEST_ICONS_FILE_HEIGHT, 16, 16
-            , coords[1]
-            , coords[2]
-            , coords[3]
-            , coords[4], 0, 2)
+            local fIcon = {["HORDE"] = _G.QUEST_TAG_ATLAS["HORDE"],
+                           ["ALLIANCE"] = _G.QUEST_TAG_ATLAS["ALLIANCE"],
+                           ["NEUTRAL"] = "BattleMaster"}
+            return _G.CreateAtlasMarkup(fIcon[faction:upper()],16,16)
         end
         local function GetMoneyString(money, useFirst)
             local goldString, silverString, copperString

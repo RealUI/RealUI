@@ -391,6 +391,7 @@ do -- ButtonCollectFrame
 
     local function setupButton(button)
         if not button then return end
+        if not button:IsVisible() then return end
         if button._isSkinned then return end
 
         button:SetParent(buttonFrame)
@@ -407,6 +408,7 @@ do -- ButtonCollectFrame
         local line, row = _G.floor(buttonFrame:GetWidth() / 32), 0
         for i = 1, #buttonFrame do
             local button = buttonFrame[i]
+
             ClearAllPoints(button)
             --print("Eval", i, i + line - 1, _G.floor(row+1) * line, row)
             if i + line - 1 == _G.floor(row + 1) * line then
@@ -417,6 +419,7 @@ do -- ButtonCollectFrame
                 SetPoint(button, "TOPLEFT", buttonFrame[i - 1], "TOPRIGHT", 2, 0)
             end
             row = i / line
+            -- button:Show()
         end
         buttonFrame:SetHeight(_G.ceil(row) * 32)
     end
@@ -424,9 +427,11 @@ do -- ButtonCollectFrame
     function MinimapAdv:UpdateButtonCollection()
         if not db.information.minimapbuttons then return end
         for i, child in next, {_G.Minimap:GetChildren()} do
-            if not(ignoreList[child:GetName()]) and not child.questID then
-                if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
-                    setupButton(child)
+            if child:GetName() then
+                if not(ignoreList[child:GetName()]) and not child.questID then
+                    if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
+                        setupButton(child)
+                    end
                 end
             end
         end
@@ -1643,17 +1648,24 @@ local function SetUpMinimapFrame()
     _G.Minimap:HookScript("OnEnter", Minimap_OnEnter)
     _G.Minimap:HookScript("OnLeave", Minimap_OnLeave)
 
-
-    local landingButton = _G.ExpansionLandingPageMinimapButton
+    local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
+    -- if not landingButton then return end
     landingButton:SetParent(_G.Minimap)
-    landingButton:SetAlpha(0)
     landingButton:ClearAllPoints()
+    landingButton:SetAlpha(0)
     landingButton:SetPoint("TOPRIGHT", 2, 2)
-    landingButton:SetSize(32, 32)
+    landingButton:SetScale(.6)
     landingButton:HookScript("OnEvent", Garrison_OnEvent)
     landingButton:HookScript("OnLeave", Garrison_OnLeave)
     landingButton:SetScript("OnEnter", Garrison_OnEnter)
     landingButton.shouldShow = false
+
+    local queueStatusButton = _G.QueueStatusButton
+    queueStatusButton:SetParent(_G.Minimap)
+    queueStatusButton:ClearAllPoints()
+    queueStatusButton:SetAlpha(0.7)
+    queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
+    queueStatusButton:SetScale(0.5)
 
     -- Make it square
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
@@ -1681,10 +1693,19 @@ local function SetUpMinimapFrame()
 
     -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
+    --_G.MinimapCluster:Hide()
+    _G.Minimap.ZoomIn:EnableMouse(false)
+    _G.Minimap.ZoomIn:ClearAllPoints()
+    _G.Minimap.ZoomOut:EnableMouse(false)
+    _G.Minimap.ZoomOut:ClearAllPoints()
+    _G.Minimap.ZoomIn:Hide()
     _G.MinimapCluster.BorderTop:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
     _G.MinimapCluster.Tracking:Hide()
-    _G.MinimapCluster.IndicatorFrame.MailFrame:ClearAllPoints()
+    _G.AddonCompartmentFrame:Hide()
+    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-1) -- this is mail icon
+    _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
+    _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
 end
 
 ----------
