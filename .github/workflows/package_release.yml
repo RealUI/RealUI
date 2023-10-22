@@ -31,5 +31,5 @@ jobs:
         GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
       run: |
         sudo apt-get install pandoc
-        curl -s https://raw.githubusercontent.com/Gethe/packager/RealUI/release.sh -o release.sh
+        curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
         bash release.sh -L -p 88269 -w 16068

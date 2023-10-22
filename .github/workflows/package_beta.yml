@@ -33,5 +33,5 @@ jobs:
         GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
       run: |
         rm -f CHANGELOG.md
-        curl -s https://raw.githubusercontent.com/Gethe/packager/RealUI/release.sh -o release.sh
+        curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
         bash release.sh -L -p 88269
