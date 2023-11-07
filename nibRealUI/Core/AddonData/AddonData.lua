@@ -9,8 +9,8 @@ local L = RealUI.L
 
 private.AddOns = {}
 function RealUI:AddRealUIProfileToAddOn(addonName)
-    --local loaded, finished = _G.IsAddOnLoaded(addonName)
-    if private.AddOns[addonName] and _G.IsAddOnLoaded(addonName) then
+    --local loaded, finished = _G.C_AddOns.IsAddOnLoaded(addonName)
+    if private.AddOns[addonName] and _G.C_AddOns.IsAddOnLoaded(addonName) then
         private.AddOns[addonName]()
     end
 end
@@ -23,7 +23,7 @@ end
 
 private.Profiles = {}
 function RealUI:SetAddOnProfileToRealUI(addonName)
-    if private.Profiles[addonName] and _G.IsAddOnLoaded(addonName) then
+    if private.Profiles[addonName] and _G.C_AddOns.IsAddOnLoaded(addonName) then
         private.Profiles[addonName]()
     end
 end

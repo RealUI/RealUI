@@ -242,7 +242,7 @@ function RealUI.LoadConfig(app, section, ...)
     debug("is loaded", configLoaded)
     if not configLoaded then
         local reason
-        configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
+        configLoaded, reason = _G.C_AddOns.LoadAddOn("nibRealUI_Config")
         debug("LoadAddOn", configLoaded, reason)
         if not configLoaded then
             _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))

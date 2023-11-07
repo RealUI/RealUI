@@ -40,11 +40,11 @@ end)
 
 function RealUI:ToggleGridTestMode(show)
     if not _G.Grid2Options then
-        _G.LoadAddOn("Grid2Options")
+        _G.C_AddOns.LoadAddOn("Grid2Options")
     end
     if not _G.Grid2Options then return end
     if not _G.Grid2 then
-        _G.LoadAddOn("Grid2")
+        _G.C_AddOns.LoadAddOn("Grid2")
     end
     if not _G.Grid2 then return end
 

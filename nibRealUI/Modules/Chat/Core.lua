@@ -9,7 +9,7 @@ local Chat = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 function Chat:PLAYER_LOGIN()
     -- Hide IM selector if BCM is enabled
-    if _G.IsAddOnLoaded("BasicChatMods") then
+    if _G.C_AddOns.IsAddOnLoaded("BasicChatMods") then
         _G["InterfaceOptionsSocialPanelChatStyle"]:Hide()
     end
 end

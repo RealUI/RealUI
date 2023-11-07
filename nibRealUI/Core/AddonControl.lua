@@ -208,7 +208,7 @@ function AddonControl:CreateOptionsFrame()
     local cbBase, cbPosition, bReset = {}, {}, {}
     local cnt = 0
     for k, addon in next, RealUIAddOnsOrder do
-        if _G.IsAddOnLoaded(addon) or (altAddOnTable[addon] and _G.IsAddOnLoaded(altAddOnTable[addon])) then
+        if _G.C_AddOns.IsAddOnLoaded(addon) or (altAddOnTable[addon] and _G.C_AddOns.IsAddOnLoaded(altAddOnTable[addon])) then
             cnt = cnt + 1
 
             -- AddOn name

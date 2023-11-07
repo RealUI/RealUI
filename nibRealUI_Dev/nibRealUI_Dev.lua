@@ -10,7 +10,7 @@ ns.isClassic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
 ns.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 
 if _G.IsTestBuild() then
-    _G.DisableAddOn("Blizzard_Deprecated")
+    _G.C_AddOns.DisableAddOn("Blizzard_Deprecated")
 end
 
 ns.debug = debug
@@ -153,7 +153,7 @@ local ClassicAddons = {
 
 local addonList = isClassic and ClassicAddons or BlizzAddons
 for i = 1, #addonList do
-    local loaded = _G.IsAddOnLoaded(addonList[i])
+    local loaded = _G.C_AddOns.IsAddOnLoaded(addonList[i])
     if loaded then
         debug("Pre-loaded:", addonList[i])
     end
@@ -280,13 +280,13 @@ local function AddOptDeps(list, optDeps)
 end
 
 for i = 1, #realuiAddons do
-    AddOptDeps(realuiAddons, {_G.GetAddOnOptionalDependencies(realuiAddons[i])})
+    AddOptDeps(realuiAddons, {_G.C_AddOns.GetAddOnOptionalDependencies(realuiAddons[i])})
 end
 
 function ns.commands:realui()
     for i = 1, #realuiAddons do
-        if _G.GetAddOnInfo(realuiAddons[i]) then
-            _G.EnableAddOn(realuiAddons[i], _G.UnitName("player"))
+        if _G.C_AddOns.GetAddOnInfo(realuiAddons[i]) then
+            _G.C_AddOns.EnableAddOn(realuiAddons[i], _G.UnitName("player"))
         end
     end
 
@@ -296,8 +296,8 @@ end
 
 function ns.commands:aurora()
     for i = 1, #auroraAddons do
-        if _G.GetAddOnInfo(auroraAddons[i]) then
-            _G.EnableAddOn(auroraAddons[i], _G.UnitName("player"))
+        if _G.C_AddOns.GetAddOnInfo(auroraAddons[i]) then
+            _G.C_AddOns.EnableAddOn(auroraAddons[i], _G.UnitName("player"))
         end
     end
 

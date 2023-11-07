@@ -1777,7 +1777,7 @@ end
 
 function MinimapAdv:OnEnable()
     if not HBD then
-        _G.LoadAddOn("HereBeDragons")
+        _G.C_AddOns.LoadAddOn("HereBeDragons")
         HBD = _G.LibStub("HereBeDragons-2.0")
         HBDP = _G.LibStub("HereBeDragons-Pins-2.0")
     end

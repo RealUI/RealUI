@@ -37,7 +37,7 @@ local patch do
 	local q, skips = {}, securecall(function()
 		local cb, r, _, an = select(4,GetBuildInfo()), {moon="haunted"}
 		r.moon, _, an = nil, issecurevariable(r, "moon")
-		for m, v, clo, chi in (GetAddOnMetadata(an, "X-TaintLess-DisableMitigations") or ""):gmatch("([%a_]+)=(%d+):?(%d*):?(%d*)") do
+		for m, v, clo, chi in (C_AddOns.GetAddOnMetadata(an, "X-TaintLess-DisableMitigations") or ""):gmatch("([%a_]+)=(%d+):?(%d*):?(%d*)") do
 			if (clo == "" or cb >= clo+0) and (chi == "" or chi+0 >= cb) then
 				r[m] = v + 0
 			end
