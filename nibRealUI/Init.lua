@@ -101,7 +101,7 @@ end
 -- Disable cargBags
 local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.charInfo.name)
 if enabled > 0 then
-    _G.C_AddOns.DisableAddOn("cargBags_Nivaya", true)
+    _G.C_AddOns.DisableAddOn("cargBags_Nivaya")
 end
 
 RealUI.globals = {

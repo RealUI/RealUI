@@ -119,7 +119,7 @@ do
 	local player = UnitName("player")
 	if player and #player > 0 then
 		for i=1, C_AddOns.GetNumAddOns() do
-			if C_AddOns.GetAddOnEnableState(player, i) > 0 then  -- addon is enabled
+			if C_AddOns.GetAddOnEnableState(i, player) > 0 then  -- addon is enabled
 				C_AddOns.EnableAddOn(i, player)
 			else
 				C_AddOns.DisableAddOn(i, player)
