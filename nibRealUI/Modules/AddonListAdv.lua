@@ -123,9 +123,9 @@ function AddonListAdv:SaveSet(name, newName)
     end
 
     for i = 1, _G.C_AddOns.GetNumAddOns() do
-        local addonName, _, _, enabled = _G.C_AddOns.GetAddOnInfo(i)
+        local addonName, _, _, loadable = _G.C_AddOns.GetAddOnInfo(i)
         --print("SaveSet4", addonName, enabled)
-        if enabled then
+        if loadable then
             table.insert(set, addonName)
         end
     end
