@@ -2,7 +2,7 @@
 ## Title: RealUI Chat
 ## Notes: Useful chat mods
 ## Author: Gethe
-## Version: 2.3.8
+## Version: 2.3.9-beta
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_ChatDB
