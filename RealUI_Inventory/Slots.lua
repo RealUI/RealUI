@@ -291,6 +291,7 @@ function BagSlotMixin:Init(bagID)
 
     self:RegisterForDrag("LeftButton")
     self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    self:RegisterEvent("PLAYER_ENTERING_WORLD");
     self:RegisterEvent("BAG_UPDATE_DELAYED")
     self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
     self:SetScript("OnEvent", self.OnEvent)
@@ -361,12 +362,19 @@ function BagSlotMixin:Update()
 end
 
 function BagSlotMixin:OnEvent(event, ...)
-    if event == "INVENTORY_SEARCH_UPDATE" then
-        self:SetMatchesSearch(not _G.C_Container.IsContainerFiltered(self:GetID()))
+    if event == "PLAYER_ENTERING_WORLD" then
+        self:UpdateBagMatchesSearch()
+	elseif event == "INVENTORY_SEARCH_UPDATE" then
+		self:UpdateBagMatchesSearch();
     else
         self:Update()
     end
 end
+
+function BagSlotMixin:UpdateBagMatchesSearch()
+	self:SetMatchesSearch(not _G.C_Container.IsContainerFiltered(self:GetID()));
+end
+
 function BagSlotMixin:OnEnter()
     _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
     local hasItem = self.inventoryID and _G.GameTooltip:SetInventoryItem("player", self.inventoryID)
