@@ -2,7 +2,7 @@
 
 -- Disable other bug catchers
 for i, addon in _G.next, {"!BugGrabber", "!Swatter", "!ImprovedErrorFrame"} do
-    local _, _, _, enabled = C_AddOns.GetAddOnInfo(addon)
+    local _, _, _, enabled = _G.C_AddOns.GetAddOnInfo(addon)
     if enabled then
         _G.C_AddOns.DisableAddOn(addon)
     end
