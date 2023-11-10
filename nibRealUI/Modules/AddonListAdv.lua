@@ -171,7 +171,7 @@ function AddonListAdv:ClearSelectionAndLoadSet(name)
     --print("ClearSelectionAndLoadSet", name)
     local set = GetSet(name)
 
-    _G.DisableAllAddOns()
+    _G.C_AddOns.DisableAllAddOns()
     self:LoadSet(set)
 end
 
