@@ -1647,30 +1647,10 @@ local function SetUpMinimapFrame()
     _G.MinimapCompassTexture:Hide()
     _G.Minimap:HookScript("OnEnter", Minimap_OnEnter)
     _G.Minimap:HookScript("OnLeave", Minimap_OnLeave)
-
-    local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
-    -- if not landingButton then return end
-    landingButton:SetParent(_G.Minimap)
-    landingButton:ClearAllPoints()
-    landingButton:SetAlpha(0)
-    landingButton:SetPoint("TOPRIGHT", 2, 2)
-    landingButton:SetScale(.6)
-    landingButton:HookScript("OnEvent", Garrison_OnEvent)
-    landingButton:HookScript("OnLeave", Garrison_OnLeave)
-    landingButton:SetScript("OnEnter", Garrison_OnEnter)
-    landingButton.shouldShow = false
-
-    local queueStatusButton = _G.QueueStatusButton
-    queueStatusButton:SetParent(_G.Minimap)
-    queueStatusButton:ClearAllPoints()
-    queueStatusButton:SetAlpha(0.7)
-    queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
-    queueStatusButton:SetScale(0.5)
-
-    -- Make it square
+   -- -- Make it square
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
 
-    -- Create New Border
+    -- -- Create New Border
     local top = _G.Minimap:CreateTexture(nil, "BACKGROUND")
     top:SetPoint("TOPLEFT", -1, 1)
     top:SetPoint("BOTTOMRIGHT", _G.Minimap, "TOPRIGHT", 1, 0)
@@ -1691,19 +1671,47 @@ local function SetUpMinimapFrame()
     right:SetPoint("BOTTOMRIGHT", 1, -1)
     right:SetColorTexture(0, 0, 0)
 
-    -- Disable MinimapCluster area
-    _G.MinimapCluster:EnableMouse(false)
-    --_G.MinimapCluster:Hide()
+    local right = _G.Minimap:CreateTexture(nil, "BACKGROUND")
+    right:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 0, 1)
+    right:SetPoint("BOTTOMRIGHT", 1, -1)
+    right:SetColorTexture(0, 0, 0)
+
     _G.Minimap.ZoomIn:EnableMouse(false)
     _G.Minimap.ZoomIn:ClearAllPoints()
     _G.Minimap.ZoomOut:EnableMouse(false)
     _G.Minimap.ZoomOut:ClearAllPoints()
     _G.Minimap.ZoomIn:Hide()
+
+    -- -- Disable MinimapCluster area
+    _G.MinimapCluster:EnableMouse(false)
     _G.MinimapCluster.BorderTop:Hide()
-    _G.MinimapCluster.ZoneTextButton:Hide()
     _G.MinimapCluster.Tracking:Hide()
+    _G.MinimapCluster.ZoneTextButton:Hide()
+
     _G.AddonCompartmentFrame:Hide()
-    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-1) -- this is mail icon
+
+    local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
+    if landingButton then
+        landingButton:SetParent(_G.Minimap)
+        landingButton:ClearAllPoints()
+        landingButton:SetAlpha(0)
+        landingButton:SetPoint("TOPRIGHT", -1, -1)
+        landingButton:SetScale(.3)
+        landingButton:HookScript("OnEvent", Garrison_OnEvent)
+        landingButton:HookScript("OnLeave", Garrison_OnLeave)
+        landingButton:SetScript("OnEnter", Garrison_OnEnter)
+        landingButton.shouldShow = false
+    end
+
+    local queueStatusButton = _G.QueueStatusButton
+    queueStatusButton:SetParent(_G.Minimap)
+    queueStatusButton:ClearAllPoints()
+    queueStatusButton:SetAlpha(0.7)
+    queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
+    queueStatusButton:SetScale(0.5)
+
+    -- AddonCompartmentFrame:Hide()
+    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
     _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
     _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
 end
@@ -1796,5 +1804,11 @@ function MinimapAdv:OnEnable()
     -- Community defined API
     function _G.GetMinimapShape()
         return "SQUARE"
+    end
+    if _G.AddonCompartmentFrame then
+        _G.AddonCompartmentFrame:HookScript("OnShow", function() _G.AddonCompartmentFrame:Hide()
+        end)
+
+        _G.AddonCompartmentFrame:Hide()
     end
 end
