@@ -1,4 +1,28 @@
-﻿## [2.3.8] ##
+﻿## [2.3.9] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Changed ###
+  * add: set questTextContrast to darkmode
+  * fix: Addon management functions moved to the C_AddOns namespace.
+  * fix: Stop AddonCompartmentFrame from popping back up uninvited...
+  * update: rename output of GetAddOnInfo to match API
+  * update: events for stolen, dispel and interupt updated
+  * update: BugGrabber r294 to r290
+  * update: UpdateBagMatchesSearch event on PLAYER_ENTERING_WORLD
+
+### Fixed ###
+  * Various fixes for 10.2.0
+
+
+## [2.3.8] ##
 ### Modified AddOns ###
 
   * nibRealUI
