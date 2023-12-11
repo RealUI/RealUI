@@ -42,7 +42,7 @@ local function GetGuildInvites()
 end
 
 local function toggleCalendar()
-    if not _G.CalendarFrame then _G.LoadAddOn("Blizzard_Calendar") end
+    if not _G.CalendarFrame then _G.C_AddOns.LoadAddOn("Blizzard_Calendar") end
     _G.Calendar_Toggle()
 end
 

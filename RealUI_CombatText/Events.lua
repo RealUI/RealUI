@@ -293,16 +293,16 @@ function eventSuffix.LEECH(eventInfo, amount, powerType, extraAmount, alternateP
     return true
 end
 
-local eventFormat = "%s %s"
+local eventFormat = "%s %s %s"
 function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
-    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName)
+    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName, extraSpellSchool)
 
     eventInfo.canMerge = false
     eventInfo.isSticky = true
     return true
 end
 function eventSuffix.DISPEL(eventInfo, extraSpellId, extraSpellName, extraSpellSchool, auraType)
-    eventInfo.string = _G["ACTION_SPELL_INTERRUPT"..auraType] .. extraSpellName
+    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_DISPEL, extraSpellName, auraType)
 
     eventInfo.canMerge = false
     return true
@@ -315,14 +315,12 @@ function eventSuffix.DISPEL_FAILED(eventInfo, extraSpellId, extraSpellName, extr
     return true
 end
 function eventSuffix.STOLEN(eventInfo, extraSpellId, extraSpellName, extraSpellSchool, auraType)
-    eventInfo.string = _G["ACTION_SPELL_STOLEN"..auraType] .. extraSpellName
+    -- eventInfo.string = _G["ACTION_SPELL_STOLEN"..auraType] .. extraSpellName
+    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_STOLEN, extraSpellName, auraType)
 
     eventInfo.canMerge = false
     return true
 end
-
-
-
 
 local eventSpecial = {}
 private.eventSpecial = eventSpecial

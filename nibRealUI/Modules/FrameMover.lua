@@ -165,7 +165,7 @@ end
 
 -- Raven - To stop bars repositioning themselves
 local function Hook_Raven()
-    if not _G.IsAddOnLoaded("Raven") then return end
+    if not _G.C_AddOns.IsAddOnLoaded("Raven") then return end
 
     local t = _G.CreateFrame("Frame")
     t:Hide()

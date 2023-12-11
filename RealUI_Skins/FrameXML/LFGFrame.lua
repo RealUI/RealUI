@@ -15,7 +15,7 @@ local Color = Aurora.Color
 -- end
 
 _G.hooksecurefunc(private.FrameXML, "LFGFrame", function()
-    if _G.IsAddOnLoaded("DBM-Core") or _G.IsAddOnLoaded("BigWigs") then return end
+    if _G.C_AddOns.IsAddOnLoaded("DBM-Core") or _G.C_AddOns.IsAddOnLoaded("BigWigs") then return end
 
     local LFGDungeonReadyDialog = _G.LFGDungeonReadyDialog
 

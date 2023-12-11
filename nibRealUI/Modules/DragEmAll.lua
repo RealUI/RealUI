@@ -355,7 +355,7 @@ function DragEmAll:OnEnable()
 
     -- Hook prior loaded addons
     for addon, frameList in next, addonFrames do
-        if _G.IsAddOnLoaded(addon) then
+        if _G.C_AddOns.IsAddOnLoaded(addon) then
             self:HookFrames(frameList)
         end
     end

@@ -18,7 +18,7 @@ local STANDALONE_NAME = "!BugGrabber"
 if bugGrabberParentAddon ~= STANDALONE_NAME then
 	local tbl = { STANDALONE_NAME, "!Swatter", "!ImprovedErrorFrame" }
 	for i = 1, 3 do
-		local _, _, _, enabled = GetAddOnInfo(tbl[i])
+		local _, _, _, enabled = C_AddOns.GetAddOnInfo(tbl[i])
 		if enabled then return end -- Bail out
 	end
 end
@@ -60,10 +60,10 @@ local L = {
 
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
-for i = 1, GetNumAddOns() do
+for i = 1, C_AddOns.GetNumAddOns() do
 	local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
 	if meta then
-		local _, _, _, enabled = GetAddOnInfo(i)
+		local _, _, _, enabled = C_AddOns.GetAddOnInfo(i)
 		if enabled then
 			displayObjectName = meta
 			break
@@ -191,7 +191,7 @@ do
 			found = minor
 		end
 		-- Then see if we can get some addon metadata
-		if not found and IsAddOnLoaded(object) then
+		if not found and C_AddOns.IsAddOnLoaded(object) then
 			found = GetAddOnMetadata(object, "X-Curse-Packaged-Version")
 			if not found then
 				found = GetAddOnMetadata(object, "Version")
@@ -521,7 +521,7 @@ do
 			if bugGrabberParentAddon == STANDALONE_NAME then
 				print(L.ADDON_DISABLED:format("Swatter", "Swatter", "Swatter"))
 			end
-			DisableAddOn("!Swatter")
+			C_AddOns.DisableAddOn("!Swatter")
 			SlashCmdList.SWATTER = nil
 			SLASH_SWATTER1, SLASH_SWATTER2 = nil, nil
 			for _, v in next, Swatter do
@@ -536,7 +536,7 @@ do
 			end
 			Swatter = nil
 
-			local _, _, _, enabled = GetAddOnInfo("Stubby")
+			local _, _, _, enabled = C_AddOns.GetAddOnInfo("Stubby")
 			if enabled then createSwatter() end
 
 			real_seterrorhandler(grabError)

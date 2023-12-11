@@ -242,7 +242,7 @@ function RealUI.LoadConfig(app, section, ...)
     debug("is loaded", configLoaded)
     if not configLoaded then
         local reason
-        configLoaded, reason = _G.LoadAddOn("nibRealUI_Config")
+        configLoaded, reason = _G.C_AddOns.LoadAddOn("nibRealUI_Config")
         debug("LoadAddOn", configLoaded, reason)
         if not configLoaded then
             _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
@@ -414,10 +414,9 @@ function RealUI:OnInitialize()
         _G.SetCVar("synchronizeBindings", 1)
         _G.SetCVar("synchronizeMacros", 1)
     end
-
-    -- removed in 10.1.7
-    -- _G.SetCVar("useCompactPartyFrames", 1)
-
+    if not (tonumber(_G.GetCVar("questTextContrast")) == 4) then
+        _G.SetCVar("questTextContrast", 4);
+    end
     -- Done
      _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
 

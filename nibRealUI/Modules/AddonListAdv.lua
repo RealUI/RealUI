@@ -122,10 +122,10 @@ function AddonListAdv:SaveSet(name, newName)
         table.remove(set, i)
     end
 
-    for i = 1, _G.GetNumAddOns() do
-        local addonName, _, _, enabled = _G.GetAddOnInfo(i)
+    for i = 1, _G.C_AddOns.GetNumAddOns() do
+        local addonName, _, _, loadable = _G.C_AddOns.GetAddOnInfo(i)
         --print("SaveSet4", addonName, enabled)
-        if enabled then
+        if loadable then
             table.insert(set, addonName)
         end
     end
@@ -141,8 +141,8 @@ function AddonListAdv:UnloadSet(set)
 
     for i = 1, #set do
         --print("UnloadSet:", set[i])
-        if _G.GetAddOnInfo(set[i]) then
-            _G.DisableAddOn(set[i])
+        if _G.C_AddOns.GetAddOnInfo(set[i]) then
+            _G.C_AddOns.DisableAddOn(set[i])
         end
     end
 
@@ -171,7 +171,7 @@ function AddonListAdv:ClearSelectionAndLoadSet(name)
     --print("ClearSelectionAndLoadSet", name)
     local set = GetSet(name)
 
-    _G.DisableAllAddOns()
+    _G.C_AddOns.DisableAllAddOns()
     self:LoadSet(set)
 end
 
@@ -183,8 +183,8 @@ function AddonListAdv:LoadSet(set)
 
     for i = 1, #set do
         --print("LoadSet: name", set[i])
-        if _G.GetAddOnInfo(set[i]) then
-            _G.EnableAddOn(set[i])
+        if _G.C_AddOns.GetAddOnInfo(set[i]) then
+            _G.C_AddOns.EnableAddOn(set[i])
         end
     end
 
@@ -362,11 +362,11 @@ function AddonListAdv:OnInitialize()
             end
         end
 
-        AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("nibRealUI_Config")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Bugs")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Skins")})
-        AddOptDeps({_G.GetAddOnOptionalDependencies("RealUI_Tooltips")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("nibRealUI")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("nibRealUI_Config")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Bugs")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Skins")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Tooltips")})
     end
 
     self:SetEnabledState(true)

@@ -261,7 +261,7 @@ function private.OnLoad()
         local Skins = RealUI:NewModule("Skins")
         Skins.db = skinsDB
 
-        if not _G.IsAddOnLoaded("Ace3") then
+        if not _G.C_AddOns.IsAddOnLoaded("Ace3") then
             private.AddOns.Ace3()
         end
 

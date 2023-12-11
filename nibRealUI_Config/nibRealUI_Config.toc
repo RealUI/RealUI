@@ -1,8 +1,8 @@
-## Interface: 100107
+## Interface: 100200
 ## Title: RealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
-## Version: 2.3.8
+## Version: 2.3.9
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI

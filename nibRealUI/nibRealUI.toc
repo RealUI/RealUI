@@ -1,8 +1,8 @@
-## Interface: 100107
+## Interface: 100200
 ## Title: RealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe
-## Version: 2.3.8
+## Version: 2.3.9
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs Blizzard_WorldMap Blizzard_Deprecated

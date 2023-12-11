@@ -3,10 +3,10 @@ local ADDON_NAME, private = ...
 -- Lua Globals --
 -- luacheck: globals select
 
-local loaded = _G.LoadAddOn("RealUI_Skins")
+local loaded = _G.C_AddOns.LoadAddOn("RealUI_Skins")
 local tries = 1
 while not loaded do
-    loaded = _G.LoadAddOn("RealUI_Skins")
+    loaded = _G.C_AddOns.LoadAddOn("RealUI_Skins")
     tries = tries + 1
     if tries > 3 then
         _G.StaticPopupDialogs["REALUI_SKINS_NOT_FOUND"] = {
@@ -18,7 +18,7 @@ while not loaded do
                 self:SetPoint("CENTER")
             end,
             OnAccept = function(self, data)
-                _G.DisableAddOn("nibRealUI")
+                _G.C_AddOns.DisableAddOn("nibRealUI")
                 _G.ReloadUI()
             end,
             timeout = 0,
@@ -99,9 +99,9 @@ for specIndex = 1, _G.GetNumSpecializationsForClassID(classID) do
 end
 
 -- Disable cargBags
-local enabled = _G.GetAddOnEnableState(RealUI.charInfo.name, "RealUI_Inventory")
+local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.charInfo.name)
 if enabled > 0 then
-    _G.DisableAddOn("cargBags_Nivaya", true)
+    _G.C_AddOns.DisableAddOn("cargBags_Nivaya")
 end
 
 RealUI.globals = {

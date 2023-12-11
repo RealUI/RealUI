@@ -61,14 +61,14 @@ local function CreateAddonSection(name, args)
 
     if not args then
         local addonName = "RealUI_" .. name
-        local _, _, _, loadable, reason = _G.GetAddOnInfo(addonName)
+        local _, _, _, loadable, reason = _G.C_AddOns.GetAddOnInfo(addonName)
         if loadable then
             args = {
                 enable = {
                     name = nameFormat:format(L[name]),
                     type = "execute",
                     func = function(info, value)
-                        _G.EnableAddOn(addonName)
+                        _G.C_AddOns.EnableAddOn(addonName)
                         _G.ReloadUI()
                     end,
                     order = 1,
@@ -1418,7 +1418,7 @@ do -- UI Tweaks
                     name = addon.name,
                     type = "group",
                     childGroups = "tab",
-                    disabled = function() return not(_G.IsAddOnLoaded(addon.name) and RealUI:GetModuleEnabled(MODNAME)) end,
+                    disabled = function() return not(_G.C_AddOns.IsAddOnLoaded(addon.name) and RealUI:GetModuleEnabled(MODNAME)) end,
                     order = addonOrderCnt,
                     args = {
                         header = {

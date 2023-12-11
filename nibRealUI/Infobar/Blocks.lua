@@ -731,7 +731,7 @@ function Infobar:CreateBlocks()
                 if _G.IsAltKeyDown() then
                     _G.ToggleTimeManager()
                 else
-                    if _G.IsAddOnLoaded("GroupCalendar5") then
+                    if _G.C_AddOns.IsAddOnLoaded("GroupCalendar5") then
                         if _G.GroupCalendar.UI.Window:IsShown() then
                             _G.HideUIPanel(_G.GroupCalendar.UI.Window)
                         else
