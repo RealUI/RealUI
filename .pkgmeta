@@ -63,7 +63,7 @@ externals:
     RealUI_Skins/Libs/AceDB-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
     RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
-        url: https://repos.wowace.com/wow/libitemupgradeinfo-1-0
+        url: https://github.com/alarofrunetotem/LibItemUpgradeInfo.git
         tag: latest
     RealUI_Skins/Libs/LibSharedMedia-3.0:
         url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
