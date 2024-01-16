@@ -1,4 +1,16 @@
-﻿## [2.3.9] ##
+﻿## [2.3.10] ##
+### Modified AddOns ###
+  * nibRealUI
+
+### Changed ###
+  * update: duplicate code removed from nibRealUI
+
+### Fixed ###
+  * update: change url of LibItemUpgradeInfo
+  * fix: this version should be able to be packaged with the curseforge packager
+
+
+## [2.3.9] ##
 ### Modified AddOns ###
 
   * nibRealUI
