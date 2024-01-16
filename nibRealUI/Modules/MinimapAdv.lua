@@ -1671,11 +1671,6 @@ local function SetUpMinimapFrame()
     right:SetPoint("BOTTOMRIGHT", 1, -1)
     right:SetColorTexture(0, 0, 0)
 
-    local right = _G.Minimap:CreateTexture(nil, "BACKGROUND")
-    right:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 0, 1)
-    right:SetPoint("BOTTOMRIGHT", 1, -1)
-    right:SetColorTexture(0, 0, 0)
-
     _G.Minimap.ZoomIn:EnableMouse(false)
     _G.Minimap.ZoomIn:ClearAllPoints()
     _G.Minimap.ZoomOut:EnableMouse(false)

@@ -414,12 +414,11 @@ function RealUI:OnInitialize()
         _G.SetCVar("synchronizeBindings", 1)
         _G.SetCVar("synchronizeMacros", 1)
     end
-    if not (tonumber(_G.GetCVar("questTextContrast")) == 4) then
+    if (tonumber(_G.GetCVar("questTextContrast")) ~= 4) then
         _G.SetCVar("questTextContrast", 4);
     end
     -- Done
      _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
-
      if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
          _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
