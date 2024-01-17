@@ -611,7 +611,7 @@ local function CreateBag(bagType)
 
         local firstBag = _G.BACKPACK_CONTAINER
         if bagType == "bank" then
-            firstBag = _G.BANK_CONTAINER
+            firstBag = _G.Enum.BagIndex.Bank -- _G.BANK_CONTAINER
         end
 
         local bagSlots = private.bagSlots[bagType]
