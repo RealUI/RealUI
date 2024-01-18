@@ -1,4 +1,13 @@
-﻿## [2.3.10] ##
+﻿## [2.3.11] ##
+### Modified AddOns ###
+
+### Changed ###
+ * TOC bump for 10.2.5
+
+### Fixed ###
+
+
+## [2.3.10] ##
 ### Modified AddOns ###
   * nibRealUI
 
