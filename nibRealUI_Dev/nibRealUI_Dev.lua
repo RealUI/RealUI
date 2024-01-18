@@ -9,9 +9,9 @@ _G.RealUI.isDev = true
 ns.isClassic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
 ns.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 
-if _G.IsTestBuild() then
-    _G.C_AddOns.DisableAddOn("Blizzard_Deprecated")
-end
+-- if _G.IsTestBuild() then
+--     _G.C_AddOns.DisableAddOn("Blizzard_Deprecated")
+-- end
 
 ns.debug = debug
 ns.commands = {}
