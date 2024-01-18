@@ -2,7 +2,7 @@
 ## Title: RealUI Skins
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe
-## Version: 2.3.11-beta
+## Version: 2.3.11
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI
@@ -15,7 +15,7 @@ Misc.lua
 Locale.lua
 RealUI_Skins.lua
 
-FrameXML\ColorPickerFrame.lua
+# FrameXML\ColorPickerFrame.lua
 FrameXML\FriendsFrame.lua
 FrameXML\LFGFrame.lua
 FrameXML\MailFrame.lua
