@@ -34,28 +34,6 @@ local function AddToTooltip(tooltip, tooltipType, tooltipID)
     end
 end
 
---[[
-local function SetupSpellTooltips()
-    local function setAuraTooltipFunction(self, unit, slotNumber, auraType)
-        local id = select(10, _G.UnitAura(unit, slotNumber, auraType))
-        if id then
-            AddToTooltip(self, TooltipTypes.spell, id)
-        end
-    end
-
-    _G.hooksecurefunc(_G.GameTooltip, "SetUnitAura", setAuraTooltipFunction)
-    _G.hooksecurefunc(_G.GameTooltip, "SetUnitBuff", function(self, unit, slotNumber) setAuraTooltipFunction(self, unit, slotNumber, "HELPFUL") end)
-    _G.hooksecurefunc(_G.GameTooltip, "SetUnitDebuff", function(self, unit, slotNumber) setAuraTooltipFunction(self, unit, slotNumber, "HARMFUL") end)
-
-    private.AddHook("OnTooltipSetSpell", function(self)
-        local _, id = self:GetSpell()
-        if id then
-            AddToTooltip(self, TooltipTypes.spell, id)
-        end
-    end, true)
-end
-]]
-
 local function SetupItemTooltips()
     _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
         local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
@@ -67,24 +45,6 @@ local function SetupItemTooltips()
         end
     end)
 end
-
---[[
-local function SetupUnitTooltips()
-    private.AddHook("OnTooltipSetUnit", function(self)
-        if _G.C_PetBattles.IsInBattle() then
-            return
-        end
-        local _, unit = self:GetUnit()
-        if unit then
-            local guid = _G.UnitGUID(unit) or ""
-            local id = tonumber(guid:match("-(%d+)-%x+$"), 10)
-            if id and (guid:match("%a+") ~= "Player") then
-                AddToTooltip(self, TooltipTypes.unit, id)
-            end
-        end
-    end, true)
-end
-]]
 
 local function SetupQuestTooltips()
     _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
