@@ -414,7 +414,7 @@ function RealUI:OnInitialize()
         _G.SetCVar("synchronizeBindings", 1)
         _G.SetCVar("synchronizeMacros", 1)
     end
-    if (tonumber(_G.GetCVar("questTextContrast")) ~= 4) then
+    if (GetCVarNumberOrDefault(_G.GetCVar("questTextContrast")) ~= 4) then
         _G.SetCVar("questTextContrast", 4);
     end
     -- Done
