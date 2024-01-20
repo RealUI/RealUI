@@ -66,10 +66,8 @@ do
 	local isKnown = IsPlayerSpell(369913)
 	if isKnown == true then
 		RegisterSpellName(356995, 2.4 / 1, true) -- Disintegrate
-		print("fast")
 		else
 		RegisterSpellName(356995, 3 / 1.25, true) -- Disintegrate
-		print("slow")
 	end
 
     -- Hunter
