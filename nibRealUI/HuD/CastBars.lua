@@ -61,6 +61,14 @@ do
 
     -- Druid
     RegisterSpellName(740, 8 / 2, true) -- Tranquility
+    
+    -- Evoker
+	local isKnown = IsPlayerSpell(369913)
+	if isKnown == true then
+		RegisterSpellName(356995, 2.4 / 1, true) -- Disintegrate
+		else
+		RegisterSpellName(356995, 3 / 1, true) -- Disintegrate
+	end
 
     -- Hunter
     RegisterSpellName(120360, 3 / 0.2, true) -- Barrage
