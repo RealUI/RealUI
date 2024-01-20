@@ -67,7 +67,7 @@ do
 	if isKnown == true then
 		RegisterSpellName(356995, 2.4 / 1, true) -- Disintegrate
 		else
-		RegisterSpellName(356995, 3 / 1.25, true) -- Disintegrate
+		RegisterSpellName(356995, 3 / 1, true) -- Disintegrate
 	end
 
     -- Hunter
