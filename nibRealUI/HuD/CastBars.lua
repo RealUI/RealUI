@@ -63,7 +63,7 @@ do
     RegisterSpellName(740, 8 / 2, true) -- Tranquility
     
     -- Evoker
-	isKnown = IsPlayerSpell(369913)
+	local isKnown = IsPlayerSpell(369913)
 	if isKnown == true then
 		RegisterSpellName(356995, 2.4 / 1, true) -- Disintegrate
 		else
