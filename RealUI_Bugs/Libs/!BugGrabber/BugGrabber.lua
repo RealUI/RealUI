@@ -2,7 +2,11 @@
 local _G = _G
 local type, table, next, tostring, tonumber, print = type, table, next, tostring, tonumber, print
 local debuglocals, debugstack, wipe, IsEncounterInProgress, GetTime = debuglocals, debugstack, table.wipe, IsEncounterInProgress, GetTime
-local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
+local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
+local DisableAddOn = C_AddOns.DisableAddOn or DisableAddOn
+local GetAddOnInfo = C_AddOns.GetAddOnInfo or GetAddOnInfo
+local IsAddOnLoaded = C_AddOns.IsAddOnLoaded or IsAddOnLoaded
+local GetNumAddOns = C_AddOns.GetNumAddOns or GetNumAddOns
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space
@@ -18,7 +22,7 @@ local STANDALONE_NAME = "!BugGrabber"
 if bugGrabberParentAddon ~= STANDALONE_NAME then
 	local tbl = { STANDALONE_NAME, "!Swatter", "!ImprovedErrorFrame" }
 	for i = 1, 3 do
-		local _, _, _, enabled = C_AddOns.GetAddOnInfo(tbl[i])
+		local _, _, _, enabled = GetAddOnInfo(tbl[i])
 		if enabled then return end -- Bail out
 	end
 end
@@ -60,10 +64,10 @@ local L = {
 
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
-for i = 1, C_AddOns.GetNumAddOns() do
+for i = 1, GetNumAddOns() do
 	local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
 	if meta then
-		local _, _, _, enabled = C_AddOns.GetAddOnInfo(i)
+		local _, _, _, enabled = GetAddOnInfo(i)
 		if enabled then
 			displayObjectName = meta
 			break
@@ -93,10 +97,10 @@ local tableToString = "table: %s"
 local function setupCallbacks()
 	if not callbacks and LibStub and LibStub("CallbackHandler-1.0", true) then
 		callbacks = LibStub("CallbackHandler-1.0"):New(addon)
-		function callbacks:OnUsed(target, eventname)
+		function callbacks:OnUsed(_, eventname)
 			if eventname == "BugGrabber_BugGrabbed" then isBugGrabbedRegistered = true end
 		end
-		function callbacks:OnUnused(target, eventname)
+		function callbacks:OnUnused(_, eventname)
 			if eventname == "BugGrabber_BugGrabbed" then isBugGrabbedRegistered = nil end
 		end
 		setupCallbacks = nil
@@ -191,7 +195,7 @@ do
 			found = minor
 		end
 		-- Then see if we can get some addon metadata
-		if not found and C_AddOns.IsAddOnLoaded(object) then
+		if not found and IsAddOnLoaded(object) then
 			found = GetAddOnMetadata(object, "X-Curse-Packaged-Version")
 			if not found then
 				found = GetAddOnMetadata(object, "Version")
@@ -390,7 +394,7 @@ end
 
 function addon:GetErrorByID(id)
 	local errorId = tableToString:format(id)
-	for i, err in next, db do
+	for _, err in next, db do
 		if tostring(err) == errorId then
 			return err
 		end
@@ -433,7 +437,7 @@ local function initDatabase()
 
 	-- If there were any load errors, we need to iterate them and
 	-- insert the relevant ones into our SV DB.
-	for i, err in next, loadErrors do
+	for _, err in next, loadErrors do
 		err.session = sv.session -- Update the session ID directly
 		local exists = fetchFromDatabase(db, err.message)
 		addon:StoreError(exists or err)
@@ -521,7 +525,7 @@ do
 			if bugGrabberParentAddon == STANDALONE_NAME then
 				print(L.ADDON_DISABLED:format("Swatter", "Swatter", "Swatter"))
 			end
-			C_AddOns.DisableAddOn("!Swatter")
+			DisableAddOn("!Swatter")
 			SlashCmdList.SWATTER = nil
 			SLASH_SWATTER1, SLASH_SWATTER2 = nil, nil
 			for _, v in next, Swatter do
@@ -536,7 +540,7 @@ do
 			end
 			Swatter = nil
 
-			local _, _, _, enabled = C_AddOns.GetAddOnInfo("Stubby")
+			local _, _, _, enabled = GetAddOnInfo("Stubby")
 			if enabled then createSwatter() end
 
 			real_seterrorhandler(grabError)
