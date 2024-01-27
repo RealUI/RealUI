@@ -370,6 +370,7 @@ local function InitializeOptions()
         if i == 1 then
             Scale.Point(btn, "TOPLEFT")
             local check = _G.CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
+
             Skin.UICheckButtonTemplate(check)
             Scale.Point(check, "CENTER", 0, 10)
             check:SetHitRectInsets(-10, -10, -1, -21)

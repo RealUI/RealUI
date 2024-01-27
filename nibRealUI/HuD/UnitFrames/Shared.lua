@@ -256,7 +256,7 @@ local CreateHealthPredictBar do
         end
 
         local overAbsorb, atMax
-        if healthBar:GetReversePercent() then
+        if healthBar:GetReversePercent() ~= nil then
             if (totalAbsorb >= health) then
                 overAbsorb = true
 

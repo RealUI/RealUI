@@ -5,13 +5,16 @@ local _, private = ...
 
 local Inventory = private.Inventory
 
-function Inventory:OpenBags()
+function Inventory:OpenBags(frame)
+    if frame ~= nil then return end
     self.main:Show()
 end
-function Inventory:CloseBags()
+function Inventory:CloseBags(frame)
+    if frame ~= nil then return end
     self.main:Hide()
 end
-function Inventory:ToggleBags()
+function Inventory:ToggleBags(frame)
+    if frame ~= nil then return end
     if self.main:IsShown() then
         self.main:Hide()
     else
