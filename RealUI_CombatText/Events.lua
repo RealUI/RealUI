@@ -293,9 +293,9 @@ function eventSuffix.LEECH(eventInfo, amount, powerType, extraAmount, alternateP
     return true
 end
 
-local eventFormat = "%s %s %s"
+local eventFormat = "%s %s (%s)"
 function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
-    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName, extraSpellSchool)
+    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName, GetSchoolString(extraSpellSchool))
 
     eventInfo.canMerge = false
     eventInfo.isSticky = true
