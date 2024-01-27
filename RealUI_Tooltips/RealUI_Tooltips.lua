@@ -319,28 +319,7 @@ _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(toolt
 
             local _, canCollect =_G.CollectionWardrobeUtil.PlayerCanCollectSource(itemModifiedAppearanceID)
             if not canCollect then
-            --[[if canCollect then
-                -- Blizz shows these tips natively, so we won't worry about them for now
-                local slotID = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
-                local transmogLocation = _G.TransmogUtil.CreateTransmogLocation(slotID, _G.Enum.TransmogType.Appearance, _G.Enum.TransmogModification.Main)
-                local sources = _G.C_TransmogCollection.GetAppearanceSources(itemAppearanceID, sourceInfo.categoryID, transmogLocation)
-                if sources then
-                    local hasSource = false
-                    for i, source in next, sources do
-                        if source.isCollected then
-                            _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_ITEM_UNKNOWN_APPEARANCE_KNOWN , _G.LIGHTBLUE_FONT_COLOR)
-                            hasSource = true
-                            break
-                        end
-                    end
-
-                    if not hasSource then
-                        _G.GameTooltip_AddColoredLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNKNOWN , _G.LIGHTBLUE_FONT_COLOR)
-                    end
-                end
-            else]]--
                 local invSlot = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
-
                 _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(itemModifiedAppearanceID)
                 if not canCollect and (invSlot == _G.INVSLOT_MAINHAND or invSlot == _G.INVSLOT_OFFHAND) then
                     local pairedTransmogID = _G.C_TransmogCollection.GetPairedArtifactAppearance(itemModifiedAppearanceID);
