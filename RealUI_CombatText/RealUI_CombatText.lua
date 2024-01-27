@@ -217,6 +217,7 @@ local function Dispatch(eventInfo, ...)
             private.eventPrefix[eventBase](eventInfo, ...)
         else
             _G.print("missing base event", eventBase, eventType)
+            _G.print("report event data", eventInfo.event)
         end
     end
 end
