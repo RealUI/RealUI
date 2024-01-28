@@ -27,4 +27,5 @@ Update
 Troubleshooting/comments/questions?
 -----------------------------------
 
-Find a bug or want to post a comment? Please visit the [RealUI Forums](http://www.wowinterface.com/forums/forumdisplay.php?f=163).
+Find a bug or want to post a comment? Please visit the ![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)(https://discord.gg/0fn0FPyQGIXpuoKO).
+
