@@ -160,6 +160,23 @@ do -- RealUI
                     type = "description",
                     order = 41,
                 },
+                HideStatusBarMaxLevel = {
+                    name = L["Infobar_HideStatusBarMaxLevel"],
+                    desc = L["Infobar_HideStatusBarMaxLevelDesc"],
+                    type = "toggle",
+                    disabled = function() return not Infobar.db.profile.blocks.realui.progress.enabled end,
+                    get = function() return Infobar.db.profile.HideStatusBarMaxLevel end,
+                    set = function(info, value)
+                        Infobar.db.profile.HideStatusBarMaxLevel = value
+                        Infobar:SettingsUpdate(info[#info], progress)
+                    end,
+                    order = 42,
+                },
+                gap3 = {
+                    name = " ",
+                    type = "description",
+                    order = 43,
+                },
                 inCombat = {
                     name = L["Infobar_CombatTooltips"],
                     desc = L["Infobar_CombatTooltipsDesc"],

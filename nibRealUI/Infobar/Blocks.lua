@@ -1687,7 +1687,8 @@ function Infobar:CreateBlocks()
             block.dataObj.icon = fa["thermometer-"..round(value * 4)]
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
-            if Infobar.db.profile.showBars then
+
+            if Infobar.db.profile.showBars and not (Infobar.db.profile.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()) then
                 local watch = Infobar.frame.watch
                 Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 

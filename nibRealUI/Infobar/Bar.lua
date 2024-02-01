@@ -856,11 +856,12 @@ function Infobar:Lock()
 end
 
 function Infobar:SettingsUpdate(setting, block)
-    if setting == "statusBar" then
+    -- print("setting:", setting, " block:", block)
+    if setting == "statusBar" or "HideStatusBarMaxLevel" then
         local watch = self.frame.watch
-        watch.main:SetShown(db.showBars)
+        watch.main:SetShown(db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()))
         for i = 1, 2 do
-            watch[i]:SetShown(db.showBars)
+            watch[i]:SetShown(db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()))
         end
         block:OnEvent("SettingsUpdate")
     elseif setting == "bgAlpha" then
@@ -930,6 +931,7 @@ function Infobar:OnInitialize()
         profile = {
             bgAlpha = 0.5,
             showBars = true,
+            HideStatusBarMaxLevel = false,
             combatTips = false,
             blockGap = 3,
             blocks = {
