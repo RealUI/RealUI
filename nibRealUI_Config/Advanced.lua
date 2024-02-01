@@ -1997,7 +1997,7 @@ do -- UI Tweaks
                             name = "Size",
                             desc = "Note: Minimap will refresh to fit the new size upon player movement.",
                             type = "range",
-                            min = 134, max = 164, step = 1,
+                            min = 134, max = 250, step = 1,
                             get = function(info) return MinimapAdv.db.profile.position.size end,
                             set = function(info, value)
                                 MinimapAdv.db.profile.position.size = value
