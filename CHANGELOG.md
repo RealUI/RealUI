@@ -1,10 +1,28 @@
 ﻿## [2.3.11] ##
 ### Modified AddOns ###
 
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Bugs
+  * RealUI_Chat
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Tooltips
+
 ### Changed ###
- * TOC bump for 10.2.5
+ * BugGrabber to v10.2.2
+ * Infobar - Hide StatusBars at maxlevel
+ * Minimap - allow larger range on minimap size
+ * Combattext events - interupt extraSpellSchool displayed
+ * Taintless from 23-05-18 to 23-09-09
+ * License info updated
 
 ### Fixed ###
+  * Changes needed for 10.2.5 API differences
+  * Fixes for deprecated functions
+  * Using Enums for LFG Roles
+  * ToolTips location are controlled via Edit and not RealUI location
+  * Fixes to address nil situations
 
 
 ## [2.3.10] ##
