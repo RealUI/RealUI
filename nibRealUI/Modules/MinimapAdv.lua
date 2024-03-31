@@ -1275,7 +1275,7 @@ local hostilePvPTypes = {
 function MinimapAdv:ZoneChange(event, ...)
     self:debug("ZoneChange", event, ...)
     local r, g, b = 0.5, 0.5, 0.5
-    local pvpType = _G.GetZonePVPInfo()
+    local pvpType = _G.C_PvP.GetZonePVPInfo()
     if pvpType == "sanctuary" then
         r, g, b = 0.41, 0.8, 0.94
     elseif pvpType == "arena" then
@@ -1680,7 +1680,7 @@ local function SetUpMinimapFrame()
     -- -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
     _G.MinimapCluster.BorderTop:Hide()
-    _G.MinimapCluster.Tracking:Hide()
+    _G.MinimapCluster.TrackingFrame:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
 
     _G.AddonCompartmentFrame:Hide()
