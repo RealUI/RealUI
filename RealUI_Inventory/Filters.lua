@@ -257,7 +257,7 @@ tinsert(private.filterList, {
     name = _G.AUCTION_CATEGORY_CONSUMABLES,
     rank = 10,
     filter = function(slot)
-        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+        local _, _, _, _, _, typeID = _G.C_Item.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == ItemClass.Consumable
     end,
 })
@@ -289,7 +289,7 @@ tinsert(private.filterList, {
     name = _G.AUCTION_CATEGORY_QUEST_ITEMS,
     rank = 3,
     filter = function(slot)
-        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+        local _, _, _, _, _, typeID = _G.C_Item.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == ItemClass.Questitem
     end,
 })
@@ -298,13 +298,13 @@ local prefix = _G.BAG_FILTER_TRADE_GOODS .. ": %s"
 local tradegoods = _G.C_AuctionHouse.GetAuctionItemSubClasses(ItemClass.Tradegoods)
 for i = 1, (#tradegoods - 1) do
     local subClassID = tradegoods[i]
-    local name = _G.GetItemSubClassInfo(ItemClass.Tradegoods, subClassID)
+    local name = _G.C_Item.GetItemSubClassInfo(ItemClass.Tradegoods, subClassID)
     tinsert(private.filterList, {
         tag = "tradegoods_"..subClassID,
         name = prefix:format(name),
         rank = 30,
         filter = function(slot)
-            local _, _, _, _, _, typeID, subTypeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+            local _, _, _, _, _, typeID, subTypeID = _G.C_Item.GetItemInfoInstant(slot.item:GetItemID())
             return typeID == ItemClass.Tradegoods and subTypeID == subClassID
         end,
     })
@@ -315,7 +315,7 @@ tinsert(private.filterList, {
     name = _G.BAG_FILTER_TRADE_GOODS,
     rank = 31,
     filter = function(slot)
-        local _, _, _, _, _, typeID = _G.GetItemInfoInstant(slot.item:GetItemID())
+        local _, _, _, _, _, typeID = _G.C_Item.GetItemInfoInstant(slot.item:GetItemID())
         return typeID == ItemClass.Tradegoods
     end,
 })

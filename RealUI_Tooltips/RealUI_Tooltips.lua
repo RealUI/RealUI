@@ -498,7 +498,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
                     local link = _G.GetInventoryItemLink(cache[guid].unit, id)
                     Tooltips:debug(id, slot)
                     if link then
-                        local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.GetItemInfo(link)
+                        local _, _, rarity, ilvl, _, _, _, _, _, _, _, _, subTypeID = _G.C_Item.GetItemInfo(link)
                         if rarity and subTypeID then
                             if rarity ~= _G.Enum.ItemQuality.Artifact then
                                 ilvl = _G.RealUI.GetItemLevel(link)

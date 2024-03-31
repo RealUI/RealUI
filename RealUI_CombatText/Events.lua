@@ -295,7 +295,7 @@ end
 
 local eventFormat = "%s %s (%s)"
 function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
-    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName, GetSchoolString(extraSpellSchool))
+    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName, _G.C_Spell.GetSchoolString(extraSpellSchool))
 
     eventInfo.canMerge = false
     eventInfo.isSticky = true
