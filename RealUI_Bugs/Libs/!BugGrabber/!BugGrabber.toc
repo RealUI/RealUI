@@ -1,4 +1,4 @@
-## Interface: 100205
+## Interface: 100206
 ## Title: BugGrabber
 ## Version: v10.2.2
 ## Notes: Grabs bugs for the bug sack.

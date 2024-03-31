@@ -1,17 +1,17 @@
-## Interface: 100205
+## Interface: 100206
 ## Title: RealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe, Hanshi
 ## Version: 2.3.11
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
-## LoadWith: RealUI_Bugs
-## RequiredDeps: RealUI_Bugs Blizzard_WorldMap Blizzard_Deprecated
+## LoadWith: RealUI_Bugs, Bartender4
+## RequiredDeps: RealUI_Bugs Blizzard_WorldMap, Blizzard_Deprecated
 ## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-1.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, Raven
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
 ## X-oUF: oUFembed
 ## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
-## Globe-Pre: RealUI_Bugs, RealUI_Skins
+## Globe-Pre: RealUI_Bugs, RealUI_Skins, Blizzard_Deprecated
 
 Libs\Libs.xml
 Util.lua
