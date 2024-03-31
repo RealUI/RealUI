@@ -2,7 +2,7 @@
 ## Title: RealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe, Hanshi
-## Version: 2.3.11
+## Version: 2.3.12
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: RealUI_Bugs, Bartender4
 ## RequiredDeps: RealUI_Bugs Blizzard_WorldMap, Blizzard_Deprecated

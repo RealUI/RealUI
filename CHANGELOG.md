@@ -1,4 +1,19 @@
-﻿## [2.3.11] ##
+﻿## [2.3.12] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Changed ###
+
+### Fixed ###
+  * Changes needed for 10.2.6 API changes - C_Item, C_PVP TrackingFrame
+  * Fixes for deprecated functions
+
+## [2.3.11] ##
 ### Modified AddOns ###
 
   * nibRealUI
