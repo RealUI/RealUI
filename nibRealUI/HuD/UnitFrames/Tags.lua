@@ -207,7 +207,13 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
-    local color = tags.Methods["threatcolor"](unit)
+    local status =  UnitThreatSituation("player", unit)
+    local color = nil
+
+    if (status ~= nil) and (_G.GetNumGroupMembers() > 0 or UnitExists("pet")) then
+        color = tags.Methods["threatcolor"]("player", unit)
+    end
+
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
     if percentage and not _G.UnitIsDeadOrGhost(unit) then
@@ -217,6 +223,9 @@ tags.Methods["realui:threat"] = function(unit)
 
         if percentage and percentage ~= 0 then
             UnitFrames:debug("threat", color, isTanking, percentage)
+            if _G.RealUI.isDev then
+                 print(("Current threat: - %s%1.0f%%|r"):format(color, percentage))
+            end
             return ("%s%1.0f%%|r"):format(color, percentage)
         end
     end
