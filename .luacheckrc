@@ -1,7 +1,9 @@
 exclude_files = {
     "**/Libs/**",
     "**/Locale/**",
-    ".release/**"
+    ".release/**",
+    "!RealUI_Preloads/**",
+    "RealUI_Preloads/**",
 }
 
 ignore = {

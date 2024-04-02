@@ -1,0 +1,8 @@
+## Interface: 100206
+## Title: !RealUI_Preloads
+## Notes: The preload Blizzard Depencies essential core of RealUI and others
+## Author: Hanshi
+## Version: 2.3.11
+## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
+## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
+RealUI_PreLoads.lua

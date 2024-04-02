@@ -88,7 +88,7 @@ local defaults, charInit do
     for specIndex = 1, #RealUI.charInfo.specs do
         local role = RealUI.charInfo.specs[specIndex].role
         debug("Spec info", specIndex, role)
-        spec[specIndex] = role == Enum.LFGRole.Healer and 2 or 1
+        spec[specIndex] = role == _G.Enum.LFGRole.Healer and 2 or 1
     end
     defaults = {
         global = {
@@ -297,7 +297,7 @@ function RealUI:OnInitialize()
     self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
     for specIndex = 1, #RealUI.charInfo.specs do
         local spec = RealUI.charInfo.specs[specIndex]
-        if spec.role == Enum.LFGRole.Healer then
+        if spec.role == _G.Enum.LFGRole.Healer then
             self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
         end
     end
