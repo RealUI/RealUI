@@ -207,12 +207,14 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
-    local status =  UnitThreatSituation("player", unit)
-    local color = nil
+    local color = tags.Methods["threatcolor"](unit)
 
-    if (status ~= nil) and (_G.GetNumGroupMembers() > 0 or UnitExists("pet")) then
-        color = tags.Methods["threatcolor"]("player", unit)
-    end
+    -- Workaround for player threat not updating properly in 10.2.6 with oUF pre-patchID c872822f26db0faa26ab00223ecde2e42691f50f
+    -- local status =  UnitThreatSituation("player", unit)
+    -- local color = nil
+    -- if (status ~= nil) and (_G.GetNumGroupMembers() > 0 or UnitExists("pet")) then
+    --     color = tags.Methods["threatcolor"]("player", unit)
+    -- end
 
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
