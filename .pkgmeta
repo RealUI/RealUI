@@ -86,3 +86,4 @@ move-folders:
     nibRealUI/RealUI_Skins: RealUI_Skins
     nibRealUI/RealUI_Tooltips: RealUI_Tooltips
     Aurora: RealUI_Skins/Aurora
+    nibRealUI/!RealUI_Preloads: "!RealUI_Preloads"
