@@ -130,7 +130,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                     local socketIdx = 0
                     if #gems > 0 then
                         for i, gem in next, gems do
-                            self.gems[i]:SetTexture(_G.C_Item.GetItemIcon(gem))
+                            self.gems[i]:SetTexture(_G.C_Item.GetItemIconByID(gem))
                             self.gems[i]:Show()
                             socketIdx = i
                         end

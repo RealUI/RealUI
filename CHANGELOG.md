@@ -1,4 +1,25 @@
-﻿## [2.3.12] ##
+﻿## [2.3.13] ##
+### Modified AddOns ###
+
+  * nibRealUI
+  * !RealUI_Preloads
+  * RealUI_Bugs
+  * RealUI_Skins
+
+### Changed ###
+  * Upgrade to BugGrabber v10.2.3
+  * Added RealUI_Preloads
+
+### Fixed ###
+  * Fixed so make RealUI_Preloads LoadWith Blizzard_CompactRaidFrames to make sure Blizzard_deprecated is loaded before RealUI
+  * Fixed Blizzard_Deprecated and friends since Blizzard changed the layout of Blizzard_Deprecated
+  * Fixed the error from threat colors on targeting units.
+  * Fixed threatcolor towards upstream in oUF
+  * Fixed some lint errors for ENUM, missing _G and unused variables.
+  * Fixed error caused by changes to GetItemIcon - replaced with C_Item.GetItemIconByID
+
+
+## [2.3.12] ##
 ### Modified AddOns ###
 
   * nibRealUI
@@ -12,6 +33,7 @@
 ### Fixed ###
   * Changes needed for 10.2.6 API changes - C_Item, C_PVP TrackingFrame
   * Fixes for deprecated functions
+
 
 ## [2.3.11] ##
 ### Modified AddOns ###
