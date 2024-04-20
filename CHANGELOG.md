@@ -1,7 +1,7 @@
 ﻿## [2.3.14] ##
 ### Modified AddOns ###
 
-  * nibRealUI (Aurora)
+  * nibRealUI (Aurora 10.2.6.1)
 
 ### Changed ###
   * Pushed related to Aurora
