@@ -7,7 +7,7 @@ local _, private = ...
 local Aurora = private.Aurora
 local Hook = Aurora.Hook
 
-do --[[ FrameXML\FriendsFrame.lua ]]
+do --[[ SharedXML\FriendsFrame.lua ]]
     local wowFormat = "%s, ".. _G.LEVEL_ABBR .. " %d"
     local bnetFriendColor = _G.FRIENDS_BNET_NAME_COLOR:GenerateHexColor()
     local bnetFormat = "|c"..bnetFriendColor.."%s|r (".. wowFormat .. ")"
@@ -68,8 +68,8 @@ do --[[ FrameXML\FriendsFrame.lua ]]
     end)
 end
 
--- do --[[ FrameXML\FriendsFrame.xml ]]
+-- do --[[ SharedXML\FriendsFrame.xml ]]
 -- end
 
---_G.hooksecurefunc(private.FrameXML, "FriendsFrame", function()
---end)
+-- _G.hooksecurefunc(private.SharedXML, "FriendsFrame", function()
+-- end)
