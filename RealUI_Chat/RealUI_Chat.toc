@@ -1,4 +1,4 @@
-## Interface: 100206
+## Interface: 100207
 ## Title: RealUI Chat
 ## Notes: Useful chat mods
 ## Author: Gethe
