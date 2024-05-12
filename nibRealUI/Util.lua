@@ -279,7 +279,7 @@ scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 local cache = {}
 local itemLevelPattern = _G.ITEM_LEVEL:gsub("%%d", "(%%d+)")
 function RealUI.GetItemLevel(itemLink)
-    local iLvl = _G.GetDetailedItemLevelInfo(itemLink)
+    local iLvl = _G.C_Item.GetDetailedItemLevelInfo(itemLink)
     if iLvl and iLvl > 0 then
         return iLvl
     end
