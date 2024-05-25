@@ -410,12 +410,9 @@ do -- ButtonCollectFrame
             local button = buttonFrame[i]
 
             ClearAllPoints(button)
-            --print("Eval", i, i + line - 1, _G.floor(row+1) * line, row)
             if i + line - 1 == _G.floor(row + 1) * line then
-                --print("Row start", i)
                 SetPoint(button, "TOPLEFT", buttonFrame, "TOPLEFT", 0, -(row * 32))
             else
-                --print("Row cont.", i)
                 SetPoint(button, "TOPLEFT", buttonFrame[i - 1], "TOPRIGHT", 2, 0)
             end
             row = i / line

@@ -1,4 +1,22 @@
-﻿## [2.3.14] ##
+﻿## [2.3.15] ##
+### Modified AddOns ###
+  * nibRealUI
+  * !RealUI_Preloads
+  * RealUI_Bugs
+  * RealUI_Skins
+  * Other files
+
+### Changed ###
+  * chore: interface update for preloads/loadwiths
+  * update: TaintLess - updated from 23-09-09 to 24-02-20
+  * fix: missing C_Item for GetDetailedItemLevelInfo
+  * chore: fix for discontinued functions
+  * chore: FrameXML is discontinued - moved to Addons\Blizzard_SharedXML
+  * chore: toc bump
+  * chg: updated FUNDING yaml file
+
+
+## [2.3.14] ##
 ### Modified AddOns ###
 
   * nibRealUI (Aurora 10.2.6.1)
