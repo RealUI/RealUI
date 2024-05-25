@@ -4,7 +4,7 @@
 ## Author: Gethe
 ## Version: 2.3.14
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
-## LoadWith: Blizzard_BNet
+## LoadWith: Blizzard_ChatFrame
 ## OptionalDeps: Ace3, LibTextDump-1.0
 ## SavedVariables: RealUI_Storage, RealUI_Debug
 
