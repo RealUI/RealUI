@@ -2,7 +2,7 @@
 ## Title: RealUI Inventory
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe
-## Version: 2.3.15
+## Version: 2.3.16
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_InventoryDB
