@@ -483,6 +483,11 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
     local block = blocksByData[dataObj]
     if block and not block.isFake then
         local blockInfo = self:GetBlockInfo(name, dataObj)
+        if not blockInfo then
+            _G.print("Error: Infobar:LibDataBroker_AttributeChanged - No blockInfo for", name)
+            _G.print("Report me....!")
+            return
+        end
         if attr == "value" or attr == "suffix" or attr == "text" then
             if dataObj.suffix and dataObj.suffix ~= "" then
                 block.text:SetText(dataObj.value .. " " .. dataObj.suffix)
