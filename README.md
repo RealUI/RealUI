@@ -1,6 +1,6 @@
 RealUI
 [![Build Status](https://github.com/RealUI/RealUI/workflows/CI/badge.svg)](https://github.com/RealUI/RealUI/actions?query=workflow%3ACI)
-[![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)](https://discord.gg/0fn0FPyQGIXpuoKO)
+[![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)](https://discord.gg/sasExJYxgf)
 ======
 
 RealUI is a minimalistic UI designed to be functional, yet also efficient and elegant.
@@ -27,5 +27,5 @@ Update
 Troubleshooting/comments/questions?
 -----------------------------------
 
-Find a bug or want to post a comment? Please visit the ![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)(https://discord.gg/0fn0FPyQGIXpuoKO).
+Find a bug or want to post a comment? Please visit the ![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)(https://discord.gg/sasExJYxgf).
 
