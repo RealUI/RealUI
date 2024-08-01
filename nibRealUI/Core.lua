@@ -259,7 +259,7 @@ function RealUI:OnProfileUpdate(event, database, profile)
 
     RealUI:SetProfilesToRealUI()
 
-    for name, module in self:IterateModules() do
+    for _, module in self:IterateModules() do
        module:OnProfileUpdate(event, profile)
     end
 
