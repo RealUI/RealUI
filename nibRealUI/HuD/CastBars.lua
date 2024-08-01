@@ -41,7 +41,7 @@ local ChannelingTicks = {}
 do
     local spellNotFound = "The spell for ID %d no longer exists."
     local function RegisterSpellName(spellID, numticks, isInstant)
-        assert(_G.GetSpellInfo(spellID), spellNotFound:format(spellID))
+        assert(_G.C_Spell.GetSpellInfo(spellID), spellNotFound:format(spellID))
 
         ChannelingTicks[spellID] = {
             ticks = numticks,
@@ -73,7 +73,7 @@ do
 
     -- Monk
     RegisterSpellName(117952, 4 / 1, false)     -- Crackling Jade Lightning
-    RegisterSpellName(191837, 3 / 1.002, false) -- Essence Font
+    -- RegisterSpellName(191837, 3 / 1.002, false) -- Essence Font
     RegisterSpellName(113656, 4 / 1, true)      -- Fists of Fury
     RegisterSpellName(115175, 20 / 0.5, false)  -- Soothing Mist
     RegisterSpellName(101546, 1.5 / 0.5, true)  -- Spinning Crane Kick

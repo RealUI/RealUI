@@ -96,16 +96,20 @@ local function InitTest()
     local spells = _G.C_SpecializationInfo.GetSpellsDisplay(specID)
 
     local spell1ID = spells[1]
-    local spell1Name = _G.GetSpellInfo(spell1ID)
+    local spell1info = _G.C_Spell.GetSpellInfo(spell1ID)
+    local spell1Name = spell1info.name
 
     local spell2ID = spells[2]
-    local spell2Name = _G.GetSpellInfo(spell2ID)
+    local spell2info = _G.C_Spell.GetSpellInfo(spell2ID)
+    local spell2Name = spell2info.name
 
     local spell3ID = spells[3]
-    local spell3Name = _G.GetSpellInfo(spell3ID)
+    local spell3info = _G.C_Spell.GetSpellInfo(spell3ID)
+    local spell3Name = spell3info.name
 
     local spell4ID = spells[4]
-    local spell4Name = _G.GetSpellInfo(spell4ID)
+    local spell4info = _G.C_Spell.GetSpellInfo(spell4ID)
+    local spell4Name = spell4info.name
 
     local eventArgs = {
         SWING_DAMAGE = function()

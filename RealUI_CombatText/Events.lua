@@ -92,8 +92,8 @@ end
 function eventPrefix.RANGE(eventInfo, ...)
     eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
 
-    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = icon
+    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = info.iconID
 
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
@@ -103,8 +103,8 @@ end
 function eventPrefix.SPELL(eventInfo, ...)
     eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
 
-    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = icon
+    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = info.iconID
 
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
@@ -114,8 +114,8 @@ end
 function eventPrefix.SPELL_EMPOWER(eventInfo, ...)
     eventInfo.spellID, eventInfo.spellName = ...
 
-    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = icon
+    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = info.iconID
 
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
@@ -125,8 +125,8 @@ end
 function eventPrefix.SPELL_PERIODIC(eventInfo, ...)
     eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
 
-    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = icon
+    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = info.iconID
 
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
@@ -136,8 +136,8 @@ end
 function eventPrefix.SPELL_BUILDING(eventInfo, ...)
     eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
 
-    local _, _, icon = _G.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = icon
+    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
+    eventInfo.icon = info.iconID
 
     if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
         private.AddEvent(eventInfo)
