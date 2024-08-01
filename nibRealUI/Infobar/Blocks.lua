@@ -549,18 +549,18 @@ function Infobar:CreateBlocks()
                 checked = function() return Infobar.locked end,
             },
             {isSpacer = true},
-            {text = _G.MicroButtonTooltipText(_G.CHARACTER_BUTTON, "TOGGLECHARACTER0"),
+            {text = _G.MicroButtonTooltipText(_G.CHARACTER_BUTTON, "TOGGLECHARACTER0"), --FIXLATER
                 func = ToggleUI,
                 arg1 = "ToggleCharacter",
                 arg2 = "PaperDollFrame",
             },
-            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"),
+            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"), --FIXLATER
                 func = ToggleUI,
                     -- ToggleSpellBook causes taint
                 arg1 = "ToggleFrame",
-                arg2 = _G.SpellBookFrame,
+                arg2 = _G.SpellBookFrame, --FIXLATER
             },
-            {text = _G.MicroButtonTooltipText(_G.TALENTS_BUTTON, "TOGGLETALENTS"),
+            {text = _G.MicroButtonTooltipText(_G.TALENTS_BUTTON, "TOGGLETALENTS"), --FIXLATER
                 func = function()
                     if _G.InCombatLockdown() then return end
 
@@ -574,14 +574,14 @@ function Infobar:CreateBlocks()
                 func = ToggleUI,
                 arg1 = "ToggleAchievementFrame",
             },
-            {text = _G.MicroButtonTooltipText(_G.QUESTLOG_BUTTON, "TOGGLEQUESTLOG"),
+            {text = _G.MicroButtonTooltipText(_G.QUESTLOG_BUTTON, "TOGGLEQUESTLOG"), --FIXLATER
                 func = ToggleUI,
                 arg1 = "ToggleQuestLog",
             },
             {text = _G.MicroButtonTooltipText(guildText, "TOGGLEGUILDTAB"),
                 func = ToggleUI,
                 arg1 = "ToggleGuildFrame",
-                disabled = _G.IsCommunitiesUIDisabledByTrialAccount,
+                disabled = _G.IsCommunitiesUIDisabledByTrialAccount, --FIXLATER
             },
             {text = _G.MicroButtonTooltipText(_G.SOCIAL_BUTTON, "TOGGLESOCIAL"),
                 func = ToggleUI,
@@ -1458,7 +1458,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Rep)
-                local name, reaction, minRep, maxRep, curRep, factionID = _G.GetWatchedFactionInfo()
+                local name, reaction, minRep, maxRep, curRep, factionID = _G.C_Reputation.GetWatchedFactionInfo()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
                 Rep.factionID = factionID
@@ -1506,7 +1506,7 @@ function Infobar:CreateBlocks()
                 return color.r, color.g, color.b
             end,
             IsValid = function(Rep)
-                return not not _G.GetWatchedFactionInfo()
+                return not not _G.C_Reputation.GetWatchedFactionInfo()
             end,
             SetTooltip = function(Rep, tooltip)
                 local curRep, maxRep, name, hasRewardPending = Rep:GetStats()
@@ -1825,7 +1825,7 @@ function Infobar:CreateBlocks()
             end,
             events = {
                 "UPDATE_EXPANSION_LEVEL",
-                "PLAYER_LEVEL_UP",
+                "PLAYER_LEVEL_CHANGED",
                 "UPDATE_EXHAUSTION",
 
                 "PLAYER_XP_UPDATE",
