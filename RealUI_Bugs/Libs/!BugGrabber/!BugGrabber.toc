@@ -1,6 +1,6 @@
-## Interface: 100207
+## Interface: 11502, 11503, 20504, 30403, 40400, 100207, 110000, 110002
 ## Title: BugGrabber
-## Version: v10.2.3
+## Version: v10.2.6
 ## Notes: Grabs bugs for the bug sack.
 ## Notes-deDE: Grabs bugs for the bug sack.
 ## Notes-ruRU: Grabs bugs for the bug sack.
