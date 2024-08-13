@@ -316,8 +316,7 @@ _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(toolt
             if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
                 _G.GameTooltip_AddColoredLine(tooltip, TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK , _G.GREEN_FONT_COLOR)
             end
-
-            local _, canCollect =_G.CollectionWardrobeUtil.PlayerCanCollectSource(itemModifiedAppearanceID)
+            local _, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(itemModifiedAppearanceID)
             if not canCollect then
                 local invSlot = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
                 _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(itemModifiedAppearanceID)
