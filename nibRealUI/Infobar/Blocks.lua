@@ -1458,7 +1458,9 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Rep)
-                local name, reaction, minRep, maxRep, curRep, factionID = _G.C_Reputation.GetWatchedFactionInfo()
+                local watchedFactionData = _G.C_Reputation.GetWatchedFactionData();
+                local curRep, minRep, maxRep, factionID = watchedFactionData.standing, watchedFactionData.minRep, watchedFactionData.max, watchedFactionData.factionID
+                -- local name, reaction, minRep, maxRep, curRep, factionID = _G.C_Reputation.GetWatchedFactionInfo()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
                 Rep.factionID = factionID
@@ -1506,7 +1508,7 @@ function Infobar:CreateBlocks()
                 return color.r, color.g, color.b
             end,
             IsValid = function(Rep)
-                return not not _G.C_Reputation.GetWatchedFactionInfo()
+                return not not _G.C_Reputation.GetWatchedFactionData()
             end,
             SetTooltip = function(Rep, tooltip)
                 local curRep, maxRep, name, hasRewardPending = Rep:GetStats()
