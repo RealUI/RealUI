@@ -294,7 +294,8 @@ tinsert(private.filterList, {
     end,
 })
 
-local prefix = _G.BAG_FILTER_TRADE_GOODS .. ": %s"
+-- FIXLATER
+local prefix = _G.BAG_FILTER_PROFESSION_GOODS .. ": %s"
 local tradegoods = _G.C_AuctionHouse.GetAuctionItemSubClasses(ItemClass.Tradegoods)
 for i = 1, (#tradegoods - 1) do
     local subClassID = tradegoods[i]
@@ -312,7 +313,7 @@ end
 
 tinsert(private.filterList, {
     tag = "tradegoods",
-    name = _G.BAG_FILTER_TRADE_GOODS,
+    name = _G.AUCTION_CATEGORY_TRADE_GOODS,
     rank = 31,
     filter = function(slot)
         local _, _, _, _, _, typeID = _G.C_Item.GetItemInfoInstant(slot.item:GetItemID())
