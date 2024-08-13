@@ -18,6 +18,7 @@ end
 local Enum = {}
 -- BagIndex added in 10.0.2
 Enum.BagIndex = {
+    Accountbanktab = -5,
     Bankbag = -4,
     Reagentbank = -3,
     Keyring = -2,
@@ -35,6 +36,11 @@ Enum.BagIndex = {
     BankBag_5 = 10,
     BankBag_6 = 11,
     BankBag_7 = 12,
+    AccountBankTab_1 = 13,
+    AccountBankTab_2 = 14,
+    AccountBankTab_3 = 15,
+    AccountBankTab_4 = 16,
+    AccountBankTab_5 = 17,
 }
 RealUI.Enum = Enum
 
