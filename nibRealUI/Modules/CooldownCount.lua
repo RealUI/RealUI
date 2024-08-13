@@ -195,10 +195,10 @@ function CooldownCount:OnEnable()
             cd._timer:Start(start, duration, modRate)
         end
     end)
-    _G.SetCVar("countdownForCooldowns", 0)
+    _G.SetCVar("countdownForCooldowns", 1)
 end
 
 function CooldownCount:OnDisable()
     self:UnregisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
-    _G.SetCVar("countdownForCooldowns", 1)
+    _G.SetCVar("countdownForCooldowns", 0)
 end
