@@ -3,13 +3,11 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <!-- Aurora -->
     <!--@non-debug@
     <Include file="..\Aurora\Skin\skin.xml"/>
-    <Include file="..\Aurora\Skin\Interface\FrameXML\FrameXML.xml"/>
-    <Include file="..\Aurora\Skin\Interface\AddOns\AddOns.xml"/>
+    <Include file="..\Aurora\Skin\Interface\AddOns\AddOns_Mainline.xml"/>
     @end-non-debug@-->
     <!--@debug@-->
     <Include file="..\..\Aurora\Skin\skin.xml"/>
-    <Include file="..\..\Aurora\Skin\Interface\FrameXML\FrameXML.xml"/>
-    <Include file="..\..\Aurora\Skin\Interface\AddOns\AddOns.xml"/>
+    <Include file="..\..\Aurora\Skin\Interface\AddOns\AddOns_Mainline.xml"/>
     <!--@end-debug@-->
 
 
