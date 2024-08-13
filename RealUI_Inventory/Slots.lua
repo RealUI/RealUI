@@ -81,7 +81,9 @@ function ItemSlotMixin:Update()
 
     local questTexture = self.IconQuestTexture
     if itemQuestInfo.questID then
-        self._auroraIconBorder:SetBackdropBorderColor(1, 1, 0)
+        if self._auroraIconBorder then
+            self._auroraIconBorder:SetBackdropBorderColor(1, 1, 0)
+        end
         if not itemQuestInfo.isActive then
             questTexture:SetTexture(_G.TEXTURE_ITEM_QUEST_BANG)
             questTexture:Show()
@@ -180,7 +182,7 @@ function BankSlotMixin:Update()
 end
 function BankSlotMixin:GetInventorySlot()
     local bagID, slotIndex = self:GetBagAndSlot()
-    if bagID == _G.REAGENTBANK_CONTAINER then
+    if bagID == _G.Enum.BagIndex.Reagentbank then
         return _G.ReagentBankButtonIDToInvSlotID(slotIndex)
     else
         return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
@@ -253,7 +255,7 @@ function private.GetFirstFreeSlot(bagID)
 end
 
 function private.GetSlotTypeForBag(bagID)
-    if bagID == _G.BANK_CONTAINER or bagID == _G.REAGENTBANK_CONTAINER then
+    if bagID == _G.BANK_CONTAINER or bagID == _G.Enum.BagIndex.Reagentbank then
         return bankSlots
     end
 
@@ -275,6 +277,7 @@ local mainBags = {
     [BagIndex.Backpack] = _G.BACKPACK_TOOLTIP,
     [BagIndex.Bank] = _G.BANK,
     [BagIndex.Reagentbank] = _G.REAGENT_BANK,
+    [BagIndex.Accountbanktab] = ACCOUNT_BANK_PANEL_TITLE,
 }
 local BagSlotMixin = {}
 function BagSlotMixin:Init(bagID)
