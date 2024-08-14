@@ -375,6 +375,7 @@ function RealUI:OnInitialize()
         RealUI.LoadConfig("RealUI")
     end)
     self:RegisterChatCommand("rl", _G.ReloadUI)
+    self:RegisterChatCommand("rl", _G.ReloadUI)
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
     self:RegisterChatCommand("findSpell", function(input)
         -- /findSpell "Spell Name" (player)|target (buff)|debuff
@@ -388,14 +389,7 @@ function RealUI:OnInitialize()
         self.FindSpellID(spellName, unit, auraType)
     end)
 
-    -- Hide store button
-    _G.GameMenuButtonEditMode:HookScript("OnClick", function()
-        RealUI.Debug("Config", "GameMenuFrame")
-        RealUI.LoadConfig("HuD")
-        _G.HideUIPanel(_G.GameMenuFrame)
-    end)
-
-    -- Position Chat Frame
+      -- Position Chat Frame
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
         _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
@@ -436,7 +430,7 @@ local onLoadMessages = {
     }
     ]]
     reload = {
-        text = "When changing the position of UI frames, please be sure to reaload the UI with /rl",
+        text = "When changing the position of UI frames, please be sure to reload the UI with /rl",
     }
 }
 function RealUI:OnEnable()
