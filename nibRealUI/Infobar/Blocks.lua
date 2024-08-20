@@ -1458,8 +1458,9 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Rep)
-                local watchedFactionData = _G.C_Reputation.GetWatchedFactionData();
-                local curRep, minRep, maxRep, factionID = watchedFactionData.standing, watchedFactionData.minRep, watchedFactionData.max, watchedFactionData.factionID
+                local watchedFactionData = _G.C_Reputation.GetWatchedFactionData()
+                local curRep, minRep, maxRep, factionID, reaction, name = watchedFactionData.currentStanding, watchedFactionData.currentReactionThreshold, watchedFactionData.nextReactionThreshold, watchedFactionData.factionID, watchedFactionData.reaction, watchedFactionData.name
+
                 -- local name, reaction, minRep, maxRep, curRep, factionID = _G.C_Reputation.GetWatchedFactionInfo()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
                 Rep.colorIndex = reaction
@@ -1657,7 +1658,7 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(" ")
             end,
             OnClick = function(Honor)
-                _G.ToggleTalentFrame(_G.PVP_TALENTS_TAB)
+                _G.PlayerSpellsUtil.TogglePlayerSpellsFrame(_G.PlayerSpellsUtil.FrameTabs.ClassTalents)
             end
         }
 
