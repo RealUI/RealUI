@@ -407,6 +407,12 @@ do -- ButtonCollectFrame
     local function positionButtons()
         local line, row = _G.floor(buttonFrame:GetWidth() / 32), 0
         for i = 1, #buttonFrame do
+            if i <= #buttonFrame and not buttonFrame[i]:IsVisible() then
+                _G.tremove(buttonFrame,i)
+            end
+        end
+
+        for i = 1, #buttonFrame do
             local button = buttonFrame[i]
 
             ClearAllPoints(button)
@@ -1166,8 +1172,22 @@ local isPulseEvent = {
     SHIPMENT_UPDATE = true,
 }
 
-local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0_Garrison
-local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower
+local GARRISONTYPE = _G.Enum.GarrisonType
+local GARRISONTYPE_6_0 = GARRISONTYPE.Type_6_0_Garrison or GARRISONTYPE.Type_6_0
+local GARRISONTYPE_7_0 = GARRISONTYPE.Type_7_0_Garrison or GARRISONTYPE.Type_7_0
+local GARRISONTYPE_8_0 = GARRISONTYPE.Type_8_0_Garrison or GARRISONTYPE.Type_8_0
+local GARRISONTYPE_9_0 = GARRISONTYPE.Type_9_0_Garrison or GARRISONTYPE.Type_9_0
+
+local GARRISONFOLLOWER = _G.Enum.GarrisonFollowerType
+local GARRISONFOLLOWER_6_0_BOAT = GARRISONFOLLOWER.FollowerType_6_0_Boat
+local GARRISONFOLLOWER_6_0 = GARRISONFOLLOWER.FollowerType_6_0_GarrisonFollower
+local GARRISONFOLLOWER_7_0 = GARRISONFOLLOWER.FollowerType_7_0_GarrisonFollower
+local GARRISONFOLLOWER_8_0 = GARRISONFOLLOWER.FollowerType_8_0_GarrisonFollower
+local GARRISONFOLLOWER_9_0 = GARRISONFOLLOWER.FollowerType_9_0_GarrisonFollower
+
+local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0_Garrison  -- FIXLATER
+local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower -- FIXLATER GARRISONFOLLOWERTYPE_9_0 -> GARRISONFOLLOWER_9_0
+
 local currencyId = _G.C_Garrison.GetCurrencyTypes(garrisonTypeWoD)
 local categoryInfo = {}
 do -- by nebula
@@ -1229,7 +1249,7 @@ local function Garrison_OnEnter(self)
     if _G.C_Garrison.GetLandingPageGarrisonType() == garrisonTypeWoD then
         _G.GameTooltip:AddLine(" ")
 
-        local currency, amount = _G.GetCurrencyInfo(currencyId)
+        local currency, amount = _G.C_CurrencyInfo.GetCurrencyInfo(currencyId)
         _G.GameTooltip:AddDoubleLine(currency, RealUI.ReadableNumber(amount), 1, 1, 1, 1, 1, 1)
 
         if #categoryInfo > 0 then
@@ -1466,7 +1486,7 @@ local function CreateFrames()
         toggle = nil,
         config = nil,
         tracking = nil,
-        farm = nil,
+        -- farm = nil,
         info = {},
     }
     MMFrames = MinimapAdv.Frames
@@ -1519,7 +1539,7 @@ local function CreateFrames()
     local menuList = {
         {text = _G.MINIMAP_TRACKING_NONE,
             checked = _G.MiniMapTrackingDropDown_IsNoTrackingActive,
-            func = _G.ClearAllTracking
+            func = _G.C_Minimap.ClearAllTracking
         },
     }
     do
@@ -1534,8 +1554,8 @@ local function CreateFrames()
             numTracking = 0
             -- make sure there are at least two options in dropdown
             for id = 1, count do
-                _, _, _, category, nested = GetTrackingInfo(id)
-                if (nested == _G.HUNTER_TRACKING and category == "spell") then
+                local trackingInfoHunter = GetTrackingInfo(id)
+                if (trackingInfoHunter.subType == _G.HUNTER_TRACKING and trackingInfoHunter.type == "spell") then
                     numTracking = numTracking + 1
                 end
             end
@@ -1555,13 +1575,14 @@ local function CreateFrames()
         tinsert(menuList, townsfolk)
 
         for id = 1, count do
-            name, texture, _, category, nested  = GetTrackingInfo(id)
+            local trackingInfo = GetTrackingInfo(id)
+            name, texture, category, nested = trackingInfo.name, trackingInfo.texture, trackingInfo.type, trackingInfo.subType
             local info = {
                 text = name,
                 icon = texture,
                 checked = function(self)
-                    local _, _, active = GetTrackingInfo(id)
-                    return active
+                    local trackingInfo = _G.C_Minimap.GetTrackingInfo(id)
+                    return trackingInfo.active
                 end,
                 func = function(self, arg1, arg2, isChecked)
                     _G.C_Minimap.SetTracking(id, isChecked)
@@ -1576,10 +1597,10 @@ local function CreateFrames()
             end
 
             if (nested < 0 or -- this tracking shouldn't be nested
-                    (nested == _G.HUNTER_TRACKING and classToken ~= "HUNTER") or
-                    (numTracking == 1 and category == "spell")) then -- this is a hunter tracking ability, but you only have one
-                tinsert(menuList, info)
-            elseif nested == _G.TOWNSFOLK then
+                (nested == _G.HUNTER_TRACKING and classToken ~= "HUNTER") or
+                (numTracking == 1 and category == "spell")) then -- this is a hunter tracking ability, but you only have one
+                    tinsert(menuList, info)
+            elseif nested == _G.TOWNSFOLK_TRACKING then
                 tinsert(townsfolk.menuList, info)
             elseif nested == _G.HUNTER_TRACKING and classToken == "HUNTER" then
                 tinsert(hunterTracking.menuList, info)
@@ -1677,10 +1698,8 @@ local function SetUpMinimapFrame()
     -- -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
     _G.MinimapCluster.BorderTop:Hide()
-    _G.MinimapCluster.TrackingFrame:Hide()
+    _G.MinimapCluster.Tracking.Button:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
-
-    _G.AddonCompartmentFrame:Hide()
 
     local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
     if landingButton then
@@ -1702,7 +1721,6 @@ local function SetUpMinimapFrame()
     queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
     queueStatusButton:SetScale(0.5)
 
-    -- AddonCompartmentFrame:Hide()
     _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
     _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
     _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
@@ -1796,11 +1814,5 @@ function MinimapAdv:OnEnable()
     -- Community defined API
     function _G.GetMinimapShape()
         return "SQUARE"
-    end
-    if _G.AddonCompartmentFrame then
-        _G.AddonCompartmentFrame:HookScript("OnShow", function() _G.AddonCompartmentFrame:Hide()
-        end)
-
-        _G.AddonCompartmentFrame:Hide()
     end
 end
