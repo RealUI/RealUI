@@ -549,22 +549,21 @@ function Infobar:CreateBlocks()
                 checked = function() return Infobar.locked end,
             },
             {isSpacer = true},
-            {text = _G.MicroButtonTooltipText(_G.CHARACTER_BUTTON, "TOGGLECHARACTER0"), --FIXLATER
+            {text = _G.MicroButtonTooltipText(_G.CHARACTER_BUTTON, "TOGGLECHARACTER0"),
                 func = ToggleUI,
                 arg1 = "ToggleCharacter",
                 arg2 = "PaperDollFrame",
             },
-            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_ABILITIES_BUTTON, "TOGGLESPELLBOOK"), --FIXLATER
-                func = ToggleUI,
-                    -- ToggleSpellBook causes taint
-                arg1 = "ToggleFrame",
-                arg2 = _G.SpellBookFrame, --FIXLATER
+            {text = _G.MicroButtonTooltipText(_G.PROFESSIONS_BUTTON, "ToggleProfessionsBook"),
+                func =  function()
+                    if _G.InCombatLockdown() then return end
+                    _G.ToggleProfessionsBook()
+                end,
             },
-            {text = _G.MicroButtonTooltipText(_G.TALENTS_BUTTON, "TOGGLETALENTS"), --FIXLATER
+            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_BUTTON, "TOGGLETALENTS"),
                 func = function()
                     if _G.InCombatLockdown() then return end
-
-                    _G.ToggleTalentFrame()
+                    _G.PlayerSpellsUtil.TogglePlayerSpellsFrame()
                 end,
                 disabled = function( ... )
                     return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
@@ -574,14 +573,14 @@ function Infobar:CreateBlocks()
                 func = ToggleUI,
                 arg1 = "ToggleAchievementFrame",
             },
-            {text = _G.MicroButtonTooltipText(_G.QUESTLOG_BUTTON, "TOGGLEQUESTLOG"), --FIXLATER
+            {text = _G.MicroButtonTooltipText(_G.QUESTLOG_BUTTON, "TOGGLEQUESTLOG"),
                 func = ToggleUI,
                 arg1 = "ToggleQuestLog",
             },
             {text = _G.MicroButtonTooltipText(guildText, "TOGGLEGUILDTAB"),
                 func = ToggleUI,
                 arg1 = "ToggleGuildFrame",
-                disabled = _G.IsCommunitiesUIDisabledByTrialAccount, --FIXLATER
+                disabled = _G.IsCommunitiesUIDisabledByTrialAccount,
             },
             {text = _G.MicroButtonTooltipText(_G.SOCIAL_BUTTON, "TOGGLESOCIAL"),
                 func = ToggleUI,
