@@ -337,7 +337,11 @@ function RealUI:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
 
     -- Register events
+    self:RegisterEvent("UNIT_LEVEL", UpdateSpec)
     self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateSpec)
+    self:RegisterEvent("PLAYER_TALENT_UPDATE", UpdateSpec)
+    self:RegisterEvent("TRAIT_CONFIG_UPDATED", UpdateSpec)
+
     self:RegisterEvent("ADDON_LOADED", function()
         if RealUI.recheckFonts then
             local SkinsDB = RealUI.GetOptions("Skins").profile
