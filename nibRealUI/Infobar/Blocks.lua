@@ -560,10 +560,19 @@ function Infobar:CreateBlocks()
                     _G.ToggleProfessionsBook()
                 end,
             },
-            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_BUTTON, "TOGGLETALENTS"),
+            {text = _G.MicroButtonTooltipText(_G.SPELLBOOK_BUTTON, "TOGGLESPELLBOOK"),
                 func = function()
                     if _G.InCombatLockdown() then return end
-                    _G.PlayerSpellsUtil.TogglePlayerSpellsFrame()
+                    _G.PlayerSpellsUtil.TogglePlayerSpellsFrame(_G.PlayerSpellsUtil.FrameTabs.SpellBook)
+                end,
+                disabled = function( ... )
+                    return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
+                end,
+            },
+            {text = _G.MicroButtonTooltipText(_G.TALENTS, "TOGGLETALENTS"),
+                func = function()
+                    if _G.InCombatLockdown() then return end
+                    _G.PlayerSpellsUtil.TogglePlayerSpellsFrame(_G.PlayerSpellsUtil.FrameTabs.ClassTalents)
                 end,
                 disabled = function( ... )
                     return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
