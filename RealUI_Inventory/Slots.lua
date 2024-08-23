@@ -168,7 +168,7 @@ function InventorySlotMixin:Update()
 
     self.BattlepayItemTexture:SetShown(C_Container.IsBattlePayItem(self:GetBagAndSlot()))
 end
-local inventorySlots = _G.CreateObjectPool(SlotFactory, SlotReset)
+local inventorySlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 inventorySlots.frameTemplate = "ContainerFrameItemButtonTemplate"
 inventorySlots.parent = "RealUIInventory"
 inventorySlots.mixin = InventorySlotMixin
@@ -217,9 +217,9 @@ function private.GetSlot(bagID, slotIndex)
             if slot.location:IsValid() then
                 if slot.isTainted and not _G.InCombatLockdown() then
                     -- We're out of combat, excise tainted slot and create a new one
-                    slots.numActiveObjects = slots.numActiveObjects - 1
+                    slots.activeObjectCount = slots.activeObjectCount - 1
                     slots.activeObjects[slot] = nil
-                    slots.resetterFunc(slots, slot)
+                    slots.resetFunc(slots, slot)
                     break
                 end
                 return slot
