@@ -294,7 +294,6 @@ tinsert(private.filterList, {
     end,
 })
 
--- FIXLATER
 local prefix = _G.BAG_FILTER_PROFESSION_GOODS .. ": %s"
 local tradegoods = _G.C_AuctionHouse.GetAuctionItemSubClasses(ItemClass.Tradegoods)
 for i = 1, (#tradegoods - 1) do
