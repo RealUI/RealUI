@@ -372,13 +372,16 @@ function InventoryBagMixin:OnHide()
 end
 
 local BankBagMixin = _G.CreateFromMixins(MainBagMixin)
+
 function BankBagMixin:Init()
     MainBagMixin.Init(self)
     self.events = {
         "PLAYERBANKSLOTS_CHANGED",
         "PLAYERBANKBAGSLOTS_CHANGED",
         "PLAYERREAGENTBANKSLOTS_CHANGED",
+        "BANK_TABS_CHANGED",
         "REAGENTBANK_PURCHASED",
+        "PLAYER_ACCOUNT_BANK_TAB_SLOTS_CHANGED", -- Account bank
     }
 
     self:SetPoint("TOPLEFT", 100, -100)
@@ -560,9 +563,10 @@ local bagInfo = {
     bank = {
         name = "RealUIBank",
         mixin = BankBagMixin,
-        bagIDs = {-1, 6, 7, 8, 9, 10, 11, -3}, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
+        bagIDs = {-1, 6, 7, 8, 9, 10, 11, 12, -5, -3}, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
     },
 }
+
 local function CreateBag(bagType)
     local info = bagInfo[bagType]
 
@@ -688,7 +692,7 @@ local function CreateBag(bagType)
             _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
             if _G.IsReagentBankUnlocked() then
                 _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
-                local freeSlots = C_Container.GetContainerNumFreeSlots(_G.REAGENTBANK_CONTAINER)
+                local freeSlots = C_Container.GetContainerNumFreeSlots(_G.Enum.BagIndex.Reagentbank)
 
                 local text = _G.NUM_FREE_SLOTS:format(freeSlots)
                 if freeSlots == 0 then
