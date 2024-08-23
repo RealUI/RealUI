@@ -1699,6 +1699,7 @@ local function SetUpMinimapFrame()
     _G.MinimapCluster:EnableMouse(false)
     _G.MinimapCluster.BorderTop:Hide()
     _G.MinimapCluster.Tracking.Button:Hide()
+    _G.MinimapCluster.Tracking.Background:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
 
     local landingButton = _G.ExpansionLandingPageMinimapButton or _G.GarrisonLandingPageMinimapButton
@@ -1721,9 +1722,18 @@ local function SetUpMinimapFrame()
     queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
     queueStatusButton:SetScale(0.5)
 
-    _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
-    _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
+    -- _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
+    -- _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
+    _G.MinimapCluster.IndicatorFrame:Hide() -- disable the mail icon -- FIXLATER to make configurable
     _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
+
+    -- FIXLATER to make configurable
+    -- _G.AddonCompartmentFrame:SetParent(_G.UIParent)
+    -- _G.AddonCompartmentFrame:SetFrameLevel(10)
+    -- _G.AddonCompartmentFrame:ClearAllPoints()
+    -- _G.AddonCompartmentFrame:SetPoint("BOTTOMRIGHT",_G.Minimap,"BOTTOMRIGHT",1,1)
+    -- _G.AddonCompartmentFrame:SetScale(0.7)
+    _G.AddonCompartmentFrame:Hide()
 end
 
 ----------
