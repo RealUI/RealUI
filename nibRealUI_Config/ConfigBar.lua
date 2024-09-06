@@ -1068,7 +1068,7 @@ do -- ClassResource
 
         if bars then
             barOptions = {
-                name = bars,
+                name = bars.name,
                 type = "group",
                 disabled = function(info)
                     return not RealUI:GetModuleEnabled(MODNAME)
