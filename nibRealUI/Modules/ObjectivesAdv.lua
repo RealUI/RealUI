@@ -25,7 +25,7 @@ local function ResetState()
 
     if ObjectivesAdv.collapsed and _G.ObjectiveTrackerFrame.userCollapsed then
         ObjectivesAdv.collapsed = false
-        _G.ObjectiveTracker_Expand()
+        _G.ObjectiveTrackerFrame:Expand()
     end
 end
 function ObjectivesAdv:UpdateState()
