@@ -44,7 +44,7 @@ function ObjectivesAdv:UpdateState()
     elseif collapse then
         self.collapsed = true
         _G.ObjectiveTrackerFrame.userCollapsed = true
-        _G.ObjectiveTracker_Collapse()
+        _G.ObjectiveTrackerFrame:Collapse()
     end
 end
 
