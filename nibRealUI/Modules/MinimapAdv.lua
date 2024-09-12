@@ -1172,18 +1172,18 @@ local isPulseEvent = {
     SHIPMENT_UPDATE = true,
 }
 
-local GARRISONTYPE = _G.Enum.GarrisonType
-local GARRISONTYPE_6_0 = GARRISONTYPE.Type_6_0_Garrison or GARRISONTYPE.Type_6_0
-local GARRISONTYPE_7_0 = GARRISONTYPE.Type_7_0_Garrison or GARRISONTYPE.Type_7_0
-local GARRISONTYPE_8_0 = GARRISONTYPE.Type_8_0_Garrison or GARRISONTYPE.Type_8_0
-local GARRISONTYPE_9_0 = GARRISONTYPE.Type_9_0_Garrison or GARRISONTYPE.Type_9_0
+-- local GARRISONTYPE = _G.Enum.GarrisonType
+-- local GARRISONTYPE_6_0 = GARRISONTYPE.Type_6_0_Garrison or GARRISONTYPE.Type_6_0
+-- local GARRISONTYPE_7_0 = GARRISONTYPE.Type_7_0_Garrison or GARRISONTYPE.Type_7_0
+-- local GARRISONTYPE_8_0 = GARRISONTYPE.Type_8_0_Garrison or GARRISONTYPE.Type_8_0
+-- local GARRISONTYPE_9_0 = GARRISONTYPE.Type_9_0_Garrison or GARRISONTYPE.Type_9_0
 
-local GARRISONFOLLOWER = _G.Enum.GarrisonFollowerType
-local GARRISONFOLLOWER_6_0_BOAT = GARRISONFOLLOWER.FollowerType_6_0_Boat
-local GARRISONFOLLOWER_6_0 = GARRISONFOLLOWER.FollowerType_6_0_GarrisonFollower
-local GARRISONFOLLOWER_7_0 = GARRISONFOLLOWER.FollowerType_7_0_GarrisonFollower
-local GARRISONFOLLOWER_8_0 = GARRISONFOLLOWER.FollowerType_8_0_GarrisonFollower
-local GARRISONFOLLOWER_9_0 = GARRISONFOLLOWER.FollowerType_9_0_GarrisonFollower
+-- local GARRISONFOLLOWER = _G.Enum.GarrisonFollowerType
+-- local GARRISONFOLLOWER_6_0_BOAT = GARRISONFOLLOWER.FollowerType_6_0_Boat
+-- local GARRISONFOLLOWER_6_0 = GARRISONFOLLOWER.FollowerType_6_0_GarrisonFollower
+-- local GARRISONFOLLOWER_7_0 = GARRISONFOLLOWER.FollowerType_7_0_GarrisonFollower
+-- local GARRISONFOLLOWER_8_0 = GARRISONFOLLOWER.FollowerType_8_0_GarrisonFollower
+-- local GARRISONFOLLOWER_9_0 = GARRISONFOLLOWER.FollowerType_9_0_GarrisonFollower
 
 local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0_Garrison  -- FIXLATER
 local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower -- FIXLATER GARRISONFOLLOWERTYPE_9_0 -> GARRISONFOLLOWER_9_0
@@ -1728,12 +1728,12 @@ local function SetUpMinimapFrame()
     _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
 
     -- FIXLATER to make configurable
-    -- _G.AddonCompartmentFrame:SetParent(_G.UIParent)
-    -- _G.AddonCompartmentFrame:SetFrameLevel(10)
-    -- _G.AddonCompartmentFrame:ClearAllPoints()
-    -- _G.AddonCompartmentFrame:SetPoint("BOTTOMRIGHT",_G.Minimap,"BOTTOMRIGHT",1,1)
-    -- _G.AddonCompartmentFrame:SetScale(0.7)
-    _G.AddonCompartmentFrame:Hide()
+    _G.AddonCompartmentFrame:SetParent(_G.UIParent)
+    _G.AddonCompartmentFrame:SetFrameLevel(10)
+    _G.AddonCompartmentFrame:ClearAllPoints()
+    _G.AddonCompartmentFrame:SetPoint("BOTTOMRIGHT",_G.Minimap,"BOTTOMRIGHT",1,1)
+    _G.AddonCompartmentFrame:SetScale(0.7)
+    -- _G.AddonCompartmentFrame:Hide()
 end
 
 ----------
@@ -1754,6 +1754,7 @@ function MinimapAdv:OnInitialize()
                     arena = true,
                     party = false,
                     raid = false,
+                    dvelve = false,
                 },
             },
             position = {
