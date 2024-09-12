@@ -2756,6 +2756,13 @@ do -- UI Tweaks
                                     set = collapseSet,
                                     order = 50,
                                 },
+                                dvelve = {
+                                    name = "Dvelves",
+                                    type = "toggle",
+                                    get = collapseGet,
+                                    set = collapseSet,
+                                    order = 60,
+                                },
                             },
                         },
                         gap2 = {

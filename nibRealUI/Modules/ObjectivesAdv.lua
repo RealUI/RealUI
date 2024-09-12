@@ -154,6 +154,7 @@ function ObjectivesAdv:OnInitialize()
                     scenario = false,
                     party = true,
                     raid = false,
+                    dvelve = false,
                 },
                 collapseframe = {
                     quest = true,
