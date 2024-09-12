@@ -378,8 +378,9 @@ function RealUI:OnInitialize()
         RealUI.Debug("Config", "/realadv")
         RealUI.LoadConfig("RealUI")
     end)
-    self:RegisterChatCommand("rl", _G.C_UI.Reload)
-    self:RegisterChatCommand("rc", _G.DoReadyCheck())
+    self:RegisterChatCommand("rl", function()
+        _G.C_UI.Reload()
+    end)
     self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
     self:RegisterChatCommand("findSpell", function(input)
         -- /findSpell "Spell Name" (player)|target (buff)|debuff
@@ -391,6 +392,9 @@ function RealUI:OnInitialize()
             auraType = unit == "target" and "debuff" or "buff"
         end
         self.FindSpellID(spellName, unit, auraType)
+    end)
+    self:RegisterChatCommand("rc",  function()
+        _G.DoReadyCheck()
     end)
 
       -- Position Chat Frame
