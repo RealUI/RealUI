@@ -2468,7 +2468,13 @@ do -- UI Tweaks
             ObjectivesAdv.db.profile.hidden.collapse[info[#info]] = value
             ObjectivesAdv:UpdateState()
         end
-
+        local function collapseFrameGet(info)
+            return ObjectivesAdv.db.profile.hidden.collapseframe[info[#info]]
+        end
+        local function collapseFrameSet(info, value)
+            ObjectivesAdv.db.profile.hidden.collapseframe[info[#info]] = value
+            ObjectivesAdv:UpdateState()
+        end
         local function hideGet(info)
             return ObjectivesAdv.db.profile.hidden.hide[info[#info]]
         end
@@ -2638,7 +2644,7 @@ do -- UI Tweaks
                     order = 60,
                     args = {
                         header = {
-                            name = "Automatically collapse the Quest Watch Frame in certain zones.",
+                            name = "Automatically collapse the Object Tracker Frames in certain zones.",
                             type = "description",
                             order = 10,
                         },
@@ -2657,8 +2663,59 @@ do -- UI Tweaks
                             type = "description",
                             order = 21,
                         },
+                        collapse_frames = {
+                            name = "Collapse the follwoing tracking frames..",
+                            type = "group",
+                            inline = true,
+                            disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and ObjectivesAdv.db.profile.hidden.enabled) end,
+                            order = 25,
+                            args = {
+                                quest = {
+                                    name = _G.QUESTS_LABEL,
+                                    type = "toggle",
+                                    get = collapseFrameGet,
+                                    set = collapseFrameSet,
+                                    order = 10,
+                                },
+                                campaign = {
+                                    name = _G.CONTAINER_CAMPAIGN_PROGRESS,
+                                    type = "toggle",
+                                    get = collapseFrameGet,
+                                    set = collapseFrameSet,
+                                    order = 20,
+                                },
+                                adventure = {
+                                    name = _G.COVENANT_MISSIONS_TITLE,
+                                    type = "toggle",
+                                    get = collapseFrameGet,
+                                    set = collapseFrameSet,
+                                    order = 30,
+                                },
+                                proffesion = {
+                                    name = _G.PROFESSIONS_TRACKER_HEADER_PROFESSION,
+                                    type = "toggle",
+                                    get = collapseFrameGet,
+                                    set = collapseFrameSet,
+                                    order = 40,
+                                },
+                                bonus = {
+                                    name = _G.BONUS_OBJECTIVE_BANNER,
+                                    type = "toggle",
+                                    get = collapseFrameGet,
+                                    set = collapseFrameSet,
+                                    order = 50,
+                                },
+                                world = {
+                                    name = _G.WORLD_QUEST_BANNER,
+                                    type = "toggle",
+                                    get = collapseFrameGet,
+                                    set = collapseFrameSet,
+                                    order = 60,
+                                },
+                            },
+                        },
                         collapse = {
-                            name = "Collapse the Quest Watch Frame in..",
+                            name = "in..",
                             type = "group",
                             inline = true,
                             disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and ObjectivesAdv.db.profile.hidden.enabled) end,
@@ -2707,7 +2764,7 @@ do -- UI Tweaks
                             order = 31,
                         },
                         hide = {
-                            name = "Hide the Quest Watch Frame completely in..",
+                            name = "Hide the Objectives Tracker Frame completely in..",
                             type = "group",
                             inline = true,
                             disabled = function() return not(ObjectivesAdv.db.profile.hidden.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,

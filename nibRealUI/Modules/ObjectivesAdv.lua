@@ -16,16 +16,35 @@ local function ResetState()
         ObjectivesAdv.hidden = false
         _G.ObjectiveTrackerFrame.realUIHidden = false
         _G.ObjectiveTrackerFrame:Show()
-
         -- Refresh fade, since fade won't update while hidden
         if RealUI:GetModuleEnabled("CombatFader") then
             CombatFader:UpdateStatus(true)
         end
     end
 
-    if ObjectivesAdv.collapsed and _G.ObjectiveTrackerFrame.userCollapsed then
+    if ObjectivesAdv.collapsed and _G.QuestObjectiveTracker.userCollapsed then
         ObjectivesAdv.collapsed = false
-        _G.ObjectiveTrackerFrame:Expand()
+        _G.QuestObjectiveTracker:SetCollapsed(false)
+    end
+    if ObjectivesAdv.collapsed and _G.CampaignQuestObjectiveTracker.userCollapsed then
+        ObjectivesAdv.collapsed = false
+        _G.CampaignQuestObjectiveTracker:SetCollapsed(false)
+    end
+    if ObjectivesAdv.collapsed and _G.AdventureObjectiveTracker.userCollapsed then
+        ObjectivesAdv.collapsed = false
+        _G.AdventureObjectiveTracker:SetCollapsed(false)
+    end
+    if ObjectivesAdv.collapsed and _G.ProfessionsRecipeTracker.userCollapsed then
+        ObjectivesAdv.collapsed = false
+        _G.ProfessionsRecipeTracker:SetCollapsed(false)
+    end
+    if ObjectivesAdv.collapsed and _G.BonusObjectiveTracker.userCollapsed then
+        ObjectivesAdv.collapsed = false
+        _G.BonusObjectiveTracker:SetCollapsed(false)
+    end
+    if ObjectivesAdv.collapsed and _G.WorldQuestObjectiveTracker.userCollapsed then
+        ObjectivesAdv.collapsed = false
+        _G.WorldQuestObjectiveTracker:SetCollapsed(false)
     end
 end
 function ObjectivesAdv:UpdateState()
@@ -43,8 +62,30 @@ function ObjectivesAdv:UpdateState()
         _G.ObjectiveTrackerFrame:Hide()
     elseif collapse then
         self.collapsed = true
-        _G.ObjectiveTrackerFrame.userCollapsed = true
-        _G.ObjectiveTrackerFrame:Collapse()
+        if db.hidden.collapseframe["quest"] == true then
+            _G.QuestObjectiveTracker.userCollapsed = true
+            _G.QuestObjectiveTracker:SetCollapsed(true)
+        end
+        if db.hidden.collapseframe["campaign"] == true then
+            _G.CampaignQuestObjectiveTracker .userCollapsed = true
+            _G.CampaignQuestObjectiveTracker:SetCollapsed(true)
+        end
+        if db.hidden.collapseframe["adventure"] == true then
+            _G.AdventureObjectiveTracker.userCollapsed = true
+            _G.AdventureObjectiveTracker:SetCollapsed(true)
+        end
+        if db.hidden.collapseframe["proffesion"] == true then
+            _G.ProfessionsRecipeTracker.userCollapsed = true
+            _G.ProfessionsRecipeTracker:SetCollapsed(true)
+        end
+        if db.hidden.collapseframe["bonus"] == true then
+            _G.BonusObjectiveTracker.userCollapsed = true
+            _G.BonusObjectiveTracker:SetCollapsed(true)
+        end
+        if db.hidden.collapseframe["world"] == true then
+            _G.WorldQuestObjectiveTracker.userCollapsed = true
+            _G.WorldQuestObjectiveTracker:SetCollapsed(true)
+        end
     end
 end
 
@@ -113,6 +154,14 @@ function ObjectivesAdv:OnInitialize()
                     scenario = false,
                     party = true,
                     raid = false,
+                },
+                collapseframe = {
+                    quest = true,
+                    campaign = true,
+                    adventure = true,
+                    proffesion = true,
+                    bonus = true,
+                    world = true,
                 },
                 hide = {
                     pvp = false,
