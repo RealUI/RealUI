@@ -155,11 +155,11 @@ local stickyLines = _G.CreateObjectPool(ScrollLineFactory, ScrollLineReset)
 stickyLines.mixin = StickyLineMixin
 
 function CombatText:UpdateLineOptions()
-    for _, line in normalLines:EnumerateInactive() do
+    -- FIXLATER
+    for _, line in normalLines:EnumerateActive() do
         line:SetOptions()
     end
-
-    for _, line in stickyLines:EnumerateInactive() do
+    for _, line in stickyLines:EnumerateActive() do
         line:SetOptions()
     end
 end
