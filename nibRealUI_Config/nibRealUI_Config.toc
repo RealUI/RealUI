@@ -2,7 +2,7 @@
 ## Title: RealUI Config
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe
-## Version: 2.3.17
+## Version: 2.4.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI

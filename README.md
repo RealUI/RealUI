@@ -5,6 +5,14 @@ RealUI
 
 RealUI is a minimalistic UI designed to be functional, yet also efficient and elegant.
 
+Information
+-----------
+
+  * This is the first release for The War Within - World of Warcraft 11.0.2
+  * This release is a major update to the Blizzard UI - with many changes to the core and modules
+  * Certain features have been disabled or removed due to changes in the Blizzard API
+  * This version is stable enoough for general use, but there are still some issues to be resolved
+
 
 Installation
 ------------

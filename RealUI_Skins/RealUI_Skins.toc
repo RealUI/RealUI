@@ -2,7 +2,7 @@
 ## Title: RealUI Skins
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe
-## Version: 2.3.17
+## Version: 2.4.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI
