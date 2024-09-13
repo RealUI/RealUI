@@ -559,6 +559,7 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 if xCoord and yCoord and instanceID then
                     -- Check if there's already a POI for this quest.
                     local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
+                    --
                     if not poiButton then
                         if _G.C_QuestLog.IsComplete(questID) then
                             poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "normal")
@@ -603,7 +604,7 @@ function MinimapAdv:POIUpdate(event, ...)
             end
         end
     end
-
+    print("POIUpdate", currentMapID, continentMapID)
     if continentMapID then
         self:RemoveAllPOIs()
 
@@ -1727,13 +1728,25 @@ local function SetUpMinimapFrame()
     _G.MinimapCluster.IndicatorFrame:Hide() -- disable the mail icon -- FIXLATER to make configurable
     _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
 
+    local isTop
+    local isLeft
     -- FIXLATER to make configurable
+    if isInFarmMode then
+        isTop = db.position.anchorto:find("TOP")
+        isLeft = db.position.anchorto:find("LEFT")
+    else
+        isTop = db.position.anchorto:find("TOP")
+        isLeft = db.position.anchorto:find("LEFT")
+    end
+    -- Set position relative to anchorto
+    local CompartmentFramePosition = format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
+
     _G.AddonCompartmentFrame:SetParent(_G.UIParent)
     _G.AddonCompartmentFrame:SetFrameLevel(10)
     _G.AddonCompartmentFrame:ClearAllPoints()
-    _G.AddonCompartmentFrame:SetPoint("BOTTOMRIGHT",_G.Minimap,"BOTTOMRIGHT",1,1)
+    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition,_G.Minimap,CompartmentFramePosition,1,1)
     _G.AddonCompartmentFrame:SetScale(0.7)
-    -- _G.AddonCompartmentFrame:Hide()
+    _G.AddonCompartmentFrame:Hide()
 end
 
 ----------
