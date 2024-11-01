@@ -1028,14 +1028,11 @@ function Infobar:CreateBlocks()
                         local info = Infobar:GetBlockInfo(block.name, block.dataObj)
                         Infobar:ShowBlock(block.name, block.dataObj, info)
                     end
-
-                    local _, online, onlineAndMobile = _G.GetNumGuildMembers()
+                    _G.C_GuildInfo.GuildRoster()
+                    _G.SetGuildRosterShowOffline(true)
+                    local total, online = _G.GetNumGuildMembers()
                     block.dataObj.value = online
-                    if online == onlineAndMobile then
-                        block.dataObj.suffix = ""
-                    else
-                        block.dataObj.suffix = "(".. onlineAndMobile - online ..")"
-                    end
+                    block.dataObj.suffix = "("..total..")"
                 end
             end,
             events = {
