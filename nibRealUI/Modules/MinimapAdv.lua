@@ -289,7 +289,7 @@ function MinimapAdv:UpdateButtonsPosition()
     self:FadeButtons()
 end
 
-local garrisonTypeSL = _G.Enum.GarrisonType.Type_9_0
+local garrisonTypeSL = _G.Enum.GarrisonType["Type_9_0_Garrison"]
 local function UpdateGarrisonButton(isTop, isLeft)
     local garrisonType = _G.C_Garrison.GetLandingPageGarrisonType()
 
@@ -558,14 +558,13 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(questInfo.x, questInfo.y, zoneInfo.mapID)
                 if xCoord and yCoord and instanceID then
                     -- Check if there's already a POI for this quest.
-                    local poiButton = _G.QuestPOI_FindButton(_G.Minimap, questID)
-                    --
+                    local poiButton = _G.ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID);
                     if not poiButton then
                         if _G.C_QuestLog.IsComplete(questID) then
-                            poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "normal")
+                            poiButton = _G.Minimap:GetButtonForQuest(questID, "normal", nil);
                         else
                             numNumericQuests = numNumericQuests + 1
-                            poiButton = _G.QuestPOI_GetButton(_G.Minimap, questID, "numeric", numNumericQuests)
+                            poiButton  =_G.Minimap:GetButtonForQuest(questID, "numeric", numNumericQuests);
                         end
                     end
 
@@ -1173,21 +1172,8 @@ local isPulseEvent = {
     SHIPMENT_UPDATE = true,
 }
 
--- local GARRISONTYPE = _G.Enum.GarrisonType
--- local GARRISONTYPE_6_0 = GARRISONTYPE.Type_6_0_Garrison or GARRISONTYPE.Type_6_0
--- local GARRISONTYPE_7_0 = GARRISONTYPE.Type_7_0_Garrison or GARRISONTYPE.Type_7_0
--- local GARRISONTYPE_8_0 = GARRISONTYPE.Type_8_0_Garrison or GARRISONTYPE.Type_8_0
--- local GARRISONTYPE_9_0 = GARRISONTYPE.Type_9_0_Garrison or GARRISONTYPE.Type_9_0
-
--- local GARRISONFOLLOWER = _G.Enum.GarrisonFollowerType
--- local GARRISONFOLLOWER_6_0_BOAT = GARRISONFOLLOWER.FollowerType_6_0_Boat
--- local GARRISONFOLLOWER_6_0 = GARRISONFOLLOWER.FollowerType_6_0_GarrisonFollower
--- local GARRISONFOLLOWER_7_0 = GARRISONFOLLOWER.FollowerType_7_0_GarrisonFollower
--- local GARRISONFOLLOWER_8_0 = GARRISONFOLLOWER.FollowerType_8_0_GarrisonFollower
--- local GARRISONFOLLOWER_9_0 = GARRISONFOLLOWER.FollowerType_9_0_GarrisonFollower
-
-local garrisonTypeWoD = _G.Enum.GarrisonType.Type_7_0_Garrison  -- FIXLATER
-local followerTypeWoD = _G.Enum.GarrisonFollowerType.FollowerType_7_0_GarrisonFollower -- FIXLATER GARRISONFOLLOWERTYPE_9_0 -> GARRISONFOLLOWER_9_0
+local garrisonTypeWoD = _G.Enum.GarrisonType["Type_7_0_Garrison"]
+local followerTypeWoD = _G.Enum.GarrisonFollowerType["FollowerType_7_0_GarrisonFollower"]
 
 local currencyId = _G.C_Garrison.GetCurrencyTypes(garrisonTypeWoD)
 local categoryInfo = {}
