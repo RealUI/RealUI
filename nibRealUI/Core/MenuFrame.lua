@@ -233,7 +233,7 @@ function MenuItemMixin:Clear()
     self.menu = nil
     self:Hide()
 end
-local menuItems = _G.CreateObjectPool(MenuItemFactory, MenuItemReset)
+local menuItems = _G.CreateUnsecuredObjectPool(MenuItemFactory, MenuItemReset)
 menuItems.mixin = MenuItemMixin
 
 
@@ -293,7 +293,7 @@ function MenuFrameMixin:Clear()
     self:ClearAllPoints()
     self:Hide()
 end
-local menuFrames = _G.CreateObjectPool(MenuFactory, MenuReset)
+local menuFrames = _G.CreateUnsecuredObjectPool(MenuFactory, MenuReset)
 menuFrames.mixin = MenuFrameMixin
 
 

@@ -188,7 +188,7 @@ function BankSlotMixin:GetInventorySlot()
         return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
     end
 end
-local bankSlots = _G.CreateObjectPool(SlotFactory, SlotReset)
+local bankSlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "BankItemButtonGenericTemplate"
 bankSlots.parent = "RealUIBank"
 bankSlots.mixin = BankSlotMixin

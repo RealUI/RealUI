@@ -39,7 +39,7 @@ local function TooltipReset(framePool, tooltip)
 end
 
 function private.SetupMultiTip()
-    tooltipPool = _G.CreateObjectPool(TooltipFactory, TooltipReset)
+    tooltipPool = _G.CreateUnsecuredObjectPool(TooltipFactory, TooltipReset)
     tooltipPool.frameTemplate = "RealUIMultiTipTemplate"
 
     local oldSetItemRef = _G.SetItemRef

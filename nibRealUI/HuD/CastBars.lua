@@ -276,7 +276,7 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     Castbar.SafeZone = SafeZone
 
     if unit == "player" then
-        Castbar.tickPool = _G.CreateObjectPool(function(pool)
+        Castbar.tickPool = _G.CreateUnsecuredObjectPool(function(pool)
             local tick = unitFrame:CreateAngle("Texture", nil, Castbar)
             tick:SetColorTexture(1, 1, 1, 0.5)
             return tick

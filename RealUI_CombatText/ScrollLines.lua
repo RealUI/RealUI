@@ -148,10 +148,10 @@ function StickyLineMixin:AddToScrollArea(scrollArea, scrollDirection)
     end
 end
 
-local normalLines = _G.CreateObjectPool(ScrollLineFactory, ScrollLineReset)
+local normalLines = _G.CreateUnsecuredObjectPool(ScrollLineFactory, ScrollLineReset)
 normalLines.mixin = ScrollLineMixin
 
-local stickyLines = _G.CreateObjectPool(ScrollLineFactory, ScrollLineReset)
+local stickyLines = _G.CreateUnsecuredObjectPool(ScrollLineFactory, ScrollLineReset)
 stickyLines.mixin = StickyLineMixin
 
 function CombatText:UpdateLineOptions()
