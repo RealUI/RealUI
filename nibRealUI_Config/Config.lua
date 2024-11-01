@@ -116,9 +116,9 @@ function RealUI:HuDTestMode(isConfigMode)
         r = 255, g = 255, b = 255,
     }
     if isConfigMode then
-        _G.SpellActivationOverlay_ShowAllOverlays(_G.SpellActivationOverlayFrame, sAlert.id, sAlert.texture, sAlert.positions, sAlert.scale, sAlert.r, sAlert.g, sAlert.b);
+        _G.SpellActivationOverlayFrame:ShowAllOverlays(_G.SpellActivationOverlayFrame, sAlert.id, sAlert.texture, sAlert.positions, sAlert.scale, sAlert.r, sAlert.g, sAlert.b);
     else
-        _G.SpellActivationOverlay_HideOverlays(_G.SpellActivationOverlayFrame, sAlert.id)
+        _G.SpellActivationOverlayFrame:HideOverlays(_G.SpellActivationOverlayFrame, sAlert.id);
     end
 
     -- Extra Action Button
