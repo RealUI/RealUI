@@ -75,6 +75,11 @@ function MinimapAdv:UpdateFarmModePOI()
     self:POIUpdate("UpdateFarmModePOI", isInFarmMode)
 end
 
+function MinimapAdv:UpdateFarmModeShowTracking()
+    MinimapAdv:FadeButtons()
+    MinimapAdv:UpdateButtonsPosition()
+end
+
 -- Get size and position data
 local function GetPositionData()
     -- Get Normal or Expanded data
@@ -227,7 +232,7 @@ function MinimapAdv:UpdateButtonsPosition()
     end
 
     -- Tracking
-    if _G.Minimap:IsVisible() and not isInFarmMode then
+    if _G.Minimap:IsVisible() and ((not isInFarmMode) or (isInFarmMode and db.expand.extras.showtracking)) then
         MMFrames.tracking:Show()
         _G.tinsert(frameOrder, "tracking")
         bfWidth = bfWidth + 15
@@ -558,22 +563,25 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(questInfo.x, questInfo.y, zoneInfo.mapID)
                 if xCoord and yCoord and instanceID then
                     -- Check if there's already a POI for this quest.
-                    local poiButton = _G.ObjectiveTrackerFrame.BlocksFrame:FindButtonByQuestID(questID);
+                    local poiButton = _G.QuestMapFrame.QuestsFrame.Contents:FindButtonByQuestID(questID)
+                    -- _G.ObjectiveTrackerFrame.BlocksFrame:POIButtonUtil.GetStyle(questID);
+                    -- +	pin:SetSelected(isSuperTracked);
+                    -- +	pin:SetStyle(isWaypoint and POIButtonUtil.Style.Waypoint or POIButtonUtil.GetStyle(questID));
                     if not poiButton then
                         if _G.C_QuestLog.IsComplete(questID) then
-                            poiButton = _G.Minimap:GetButtonForQuest(questID, "normal", nil);
+                            poiButton = _G.QuestScrollFrame.Contents:GetButtonForQuest(questID, "normal", nil);
                         else
                             numNumericQuests = numNumericQuests + 1
-                            poiButton  =_G.Minimap:GetButtonForQuest(questID, "numeric", numNumericQuests);
+                            poiButton  =_G.QuestScrollFrame.Contents:GetButtonForQuest(questID, "numeric", numNumericQuests);
                         end
                     end
-
-                    if _G.QuestUtils_IsQuestWatched(questID) or not db.poi.watchedOnly then
-                        poiButton:Add(xCoord, yCoord, instanceID)
-                        if isSuperTracked then
-                            _G.QuestPOI_SelectButton(poiButton)
-                        end
-                    end
+                    -- FIXLATER ?
+                    -- if _G.QuestUtils_IsQuestWatched(questID) or not db.poi.watchedOnly then
+                    --     poiButton:Add(xCoord, yCoord, instanceID)
+                    --     if isSuperTracked then
+                    --         _G.QuestPOI_SelectButton(poiButton)
+                    --     end
+                    -- end
                 elseif RealUI.isDev then
                     _G.print("Could not place POI", questID, xCoord, yCoord, instanceID)
                 end
@@ -603,7 +611,7 @@ function MinimapAdv:POIUpdate(event, ...)
             end
         end
     end
-    print("POIUpdate", currentMapID, continentMapID)
+    --  print("POIUpdate", currentMapID, continentMapID)
     if continentMapID then
         self:RemoveAllPOIs()
 
@@ -949,10 +957,11 @@ function MinimapAdv:FadeButtons()
         if _G.Minimap.mouseover or MenuFrame:IsMenuOpen(MMFrames.tracking) or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
 
-            if not isInFarmMode then
+            if (not isInFarmMode) or (isInFarmMode and db.expand.extras.showtracking) then
                 MMFrames.tracking:Show()
                 numButtons = numButtons + 1
             end
+
             if not _G.IsInInstance() then
                 MMFrames.farm:Show()
                 numButtons = numButtons + 1
@@ -1777,6 +1786,7 @@ function MinimapAdv:OnInitialize()
                     gatherertoggle = false,
                     clickthrough = false,
                     hidepoi = true,
+                    showtracking = false,
                 },
             },
             information = {

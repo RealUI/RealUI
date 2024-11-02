@@ -2205,6 +2205,16 @@ do -- UI Tweaks
                                     end,
                                     order = 30,
                                 },
+                                showtracking = {
+                                    name = "Show Tracking in Farm Mode",
+                                    type = "toggle",
+                                    get = function(info) return MinimapAdv.db.profile.expand.extras.showtracking end,
+                                    set = function(info, value)
+                                        MinimapAdv.db.profile.expand.extras.showtracking = value
+                                        MinimapAdv:UpdateFarmModeShowTracking()
+                                    end,
+                                    order = 30,
+                                },
                             },
                         },
                     },
