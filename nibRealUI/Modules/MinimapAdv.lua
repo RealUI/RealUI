@@ -1651,6 +1651,25 @@ local function CreateFrames()
     MMFrames.info.zoneIndicator.bg:SetTexture(Textures.ZoneIndicator)
     MMFrames.info.zoneIndicator.bg:SetVertexColor(0.5, 0.5, 0.5)
     MMFrames.info.zoneIndicator.bg:SetAllPoints(MMFrames.info.zoneIndicator)
+    local isTop
+    local isLeft
+    -- FIXLATER to make configurable
+    if isInFarmMode then
+        isTop = db.position.anchorto:find("TOP")
+        isLeft = db.position.anchorto:find("LEFT")
+    else
+        isTop = db.position.anchorto:find("TOP")
+        isLeft = db.position.anchorto:find("LEFT")
+    end
+    -- Set position relative to anchorto
+    local CompartmentFramePosition = format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
+
+    _G.AddonCompartmentFrame:SetParent(_G.UIParent)
+    _G.AddonCompartmentFrame:SetFrameLevel(10)
+    _G.AddonCompartmentFrame:ClearAllPoints()
+    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition,MMFrames.info.Coords,CompartmentFramePosition,0,20)
+    _G.AddonCompartmentFrame:SetScale(0.7)
+    _G.AddonCompartmentFrame:Hide()
 end
 
 -------------------
@@ -1722,26 +1741,6 @@ local function SetUpMinimapFrame()
     -- _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
     _G.MinimapCluster.IndicatorFrame:Hide() -- disable the mail icon -- FIXLATER to make configurable
     _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
-
-    local isTop
-    local isLeft
-    -- FIXLATER to make configurable
-    if isInFarmMode then
-        isTop = db.position.anchorto:find("TOP")
-        isLeft = db.position.anchorto:find("LEFT")
-    else
-        isTop = db.position.anchorto:find("TOP")
-        isLeft = db.position.anchorto:find("LEFT")
-    end
-    -- Set position relative to anchorto
-    local CompartmentFramePosition = format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
-
-    _G.AddonCompartmentFrame:SetParent(_G.UIParent)
-    _G.AddonCompartmentFrame:SetFrameLevel(10)
-    _G.AddonCompartmentFrame:ClearAllPoints()
-    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition,_G.Minimap,CompartmentFramePosition,1,1)
-    _G.AddonCompartmentFrame:SetScale(0.7)
-    _G.AddonCompartmentFrame:Hide()
 end
 
 ----------
