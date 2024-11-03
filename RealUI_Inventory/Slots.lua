@@ -277,7 +277,7 @@ local mainBags = {
     [BagIndex.Backpack] = _G.BACKPACK_TOOLTIP,
     [BagIndex.Bank] = _G.BANK,
     [BagIndex.Reagentbank] = _G.REAGENT_BANK,
-    [BagIndex.Accountbanktab] = ACCOUNT_BANK_PANEL_TITLE,
+    [BagIndex.Accountbanktab] = _G.ACCOUNT_BANK_PANEL_TITLE,
 }
 local BagSlotMixin = {}
 function BagSlotMixin:Init(bagID)
