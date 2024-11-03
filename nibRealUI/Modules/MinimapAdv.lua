@@ -575,13 +575,16 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                             poiButton  =_G.QuestScrollFrame.Contents:GetButtonForQuest(questID, "numeric", numNumericQuests);
                         end
                     end
-                    -- FIXLATER ?
-                    -- if _G.QuestUtils_IsQuestWatched(questID) or not db.poi.watchedOnly then
-                    --     poiButton:Add(xCoord, yCoord, instanceID)
-                    --     if isSuperTracked then
-                    --         _G.QuestPOI_SelectButton(poiButton)
-                    --     end
-                    -- end
+                    if poiButton then
+                        if _G.QuestUtils_IsQuestWatched(questID) or not db.poi.watchedOnly then
+                            poiButton.xCoord = xCoord
+                            poiButton.yCoord = yCoord
+                            poiButton.instanceID = instanceID
+                            if isSuperTracked then
+                                _G.QuestPOI_SelectButton(poiButton)
+                            end
+                        end
+                    end
                 elseif RealUI.isDev then
                     _G.print("Could not place POI", questID, xCoord, yCoord, instanceID)
                 end
@@ -1577,8 +1580,8 @@ local function CreateFrames()
                 text = name,
                 icon = texture,
                 checked = function(self)
-                    local trackingInfo = _G.C_Minimap.GetTrackingInfo(id)
-                    return trackingInfo.active
+                    local trackingInfo2 = _G.C_Minimap.GetTrackingInfo(id)
+                    return trackingInfo2.active
                 end,
                 func = function(self, arg1, arg2, isChecked)
                     _G.C_Minimap.SetTracking(id, isChecked)
@@ -1662,7 +1665,7 @@ local function CreateFrames()
         isLeft = db.position.anchorto:find("LEFT")
     end
     -- Set position relative to anchorto
-    local CompartmentFramePosition = format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
+    local CompartmentFramePosition = _G.format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
 
     _G.AddonCompartmentFrame:SetParent(_G.UIParent)
     _G.AddonCompartmentFrame:SetFrameLevel(10)
