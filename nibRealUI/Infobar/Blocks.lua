@@ -1538,12 +1538,9 @@ function Infobar:CreateBlocks()
             end,
             OnClick = function(Rep)
                 if Rep.isMajorFaction then
-                    --_G.PlayerInteractionFrameManagerMixin:ShowFrame(_G.Enum.PlayerInteractionType.MajorFactionRenown)
-
                     if not _G.MajorFactionRenownFrame then
                         _G.MajorFactions_LoadUI()
                     end
-
                     _G.HideUIPanel(_G.MajorFactionRenownFrame)
                     if Rep.factionID > 0 then
                         _G.EventRegistry:TriggerEvent("MajorFactionRenownMixin.MajorFactionRenownRequest", Rep.factionID)
@@ -2077,7 +2074,7 @@ function Infobar:CreateBlocks()
             end,
             OnClick = function(block, ...)
                 Infobar:debug("spec: OnClick", block.side, ...)
-                _G.ToggleTalentFrame(_G.TalentMicroButton.suggestedTab)
+                _G.PlayerSpellsUtil.OpenToClassSpecializationsTab(_G.ProfessionMicroButton.suggestedTab)
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("spec: OnEvent", block.side, event, ...)
