@@ -296,6 +296,7 @@ function BagSlotMixin:Init(bagID)
     self:RegisterEvent("PLAYER_ENTERING_WORLD");
     self:RegisterEvent("BAG_UPDATE_DELAYED")
     self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
+    self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
     self:SetScript("OnEvent", self.OnEvent)
     self:SetScript("OnEnter", self.OnEnter)
     self:SetScript("OnLeave", self.OnLeave)

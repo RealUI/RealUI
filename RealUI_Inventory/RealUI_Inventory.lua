@@ -63,7 +63,7 @@ function private.CalculateJunkProfit(isAtMerchant)
     for _, slot in ipairs(bag.slots) do
         local _, _, _, _, _, _, _, _, _, _, sellPrice = _G.C_Item.GetItemInfo(slot.item:GetItemLink())
         if sellPrice > 0 then
-            local stackCount = C_Container.GetContainerItemInfo(slot:GetBagAndSlot()).stackCount
+            local stackCount = _G.C_Container.GetContainerItemInfo(slot:GetBagAndSlot()).stackCount
             profit = profit + (sellPrice * stackCount)
 
             slot.JunkIcon:SetShown(isAtMerchant)

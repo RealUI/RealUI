@@ -217,6 +217,7 @@ local BasicEvents = {
     "BAG_UPDATE_DELAYED",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
+    "PLAYERREAGENTBANKSLOTS_CHANGED"
 }
 
 local MainBagMixin = _G.CreateFromMixins(_G.ContinuableContainer, BagMixin)
@@ -558,12 +559,23 @@ local bagInfo = {
     main = {
         name = "RealUIInventory",
         mixin = InventoryBagMixin,
-        bagIDs = {0, 1, 2, 3, 4, 5}, -- BACKPACK_CONTAINER through NUM_TOTAL_EQUIPPED_BAG_SLOTS
+        bagIDs = {_G.Enum.BagIndex.Backpack, _G.Enum.BagIndex.Bag_1, _G.Enum.BagIndex.Bag_2, _G.Enum.BagIndex.Bag_3, _G.Enum.BagIndex.Bag_4, _G.Enum.BagIndex.ReagentBag}, -- BACKPACK_CONTAINER through NUM_TOTAL_EQUIPPED_BAG_SLOTS
     },
     bank = {
         name = "RealUIBank",
         mixin = BankBagMixin,
-        bagIDs = {-1, 6, 7, 8, 9, 10, 11, 12, -5, -3}, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
+        bagIDs = {
+            _G.Enum.BagIndex.Bank, _G.Enum.BagIndex.BankBag_1, _G.Enum.BagIndex.BankBag_2, _G.Enum.BagIndex.BankBag_3,
+            _G.Enum.BagIndex.BankBag_4, _G.Enum.BagIndex.BankBag_5, _G.Enum.BagIndex.BankBag_6, _G.Enum.BagIndex.BankBag_7,
+            _G.Enum.BagIndex.ReagentBag
+        }, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
+    },
+    warband = {
+        name = "RealUIWarband",
+        mixin = BankBagMixin,
+        bagIDs = {
+            _G.Enum.BagIndex.AccountBankTab_1, _G.Enum.BagIndex.AccountBankTab_2, _G.Enum.BagIndex.AccountBankTab_3, _G.Enum.BagIndex.AccountBankTab_4, _G.Enum.BagIndex.AccountBankTab_5,
+        }, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
     },
 }
 
@@ -577,7 +589,9 @@ local function CreateBag(bagType)
     main.bagIDs = info.bagIDs
     Inventory[bagType] = main
     tinsert(_G.UISpecialFrames, info.name)
-
+    if bagType == "warband" then
+        return
+    end
     local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
     function(self, button)
         if bagType == "bank" and button == "RightButton" then
@@ -678,7 +692,8 @@ local function CreateBag(bagType)
 
         restackButton:SetPoint("TOPRIGHT", settingsButton, "TOPLEFT", -5, 0)
         main.restackButton = restackButton
-    else
+    end
+    if bagType == "bank" then
         local deposit = CreateFeatureButton(main, nil, "download",
         function(self, button)
             if _G.IsReagentBankUnlocked() then
@@ -807,4 +822,5 @@ function private.CreateBags()
     Inventory:debug("private.CreateBags")
     CreateBag("main")
     CreateBag("bank")
+    -- CreateBag("warband")
 end
