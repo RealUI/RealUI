@@ -80,6 +80,13 @@ local bankEvents = {
     [_G.Enum.PlayerInteractionType.GuildBanker] = 0,
     [_G.Enum.PlayerInteractionType.AccountBanker] = 0,
 }
+
+local bankInteractionType = {
+    [_G.Enum.PlayerInteractionType.AccountBanker] = true,
+    [_G.Enum.PlayerInteractionType.Banker] = true,
+    [_G.Enum.PlayerInteractionType.CharacterBanker] = true,
+}
+
 function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_SHOW(event, id)
     if bagEvents[id] and bagEvents[id] >= 0 then
         self:OpenBags()
@@ -89,7 +96,7 @@ function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_SHOW(event, id)
         self:OpenBank()
     end
 
-    if id == _G.Enum.PlayerInteractionType.Banker  or id == _G.Enum.PlayerInteractionType.AccountBanker then
+    if bankInteractionType[id] then
         self.atBank = true
     elseif id == _G.Enum.PlayerInteractionType.Merchant then
         MERCHANT_SHOW()
@@ -105,7 +112,7 @@ function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_HIDE(event, id)
         self:CloseBank()
     end
 
-    if id == _G.Enum.PlayerInteractionType.Banker  or id == _G.Enum.PlayerInteractionType.AccountBanker then
+    if bankInteractionType[id] then
         self.atBank = false
     elseif id == _G.Enum.PlayerInteractionType.Merchant then
         MERCHANT_CLOSED()
