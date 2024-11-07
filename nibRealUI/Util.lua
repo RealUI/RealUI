@@ -50,19 +50,19 @@ local C_Container = {
     GetContainerNumSlots = _G.GetContainerNumSlots,
 
     GetContainerItemInfo = function(bagID, slot)
-        local icon, itemCount, locked, quality, readable, lootable, itemLink, isFiltered, noValue, itemID, isBound = _G.GetContainerItemInfo(bagID, slot)
+        local info = _G.C_Container.GetContainerItemInfo(bagID, slot)
         return {
-            iconFileID = icon,
-            stackCount = itemCount,
-            isLocked = locked,
-            quality = quality,
-            isReadable = readable,
-            hasLoot = lootable,
-            hyperlink = itemLink,
-            isFiltered = isFiltered,
-            hasNoValue = noValue,
-            itemID = itemID,
-            isBound = isBound
+            iconFileID = info.iconFileID,
+            stackCount = info.stackCount,
+            isLocked = info.isLocked,
+            quality = info.quality,
+            isReadable = info.isReadable,
+            hasLoot = info.hasLoot,
+            hyperlink = info.hyperlink,
+            isFiltered = info.isFiltered,
+            hasNoValue = info.hasNoValue,
+            itemID = info.itemID,
+            isBound = info.isBound
         }
     end,
     GetContainerItemEquipmentSetInfo = _G.GetContainerItemEquipmentSetInfo,
