@@ -1913,7 +1913,7 @@ function Infobar:CreateBlocks()
                 local freeSlots, totalSlots = 0, 0
 
                 -- Cycle through bags
-                for bagID = RealUI.Enum.BagIndex.Backpack, _G.NUM_BAG_SLOTS do
+                for bagID = _G.Enum.BagIndex.Backpack, _G.NUM_BAG_SLOTS do
                     local slots, slotsTotal = C_Container.GetContainerNumFreeSlots(bagID), C_Container.GetContainerNumSlots(bagID)
                     if ( bagID >= 1 ) then  -- Extra bag
                         local bagLink = _G.GetInventoryItemLink("player", C_Container.ContainerIDToInventoryID(bagID))
