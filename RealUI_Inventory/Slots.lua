@@ -11,7 +11,6 @@ local Skin = Aurora.Skin
 -- RealUI --
 local Inventory = private.Inventory
 local C_Container = _G.RealUI.C_Container
-local BagIndex = _G.RealUI.Enum.BagIndex
 
 local function SlotFactory(pool)
     local numActive = pool:GetNumActive()
@@ -274,10 +273,10 @@ end
 private.SearchItemsForBag = SearchItemsForBag
 
 local mainBags = {
-    [BagIndex.Backpack] = _G.BACKPACK_TOOLTIP,
-    [BagIndex.Bank] = _G.BANK,
-    [BagIndex.Reagentbank] = _G.REAGENT_BANK,
-    [BagIndex.Accountbanktab] = _G.ACCOUNT_BANK_PANEL_TITLE,
+    [_G.Enum.BagIndex.Backpack] = _G.BACKPACK_TOOLTIP,
+    [_G.Enum.BagIndex.Bank] = _G.BANK,
+    [_G.Enum.BagIndex.Reagentbank] = _G.REAGENT_BANK,
+    [_G.Enum.BagIndex.Accountbanktab] = _G.ACCOUNT_BANK_PANEL_TITLE,
 }
 local BagSlotMixin = {}
 function BagSlotMixin:Init(bagID)
@@ -309,11 +308,11 @@ function BagSlotMixin:Init(bagID)
 
     Skin.FrameTypeItemButton(self)
     if self.isBag then
-        if bagID >= BagIndex.Backpack and bagID <= _G.NUM_BAG_SLOTS then
+        if bagID >= _G.Enum.BagIndex.Backpack and bagID <= _G.NUM_BAG_SLOTS then
             self.inventorySlot = "Bag"..(bagID - 1).."Slot"
 
             self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-        elseif bagID == BagIndex.ReagentBag then
+        elseif bagID == _G.Enum.BagIndex.ReagentBag then
             local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
             self.inventorySlot = "ReagentBag"..slotID.."Slot"
 

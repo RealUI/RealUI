@@ -15,34 +15,34 @@ end
 ----====####$$$$%%%%%$$$$####====----
 --          Compatibility          --
 ----====####$$$$%%%%%$$$$####====----
-local Enum = {}
--- BagIndex added in 10.0.2
-Enum.BagIndex = {
-    Accountbanktab = -5,
-    Bankbag = -4,
-    Reagentbank = -3,
-    Keyring = -2,
-    Bank = -1,
-    Backpack = 0,
-    Bag_1 = 1,
-    Bag_2 = 2,
-    Bag_3 = 3,
-    Bag_4 = 4,
-    ReagentBag = 5,
-    BankBag_1 = 6,
-    BankBag_2 = 7,
-    BankBag_3 = 8,
-    BankBag_4 = 9,
-    BankBag_5 = 10,
-    BankBag_6 = 11,
-    BankBag_7 = 12,
-    AccountBankTab_1 = 13,
-    AccountBankTab_2 = 14,
-    AccountBankTab_3 = 15,
-    AccountBankTab_4 = 16,
-    AccountBankTab_5 = 17,
-}
-RealUI.Enum = Enum
+-- local Enum = {}
+-- -- BagIndex added in 10.0.2
+-- Enum.BagIndex = {
+--     Accountbanktab = -5,
+--     Bankbag = -4,
+--     Reagentbank = -3,
+--     Keyring = -2,
+--     Bank = -1,
+--     Backpack = 0,
+--     Bag_1 = 1,
+--     Bag_2 = 2,
+--     Bag_3 = 3,
+--     Bag_4 = 4,
+--     ReagentBag = 5,
+--     BankBag_1 = 6,
+--     BankBag_2 = 7,
+--     BankBag_3 = 8,
+--     BankBag_4 = 9,
+--     BankBag_5 = 10,
+--     BankBag_6 = 11,
+--     BankBag_7 = 12,
+--     AccountBankTab_1 = 13,
+--     AccountBankTab_2 = 14,
+--     AccountBankTab_3 = 15,
+--     AccountBankTab_4 = 16,
+--     AccountBankTab_5 = 17,
+-- }
+-- RealUI.Enum = Enum
 
 -- C_Container expanded in 10.0.2
 local C_Container = {

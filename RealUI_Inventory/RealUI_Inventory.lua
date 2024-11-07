@@ -32,7 +32,7 @@ function private.Update()
 end
 
 function private.GetBagTypeForBagID(bagID)
-    if bagID >= RealUI.Enum.BagIndex.Backpack and bagID <= _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS then
+    if bagID >= _G.Enum.BagIndex.Backpack and bagID <= _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS then
         return "main"
     else
         return "bank"
