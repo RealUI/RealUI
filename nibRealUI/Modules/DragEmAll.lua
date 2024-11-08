@@ -109,7 +109,7 @@ local addonFrames = {
         CollectionsJournalMover = {"CollectionsJournal"}
     },
     Blizzard_Communities = {
-        CommunitiesFrame = {"CommunitiesGuildLogFrame"}
+        CommunitiesFrameMover = {"CommunitiesFrame"}
     },
     --Blizzard_CompactRaidFrames = {},
     --Blizzard_Contribution = {},
@@ -261,6 +261,19 @@ function DragEmAll:HookFrame(frameName, children)
             frame:Hide()
         end)
     end
+    if frameName == "CommunitiesFrameMover" then
+        _G.print("CommunitiesFrameMover")
+        frame:SetWidth(_G.CommunitiesFrame:GetWidth())
+        frame:SetHeight(_G.CommunitiesFrame:GetHeight())
+        _G.CommunitiesFrame:HookScript("OnShow", function()
+            frame:Show()
+            FramePoint.FixCommunitiesFrame(frame:GetPoint())
+        end)
+        _G.CommunitiesFrame:HookScript("OnHide", function()
+            frame:Hide()
+        end)
+    end
+
     frames[frameName] = children
 end
 
@@ -372,6 +385,18 @@ function DragEmAll:OnEnable()
     bg:SetAllPoints(collectionsJournalMover)
     bg:Hide()
     collectionsJournalMover.dragBG = bg
+
+    local CommunitiesFrameMover = _G.CreateFrame("Frame", "CommunitiesFrameMover", _G.UIParent)
+    CommunitiesFrameMover:SetSize(100, 100)
+    CommunitiesFrameMover:SetPoint("TOPLEFT")
+    CommunitiesFrameMover:Hide()
+
+    local communitiesbg = CommunitiesFrameMover:CreateTexture(nil, "BACKGROUND")
+    communitiesbg:SetColorTexture(1, 1, 1, 0.2)
+    communitiesbg:SetAllPoints(CommunitiesFrameMover)
+    communitiesbg:Hide()
+    CommunitiesFrameMover.dragBG = bg
+
 
     -- Making the ColorPickerFrame itself draggable makes interacting with the
     -- color picker widgets difficult, so we need to do something different to

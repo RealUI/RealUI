@@ -86,6 +86,16 @@ local function FixCollectionJournal(point, anchor, relPoint, x, y)
 end
 FramePoint.FixCollectionJournal = FixCollectionJournal
 
+local function FixCommunitiesFrame(point, anchor, relPoint, x, y)
+    local CommunitiesFrame = _G.CommunitiesFrame
+    local mover = _G.CommunitiesFrameMover
+
+    CommunitiesFrame:ClearAllPoints()
+    CommunitiesFrame:SetPoint(point, _G.UIParent, relPoint, x, y)
+    mover:Show()
+end
+FramePoint.FixCommunitiesFrame = FixCommunitiesFrame
+
 function FramePoint.OnDragStart(frame)
     LibWin.OnDragStart(frame)
     if frame.dragBG then
@@ -101,6 +111,9 @@ function FramePoint.OnDragStop(frame)
     else
         if frame:GetName() == "CollectionsJournalMover" then
             FixCollectionJournal(point, anchor, relPoint, x, y)
+        end
+        if frame:GetName() == "CommunitiesFrameMover" then
+            FixCommunitiesFrame(point, anchor, relPoint, x, y)
         end
 
         RealUI.SetPixelPoint(frame)
