@@ -1,8 +1,8 @@
-## Interface: 100207,110000,110002
+## Interface: 110000,110005
 ## Title: RealUI Combat Text
 ## Notes: Scrolling combat text designed for RealUI
-## Author: Gethe
-## Version: 2.4.0
+## Author: Gethe, Hanshi
+## Version: 2.4.1
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_CombatTextDB

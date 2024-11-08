@@ -1,4 +1,50 @@
-﻿## [2.4.0] ##
+﻿## [2.4.1] ##
+### Modified AddOns ###
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * nibRealUI
+  * nibRealUI_Config
+
+### Information ###
+  * This is the second release for The War Within - World of Warcraft 11.0.5
+  * This release is a major update to the Blizzard UI - with many changes to the core and modules
+  * Certain features have been disabled or removed due to changes in the Blizzard API
+  * This version is stable enoough for general use, but there are still some issues to be resolved
+
+### Added ###
+  * add: Show Tracking in Farm Mode (configurable)
+
+### Changed ###
+  * chg: dragemall changes to stop blocking communties frame
+  * chg: removed RealUI.C_Container
+  * chg: removed unused xml
+  * chg: updated masque skin for 11.0.0 and new api
+  * chg: AddonCompartmentFrame now anchored to coords
+  * chg: removed compability realui.enum.bankindex replaced with _G.Enum.BagIndex..
+  * chg: SpellActivationOverlay_ShowAllOverlays and SpellActivationOverlay_HideOverlays replaced.
+  * chg: removed debug threat spam :)
+  * chg: GetNumGuildMembers no longer gives back onlineandmobile users - replacing block entry
+  * chg: CreateObjectPool is now securepools - replace with CreateUnsecuredObjectPool
+  * chg: removed RealUI.Enum,BagIndex
+
+### Fixed ###
+a497c0ff fix: GetContainerItemInfo changed .
+  * fix: spec button on block were broken due to changed api
+  * fix: look up bankInteractionType with variable..
+  * fix: POIButton:add was removed - add coordinates directly
+  * fix: missing _G in Inventory
+  * fix: MinimapAdv - GarrisonEnums, ObjectiveTrackerPOI, and cleanups.
+  * fix: CompartmentFramePosition on minimap to follow anchorto
+
+### Disabled ###
+
+## Detailed Changes ##
+[2.4.1]: https://github.com/RealUI/RealUI/compare/2.4.0...2.4.1
+
+
+## [2.4.0] ##
 ### Modified AddOns ###
   * RealUI_Bugs
   * RealUI_CombatText
