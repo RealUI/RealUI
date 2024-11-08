@@ -5,7 +5,6 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = _G.RealUI
-local C_Container = RealUI.C_Container
 
 local Inventory = RealUI:NewModule("Inventory", "AceEvent-3.0", "AceHook-3.0")
 private.Inventory = Inventory
