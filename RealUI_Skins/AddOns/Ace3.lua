@@ -333,7 +333,7 @@ local function SkinAceGUI()
                 widget.slider:GetThumbTexture():SetSize(16, 16)
             end,
             Dropdown = function(widget)
-                Skin.UIDropDownMenuTemplate(widget.dropdown)
+                Skin.DropdownButton(widget.dropdown)
                 widget.dropdown:SetBackdropOption("offsets", {
                     left = 21,
                     right = 20,

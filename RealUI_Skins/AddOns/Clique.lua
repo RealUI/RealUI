@@ -21,10 +21,10 @@ do --[[ AddOns\Clique.lua ]]
 
         Skin.UICheckButtonTemplate(self.specswap)
         for i, dropdown in next, self.talentProfiles do
-            Skin.UIDropDownMenuTemplate(dropdown)
+            Skin.DropdownButton(dropdown)
         end
 
-        Skin.UIDropDownMenuTemplate(self.profiledd)
+        Skin.DropdownButton(self.profiledd)
         Skin.UICheckButtonTemplate(self.stopcastingfix)
     end
     function Hook.BLACKLIST_CreateOptions(self)
@@ -81,7 +81,7 @@ function private.AddOns.Clique()
     local CliqueConfig = _G.CliqueConfig
     _G.hooksecurefunc(CliqueConfig, "SetupGUI", Hook.CliqueConfig_SetupGUI)
     Skin.ButtonFrameTemplate(CliqueConfig)
-    Skin.UIDropDownMenuTemplate(CliqueConfig.dropdown)
+    Skin.DropdownButton(CliqueConfig.dropdown)
 
     local page1 = CliqueConfig.page1
     Skin.CliqueColumnTemplate(page1.column1)

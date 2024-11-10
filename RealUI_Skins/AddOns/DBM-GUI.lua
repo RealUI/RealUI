@@ -91,7 +91,7 @@ do --[[ AddOns\DBM-GUI.xml ]]
         Skin.ExpandOrCollapse(Button)
     end
     function Skin.DBM_UIDropDownMenuTemplate(Frame)
-        Skin.UIDropDownMenuTemplate(Frame)
+        Skin.DropdownButton(Frame)
         local name = Frame:GetName()
         local topOffset, bottomOffset = 5, 9
         if Frame._height then
