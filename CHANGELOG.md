@@ -1,4 +1,15 @@
-﻿## [2.4.1] ##
+﻿## [2.4.2] ##
+### Modified AddOns ###
+  * Aurora 11.0.5.3
+
+### Changed ###
+  * fix: Aurora chg of UIDropDownMenuTemplate replaced with DropdownButton
+
+## Detailed Changes ##
+[2.4.1]: https://github.com/RealUI/RealUI/compare/2.4.2...2.4.1
+
+
+## [2.4.1] ##
 ### Modified AddOns ###
   * RealUI_CombatText
   * RealUI_Inventory
