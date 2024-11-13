@@ -68,8 +68,15 @@ function RealUI.RegisterModdedFrame(frame, updateFunc)
     moddedFrames[frame] = updateFunc or false
 end
 
+--[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
+    WorldMap and map action button. As such, we only use that if we absolutly have to.
+    WoW CVar can't go below .64
+]]
+
+
 local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
+    _G.print("RealUI.UpdateUIScale")
     if uiScaleChanging then return end
 
     -- https://www.reddit.com/r/wow/comments/95o2qn/how_to_pixel_perfect_ui/
@@ -79,33 +86,28 @@ function RealUI.UpdateUIScale(newScale)
     private.debug("pixel scale", pixelScale, uiMod)
 
     local oldScale = private.skinsDB.customScale
-    local cvarScale, parentScale = tonumber(_G.GetCVar("uiscale")), RealUI.Round(_G.UIParent:GetScale(), 2)
+    local cvarScale, parentScale = tonumber(RealUI.Round(_G.GetCVar("uiscale"),2)), RealUI.Round(_G.UIParent:GetScale(), 2)
     private.debug("current scale", oldScale, cvarScale, parentScale)
-
+    if parentScale == 1 then -- bail if UIParent is scaled to 1... we don't want to mess with that
+        return
+    end
     -- Get Scale
     if private.skinsDB.isPixelScale then
-        newScale = pixelScale
+        newScale = RealUI.Round(pixelScale,2)
     end
-
     if not newScale then
         newScale = oldScale
     end
     private.debug("newScale", newScale)
-
-
     local uiScale = newScale
     if private.skinsDB.isHighRes then
-        uiScale = uiScale * 2
+        uiScale = RealUI.Round(uiScale * 2, 2)
     end
 
     uiScaleChanging = true
     private.debug("update uiScale", uiScale)
-    if cvarScale ~= uiScale then
-        --[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
-            WorldMap and map action button. As such, we only use that if we absolutly have to.
 
-            WoW CVar can't go below .64
-        ]]
+    if (cvarScale ~= uiScale and not private.skinsDB.isPixelScal) then
         _G.SetCVar("uiScale", max(uiScale, 0.64))
     end
     if parentScale ~= uiScale then
@@ -157,7 +159,7 @@ function RealUI:AddFrameStripes(Frame)
 end
 
 function private.OnLoad()
-    --print("OnLoad Aurora", Aurora, private.Aurora)
+    _G.print("OnLoad RealUI")
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
     skinsDB:RegisterCallback("OnProfileChanged", function(db, newProfile)
         RealUI:ReloadUIDialog()
