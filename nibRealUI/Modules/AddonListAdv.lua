@@ -375,8 +375,9 @@ end
 
 function AddonListAdv:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    -- _G.AddonList.Dropdown:
     -- FIXLATER
-    -- _G.UIDropDownMenu_SetSelectedValue(_G.AddonList.Dropdown, RealUI.charInfo.name)
+    -- _G.UIDropDownMenu_SeStelectedValue(_G.AddonList.Dropdown, RealUI.charInfo.name)
 
     if LoggedIn then self:RefreshMod() end
 end
