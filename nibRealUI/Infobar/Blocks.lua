@@ -1955,7 +1955,7 @@ function Infobar:CreateBlocks()
                                 _G.EquipmentManager_EquipSet(dbc.specgear[specIndex])
                             end
                         else
-                            _G.SetSpecialization(specIndex)
+                            _G.C_SpecializationInfo.SetSpecialization(specIndex)
                             if dbc.specgear[specIndex] >= 0 then
                                 equipmentNeedsUpdate = dbc.specgear[specIndex]
                             end
