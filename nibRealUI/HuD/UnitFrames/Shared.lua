@@ -364,6 +364,9 @@ local function CreatePowerBar(parent, info, isAngled)
         Power.step, Power.warn = CreateSteps(parent, height, info)
         local powerType
         function Power:UpdateReverse()
+            if not ndb.settings then
+                _G.print("settings is missings..")
+            end
             if ndb.settings.reverseUnitFrameBars then
                 Power:SetReversePercent(RealUI.ReversePowers[powerType])
             else
@@ -653,6 +656,11 @@ end
 function UnitFrames:InitializeLayout()
     db = UnitFrames.db.profile
     ndb = RealUI.db.profile
+    if not ndb.settings then
+        _G.print(" UnitFrames:InitializeLayout - settings is missings..")
+    else
+        _G.print(" UnitFrames:InitializeLayout - settings is ok..")
+    end
 
     oUF:RegisterStyle("RealUI", Shared)
     oUF:Factory(function(...)
