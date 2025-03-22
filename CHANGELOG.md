@@ -1,16 +1,17 @@
 ﻿## [2.5.0] ##
 ### Modified AddOns ###
-  * Aurora 11.1.0.0
+  * Aurora 11.1.0.1
   * RealUI_Skins
   * nibRealUI
+  * nibRealUI_Dev
 
 ### Information ###
   * This is the first release for The War Within - World of Warcraft 11.1.0
   * Certain features have been disabled or removed due to changes in the Blizzard API
   * This version is stable enoough for general use, but there are still some issues to be resolved
 
-
 ### Changed ###
+  * chg: make addonprofiler off on RealUI releases and configurable with RealUI_Dev
   * fix: UpdateUIScale add some sanity checks and round only to 2 decimals
   * fix: SetSpecialization to C_SpecializationInfo.SetSpecialization (tnx Squishses)
   * chg: Some debug code
