@@ -1,5 +1,6 @@
 ## Interface: 110100
 ## Title: RealUI Dev
+## Category: RealUI
 ## Notes: Development assistant for RealUI
 ## Version: 2.5.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon

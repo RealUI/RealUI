@@ -1,5 +1,6 @@
 ## Interface: 110100
 ## Title: RealUI
+## Category: RealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe, Hanshi
 ## Version: 2.5.0

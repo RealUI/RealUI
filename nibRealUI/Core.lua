@@ -20,7 +20,8 @@ RealUI.verinfo.string = version
 
 RealUI.configModeModules = {}
 RealUI.defaultPositions = {
-    [1] = {     -- DPS/Tank
+    [1] = {
+        -- DPS/Tank
         ["HuDX"] = 0,
         ["HuDY"] = -38,
         ["UFHorizontal"] = 200,
@@ -31,10 +32,11 @@ RealUI.defaultPositions = {
         ["CastBarTargetX"] = 0,
         ["CastBarTargetY"] = 0,
         ["SpellAlertWidth"] = 150,
-        ["BossX"] = -32,        -- Boss anchored to RIGHT
-        ["BossY"] = 314,
+        ["BossX"] = -32, -- Boss anchored to RIGHT
+        ["BossY"] = 314
     },
-    [2] = {     -- Healing
+    [2] = {
+        -- Healing
         ["HuDX"] = 0,
         ["HuDY"] = -38,
         ["UFHorizontal"] = 200,
@@ -45,9 +47,9 @@ RealUI.defaultPositions = {
         ["CastBarTargetX"] = 0,
         ["CastBarTargetY"] = -20,
         ["SpellAlertWidth"] = 150,
-        ["BossX"] = -32,        -- Boss anchored to RIGHT
-        ["BossY"] = 314,
-    },
+        ["BossX"] = -32, -- Boss anchored to RIGHT
+        ["BossY"] = 314
+    }
 }
 
 private.profileToLayout = {
@@ -66,23 +68,24 @@ RealUI.hudSizeOffsets = {
         ["SpellAlertWidth"] = 0,
         ["ActionBarsY"] = 0,
         ["CastBarPlayerY"] = 0,
-        ["CastBarTargetY"] = 0,
+        ["CastBarTargetY"] = 0
     },
     [2] = {
         ["UFHorizontal"] = 100,
         ["SpellAlertWidth"] = 100,
         ["ActionBarsY"] = -20,
         ["CastBarPlayerY"] = -20,
-        ["CastBarTargetY"] = -20,
-    },
+        ["CastBarTargetY"] = -20
+    }
 }
 
 -- Default Options
-local defaults, charInit do
+local defaults, charInit
+do
     charInit = {
         installStage = 0,
         initialized = false,
-        needchatmoved = true,
+        needchatmoved = true
     }
     local spec = {}
     for specIndex = 1, #RealUI.charInfo.specs do
@@ -93,29 +96,28 @@ local defaults, charInit do
     defaults = {
         global = {
             tutorial = {
-                stage = -1,
+                stage = -1
             },
             tags = {
                 firsttime = true,
                 lowResOptimized = false,
-                slashRealUITyped = false,   -- To disable "Type /realui" message
+                slashRealUITyped = false -- To disable "Type /realui" message
             },
-            messages = {
-            },
+            messages = {},
             verinfo = {},
             patchedTOC = 0,
-            currency = {},
+            currency = {}
         },
         char = {
             init = charInit,
             layout = {
-                current = 1,    -- 1 = DPS/Tank, 2 = Healing
+                current = 1, -- 1 = DPS/Tank, 2 = Healing
                 spec = spec -- Save layout for each spec
-            },
+            }
         },
         profile = {
             modules = {
-                ['*'] = true,
+                ["*"] = true
             },
             registeredChars = {},
             -- HuD positions
@@ -126,9 +128,9 @@ local defaults, charInit do
             -- Dynamic UI settings
             settings = {
                 hudSize = 2,
-                reverseUnitFrameBars = false,
-            },
-        },
+                reverseUnitFrameBars = false
+            }
+        }
     }
 end
 
@@ -171,10 +173,13 @@ function RealUI:UpdateLayout(layout)
     self.ncLayout = layout == 1 and 2 or 1
 
     if self.isConfigMode and _G.Grid2Options then
-        self:ScheduleTimer(function()
-            self:ToggleGridTestMode(false)
-            self:ToggleGridTestMode(true)
-        end, 0.5)
+        self:ScheduleTimer(
+            function()
+                self:ToggleGridTestMode(false)
+                self:ToggleGridTestMode(true)
+            end,
+            0.5
+        )
     end
 end
 
@@ -212,13 +217,15 @@ function RealUI:GetVersionChange(oldVer, curVer)
     end
 end
 
-
 -- To help position UI elements
 function _G.RealUI_TestRaidWarnings()
-    RealUI:ScheduleRepeatingTimer(function()
-        _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, { r = 0, g = 1, b = 0 })
-        _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, { r = 0, g = 1, b = 0 })
-    end, 5)
+    RealUI:ScheduleRepeatingTimer(
+        function()
+            _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, {r = 0, g = 1, b = 0})
+            _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, {r = 0, g = 1, b = 0})
+        end,
+        5
+    )
 end
 
 function RealUI:Taint_Logging_Toggle()
@@ -237,7 +244,13 @@ local configLoaded = false
 function RealUI.LoadConfig(app, section, ...)
     debug("RealUI.LoadConfig", app, section, ...)
     if _G.InCombatLockdown() then
-        return RealUI:Notification(L["Alert_CombatLockdown"], true, L["Alert_CantOpenInCombat"], nil, [[Interface\AddOns\nibRealUI\Media\Notification_Alert]])
+        return RealUI:Notification(
+            L["Alert_CombatLockdown"],
+            true,
+            L["Alert_CantOpenInCombat"],
+            nil,
+            [[Interface\AddOns\nibRealUI\Media\Notification_Alert]]
+        )
     end
     debug("is loaded", configLoaded)
     if not configLoaded then
@@ -245,7 +258,7 @@ function RealUI.LoadConfig(app, section, ...)
         configLoaded, reason = _G.C_AddOns.LoadAddOn("nibRealUI_Config")
         debug("LoadAddOn", configLoaded, reason)
         if not configLoaded then
-            _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_"..reason]))
+            _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_" .. reason]))
         end
     end
     debug("ToggleConfig", RealUI.ToggleConfig)
@@ -260,7 +273,7 @@ function RealUI:OnProfileUpdate(event, database, profile)
     RealUI:SetProfilesToRealUI()
 
     for _, module in self:IterateModules() do
-       module:OnProfileUpdate(event, profile)
+        module:OnProfileUpdate(event, profile)
     end
 
     -- Update old stuff too for now
@@ -284,7 +297,7 @@ _G.StaticPopupDialogs["PUDRUIRELOADUI"] = {
     timeout = 0,
     whileDead = true,
     hideOnEscape = true,
-    notClosableByLogout = false,
+    notClosableByLogout = false
 }
 function RealUI:ReloadUIDialog()
     _G.StaticPopup_Show("PUDRUIRELOADUI")
@@ -303,7 +316,6 @@ function RealUI:OnInitialize()
     end
 
     self.db:SetProfile(private.layoutToProfile[1]) -- set back to default
-
 
     debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
     db = self.db.profile
@@ -342,62 +354,77 @@ function RealUI:OnInitialize()
     self:RegisterEvent("PLAYER_TALENT_UPDATE", UpdateSpec)
     self:RegisterEvent("TRAIT_CONFIG_UPDATED", UpdateSpec)
 
-    self:RegisterEvent("ADDON_LOADED", function()
-        if RealUI.recheckFonts then
-            local SkinsDB = RealUI.GetOptions("Skins").profile
-            local LSM = _G.LibStub("LibSharedMedia-3.0")
-            for fontType in next, RealUI.recheckFonts do
-                local font = SkinsDB.fonts[fontType]
-                if type(font) == "table" then
-                    for name, path in next, LSM.MediaTable.font do
-                        if font.name == name then
-                            RealUI.recheckFonts[fontType] = nil
-                            SkinsDB.fonts[fontType] = {
-                                name = name,
-                                path = path
-                            }
-                            break
-                        elseif font.name == "" and font.path == path then
-                            RealUI.recheckFonts[fontType] = nil
-                            SkinsDB.fonts[fontType] = {
-                                name = name,
-                                path = path
-                            }
-                            break
+    self:RegisterEvent(
+        "ADDON_LOADED",
+        function()
+            if RealUI.recheckFonts then
+                local SkinsDB = RealUI.GetOptions("Skins").profile
+                local LSM = _G.LibStub("LibSharedMedia-3.0")
+                for fontType in next, RealUI.recheckFonts do
+                    local font = SkinsDB.fonts[fontType]
+                    if type(font) == "table" then
+                        for name, path in next, LSM.MediaTable.font do
+                            if font.name == name then
+                                RealUI.recheckFonts[fontType] = nil
+                                SkinsDB.fonts[fontType] = {
+                                    name = name,
+                                    path = path
+                                }
+                                break
+                            elseif font.name == "" and font.path == path then
+                                RealUI.recheckFonts[fontType] = nil
+                                SkinsDB.fonts[fontType] = {
+                                    name = name,
+                                    path = path
+                                }
+                                break
+                            end
                         end
                     end
                 end
             end
         end
-    end)
+    )
 
     -- Chat Commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
-    self:RegisterChatCommand("realadv", function()
-        RealUI.Debug("Config", "/realadv")
-        RealUI.LoadConfig("RealUI")
-    end)
-    self:RegisterChatCommand("rl", function()
-        _G.C_UI.Reload()
-    end)
-    self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
-    self:RegisterChatCommand("findSpell", function(input)
-        -- /findSpell "Spell Name" (player)|target (buff)|debuff
-        local spellName, unit, auraType = self:GetArgs(input, 3)
-        _G.assert(type(spellName) == "string", "A spell name must be provided")
-        unit = unit or "player"
-        if auraType == nil then
-            -- Default this to false for player, true for target.
-            auraType = unit == "target" and "debuff" or "buff"
+    self:RegisterChatCommand(
+        "realadv",
+        function()
+            RealUI.Debug("Config", "/realadv")
+            RealUI.LoadConfig("RealUI")
         end
-        self.FindSpellID(spellName, unit, auraType)
-    end)
-    self:RegisterChatCommand("rc",  function()
-        _G.DoReadyCheck()
-    end)
+    )
+    self:RegisterChatCommand(
+        "rl",
+        function()
+            _G.C_UI.Reload()
+        end
+    )
+    self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+    self:RegisterChatCommand(
+        "findSpell",
+        function(input)
+            -- /findSpell "Spell Name" (player)|target (buff)|debuff
+            local spellName, unit, auraType = self:GetArgs(input, 3)
+            _G.assert(type(spellName) == "string", "A spell name must be provided")
+            unit = unit or "player"
+            if auraType == nil then
+                -- Default this to false for player, true for target.
+                auraType = unit == "target" and "debuff" or "buff"
+            end
+            self.FindSpellID(spellName, unit, auraType)
+        end
+    )
+    self:RegisterChatCommand(
+        "rc",
+        function()
+            _G.DoReadyCheck()
+        end
+    )
 
-      -- Position Chat Frame
+    -- Position Chat Frame
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
         _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
@@ -417,15 +444,30 @@ function RealUI:OnInitialize()
         _G.SetCVar("synchronizeMacros", 1)
     end
     if ((_G.GetCVarNumberOrDefault("questTextContrast")) ~= 4) then
-        _G.SetCVar("questTextContrast", 4);
+        _G.SetCVar("questTextContrast", 4)
     end
     -- Done
-     _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
-     if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
-         _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
+    _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
+    if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
+        _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
     -- Check AccountStatus
     _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
+    -- Check AddOnProfiler status
+    _G.print(("AddOnProfiler is active: %s."):format(_G.tostring(_G.C_AddOnProfiler.IsEnabled())))
+    if _G.C_AddOnProfiler.IsEnabled() then
+        if not RealUI.isDev then
+            _G.print("Deactivating AddOnProfiler...")
+            _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
+            _G.C_CVar.SetCVar("addonProfilerEnabled", "0")
+        else
+            _G.print("RealUI Developer - do you want to turn off AddOnProfiler for this session?")
+        end
+    else
+        if RealUI.isDev then
+            _G.print("RealUI Developer - do you want to turn On                                                                                                          AddOnProfiler for this session?")
+        end
+    end
 end
 
 local onLoadMessages = {
@@ -438,7 +480,7 @@ local onLoadMessages = {
     }
     ]]
     reload = {
-        text = "When changing the position of UI frames, please be sure to reload the UI with /rl",
+        text = "When changing the position of UI frames, please be sure to reload the UI with /rl"
     }
 }
 function RealUI:OnEnable()
@@ -465,14 +507,16 @@ function RealUI:OnEnable()
                 end
             end
             if not _G.LOCALE_enUS then
-                 _G.print("Want to contribute? You can help localize RealUI into your native language at bit.ly/RealUILocale")
+                _G.print(
+                    "Want to contribute? You can help localize RealUI into your native language at bit.ly/RealUILocale"
+                )
             end
         end
     end
 
     -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
     if _G.GetCVar("taintLog") ~= "0" then
-         _G.print(L["Slash_Taint"])
+        _G.print(L["Slash_Taint"])
     end
 
     UpdateSpec()
@@ -480,7 +524,6 @@ function RealUI:OnEnable()
     -- Update styling
     self:UpdateFrameStyle()
 end
-
 
 do
     local prototype = {
@@ -493,7 +536,7 @@ do
             if self.RefreshMod then
                 self:RefreshMod(...)
             end
-        end,
+        end
     }
     RealUI:SetDefaultModulePrototype(prototype)
 end
@@ -513,4 +556,3 @@ function RealUI:SetModuleEnabled(module, value)
         return value
     end
 end
-

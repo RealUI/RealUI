@@ -1,5 +1,6 @@
 ## Interface: 110100
 ## Title: RealUI Combat Text
+## Category: RealUI
 ## Notes: Scrolling combat text designed for RealUI
 ## Author: Gethe, Hanshi
 ## Version: 2.5.0

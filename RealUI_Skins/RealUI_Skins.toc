@@ -1,5 +1,6 @@
 ## Interface: 110100
 ## Title: RealUI Skins
+## Category: RealUI
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe, Hanshi
 ## Version: 2.5.0
