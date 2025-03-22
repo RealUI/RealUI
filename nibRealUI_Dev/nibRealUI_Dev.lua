@@ -5,6 +5,7 @@ local ADDON_NAME, ns = ...
 
 -- RealUI --
 local debug = _G.RealUI.GetDebug("Dev")
+
 _G.RealUI.isDev = true
 ns.isClassic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
 ns.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
@@ -356,6 +357,32 @@ function ns.commands:combatEvents()
         end
     end)
 end
+
+
+_G.StaticPopupDialogs["REALUIDEVPROFILER"] = {
+    text = "Enable/Disable AddOnProfiler",
+    button1 = "Enable",
+    button2 = "Disable",
+    OnAccept = function()
+        _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
+        _G.C_CVar.SetCVar("addonProfilerEnabled", "1")
+        _G.print(("AddOnProfiler is active: %s."):format(_G.tostring(_G.C_AddOnProfiler.IsEnabled())))
+    end,
+    OnCancel = function()
+        _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
+        _G.C_CVar.SetCVar("addonProfilerEnabled", "0")
+        _G.print(("AddOnProfiler is active: %s."):format(_G.tostring(_G.C_AddOnProfiler.IsEnabled())))
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    notClosableByLogout = false
+}
+
+function ns.commands:addonprofiler()
+    _G.StaticPopup_Show("REALUIDEVPROFILER")
+end
+
 
 -- Slash Commands
 _G.SLASH_DEV1 = "/dev"

@@ -461,11 +461,11 @@ function RealUI:OnInitialize()
             _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
             _G.C_CVar.SetCVar("addonProfilerEnabled", "0")
         else
-            _G.print("RealUI Developer - do you want to turn off AddOnProfiler for this session?")
+            _G.print("RealUI Developer - to turn off use /dev addonprofiler")
         end
     else
         if RealUI.isDev then
-            _G.print("RealUI Developer - do you want to turn On                                                                                                          AddOnProfiler for this session?")
+            _G.print("RealUI Developer - to turn on use /dev addonprofiler")
         end
     end
 end
