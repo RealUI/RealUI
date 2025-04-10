@@ -310,7 +310,7 @@ function RealUI:OnInitialize()
     self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
     for specIndex = 1, #RealUI.charInfo.specs do
         local spec = RealUI.charInfo.specs[specIndex]
-        if spec.role == "HGEALER" then
+        if spec.role == "HEALER" then
             self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
         end
     end
