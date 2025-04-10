@@ -87,7 +87,8 @@ function private.AddOns.Grid2()
     local Grid2RaidDebuffs = namespaces.Grid2RaidDebuffs.profiles
     Grid2RaidDebuffs["RealUI-Healing"] = {
         ["enabledModules"] = {
-            ["Battle for Azeroth"] = true,
+            ["The War Within"] = true,
+            ["Mythic+ Dungeons"] = true,
         },
     }
 
@@ -1562,7 +1563,7 @@ function private.Profiles.Grid2()
     for specIndex = 1, #RealUI.charInfo.specs do
         local profile = private.layoutToProfile[1]
         _G.print("RealUI.charInfo.specs[specIndex].role: ", RealUI.charInfo.specs[specIndex].role)
-        if RealUI.charInfo.specs[specIndex].role == _G.Enum.LFGRole.Healer then
+        if RealUI.charInfo.specs[specIndex].role == "HEALER" then
             profile = private.layoutToProfile[2]
         end
 
