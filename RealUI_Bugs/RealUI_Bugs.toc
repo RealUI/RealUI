@@ -1,4 +1,4 @@
-## Interface: 110100
+## Interface: 110105
 ## Title: RealUI Bugs
 ## Category: RealUI
 ## Notes: Bug catcher
