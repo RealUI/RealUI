@@ -306,30 +306,30 @@ local function RealUITutorial_HelpPlate_Show(self, parent, mainHelpButton)
 
     HP_CP = self
     HP_CP.mainHelpButton = mainHelpButton
-    for i = 1, #self do
-        local button = _G.HelpPlate_GetButton()
-        button:ClearAllPoints()
-        button:SetPoint( self[i].ButtonAnchor, _G.HelpPlate, self[i].ButtonAnchor, self[i].ButtonPos.x, self[i].ButtonPos.y )
-        button.tooltipDir = self[i].ToolTipDir
-        button.toolTipText = self[i].ToolTipText
-        button.viewed = false
-        button:Show()
-        button.HelpI:Show()
-        button.Pulse:Play()
+    -- for i = 1, #self do
+    --     local button = _G.HelpPlate_GetButton()
+    --     button:ClearAllPoints()
+    --     button:SetPoint( self[i].ButtonAnchor, _G.HelpPlate, self[i].ButtonAnchor, self[i].ButtonPos.x, self[i].ButtonPos.y )
+    --     button.tooltipDir = self[i].ToolTipDir
+    --     button.toolTipText = self[i].ToolTipText
+    --     button.viewed = false
+    --     button:Show()
+    --     button.HelpI:Show()
+    --     button.Pulse:Play()
 
-        -- We need to override this function because Blizzards' indexes a local var that will be nil
-        local onLeave = button:GetScript("OnLeave")
-        button:SetScript("OnLeave", function(btn)
-            if _G.RealUITutorialBG:IsShown() then
-                _G.HelpPlate_TooltipHide();
-                btn.box.BG:Show();
-                btn.boxHighlight:Hide();
-                btn.viewed = true;
-            else
-                onLeave(btn)
-            end
-        end)
-    end
+    --     -- We need to override this function because Blizzards' indexes a local var that will be nil
+    --     local onLeave = button:GetScript("OnLeave")
+    --     button:SetScript("OnLeave", function(btn)
+    --         if _G.RealUITutorialBG:IsShown() then
+    --             _G.HelpPlate_TooltipHide();
+    --             btn.box.BG:Show();
+    --             btn.boxHighlight:Hide();
+    --             btn.viewed = true;
+    --         else
+    --             onLeave(btn)
+    --         end
+    --     end)
+    -- end
     _G.HelpPlate:SetPoint("CENTER", parent, "CENTER", 0, 0 )
     _G.HelpPlate:SetSize(RealUI.GetInterfaceSize())
     _G.HelpPlate.userToggled = true
