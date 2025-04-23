@@ -120,7 +120,7 @@ local function GetUnitClassification(unit)
     elseif IsBattlePet then
         unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
     else
-        unitType = _G.C_CreatureInfo.UnitCreatureType(unit) or "unitType"
+        unitType = _G.UnitCreatureType(unit) or "unitType"
     end
 
     local diff
