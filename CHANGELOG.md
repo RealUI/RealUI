@@ -1,18 +1,17 @@
-﻿## [2.5.1] ##
+﻿## [2.5.2] ##
 ### Modified AddOns ###
-  * Aurora 11.1.0.3
+  * Aurora 11.1.5.0
   * RealUI_Skins
   * nibRealUI
-  * RealUI_Inventory
+  * RealUI_Tooltips
 
 ### Changed ###
-  * fix: RealUI_Inventory/Bags.lua - fix ReagentBank - was not showing correctly.
-  * chg: Enabled M+ and TWW modules for Grid2RaidDebuffs
-  * chg: GetSpecializationInfoForClassID returns role as tekst not related to ENUM.LFG...
-  * chg: error in MailFrame.lua was in local WTF folder...
+  * fix: HelpPlate_GetButton was remove from the API
+  * revert: RealUI_Inventory error that sneaked in on mouse over npcs
+
 
 ## Detailed Changes ##
-[2.5.0]: https://github.com/RealUI/RealUI/compare/2.5.0...2.5.1
+[2.5.1]: https://github.com/RealUI/RealUI/compare/2.5.1...2.5.2
 
 
 ## [2.5.0] ##
