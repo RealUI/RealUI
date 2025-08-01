@@ -195,7 +195,7 @@ local function UpdateSpec(...)
     end
 
     local specInfo = RealUI.charInfo.specs
-    local new = _G.GetSpecialization()
+    local new = _G.C_SpecializationInfo.GetSpecialization()
     if specInfo.current.index ~= new then
         specInfo.current = RealUI.charInfo.specs[new]
 
