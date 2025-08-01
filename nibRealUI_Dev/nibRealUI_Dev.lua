@@ -104,7 +104,6 @@ local BlizzAddons = {
     "Blizzard_TrainerUI",
     "Blizzard_Tutorial",
     "Blizzard_TutorialTemplates",
-    "Blizzard_VoidStorageUI",
     "Blizzard_WarboardUI",
     "Blizzard_WarfrontsPartyPoseUI",
 }

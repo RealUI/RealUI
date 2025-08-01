@@ -197,9 +197,6 @@ local addonFrames = {
     Blizzard_TrainerUI = {
         ClassTrainerFrame = {}
     },
-    Blizzard_VoidStorageUI = {
-        VoidStorageFrame = {"VoidStorageBorderFrameMouseBlockFrame"},
-    },
     Blizzard_WarboardUI = {
         WarboardQuestChoiceFrame = {}
     },
