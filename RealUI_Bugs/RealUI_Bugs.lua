@@ -88,7 +88,7 @@ local errorFrame do
     reload:SetScript("OnClick", _G.ReloadUI)
     errorFrame.Reload = reload
 
-    local index = errorFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalCenter")
+    local index = errorFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     index:SetSize(70, 16)
     index:SetPoint("BOTTOM", 0, 16)
     errorFrame.IndexLabel = index
