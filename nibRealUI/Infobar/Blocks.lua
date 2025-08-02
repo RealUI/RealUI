@@ -1576,7 +1576,7 @@ function Infobar:CreateBlocks()
                     end
 
                     local xp, totalLevelXP, currentLevel
-                    if _G.AzeriteUtil.IsAzeriteItemLocationBankBag(azeriteItemLocation) then
+                    if _G.AzeriteUtil.IsAzeriteItemLocationBankTab(azeriteItemLocation) then
                         xp, totalLevelXP = 0, 1
                         currentLevel = -1
                     else
