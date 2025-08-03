@@ -99,7 +99,7 @@ do
 				return
 			end
 		end
-		--print("ADDON LIST FIX ACTIVATED")
+		_G.print("ADDON LIST FIX ACTIVATED")
 	end
 end
 
