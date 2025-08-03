@@ -46,7 +46,7 @@ local function UpdateCC(self, event, unit)
                     if chat == "GROUP" then
                         chat = "INSTANCE_CHAT"
                     end
-                    _G.SendChatMessage("Trinket used by: ".._G.GetUnitName(unit, true), chat)
+                    _G.C_ChatInfo.SendChatMessage("Trinket used by: ".._G.GetUnitName(unit, true), chat)
                 elseif RealUI.isDev then
                     _G.print("Trinket used by: ".._G.GetUnitName(unit, true))
                 end
