@@ -46,7 +46,7 @@ function private.SellJunk()
             slot.sellPrice = nil
             slot.JunkIcon:Hide()
 
-            _G.C_Container.UseContainerItem(slot:GetBagAndSlot())
+            _G.C_Container.UseContainerItem(slot:GetBagAndSlot()) --- FIXME
         end
     end
 

@@ -45,8 +45,8 @@ _G.StaticPopupDialogs["RealUI_ResetAddonProfile"] = {
     text = L["Patch_UpdateAddonSettings"],
     button1 = _G.YES,
     button2 = _G.NO,
-    OnAccept = function(self)
-        RealUI:SetUpAddonProfile(self.text.text_arg1)
+    OnAccept = function(dialog)
+        RealUI:SetUpAddonProfile(dialog.text.text_arg1)
     end,
     OnCancel = function() end,
     timeout = 0,

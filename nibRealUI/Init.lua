@@ -12,12 +12,12 @@ while not loaded do
         _G.StaticPopupDialogs["REALUI_SKINS_NOT_FOUND"] = {
             text = "Module \"Skins\" was not found. RealUI will now be disabled.",
             button1 = _G.OKAY,
-            OnShow = function(self)
-                self:SetScale(2)
-                self:ClearAllPoints()
-                self:SetPoint("CENTER")
+            OnShow = function(dialog)
+                dialog:SetScale(2)
+                dialog:ClearAllPoints()
+                dialog:SetPoint("CENTER")
             end,
-            OnAccept = function(self, data)
+            OnAccept = function(dialog, data)
                 _G.C_AddOns.DisableAddOn("nibRealUI")
                 _G.ReloadUI()
             end,
