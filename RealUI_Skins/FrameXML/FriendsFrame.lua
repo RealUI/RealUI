@@ -19,7 +19,8 @@ do --[[ SharedXML\FriendsFrame.lua ]]
         local nameText, nameColor
         nameText = _G.BNet_GetBNetAccountName(accountInfo)
 
-        local characterName = _G.BNet_GetValidatedCharacterName(accountInfo.gameAccountInfo.characterName, nil, accountInfo.gameAccountInfo.clientProgram)
+		local characterName = _G.FriendsFrame_GetFormattedCharacterName(accountInfo.gameAccountInfo.characterName, nil, accountInfo.gameAccountInfo.clientProgram, accountInfo.gameAccountInfo.timerunningSeasonID);
+
         if characterName ~= "" then
             if accountInfo.gameAccountInfo.clientProgram == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
                 local classToken = _G.CUSTOM_CLASS_COLORS:GetClassToken(accountInfo.gameAccountInfo.className)
