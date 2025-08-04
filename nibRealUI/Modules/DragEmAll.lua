@@ -109,7 +109,7 @@ local addonFrames = {
         CollectionsJournalMover = {"CollectionsJournal"}
     },
     Blizzard_Communities = {
-        CommunitiesFrameMover = {"CommunitiesFrame"}
+        CommunitiesFrame = {"CommunitiesFrame"}
     },
     --Blizzard_CompactRaidFrames = {},
     --Blizzard_Contribution = {},
