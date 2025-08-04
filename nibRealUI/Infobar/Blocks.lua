@@ -1177,7 +1177,7 @@ function Infobar:CreateBlocks()
                         local name
                         if accountInfo.accountName then
                             name = accountInfo.accountName
-                            characterName = _G.BNet_GetValidatedCharacterName(characterName, accountInfo.battleTag, client)
+                            characterName = _G.FriendsFrame_GetFormattedCharacterName(accountInfo.gameAccountInfo.characterName, nil, accountInfo.gameAccountInfo.clientProgram, accountInfo.gameAccountInfo.timerunningSeasonID);
                         else
                             name = _G.UNKNOWN
                         end
