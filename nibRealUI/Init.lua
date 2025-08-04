@@ -99,8 +99,8 @@ for specIndex = 1, _G.C_SpecializationInfo.GetNumSpecializationsForClassID(class
 end
 
 -- Disable cargBags
-local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.charInfo.name)
-if enabled > 0 then
+local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.charInfo.name) == Enum.AddOnEnableState.All;
+if enabled == true then
     _G.C_AddOns.DisableAddOn("cargBags_Nivaya")
 end
 
