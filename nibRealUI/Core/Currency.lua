@@ -130,6 +130,7 @@ function Currency:OnInitialize()
 
     self:RegisterEvent("CURRENCY_DISPLAY_UPDATE", UpdateCurrency)
     self:RegisterEvent("PLAYER_MONEY", UpdateMoney)
+    self:RegisterEvent("ACCOUNT_MONEY", UpdateMoney)
     if characterInfo.faction == "Neutral" then
         self:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")
     end

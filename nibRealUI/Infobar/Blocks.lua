@@ -2377,6 +2377,7 @@ function Infobar:CreateBlocks()
 
                 local currencyData = {}
                 local realmMoneyTotal = 0
+                local accountMoneyTotal =  0
                 for index, realm in next, RealUI.realmInfo.connectedRealms do
                     local realmDB = currencyDB[realm]
                     if realmDB then
@@ -2452,6 +2453,8 @@ function Infobar:CreateBlocks()
 
                 tooltip:AddLine(L["Currency_TotalMoney"]..GetMoneyString(realmMoneyTotal))
                 tooltip:AddLine(" ")
+                tooltip:AddLine(L["Currency_TotalMoney_Account"]..GetMoneyString(accountMoneyTotal))
+                tooltip:AddLine(" ")
 
                 hintLine = tooltip:AddLine(L["Currency_Cycle"])
                 tooltip:SetLineTextColor(hintLine, Color.green:GetRGB())
@@ -2465,6 +2468,7 @@ function Infobar:CreateBlocks()
             events = {
                 "CURRENCY_DISPLAY_UPDATE",
                 "PLAYER_MONEY",
+                "ACCOUNT_MONEY"
             },
         })
     end
