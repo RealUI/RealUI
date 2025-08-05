@@ -7,6 +7,7 @@ ignore:
     - package.bat
     - nibRealUI_Dev
     - RealUI_Chat
+    - RealUI_Inventory
 
 externals:
     nibRealUI/Libs/AceAddon-3.0:
@@ -82,7 +83,6 @@ move-folders:
     nibRealUI/nibRealUI_Config: nibRealUI_Config
     nibRealUI/RealUI_Bugs: RealUI_Bugs
     nibRealUI/RealUI_CombatText: RealUI_CombatText
-    nibRealUI/RealUI_Inventory: RealUI_Inventory
     nibRealUI/RealUI_Skins: RealUI_Skins
     nibRealUI/RealUI_Tooltips: RealUI_Tooltips
     Aurora: RealUI_Skins/Aurora
