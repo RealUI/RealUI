@@ -1,9 +1,9 @@
-## Interface: 110105
+## Interface: 110200
 ## Title: RealUI Skins
 ## Category: RealUI
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe, Hanshi
-## Version: 2.5.2
+## Version: 2.5.3
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI

@@ -1,8 +1,8 @@
-## Interface: 110105
+## Interface: 110200
 ## Title: RealUI Dev
 ## Category: RealUI
 ## Notes: Development assistant for RealUI
-## Version: 2.5.2
+## Version: 2.5.3
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs
