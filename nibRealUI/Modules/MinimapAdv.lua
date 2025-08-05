@@ -6,6 +6,7 @@ local _, private = ...
 -- Libs --
 local Aurora = _G.Aurora
 local Color = Aurora.Color
+local Skin = Aurora.Skin
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -1667,6 +1668,7 @@ local function CreateFrames()
     -- Set position relative to anchorto
     local CompartmentFramePosition = _G.format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
 
+    Skin.DropdownButton(_G.AddonCompartmentFrame)
     _G.AddonCompartmentFrame:SetParent(_G.UIParent)
     _G.AddonCompartmentFrame:SetFrameLevel(10)
     _G.AddonCompartmentFrame:ClearAllPoints()
