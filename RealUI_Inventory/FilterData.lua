@@ -4,7 +4,7 @@ local _, private = ...
 -- luacheck: globals wipe bit
 
 local equipSetItems = {}
-local first, last = _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS+1, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS + _G.C_Bank.FetchNumPurchasedBankTabs(_G.Enum.BankType.Character)
+local first, last = _G.Enum.BagIndex.Backpack, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS + _G.C_Bank.FetchNumPurchasedBankTabs(_G.Enum.BankType.Character)
 -- local first, last = _G.Enum.BagIndex.Reagentbank, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
 local BANK_BAG = _G.Enum.BagIndex.Bank
 function private.UpdateEquipSetItems()

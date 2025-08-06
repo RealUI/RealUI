@@ -69,6 +69,10 @@ local menu do
         wipe(menuList)
         tinsert(menuList, 1, title)
         for i, filter in Inventory:IndexedFilters() do
+            if not filter then
+                _G.print("Inventory:UpdateLines - Filter is nil at index", i)
+                return
+            end
             if filter:IsEnabled() then
                 self:AddFilter(filter)
             end
@@ -270,20 +274,16 @@ tinsert(private.filterList, {
     end,
 })
 
--- FIXME LATER
--- tinsert(private.filterList, {
---     tag = "sets",
---     name = (":"):split(_G.EQUIPMENT_SETS),
---     rank = 20,
---     filter = function(slot)
---         -- API is bugged, always returns false
---         --local isSet, setList = _G.C_Container.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
---         local bagID, slotIndex = slot:GetBagAndSlot()
---         _G.print("Checking if item is in an equipment set", bagID, slotIndex)
---         local isSet = private.equipSetItems[bagID][slotIndex]
---         return isSet
---     end,
--- })
+tinsert(private.filterList, {
+    tag = "sets",
+    name = (":"):split(_G.EQUIPMENT_SETS),
+    rank = 20,
+    filter = function(slot)
+        local bagID, slotIndex = slot:GetBagAndSlot()
+        local isSet = private.equipSetItems[bagID][slotIndex]
+        return isSet
+    end,
+})
 
 tinsert(private.filterList, {
     tag = "ToBnetAccountUntilEquipped",
@@ -363,7 +363,6 @@ function private.CreateFilters()
     for i, info in ipairs(private.filterList) do
         Inventory:CreateFilter(info)
     end
-
     menu:UpdateLines()
 end
 
