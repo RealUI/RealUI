@@ -213,10 +213,14 @@ local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COST
 local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
+    "BAG_CLOSED",
     "BAG_UPDATE_DELAYED",
+    "BANK_BAG_SLOT_FLAGS_UPDATED",
+    "PLAYERBANKSLOTS_CHANGED",
     "UNIT_INVENTORY_CHANGED",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
+    "BAG_CONTAINER_UPDATE",
 }
 
 local MainBagMixin = _G.CreateFromMixins(_G.ContinuableContainer, BagMixin)
@@ -586,6 +590,7 @@ local function CreateBag(bagType)
     end,
     function(self)
         if bagType == "bank" then
+            _G.print("ReportError: BankFrame is not yet supported in Retail 11.2.")
             -- BankTab Buy here? FIXLATER
             -- local numSlots, full = _G.GetNumBankSlots()
             -- if not full then

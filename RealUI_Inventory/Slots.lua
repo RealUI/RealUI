@@ -310,19 +310,19 @@ function BagSlotMixin:Init(bagID)
             local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
             self.inventorySlot = "ReagentBag"..slotID.."Slot"
             self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-
         -- elseif bagID >= _G.Enum.BagIndex.AccountBankTab_1 and bagID <= _G.Enum.BagIndex.AccountBankTab_5 then
         --     local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
         --     self.inventorySlot = "AccountBankTab_1"..slotID.."Slot"
         --     self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
         else
-            local slotID = bagID - _G.NUM_BAG_SLOTS
-            self.inventorySlot = "Bag"..slotID
-
-            self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-            self.inventoryID = _G.BankButtonIDToInvSlotID(slotID, 1)
-
-            self.bankSlotID = slotID
+            -- Bank bag
+            -- FIXME
+            _G.print("BagSlotMixin:Init", self.inventorySlot, self.inventoryID, self.fallbackTexture)
+            -- local slotID = bagID - _G.NUM_BAG_SLOTS
+            -- self.inventorySlot = "Bag"..slotID
+            -- self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
+            -- self.inventoryID = _G.BankButtonIDToInvSlotID(slotID, 1)
+            -- self.bankSlotID = slotID
         end
     else
         self.fallbackTexture = [[Interface\Buttons\Button-Backpack-Up]]
@@ -424,7 +424,6 @@ end
 private.bagSlots = {}
 function private.CreateBagSlots(main)
     Inventory:debug("private.CreateBagSlots", main.bagType)
-    _G.print("Creating bag slots for", main.bagType)
     local bagSlots, bagType = private.bagSlots, main.bagType
     bagSlots[bagType] = {}
 

@@ -565,6 +565,7 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 if xCoord and yCoord and instanceID then
                     -- Check if there's already a POI for this quest.
                     local poiButton = _G.QuestMapFrame.QuestsFrame.Contents:FindButtonByQuestID(questID)
+                    -- FIXLATER
                     -- _G.ObjectiveTrackerFrame.BlocksFrame:POIButtonUtil.GetStyle(questID);
                     -- +	pin:SetSelected(isSuperTracked);
                     -- +	pin:SetStyle(isWaypoint and POIButtonUtil.Style.Waypoint or POIButtonUtil.GetStyle(questID));
@@ -674,13 +675,16 @@ function MinimapAdv:UpdatePOIEnabled()
         self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
-        self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
+        -- FIXLATER
+        -- self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
+        -- EventRegistry:RegisterCallback("Supertracking.OnChanged", self.RefreshAllData, self);
     else
         self:RemoveAllPOIs()
         self:UnregisterEvent("QUEST_POI_UPDATE")
         self:UnregisterEvent("QUEST_LOG_UPDATE")
         self:UnregisterEvent("QUEST_WATCH_LIST_CHANGED")
-        self:UnregisterEvent("SUPER_TRACKING_CHANGED")
+        -- FIXLATER
+        -- self:UnregisterEvent("SUPER_TRACKING_CHANGED")
     end
 end
 
