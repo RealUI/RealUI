@@ -16,7 +16,6 @@ local Color = Aurora.Color
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
 local L = RealUI.L
-local C_Container = RealUI.C_Container
 
 local BagMixin do
     local HEADER_SPACE = 20
@@ -215,9 +214,9 @@ local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
     "BAG_UPDATE_DELAYED",
+    "UNIT_INVENTORY_CHANGED",
     "INVENTORY_SEARCH_UPDATE",
     "ITEM_LOCK_CHANGED",
-    "PLAYERREAGENTBANKSLOTS_CHANGED"
 }
 
 local MainBagMixin = _G.CreateFromMixins(_G.ContinuableContainer, BagMixin)
@@ -282,7 +281,7 @@ end
 function MainBagMixin:GetNumFreeSlots()
     local totalFree, freeSlots, bagFamily = 0
     for k, bagID in self:IterateBagIDs() do
-        freeSlots, bagFamily = C_Container.GetContainerNumFreeSlots(bagID)
+        freeSlots, bagFamily = _G.C_Container.GetContainerNumFreeSlots(bagID)
         if bagFamily == 0 then
             totalFree = totalFree + freeSlots
         end
@@ -377,11 +376,7 @@ local BankBagMixin = _G.CreateFromMixins(MainBagMixin)
 function BankBagMixin:Init()
     MainBagMixin.Init(self)
     self.events = {
-        "PLAYERBANKSLOTS_CHANGED",
-        "PLAYERBANKBAGSLOTS_CHANGED",
-        "PLAYERREAGENTBANKSLOTS_CHANGED",
         "BANK_TABS_CHANGED",
-        "REAGENTBANK_PURCHASED",
         "PLAYER_ACCOUNT_BANK_TAB_SLOTS_CHANGED", -- Account bank
     }
 
@@ -565,17 +560,9 @@ local bagInfo = {
         name = "RealUIBank",
         mixin = BankBagMixin,
         bagIDs = {
-            _G.Enum.BagIndex.Bank, _G.Enum.BagIndex.BankBag_1, _G.Enum.BagIndex.BankBag_2, _G.Enum.BagIndex.BankBag_3,
-            _G.Enum.BagIndex.BankBag_4, _G.Enum.BagIndex.BankBag_5, _G.Enum.BagIndex.BankBag_6, _G.Enum.BagIndex.BankBag_7,
-            _G.Enum.BagIndex.Reagentbank
-        }, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
-    },
-    warband = {
-        name = "RealUIWarband",
-        mixin = BankBagMixin,
-        bagIDs = {
-            _G.Enum.BagIndex.AccountBankTab_1, _G.Enum.BagIndex.AccountBankTab_2, _G.Enum.BagIndex.AccountBankTab_3, _G.Enum.BagIndex.AccountBankTab_4, _G.Enum.BagIndex.AccountBankTab_5,
-        }, -- BANK_CONTAINER, (NUM_TOTAL_EQUIPPED_BAG_SLOTS + 1) through (NUM_TOTAL_EQUIPPED_BAG_SLOTS + NUM_BANKBAGSLOTS), REAGENTBANK_CONTAINER
+            _G.Enum.BagIndex.CharacterBankTab_1, _G.Enum.BagIndex.CharacterBankTab_2, _G.Enum.BagIndex.CharacterBankTab_3, _G.Enum.BagIndex.CharacterBankTab_4,
+            _G.Enum.BagIndex.CharacterBankTab_5, _G.Enum.BagIndex.CharacterBankTab_6
+        },
     },
 }
 
@@ -599,22 +586,23 @@ local function CreateBag(bagType)
     end,
     function(self)
         if bagType == "bank" then
-            local numSlots, full = _G.GetNumBankSlots()
-            if not full then
-                local cost = _G.GetBankSlotCost(numSlots)
-                _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
-                _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
+            -- BankTab Buy here? FIXLATER
+            -- local numSlots, full = _G.GetNumBankSlots()
+            -- if not full then
+            --     local cost = _G.GetBankSlotCost(numSlots)
+            --     _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+            --     _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
+            --     _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
 
-                local text = bagCost .. _G.GetMoneyString(cost)
-                if _G.GetMoney() >= cost then
-                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
-                else
-                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
-                end
+            --     local text = bagCost .. _G.GetMoneyString(cost)
+            --     if _G.GetMoney() >= cost then
+            --         _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+            --     else
+            --         _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+            --     end
 
-                _G.GameTooltip:Show()
-            end
+            --     _G.GameTooltip:Show()
+            -- end
         end
     end)
 
@@ -626,7 +614,7 @@ local function CreateBag(bagType)
 
         local firstBag = _G.BACKPACK_CONTAINER
         if bagType == "bank" then
-            firstBag = _G.Enum.BagIndex.Bank -- _G.BANK_CONTAINER
+            firstBag = _G.Enum.BagIndex.CharacterBankTab_1 -- _G.BANK_CONTAINER
         end
 
 
@@ -694,37 +682,28 @@ local function CreateBag(bagType)
     if bagType == "bank" then
         local deposit = CreateFeatureButton(main, nil, "download",
         function(self, button)
-            if _G.IsReagentBankUnlocked() then
-                _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
-                _G.DepositReagentBank()
-            else
-                _G.StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
-            end
+            _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
+            -- _G.DepositReagentBank() -- disabled in 11.2.0
         end,
         function(self)
             _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-            if _G.IsReagentBankUnlocked() then
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
-                local freeSlots = C_Container.GetContainerNumFreeSlots(_G.Enum.BagIndex.Reagentbank)
+            -- BankTab Buy here? FIXLATER
+            -- if _G.IsReagentBankUnlocked() then
+            --     _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
+            --     local freeSlots = C_Container.GetContainerNumFreeSlots(_G.Enum.BagIndex.Reagentbank)
 
-                local text = _G.NUM_FREE_SLOTS:format(freeSlots)
-                if freeSlots == 0 then
-                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
-                else
-                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
-                end
-            else
-                local cost = _G.GetReagentBankCost()
-                _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_PURCHASE_TEXT, nil, true)
-                _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
+            -- else
+            --     local cost = _G.GetReagentBankCost()
+            --     _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_PURCHASE_TEXT, nil, true)
+            --     _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
 
-                local text = bagCost .. _G.GetMoneyString(cost)
-                if _G.GetMoney() >= cost then
-                    _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
-                else
-                    _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
-                end
-            end
+            --     local text = bagCost .. _G.GetMoneyString(cost)
+            --     if _G.GetMoney() >= cost then
+            --         _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
+            --     else
+            --         _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
+            --     end
+            -- end
             _G.GameTooltip:Show()
         end)
 
@@ -735,7 +714,6 @@ local function CreateBag(bagType)
         function(self)
             _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
             _G.C_Container.SortBankBags()
-            _G.C_Container.SortReagentBankBags()
         end,
         function(self)
             _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -747,61 +725,6 @@ local function CreateBag(bagType)
         restackButton:SetPoint("TOPRIGHT", deposit, "TOPLEFT", -5, 0)
         main.restackButton = restackButton
     end
-    -- if bagType == "warband" then
-    --     local deposit = CreateFeatureButton(main, nil, "download",
-    --     function(self, button)
-    --         if _G.IsReagentBankUnlocked() then
-    --             _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
-    --             _G.DepositReagentBank()
-    --         else
-    --             _G.StaticPopup_Show("CONFIRM_BUY_REAGENTBANK_TAB")
-    --         end
-    --     end,
-    --     function(self)
-    --         _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
-    --         if _G.IsReagentBankUnlocked() then
-    --             _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
-    --             local freeSlots = C_Container.GetContainerNumFreeSlots(_G.Enum.BagIndex.Reagentbank)
-
-    --             local text = _G.NUM_FREE_SLOTS:format(freeSlots)
-    --             if freeSlots == 0 then
-    --                 _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
-    --             else
-    --                 _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
-    --             end
-    --         else
-    --             local cost = _G.GetReagentBankCost()
-    --             _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_PURCHASE_TEXT, nil, true)
-    --             _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
-
-    --             local text = bagCost .. _G.GetMoneyString(cost)
-    --             if _G.GetMoney() >= cost then
-    --                 _G.GameTooltip_AddNormalLine(_G.GameTooltip, text)
-    --             else
-    --                 _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
-    --             end
-    --         end
-    --         _G.GameTooltip:Show()
-    --     end)
-
-    --     deposit:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
-    --     main.deposit = deposit
-
-    --     local restackButton = CreateFeatureButton(main, nil, "repeat",
-    --     function(self)
-    --         _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
-    --         _G.C_Container.SortAccountBankBags()
-    --     end,
-    --     function(self)
-    --         _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    --         _G.GameTooltip_SetTitle(_G.GameTooltip, L.Inventory_Restack, nil, true)
-
-    --         _G.GameTooltip:Show()
-    --     end)
-
-    --     restackButton:SetPoint("TOPRIGHT", deposit, "TOPLEFT", -5, 0)
-    --     main.restackButton = restackButton
-    -- end
 
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
     searchBox:SetPoint("BOTTOMLEFT", 9, 5)
@@ -874,6 +797,6 @@ end
 function private.CreateBags()
     Inventory:debug("private.CreateBags")
     CreateBag("main")
-    CreateBag("bank")
+    -- CreateBag("bank")
     -- CreateBag("warband")
 end

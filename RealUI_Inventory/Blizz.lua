@@ -31,15 +31,16 @@ Inventory:RawHook("ToggleAllBags", "ToggleBags", true)
 Inventory:RawHook("OpenAllBags", "OpenBags", true)
 Inventory:RawHook("OpenBag", "OpenBags", true)
 
-function Inventory:OpenBank()
-    self.bank:Show()
-end
-function Inventory:CloseBank()
-    self.bank:Hide()
-end
-_G.BankFrame:UnregisterAllEvents()
-_G.BankFrame:SetScript("OnShow", nil)
-_G.BankFrame:SetParent(_G.RealUI.UIHider)
+-- FIXME
+-- function Inventory:OpenBank()
+--     self.bank:Show()
+-- end
+-- function Inventory:CloseBank()
+--     self.bank:Hide()
+-- end
+-- _G.BankFrame:UnregisterAllEvents()
+-- _G.BankFrame:SetScript("OnShow", nil)
+-- _G.BankFrame:SetParent(_G.RealUI.UIHider)
 
 local function MERCHANT_SHOW(event, ...)
     local bag = Inventory.main.bags.junk
@@ -92,9 +93,10 @@ function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_SHOW(event, id)
         self:OpenBags()
     end
 
-    if bankEvents[id] and bankEvents[id] >= 0 then
-        self:OpenBank()
-    end
+    -- FIXME
+    -- if bankEvents[id] and bankEvents[id] >= 0 then
+    --     self:OpenBank()
+    -- end
 
     if bankInteractionType[id] then
         self.atBank = true
@@ -108,9 +110,9 @@ function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_HIDE(event, id)
         self:CloseBags()
     end
 
-    if bankEvents[id] and bankEvents[id] <= 0 then
-        self:CloseBank()
-    end
+    -- if bankEvents[id] and bankEvents[id] <= 0 then
+    --     self:CloseBank()
+    -- end
 
     if bankInteractionType[id] then
         self.atBank = false

@@ -3,53 +3,9 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals wipe bit
 
-local EquipmentManager_UnpackLocation do
-    local LOCATION_PLAYER = _G.ITEM_INVENTORY_LOCATION_PLAYER
-    local LOCATION_BANK = _G.ITEM_INVENTORY_LOCATION_BANK
-    local LOCATION_BAGS = _G.ITEM_INVENTORY_LOCATION_BAGS
-    local LOCATION_VOIDSTORAGE = _G.ITEM_INVENTORY_LOCATION_VOIDSTORAGE
-    local BAG_BIT_OFFSET = _G.ITEM_INVENTORY_BAG_BIT_OFFSET
-    local NUM_TOTAL_EQUIPPED_BAG_SLOTS = _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
-
-    -- Blizzards version is broken for bank bags
-    function EquipmentManager_UnpackLocation(location)
-        if location < 0 then
-            return false, false, false, false, 0
-        end
-
-        local player = (bit.band(location, LOCATION_PLAYER) ~= 0)
-        local bank = (bit.band(location, LOCATION_BANK) ~= 0)
-        local bags = (bit.band(location, LOCATION_BAGS) ~= 0)
-        local voidStorage = (bit.band(location, LOCATION_VOIDSTORAGE) ~= 0)
-        local tab, voidSlot
-
-        if player then
-            location = location - LOCATION_PLAYER
-        elseif bank then
-            location = location - LOCATION_BANK
-        elseif voidStorage then
-            location = location - LOCATION_VOIDSTORAGE
-            tab = bit.rshift(location, BAG_BIT_OFFSET)
-            voidSlot = location - bit.lshift(tab, BAG_BIT_OFFSET)
-        end
-
-        if bags then
-            location = location - LOCATION_BAGS
-            local bag = bit.rshift(location, BAG_BIT_OFFSET)
-            local slot = location - bit.lshift(bag, BAG_BIT_OFFSET)
-
-            if bank then
-                bag = bag + NUM_TOTAL_EQUIPPED_BAG_SLOTS
-            end
-            return player, bank, bags, voidStorage, slot, bag, tab, voidSlot
-        else
-            return player, bank, bags, voidStorage, location, nil, tab, voidSlot
-        end
-    end
-end
-
 local equipSetItems = {}
-local first, last = _G.Enum.BagIndex.Reagentbank, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS + _G.NUM_BANKBAGSLOTS
+local first, last = _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS+1, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS + _G.C_Bank.FetchNumPurchasedBankTabs(_G.Enum.BankType.Character)
+-- local first, last = _G.Enum.BagIndex.Reagentbank, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
 local BANK_BAG = _G.Enum.BagIndex.Bank
 function private.UpdateEquipSetItems()
     for i = first, last do
@@ -59,17 +15,17 @@ function private.UpdateEquipSetItems()
             equipSetItems[i] = {}
         end
     end
-
     local setIDs = _G.C_EquipmentSet.GetEquipmentSetIDs()
     for i = 1, #setIDs do
         local locations = _G.C_EquipmentSet.GetItemLocations(setIDs[i])
         for j = 1, 19 do
             if locations[j] then
-                local _, bank, bags, _, slot, bag = EquipmentManager_UnpackLocation(locations[j])
-                if bank and not bags then
-                    bag, slot = BANK_BAG, slot - 63
-                end
-
+                local locationData = _G.EquipmentManager_GetLocationData(locations[j])
+                local bag, bags, bank, slot = locationData.bag, locationData.bags, locationData.bank, locationData.slot;
+                -- FIXME: BagIndex.Bank is replaced by tabs
+                -- if bank and not bags then
+                --     bag, slot = BANK_BAG, slot - 63
+                -- end
                 if bag and slot then
                     equipSetItems[bag][slot] = true
                 end

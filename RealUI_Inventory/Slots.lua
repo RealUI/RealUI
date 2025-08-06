@@ -10,7 +10,6 @@ local Skin = Aurora.Skin
 
 -- RealUI --
 local Inventory = private.Inventory
-local C_Container = _G.RealUI.C_Container
 
 local function SlotFactory(pool)
     local numActive = pool:GetNumActive()
@@ -60,8 +59,8 @@ function ItemSlotMixin:Update()
     local bagID, slotIndex = self:GetBagAndSlot()
     local item = self.item
 
-    local itemInfo = C_Container.GetContainerItemInfo(bagID, slotIndex)
-    local itemQuestInfo = C_Container.GetContainerItemQuestInfo(bagID, slotIndex)
+    local itemInfo = _G.C_Container.GetContainerItemInfo(bagID, slotIndex)
+    local itemQuestInfo = _G.C_Container.GetContainerItemQuestInfo(bagID, slotIndex)
 
     local icon = item:GetItemIcon()
     local quality = item:GetItemQuality()
@@ -107,7 +106,7 @@ function ItemSlotMixin:UpdateCooldown()
     local cooldown = self.Cooldown
     self.Cooldown:Hide()
 
-    local start, duration, enable = C_Container.GetContainerItemCooldown(self:GetBagAndSlot())
+    local start, duration, enable = _G.C_Container.GetContainerItemCooldown(self:GetBagAndSlot())
     _G.CooldownFrame_Set(cooldown, start, duration, enable)
 
     if duration > 0 and enable == 0 then
@@ -117,7 +116,7 @@ function ItemSlotMixin:UpdateCooldown()
     end
 end
 function ItemSlotMixin:UpdateItemContext()
-    local isFiltered = C_Container.GetContainerItemInfo(self:GetBagAndSlot()).isFiltered
+    local isFiltered = _G.C_Container.GetContainerItemInfo(self:GetBagAndSlot()).isFiltered
     self:UpdateItemContextMatching()
     self:SetMatchesSearch(not isFiltered)
 end
@@ -165,7 +164,7 @@ function InventorySlotMixin:Update()
         self.JunkIcon:Hide()
     end
 
-    self.BattlepayItemTexture:SetShown(C_Container.IsBattlePayItem(self:GetBagAndSlot()))
+    self.BattlepayItemTexture:SetShown(_G.C_Container.IsBattlePayItem(self:GetBagAndSlot()))
 end
 local inventorySlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 inventorySlots.frameTemplate = "ContainerFrameItemButtonTemplate"
@@ -181,11 +180,7 @@ function BankSlotMixin:Update()
 end
 function BankSlotMixin:GetInventorySlot()
     local bagID, slotIndex = self:GetBagAndSlot()
-    if bagID == _G.Enum.BagIndex.Reagentbank then
-        return _G.ReagentBankButtonIDToInvSlotID(slotIndex)
-    else
-        return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
-    end
+    return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
 end
 local bankSlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "BankItemButtonGenericTemplate"
@@ -195,7 +190,7 @@ bankSlots.mixin = BankSlotMixin
 
 function private.UpdateSlots(bagID)
     Inventory:debug("private.UpdateSlots", bagID)
-    for slotIndex = 1, C_Container.GetContainerNumSlots(bagID) do
+    for slotIndex = 1, _G.C_Container.GetContainerNumSlots(bagID) do
         local slot = private.GetSlot(bagID, slotIndex)
         if slot then
             slot.cancel = slot.item:ContinueWithCancelOnItemLoad(function()
@@ -243,10 +238,10 @@ function private.GetSlot(bagID, slotIndex)
 end
 
 function private.GetFirstFreeSlot(bagID)
-    if C_Container.GetContainerNumFreeSlots(bagID) > 0 then
-        local numSlots = C_Container.GetContainerNumSlots(bagID)
+    if _G.C_Container.GetContainerNumFreeSlots(bagID) > 0 then
+        local numSlots = _G.C_Container.GetContainerNumSlots(bagID)
         for slotIndex = 1, numSlots do
-            if not C_Container.GetContainerItemLink(bagID, slotIndex) then
+            if not _G.C_Container.GetContainerItemLink(bagID, slotIndex) then
                 return slotIndex
             end
         end
@@ -274,8 +269,7 @@ private.SearchItemsForBag = SearchItemsForBag
 
 local mainBags = {
     [_G.Enum.BagIndex.Backpack] = _G.BACKPACK_TOOLTIP,
-    [_G.Enum.BagIndex.Bank] = _G.BANK,
-    [_G.Enum.BagIndex.Reagentbank] = _G.REAGENT_BANK,
+    [_G.Enum.BagIndex.Characterbanktab] = _G.BANK,
     [_G.Enum.BagIndex.Accountbanktab] = _G.ACCOUNT_BANK_PANEL_TITLE,
 }
 local BagSlotMixin = {}
@@ -296,7 +290,6 @@ function BagSlotMixin:Init(bagID)
     self:RegisterEvent("PLAYER_ENTERING_WORLD");
     self:RegisterEvent("BAG_UPDATE_DELAYED")
     self:RegisterEvent("INVENTORY_SEARCH_UPDATE")
-    self:RegisterEvent("PLAYERREAGENTBANKSLOTS_CHANGED")
     self:SetScript("OnEvent", self.OnEvent)
     self:SetScript("OnEnter", self.OnEnter)
     self:SetScript("OnLeave", self.OnLeave)
@@ -316,8 +309,12 @@ function BagSlotMixin:Init(bagID)
         elseif bagID == _G.Enum.BagIndex.ReagentBag then
             local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
             self.inventorySlot = "ReagentBag"..slotID.."Slot"
-
             self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
+
+        -- elseif bagID >= _G.Enum.BagIndex.AccountBankTab_1 and bagID <= _G.Enum.BagIndex.AccountBankTab_5 then
+        --     local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
+        --     self.inventorySlot = "AccountBankTab_1"..slotID.."Slot"
+        --     self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
         else
             local slotID = bagID - _G.NUM_BAG_SLOTS
             self.inventorySlot = "Bag"..slotID
@@ -345,6 +342,7 @@ function BagSlotMixin:Update()
         _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", self.inventoryID), true)
 
         if self.bagType == "bank" then
+            -- C_Bank.FetchNumPurchasedBankTabs(Enum.BankType.Character)
             if self.bankSlotID <= _G.GetNumBankSlots() then
                 _G.SetItemButtonTextureVertexColor(self, 1.0, 1.0, 1.0)
                 self.tooltipText = _G.BANK_BAG
@@ -385,7 +383,7 @@ function BagSlotMixin:OnEnter()
         _G.GameTooltip:SetText(self.tooltipText, 1.0, 1.0, 1.0)
     end
 
-    local freeSlots = C_Container.GetContainerNumFreeSlots(self:GetID())
+    local freeSlots = _G.C_Container.GetContainerNumFreeSlots(self:GetID())
     local text = _G.NUM_FREE_SLOTS:format(freeSlots)
     if freeSlots == 0 then
         _G.GameTooltip_AddErrorLine(_G.GameTooltip, text)
@@ -426,6 +424,7 @@ end
 private.bagSlots = {}
 function private.CreateBagSlots(main)
     Inventory:debug("private.CreateBagSlots", main.bagType)
+    _G.print("Creating bag slots for", main.bagType)
     local bagSlots, bagType = private.bagSlots, main.bagType
     bagSlots[bagType] = {}
 

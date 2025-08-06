@@ -7,7 +7,6 @@ local _, private = ...
 local RealUI = _G.RealUI
 local Inventory = private.Inventory
 local L = RealUI.L
-local C_Container = RealUI.C_Container
 
 local menu do
     local MenuFrame = RealUI:GetModule("MenuFrame")
@@ -166,9 +165,9 @@ do
         local filter = _G.Mixin(info, FilterMixin)
 
         private.CreateFilterBag(Inventory.main, filter)
-        if filter.tag ~= "new" then
-            private.CreateFilterBag(Inventory.bank, filter)
-        end
+        -- if filter.tag ~= "new" then
+        --     private.CreateFilterBag(Inventory.bank, filter)
+        -- end
 
         Inventory:AddFilter(filter)
         return filter
@@ -247,7 +246,7 @@ tinsert(private.filterList, {
     name = _G.BAG_FILTER_JUNK,
     rank = 0,
     filter = function(slot)
-        local itemInfo = C_Container.GetContainerItemInfo(slot:GetBagAndSlot())
+        local itemInfo = _G.C_Container.GetContainerItemInfo(slot:GetBagAndSlot())
         return itemInfo.quality == _G.Enum.ItemQuality.Poor and not itemInfo.hasNoValue
     end,
 })
@@ -265,22 +264,39 @@ tinsert(private.filterList, {
 tinsert(private.filterList, {
     tag = "equipment",
     name = _G.BAG_FILTER_EQUIPMENT,
-    rank = 21,
+    rank = 22,
     filter = function(slot)
         return slot:GetItemType() == "equipment"
     end,
 })
 
+-- FIXME LATER
+-- tinsert(private.filterList, {
+--     tag = "sets",
+--     name = (":"):split(_G.EQUIPMENT_SETS),
+--     rank = 20,
+--     filter = function(slot)
+--         -- API is bugged, always returns false
+--         --local isSet, setList = _G.C_Container.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
+--         local bagID, slotIndex = slot:GetBagAndSlot()
+--         _G.print("Checking if item is in an equipment set", bagID, slotIndex)
+--         local isSet = private.equipSetItems[bagID][slotIndex]
+--         return isSet
+--     end,
+-- })
+
 tinsert(private.filterList, {
-    tag = "sets",
-    name = (":"):split(_G.EQUIPMENT_SETS),
-    rank = 20,
+    tag = "ToBnetAccountUntilEquipped",
+    name = "ToBnetAccountUntilEquipped",
+    rank = 21,
     filter = function(slot)
-        -- API is bugged, always returns false
-        --local isSet, setList = _G.C_Container.GetContainerItemEquipmentSetInfo(slot:GetBagAndSlot())
-        local bagID, slotIndex = slot:GetBagAndSlot()
-        local isSet = private.equipSetItems[bagID][slotIndex]
-        return isSet
+        local itemName, _, _, _, _, _, _, _, _, _, _, _, _, bindType, _, _, _ = _G.C_Item.GetItemInfo(slot.item:GetItemID())
+        if bindType and bindType == _G.Enum.ItemBind.BnetAccountUntilEquipped then
+            _G.print("ToBnetAccountUntilEquipped", itemName)
+            _G.print("ToBnetAccountUntilEquipped", slot.item:GetItemID())
+            _G.print("BindType", bindType)
+        end
+        return bindType == _G.Enum.ItemBind.BnetAccountUntilEquipped
     end,
 })
 
