@@ -550,7 +550,8 @@ end
 
 
 local function AddPOIsForZone(zoneInfo, numNumericQuests)
-    local quests = _G.C_QuestLog.GetQuestsOnMap(zoneInfo.mapID)
+    -- local quests = _G.C_QuestLog.GetQuestsOnMap(zoneInfo.mapID)
+    local quests = _G.GetQuestsOnMapCached(zoneInfo.mapID)
     if not quests then return numNumericQuests end
 
     for _, questInfo in next, quests do
@@ -1588,8 +1589,9 @@ local function CreateFrames()
                     local trackingInfo2 = _G.C_Minimap.GetTrackingInfo(id)
                     return trackingInfo2.active
                 end,
-                func = function(self, arg1, arg2, isChecked)
-                    _G.C_Minimap.SetTracking(id, isChecked)
+                func = function(self, arg1, arg2, selected)
+                    _G.MinimapUtil.SetTrackingFilterByFilterIndex(id, selected);
+                    -- _G.C_Minimap.SetTracking(id, isChecked)
                 end,
                 keepShown = true
             }
