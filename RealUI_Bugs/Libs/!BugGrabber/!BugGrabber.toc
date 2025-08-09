@@ -1,6 +1,6 @@
-## Interface: 11506, 11507, 20504, 30404, 40402, 40401, 110105, 110007, 110100
+## Interface: 11506, 11507, 20504, 30405, 40402, 40401, 50500, 110105, 110107, 110200
 ## Title: BugGrabber
-## Version: v11.1.1
+## Version: v11.1.5
 ## Notes: Grabs bugs for the bug sack.
 ## Notes-deDE: Grabs bugs for the bug sack.
 ## Notes-ruRU: Grabs bugs for the bug sack.
@@ -12,7 +12,7 @@
 ## Notes-esMX: Grabs bugs for the bug sack.
 ## Notes-itIT: Grabs bugs for the bug sack.
 ## Notes-ptBR: Grabs bugs for the bug sack.
-## Author: Funkydude
+## Author: Funkeh
 ## X-Credits: Rabbit, Rowne, Ramble, kergoth, ckknight, Fritti
 ## X-License: All Rights Reserved
 ## X-Category: Development Tools

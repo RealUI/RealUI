@@ -1,14 +1,8 @@
 ------------------------------------------------------------------------
-r322 | funkehdude | 2025-04-23 16:05:47 +0000 (Wed, 23 Apr 2025) | 1 line
+r330 | funkehdude | 2025-07-11 17:09:46 +0000 (Fri, 11 Jul 2025) | 1 line
 Changed paths:
-   M /trunk/.luacheckrc
+   M /trunk/!BugGrabber.toc
 
-Update luacheck
-------------------------------------------------------------------------
-r321 | funkehdude | 2025-04-23 15:55:55 +0000 (Wed, 23 Apr 2025) | 1 line
-Changed paths:
-   M /trunk/BugGrabber.lua
-
-Fix LUA_WARNING handling as of WoW 11.1.5
+Bump toc
 ------------------------------------------------------------------------
 
