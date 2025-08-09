@@ -566,10 +566,6 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 if xCoord and yCoord and instanceID then
                     -- Check if there's already a POI for this quest.
                     local poiButton = _G.QuestMapFrame.QuestsFrame.Contents:FindButtonByQuestID(questID)
-                    -- FIXLATER
-                    -- _G.ObjectiveTrackerFrame.BlocksFrame:POIButtonUtil.GetStyle(questID);
-                    -- +	pin:SetSelected(isSuperTracked);
-                    -- +	pin:SetStyle(isWaypoint and POIButtonUtil.Style.Waypoint or POIButtonUtil.GetStyle(questID));
                     if not poiButton then
                         if _G.C_QuestLog.IsComplete(questID) then
                             poiButton = _G.QuestScrollFrame.Contents:GetButtonForQuest(questID, "normal", nil);
