@@ -338,14 +338,14 @@ _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(toolt
 end)
 
 --[[
-private.AddHook("OnTooltipSetUnit", function(self)
+private.AddHook("OnTooltipSetUnit", function(dialog)
     Tooltips:debug("--- OnTooltipSetUnit ---")
-    local unit = GetUnit(self)
+    local unit = GetUnit(dialog)
     if not _G.UnitExists(unit) then return end
     Tooltips:debug("unit:", unit)
 
 
-    private.AddObjectiveProgress(self, unit, previousLine)
+    private.AddObjectiveProgress(dialog, unit, previousLine)
 
     AddDynamicInfo(unit, _G.UnitIsPlayer(unit))
 
@@ -468,7 +468,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
 
     local frame = _G.CreateFrame("Frame")
     frame:RegisterEvent("INSPECT_READY")
-    frame:SetScript("OnEvent", function(self, event, guid)
+    frame:SetScript("OnEvent", function(dialog, event, guid)
         if not cache[guid] or _G.UnitGUID(cache[guid].unit) ~= guid then return end
         local unit = cache[guid].unit
 
