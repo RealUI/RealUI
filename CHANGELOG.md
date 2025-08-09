@@ -1,4 +1,48 @@
-﻿## [2.5.2] ##
+﻿## [2.5.3] ##
+### Modified AddOns ###
+  * Aurora 11.2.0.1
+  * oUF
+  * RealUI_Skins
+  * nibRealUI
+  * RealUI_Bugs
+  * RealUI_Dev
+
+### Changed ###
+  * chg: BugGrabber - version: v11.1.5
+  * tmp: RealUI_Inventory workarounds
+  * add: reminder about LibWindow-1.1
+  * Removed commented code
+  * chg: Minimap use GetQuestsOnMapCached
+  * cleanup: C_Container unused code
+  * chg: re-enabled   RealUI_Inventory
+  * chg: ClearAllPoints changed in 11.2.0 - breaks moving certain windows
+  * chg: Minor RealUI_Inventory changes
+  * fix: RealUI_Inventory bugging out with EquipmentSets
+  * chg: RealUI.C_Container removed and replaced with _G.C_Container
+  * chg: Masque - api version update
+  * chg: make RealUI_Inventory load, bags ok - banks disabled
+  * fix: LFGFrame hook.
+  * chg: skin for AddonCompartmentFrame
+  * add: Adding skeleton for account wide money in infobar
+  * chg: toc update for 11.2.0
+  * fix: CommunitiesFrame is moveable again
+  * chg: BNet_GetValidatedCharacterName -> FriendsFrame_GetFormattedCharacterName
+  * chg: replace BNet_GetValidatedCharacterName with FriendsFrame_GetFormattedCharacterName - 11.2
+  * chg: addons enabled is now boolean
+  * chg: SendChatMessage -> C_ChatInfo.SendChatMessage
+  * chg: naming chg from self following blizzard standards
+  * chg: add debug info for blizzbugs
+  * chg: GameFontNormalCenter replaced by GameFontNormal
+  * chg: IsAzeriteItemLocationBankBag ->  IsAzeriteItemLocationBankTab
+  * chg: other changes related to C_SpecializationInfo implementation.
+  * chg: GetSpecialization ->  C_SpecializationInfo.GetSpecialization
+  * chg: Blizzard_VoidStorageUI removed in retail.
+
+## Detailed Changes ##
+[2.5.2]: https://github.com/RealUI/RealUI/compare/2.5.2...2.5.3
+
+
+## [2.5.2] ##
 ### Modified AddOns ###
   * Aurora 11.1.5.0
   * RealUI_Skins
