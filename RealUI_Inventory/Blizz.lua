@@ -76,11 +76,11 @@ local bagEvents = {
     [_G.Enum.PlayerInteractionType.AccountBanker] = 0,
     [_G.Enum.PlayerInteractionType.Merchant] = 0,
 }
-local bankEvents = {
-    [_G.Enum.PlayerInteractionType.Banker] = 0,
-    [_G.Enum.PlayerInteractionType.GuildBanker] = 0,
-    [_G.Enum.PlayerInteractionType.AccountBanker] = 0,
-}
+-- local bankEvents = {
+--     [_G.Enum.PlayerInteractionType.Banker] = 0,
+--     [_G.Enum.PlayerInteractionType.GuildBanker] = 0,
+--     [_G.Enum.PlayerInteractionType.AccountBanker] = 0,
+-- }
 
 local bankInteractionType = {
     [_G.Enum.PlayerInteractionType.AccountBanker] = true,

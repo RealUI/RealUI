@@ -179,7 +179,7 @@ function BankSlotMixin:Update()
     _G.BankFrameItemButton_UpdateLocked(self)
 end
 function BankSlotMixin:GetInventorySlot()
-    local bagID, slotIndex = self:GetBagAndSlot()
+    local _, slotIndex = self:GetBagAndSlot()
     return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
 end
 local bankSlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)

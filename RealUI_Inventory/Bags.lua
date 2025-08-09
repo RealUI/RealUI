@@ -209,7 +209,7 @@ function FilterBagMixin:Update()
     -- body
 end
 
-local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
+-- local bagCost = _G.CreateAtlasMarkup("NPE_RightClick", 20, 20, 0, -2) .. _G.COSTS_LABEL .. " "
 local BasicEvents = {
     "BAG_UPDATE",
     "BAG_UPDATE_COOLDOWN",
