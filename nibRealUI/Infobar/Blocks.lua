@@ -181,14 +181,14 @@ local function SetupTextTable()
             end
         end
 
-        local function OnUpdate(self, ...)
-            Infobar:debug("textTable:OnUpdate", ...)
+        local function OnUpdate(self, data)
+            Infobar:debug("textTable:OnUpdate", data)
             self:SetScript("OnUpdate", nil)
-            local data = self.data
+            -- local data = self.data
 
             if extData[data].sortColumn and #data > 0 then
                 sortColumn = extData[data].sortColumn:GetID()
-                Infobar:debug("Header_OnClick", sortColumn, ...)
+                Infobar:debug("Header_OnClick", sortColumn, data)
 
 
                 sortInverted = extData[data].sortInverted
