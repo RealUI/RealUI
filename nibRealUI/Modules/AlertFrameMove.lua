@@ -74,12 +74,12 @@ end
 
 local function SetUpAlert()
     AlertFrameMove:debug("SetUpAlert")
-    _G.hooksecurefunc(_G.AlertFrame, "UpdateAnchors", function(self)
+    _G.hooksecurefunc(_G.AlertFrame, "UpdateAnchors", function(dialog)
         AlertFrameMove:debug("UpdateAnchors")
-        self:ClearAllPoints()
-        self:SetAllPoints(AlertFrameHolder)
+        dialog:ClearAllPoints()
+        dialog:SetAllPoints(AlertFrameHolder)
     end)
-    _G.hooksecurefunc(_G.AlertFrame, "AddAlertFrameSubSystem", function(self, alertFrameSubSystem)
+    _G.hooksecurefunc(_G.AlertFrame, "AddAlertFrameSubSystem", function(dialog, alertFrameSubSystem)
         AlertFrameMove:debug("AddAlertFrameSubSystem")
         local _, isBlacklisted = ReplaceAnchors(alertFrameSubSystem)
 

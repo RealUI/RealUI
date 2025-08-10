@@ -16,19 +16,19 @@ end
 do
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("ADDON_LOADED")
-	frame:SetScript("OnEvent", function(self, event, name)
+	frame:SetScript("OnEvent", function(dialog, event, name)
 		if name == "Blizzard_TradeSkillUI" then
 			local old_OnClick = TradeSkillFrame.RecipeList.buttons[1]:GetScript("OnClick")
-			local new_OnClick = function(self, button)
-				if IsModifiedClick() and self.isHeader then
-					return self:GetParent():GetParent():OnHeaderButtonClicked(self, self.tradeSkillInfo, button)
+			local new_OnClick = function(dialog, button)
+				if IsModifiedClick() and dialog.isHeader then
+					return dialog:GetParent():GetParent():OnHeaderButtonClicked(dialog, dialog.tradeSkillInfo, button)
 				end
-				old_OnClick(self, button)
+				old_OnClick(dialog, button)
 			end
 			for i = 1, #TradeSkillFrame.RecipeList.buttons do
 				TradeSkillFrame.RecipeList.buttons[i]:SetScript("OnClick", new_OnClick)
 			end
-			self:UnregisterAllEvents()
+			dialog:UnregisterAllEvents()
 		end
 	end)
 end
@@ -40,9 +40,9 @@ end
 if GetLocale() ~= "enUS" then
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("ADDON_LOADED")
-	frame:SetScript("OnEvent", function(self, event, name)
+	frame:SetScript("OnEvent", function(dialog, event, name)
 		if name == "Blizzard_GarrisonUI" then
-			hooksecurefunc("GarrisonShipyardMap_SetupBonus", function(self, missionFrame, mission)
+			hooksecurefunc("GarrisonShipyardMap_SetupBonus", function(dialog, missionFrame, mission)
 				if (mission.typePrefix == "ShipMissionIcon-Bonus" and not missionFrame.bonusRewardArea) then
 					missionFrame.bonusRewardArea = true
 					for id, reward in pairs(mission.rewards) do
@@ -51,12 +51,12 @@ if GetLocale() ~= "enUS" then
 						posY = posY * -1
 						missionFrame.BonusAreaEffect:SetAtlas(reward.textureAtlas, true)
 						missionFrame.BonusAreaEffect:ClearAllPoints()
-						missionFrame.BonusAreaEffect:SetPoint("CENTER", self.MapTexture, "TOPLEFT", posX, posY)
+						missionFrame.BonusAreaEffect:SetPoint("CENTER", dialog.MapTexture, "TOPLEFT", posX, posY)
 						break
 					end
 				end
 			end)
-			self:UnregisterAllEvents()
+			dialog:UnregisterAllEvents()
 		end
 	end)
 end
@@ -72,7 +72,7 @@ end
 do
 	local frame = CreateFrame("Frame")
 	frame:RegisterEvent("ADDON_LOADED")
-	frame:SetScript("OnEvent", function(self, event, name)
+	frame:SetScript("OnEvent", function(dialog, event, name)
 		if name == "Blizzard_Collections" then
 			for i = 1, 3 do
 				local button = _G["PetJournalLoadoutPet"..i]
@@ -80,7 +80,7 @@ do
 					button.dragButton:RegisterForClicks("LeftButtonUp")
 				end
 			end
-			self:UnregisterAllEvents()
+			dialog:UnregisterAllEvents()
 		end
 	end)
 end

@@ -42,15 +42,15 @@ local function CreateTotems(parent)
 end
 
 UnitFrames.player = {
-    create = function(self)
-        CreateTotems(self)
+    create = function(dialog)
+        CreateTotems(dialog)
 
         --[[ Additional Power ]]--
-        local AdditionalPower = _G.CreateFrame("StatusBar", nil, self.Power)
+        local AdditionalPower = _G.CreateFrame("StatusBar", nil, dialog.Power)
         AdditionalPower:SetStatusBarTexture(RealUI.textures.plain, "BORDER")
         AdditionalPower:SetStatusBarColor(0, 0, 0, 0.75)
-        AdditionalPower:SetPoint("BOTTOMLEFT", self.Power, "TOPLEFT", 0, 0)
-        AdditionalPower:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -self.Power:GetHeight(), 0)
+        AdditionalPower:SetPoint("BOTTOMLEFT", dialog.Power, "TOPLEFT", 0, 0)
+        AdditionalPower:SetPoint("BOTTOMRIGHT", dialog.Power, "TOPRIGHT", -dialog.Power:GetHeight(), 0)
         AdditionalPower:SetHeight(1)
 
         local bg = AdditionalPower:CreateTexture(nil, 'BACKGROUND')
@@ -84,25 +84,25 @@ UnitFrames.player = {
             },
         }
 
-        self.AdditionalPower = AdditionalPower
-        self.AdditionalPower.bg = bg
+        dialog.AdditionalPower = AdditionalPower
+        dialog.AdditionalPower.bg = bg
 
         --[[ PvP Timer ]]--
-        local pvp = self.PvPIndicator
+        local pvp = dialog.PvPIndicator
         pvp.text = pvp:CreateFontString(nil, "OVERLAY")
-        pvp.text:SetPoint("BOTTOMLEFT", self.Health, "TOPLEFT", 15, 2)
+        pvp.text:SetPoint("BOTTOMLEFT", dialog.Health, "TOPLEFT", 15, 2)
         pvp.text:SetFontObject("SystemFont_Shadow_Med1_Outline")
         pvp.text:SetJustifyH("LEFT")
         pvp.text.frequentUpdates = 1
-        self:Tag(pvp.text, "[realui:pvptimer]")
+        dialog:Tag(pvp.text, "[realui:pvptimer]")
 
         --[[ Raid Icon ]]--
-        self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY")
-        self.RaidTargetIndicator:SetSize(20, 20)
-        self.RaidTargetIndicator:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 10, 4)
+        dialog.RaidTargetIndicator = dialog:CreateTexture(nil, "OVERLAY")
+        dialog.RaidTargetIndicator:SetSize(20, 20)
+        dialog.RaidTargetIndicator:SetPoint("BOTTOMLEFT", dialog, "TOPRIGHT", 10, 4)
 
         --[[ Class Resource ]]--
-        RealUI:GetModule("ClassResource"):Setup(self, self.unit)
+        RealUI:GetModule("ClassResource"):Setup(dialog, dialog.unit)
     end,
     health = {
         leftVertex = 1,

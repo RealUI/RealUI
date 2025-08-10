@@ -61,8 +61,8 @@ end
 
 if not CheckforRealm() then
     local frame = _G.CreateFrame("Frame")
-    frame:SetScript("OnUpdate", function(self)
-        self:SetShown(not CheckforRealm())
+    frame:SetScript("OnUpdate", function(dialog)
+        dialog:SetShown(not CheckforRealm())
     end)
 end
 

@@ -708,7 +708,7 @@ do -- AddDynamicInfo, ClearDynamicInfo
     end
 
     local updateTime = 0
-    frame:SetScript("OnUpdate", function(self, elapsed)
+    frame:SetScript("OnUpdate", function(dialog, elapsed)
         updateTime = (updateTime or 0) + elapsed
         if updateTime < 1 then return end
 

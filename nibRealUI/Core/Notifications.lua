@@ -18,30 +18,30 @@ local timeShown = 6
 
 local function hideBanner()
     local scale
-    f:SetScript("OnUpdate", function(self)
-        scale = self:GetScale() - interval
+    f:SetScript("OnUpdate", function(dialog)
+        scale = dialog:GetScale() - interval
         if scale <= 0.1 then
-            self:SetScript("OnUpdate", nil)
-            self:Hide()
+            dialog:SetScript("OnUpdate", nil)
+            dialog:Hide()
             bannerShown = false
             return
         end
-        self:SetScale(scale)
-        self:SetAlpha(scale)
+        dialog:SetScale(scale)
+        dialog:SetAlpha(scale)
     end)
 end
 
 local function fadeTimer()
     local last = 0
-    f:SetScript("OnUpdate", function(self, elapsed)
+    f:SetScript("OnUpdate", function(dialog, elapsed)
         local width = f:GetWidth()
         if width > bannerWidth then
-            self:SetWidth(width - (interval*100))
+            dialog:SetWidth(width - (interval*100))
         end
         last = last + elapsed
         if last >= timeShown then
-            self:SetWidth(bannerWidth)
-            self:SetScript("OnUpdate", nil)
+            dialog:SetWidth(bannerWidth)
+            dialog:SetScript("OnUpdate", nil)
             hideBanner()
         end
     end)
@@ -52,15 +52,15 @@ local function showBanner()
     f:Show()
 
     local scale
-    f:SetScript("OnUpdate", function(self)
+    f:SetScript("OnUpdate", function(dialog)
         scale = self:GetScale() + interval
         if scale >= 1 then
-            self:SetScale(1)
-            self:SetScript("OnUpdate", nil)
+            dialog:SetScale(1)
+            dialog:SetScript("OnUpdate", nil)
             fadeTimer()
         else
-            self:SetScale(scale)
-            self:SetAlpha(scale)
+            dialog:SetScale(scale)
+            dialog:SetAlpha(scale)
         end
     end)
 end
@@ -113,9 +113,9 @@ local function handleIncoming()
     processing = true
     local i = 1
 
-    handler:SetScript("OnUpdate", function(self)
+    handler:SetScript("OnUpdate", function(dialog)
         if incoming[i] == nil then
-            self:SetScript("OnUpdate", nil)
+            dialog:SetScript("OnUpdate", nil)
             incoming = {}
             processing = false
             return
@@ -128,10 +128,10 @@ local function handleIncoming()
     end)
 end
 
-handler:SetScript("OnEvent", function(self, _, unit)
+handler:SetScript("OnEvent", function(dialog, _, unit)
     if unit == "player" and not _G.UnitIsAFK("player") then
         handleIncoming()
-        self:UnregisterEvent("PLAYER_FLAGS_CHANGED")
+        dialog:UnregisterEvent("PLAYER_FLAGS_CHANGED")
     end
 end)
 
@@ -156,30 +156,30 @@ end
 
 -- Mouse events
 
-local function expand(self)
-    local width = self:GetWidth()
+local function expand(dialog)
+    local width = dialog:GetWidth()
 
     if text:IsTruncated() and width < (_G.GetScreenWidth() / 1.5) then
-        self:SetWidth(width+(interval*100))
+        dialog:SetWidth(width+(interval*100))
     else
-        self:SetScript("OnUpdate", nil)
+        dialog:SetScript("OnUpdate", nil)
     end
 end
 
-f:SetScript("OnEnter", function(self)
-    self:SetScript("OnUpdate", nil)
-    self:SetScale(1)
+f:SetScript("OnEnter", function(dialog)
+    dialog:SetScript("OnUpdate", nil)
+    dialog:SetScale(1)
     self:SetAlpha(1)
     self:SetScript("OnUpdate", expand)
 end)
 
 f:SetScript("OnLeave", fadeTimer)
 
-f:SetScript("OnMouseUp", function(self, button)
-    self:SetScript("OnUpdate", nil)
-    self:Hide()
-    self:SetScale(0.1)
-    self:SetAlpha(0.1)
+f:SetScript("OnMouseUp", function(dialog, button)
+    dialog:SetScript("OnUpdate", nil)
+    dialog:Hide()
+    dialog:SetScale(0.1)
+    dialog:SetAlpha(0.1)
     bannerShown = false
     -- right click just hides the banner
     if button ~= "RightButton" and f.clickFunc then

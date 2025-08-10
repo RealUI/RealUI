@@ -81,11 +81,11 @@ local function CreateAuras(parent)
     auras.numBuffs = bossDB.buffCount
     auras.numDebuffs = bossDB.debuffCount
 
-    auras.FilterAura = function(self, unit, data)
+    auras.FilterAura = function(dialog, unit, data)
         --    name, texture, count, debuffType, duration, expiration, caster
         local duration, expiration, sourceUnit = data.duration, data.expirationTime, data.sourceUnit
         if not sourceUnit then return false end
-        UnitFrames:debug("Boss:FilterAura", self, unit, duration, expiration, sourceUnit)
+        UnitFrames:debug("Boss:FilterAura", dialog, unit, duration, expiration, sourceUnit)
 
 
         -- Cast by Player
@@ -101,8 +101,8 @@ local function CreateAuras(parent)
             return isNPC
         end
     end
-    auras.PostCreateButton = function(self, button)
-        UnitFrames:debug("Boss:PostCreateButton", self, button)
+    auras.PostCreateButton = function(dialog, button)
+        UnitFrames:debug("Boss:PostCreateButton", dialog, button)
         Base.CropIcon(button.Icon, button)
         button.Count:SetFontObject("NumberFont_Outline_Med")
 
@@ -133,8 +133,8 @@ local function CreateAuras(parent)
             end
         end)
     end
-    auras.PostUpdateButton = function(self, button, unit, data, position)
-        UnitFrames:debug("Boss:PostUpdateButton", self, unit, button, position)
+    auras.PostUpdateButton = function(dialog, button, unit, data, position)
+        UnitFrames:debug("Boss:PostUpdateButton", dialog, unit, button, position)
 
         local duration, expiration = data.duration, data.expirationTime
         if duration and duration > 0 then
@@ -155,20 +155,20 @@ local function CreateAuras(parent)
 end
 
 UnitFrames.boss = {
-    create = function(self)
-        CreateAuras(self)
-        self.Health.text:SetPoint("LEFT", self.Health, 1, 0)
-        self.Power.displayAltPower = true
+    create = function(dialog)
+        CreateAuras(dialog)
+        dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
+        dialog.Power.displayAltPower = true
 
-        self.Name = self.Health:CreateFontString(nil, "OVERLAY")
-        self.Name:SetPoint("RIGHT", self.Health, -1, 0)
-        self.Name:SetFontObject("SystemFont_Shadow_Med1")
-        self.Name:SetJustifyH("RIGHT")
-        self:Tag(self.Name, "[realui:name]")
+        dialog.Name = dialog.Health:CreateFontString(nil, "OVERLAY")
+        dialog.Name:SetPoint("RIGHT", dialog.Health, -1, 0)
+        dialog.Name:SetFontObject("SystemFont_Shadow_Med1")
+        dialog.Name:SetJustifyH("RIGHT")
+        dialog:Tag(dialog.Name, "[realui:name]")
 
-        self.RaidTargetIndicator = self:CreateTexture(nil, 'OVERLAY')
-        self.RaidTargetIndicator:SetSize(20, 20)
-        self.RaidTargetIndicator:SetPoint("CENTER", self)
+        dialog.RaidTargetIndicator = dialog:CreateTexture(nil, 'OVERLAY')
+        dialog.RaidTargetIndicator:SetSize(20, 20)
+        dialog.RaidTargetIndicator:SetPoint("CENTER", dialog)
     end,
     health = {
         text = "[realui:healthPercent]",

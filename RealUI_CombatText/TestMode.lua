@@ -223,7 +223,7 @@ local testFrame = _G.CreateFrame("Frame")
 testFrame:Hide()
 
 local update = 0
-testFrame:SetScript("OnUpdate", function(self, elapsed)
+testFrame:SetScript("OnUpdate", function(dialog, elapsed)
     update = update + elapsed
     if update > (isSpamming and 0.25 or 0.5) then
         private.FilterEvent(GetEvent())

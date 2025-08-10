@@ -376,11 +376,11 @@ function Loot:UpdateLootPosition()
     end
 end
 
-RealUILootFrame:SetScript("OnEvent", function(self, event, ...)
-    self[event](self, event, ...)
+RealUILootFrame:SetScript("OnEvent", function(dialog, event, ...)
+    dialog[event](dialog, event, ...)
 end)
 
-RealUILootFrame:SetScript("OnHide", function(self)
+RealUILootFrame:SetScript("OnHide", function(dialog)
     _G.StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")
     _G.CloseLoot()
 end)

@@ -36,8 +36,8 @@ _G.StaticPopupDialogs["ALA_SaveAs"] = {
     button2 = _G.CANCEL,
     OnAccept = OnSaveAs,
     EditBoxOnEnterPressed = OnSaveAs,
-    EditBoxOnEscapePressed = function(self)
-        self:GetParent():Hide()
+    EditBoxOnEscapePressed = function(editbox)
+        editbox:GetParent():Hide()
     end,
     timeout = 0,
     hideOnEscape = 1,
@@ -203,8 +203,8 @@ _G.Aurora.Skin.UIPanelButtonTemplate(setsButton)
 setsButton:SetSize(100, 22)
 setsButton:SetText(_G.WARDROBE_SETS)
 setsButton:SetPoint("LEFT", _G.AddonCharacterDropDownButton, "RIGHT", 10, 0)
-setsButton:SetScript("OnClick", function(self)
-    MenuFrame:Open(self, "BOTTOMRIGHT", self:GetMenu())
+setsButton:SetScript("OnClick", function(dialog)
+    MenuFrame:Open(dialog, "BOTTOMRIGHT", dialog:GetMenu())
 end)
 
 local function GetSetOptions(setName)

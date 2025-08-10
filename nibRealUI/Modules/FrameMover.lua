@@ -84,7 +84,7 @@ local function HideFrameGroup(FramesTable)
 
         frame:UnregisterAllEvents()
         frame:Hide()
-        frame:SetScript("OnShow", function(self) self:Hide() end)
+        frame:SetScript("OnShow", function(dialog) dialog:Hide() end)
     end
 end
 

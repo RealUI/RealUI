@@ -108,8 +108,8 @@ local function SkinAceGUI()
             options.insets.top, options.insets.bottom = 0, 0
             widget.dragger:SetBackdrop(options)
             widget.dragger:SetBackdropColor(1, 1, 1, 0)
-            widget.dragger:SetScript("OnEnter", function(self)
-                self:SetBackdropColor(highlightColor.r, highlightColor.g, highlightColor.b, 0.8)
+            widget.dragger:SetScript("OnEnter", function(dialog)
+                dialog:SetBackdropColor(highlightColor.r, highlightColor.g, highlightColor.b, 0.8)
             end)
 
             Base.SetBackdrop(widget.treeframe, frameColor)
@@ -238,8 +238,8 @@ local function SkinAceGUI()
                     end
                 end
 
-                bg:SetScript("OnEnter", function(self, ...) end)
-                bg:SetScript("OnLeave", function(self, ...) end)
+                bg:SetScript("OnEnter", function(dialog, ...) end)
+                bg:SetScript("OnLeave", function(dialog, ...) end)
                 bg:SetScript("OnMouseDown", widget.frame:GetScript("OnMouseDown"))
                 bg:SetScript("OnMouseUp", widget.frame:GetScript("OnMouseUp"))
                 Base.SetBackdrop(bg, Color.button, 0.3)

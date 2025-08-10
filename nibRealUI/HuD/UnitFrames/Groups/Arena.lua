@@ -66,24 +66,24 @@ local function CreateTrinket(parent)
     local trinket = _G.CreateFrame("Frame", nil, parent)
     trinket:SetSize(iconSize, iconSize)
     trinket:SetPoint("TOPRIGHT", parent, "TOPLEFT", -3, 0)
-    trinket:SetScript("OnUpdate", function(self, elapsed)
-        self.elapsed = self.elapsed + elapsed
-        if self.elapsed >= self.interval then
-            self.elapsed = 0
-            if self.startTime and self.endTime then
+    trinket:SetScript("OnUpdate", function(dialog, elapsed)
+        dialog.elapsed = dialog.elapsed + elapsed
+        if dialog.elapsed >= dialog.interval then
+            dialog.elapsed = 0
+            if dialog.startTime and dialog.endTime then
                 local now = _G.GetTime()
-                self.timer:SetValue(self.endTime - now)
-                self.text:SetText(TimeFormat(_G.ceil(self.endTime - now)))
+                dialog.timer:SetValue(dialog.endTime - now)
+                dialog.text:SetText(TimeFormat(_G.ceil(dialog.endTime - now)))
 
-                local per = (self.endTime - now) / (self.endTime - self.startTime)
+                local per = (dialog.endTime - now) / (dialog.endTime - dialog.startTime)
                 if per > 0.5 then
-                    self.timer:SetStatusBarColor(1 - ((per*2)-1), 1, 0)
+                    dialog.timer:SetStatusBarColor(1 - ((per*2)-1), 1, 0)
                 else
-                    self.timer:SetStatusBarColor(1, (per*2), 0)
+                    dialog.timer:SetStatusBarColor(1, (per*2), 0)
                 end
             else
-                self.timer:Hide()
-                self.text:SetText()
+                dialog.timer:Hide()
+                dialog.text:SetText()
             end
         end
     end)
@@ -133,29 +133,29 @@ local function CreateTrinket(parent)
 end
 
 UnitFrames.arena = {
-    create = function(self)
-        --print("CreateArena", self.unit)
-        CreateTrinket(self)
+    create = function(dialog)
+        --print("CreateArena", dialog.unit)
+        CreateTrinket(dialog)
 
-        local color = self.colors.health
-        self.Health.text:SetPoint("LEFT", self.Health, 1, 0)
-        self.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
-        function self.Health.PostUpdateArenaPreparation(this, event, specID)
+        local color = dialog.colors.health
+        dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
+        dialog.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
+        function dialog.Health.PostUpdateArenaPreparation(this, event, specID)
             local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
             this.Trinket.icon:SetTexture(specIcon)
         end
 
-        self.Name = self.Health:CreateFontString(nil, "OVERLAY")
-        self.Name:SetPoint("RIGHT", self.Health, -1, 0)
-        self.Name:SetFontObject("SystemFont_Shadow_Med1")
-        self.Name:SetJustifyH("RIGHT")
-        self:Tag(self.Name, "[realui:name]")
+        dialog.Name = dialog.Health:CreateFontString(nil, "OVERLAY")
+        dialog.Name:SetPoint("RIGHT", sedialoglf.Health, -1, 0)
+        dialog.Name:SetFontObject("SystemFont_Shadow_Med1")
+        dialog.Name:SetJustifyH("RIGHT")
+        dialog:Tag(dialog.Name, "[realui:name]")
 
-        self.RaidTargetIndicator = self:CreateTexture(nil, 'OVERLAY')
-        self.RaidTargetIndicator:SetSize(20, 20)
-        self.RaidTargetIndicator:SetPoint("CENTER", self)
+        dialog.RaidTargetIndicator = dialog:CreateTexture(nil, 'OVERLAY')
+        dialog.RaidTargetIndicator:SetSize(20, 20)
+        dialog.RaidTargetIndicator:SetPoint("CENTER", seldialogf)
 
-        self:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
+        dialog:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
     end,
     health = {
         text = "[realui:healthPercent]",

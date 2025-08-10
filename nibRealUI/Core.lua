@@ -528,13 +528,13 @@ end
 do
     local prototype = {
         isPatch = RealUI.isPatch,
-        debug = function(self, ...)
-            return RealUI.Debug(self.moduleName, ...)
+        debug = function(dialog, ...)
+            return RealUI.Debug(dialog.moduleName, ...)
         end,
-        OnProfileUpdate = function(self, ...)
-            self:SetEnabledState(RealUI.db.profile.modules[self.moduleName])
-            if self.RefreshMod then
-                self:RefreshMod(...)
+        OnProfileUpdate = function(dialog, ...)
+            dialog:SetEnabledState(dialog.db.profile.modules[dialog.moduleName])
+            if dialog.RefreshMod then
+                dialog:RefreshMod(...)
             end
         end
     }

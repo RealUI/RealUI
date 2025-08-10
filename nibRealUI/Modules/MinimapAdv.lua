@@ -1193,7 +1193,7 @@ local currencyId = _G.C_Garrison.GetCurrencyTypes(garrisonTypeWoD)
 local categoryInfo = {}
 do -- by nebula
     local frame = _G.CreateFrame("Frame")
-    frame:SetScript("OnEvent", function(self, event)
+    frame:SetScript("OnEvent", function(dialog, event)
         if _G.C_Garrison.GetLandingPageGarrisonType() ~= garrisonTypeWoD then return end
 
         if event == "GARRISON_FOLLOWER_CATEGORIES_UPDATED" then
@@ -1434,24 +1434,24 @@ local function NewInfoFrame(name, parent, format)
     NewFrame.text = text
 
     if format then
-        NewFrame:SetScript("OnUpdate", function(self, elapsed)
-            if not self.queuedTime then return end
+        NewFrame:SetScript("OnUpdate", function(dialog, elapsed)
+            if not dialog.queuedTime then return end
             --Don't update every tick (can't do 1 second beause it might be 1.01 seconds and we'll miss a tick.
             --Also can't do slightly less than 1 second (0.9) because we'll end up with some lingering numbers
-            self.updateThrottle = (self.updateThrottle or 0.1) - elapsed
-            if ( self.updateThrottle <= 0 ) then
+            dialog.updateThrottle = (dialog.updateThrottle or 0.1) - elapsed
+            if ( dialog.updateThrottle <= 0 ) then
                 local queueStr
-                local timeInQueue = _G.SecondsToClock(_G.GetTime() - self.queuedTime)
-                if self.myWait > 0 then
-                    local avgWait = _G.SecondsToTime(self.myWait, false, false, 1)
+                local timeInQueue = _G.SecondsToClock(_G.GetTime() - dialog.queuedTime)
+                if dialog.myWait > 0 then
+                    local avgWait = _G.SecondsToTime(dialog.myWait, false, false, 1)
                     queueStr = ("%s |cffc0c0c0(%s)|r"):format(timeInQueue, avgWait)
                 else
                     queueStr = ("%s"):format(timeInQueue)
                 end
 
-                self.text:SetFormattedText(format, Color.orange.colorStr, queueStr)
-                self:SetHeight(self.text:GetStringHeight())
-                self.updateThrottle = 0.1
+                dialog.text:SetFormattedText(format, Color.orange.colorStr, queueStr)
+                dialog:SetHeight(dialog.text:GetStringHeight())
+                dialog.updateThrottle = 0.1
             end
         end)
     end
@@ -1581,11 +1581,11 @@ local function CreateFrames()
             local info = {
                 text = name,
                 icon = texture,
-                checked = function(self)
+                checked = function(dialog)
                     local trackingInfo2 = _G.C_Minimap.GetTrackingInfo(id)
                     return trackingInfo2.active
                 end,
-                func = function(self, arg1, arg2, selected)
+                func = function(dialog, arg1, arg2, selected)
                     _G.MinimapUtil.SetTrackingFilterByFilterIndex(id, selected);
                     -- _G.C_Minimap.SetTracking(id, isChecked)
                 end,

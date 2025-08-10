@@ -273,10 +273,10 @@ local function RealUITutorial_HelpPlate_AnimateOut()
                 if ( button.animGroup_Show:IsPlaying() ) then
                     button.animGroup_Show:Stop()
                 end
-                button.animGroup_Show:SetScript("OnFinished", function(self)
+                button.animGroup_Show:SetScript("OnFinished", function(dialog)
                     -- Hide the parent button
-                    self.parent:Hide()
-                    self:SetScript("OnFinished", nil)
+                    dialog.parent:Hide()
+                    dialog:SetScript("OnFinished", nil)
 
                     -- Hide everything
                     button.box:Hide()

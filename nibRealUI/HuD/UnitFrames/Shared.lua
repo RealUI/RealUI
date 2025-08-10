@@ -142,9 +142,9 @@ local function CreateHealthBar(parent, info, isAngled)
 
         if not (ndb.settings.reverseUnitFrameBars) then
             Health:SetReverseFill(true)
-            Health.PostUpdate = function(self, unit, cur, max)
-                self:SetValue(max * 0.75)
-                self:SetValue(max - self:GetValue())
+            Health.PostUpdate = function(dialog, unit, cur, max)
+                dialog:SetValue(max * 0.75)
+                dialog:SetValue(max - dialog:GetValue())
             end
         end
     end

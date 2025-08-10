@@ -9,26 +9,26 @@ local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 UnitFrames.target = {
-    create = function(self)
-        self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
-        self.Name:SetPoint("BOTTOMRIGHT", self.Health, "TOPRIGHT", -12, 2)
-        self.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
-        self:Tag(self.Name, "[realui:level] [realui:name]")
+    create = function(dialog)
+        dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
+        dialog.Name:SetPoint("BOTTOMRIGHT", dialog.Health, "TOPRIGHT", -12, 2)
+        dialog.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
+        dialog:Tag(dialog.Name, "[realui:level] [realui:name]")
 
-        self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY")
-        self.RaidTargetIndicator:SetSize(20, 20)
-        self.RaidTargetIndicator:SetPoint("BOTTOMRIGHT", self, "TOPLEFT", -10, 4)
+        dialog.RaidTargetIndicator = dialog:CreateTexture(nil, "OVERLAY")
+        dialog.RaidTargetIndicator:SetSize(20, 20)
+        dialog.RaidTargetIndicator:SetPoint("BOTTOMRIGHT", dialog, "TOPLEFT", -10, 4)
 
-        self.Threat = self.overlay:CreateFontString(nil, "OVERLAY")
-        self.Threat:SetPoint("TOPRIGHT", self, "TOPLEFT", -10, -18)
-        self.Threat:SetFontObject("SystemFont_Shadow_Med1_Outline")
-        self:Tag(self.Threat, "[realui:threat]")
+        dialog.Threat = dialog.overlay:CreateFontString(nil, "OVERLAY")
+        dialog.Threat:SetPoint("TOPRIGHT", dialog, "TOPLEFT", -10, -18)
+        dialog.Threat:SetFontObject("SystemFont_Shadow_Med1_Outline")
+        dialog:Tag(dialog.Threat, "[realui:threat]")
 
-        self.Range = self.overlay:CreateFontString(nil, "OVERLAY")
-        self.Range:SetPoint("TOPRIGHT", self, "TOPLEFT", -10, -4)
-        self.Range:SetFontObject("SystemFont_Shadow_Med1_Outline")
-        self.Range.frequentUpdates = true
-        self:Tag(self.Range, "[realui:range]")
+        dialog.Range = dialog.overlay:CreateFontString(nil, "OVERLAY")
+        dialog.Range:SetPoint("TOPRIGHT", dialog, "TOPLEFT", -10, -4)
+        dialog.Range:SetFontObject("SystemFont_Shadow_Med1_Outline")
+        dialog.Range.frequentUpdates = true
+        dialog:Tag(dialog.Range, "[realui:range]")
     end,
     health = {
         leftVertex = 2,

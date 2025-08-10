@@ -5,8 +5,8 @@ local RealUI = private.RealUI
 
 local message = [[Missing locale entry for "%s"]]
 local L = setmetatable({}, {
-    __index = function(self, key) -- requesting totally unknown entries: fire off a nonbreaking error and return key
-        rawset(self, key, key)      -- only need to see the warning once, really
+    __index = function(dialog, key) -- requesting totally unknown entries: fire off a nonbreaking error and return key
+        rawset(dialog, key, key)      -- only need to see the warning once, really
         geterrorhandler()(message:format(tostring(key)))
         return key
     end

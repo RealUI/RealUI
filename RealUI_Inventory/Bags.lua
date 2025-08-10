@@ -484,22 +484,22 @@ local function CreateFeatureButton(bag, text, atlas, onClick, onEnter)
 
     button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     button:SetScript("OnClick", onClick)
-    button:SetScript("OnEnter", function(self)
-        if self.icon then
-            self.icon:SetTextColor(Color.highlight:GetRGB())
+    button:SetScript("OnEnter", function(dialog)
+        if dialog.icon then
+            dialog.icon:SetTextColor(Color.highlight:GetRGB())
         else
-            self.texture:SetVertexColor(Color.highlight:GetRGB())
+            dialog.texture:SetVertexColor(Color.highlight:GetRGB())
         end
 
         if onEnter then
-            onEnter(self)
+            onEnter(dialog)
         end
     end)
-    button:SetScript("OnLeave", function(self)
-        if self.icon then
-            self.icon:SetTextColor(Color.white:GetRGB())
+    button:SetScript("OnLeave", function(dialog)
+        if dialog.icon then
+            dialog.icon:SetTextColor(Color.white:GetRGB())
         else
-            self.texture:SetVertexColor(Color.white:GetRGB())
+            dialog.texture:SetVertexColor(Color.white:GetRGB())
         end
         _G.GameTooltip_Hide()
     end)
@@ -523,7 +523,7 @@ function private.CreateFilterBag(main, filter)
     bag.filter = filter
 
     if tag == "new" then
-        bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(self)
+        bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(dialog)
             for bagID, items in next, main.new do
                 for slotIndex in next, items do
                     _G.C_NewItems.RemoveNewItem(bagID, slotIndex)
@@ -539,8 +539,8 @@ function private.CreateFilterBag(main, filter)
 
     if tag == "junk" then
         bag.sellJunk = CreateFeatureButton(bag, _G.AUCTION_HOUSE_SELL_TAB, "trash", private.SellJunk,
-        function(self)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        function(dialog)
+            _G.GameTooltip:SetOwner(dialog, "ANCHOR_LEFT")
             _G.GameTooltip_SetTitle(_G.GameTooltip, _G.GetMoneyString(bag.profit, true), nil, true)
 
             _G.GameTooltip:Show()
@@ -581,21 +581,21 @@ local function CreateBag(bagType)
     Inventory[bagType] = main
     tinsert(_G.UISpecialFrames, info.name)
     local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
-    function(self, button)
+    function(dialog, button)
         if bagType == "bank" and button == "RightButton" then
             _G.StaticPopup_Show("CONFIRM_BUY_BANK_SLOT")
         else
-            self:ToggleBags()
+            dialog:ToggleBags()
         end
     end,
-    function(self)
+    function(dialog)
         if bagType == "bank" then
             _G.print("ReportError: BankFrame is not yet supported in Retail 11.2.")
             -- BankTab Buy here? FIXLATER
             -- local numSlots, full = _G.GetNumBankSlots()
             -- if not full then
             --     local cost = _G.GetBankSlotCost(numSlots)
-            --     _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+            --     _G.GameTooltip:SetOwner(dialog, "ANCHOR_BOTTOMRIGHT")
             --     _G.GameTooltip_SetTitle(_G.GameTooltip, _G.BANKSLOTPURCHASE_LABEL, nil, true)
             --     _G.GameTooltip_AddBlankLineToTooltip(_G.GameTooltip)
 
@@ -656,11 +656,11 @@ local function CreateBag(bagType)
 
     if bagType == "main" then
         local settingsButton = CreateFeatureButton(main, nil, "cog",
-        function(self)
+        function(dialog)
             RealUI.LoadConfig("RealUI", "inventory")
         end,
-        function(self)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        function(dialog)
+            _G.GameTooltip:SetOwner(dialog, "ANCHOR_LEFT")
             _G.GameTooltip_SetTitle(_G.GameTooltip, _G.SETTINGS, nil, true)
 
             _G.GameTooltip:Show()
@@ -670,12 +670,12 @@ local function CreateBag(bagType)
         main.settingsButton = settingsButton
 
         local restackButton = CreateFeatureButton(main, nil, "repeat",
-        function(self)
+        function(dialog)
             _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
             _G.C_Container.SortBags()
         end,
-        function(self)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        function(dialog)
+            _G.GameTooltip:SetOwner(dialog, "ANCHOR_LEFT")
             _G.GameTooltip_SetTitle(_G.GameTooltip, L.Inventory_Restack, nil, true)
 
             _G.GameTooltip:Show()
@@ -686,12 +686,12 @@ local function CreateBag(bagType)
     end
     if bagType == "bank" then
         local deposit = CreateFeatureButton(main, nil, "download",
-        function(self, button)
+        function(dialog, button)
             _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
             -- _G.DepositReagentBank() -- disabled in 11.2.0
         end,
-        function(self)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
+        function(dialog)
+            _G.GameTooltip:SetOwner(dialog, "ANCHOR_BOTTOMRIGHT")
             -- BankTab Buy here? FIXLATER
             -- if _G.IsReagentBankUnlocked() then
             --     _G.GameTooltip_SetTitle(_G.GameTooltip, _G.REAGENTBANK_DEPOSIT, nil, true)
@@ -716,12 +716,12 @@ local function CreateBag(bagType)
         main.deposit = deposit
 
         local restackButton = CreateFeatureButton(main, nil, "repeat",
-        function(self)
+        function(dialog)
             _G.PlaySound(_G.SOUNDKIT.UI_BAG_SORTING_01)
             _G.C_Container.SortBankBags()
         end,
-        function(self)
-            _G.GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        function(dialog)
+            _G.GameTooltip:SetOwner(dialog, "ANCHOR_LEFT")
             _G.GameTooltip_SetTitle(_G.GameTooltip, L.Inventory_Restack, nil, true)
 
             _G.GameTooltip:Show()
@@ -736,8 +736,8 @@ local function CreateBag(bagType)
     searchBox:SetPoint("BOTTOMRIGHT", -4, 5)
     searchBox:SetHeight(20)
     searchBox:Hide()
-    _G.hooksecurefunc(searchBox, "ClearFocus", function(self)
-        self:Hide()
+    _G.hooksecurefunc(searchBox, "ClearFocus", function(dialog)
+        dialog:Hide()
         main.moneyFrame:Show()
         main.searchButton:Show()
     end)
@@ -745,8 +745,8 @@ local function CreateBag(bagType)
     main.searchBox = searchBox
 
     local searchButton = CreateFeatureButton(main, _G.SEARCH, "common-search-magnifyingglass",
-    function(self)
-        self:Hide()
+    function(dialog)
+        dialog:Hide()
         main.moneyFrame:Hide()
         main.searchBox:Show()
         main.searchBox:SetFocus()

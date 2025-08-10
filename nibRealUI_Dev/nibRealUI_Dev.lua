@@ -211,7 +211,7 @@ local autorunAddon = {
 }
 local eventFrame = _G.CreateFrame("Frame")
 eventFrame:RegisterAllEvents()
-eventFrame:SetScript("OnEvent", function(self, event, ...)
+eventFrame:SetScript("OnEvent", function(dialog, event, ...)
     lastEvent = event
     if event == "PLAYER_LOGIN" then
         for command, run in next, autorunScripts do

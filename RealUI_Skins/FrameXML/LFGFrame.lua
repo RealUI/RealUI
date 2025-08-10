@@ -28,14 +28,14 @@ _G.hooksecurefunc(private.AddOns, "LFGFrame", function()
 
     local duration, remaining = 40
     timerBar:SetMinMaxValues(0, duration)
-    timerBar:SetScript("OnUpdate", function(self, elapsed)
+    timerBar:SetScript("OnUpdate", function(dialog, elapsed)
         if not remaining then
             remaining = duration
         end
         remaining = remaining - elapsed
 
         if remaining > 0 then
-            self:SetValue(remaining)
+            dialog:SetValue(remaining)
         else
             remaining = nil
         end

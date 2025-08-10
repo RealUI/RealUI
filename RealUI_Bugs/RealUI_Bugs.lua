@@ -75,8 +75,8 @@ local errorFrame do
     text:SetMaxLetters(0)
     text:SetFontObject("GameFontHighlightSmall")
     text:SetScript("OnEscapePressed", _G.EditBox_ClearFocus)
-    text:SetScript("OnEditFocusGained", function(self)
-        self:HighlightText()
+    text:SetScript("OnEditFocusGained", function(dialog)
+        dialog:HighlightText()
     end)
     scrollFrame:SetScrollChild(text)
     scrollFrame.Text = text
@@ -324,14 +324,14 @@ _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_BugGrabbed")
 _G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_CapturePaused")
 errorFrame:RegisterEvent("ADDON_LOADED")
 errorFrame:RegisterEvent("LUA_WARNING")
-errorFrame:SetScript("OnEvent", function(self, event, ...)
-    if self[event] then
-        self[event](...)
+errorFrame:SetScript("OnEvent", function(dialog, event, ...)
+    if dialog[event] then
+        dialog[event](...)
     end
 end)
 
-errorFrame:SetScript("OnShow", function(self)
-    self:Update()
+errorFrame:SetScript("OnShow", function(dialog)
+    dialog:Update()
 end)
 
 _G.hooksecurefunc("SetItemRef", function(link, _, _, frame)

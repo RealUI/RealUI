@@ -222,8 +222,8 @@ local function CreateInstallWindow()
 
         local setHighRes = _G.CreateFrame("CheckButton", nil, installFrame, "OptionsBaseCheckButtonTemplate")
         setHighRes:SetPoint("TOPLEFT", installText, "BOTTOMLEFT", -10, -20)
-        setHighRes:SetScript("OnClick", function(self)
-            local isChecked = self:GetChecked()
+        setHighRes:SetScript("OnClick", function(dialog)
+            local isChecked = dialog:GetChecked()
             if isChecked then
                 _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
             else
@@ -257,16 +257,16 @@ local function CreateInstallWindow()
     installFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     installFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     installFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-    installFrame:SetScript("OnEvent", function(self, event)
+    installFrame:SetScript("OnEvent", function(dialog, event)
         if event == "PLAYER_ENTERING_WORLD" then
             if not(_G.InCombatLockdown()) then
-                self:Show()
+                dialog:Show()
             end
         elseif event == "PLAYER_REGEN_DISABLED" then
-            self:Hide()
+            dialog:Hide()
             _G.print("|cffff0000RealUI Installation paused until you leave combat.|r")
         else
-            self:Show()
+            dialog:Show()
         end
     end)
 end

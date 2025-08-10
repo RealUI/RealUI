@@ -9,11 +9,11 @@ local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 UnitFrames.focus = {
-    create = function(self)
-        self.Name = self.overlay:CreateFontString(nil, "OVERLAY")
-        self.Name:SetPoint("BOTTOMLEFT", self, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
-        self.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
-        self:Tag(self.Name, "[realui:name]")
+    create = function(dialog)
+        dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
+        dialog.Name:SetPoint("BOTTOMLEFT", dialog, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
+        dialog.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
+        dialog:Tag(dialog.Name, "[realui:name]")
     end,
     health = {
         leftVertex = 2,

@@ -32,9 +32,9 @@ local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
 local RavenTimer
-_G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(self)
-    if self._show then
-        self:Show()
+_G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(dialog)
+    if dialog._show then
+        dialog:Show()
     end
 end)
 
@@ -177,15 +177,15 @@ local hudConfig, hudToggle do
     -- The HuD Config bar
     hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
     Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
-    hudConfig:SetScript("OnEvent", function(self, event, ...)
+    hudConfig:SetScript("OnEvent", function(dialog, event, ...)
         if event == "PLAYER_REGEN_DISABLED" then
             hudToggle(true)
         end
     end)
 
     local slideAnim = hudConfig:CreateAnimationGroup()
-    slideAnim:SetScript("OnFinished", function(self)
-        local _, y = self.slide:GetOffset()
+    slideAnim:SetScript("OnFinished", function(dialog)
+        local _, y = dialog.slide:GetOffset()
         hudConfig:ClearAllPoints()
         if y < 0 then
             Scale.Point(hudConfig, "TOP", _G.UIParent, "TOP", 0, 0)
@@ -282,31 +282,31 @@ local function InitializeOptions()
             slug = slug,
             name = tab.name,
             icon = tab.icon,
-            onclick = tab.order == -1 and function(self, ...)
-                debug("OnClick", self.slug, ...)
+            onclick = tab.order == -1 and function(dialog, ...)
+                debug("OnClick", dialog.slug, ...)
                 highlight:Hide()
                 hudToggle()
             end or nil,
         })
     end
     _G.tinsert(tabs, _G.tremove(tabs, 1)) -- Move close to the end
-    local function tabOnClick(self, ...)
-        debug("OnClick", self.slug, ...)
+    local function tabOnClick(dialog, ...)
+        debug("OnClick", dialog.slug, ...)
         if highlight.clicked and tabs[highlight.clicked].frame then
             tabs[highlight.clicked].frame:Hide()
         end
         local widget = ACD.OpenFrames["HuD"]
-        if widget and highlight.clicked == self.ID then
+        if widget and highlight.clicked == dialog.ID then
             highlight.clicked = nil
             Scale.Point(widget.titlebg, "TOP", 0, 12)
             ACD:Close("HuD")
         else
-            highlight.clicked = self.ID
-            ACD:Open("HuD", self.slug)
+            highlight.clicked = dialog.ID
+            ACD:Open("HuD", dialog.slug)
             widget = ACD.OpenFrames["HuD"]
             widget:ClearAllPoints()
             Scale.Point(widget, "TOP", hudConfig, "BOTTOM")
-            widget:SetTitle(self.text:GetText())
+            widget:SetTitle(dialog.text:GetText())
             Scale.Point(widget.titlebg, "TOP", 0, 0)
             -- the position will get reset via SetStatusTable, so we need to set our new positions there too.
             local status = widget.status or widget.localstatus
@@ -324,16 +324,16 @@ local function InitializeOptions()
         btn.ID = i
         btn.slug = tab.slug
         Scale.Size(btn, width, height)
-        btn:SetScript("OnEnter", function(self, ...)
+        btn:SetScript("OnEnter", function(dialog, ...)
             if slideAnim:IsPlaying() then return end
             debug("OnEnter", tab.slug)
             if highlight:IsShown() then
                 debug(highlight.hover, highlight.clicked)
-                if highlight.hover ~= self.ID then
-                    hl:SetOffset(Scale.Value(width) * (self.ID - highlight.hover), 0)
+                if highlight.hover ~= dialog.ID then
+                    hl:SetOffset(Scale.Value(width) * (dialog.ID - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = i
-                        highlight:SetAllPoints(self)
+                        highlight:SetAllPoints(dialog)
                     end)
                     hlAnim:Play()
                 elseif hlAnim:IsPlaying() then
@@ -342,11 +342,11 @@ local function InitializeOptions()
                 end
             else
                 highlight.hover = i
-                highlight:SetAllPoints(self)
+                highlight:SetAllPoints(dialog)
                 highlight:Show()
             end
         end)
-        btn:SetScript("OnLeave", function(self, ...)
+        btn:SetScript("OnLeave", function(dialog, ...)
             if hudConfig:IsMouseOver() then return end
             debug("OnLeave hudConfig", ...)
             if highlight.clicked then
@@ -375,8 +375,8 @@ local function InitializeOptions()
             Scale.Point(check, "CENTER", 0, 10)
             check:SetHitRectInsets(-10, -10, -1, -21)
 
-            check:SetScript("OnClick", function(self)
-                RealUI:HuDTestMode(self:GetChecked())
+            check:SetScript("OnClick", function(dialog)
+                RealUI:HuDTestMode(dialog:GetChecked())
             end)
         else
             Scale.Point(btn, "TOPLEFT", prevFrame, "TOPRIGHT")

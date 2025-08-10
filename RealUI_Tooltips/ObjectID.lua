@@ -95,23 +95,23 @@ local function SetupAchievementTooltips()
 end
 
 local function SetupCurrencyTooltips()
-    local function setCurrencyTooltipFunction(self, link)
+    local function setCurrencyTooltipFunction(dialog, link)
         local currencyID = link:match("currency:(%d+)")
         if currencyID then
-            AddToTooltip(self, TooltipTypes.currency, currencyID)
+            AddToTooltip(dialog, TooltipTypes.currency, currencyID)
         end
     end
 
     private.AddHook("SetHyperlink", setCurrencyTooltipFunction)
-    private.AddHook("SetCurrencyToken", function(self, index)
-        setCurrencyTooltipFunction(self, _G.C_CurrencyInfo.GetCurrencyListLink(index))
+    private.AddHook("SetCurrencyToken", function(dialog, index)
+        setCurrencyTooltipFunction(dialog, _G.C_CurrencyInfo.GetCurrencyListLink(index))
     end)
 end
 
 local function SetupAzeriteTooltips()
-    private.AddHook("SetAzeriteEssence", function(self, azeriteID, rank)
+    private.AddHook("SetAzeriteEssence", function(dialog, azeriteID, rank)
         if azeriteID then
-            AddToTooltip(self, TooltipTypes.azerite, azeriteID)
+            AddToTooltip(dialog, TooltipTypes.azerite, azeriteID)
         end
     end)
 end
