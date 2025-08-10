@@ -146,7 +146,7 @@ UnitFrames.arena = {
         end
 
         dialog.Name = dialog.Health:CreateFontString(nil, "OVERLAY")
-        dialog.Name:SetPoint("RIGHT", sedialoglf.Health, -1, 0)
+        dialog.Name:SetPoint("RIGHT", dialog.Health, -1, 0)
         dialog.Name:SetFontObject("SystemFont_Shadow_Med1")
         dialog.Name:SetJustifyH("RIGHT")
         dialog:Tag(dialog.Name, "[realui:name]")

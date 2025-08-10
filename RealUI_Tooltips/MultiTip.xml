@@ -24,21 +24,21 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
                 self:RegisterForDrag("LeftButton");
                 self.shoppingTooltips = { ItemRefShoppingTooltip1, ItemRefShoppingTooltip2 };
                 self.updateTooltipTime = 0;
-                self.UpdateTooltip = function(self, elapsed)
+                self.UpdateTooltip = function(dialog, elapsed)
                     if ( IsModifiedClick("COMPAREITEMS")) then
-                        self.updateTooltipTime = self.updateTooltipTime - elapsed;
-                        if ( self.updateTooltipTime > 0 ) then
+                        dialog.updateTooltipTime = dialog.updateTooltipTime - elapsed;
+                        if ( dialog.updateTooltipTime > 0 ) then
                             return;
                         end
-                        self.updateTooltipTime = TOOLTIP_UPDATE_TIME;
-                        GameTooltip_ShowCompareItem(self);
+                        dialog.updateTooltipTime = TOOLTIP_UPDATE_TIME;
+                        GameTooltip_ShowCompareItem(dialog);
                     else
-                        for _, frame in pairs(self.shoppingTooltips) do
+                        for _, frame in pairs(dialog.shoppingTooltips) do
                             frame:Hide();
                         end
 
-                        self.needsReset = true;
-                        self.comparing = false;
+                        dialog.needsReset = true;
+                        dialog.comparing = false;
                     end
                 end
             </OnLoad>
