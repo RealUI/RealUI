@@ -169,8 +169,8 @@ end
 f:SetScript("OnEnter", function(dialog)
     dialog:SetScript("OnUpdate", nil)
     dialog:SetScale(1)
-    self:SetAlpha(1)
-    self:SetScript("OnUpdate", expand)
+    dialog:SetAlpha(1)
+    dialog:SetScript("OnUpdate", expand)
 end)
 
 f:SetScript("OnLeave", fadeTimer)

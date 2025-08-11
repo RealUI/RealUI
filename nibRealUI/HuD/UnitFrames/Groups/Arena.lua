@@ -153,7 +153,7 @@ UnitFrames.arena = {
 
         dialog.RaidTargetIndicator = dialog:CreateTexture(nil, 'OVERLAY')
         dialog.RaidTargetIndicator:SetSize(20, 20)
-        dialog.RaidTargetIndicator:SetPoint("CENTER", seldialogf)
+        dialog.RaidTargetIndicator:SetPoint("CENTER", dialog)
 
         dialog:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
     end,
