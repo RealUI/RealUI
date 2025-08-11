@@ -53,7 +53,7 @@ local function showBanner()
 
     local scale
     f:SetScript("OnUpdate", function(dialog)
-        scale = self:GetScale() + interval
+        scale = dialog:GetScale() + interval
         if scale >= 1 then
             dialog:SetScale(1)
             dialog:SetScript("OnUpdate", nil)
