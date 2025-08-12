@@ -181,10 +181,10 @@ local function SetupTextTable()
             end
         end
 
-        local function OnUpdate(self, data)
-            Infobar:debug("textTable:OnUpdate", data)
+        local function OnUpdate(self, ...)
+            Infobar:debug("textTable:OnUpdate", ...)
             self:SetScript("OnUpdate", nil)
-            -- local data = self.data
+            local data = self.data
 
             if extData[data].sortColumn and #data > 0 then
                 sortColumn = extData[data].sortColumn:GetID()
