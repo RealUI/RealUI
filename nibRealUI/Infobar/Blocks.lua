@@ -578,6 +578,10 @@ function Infobar:CreateBlocks()
                     return not _G.C_SpecializationInfo.CanPlayerUseTalentSpecUI()
                 end,
             },
+            {text = "Calendar",
+                func = ToggleUI,
+                arg1 = "ToggleCalendar",
+            },
             {text = _G.MicroButtonTooltipText(_G.ACHIEVEMENT_BUTTON, "TOGGLEACHIEVEMENT"),
                 func = ToggleUI,
                 arg1 = "ToggleAchievementFrame",
@@ -611,12 +615,16 @@ function Infobar:CreateBlocks()
                 func = ToggleUI,
                 arg1 = "ToggleEncounterJournal",
             },
-            {text = _G.BLIZZARD_STORE,
+            -- {text = _G.BLIZZARD_STORE,
+            --     func = ToggleUI,
+            --     arg1 = "ToggleStoreUI",
+            --     disabled = function( ... )
+            --         return not _G.C_StorePublic.IsEnabled()
+            --     end,
+            -- },
+            {text = _G.HELP_BUTTON,
                 func = ToggleUI,
-                arg1 = "ToggleStoreUI",
-                disabled = function( ... )
-                    return not _G.C_StorePublic.IsEnabled()
-                end,
+                arg1 = "ToggleHelpFrame",
             },
             {text = _G.HELP_BUTTON,
                 func = ToggleUI,
