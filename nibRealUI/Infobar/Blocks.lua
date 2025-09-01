@@ -1037,7 +1037,7 @@ function Infobar:CreateBlocks()
                         Infobar:ShowBlock(block.name, block.dataObj, info)
                     end
                     _G.C_GuildInfo.GuildRoster()
-                    _G.SetGuildRosterShowOffline(true)
+            --         _G.SetGuildRosterShowOffline(true)
                     local total, online = _G.GetNumGuildMembers()
                     block.dataObj.value = online
                     block.dataObj.suffix = "("..total..")"
