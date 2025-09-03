@@ -190,7 +190,9 @@ local addonFrames = {
     Blizzard_TimeManager = {
         TimeManagerFrame = {}
     },
-    --Blizzard_TokenUI = {},
+    Blizzard_TokenUI = {
+        CurrencyTransferMenu = {}
+    },
     Blizzard_TradeSkillUI = {
         TradeSkillFrame = {}
     },
