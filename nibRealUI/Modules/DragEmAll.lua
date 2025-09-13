@@ -174,6 +174,9 @@ local addonFrames = {
     },
     --Blizzard_PVPMatch = {},
     --Blizzard_PVPUI = {},
+    Blizzard_ProfessionsBook = {
+        ProfessionsBookFrame = {}
+    },
     Blizzard_QuestChoice = {
         QuestChoiceFrame = {}
     },
