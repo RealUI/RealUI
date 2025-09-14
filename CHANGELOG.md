@@ -1,4 +1,29 @@
-﻿## [2.5.3] ##
+﻿## [2.5.4] ##
+### Modified AddOns ###
+  * Aurora 11.2.0.6
+  * oUF
+  * nibRealUI
+  * RealUI_Bugs
+  * RealUI_Skins
+  * RealUI_Dev
+
+### Changed ###
+  * chg: renable part of blocks disabled to debug c stack overflow
+  * add: make Blizzard_ProfessionsBook dragable..
+  * chg: make CurrencyTransferMenu draggable
+  * fix: C stack overflow fix in relation to GUILD_ROSTER_UPDATE
+  * chg: add calendar back to minimenu, and remove store as it taints
+  * chg: Patch 11.1.5 removed the ability to disable the profiler. It is now permanently enabled.
+  * revert: blocks onupdate function
+  * chg: more selfies replaced
+  * chg: missed one self -> dialog
+  * chg: Blizzard stopped using function(self) replaced function(dialog)
+
+## Detailed Changes ##
+[2.5.3]: https://github.com/RealUI/RealUI/compare/2.5.3...2.5.4
+
+
+## [2.5.3] ##
 ### Modified AddOns ###
   * Aurora 11.2.0.1
   * oUF
