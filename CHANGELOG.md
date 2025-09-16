@@ -1,4 +1,15 @@
-﻿## [2.5.4] ##
+﻿## [2.5.5] ##
+### Modified AddOns ###
+  * Aurora 11.2.0.7
+
+### Changed ###
+
+
+## Detailed Changes ##
+[2.5.4]: https://github.com/RealUI/RealUI/compare/2.5.4...2.5.5
+
+
+## [2.5.4] ##
 ### Modified AddOns ###
   * Aurora 11.2.0.6
   * oUF
