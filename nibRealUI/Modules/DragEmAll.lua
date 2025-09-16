@@ -209,6 +209,9 @@ local addonFrames = {
         WarboardQuestChoiceFrame = {}
     },
     --Blizzard_WarfrontsPartyPoseUI = {},
+    Blizzard_WeeklyRewards = {
+        WeeklyRewardsFrame = {}
+    },
     Blizzard_WorldMap = {
         WorldMapFrame = {}
     },
