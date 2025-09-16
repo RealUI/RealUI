@@ -169,6 +169,9 @@ local addonFrames = {
         OrderHallTalentFrame = {}
     },
     --Blizzard_PartyPoseUI = {},
+    Blizzard_PlayerSpells = {
+        PlayerSpellsFrame =  {"PlayerSpellsFrame","SpellBookFrame", "TalentsFrame","SpecFrame"}
+    },
     Blizzard_PlayerChoiceUI = {
         PlayerChoiceFrame = {}
     },
