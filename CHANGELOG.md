@@ -8,6 +8,7 @@
   * RealUI_Dev
 
 ### Changed ###
+  * chg: Blizzard_PlayerSpells dragable
   * chg: renable part of blocks disabled to debug c stack overflow
   * add: make Blizzard_ProfessionsBook dragable..
   * chg: make CurrencyTransferMenu draggable
