@@ -1,9 +1,10 @@
 ﻿## [2.5.5] ##
 ### Modified AddOns ###
-  * Aurora 11.2.0.7
+  * Aurora 11.2.5.0
+  * nibRealUI
 
 ### Changed ###
-
+  * chg: make WeeklyRewardsFrame moveable
 
 ## Detailed Changes ##
 [2.5.4]: https://github.com/RealUI/RealUI/compare/2.5.4...2.5.5
