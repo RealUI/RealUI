@@ -1,9 +1,9 @@
-## Interface: 110200
+## Interface: 110205
 ## Title: RealUI Tooltips
 ## Category: RealUI
 ## Notes: Useful tooltip mods
 ## Author: Gethe, Hanshi
-## Version: 2.5.4
+## Version: 2.5.5
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## OptionalDeps: LibObjectiveProgress-1.0
