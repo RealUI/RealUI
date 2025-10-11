@@ -5,6 +5,7 @@
 
 ### Changed ###
   * chg: make WeeklyRewardsFrame moveable
+  * chg: make CommunitiesGuildLogFrame moveable
 
 ## Detailed Changes ##
 [2.5.4]: https://github.com/RealUI/RealUI/compare/2.5.4...2.5.5
