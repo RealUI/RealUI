@@ -2,7 +2,7 @@
 ## Title: RealUI Dev
 ## Category: RealUI
 ## Notes: Development assistant for RealUI
-## Version: 2.5.5
+## Version: 2.5.6
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs
