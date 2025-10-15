@@ -1,8 +1,14 @@
 ------------------------------------------------------------------------
-r330 | funkehdude | 2025-07-11 17:09:46 +0000 (Fri, 11 Jul 2025) | 1 line
+r338 | funkehdude | 2025-10-15 15:53:40 +0000 (Wed, 15 Oct 2025) | 1 line
 Changed paths:
    M /trunk/!BugGrabber.toc
 
 Bump toc
+------------------------------------------------------------------------
+r337 | funkehdude | 2025-10-15 15:51:40 +0000 (Wed, 15 Oct 2025) | 1 line
+Changed paths:
+   M /trunk/BugGrabber.lua
+
+Add a fallback for when `GetErrorCallstackHeight` is nil
 ------------------------------------------------------------------------
 

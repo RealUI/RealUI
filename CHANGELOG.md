@@ -1,10 +1,11 @@
-﻿## [2.5.5] ##
+﻿## [2.5.6] ##
 ### Modified AddOns ###
-  * Aurora 11.2.5.0
+  * Aurora 11.2.5.1
   * nibRealUI
 
 ### Changed ###
   * chg: infobar - blocks - removed druplicate ToggleHelpFrame
+  * BugGrabber - version: v11.2.2
 
 ## Detailed Changes ##
 [2.5.5]: https://github.com/RealUI/RealUI/compare/2.5.5...2.5.6

@@ -256,16 +256,22 @@ do
 	local GetErrorData
 	do
 		local GetCallstackHeight, GetErrorCallstackHeight, debugstack, debuglocals = GetCallstackHeight, GetErrorCallstackHeight, debugstack, debuglocals
-		function GetErrorData() -- This code is lifted from Blizzard's error handler
+		function GetErrorData() -- This code is lifted from Blizzard's error handler, and adapted to compensate for GetErrorCallstackHeight sometimes being nil
 			local currentStackHeight = GetCallstackHeight()
 			local errorCallStackHeight = GetErrorCallstackHeight()
-			local errorStackOffset = errorCallStackHeight and (errorCallStackHeight - 1)
-			local debugStackLevel = currentStackHeight - (errorStackOffset or 0)
+			if errorCallStackHeight then
+				local errorStackOffset = errorCallStackHeight - 1
+				local debugStackLevel = currentStackHeight - errorStackOffset
 
-			local stack = debugstack(debugStackLevel)
-			local locals = debuglocals(debugStackLevel)
+				local stack = debugstack(debugStackLevel)
+				local locals = debuglocals(debugStackLevel)
 
-			return stack, locals
+				return stack, locals
+			else
+				local stack = debugstack(3)
+				local locals = debuglocals(3)
+				return stack, locals
+			end
 		end
 	end
 
