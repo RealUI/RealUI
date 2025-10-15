@@ -4,6 +4,18 @@
   * nibRealUI
 
 ### Changed ###
+  * chg: infobar - blocks - removed druplicate ToggleHelpFrame
+
+## Detailed Changes ##
+[2.5.5]: https://github.com/RealUI/RealUI/compare/2.5.5...2.5.6
+
+
+## [2.5.5] ##
+### Modified AddOns ###
+  * Aurora 11.2.5.0
+  * nibRealUI
+
+### Changed ###
   * chg: make WeeklyRewardsFrame moveable
   * chg: make CommunitiesGuildLogFrame moveable
 
