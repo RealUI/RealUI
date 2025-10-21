@@ -1363,7 +1363,8 @@ function MinimapAdv:ADDON_LOADED(event, ...)
     elseif addon == "Blizzard_OrderHallUI" then
         _G.C_Timer.After(0.1, HideCommandBar)
         _G.OrderHallCommandBar.SetShown = HideCommandBar
-        _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
+        -- FIXLATER - removed in 11.2.5
+        -- _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     elseif addon == "Blizzard_HybridMinimap" then
         SetupHybridMinimap()
     end
