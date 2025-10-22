@@ -672,16 +672,14 @@ function MinimapAdv:UpdatePOIEnabled()
         self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
-        -- FIXLATER
-        -- self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
-        -- EventRegistry:RegisterCallback("Supertracking.OnChanged", self.RefreshAllData, self);
+        self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
+        EventRegistry:RegisterCallback("Supertracking.OnChanged", self.RefreshAllData, self);
     else
         self:RemoveAllPOIs()
         self:UnregisterEvent("QUEST_POI_UPDATE")
         self:UnregisterEvent("QUEST_LOG_UPDATE")
         self:UnregisterEvent("QUEST_WATCH_LIST_CHANGED")
-        -- FIXLATER
-        -- self:UnregisterEvent("SUPER_TRACKING_CHANGED")
+        self:UnregisterEvent("SUPER_TRACKING_CHANGED")
     end
 end
 
@@ -1363,8 +1361,6 @@ function MinimapAdv:ADDON_LOADED(event, ...)
     elseif addon == "Blizzard_OrderHallUI" then
         _G.C_Timer.After(0.1, HideCommandBar)
         _G.OrderHallCommandBar.SetShown = HideCommandBar
-        -- FIXLATER - removed in 11.2.5
-        -- _G.hooksecurefunc("OrderHall_CheckCommandBar", HideCommandBar)
     elseif addon == "Blizzard_HybridMinimap" then
         SetupHybridMinimap()
     end
