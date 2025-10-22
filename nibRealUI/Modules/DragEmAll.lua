@@ -173,8 +173,8 @@ local addonFrames = {
     Blizzard_PlayerSpells = {
         PlayerSpellsFrame =  {"PlayerSpellsFrame","SpellBookFrame", "TalentsFrame","SpecFrame"}
     },
-    Blizzard_PlayerChoiceUI = {
-        PlayerChoiceFrame = {}
+    Blizzard_PlayerChoice = {
+        PlayerChoiceFrame = {"PlayerChoiceFrame"}
     },
     --Blizzard_PVPMatch = {},
     --Blizzard_PVPUI = {},
