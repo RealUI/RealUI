@@ -673,7 +673,7 @@ function MinimapAdv:UpdatePOIEnabled()
         self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
         self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
-        EventRegistry:RegisterCallback("Supertracking.OnChanged", self.RefreshAllData, self);
+        _G.EventRegistry:RegisterCallback("Supertracking.OnChanged", self.RefreshAllData, self);
     else
         self:RemoveAllPOIs()
         self:UnregisterEvent("QUEST_POI_UPDATE")
