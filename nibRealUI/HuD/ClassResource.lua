@@ -287,8 +287,6 @@ function ClassResource:Setup(unitFrame, unit)
     if playerClass == "MONK" then
         self.bar = isEnabled and self:CreateStagger(unitFrame, unit) or {}
         self.bar.info = _G.C_Spell.GetSpellInfo(124255)
-        --  FIXLATER
-        -- https://warcraft.wiki.gg/wiki/API_C_Spell.GetSpellInfo
     end
 end
 
