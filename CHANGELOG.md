@@ -1,4 +1,19 @@
-﻿## [2.5.6] ##
+﻿## [2.5.7] ##
+### Modified AddOns ###
+  * Aurora 11.2.5.2
+  * nibRealUI
+
+### Changed ###
+  * chg: fix an missing _G in EventRegistry
+  * chg: make PlayerChoiceFrame moveable.
+  * chg: fix for SUPER_TRACKING in Minimap
+  * chore: removed some FIXLATERs
+  * chg: OrderHall_CheckCommandBar removed from remix
+
+## Detailed Changes ##
+[2.5.6]: https://github.com/RealUI/RealUI/compare/2.5.6...2.5.7
+
+## [2.5.6] ##
 ### Modified AddOns ###
   * Aurora 11.2.5.1
   * nibRealUI

@@ -3,7 +3,7 @@
 ## Category: RealUI
 ## Notes: Bug catcher
 ## Author: Gethe, Hanshi
-## Version: 2.5.6
+## Version: 2.5.7
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: Blizzard_ChatFrame
 ## OptionalDeps: Ace3, LibTextDump-1.0
