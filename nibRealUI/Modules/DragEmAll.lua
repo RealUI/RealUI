@@ -171,7 +171,8 @@ local addonFrames = {
     },
     --Blizzard_PartyPoseUI = {},
     Blizzard_PlayerSpells = {
-        PlayerSpellsFrame =  {"PlayerSpellsFrame","SpellBookFrame", "TalentsFrame","SpecFrame"}
+        -- PlayerSpellsFrame =  {"PlayerSpellsFrame","SpellBookFrame", "TalentsFrame","SpecFrame"}
+        PlayerSpellsFrame =  {}
     },
     Blizzard_PlayerChoice = {
         PlayerChoiceFrame = {"PlayerChoiceFrame"}
