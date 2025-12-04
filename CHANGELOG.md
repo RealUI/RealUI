@@ -1,4 +1,19 @@
-﻿## [2.5.7] ##
+﻿## [2.5.8] ##
+### Modified AddOns ###
+  * Aurora 11.2.7.0
+  * nibRealUI
+
+### Changed ###
+  * fix: SetCVarBitfield throws error  LE_FRAME_TUTORIAL_ACCOUNT_*
+  * chg: fix for ZoneAbilityFrame spellButton
+  * chg: fix for double tap dragem..
+  * BugGrabber - version: v11.2.5
+
+## Detailed Changes ##
+[2.5.7]: https://github.com/RealUI/RealUI/compare/2.5.7...2.5.8
+
+
+## [2.5.7] ##
 ### Modified AddOns ###
   * Aurora 11.2.5.2
   * nibRealUI
