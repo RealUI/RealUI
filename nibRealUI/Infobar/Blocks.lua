@@ -1700,7 +1700,6 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Housing)
-                local trackedHouse = _G.C_Housing.GetTrackedHouseGuid()
                 local current, minBar, maxBar, level = 0, 0, 1, 1;
                 local trackedHouseGUID = _G.C_Housing.GetTrackedHouseGuid();
                 if  houseLevelFavorCache[trackedHouseGUID] == nil then
@@ -1722,7 +1721,7 @@ function Infobar:CreateBlocks()
                 return trackedHouse ~= nil
             end,
             SetTooltip = function(Housing, tooltip)
-                local current, maxBar, minBar, level = Housing:GetStats()
+                local current, maxBar, _, level = Housing:GetStats()
                 local favourStats = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(current), RealUI.ReadableNumber(maxBar), (current/maxBar)*100)
                 local titleName = ("Hose level %d"):format(level)
                 local lineNum = tooltip:AddLine(titleName.._G.HEADER_COLON, favourStats)
@@ -1914,11 +1913,11 @@ function Infobar:CreateBlocks()
                         houseLevelFavorCache[data.houseGUID].houseName = data.houseName
                     end
                 elseif event == "TRACKED_HOUSE_CHANGED" then
-                    local guid = ...
-                    if guid == nil then
+                    local newguid = ...
+                    if newguid == nil then
                         return
                     end
-                    _G.C_Housing.GetCurrentHouseLevelFavor(guid)
+                    _G.C_Housing.GetCurrentHouseLevelFavor(newguid)
                 end
 
                 UpdateProgress(block)
