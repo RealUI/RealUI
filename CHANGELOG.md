@@ -1,4 +1,16 @@
-﻿## [2.5.8] ##
+﻿## [2.5.9] ##
+### Modified AddOns ###
+  * nibRealUI
+
+### Changed ###
+  * add: housing xp tracking added
+
+## Detailed Changes ##
+[2.5.8]: https://github.com/RealUI/RealUI/compare/2.5.8...2.5.9
+
+
+
+## [2.5.8] ##
 ### Modified AddOns ###
   * Aurora 11.2.7.0
   * nibRealUI
