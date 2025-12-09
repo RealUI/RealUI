@@ -31,6 +31,8 @@ Scale.Point(testCell, "CENTER")
 Scale.Size(testCell, 500, 20)
 testCell:Hide()
 
+local houseLevelFavorCache = {}
+
 local iconFont
 local TextTableCellProvider, TextTableCellPrototype
 local function SetupTextTable()
@@ -1403,6 +1405,11 @@ function Infobar:CreateBlocks()
         local C_AzeriteItem = _G.C_AzeriteItem
         local azeriteItem, azeriteItemLocation
         local watchStates = {}
+        local guid = _G.C_Housing.GetTrackedHouseGuid()
+        if guid then
+            _G.C_Housing.GetCurrentHouseLevelFavor(guid)
+        end
+
         watchStates["xp"] = {
             GetNext = function(XP)
                 if watchStates["rep"]:IsValid() then
@@ -1411,6 +1418,8 @@ function Infobar:CreateBlocks()
                     return "artifact"
                 elseif watchStates["honor"]:IsValid() then
                     return "honor"
+                elseif watchStates["housing"]:IsValid() then
+                    return "housing"
                 elseif watchStates["xp"]:IsValid() then
                     return "xp"
                 else
@@ -1458,6 +1467,8 @@ function Infobar:CreateBlocks()
                     return "artifact"
                 elseif watchStates["honor"]:IsValid() then
                     return "honor"
+                elseif watchStates["housing"]:IsValid() then
+                    return "housing"
                 elseif watchStates["xp"]:IsValid() then
                     return "xp"
                 elseif watchStates["rep"]:IsValid() then
@@ -1560,6 +1571,8 @@ function Infobar:CreateBlocks()
             GetNext = function(Art)
                 if watchStates["honor"]:IsValid() then
                     return "honor"
+                elseif watchStates["housing"]:IsValid() then
+                    return "housing"
                 elseif watchStates["xp"]:IsValid() then
                     return "xp"
                 elseif watchStates["rep"]:IsValid() then
@@ -1631,7 +1644,9 @@ function Infobar:CreateBlocks()
         watchStates["honor"] = {
             hint = L["Progress_OpenHonor"],
             GetNext = function(Honor)
-                if watchStates["xp"]:IsValid() then
+                if watchStates["housing"]:IsValid() then
+                    return "housing"
+                elseif watchStates["xp"]:IsValid() then
                     return "xp"
                 elseif watchStates["rep"]:IsValid() then
                     return "rep"
@@ -1667,6 +1682,59 @@ function Infobar:CreateBlocks()
                 _G.PlayerSpellsUtil.TogglePlayerSpellsFrame(_G.PlayerSpellsUtil.FrameTabs.ClassTalents)
             end
         }
+        watchStates["housing"] = {
+            hint = L["Progress_OpenHousing"],
+            GetNext = function(Housing)
+                if watchStates["xp"]:IsValid() then
+                    return "xp"
+                elseif watchStates["rep"]:IsValid() then
+                    return "rep"
+                elseif watchStates["artifact"]:IsValid() then
+                    return "artifact"
+                elseif watchStates["honor"]:IsValid() then
+                    return "honor"
+                elseif watchStates["housing"]:IsValid() then
+                    return "housing"
+                else
+                    return nil
+                end
+            end,
+            GetStats = function(Housing)
+                local trackedHouse = _G.C_Housing.GetTrackedHouseGuid()
+                local current, minBar, maxBar, level = 0, 0, 1, 1;
+                local trackedHouseGUID = _G.C_Housing.GetTrackedHouseGuid();
+                if  houseLevelFavorCache[trackedHouseGUID] == nil then
+                    _G.C_Housing.GetCurrentHouseLevelFavor(trackedHouseGUID);
+                end
+                if houseLevelFavorCache[trackedHouseGUID].houseLevel then
+                    current = houseLevelFavorCache[trackedHouseGUID].houseFavor;
+                    level = houseLevelFavorCache[trackedHouseGUID].houseLevel;
+                    minBar = _G.C_Housing.GetHouseLevelFavorForLevel(level);
+                    maxBar = _G.C_Housing.GetHouseLevelFavorForLevel(level + 1);
+                end
+                return current, maxBar, minBar, level
+            end,
+            GetColor = function(Housing)
+                return 0.58, 0.0, 0.5
+            end,
+            IsValid = function(Housing)
+                local trackedHouse = _G.C_Housing.GetTrackedHouseGuid()
+                return trackedHouse ~= nil
+            end,
+            SetTooltip = function(Housing, tooltip)
+                local current, maxBar, minBar, level = Housing:GetStats()
+                local favourStats = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(current), RealUI.ReadableNumber(maxBar), (current/maxBar)*100)
+                local titleName = ("Hose level %d"):format(level)
+                local lineNum = tooltip:AddLine(titleName.._G.HEADER_COLON, favourStats)
+                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
+                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
+                tooltip:AddLine(" ")
+            end,
+            OnClick = function(Housing)
+                _G.HousingFramesUtil.ToggleHousingDashboard();
+            end
+        }
+
 
         function Infobar.frame.watch:UpdateColors()
             local alpha = _G.Lerp(0.4, 0.5, (Infobar.db.profile.bgAlpha / 1))
@@ -1828,6 +1896,29 @@ function Infobar:CreateBlocks()
                     if not watchStates[dbc.progressState]:IsValid() then
                         UpdateState(block)
                     end
+                elseif event == "HOUSE_LEVEL_FAVOR_UPDATED" then
+                    local info = ...
+                    if info.houseGUID == nil then
+                        return
+                    end
+                    houseLevelFavorCache[info.houseGUID] = houseLevelFavorCache[info.houseGUID] or {}
+                    houseLevelFavorCache[info.houseGUID].houseLevel = info.houseLevel
+                    houseLevelFavorCache[info.houseGUID].houseFavor = info.houseFavor
+                elseif event == "PLAYER_HOUSE_LIST_UPDATED" then
+                    local info = ...
+                    if info == nil then
+                        return
+                    end
+                    for _, data in next, info do
+                        houseLevelFavorCache[data.houseGUID] = houseLevelFavorCache[data.houseGUID] or {}
+                        houseLevelFavorCache[data.houseGUID].houseName = data.houseName
+                    end
+                elseif event == "TRACKED_HOUSE_CHANGED" then
+                    local guid = ...
+                    if guid == nil then
+                        return
+                    end
+                    _G.C_Housing.GetCurrentHouseLevelFavor(guid)
                 end
 
                 UpdateProgress(block)
@@ -1850,6 +1941,10 @@ function Infobar:CreateBlocks()
 
                 "HONOR_XP_UPDATE",
                 "HONOR_LEVEL_UPDATE",
+
+                "HOUSE_LEVEL_FAVOR_UPDATED",
+                "PLAYER_HOUSE_LIST_UPDATED",
+                "TRACKED_HOUSE_CHANGED",
             },
         })
     end
