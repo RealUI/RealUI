@@ -1,9 +1,9 @@
-## Interface: 110205
+## Interface: 110207
 ## Title: RealUI Bugs
 ## Category: RealUI
 ## Notes: Bug catcher
 ## Author: Gethe, Hanshi
-## Version: 2.5.7
+## Version: 2.5.8
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: Blizzard_ChatFrame
 ## OptionalDeps: Ace3, LibTextDump-1.0
