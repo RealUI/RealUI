@@ -32,6 +32,9 @@ function RealUI.GetSafeVals(min, max)
     end
 end
 function RealUI.ReadableNumber(value)
+    if  _G.issecretvalue(value) then
+        return "****"
+    end
     local retString = _G.tostring(value)
     local strLen = retString:len()
     if strLen > 8 then

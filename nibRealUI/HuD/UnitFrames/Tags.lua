@@ -129,8 +129,7 @@ tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 
 -- Health AbsValue
 tags.Methods["realui:healthValue"] = function(unit)
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return 0 end
-
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) or _G.issecretvalue(_G.UnitHealth(unit)) then return 0 end
     return RealUI.ReadableNumber(_G.UnitHealth(unit))
 end
 tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
@@ -243,24 +242,24 @@ local rangeColors = {
     [50] = Color.red,
     [100] = Color.red,
 }
-local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
-tags.Methods["realui:range"] = function(unit)
-    local _, maxRange = rangeCheck:GetRange("target")
-    if maxRange and not _G.UnitIsUnit("target", "player") then
-        local section
-        if maxRange <= 5 then
-            section = 5
-        elseif maxRange <= 30 then
-            section = 30
-        elseif maxRange <= 35 then
-            section = 35
-        elseif maxRange <= 40 then
-            section = 40
-        elseif maxRange <= 50 then
-            section = 50
-        else
-            section = 100
-        end
-        return ("|c%s%d|r"):format(rangeColors[section].colorStr, maxRange)
-    end
-end
+-- local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
+-- tags.Methods["realui:range"] = function(unit)
+--     local _, maxRange = rangeCheck:GetRange("target")
+--     if maxRange and not _G.UnitIsUnit("target", "player") then
+--         local section
+--         if maxRange <= 5 then
+--             section = 5
+--         elseif maxRange <= 30 then
+--             section = 30
+--         elseif maxRange <= 35 then
+--             section = 35
+--         elseif maxRange <= 40 then
+--             section = 40
+--         elseif maxRange <= 50 then
+--             section = 50
+--         else
+--             section = 100
+--         end
+--         return ("|c%s%d|r"):format(rangeColors[section].colorStr, maxRange)
+--     end
+-- end

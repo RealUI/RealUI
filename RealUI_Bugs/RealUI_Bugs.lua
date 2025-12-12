@@ -26,15 +26,17 @@ function RealUI.Debug(mod, ...)
         local arg = select(i, ...)
         text = text .. tostring(arg) .. "     "
     end
-    if modDebug.prevLine == text then
-        modDebug.numDuped = modDebug.numDuped + 1
-    else
-        if modDebug.numDuped > 0 then
-            modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
-            modDebug.numDuped = 0
+    if not _G.issecretvalue(text) then
+        if modDebug.prevLine == text then
+            modDebug.numDuped = modDebug.numDuped + 1
+        else
+            if modDebug.numDuped > 0 then
+                modDebug:AddLine(("^^ Repeated %d times ^^"):format(modDebug.numDuped))
+                modDebug.numDuped = 0
+            end
+            modDebug:AddLine(text, "%H:%M:%S")
+            modDebug.prevLine = text
         end
-        modDebug:AddLine(text, "%H:%M:%S")
-        modDebug.prevLine = text
     end
 end
 function RealUI.GetDebug(mod)

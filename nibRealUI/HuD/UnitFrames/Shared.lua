@@ -79,6 +79,9 @@ local function PositionSteps(self, vert)
     end
 end
 local function UpdateSteps(self, unit, cur, max)
+    if _G.issecretvalue(cur) then
+        cur = max
+    end
     UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
     --cur = max * .25
     --self:SetValue(cur)

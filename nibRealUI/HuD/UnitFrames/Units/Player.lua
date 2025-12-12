@@ -46,46 +46,46 @@ UnitFrames.player = {
         CreateTotems(dialog)
 
         --[[ Additional Power ]]--
-        local AdditionalPower = _G.CreateFrame("StatusBar", nil, dialog.Power)
-        AdditionalPower:SetStatusBarTexture(RealUI.textures.plain, "BORDER")
-        AdditionalPower:SetStatusBarColor(0, 0, 0, 0.75)
-        AdditionalPower:SetPoint("BOTTOMLEFT", dialog.Power, "TOPLEFT", 0, 0)
-        AdditionalPower:SetPoint("BOTTOMRIGHT", dialog.Power, "TOPRIGHT", -dialog.Power:GetHeight(), 0)
-        AdditionalPower:SetHeight(1)
+        -- local AdditionalPower = _G.CreateFrame("StatusBar", nil, dialog.Power)
+        -- AdditionalPower:SetStatusBarTexture(RealUI.textures.plain, "BORDER")
+        -- AdditionalPower:SetStatusBarColor(0, 0, 0, 0.75)
+        -- AdditionalPower:SetPoint("BOTTOMLEFT", dialog.Power, "TOPLEFT", 0, 0)
+        -- AdditionalPower:SetPoint("BOTTOMRIGHT", dialog.Power, "TOPRIGHT", -dialog.Power:GetHeight(), 0)
+        -- AdditionalPower:SetHeight(1)
 
-        local bg = AdditionalPower:CreateTexture(nil, 'BACKGROUND')
-        bg:SetAllPoints(AdditionalPower)
-        bg:SetColorTexture(.2, .2, 1)
+        -- local bg = AdditionalPower:CreateTexture(nil, 'BACKGROUND')
+        -- bg:SetAllPoints(AdditionalPower)
+        -- bg:SetColorTexture(.2, .2, 1)
 
-        function AdditionalPower.PostUpdate(this, cur, max)
-            if cur == max then
-                if this:IsVisible() then
-                    this:Hide()
-                end
-            else
-                if not this:IsVisible() then
-                    this:Show()
-                end
-            end
-        end
+        -- function AdditionalPower.PostUpdate(this, cur, max)
+        --     if cur == max then
+        --         if this:IsVisible() then
+        --             this:Hide()
+        --         end
+        --     else
+        --         if not this:IsVisible() then
+        --             this:Show()
+        --         end
+        --     end
+        -- end
 
-        AdditionalPower.colorPower = true
-        AdditionalPower.displayPairs = {
-            DRUID = {
-                [_G.Enum.PowerType.LunarPower] = true,
-                [_G.Enum.PowerType.Rage] = true,
-                [_G.Enum.PowerType.Energy] = true,
-            },
-            PRIEST = {
-                [_G.Enum.PowerType.Insanity] = true,
-            },
-            SHAMAN = {
-                [_G.Enum.PowerType.Maelstrom] = true,
-            },
-        }
+        -- AdditionalPower.colorPower = true
+        -- AdditionalPower.displayPairs = {
+        --     DRUID = {
+        --         [_G.Enum.PowerType.LunarPower] = true,
+        --         [_G.Enum.PowerType.Rage] = true,
+        --         [_G.Enum.PowerType.Energy] = true,
+        --     },
+        --     PRIEST = {
+        --         [_G.Enum.PowerType.Insanity] = true,
+        --     },
+        --     SHAMAN = {
+        --         [_G.Enum.PowerType.Maelstrom] = true,
+        --     },
+        -- }
 
-        dialog.AdditionalPower = AdditionalPower
-        dialog.AdditionalPower.bg = bg
+        -- dialog.AdditionalPower = AdditionalPower
+        -- dialog.AdditionalPower.bg = bg
 
         --[[ PvP Timer ]]--
         local pvp = dialog.PvPIndicator

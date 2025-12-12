@@ -93,6 +93,9 @@ do -- Other
                         end,
                         set = function(info, value)
                             RealUI.db.char.layout.spec[RealUI.charInfo.specs.current.index] = value
+                            if _G.issecretvalue(value) then
+                                _G.print("Layout_Layout value is secret. Changing layout skipped.")
+                            end
                             RealUI:UpdateLayout(value)
                         end,
                         order = 10,

@@ -76,8 +76,9 @@ function CombatFader:UpdateStatus(force)
         else
             status = "target"               -- Target - Priority 3
         end
-    elseif (_G.UnitHealth("player") < _G.UnitHealthMax("player")) or not isPowerRested(powerToken) then
-        status = "hurt"                     -- Hurt - Priority 4
+    -- FIXBETA
+    -- elseif (_G.UnitHealth("player") < _G.UnitHealthMax("player")) or not isPowerRested(powerToken) then
+    --     status = "hurt"                     -- Hurt - Priority 4
     else
         status = "outofcombat"          -- OutOfCombat - Priority 5
     end
@@ -209,11 +210,11 @@ end
 
 function CombatFader:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+
     self:RegisterEvent("PLAYER_TARGET_CHANGED")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateCombatState")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateCombatState")
     self:UpdateCombatState()
-
     if LoggedIn then self:RefreshMod() end
 end
 

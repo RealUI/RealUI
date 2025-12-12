@@ -269,8 +269,8 @@ function ClassResource:CreateStagger(unitFrame, unit)
 end
 
 function ClassResource:Setup(unitFrame, unit)
-    local isEnabled = ClassResource:IsEnabled()
-
+    -- local isEnabled = ClassResource:IsEnabled()
+    local isEnabled = false
     -- Points
     if isEnabled then
         if playerClass == "DEATHKNIGHT" then

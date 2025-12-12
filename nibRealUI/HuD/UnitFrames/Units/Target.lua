@@ -28,7 +28,8 @@ UnitFrames.target = {
         dialog.Range:SetPoint("TOPRIGHT", dialog, "TOPLEFT", -10, -4)
         dialog.Range:SetFontObject("SystemFont_Shadow_Med1_Outline")
         dialog.Range.frequentUpdates = true
-        dialog:Tag(dialog.Range, "[realui:range]")
+        -- FIXBETA
+        -- dialog:Tag(dialog.Range, "[realui:range]")
     end,
     health = {
         leftVertex = 2,

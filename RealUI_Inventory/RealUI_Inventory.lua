@@ -113,12 +113,14 @@ function Inventory:OnInitialize()
     private.Update()
 
     self.Update = private.Update
-
-    _G.C_Timer.After(1, function()
-        -- Disable tutorials
-        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
-        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_HEIRLOOM_JOURNAL_LEVEL, true)
-        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_TRANSMOG_SETS_TAB, true)
-        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_MOUNT_COLLECTION_DRAGONRIDING, true)
-    end)
+    -- FIXBETA
+    if private.isRetail and not private.isBetaBuild then
+        _G.C_Timer.After(1, function()
+            -- Disable tutorials
+            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
+            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_HEIRLOOM_JOURNAL_LEVEL, true)
+            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_TRANSMOG_SETS_TAB, true)
+            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_MOUNT_COLLECTION_DRAGONRIDING, true)
+        end)
+    end
 end
