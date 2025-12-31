@@ -117,8 +117,10 @@ function Inventory:OnInitialize()
     _G.C_Timer.After(1, function()
         -- Disable tutorials
         _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
-        -- _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_HEIRLOOM_JOURNAL_LEVEL, true)
-        -- _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_TRANSMOG_SETS_TAB, true)
-        -- _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_MOUNT_COLLECTION_DRAGONRIDING, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.TransmogSetsTab, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.AssistedCombatRotationDragSpell, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.AssistedCombatRotationActionButton, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.HeirloomJournalLevel, true)
+
     end)
 end
