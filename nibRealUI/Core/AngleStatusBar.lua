@@ -313,6 +313,10 @@ end
 -- This should except a percentage or discrete value.
 function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
     local meta = bars[self]
+
+    if _G.issecretvalue(meta.maxVal) then
+        meta.maxVal = 100
+    end
     if _G.issecretvalue(value) then
         value = meta.maxVal
     end
