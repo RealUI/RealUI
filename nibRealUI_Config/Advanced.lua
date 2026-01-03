@@ -769,6 +769,10 @@ do -- Skins
         }
 
         for classToken, color in next, _G.CUSTOM_CLASS_COLORS do
+            -- FIXBETA
+            if (classToken == "ADVENTURER") then
+               classToken = "Adventurer"
+            end
             classColors.args[classToken] = {
                 name = _G.LOCALIZED_CLASS_NAMES_MALE[classToken],
                 type = "color",
