@@ -422,7 +422,7 @@ function RealUI:InitTutorial()
         RealUI.db.global.tutorial.stage = -1
     end)
 
-    local btnClose = createTextButton("RealUITutorialButtonClose", _G.HelpPlate)
+    local btnClose = createTextButton("RealUITutorialButtonClose", _G.HelpPlateButton)
     btnClose:SetPoint("CENTER")
     btnClose:SetText(ButtonTexts.finished)
     btnClose:SetAttribute("type", "macro")
