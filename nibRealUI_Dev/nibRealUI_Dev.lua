@@ -358,41 +358,21 @@ function ns.commands:combatEvents()
     end)
 end
 
-
-_G.StaticPopupDialogs["REALUIDEVPROFILER"] = {
-    text = "Enable/Disable AddOnProfiler",
-    button1 = "Enable",
-    button2 = "Disable",
-    OnAccept = function()
-        _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
-        _G.C_CVar.SetCVar("addonProfilerEnabled", "1")
-        _G.print(("AddOnProfiler is active: %s."):format(_G.tostring(_G.C_AddOnProfiler.IsEnabled())))
-    end,
-    OnCancel = function()
-        _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
-        _G.C_CVar.SetCVar("addonProfilerEnabled", "0")
-        _G.print(("AddOnProfiler is active: %s."):format(_G.tostring(_G.C_AddOnProfiler.IsEnabled())))
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    notClosableByLogout = false
-}
-
-function ns.commands:addonprofiler()
-    _G.StaticPopup_Show("REALUIDEVPROFILER")
+function ns.commands:reset()
+    _G.nibRealUIDB = nil
+    _G.ReloadUI()
 end
 
 
 -- Slash Commands
-_G.SLASH_DEV1 = "/dev"
+_G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)
     local command, arg = _G.strsplit(" ", msg)
     ns.debug("msg:", command, arg, editBox)
     if ns.commands[command] then
         ns.commands[command](ns.commands, arg)
     else
-        _G.print("Usage: /dev |cff22dd22command|r")
+        _G.print("Usage: /realdev |cff22dd22command|r")
         for cmd, value in next, ns.commands do
             _G.print(cmd)
         end
