@@ -12,7 +12,7 @@ local Chat = RealUI:GetModule("Chat")
 local MODNAME = "Chat_Tabs"
 local Chat_Tabs = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
-local maxTabs = _G.NUM_CHAT_WINDOWS
+local maxTabs = _G.Constants.ChatFrameConstants.MaxChatWindows
 
 -- Tab Style update
 local function UpdateTabStyle(self, style)

@@ -47,7 +47,7 @@ function Chat:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
 
     local start, stop = 3, 8
-    for i = 1, _G.NUM_CHAT_WINDOWS do
+    for i = 1, _G.Constants.ChatFrameConstants.MaxChatWindows do
         local editbox = _G["ChatFrame"..i.."EditBox"]
         for k = start, stop do
             local tex = _G.select(k, editbox:GetRegions())

@@ -51,6 +51,9 @@ function private.SellJunk()
     end
 
     if bag.profit > 0 then
+        -- FIXMELATER
+        -- -function GetMoneyString(money, separateThousands, checkGoldThreshold)
+        -- +function GetMoneyString(money, separateThousands, checkGoldThreshold, showZeroAsGold)
         local money = _G.GetMoneyString(bag.profit, true)
         _G.print(_G.AMOUNT_RECEIVED_COLON, money)
     end
@@ -114,13 +117,13 @@ function Inventory:OnInitialize()
 
     self.Update = private.Update
     -- FIXBETA
-    if private.isRetail and not private.isMidnight then
-        _G.C_Timer.After(1, function()
-            -- Disable tutorials
-            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
-            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_HEIRLOOM_JOURNAL_LEVEL, true)
-            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_TRANSMOG_SETS_TAB, true)
-            _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_ACCOUNT_MOUNT_COLLECTION_DRAGONRIDING, true)
-        end)
-    end
+    _G.C_Timer.After(1, function()
+        -- Disable tutorials
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.TransmogSetsTab, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.AssistedCombatRotationDragSpell, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.AssistedCombatRotationActionButton, true)
+        _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.Enum.FrameTutorialAccount.HeirloomJournalLevel, true)
+
+    end)
 end
