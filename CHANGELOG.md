@@ -1,4 +1,16 @@
-﻿## [2.5.9] ##
+﻿## [2.5.10] ##
+### Modified AddOns ###
+  * Aurora 11.2.7.2
+  * nibRealUI
+  * RealUI_Inventory
+
+### Changed ###
+  * chg: moved from NUM_CHAT_WINDOWS to Constants.ChatFrameConstants.MaxChatWindows
+
+## Detailed Changes ##
+[2.5.9]: https://github.com/RealUI/RealUI/compare/2.5.9...2.5.10
+
+## [2.5.9] ##
 ### Modified AddOns ###
   * Aurora 11.2.7.1
   * nibRealUI

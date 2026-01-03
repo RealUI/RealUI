@@ -1,4 +1,4 @@
-Copyright © 2010-2024
+Copyright © 2010-2026
 [Nibelheim](http://www.wowinterface.com/forums/member.php?u=225161),
 [Gethe](http://www.wowinterface.com/forums/member.php?u=111611).
 [Hanshi/arnvid](https://github.com/arnvid)
