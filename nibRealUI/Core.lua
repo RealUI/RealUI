@@ -453,25 +453,6 @@ function RealUI:OnInitialize()
     end
     -- Check AccountStatus
     _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
-    -- Check AddOnProfiler status
-    _G.print(("AddOnProfiler is active: %s."):format(_G.tostring(_G.C_AddOnProfiler.IsEnabled())))
-    if _G.C_AddOnProfiler.IsEnabled() then
-        _G.print("Addon Profiler is active. Patch 11.1.5 removed the ability to disable the profiler. It is now permanently enabled..")
-        -- if not RealUI.isDev then
-        --     _G.print("Deactivating AddOnProfiler...")
-        --     _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
-        --     _G.C_CVar.SetCVar("addonProfilerEnabled", "0")
-        -- else
-        --     _G.print("Deactivating AddOnProfiler...")
-        --     _G.C_CVar.RegisterCVar("addonProfilerEnabled", "1")
-        --     _G.C_CVar.SetCVar("addonProfilerEnabled", "0")
-        --     _G.print("RealUI Developer - to turn on use /dev addonprofiler")
-        -- end
-    else
-        if RealUI.isDev then
-            _G.print("RealUI Developer - to turn on use /dev addonprofiler")
-        end
-    end
 end
 
 local onLoadMessages = {
