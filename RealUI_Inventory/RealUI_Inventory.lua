@@ -114,7 +114,7 @@ function Inventory:OnInitialize()
 
     self.Update = private.Update
     -- FIXBETA
-    if private.isRetail and not private.isBetaBuild then
+    if private.isRetail and not private.isMidnight then
         _G.C_Timer.After(1, function()
             -- Disable tutorials
             _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
