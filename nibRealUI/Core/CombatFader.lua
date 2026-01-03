@@ -30,7 +30,12 @@ end
 local function FadeIt(self, newOpacity, instant)
     CombatFader:debug("FadeIt", newOpacity, instant)
     if self.realUIHidden then return end
-    local currentOpacity = self:GetAlpha()
+
+    -- FIXBETA
+    local currentOpacity = 100
+    if not _G.issecretvalue(self:GetAlpha()) then
+        currentOpacity = self:GetAlpha()
+    end
     local fadeTime = instant and 0 or FADE_TIME
     if newOpacity > currentOpacity then
         _G.UIFrameFadeIn(self, fadeTime, currentOpacity, newOpacity)
