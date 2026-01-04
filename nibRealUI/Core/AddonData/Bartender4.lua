@@ -14,43 +14,46 @@ function private.AddOns.Bartender4()
             {
                 ["version"] = 3,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["flyoutDirection"] = "DOWN",
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[mod:ctrl][@focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]][overridebar][cursor]show;hide",
                 },
                 ["position"] = {
                     ["point"] = "CENTER",
-                    ["x"] = -171.5,
+                    ["x"] = -224.5,
                     ["y"] = -199.5,
                 },
             }, -- [1]
             {
                 ["version"] = 3,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][@focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
                 },
                 ["position"] = {
                     ["point"] = "BOTTOM",
-                    ["x"] = -171.5,
+                    ["x"] = -224.5,
                     ["y"] = 89,
                 },
             }, -- [2]
             {
                 ["version"] = 3,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][@focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
                 },
                 ["position"] = {
                     ["point"] = "BOTTOM",
-                    ["x"] = -171.5,
+                    ["x"] = -224.5,
                     ["y"] = 62,
                 },
             }, -- [3]
@@ -58,11 +61,12 @@ function private.AddOns.Bartender4()
                 ["version"] = 3,
                 ["rows"] = 12,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["flyoutDirection"] = "LEFT",
                 ["fadeoutalpha"] = 0,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
                 },
                 ["position"] = {
@@ -75,11 +79,12 @@ function private.AddOns.Bartender4()
                 ["version"] = 3,
                 ["rows"] = 12,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["flyoutDirection"] = "LEFT",
                 ["fadeoutalpha"] = 0,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
                 },
                 ["position"] = {
@@ -91,6 +96,9 @@ function private.AddOns.Bartender4()
             {
                 ["enabled"] = false,
             }, -- [6]
+            {
+                ["enabled"] = false,
+            }, -- [7]
         },
     }
     ActionBars["RealUI-Healing"] = {
@@ -98,43 +106,46 @@ function private.AddOns.Bartender4()
             {
                 ["version"] = 3,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["flyoutDirection"] = "DOWN",
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[mod:ctrl][@focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui]][overridebar][cursor]show;hide",
                 },
                 ["position"] = {
                     ["point"] = "CENTER",
-                    ["x"] = -171.5,
+                    ["x"] = -224.5,
                     ["y"] = -199.5,
                 },
             }, -- [1]
             {
                 ["version"] = 3,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][@focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
                 },
                 ["position"] = {
                     ["point"] = "BOTTOM",
-                    ["x"] = -171.5,
+                    ["x"] = -224.5,
                     ["y"] = 89,
                 },
             }, -- [2]
             {
                 ["version"] = 3,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][@focus,exists][harm,nodead][combat][group:party][group:raid][vehicleui][cursor]show;hide",
                 },
                 ["position"] = {
                     ["point"] = "BOTTOM",
-                    ["x"] = -171.5,
+                    ["x"] = -224.5,
                     ["y"] = 62,
                 },
             }, -- [3]
@@ -142,16 +153,17 @@ function private.AddOns.Bartender4()
                 ["version"] = 3,
                 ["rows"] = 12,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["flyoutDirection"] = "LEFT",
                 ["fadeoutalpha"] = 0,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
                 },
                 ["position"] = {
                     ["point"] = "RIGHT",
-                    ["x"] = -36,
+                    ["x"] = -224.5,
                     ["y"] = 334.5,
                 },
             }, -- [4]
@@ -159,22 +171,26 @@ function private.AddOns.Bartender4()
                 ["version"] = 3,
                 ["rows"] = 12,
                 ["padding"] = -9,
+                ["showgrid"] = true,
                 ["flyoutDirection"] = "LEFT",
                 ["fadeoutalpha"] = 0,
                 ["hidemacrotext"] = true,
                 ["visibility"] = {
-                    ["custom"] = true,
+                    ["custom"] = false,
                     ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
                 },
                 ["position"] = {
                     ["point"] = "RIGHT",
-                    ["x"] = -36,
+                    ["x"] = -224.5,
                     ["y"] = 10.5,
                 },
             }, -- [5]
             {
                 ["enabled"] = false,
             }, -- [6]
+            {
+                ["enabled"] = false,
+            }, -- [7]
         },
     }
 
@@ -222,7 +238,7 @@ function private.AddOns.Bartender4()
         ["padding"] = -7,
         ["fadeoutalpha"] = 0,
         ["visibility"] = {
-            ["custom"] = true,
+            ["custom"] = false,
             ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
         },
         ["position"] = {
@@ -238,7 +254,7 @@ function private.AddOns.Bartender4()
         ["padding"] = -7,
         ["fadeoutalpha"] = 0,
         ["visibility"] = {
-            ["custom"] = true,
+            ["custom"] = false,
             ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
         },
         ["position"] = {
@@ -275,9 +291,10 @@ function private.AddOns.Bartender4()
         ["version"] = 3,
         ["rows"] = 10,
         ["padding"] = -7,
+        ["showgrid"] = true,
         ["fadeoutalpha"] = 0,
         ["visibility"] = {
-            ["custom"] = true,
+            ["custom"] = false,
             ["customdata"] = "[nopet][petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
         },
         ["position"] = {
@@ -290,9 +307,10 @@ function private.AddOns.Bartender4()
         ["version"] = 3,
         ["rows"] = 10,
         ["padding"] = -7,
+        ["showgrid"] = true,
         ["fadeoutalpha"] = 0,
         ["visibility"] = {
-            ["custom"] = true,
+            ["custom"] = false,
             ["customdata"] = "[nopet][petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl]show;fade",
         },
         ["position"] = {
