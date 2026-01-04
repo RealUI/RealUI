@@ -4,7 +4,7 @@ local _, private = ...
 local RealUI = private.RealUI
 local db
 
-if RealUI.isPatch then return end
+if RealUI.isDragonflight then return end
 -- TODO: move this to Aurora
 
 local Chat = RealUI:GetModule("Chat")
