@@ -34,7 +34,10 @@ end
 private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local RealUI = private.RealUI
 
-RealUI.isPatch = select(4, _G.GetBuildInfo()) >= 100002
+RealUI.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
+RealUI.isMidnight = RealUI.isRetail and select(4, _G.GetBuildInfo()) >= 120000
+RealUI.isBetaBuild = RealUI.isRetail and select(4, _G.GetBuildInfo()) == 120001
+RealUI.isDragonflight = select(4, _G.GetBuildInfo()) >= 100002 or select(4, _G.GetBuildInfo()) <= 110000
 RealUI.realmInfo = {
     realm = _G.GetRealmName(),
     connectedRealms = _G.GetAutoCompleteRealms(),

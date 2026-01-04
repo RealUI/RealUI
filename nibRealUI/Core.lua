@@ -512,7 +512,9 @@ end
 
 do
     local prototype = {
-        isPatch = RealUI.isPatch,
+        isRetail = RealUI.isRetail,
+        isDragonflight = RealUI.isDragonflight,
+        isMidnight = RealUI.isMidnight,
         debug = function(dialog, ...)
             return RealUI.Debug(dialog.moduleName, ...)
         end,
