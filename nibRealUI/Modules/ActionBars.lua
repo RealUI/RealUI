@@ -198,7 +198,6 @@ function ActionBars:ApplyABSettings(tag)
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
-            _G.print("Applied Bartender4 settings to Bar "..id .. " x: "..x.." y: "..y.." point: "..point)
             BTBar:SetButtons()
         else
             BarSizes[id] = 0
