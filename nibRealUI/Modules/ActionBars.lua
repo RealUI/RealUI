@@ -29,7 +29,7 @@ local Textures = {
 
 local Doodads = {}
 local buttonSizes = {
-    bars = 26,
+    bars = 35,
     petBar = 22,
     stanceBar = 22,
 }
@@ -123,9 +123,9 @@ function ActionBars:ApplyABSettings(tag)
 
                 -- Extra on X for pixel perfection
                 if isTopBar then
-                    if not(IsOdd(BarPadding.top[id])) or IsOdd(numButtons) then x = x + 0.5 end
+                    if not(IsOdd(BarPadding.top[id])) or IsOdd(numButtons) then x = x + 1.0 end
                 else
-                    if not(IsOdd(BarPadding.bottom[id])) or IsOdd(numButtons) then x = x + 0.5 end
+                    if not(IsOdd(BarPadding.bottom[id])) or IsOdd(numButtons) then x = x + 1.0 end
                 end
 
                 -- Bar Place
@@ -198,7 +198,7 @@ function ActionBars:ApplyABSettings(tag)
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
-
+            _G.print("Applied Bartender4 settings to Bar "..id .. " x: "..x.." y: "..y.." point: "..point)
             BTBar:SetButtons()
         else
             BarSizes[id] = 0
