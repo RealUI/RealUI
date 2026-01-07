@@ -52,7 +52,6 @@ end
 local function AbbreviateName(name, maxLength)
     if not name then return "" end
     local maxNameLength = maxLength or 12
-
     local length = strlenutf8(name)
     local words, newName = {_G.strsplit(" ", name)}
     if #words > 2 and strlenutf8(name) > maxNameLength then
@@ -84,13 +83,15 @@ tags.Methods["realui:name"] = function(unit, realUnit)
         isDead = true
     end
 
-
     local unitTag = unit:match("^(%w-)%d") or unit
 
     --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
     local name = _G.UnitName(unit) or ""
-    name = AbbreviateName(name, UnitFrames[unitTag].nameLength)
-
+    if RealUI.isSecret(name) then
+        _G.print("Secret name detected for unit:", unit, "original name:", name)
+    else
+        name = AbbreviateName(name, UnitFrames[unitTag].nameLength)
+    end
     local nameColor = "|cffffffff"
     if isDead then
         nameColor = "|cff3f3f3f"
@@ -129,7 +130,8 @@ tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 
 -- Health AbsValue
 tags.Methods["realui:healthValue"] = function(unit)
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) or _G.issecretvalue(_G.UnitHealth(unit)) then return 0 end
+    -- FIXBETA
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) or RealUI.isSecret(_G.UnitHealth(unit)) then return 0 end
     return RealUI.ReadableNumber(_G.UnitHealth(unit))
 end
 tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
