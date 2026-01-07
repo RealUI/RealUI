@@ -411,3 +411,7 @@ function RealUI.GetOptions(modName, path)
     end
     return options
 end
+
+function RealUI.isSecret(value)
+    return _G.issecrettable(value) or _G.issecretvalue(value)
+end
