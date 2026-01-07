@@ -317,10 +317,11 @@ end
 function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
     local meta = bars[self]
 
-    if _G.issecretvalue(meta.maxVal) then
+    -- FIXBETA
+    if RealUI.isSecret(meta.maxVal) then
         meta.maxVal = 100
     end
-    if _G.issecretvalue(value) then
+    if RealUI.isSecret(value) then
         value = meta.maxVal
     end
     if value > meta.maxVal then value = meta.maxVal end

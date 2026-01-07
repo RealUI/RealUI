@@ -79,10 +79,11 @@ local function PositionSteps(self, vert)
     end
 end
 local function UpdateSteps(self, unit, cur, max)
-    if _G.issecretvalue(max) then
+    -- FIXBETA
+    if RealUI.isSecret(max) then
         max = 100
     end
-    if _G.issecretvalue(cur) then
+    if RealUI.isSecret(cur) then
         cur = max
     end
     UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
