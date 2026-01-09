@@ -126,7 +126,7 @@ private.other = {
 
 local COMBATLOG_FILTER_MINE = _G.COMBATLOG_FILTER_MINE
 local COMBATLOG_FILTER_MY_PET = _G.COMBATLOG_FILTER_MY_PET
-local CombatLog_Object_IsA = _G.CombatLog_Object_IsA
+local CombatLog_Object_IsA = _G.C_CombatLog.DoesObjectMatchFilter
 local cachedGUIDs = {
     [private.player.guid] = "player"
 }
@@ -231,7 +231,7 @@ local function FilterEvent(timestamp, event, ...)
 end
 private.FilterEvent = FilterEvent
 function CombatText:COMBAT_LOG_EVENT_UNFILTERED()
-    FilterEvent(_G.CombatLogGetCurrentEventInfo())
+    FilterEvent(_G.C_CombatLog.GetCurrentEntryInfo())
 end
 
 function CombatText:PLAYER_REGEN_ENABLED()

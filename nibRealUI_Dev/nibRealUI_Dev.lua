@@ -351,7 +351,7 @@ function ns.commands:combatEvents()
 
     _G.EventTrace:SetScript("OnEvent", function(this, event, ...)
         if (event == "COMBAT_LOG_EVENT_UNFILTERED") then
-            this:LogEvent(event, _G.CombatLogGetCurrentEventInfo())
+            this:LogEvent(event, _G.C_CombatLog.GetCurrentEntryInfo())
         else
             originalOnEvent(this, event, ...)
         end
