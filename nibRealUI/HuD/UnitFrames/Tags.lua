@@ -140,7 +140,7 @@ tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_
 tags.Methods["realui:healthPercent"] = function(unit)
     local percent
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
-        percent = _G.UnitHealthPercent(unit, true, CurveConstants.ScaleTo100)
+        percent = 0
     else
         percent = tags.Methods.perhp(unit)
     end
