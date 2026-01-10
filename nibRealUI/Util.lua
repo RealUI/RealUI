@@ -33,7 +33,7 @@ function RealUI.GetSafeVals(min, max)
 end
 function RealUI.ReadableNumber(value)
     -- FIXBETA
-    if  RealUI.isSecret(value) then
+    if RealUI.isSecret(value) then
         return value
     end
     local retString = _G.tostring(value)
