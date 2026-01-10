@@ -633,5 +633,5 @@ end
 
 -------------
 function AngleStatusBar:OnInitialize()
-    --TestASB()
+    -- TestASB(true, 50)
 end
