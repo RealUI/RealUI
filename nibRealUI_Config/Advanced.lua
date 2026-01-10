@@ -769,7 +769,6 @@ do -- Skins
         }
 
         for classToken, color in next, _G.CUSTOM_CLASS_COLORS do
-            -- FIXBETA
             if (classToken == "ADVENTURER") then
                classToken = "Adventurer"
             end
