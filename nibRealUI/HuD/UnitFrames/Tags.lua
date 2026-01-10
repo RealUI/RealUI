@@ -140,7 +140,7 @@ tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_
 tags.Methods["realui:healthPercent"] = function(unit)
     local percent
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
-        percent = 0
+        percent = _G.UnitHealthPercent(unit, true, CurveConstants.ScaleTo100)
     else
         percent = tags.Methods.perhp(unit)
     end
@@ -209,14 +209,6 @@ tags.Events["realui:power"] = tags.Events["realui:powerValue"]
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
     local color = tags.Methods["threatcolor"](unit)
-
-    -- Workaround for player threat not updating properly in 10.2.6 with oUF pre-patchID c872822f26db0faa26ab00223ecde2e42691f50f
-    -- local status =  UnitThreatSituation("player", unit)
-    -- local color = nil
-    -- if (status ~= nil) and (_G.GetNumGroupMembers() > 0 or UnitExists("pet")) then
-    --     color = tags.Methods["threatcolor"]("player", unit)
-    -- end
-
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
     if percentage and not _G.UnitIsDeadOrGhost(unit) then
@@ -244,24 +236,25 @@ local rangeColors = {
     [50] = Color.red,
     [100] = Color.red,
 }
--- local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
--- tags.Methods["realui:range"] = function(unit)
---     local _, maxRange = rangeCheck:GetRange("target")
---     if maxRange and not _G.UnitIsUnit("target", "player") then
---         local section
---         if maxRange <= 5 then
---             section = 5
---         elseif maxRange <= 30 then
---             section = 30
---         elseif maxRange <= 35 then
---             section = 35
---         elseif maxRange <= 40 then
---             section = 40
---         elseif maxRange <= 50 then
---             section = 50
---         else
---             section = 100
---         end
---         return ("|c%s%d|r"):format(rangeColors[section].colorStr, maxRange)
---     end
--- end
+
+local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
+tags.Methods["realui:range"] = function(unit)
+    local _, maxRange = rangeCheck:GetRange("target")
+    if maxRange and not _G.UnitIsUnit("target", "player") then
+        local section
+        if maxRange <= 5 then
+            section = 5
+        elseif maxRange <= 30 then
+            section = 30
+        elseif maxRange <= 35 then
+            section = 35
+        elseif maxRange <= 40 then
+            section = 40
+        elseif maxRange <= 50 then
+            section = 50
+        else
+            section = 100
+        end
+        return ("|c%s%d|r"):format(rangeColors[section].colorStr, maxRange)
+    end
+end
