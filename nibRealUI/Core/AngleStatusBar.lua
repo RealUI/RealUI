@@ -380,7 +380,7 @@ local function SetPixels(texture)
     texture:SetSnapToPixelGrid(false)
 end
 local function CreateAngleFrame(name, parent)
-    local frame = _G.CreateFrame("Frame", name, parent)
+    local frame = _G.CreateFrame("StatusBar", name, parent)
     frame:SetScript("OnSizeChanged", OnSizeChanged)
 
     --[[
