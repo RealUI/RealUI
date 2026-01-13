@@ -136,14 +136,14 @@ UnitFrames.arena = {
     create = function(dialog)
         --print("CreateArena", dialog.unit)
         CreateTrinket(dialog)
-
-        local color = dialog.colors.health
-        dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
-        dialog.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
-        function dialog.Health.PostUpdateArenaPreparation(this, event, specID)
-            local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
-            this.Trinket.icon:SetTexture(specIcon)
-        end
+        -- FIXBETA
+        -- local color = dialog.colors.health
+        -- dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
+        -- dialog.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
+        -- function dialog.Health.PostUpdateArenaPreparation(this, event, specID)
+        --     local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
+        --     this.Trinket.icon:SetTexture(specIcon)
+        -- end
 
         dialog.Name = dialog.Health:CreateFontString(nil, "OVERLAY")
         dialog.Name:SetPoint("RIGHT", dialog.Health, -1, 0)

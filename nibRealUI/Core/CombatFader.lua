@@ -33,7 +33,7 @@ local function FadeIt(self, newOpacity, instant)
 
     -- FIXBETA
     local currentOpacity = 100
-    if not _G.issecretvalue(self:GetAlpha()) then
+    if not RealUI.isSecret(self:GetAlpha()) then
         currentOpacity = self:GetAlpha()
     end
     local fadeTime = instant and 0 or FADE_TIME
@@ -81,9 +81,12 @@ function CombatFader:UpdateStatus(force)
         else
             status = "target"               -- Target - Priority 3
         end
-    -- FIXBETA
-    -- elseif (_G.UnitHealth("player") < _G.UnitHealthMax("player")) or not isPowerRested(powerToken) then
-    --     status = "hurt"                     -- Hurt - Priority 4
+    elseif not RealUI.isSecret(_G.UnitHealthPercent("player", true, CurveConstants.ScaleTo100)) then
+        if (_G.UnitHealthPercent("player", true, CurveConstants.ScaleTo100) < 100) or not isPowerRested(powerToken) then
+            status = "hurt"                     -- Hurt - Priority 4
+        else
+            status = "outofcombat"          -- OutOfCombat - Priority 5
+        end
     else
         status = "outofcombat"          -- OutOfCombat - Priority 5
     end

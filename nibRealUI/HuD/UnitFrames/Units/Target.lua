@@ -22,14 +22,14 @@ UnitFrames.target = {
         dialog.Threat = dialog.overlay:CreateFontString(nil, "OVERLAY")
         dialog.Threat:SetPoint("TOPRIGHT", dialog, "TOPLEFT", -10, -18)
         dialog.Threat:SetFontObject("SystemFont_Shadow_Med1_Outline")
-        dialog:Tag(dialog.Threat, "[realui:threat]")
+        -- FIXBETA
+        -- dialog:Tag(dialog.Threat, "[realui:threat]")
 
         dialog.Range = dialog.overlay:CreateFontString(nil, "OVERLAY")
         dialog.Range:SetPoint("TOPRIGHT", dialog, "TOPLEFT", -10, -4)
         dialog.Range:SetFontObject("SystemFont_Shadow_Med1_Outline")
         dialog.Range.frequentUpdates = true
-        -- FIXBETA
-        -- dialog:Tag(dialog.Range, "[realui:range]")
+        dialog:Tag(dialog.Range, "[realui:range]")
     end,
     health = {
         leftVertex = 2,
