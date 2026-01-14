@@ -379,16 +379,14 @@ local function SetPixels(texture)
     texture:SetTexelSnappingBias(0.0)
     texture:SetSnapToPixelGrid(false)
 end
-local function CreateAngleFrame(name, parent)
-    local frame = _G.CreateFrame("StatusBar", name, parent)
-    frame:SetScript("OnSizeChanged", OnSizeChanged)
 
+local function SetAngleFrameDefaults(frame)
+    frame:SetScript("OnSizeChanged", OnSizeChanged)
     --[[
     local test = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
     test:SetTexture(1, 1, 1, 0.5)
     test:SetAllPoints(frame)
     --]]
-
     local bg = frame:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(0, 0, 0, 0.5)
     bg:SetAllPoints()
@@ -426,12 +424,17 @@ local function CreateAngleFrame(name, parent)
     right:SetEndPoint("BOTTOMRIGHT")
     SetPixels(right)
     frame.right = right
+end
 
+local function CreateAngleFrame(name, parent)
+    local frame = _G.CreateFrame("Frame", name, parent)
+    SetAngleFrameDefaults(frame)
     return frame
 end
 
 local function CreateAngleStatusBar(name, parent)
-    local bar = CreateAngleFrame(name, parent)
+    local bar = _G.CreateFrame("StatusBar", name, parent)
+    SetAngleFrameDefaults(bar)
     bar.top:SetDrawLayer("OVERLAY")
     bar.bottom:SetDrawLayer("OVERLAY")
     bar.left:SetDrawLayer("OVERLAY")
@@ -439,18 +442,16 @@ local function CreateAngleStatusBar(name, parent)
     bar:SetScript("OnSizeChanged", OnSizeChanged)
     _G.Mixin(bar, AngleFrameMixin)
 
-    --[[
-    local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
-    test:SetColorTexture(1, 1, 1, 0.2)
-    test:SetAllPoints(bar)
-    --]]
-
+    -- --[[
+    -- local test = bar:CreateTexture(nil, "BACKGROUND", nil, -8)
+    -- test:SetColorTexture(1, 1, 1, 0.2)
+    -- test:SetAllPoints(bar)
+    -- --]]
     local fill = bar:CreateTexture(nil, "ARTWORK")
     fill:SetPoint("TOP")
     fill:SetPoint("BOTTOM")
     fill:SetPoint("LEFT")
     bar.fill = fill
-
     return bar
 end
 
@@ -545,7 +546,6 @@ function AngleStatusBar:AttachFrame(frame, point, bar, relPoint, xOffset, yOffse
         if meta.leftVertex == vertex then
             xOffset = meta.minWidth
         end
-
         if meta.rightVertex == vertex then
             xOffset = -meta.minWidth
         end
