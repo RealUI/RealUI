@@ -81,8 +81,8 @@ function CombatFader:UpdateStatus(force)
         else
             status = "target"               -- Target - Priority 3
         end
-    elseif not RealUI.isSecret(_G.UnitHealthPercent("player", true, CurveConstants.ScaleTo100)) then
-        if (_G.UnitHealthPercent("player", true, CurveConstants.ScaleTo100) < 100) or not isPowerRested(powerToken) then
+    elseif not RealUI.isSecret(_G.UnitHealthPercent("player", true, _G.CurveConstants.ScaleTo100)) then
+        if (_G.UnitHealthPercent("player", true, _G.CurveConstants.ScaleTo100) < 100) or not isPowerRested(powerToken) then
             status = "hurt"                     -- Hurt - Priority 4
         else
             status = "outofcombat"          -- OutOfCombat - Priority 5
