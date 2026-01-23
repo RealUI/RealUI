@@ -53,9 +53,9 @@ UnitFrames.player = {
         AdditionalPower:SetPoint("BOTTOMRIGHT", dialog.Power, "TOPRIGHT", -dialog.Power:GetHeight(), 0)
         AdditionalPower:SetHeight(1)
 
-        local bg = AdditionalPower:CreateTexture(nil, 'BACKGROUND')
-        bg:SetAllPoints(AdditionalPower)
-        bg:SetColorTexture(.2, .2, 1)
+        -- local bg = AdditionalPower:CreateTexture(nil, 'BACKGROUND')
+        -- bg:SetAllPoints(AdditionalPower)
+        -- bg:SetColorTexture(.2, .2, 1)
 
         -- function AdditionalPower.PostUpdate(this, cur, max)
         --     if cur == max then
@@ -85,7 +85,7 @@ UnitFrames.player = {
         }
 
         dialog.AdditionalPower = AdditionalPower
-        dialog.AdditionalPower.bg = bg
+        -- dialog.AdditionalPower.bg = bg
 
         --[[ PvP Timer ]]--
         local pvp = dialog.PvPIndicator

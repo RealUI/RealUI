@@ -24,32 +24,39 @@ local Lerp = _G.Lerp
 local function SetBarValue(self, value)
     local meta = bars[self]
     meta.value = value
-    local isMaxed, isReversePerc, isReverseFill = meta.maxVal == 0, self:GetReversePercent(), self:GetReverseFill()
-    local minWidth, maxWidth, width = meta.minWidth, meta.maxWidth
+    if not meta.maxVal then return end
+    local isMaxed = meta.maxVal == 0
+    local isReversePerc, isReverseFill = false, false
+    if not RealUI.isMidnight then
+        isReversePerc, isReverseFill = self:GetReversePercent(), self:GetReverseFill()
+    end
+    local minWidth, maxWidth, width = meta.minWidth, meta.maxWidth, meta.maxWidth
     local left, right, top, bottom = 0, 1, 0, 1
 
     -- Take the value, and adjust it to within the bounds of the bar.
-    if isReversePerc then
-        if isMaxed then
-            width = maxWidth
-        else
-            -- This makes `width` smaller when `value` gets larger and vice versa.
-            width = Lerp(maxWidth, minWidth, (value / meta.maxVal))
-            if isReverseFill then
-                left = Lerp(0, 1, (value / meta.maxVal))
+    if not (RealUI.isSecret(meta.maxVal) or RealUI.isSecret(value)) then
+        if isReversePerc then
+            if isMaxed then
+                width = maxWidth
             else
-                right = Lerp(1, 0, (value / meta.maxVal))
+                -- This makes `width` smaller when `value` gets larger and vice versa.
+                width = Lerp(maxWidth, minWidth, (value / meta.maxVal))
+                if isReverseFill then
+                    left = Lerp(0, 1, (value / meta.maxVal))
+                else
+                    right = Lerp(1, 0, (value / meta.maxVal))
+                end
             end
-        end
-    else
-        if isMaxed then
-            width = minWidth
         else
-            width = Lerp(minWidth, maxWidth, (value / meta.maxVal))
-            if isReverseFill then
-                left = Lerp(1, 0, (value / meta.maxVal))
+            if isMaxed then
+                width = minWidth
             else
-                right = Lerp(0, 1, (value / meta.maxVal))
+                width = Lerp(minWidth, maxWidth, (value / meta.maxVal))
+                if isReverseFill then
+                    left = Lerp(1, 0, (value / meta.maxVal))
+                else
+                    right = Lerp(0, 1, (value / meta.maxVal))
+                end
             end
         end
     end
@@ -73,11 +80,12 @@ local function SetBarValue(self, value)
     if meta.texture then
         self.fill:SetTexCoord(left, right, top, bottom)
     end
-
-    if isReversePerc then
-        self.fill:SetShown(value < meta.maxVal)
-    else
-        self.fill:SetShown(value > meta.minVal)
+    if not (RealUI.isSecret(meta.maxVal) or RealUI.isSecret(value)) then
+        if isReversePerc then
+            self.fill:SetShown(value < meta.maxVal)
+        else
+            self.fill:SetShown(value > meta.minVal)
+        end
     end
 end
 
@@ -316,15 +324,9 @@ end
 -- This should except a percentage or discrete value.
 function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
     local meta = bars[self]
-
-    -- FIXBETA
-    if RealUI.isSecret(meta.maxVal) then
-        meta.maxVal = 100
+    if not (RealUI.isSecret(meta.maxVal) or RealUI.isSecret(value)) then
+        if value > meta.maxVal then value = meta.maxVal end
     end
-    if RealUI.isSecret(value) then
-        value = meta.maxVal
-    end
-    if value > meta.maxVal then value = meta.maxVal end
     if meta.smooth and not ignoreSmooth then
         smoothBars[self] = value
     else
@@ -499,6 +501,35 @@ function AngleStatusBar:CreateAngle(frameType, name, parent)
         end
 
         return frame
+    elseif frameType == "CastBar" then
+        local bar = CreateAngleStatusBar(name, parent)
+        -- _G.Mixin(bar, AngleStatusBarMixin)
+
+        bars[bar] = {
+            regions = {},
+            children = {},
+            fillColor = {},
+            bgColor = {},
+            borderColor = {},
+            minWidth = 0,
+            maxWidth = 0,
+            leftVertex = 1,
+            rightVertex = 4,
+            smooth = true,
+            value = 0,
+            hasBG = true
+        }
+        _G.tinsert(bars[bar].regions, bar.bg)
+        _G.tinsert(bars[bar].regions, bar.fill)
+        bar:SetMinMaxValues(0, 0)
+
+        local parentMeta = bars[parent]
+        if parentMeta then
+            _G.tinsert(parentMeta.children, bar)
+            bar:SetAngleVertex(parentMeta.leftVertex, parentMeta.rightVertex)
+        end
+
+        return bar
     elseif frameType == "StatusBar" then
         local bar = CreateAngleStatusBar(name, parent)
         _G.Mixin(bar, AngleStatusBarMixin)

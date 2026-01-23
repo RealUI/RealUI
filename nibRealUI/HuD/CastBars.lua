@@ -256,12 +256,12 @@ end
 function CastBars:CreateCastBars(unitFrame, unit, unitData)
     self:debug("CreateCastBars", unit)
     local info, unitDB = unitData.power or unitData.health, db[unit]
-
-    unitFrame.Castbar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
+    unitFrame.Castbar = unitFrame:CreateAngle("CastBar", nil, unitFrame)
     local Castbar = unitFrame.Castbar
     Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
     Castbar:SetStatusBarColor(interruptible:GetRGB())
-    Castbar:SetSmooth(false)
+    -- Castbar:smoothing       (false)
+    -- Castbar:SetSmooth(false)
     Castbar:SetReverseFill(unitDB.reverse)
 
     Castbar.Icon = Castbar:CreateTexture(nil, "OVERLAY")
