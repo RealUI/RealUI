@@ -1,5 +1,4 @@
 local _, private = ...
-
 -- Lua Globals --
 -- luacheck: globals next tinsert ceil tostring tostringall
 
@@ -9,6 +8,11 @@ local FramePoint = RealUI:GetModule("FramePoint")
 
 local CombatText = RealUI:NewModule("CombatText", "AceEvent-3.0")
 private.CombatText = CombatText
+
+if RealUI.isMidnight then
+    _G.print("CombatText is not supported in Midnight. Disabling module.")
+    return
+end
 
 local defaults = {
     global = {
