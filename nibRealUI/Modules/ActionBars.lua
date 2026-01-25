@@ -438,7 +438,7 @@ function ActionBars:PLAYER_ENTERING_WORLD()
 
     if EnteredWorld then return end
 
-    self:RegisterEvent("UNIT_PET", function()
+    self:RegisterEvent("PET_UI_UPDATE", function()
         self:RefreshDoodads("Pet")
     end)
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", function()
