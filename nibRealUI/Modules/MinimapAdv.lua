@@ -565,7 +565,7 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                 local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(questInfo.x, questInfo.y, zoneInfo.mapID)
                 if xCoord and yCoord and instanceID then
                     -- Check if there's already a POI for this quest.
-                    local poiButton = _G.QuestMapFrame.QuestsFrame.Contents:FindButtonByQuestID(questID)
+                    local poiButton = _G.QuestMapFrame.QuestsFrame.ScrollFrame.Contents:FindButtonByQuestID(questID)
                     if not poiButton then
                         if _G.C_QuestLog.IsComplete(questID) then
                             poiButton = _G.QuestScrollFrame.Contents:GetButtonForQuest(questID, "normal", nil);
