@@ -617,6 +617,12 @@ function Infobar:CreateBlocks()
                 func = ToggleUI,
                 arg1 = "ToggleEncounterJournal",
             },
+            {text = _G.MicroButtonTooltipText(_G.HOUSING_MICRO_BUTTON, "TOGGLEHOUSINGUI"),
+                func =  function()
+                    if _G.InCombatLockdown() then return end
+                    _G.HousingFramesUtil.ToggleHousingDashboard()
+                end,
+            },
             -- {text = _G.BLIZZARD_STORE,
             --     func = ToggleUI,
             --     arg1 = "ToggleStoreUI",
