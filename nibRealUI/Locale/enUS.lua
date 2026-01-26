@@ -230,5 +230,4 @@ L["UnitFrames_SetFocus"] = "Click to set Focus"
 L["UnitFrames_SetFocusDesc"] = "Set focus by click+modifier on a Unit Frame."
 L["UnitFrames_Units"] = "Units"
 L["Version"] = "Version"
-
 RealUI.L = L

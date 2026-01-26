@@ -21,6 +21,7 @@ Init.lua
 Locale.xml
 
 Core.lua
+GameMenu.lua
 Core.xml
 Modules.xml
 HuD.xml
