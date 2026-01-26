@@ -623,11 +623,13 @@ function Infobar:CreateBlocks()
                     _G.HousingFramesUtil.ToggleHousingDashboard()
                 end,
             },
+            -- FIXMELATER -- This taints like a ....
             -- {text = _G.BLIZZARD_STORE,
-            --     func = ToggleUI,
-            --     arg1 = "ToggleStoreUI",
+            --     func = function()
+            --         StoreMicroButton:Click()
+            --     end,
             --     disabled = function( ... )
-            --         return not _G.C_StorePublic.IsEnabled()
+            --         return ((not _G.C_StorePublic.IsEnabled()) or _G.IsTrialAccount())
             --     end,
             -- },
             {text = _G.HELP_BUTTON,
