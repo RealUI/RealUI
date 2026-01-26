@@ -129,6 +129,8 @@ local function CreateHealthBar(parent, info, isAngled)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
         Health:SetReverseFill(info.point == "RIGHT")
+        Health:SetReverseMissing(true)
+        Health:SetFlatTexture(true)
 
         Health.step, Health.warn = CreateSteps(parent, height, info)
         Health.PositionSteps = PositionSteps
@@ -366,6 +368,8 @@ local function CreatePowerBar(parent, info, isAngled)
         Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
         Power:SetReverseFill(info.point == "RIGHT")
+        Power:SetReverseMissing(true)
+        Power:SetFlatTexture(true)
 
         Power.step, Power.warn = CreateSteps(parent, height, info)
         local powerType
@@ -373,7 +377,9 @@ local function CreatePowerBar(parent, info, isAngled)
             if not ndb.settings then
                 _G.print("settings is missings..")
             end
-            if ndb.settings.reverseUnitFrameBars then
+            if Power.GetReverseMissing and Power:GetReverseMissing() then
+                Power:SetReversePercent(true)
+            elseif ndb.settings.reverseUnitFrameBars then
                 Power:SetReversePercent(RealUI.ReversePowers[powerType])
             else
                 Power:SetReversePercent(not RealUI.ReversePowers[powerType])

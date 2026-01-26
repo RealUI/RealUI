@@ -28,7 +28,11 @@ function UnitFrames:RefreshUnits(event)
         local unit = _G["RealUI" .. units[i] .. "Frame"]
         unit.Health.colorClass = db.overlay.classColor
 
+        if unit.Health.GetReverseMissing and unit.Health:GetReverseMissing() then
+            unit.Health:SetReversePercent(true)
+        else
         unit.Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+        end
 
         if unit.Power then
             unit.Power:UpdateReverse(ndb.settings.reverseUnitFrameBars)

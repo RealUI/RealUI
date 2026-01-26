@@ -122,7 +122,11 @@ function CastBars:UpdateSettings(unit)
     local unitDB = db[unit]
     local size = castbarSizes[unit]
 
-    castbar:SetReverseFill(unitDB.reverse)
+    local reverse = unitDB.reverse
+    if unit == "player" then
+        reverse = true
+    end
+    castbar:SetReverseFill(reverse)
     castbar:SetSize(size.x * unitDB.scale, size.y * unitDB.scale)
     castbar.Icon:SetSize(size.icon * unitDB.scale, size.icon * unitDB.scale)
 
@@ -213,7 +217,7 @@ local function PostCastStart(self, unit)
         self.flashAnim:Stop()
     end
 
-    if self.notInterruptible then
+    if not RealUI.isSecret(self.notInterruptible) and self.notInterruptible then
         self:SetStatusBarColor(uninterruptible:GetRGB())
     else
         self:SetStatusBarColor(interruptible:GetRGB())
@@ -245,7 +249,7 @@ local function PostCastFail(self, unit, spellID)
 end
 local function PostCastInterruptible(self, unit)
     CastBars:debug("PostCastInterruptible", unit)
-    if self.notInterruptible then
+    if not RealUI.isSecret(self.notInterruptible) and self.notInterruptible then
         self:SetStatusBarColor(uninterruptible:GetRGB())
     else
         self:SetStatusBarColor(interruptible:GetRGB())

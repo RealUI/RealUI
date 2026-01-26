@@ -32,11 +32,12 @@ function ClassResource:GetResources()
 end
 
 function ClassResource:ForceUpdate()
-    if ClassResource.points then
-        ClassResource.points:ForceUpdate()
+    local pts, bar = ClassResource.points, ClassResource.bar
+    if pts and pts.ForceUpdate then
+        pts:ForceUpdate()
     end
-    if ClassResource.bar then
-        ClassResource.bar:ForceUpdate()
+    if bar and bar.ForceUpdate then
+        bar:ForceUpdate()
     end
     CombatFader:RefreshMod()
 end
@@ -295,21 +296,28 @@ function ClassResource:ToggleConfigMode(isConfigMode)
     self.configMode = isConfigMode
 
     if isConfigMode then
-        if self.points then
-            self.points:SetAlpha(1)
+        local pts, bar = self.points, self.bar
+        if pts and pts.SetAlpha then
+            pts:SetAlpha(1)
             for i = 1, power.max do
                 if self.isRunes then
-                    self.points[i]:SetValue(i / power.max)
+                    if pts[i] and pts[i].SetValue then
+                        pts[i]:SetValue(i / power.max)
+                    end
                 else
-                    self.points[i]:SetShown(isConfigMode)
-                    self.points:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, power.type)
+                    if pts[i] and pts[i].SetShown then
+                        pts[i]:SetShown(isConfigMode)
+                    end
+                    if pts.PostUpdate then
+                        pts:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, power.type)
+                    end
                 end
             end
         end
-        if self.bar then
+        if bar and bar.SetMinMaxValues and bar.PostUpdate then
             local maxHealth = _G.UnitHealthMax("player")
-            self.bar:SetMinMaxValues(0, maxHealth)
-            self.bar:PostUpdate(maxHealth * 0.4, maxHealth)
+            bar:SetMinMaxValues(0, maxHealth)
+            bar:PostUpdate(maxHealth * 0.4, maxHealth)
         end
     else
         ClassResource:ForceUpdate()

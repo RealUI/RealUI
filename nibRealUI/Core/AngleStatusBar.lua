@@ -21,8 +21,27 @@ local function debug(isDebug, ...) -- luacheck: ignore
 end
 
 local Lerp = _G.Lerp
+local DEFAULT_STATUSBAR_TEXTURE = [[Interface\TargetingFrame\UI-StatusBar]]
+local DEFAULT_PLAIN_TEXTURE = [[Interface\Buttons\WHITE8x8]]
+local StatusBar_SetValue, StatusBar_SetMinMaxValues, StatusBar_SetStatusBarTexture, StatusBar_GetStatusBarTexture do
+    local temp = _G.CreateFrame("StatusBar")
+    StatusBar_SetValue = temp.SetValue
+    StatusBar_SetMinMaxValues = temp.SetMinMaxValues
+    StatusBar_SetStatusBarTexture = temp.SetStatusBarTexture
+    StatusBar_GetStatusBarTexture = temp.GetStatusBarTexture
+    temp:Hide()
+end
+
+-- 12.0.1: min/max/value can be "secret" (UnitPower etc.); never compare or use in arithmetic.
+local function hasSecretRange(meta)
+    return meta and (meta.hasSecretRange or RealUI.isSecret(meta.minVal) or RealUI.isSecret(meta.maxVal))
+end
+
 local function SetBarValue(self, value)
     local meta = bars[self]
+    if not meta then return end
+    -- Check secrets BEFORE any comparison or arithmetic (avoids "attempt to compare field 'maxVal' (a secret value)").
+    if hasSecretRange(meta) or RealUI.isSecret(value) then return end
     meta.value = value
     if not meta.maxVal then return end
     local isMaxed = meta.maxVal == 0
@@ -33,30 +52,36 @@ local function SetBarValue(self, value)
     local minWidth, maxWidth, width = meta.minWidth, meta.maxWidth, meta.maxWidth
     local left, right, top, bottom = 0, 1, 0, 1
 
-    -- Take the value, and adjust it to within the bounds of the bar.
-    if not (RealUI.isSecret(meta.maxVal) or RealUI.isSecret(value)) then
+    -- For reverseMissing mode, oUF already passes us the MISSING value, not current value
+    -- So we don't need to invert it again
+    local displayValue = value
+    local percent = value / meta.maxVal
+    if meta.reverseMissing and not isMaxed then
+        -- oUF already inverted, so just use value as-is
+        -- We want normal fill behavior (more missing = larger bar)
+        isReversePerc = false
+    end
+
         if isReversePerc then
             if isMaxed then
                 width = maxWidth
             else
-                -- This makes `width` smaller when `value` gets larger and vice versa.
-                width = Lerp(maxWidth, minWidth, (value / meta.maxVal))
+            width = Lerp(maxWidth, minWidth, percent)
                 if isReverseFill then
-                    left = Lerp(0, 1, (value / meta.maxVal))
+                left = Lerp(0, 1, percent)
                 else
-                    right = Lerp(1, 0, (value / meta.maxVal))
+                right = Lerp(1, 0, percent)
                 end
             end
         else
             if isMaxed then
                 width = minWidth
             else
-                width = Lerp(minWidth, maxWidth, (value / meta.maxVal))
+            width = Lerp(minWidth, maxWidth, percent)
                 if isReverseFill then
-                    left = Lerp(1, 0, (value / meta.maxVal))
+                left = Lerp(1, 0, percent)
                 else
-                    right = Lerp(0, 1, (value / meta.maxVal))
-                end
+                right = Lerp(0, 1, percent)
             end
         end
     end
@@ -80,13 +105,14 @@ local function SetBarValue(self, value)
     if meta.texture then
         self.fill:SetTexCoord(left, right, top, bottom)
     end
-    if not (RealUI.isSecret(meta.maxVal) or RealUI.isSecret(value)) then
-        if isReversePerc then
+    if meta.reverseMissing then
+        -- For reverseMissing, show fill only when there's missing health/power
+        self.fill:SetShown(displayValue > 0)
+    elseif isReversePerc then
             self.fill:SetShown(value < meta.maxVal)
         else
             self.fill:SetShown(value > meta.minVal)
         end
-    end
 end
 
 local smoothBars do
@@ -99,20 +125,23 @@ local smoothBars do
         if range > 0.0 then
             return abs((newValue - targetValue) / range) < .00001
         end
-
         return true
     end
 
     local function ProcessSmoothStatusBars()
         for bar, targetValue in next, smoothBars do
+            local meta = bars[bar]
+            if hasSecretRange(meta) then
+                smoothBars[bar] = nil
+            else
             local effectiveTargetValue = Clamp(targetValue, bar:GetMinMaxValues())
             local newValue = FrameDeltaLerp(bar:GetValue(), effectiveTargetValue, .25)
             if IsCloseEnough(bar, newValue, effectiveTargetValue) then
                 smoothBars[bar] = nil
             end
-
             SetBarValue(bar, newValue)
         end
+    end
     end
     _G.C_Timer.NewTicker(0, ProcessSmoothStatusBars)
 end
@@ -270,7 +299,26 @@ function AngleStatusBarMixin:SetStatusBarColor(r, g, b, a)
     local meta = bars[self]
     local color = meta.fillColor
     color.r, color.g, color.b, color.a = r, g, b, a
+
+    if meta.reverseMissing then
+        if meta.hasBG and self.bg then
+            self.bg:SetColorTexture(0, 0, 0, 0.3)
+        end
+        if not meta.texture or meta.texture == "" then
+            self.fill:SetColorTexture(r, g, b, a)
+        else
+            self.fill:SetVertexColor(r, g, b, a)
+        end
+    elseif meta.invertFill then
+        if meta.hasBG and self.bg then
+            self.bg:SetColorTexture(r, g, b, a)
+        end
     if not meta.texture or meta.texture == "" then
+            self.fill:SetColorTexture(0, 0, 0, 0)
+        else
+            self.fill:SetVertexColor(1, 1, 1, 0)
+        end
+    elseif not meta.texture or meta.texture == "" then
         self.fill:SetColorTexture(r, g, b, a)
     else
         self.fill:SetVertexColor(r, g, b, a)
@@ -283,25 +331,61 @@ end
 
 function AngleStatusBarMixin:SetStatusBarTexture(texture, layer)
     if not texture then return end
+    local meta = bars[self]
+    if meta and meta.forcePlain then
+        texture = DEFAULT_PLAIN_TEXTURE
+    end
     local texType = type(texture)
     if texType == "string" or texType == "number" then
         bars[self].texture = texture
         self.fill:SetTexture(texture)
+        if StatusBar_SetStatusBarTexture then
+            StatusBar_SetStatusBarTexture(self, self.fill, layer)
+        end
 
         if layer then
             self.fill:SetDrawLayer(layer)
         end
     else
         self.fill = texture
+        if StatusBar_SetStatusBarTexture then
+            StatusBar_SetStatusBarTexture(self, self.fill, layer)
+        end
     end
 
 end
 function AngleStatusBarMixin:GetStatusBarTexture()
+    -- If no texture is assigned yet, return nil so oUF can apply a default.
+    if StatusBar_GetStatusBarTexture then
+        local tex = StatusBar_GetStatusBarTexture(self)
+        if tex and tex:GetTexture() then
+            return tex
+        end
+    end
+    if self.fill and self.fill:GetTexture() then
     return self.fill
+    end
+    return nil
 end
 
 function AngleStatusBarMixin:SetMinMaxValues(minVal, maxVal)
     local meta = bars[self]
+    -- 12.0.1: never store secret min/max; keeps hasSecretRange(meta) false so we can still update with percent.
+    if RealUI.isSecret(minVal) or RealUI.isSecret(maxVal) then
+        if StatusBar_SetMinMaxValues then
+            StatusBar_SetMinMaxValues(self, minVal, maxVal)
+        end
+        meta.minVal = nil
+        meta.maxVal = nil
+        meta.hasSecretRange = true
+        return
+    end
+    if StatusBar_SetMinMaxValues then
+        StatusBar_SetMinMaxValues(self, minVal, maxVal)
+    end
+    meta.hasSecretRange = false
+    meta.minVal = minVal
+    meta.maxVal = maxVal
 
     local targetValue = smoothBars[self]
     if targetValue then
@@ -309,24 +393,70 @@ function AngleStatusBarMixin:SetMinMaxValues(minVal, maxVal)
         if maxVal ~= 0 and meta.maxVal and meta.maxVal ~= 0 then
             ratio = maxVal / meta.maxVal
         end
-
         smoothBars[self] = targetValue * ratio
     end
-
-    meta.minVal = minVal
-    meta.maxVal = maxVal
 end
 function AngleStatusBarMixin:GetMinMaxValues()
     local meta = bars[self]
     return meta.minVal, meta.maxVal
 end
 
--- This should except a percentage or discrete value.
+-- This should accept a percentage or discrete value.
 function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
     local meta = bars[self]
-    if not (RealUI.isSecret(meta.maxVal) or RealUI.isSecret(value)) then
-        if value > meta.maxVal then value = meta.maxVal end
+    if hasSecretRange(meta) or RealUI.isSecret(value) then
+        if smoothBars[self] then
+            smoothBars[self] = nil
+        end
+        if StatusBar_SetValue then
+            -- oUF already inverts the value for reverseMissing, so use it as-is
+            StatusBar_SetValue(self, value)
+        end
+        meta.value = value
+
+        -- For reverseMissing with secrets, manually control fill visibility
+        if meta.reverseMissing then
+            local isZero = false
+            pcall(function()
+                isZero = (value == 0)
+            end)
+            if isZero then
+                self.fill:Hide()
+                return
+            else
+                self.fill:Show()
+            end
+        end
+
+        local width = self.fill:GetWidth()
+        if meta.isTrapezoid and not RealUI.isSecret(width) then
+            if width < (meta.minWidth * 2) then
+                local vertexOfs = width / 2
+                self.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
+                self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
+                self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
+                meta.isLess = true
+            elseif meta.isLess then
+                self.fill:SetPoint(meta.isTrapezoid)
+                self.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
+                self.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
+                meta.isLess = false
+            end
+        end
+        if RealUI.isSecret(width) then
+            -- For secret values, let the native StatusBar control visibility
+            -- Don't manually show/hide
+        else
+            if meta.reverseMissing then
+                -- For reverseMissing, hide fill at full health (value=0)
+                self.fill:SetShown(value > 0)
+            else
+                self.fill:SetShown(width > 0)
+            end
     end
+        return
+    end
+    if value > meta.maxVal then value = meta.maxVal end
     if meta.smooth and not ignoreSmooth then
         smoothBars[self] = value
     else
@@ -342,6 +472,35 @@ function AngleStatusBarMixin:SetSmooth(isSmooth)
 end
 function AngleStatusBarMixin:GetSmooth()
     return bars[self].smooth
+end
+
+function AngleStatusBarMixin:SetInvertFill(isInvert)
+    bars[self].invertFill = isInvert
+end
+function AngleStatusBarMixin:GetInvertFill()
+    return bars[self].invertFill
+end
+
+function AngleStatusBarMixin:SetReverseMissing(isReverseMissing)
+    bars[self].reverseMissing = isReverseMissing
+    if isReverseMissing then
+        self:SetReversePercent(true)
+        if self.bg then
+            self.bg:Show()
+        end
+    end
+end
+function AngleStatusBarMixin:GetReverseMissing()
+    return bars[self].reverseMissing
+end
+
+function AngleStatusBarMixin:SetFlatTexture(isFlat)
+    bars[self].forcePlain = isFlat
+    local texture = bars[self].texture or DEFAULT_STATUSBAR_TEXTURE
+    self:SetStatusBarTexture(texture)
+end
+function AngleStatusBarMixin:GetFlatTexture()
+    return bars[self].forcePlain
 end
 
 -- Setting this to true will make the bars fill from right to left
@@ -503,7 +662,7 @@ function AngleStatusBar:CreateAngle(frameType, name, parent)
         return frame
     elseif frameType == "CastBar" then
         local bar = CreateAngleStatusBar(name, parent)
-        -- _G.Mixin(bar, AngleStatusBarMixin)
+        _G.Mixin(bar, AngleStatusBarMixin)
 
         bars[bar] = {
             regions = {},

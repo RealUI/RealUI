@@ -590,7 +590,7 @@ local function CreateBag(bagType)
     end,
     function(dialog)
         if bagType == "bank" then
-            _G.print("ReportError: BankFrame is not yet supported in Retail 11.2.")
+            _G.print("ReportError: BankFrame is not yet supported in Retail 12.0.0.")
             -- BankTab Buy here? FIXLATER
             -- local numSlots, full = _G.GetNumBankSlots()
             -- if not full then

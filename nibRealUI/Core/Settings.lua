@@ -71,7 +71,7 @@ local characterCVars = {
 -- CVars
 local function SetDefaultCVars()
     debug("SetDefaultCVars")
-    if _G.C_AddOns.IsAddOnLoaded("RealUI_CombatText") then
+    if _G.C_AddOns.IsAddOnLoaded("RealUI_CombatText") and not RealUI.isMidnight then
         accountCVars["enableFloatingCombatText"] = 0   -- Turn off Combat Text
     end
 
