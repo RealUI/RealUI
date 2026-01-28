@@ -264,6 +264,7 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     local Castbar = unitFrame.Castbar
     Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
     Castbar:SetStatusBarColor(interruptible:GetRGB())
+    Castbar:SetFlatTexture(true) -- Use flat texture instead of gradient
     -- Castbar:smoothing       (false)
     -- Castbar:SetSmooth(false)
     Castbar:SetReverseFill(unitDB.reverse)
