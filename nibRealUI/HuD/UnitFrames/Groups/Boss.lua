@@ -81,10 +81,17 @@ local function CreateAuras(parent)
     auras.numBuffs = bossDB.buffCount
     auras.numDebuffs = bossDB.debuffCount
 
+    -- oUF can perform partial UNIT_AURA updates before a full update;
+    -- ensure these caches exist to avoid nil-index assignment errors.
+    auras.allBuffs = auras.allBuffs or {}
+    auras.activeBuffs = auras.activeBuffs or {}
+    auras.allDebuffs = auras.allDebuffs or {}
+    auras.activeDebuffs = auras.activeDebuffs or {}
+
     auras.FilterAura = function(dialog, unit, data)
         --    name, texture, count, debuffType, duration, expiration, caster
         local duration, expiration, sourceUnit = data.duration, data.expirationTime, data.sourceUnit
-        if not sourceUnit then return false end
+        if not sourceUnit or RealUI.isSecret(sourceUnit) or type(sourceUnit) ~= "string" then return false end
         UnitFrames:debug("Boss:FilterAura", dialog, unit, duration, expiration, sourceUnit)
 
 
@@ -93,7 +100,7 @@ local function CreateAuras(parent)
 
         -- Cast by NPC
         if UnitFrames.db.profile.boss.showNPCAuras then
-            local guid, isNPC = _G.UnitGUID(data.sourceUnit), false
+            local guid, isNPC = _G.UnitGUID(sourceUnit), false
             if guid then
                 local unitType = _G.strsplit("-", guid)
                 isNPC = (unitType == "Creature")
