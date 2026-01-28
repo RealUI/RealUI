@@ -2790,7 +2790,7 @@ function Infobar:CreateBlocks()
             [228940] = {name = "Notorious Thread's Hearthstone", type = "toy"},
         }
 
-        local function UseHearthstone(itemID)
+        local function UseHearthstone(itemID) -- luacheck: ignore
             if not itemID or not hearthstones[itemID] then return end
             local hsData = hearthstones[itemID]
 
@@ -2805,8 +2805,8 @@ function Infobar:CreateBlocks()
                 end
             else
                 -- Use item
-                if _G.GetItemCount(itemID) > 0 then
-                    _G.UseItemByName(itemID)
+                if _G.C_Item.GetItemCount(itemID) > 0 then
+                    _G.C_Item.UseItemByName(itemID)
                 end
             end
         end
@@ -2829,8 +2829,8 @@ function Infobar:CreateBlocks()
                 -- Both toys and items use GetItemCooldown
                 if _G.C_Container and _G.C_Container.GetItemCooldown then
                     startTime, duration = _G.C_Container.GetItemCooldown(itemID)
-                elseif _G.GetItemCooldown then
-                    startTime, duration = _G.GetItemCooldown(itemID)
+                elseif _G.C_Container.GetItemCooldown then
+                    startTime, duration = _G.C_Container.GetItemCooldown(itemID)
                 end
             end
 
