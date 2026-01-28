@@ -141,7 +141,41 @@ tags.Methods["realui:healthPercent"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         percent = 0
     else
-        percent = tags.Methods.perhp(unit)
+        if _G.UnitHealthPercent and _G.CurveConstants and _G.CurveConstants.ScaleTo100 then
+            percent = _G.UnitHealthPercent(unit, true, _G.CurveConstants.ScaleTo100)
+            if RealUI.isSecret(percent) then
+                percent = nil
+            end
+        end
+        if not percent and _G.UnitHealthPercent then
+            percent = _G.UnitHealthPercent(unit, true)
+            if RealUI.isSecret(percent) then
+                percent = nil
+            end
+        end
+        if (not percent or percent == 0) and oUF and oUF.objects then
+            for i = 1, #oUF.objects do
+                local frame = oUF.objects[i]
+                if frame and frame.unit == unit and frame.Health then
+                    local cur = frame.Health.cur
+                    local max = frame.Health.max
+                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) and max > 0 then
+                        percent = cur / max
+                    elseif frame.Health.GetVisualPercent then
+                        local visPercent = frame.Health:GetVisualPercent()
+                        if visPercent then
+                            percent = visPercent
+                        end
+                    end
+                    break
+                end
+            end
+        end
+        if not percent then
+            percent = 0
+        elseif percent <= 1 then
+            percent = percent * 100
+        end
     end
     UnitFrames:debug("realui:healthPercent", percent)
     return ("%d|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
@@ -176,7 +210,42 @@ tags.Methods["realui:powerPercent"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
         percent = 0
     else
-        percent = tags.Methods.perpp(unit)
+        local powerType = _G.UnitPowerType(unit)
+        if _G.UnitPowerPercent and _G.CurveConstants and _G.CurveConstants.ScaleTo100 then
+            percent = _G.UnitPowerPercent(unit, powerType, true, _G.CurveConstants.ScaleTo100)
+            if RealUI.isSecret(percent) then
+                percent = nil
+            end
+        end
+        if not percent and _G.UnitPowerPercent then
+            percent = _G.UnitPowerPercent(unit, powerType, true)
+            if RealUI.isSecret(percent) then
+                percent = nil
+            end
+        end
+        if (not percent or percent == 0) and oUF and oUF.objects then
+            for i = 1, #oUF.objects do
+                local frame = oUF.objects[i]
+                if frame and frame.unit == unit and frame.Power then
+                    local cur = frame.Power.cur
+                    local max = frame.Power.max
+                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) and max > 0 then
+                        percent = cur / max
+                    elseif frame.Power.GetVisualPercent then
+                        local visPercent = frame.Power:GetVisualPercent()
+                        if visPercent then
+                            percent = visPercent
+                        end
+                    end
+                    break
+                end
+            end
+        end
+        if not percent then
+            percent = 0
+        elseif percent <= 1 then
+            percent = percent * 100
+        end
     end
     local _, ptoken = _G.UnitPowerType(unit)
     return ("%d|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))

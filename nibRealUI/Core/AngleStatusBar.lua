@@ -23,12 +23,14 @@ end
 local Lerp = _G.Lerp
 local DEFAULT_STATUSBAR_TEXTURE = [[Interface\TargetingFrame\UI-StatusBar]]
 local DEFAULT_PLAIN_TEXTURE = [[Interface\Buttons\WHITE8x8]]
-local StatusBar_SetValue, StatusBar_SetMinMaxValues, StatusBar_SetStatusBarTexture, StatusBar_GetStatusBarTexture do
+local StatusBar_SetValue, StatusBar_SetMinMaxValues, StatusBar_SetStatusBarTexture, StatusBar_GetStatusBarTexture, StatusBar_GetValue, StatusBar_GetMinMaxValues do
     local temp = _G.CreateFrame("StatusBar")
     StatusBar_SetValue = temp.SetValue
     StatusBar_SetMinMaxValues = temp.SetMinMaxValues
     StatusBar_SetStatusBarTexture = temp.SetStatusBarTexture
     StatusBar_GetStatusBarTexture = temp.GetStatusBarTexture
+    StatusBar_GetValue = temp.GetValue
+    StatusBar_GetMinMaxValues = temp.GetMinMaxValues
     temp:Hide()
 end
 
@@ -49,7 +51,7 @@ local function SetBarValue(self, value)
     if not RealUI.isMidnight then
         isReversePerc, isReverseFill = self:GetReversePercent(), self:GetReverseFill()
     end
-    local minWidth, maxWidth, width = meta.minWidth, meta.maxWidth, meta.maxWidth
+    local minWidth, maxWidth, width = meta.minWidth, meta.maxWidth, meta.maxWidth -- luacheck: ignore
     local left, right, top, bottom = 0, 1, 0, 1
 
     -- For reverseMissing mode, oUF already passes us the MISSING value, not current value
@@ -301,6 +303,9 @@ function AngleStatusBarMixin:SetStatusBarColor(r, g, b, a)
     color.r, color.g, color.b, color.a = r, g, b, a
 
     if meta.reverseMissing then
+        -- Reverse missing mode: fill shows missing portion in color
+        -- At 100% → fill minimal (no missing) → bar looks empty
+        -- At 0% → fill maximal (all missing) → bar fully colored
         if meta.hasBG and self.bg then
             self.bg:SetColorTexture(0, 0, 0, 0.3)
         end
@@ -443,8 +448,8 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
                 meta.isLess = false
             end
         end
-        if RealUI.isSecret(width) then
-            -- For secret values, let the native StatusBar control visibility
+        if RealUI.isSecret(width) then -- luacheck: ignore
+        -- For secret values, let the native StatusBar control visibility
             -- Don't manually show/hide
         else
             if meta.reverseMissing then
@@ -465,6 +470,61 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
 end
 function AngleStatusBarMixin:GetValue()
     return bars[self].value
+end
+
+-- Get visual percentage from bar width (useful for secret values)
+function AngleStatusBarMixin:GetVisualPercent()
+    local meta = bars[self]
+    if not meta then return 0 end
+
+    -- Try to get values from native StatusBar first
+    local min, max = StatusBar_GetMinMaxValues and StatusBar_GetMinMaxValues(self) or 0, 100
+    local value = StatusBar_GetValue and StatusBar_GetValue(self) or 0
+
+    -- Check if we can use the native values
+    local canUseNative = true
+    if RealUI.isSecret(min) or RealUI.isSecret(max) or RealUI.isSecret(value) then
+        canUseNative = false
+    end
+
+    if canUseNative and max > 0 then
+        local percent = value / max
+        -- For reverseMissing mode, the value is already the missing amount
+        -- So we need to invert to get current %
+        if meta.reverseMissing then
+            percent = 1 - percent
+        end
+        return percent
+    end
+
+    -- Fallback: Try to calculate from visual width
+    -- For reverseMissing mode, if fill is hidden, we're at 100% (no missing health)
+    if meta.reverseMissing and self.fill and not self.fill:IsShown() then
+        return 1 -- 100% health
+    end
+
+    local currentWidth = self.fill:GetWidth()
+    if RealUI.isSecret(currentWidth) or not currentWidth then
+        -- Can't calculate if width is secret or nil
+        return nil
+    end
+
+    local minWidth = meta.minWidth
+    local maxWidth = meta.maxWidth
+
+    if not minWidth or not maxWidth then return 0 end
+    if maxWidth == minWidth then return 1 end -- Avoid division by zero
+
+    -- Calculate percent based on width
+    local percent = (currentWidth - minWidth) / (maxWidth - minWidth)
+    percent = math.max(0, math.min(1, percent)) -- Clamp to 0-1
+
+    -- For reverseMissing mode, invert the percentage
+    if meta.reverseMissing then
+        percent = 1 - percent
+    end
+
+    return percent
 end
 
 function AngleStatusBarMixin:SetSmooth(isSmooth)
