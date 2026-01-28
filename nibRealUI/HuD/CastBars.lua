@@ -199,7 +199,15 @@ local function PlayFlash(anim)
     anim.bar.Text:SetTextColor(anim.color:GetRGB())
     anim.bar:SetStatusBarColor(anim.color:GetRGB())
 
-    anim.flash:SetFromAlpha(anim.bar:GetAlpha())
+    local fromAlpha = anim.bar:GetAlpha()
+    if RealUI.isSecret(fromAlpha) or type(fromAlpha) ~= "number" then
+        fromAlpha = 1
+    elseif fromAlpha < 0 then
+        fromAlpha = 0
+    elseif fromAlpha > 1 then
+        fromAlpha = 1
+    end
+    anim.flash:SetFromAlpha(fromAlpha)
     anim.flash:SetToAlpha(0)
 end
 local function EndFlash(anim, ...)
