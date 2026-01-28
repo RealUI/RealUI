@@ -57,19 +57,110 @@ local function GetUnit(self)
     return unit or "mouseover"
 end
 ]]
+local function IsSafeUnitToken(unit)
+    return type(unit) == "string" and not RealUI.isSecret(unit) and unit ~= ""
+end
+
+local function IsNonSecretTrue(value)
+    if RealUI.isSecret(value) or value == nil then
+        return false
+    end
+    return value == true
+end
+
+local function IsNonSecretString(value)
+    return type(value) == "string" and not RealUI.isSecret(value)
+end
+
+local function GetHighlightRGB()
+    local c = _G.HIGHLIGHT_FONT_COLOR
+    if c and type(c.r) == "number" and type(c.g) == "number" and type(c.b) == "number" then
+        return c.r, c.g, c.b
+    end
+    return 1, 1, 1
+end
+
+local function GetSafeGlobalString(key, fallback)
+    local value = _G[key]
+    if IsNonSecretString(value) and value ~= "" then
+        return value
+    end
+    return fallback
+end
+
+local function FormatMoneyIcons(amount)
+    local gold = math.floor(amount / 10000)
+    local silver = math.floor((amount % 10000) / 100)
+    local copper = amount % 100
+
+    local parts = {}
+    if gold > 0 then
+        parts[#parts + 1] = ("%d|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t"):format(gold)
+    end
+    if gold > 0 or silver > 0 then
+        parts[#parts + 1] = ("%d|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:2:0|t"):format(silver)
+    end
+    parts[#parts + 1] = ("%d|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:2:0|t"):format(copper)
+    return table.concat(parts, " ")
+end
+
+local function AddTooltipMoneyText(tooltip, amount, prefix)
+    if RealUI.isSecret(amount) or type(amount) ~= "number" then
+        return
+    end
+
+    local moneyText = FormatMoneyIcons(amount)
+    if prefix then
+        local r, g, b = GetHighlightRGB()
+        tooltip:AddDoubleLine(prefix, moneyText, r, g, b, 1, 1, 1)
+    else
+        tooltip:AddLine(moneyText, 1, 1, 1)
+    end
+end
+
+local function SafeTooltip_OnTooltipAddMoney(self, cost, maxcost)
+    if RealUI.isSecret(cost) or type(cost) ~= "number" then
+        return
+    end
+
+    if _G.GameTooltip_ClearMoney then
+        pcall(_G.GameTooltip_ClearMoney, self)
+    end
+
+    if maxcost ~= nil and (RealUI.isSecret(maxcost) or type(maxcost) ~= "number") then
+        maxcost = nil
+    end
+
+    local sellPrice = GetSafeGlobalString("SELL_PRICE", "Sell Price")
+    local minimum = GetSafeGlobalString("MINIMUM", "Minimum")
+    local maximum = GetSafeGlobalString("MAXIMUM", "Maximum")
+
+    if maxcost ~= nil and maxcost >= 1 then
+        local r, g, b = GetHighlightRGB()
+        self:AddLine(("%s:"):format(sellPrice), r, g, b)
+        local indent = string.rep(" ", 4)
+        AddTooltipMoneyText(self, cost, ("%s%s:"):format(indent, minimum))
+        AddTooltipMoneyText(self, maxcost, ("%s%s:"):format(indent, maximum))
+    else
+        AddTooltipMoneyText(self, cost, string.format("%s:", sellPrice))
+    end
+end
 local function GetUnitColor(unit)
+    if not IsSafeUnitToken(unit) then
+        return Color.white
+    end
     local color
-    if _G.UnitPlayerControlled(unit) then
+    if IsNonSecretTrue(_G.UnitPlayerControlled(unit)) then
         local _, class = _G.UnitClass(unit)
         color = _G.CUSTOM_CLASS_COLORS[class]
-    elseif _G.UnitIsTapDenied(unit) then
+    elseif IsNonSecretTrue(_G.UnitIsTapDenied(unit)) then
         color = Color.gray
     else
         local reaction = _G.UnitReaction(unit, "player")
-        if reaction then
-            color = _G.FACTION_BAR_COLORS[reaction]
-        else
+        if RealUI.isSecret(reaction) or reaction == nil then
             color = Color.white
+        else
+            color = _G.FACTION_BAR_COLORS[reaction]
         end
     end
 
@@ -77,9 +168,21 @@ local function GetUnitColor(unit)
     return color
 end
 local function GetUnitName(unit)
+    if not IsSafeUnitToken(unit) then
+        return "Unknown"
+    end
     local unitName, server = _G.UnitName(unit)
-    if Tooltips.db.global.showTitles then
-        unitName = _G.UnitPVPName(unit) or unitName
+    if RealUI.isSecret(unitName) then
+        return "Unknown"
+    end
+    if RealUI.isSecret(server) then
+        server = ""
+    end
+    if Tooltips.db.global.showTitles and not RealUI.isSecret(unit) then
+        local pvpName = _G.UnitPVPName(unit)
+        if pvpName ~= nil and not RealUI.isSecret(pvpName) then
+            unitName = pvpName
+        end
     end
 
     if server and server ~= "" then
@@ -87,40 +190,63 @@ local function GetUnitName(unit)
             unitName = unitName.."-"..server
         else
             local relationship = _G.UnitRealmRelationship(unit)
-            --print("relationship", relationship)
-            if relationship == _G.LE_REALM_RELATION_VIRTUAL then
-                unitName = unitName.._G.INTERACTIVE_SERVER_LABEL
-            elseif relationship == _G.LE_REALM_RELATION_COALESCED then
-                unitName = unitName.._G.FOREIGN_SERVER_LABEL
+            if not RealUI.isSecret(relationship) then
+                --print("relationship", relationship)
+                if relationship == _G.LE_REALM_RELATION_VIRTUAL then
+                    unitName = unitName.._G.INTERACTIVE_SERVER_LABEL
+                elseif relationship == _G.LE_REALM_RELATION_COALESCED then
+                    unitName = unitName.._G.FOREIGN_SERVER_LABEL
+                end
             end
         end
     end
 
-    local iconIndex = (_G.GetRaidTargetIndex(unit))
-    if iconIndex and _G.ICON_LIST[iconIndex] then
-        unitName = ("%s12|t %s"):format(_G.ICON_LIST[iconIndex], unitName)
+    if not RealUI.isSecret(unit) then
+        local iconIndex = (_G.GetRaidTargetIndex(unit))
+        if RealUI.isSecret(iconIndex) then
+            iconIndex = nil
+        end
+        if iconIndex and _G.ICON_LIST[iconIndex] then
+            unitName = ("%s12|t %s"):format(_G.ICON_LIST[iconIndex], unitName)
+        end
     end
 
     return unitName
 end
 local function GetUnitClassification(unit)
+    if not IsSafeUnitToken(unit) then
+        return
+    end
     local level
-    local IsBattlePet = _G.UnitIsBattlePet(unit)
+    local IsBattlePet = IsNonSecretTrue(_G.UnitIsBattlePet(unit))
     if IsBattlePet then
         level = _G.UnitBattlePetLevel(unit)
     else
         level = _G.UnitLevel(unit)
     end
 
-    if not level then return end
+    if RealUI.isSecret(level) or level == nil then return end
 
     local unitType
-    if _G.UnitIsPlayer(unit) then
-        unitType = ("%s |c%s%s|r"):format(_G.UnitRace(unit), _G.RealUI.GetColorString(GetUnitColor(unit)), _G.UnitClass(unit))
+    if IsNonSecretTrue(_G.UnitIsPlayer(unit)) then
+        local unitRace = _G.UnitRace(unit)
+        if unitRace == nil or RealUI.isSecret(unitRace) then
+            unitRace = ""
+        end
+        local unitClassName = _G.UnitClass(unit)
+        if unitClassName == nil or RealUI.isSecret(unitClassName) then
+            unitClassName = ""
+        end
+        unitType = ("%s |c%s%s|r"):format(unitRace, _G.RealUI.GetColorString(GetUnitColor(unit)), unitClassName)
     elseif IsBattlePet then
         unitType = _G["BATTLE_PET_NAME_".._G.UnitBattlePetType(unit)]
     else
-        unitType = _G.UnitCreatureType(unit) or "unitType"
+        local creatureType = _G.UnitCreatureType(unit)
+        if creatureType == nil or RealUI.isSecret(creatureType) then
+            unitType = "unitType"
+        else
+            unitType = creatureType
+        end
     end
 
     local diff
@@ -129,7 +255,7 @@ local function GetUnitClassification(unit)
         diff = _G.QuestDifficultyColors.impossible
     elseif IsBattlePet then
         local teamLevel = _G.C_PetJournal.GetPetTeamAverageLevel()
-        if teamLevel then -- from WorldMapFrame.lua: 2522
+        if teamLevel ~= nil and not RealUI.isSecret(teamLevel) then -- from WorldMapFrame.lua: 2522
             if teamLevel < level then
                 --add 2 to the min level because it's really hard to fight higher level pets
                 diff = _G.GetRelativeDifficultyColor(teamLevel, level + 2)
@@ -147,7 +273,7 @@ local function GetUnitClassification(unit)
         diff = _G.GetCreatureDifficultyColor(level)
     end
 
-    if _G.UnitIsDeadOrGhost(unit) then
+    if IsNonSecretTrue(_G.UnitIsDeadOrGhost(unit)) then
         unitType = ("%s |cffCCCCCC%s|r"):format(unitType, _G.DEAD)
     end
 
@@ -241,11 +367,13 @@ _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestObjective, function(to
 end)
 _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.UnitName, function(tooltip, lineData)
     local unitToken = lineData.unitToken
-    if unitToken then
+    if IsSafeUnitToken(unitToken) then
         lineData.leftText = GetUnitName(unitToken)
         lineData.leftColor = GetUnitColor(unitToken)
 
         tooltip._unitToken = unitToken
+    else
+        tooltip._unitToken = nil
     end
 end)
 _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lineData)
@@ -253,7 +381,7 @@ _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lin
     if tooltip._unitToken then
         local unitToken = tooltip._unitToken
         if tooltip:NumLines() == 1 then
-            if _G.UnitIsPlayer(unitToken) then
+            if IsNonSecretTrue(_G.UnitIsPlayer(unitToken)) then
                 local unitGuild, unitRank = _G.GetGuildInfo(unitToken)
                 if unitGuild then
                     lineData.leftText = ("|cffffffb3<%s> |cff00E6A8%s|r"):format(unitGuild, unitRank)
@@ -263,7 +391,7 @@ _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lin
 
         local classification = GetUnitClassification(unitToken)
         if classification then
-            if lineData.leftText:find(_G.LEVEL) then
+            if IsNonSecretString(lineData.leftText) and lineData.leftText:find(_G.LEVEL) then
                 lineData.leftText = classification
             end
         end
@@ -276,27 +404,38 @@ _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Unit, function(toolt
     end
 
     local unitToken = tooltip._unitToken
-    if not unitToken then return end
+    if not IsSafeUnitToken(unitToken) then
+        tooltip.factionIcon:Hide()
+        return
+    end
 
-    if _G.UnitIsPVP(unitToken) then
-        local icon = factionIcon[_G.UnitFactionGroup(unitToken) or "Neutral"]
+    if IsNonSecretTrue(_G.UnitIsPVP(unitToken)) then
+        local unitFactionGroup = _G.UnitFactionGroup(unitToken)
+        if not IsNonSecretString(unitFactionGroup) then
+            unitFactionGroup = "Neutral"
+        end
+        local icon = factionIcon[unitFactionGroup] or factionIcon.Neutral
         tooltip.factionIcon:SetAtlas(icon.texture)
         tooltip.factionIcon:SetSize(icon.width, icon.height)
         tooltip.factionIcon:Show()
+    else
+        tooltip.factionIcon:Hide()
     end
 
     --private.AddObjectiveProgress(tooltip, unitToken, previousLine)
 
     local unitTarget = unitToken.."target"
-    if _G.UnitExists(unitTarget) then
+    if IsNonSecretTrue(_G.UnitExists(unitTarget)) then
         local text
-        if _G.UnitIsUnit(unitTarget, "player") then
+        if IsNonSecretTrue(_G.UnitIsUnit(unitTarget, "player")) then
             text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
         else
             text = GetUnitName(unitTarget)
         end
 
-        _G.GameTooltip_AddColoredDoubleLine(tooltip, _G.TARGET, text, normalFont, GetUnitColor(unitTarget))
+        if text then
+            _G.GameTooltip_AddColoredDoubleLine(tooltip, _G.TARGET, text, normalFont, GetUnitColor(unitTarget))
+        end
     end
 end)
 
@@ -393,5 +532,11 @@ function Tooltips:OnInitialize()
     private.questCache = self.db.global.questCache
     for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
         private.HookTooltip(tooltip)
+    end
+
+    if not private._moneyHooked and type(_G.GameTooltip_OnTooltipAddMoney) == "function" then
+        private._moneyHooked = true
+        private._origGameTooltip_OnTooltipAddMoney = _G.GameTooltip_OnTooltipAddMoney
+        _G.GameTooltip_OnTooltipAddMoney = SafeTooltip_OnTooltipAddMoney
     end
 end
