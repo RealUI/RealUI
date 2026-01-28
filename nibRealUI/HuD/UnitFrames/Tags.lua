@@ -87,9 +87,7 @@ tags.Methods["realui:name"] = function(unit, realUnit)
 
     --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
     local name = _G.UnitName(unit) or ""
-    if RealUI.isSecret(name) then
-        _G.print("Secret name detected for unit:", unit, "original name:", name)
-    else
+    if not RealUI.isSecret(name) then
         name = AbbreviateName(name, UnitFrames[unitTag].nameLength)
     end
     local nameColor = "|cffffffff"

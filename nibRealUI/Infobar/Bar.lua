@@ -213,6 +213,10 @@ function BlockMixin:RestorePosition()
     dock:AddBlock(self, blockInfo.index)
 end
 
+local function AdjustElementsDeferred(block, info)
+    block:AdjustElements(info)
+end
+
 function BlockMixin:AdjustElements(blockInfo)
     local font, size, outline = blockFont.font, Scale.Value(blockFont.size), blockFont.outline
     local space = 2
@@ -257,6 +261,11 @@ function BlockMixin:AdjustElements(blockInfo)
         Infobar:debug("label", self.dataObj.label, width)
     else
         self.label:Hide()
+    end
+
+    if _G.InCombatLockdown and _G.InCombatLockdown() then
+        RealUI.TryInCombat(AdjustElementsDeferred, false, self, blockInfo)
+        return
     end
 
     self:SetWidth(width)

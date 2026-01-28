@@ -240,11 +240,17 @@ local function PostCastStop(self, unit, spellID)
     self.Text:SetText(_G.SUCCESS)
     self:Show()
     self.flashAnim.color = Color.green
+    if _G.InCombatLockdown and _G.InCombatLockdown() then
+        return
+    end
     self.flashAnim:Play()
 end
 local function PostCastFail(self, unit, spellID)
     CastBars:debug("PostCastFail", unit, spellID)
     self.flashAnim.color = Color.red
+    if _G.InCombatLockdown and _G.InCombatLockdown() then
+        return
+    end
     self.flashAnim:Play()
 end
 local function PostCastInterruptible(self, unit)
