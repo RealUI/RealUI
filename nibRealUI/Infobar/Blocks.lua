@@ -2562,8 +2562,12 @@ function Infobar:CreateBlocks()
                                         local currencyInfo = _G.C_CurrencyInfo.GetCurrencyInfo(data["token"..i])
 
                                         local amount = data[data["token"..i]] or 0
-                                        tinsert(currency.info, TOKEN_STRING:format(currencyInfo.iconFileID, amount))
-                                        tinsert(currency.meta, currencyInfo.name)
+                                        if currencyInfo then
+                                            tinsert(currency.info, TOKEN_STRING:format(currencyInfo.iconFileID, amount))
+                                            tinsert(currency.meta, currencyInfo.name)
+                                        else
+                                            tinsert(currency.info, "---")
+                                        end
                                     else
                                         tinsert(currency.info, "---")
                                     end
