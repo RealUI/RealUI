@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals time next select tonumber tostring tinsert
+-- luacheck: globals _G time next select tonumber tostring tinsert type pairs
 
 -- Libs --
 local Aurora = _G.Aurora
@@ -59,6 +59,16 @@ end
 ]]
 local function IsSafeUnitToken(unit)
     return type(unit) == "string" and not RealUI.isSecret(unit) and unit ~= ""
+end
+
+local function IsSafeTooltipData(tooltip, lineData)
+    if RealUI.isSecret(tooltip) or RealUI.isSecret(lineData) then
+        return false
+    end
+    if type(lineData) ~= "table" then
+        return false
+    end
+    return true
 end
 
 local function IsNonSecretTrue(value)
@@ -354,127 +364,148 @@ end
 
 local LineTypeEnums = _G.Enum.TooltipDataLineType
 local TooltipTypeEnums = _G.Enum.TooltipDataType
-
-_G.TooltipDataProcessor.AddLinePostCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
-    if tooltip._unitToken then
-        tooltip._questID = lineData.id
-    end
-end)
-_G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestObjective, function(tooltip, lineData)
-    if tooltip._unitToken and tooltip._questID then
-        private.AddObjectiveProgress(tooltip, lineData)
-    end
-end)
-_G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.UnitName, function(tooltip, lineData)
-    local unitToken = lineData.unitToken
-    if IsSafeUnitToken(unitToken) then
-        lineData.leftText = GetUnitName(unitToken)
-        lineData.leftColor = GetUnitColor(unitToken)
-
-        tooltip._unitToken = unitToken
-    else
-        tooltip._unitToken = nil
-    end
-end)
-_G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lineData)
-    --PrintDataArgs("AddLinePreCall:None", lineData)
-    if tooltip._unitToken then
-        local unitToken = tooltip._unitToken
-        if tooltip:NumLines() == 1 then
-            if IsNonSecretTrue(_G.UnitIsPlayer(unitToken)) then
-                local unitGuild, unitRank = _G.GetGuildInfo(unitToken)
-                if unitGuild then
-                    lineData.leftText = ("|cffffffb3<%s> |cff00E6A8%s|r"):format(unitGuild, unitRank)
-                end
-            end
+if _G.issecure and _G.issecure() then
+    _G.TooltipDataProcessor.AddLinePostCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
+        if not IsSafeTooltipData(tooltip, lineData) then
+            return
         end
-
-        local classification = GetUnitClassification(unitToken)
-        if classification then
-            if IsNonSecretString(lineData.leftText) and lineData.leftText:find(_G.LEVEL) then
-                lineData.leftText = classification
-            end
+        if tooltip._unitToken then
+            tooltip._questID = lineData.id
         end
-    end
-end)
-_G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Unit, function(tooltip, tooltipData)
-    if not tooltip.factionIcon then
-        tooltip.factionIcon = tooltip:CreateTexture(nil, "BORDER")
-        tooltip.factionIcon:SetPoint("CENTER", tooltip, "LEFT", 0, 0)
-    end
-
-    local unitToken = tooltip._unitToken
-    if not IsSafeUnitToken(unitToken) then
-        tooltip.factionIcon:Hide()
-        return
-    end
-
-    if IsNonSecretTrue(_G.UnitIsPVP(unitToken)) then
-        local unitFactionGroup = _G.UnitFactionGroup(unitToken)
-        if not IsNonSecretString(unitFactionGroup) then
-            unitFactionGroup = "Neutral"
+    end)
+    _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestObjective, function(tooltip, lineData)
+        if not IsSafeTooltipData(tooltip, lineData) then
+            return
         end
-        local icon = factionIcon[unitFactionGroup] or factionIcon.Neutral
-        tooltip.factionIcon:SetAtlas(icon.texture)
-        tooltip.factionIcon:SetSize(icon.width, icon.height)
-        tooltip.factionIcon:Show()
-    else
-        tooltip.factionIcon:Hide()
-    end
+        if tooltip._unitToken and tooltip._questID then
+            private.AddObjectiveProgress(tooltip, lineData)
+        end
+    end)
+    _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.UnitName, function(tooltip, lineData)
+        if not IsSafeTooltipData(tooltip, lineData) then
+            return
+        end
+        local unitToken = lineData.unitToken
+        if IsSafeUnitToken(unitToken) then
+            lineData.leftText = GetUnitName(unitToken)
+            lineData.leftColor = GetUnitColor(unitToken)
 
-    --private.AddObjectiveProgress(tooltip, unitToken, previousLine)
-
-    local unitTarget = unitToken.."target"
-    if IsNonSecretTrue(_G.UnitExists(unitTarget)) then
-        local text
-        if IsNonSecretTrue(_G.UnitIsUnit(unitTarget, "player")) then
-            text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
+            tooltip._unitToken = unitToken
         else
-            text = GetUnitName(unitTarget)
+            tooltip._unitToken = nil
         end
-
-        if text then
-            _G.GameTooltip_AddColoredDoubleLine(tooltip, _G.TARGET, text, normalFont, GetUnitColor(unitTarget))
+    end)
+    _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lineData)
+        if not IsSafeTooltipData(tooltip, lineData) then
+            return
         end
-    end
-end)
-
-local TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK = "|A:common-icon-checkmark:16:16:0:-1|a ".._G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN;
-_G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
-    local owner = tooltip:GetOwner()
-    if (owner and owner.GetParent) and owner:GetParent() == _G.DressUpFrame.CustomSetDetailsPanel then
-        return
-    end
-
-    --PrintDataArgs("AddTooltipPostCall:Item", tooltipData)
-    local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
-    if Tooltips.db.global.showTransmog and link then
-        local itemAppearanceID, itemModifiedAppearanceID = _G.C_TransmogCollection.GetItemInfo(link)
-        if itemAppearanceID and itemModifiedAppearanceID then
-            local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID)
-            if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
-                _G.GameTooltip_AddColoredLine(tooltip, TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK , _G.GREEN_FONT_COLOR)
-            end
-            local _, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(itemModifiedAppearanceID)
-            if not canCollect then
-                local invSlot = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
-                _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(itemModifiedAppearanceID)
-                if not canCollect and (invSlot == _G.INVSLOT_MAINHAND or invSlot == _G.INVSLOT_OFFHAND) then
-                    local pairedTransmogID = _G.C_TransmogCollection.GetPairedArtifactAppearance(itemModifiedAppearanceID);
-                    if pairedTransmogID then
-                        _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(pairedTransmogID);
+        --PrintDataArgs("AddLinePreCall:None", lineData)
+        if tooltip._unitToken then
+            local unitToken = tooltip._unitToken
+            if tooltip:NumLines() == 1 then
+                if IsNonSecretTrue(_G.UnitIsPlayer(unitToken)) then
+                    local unitGuild, unitRank = _G.GetGuildInfo(unitToken)
+                    if unitGuild then
+                        lineData.leftText = ("|cffffffb3<%s> |cff00E6A8%s|r"):format(unitGuild, unitRank)
                     end
                 end
+            end
 
-                if canCollect then
-                    _G.GameTooltip_AddErrorLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNUSABLE)
-                else
-                    _G.GameTooltip_AddErrorLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNCOLLECTABLE)
+            local classification = GetUnitClassification(unitToken)
+            if classification then
+                if IsNonSecretString(lineData.leftText) and lineData.leftText:find(_G.LEVEL) then
+                    lineData.leftText = classification
                 end
             end
         end
-    end
-end)
+    end)
+    _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Unit, function(tooltip, tooltipData)
+        if RealUI.isSecret(tooltip) or RealUI.isSecret(tooltipData) then
+            return
+        end
+        if not tooltip.factionIcon then
+            tooltip.factionIcon = tooltip:CreateTexture(nil, "BORDER")
+            tooltip.factionIcon:SetPoint("CENTER", tooltip, "LEFT", 0, 0)
+        end
+
+        local unitToken = tooltip._unitToken
+        if not IsSafeUnitToken(unitToken) then
+            tooltip.factionIcon:Hide()
+            return
+        end
+
+        if IsNonSecretTrue(_G.UnitIsPVP(unitToken)) then
+            local unitFactionGroup = _G.UnitFactionGroup(unitToken)
+            if not IsNonSecretString(unitFactionGroup) then
+                unitFactionGroup = "Neutral"
+            end
+            local icon = factionIcon[unitFactionGroup] or factionIcon.Neutral
+            tooltip.factionIcon:SetAtlas(icon.texture)
+            tooltip.factionIcon:SetSize(icon.width, icon.height)
+            tooltip.factionIcon:Show()
+        else
+            tooltip.factionIcon:Hide()
+        end
+
+        --private.AddObjectiveProgress(tooltip, unitToken, previousLine)
+
+        local unitTarget = unitToken.."target"
+        if IsNonSecretTrue(_G.UnitExists(unitTarget)) then
+            local text
+            if IsNonSecretTrue(_G.UnitIsUnit(unitTarget, "player")) then
+                text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
+            else
+                text = GetUnitName(unitTarget)
+            end
+
+            if text then
+                _G.GameTooltip_AddColoredDoubleLine(tooltip, _G.TARGET, text, normalFont, GetUnitColor(unitTarget))
+            end
+        end
+    end)
+end
+
+local TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK = "|A:common-icon-checkmark:16:16:0:-1|a ".._G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN;
+if _G.issecure and _G.issecure() then
+    _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
+        if RealUI.isSecret(tooltip) or RealUI.isSecret(tooltipData) then
+            return
+        end
+        local owner = tooltip:GetOwner()
+        if (owner and owner.GetParent) and owner:GetParent() == _G.DressUpFrame.CustomSetDetailsPanel then
+            return
+        end
+
+        --PrintDataArgs("AddTooltipPostCall:Item", tooltipData)
+        local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
+        if Tooltips.db.global.showTransmog and link then
+            local itemAppearanceID, itemModifiedAppearanceID = _G.C_TransmogCollection.GetItemInfo(link)
+            if itemAppearanceID and itemModifiedAppearanceID then
+                local sourceInfo = _G.C_TransmogCollection.GetSourceInfo(itemModifiedAppearanceID)
+                if _G.C_TransmogCollection.PlayerHasTransmog(sourceInfo.itemID, sourceInfo.itemModID) then
+                    _G.GameTooltip_AddColoredLine(tooltip, TRANSMOGRIFY_TOOLTIP_APPEARANCE_KNOWN_CHECKMARK , _G.GREEN_FONT_COLOR)
+                end
+                local _, canCollect =_G.C_TransmogCollection.PlayerCanCollectSource(itemModifiedAppearanceID)
+                if not canCollect then
+                    local invSlot = _G.C_Transmog.GetSlotForInventoryType(sourceInfo.invType)
+                    _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(itemModifiedAppearanceID)
+                    if not canCollect and (invSlot == _G.INVSLOT_MAINHAND or invSlot == _G.INVSLOT_OFFHAND) then
+                        local pairedTransmogID = _G.C_TransmogCollection.GetPairedArtifactAppearance(itemModifiedAppearanceID);
+                        if pairedTransmogID then
+                            _, canCollect = _G.C_TransmogCollection.AccountCanCollectSource(pairedTransmogID);
+                        end
+                    end
+
+                    if canCollect then
+                        _G.GameTooltip_AddErrorLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNUSABLE)
+                    else
+                        _G.GameTooltip_AddErrorLine(tooltip, _G.TRANSMOGRIFY_TOOLTIP_APPEARANCE_UNCOLLECTABLE)
+                    end
+                end
+            end
+        end
+    end)
+end
 
 --[[
 private.AddHook("OnTooltipSetUnit", function(dialog)

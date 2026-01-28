@@ -1,9 +1,12 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals select tonumber ipairs tinsert
+-- luacheck: globals _G select tonumber ipairs tinsert type
 
 local Inventory = private.Inventory
+
+-- RealUI --
+local RealUI = _G.RealUI
 
 -- Libs --
 local Aurora = _G.Aurora
@@ -27,6 +30,9 @@ local TooltipTypes = {
 local formatString = "%s ID: %d"
 --local formatStringGray = Color.gray:WrapTextInColorCode(formatString)
 local function AddToTooltip(tooltip, tooltipType, tooltipID)
+    if RealUI.isSecret(tooltip) or RealUI.isSecret(tooltipType) or RealUI.isSecret(tooltipID) then
+        return
+    end
     if not tooltip._id then
         local tooltipText = formatString:format(tooltipType, tooltipID)
         _G.GameTooltip_AddColoredLine(tooltip, tooltipText , Color.gray)
@@ -34,29 +40,49 @@ local function AddToTooltip(tooltip, tooltipType, tooltipID)
     end
 end
 
+local function IsSafeTooltipData(tooltip, lineData)
+    if RealUI.isSecret(tooltip) or RealUI.isSecret(lineData) then
+        return false
+    end
+    if type(lineData) ~= "table" then
+        return false
+    end
+    return true
+end
+
 local function SetupItemTooltips()
-    _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
-        local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
-        if link then
-            local id = link:match("item:(%d*)")
-            if id then
-                AddToTooltip(tooltip, TooltipTypes.item, id)
+    if _G.issecure and _G.issecure() then
+        _G.TooltipDataProcessor.AddTooltipPostCall(TooltipTypeEnums.Item, function(tooltip, tooltipData)
+            if RealUI.isSecret(tooltip) or RealUI.isSecret(tooltipData) then
+                return
             end
-        end
-    end)
+            local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
+            if link then
+                local id = link:match("item:(%d*)")
+                if id then
+                    AddToTooltip(tooltip, TooltipTypes.item, id)
+                end
+            end
+        end)
+    end
 end
 
 local function SetupQuestTooltips()
-    _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
-        if tooltip._unitToken then
-            tooltip._questID = lineData.id
-        end
+    if _G.issecure and _G.issecure() then
+        _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestTitle, function(tooltip, lineData)
+            if not IsSafeTooltipData(tooltip, lineData) then
+                return
+            end
+            if tooltip._unitToken then
+                tooltip._questID = lineData.id
+            end
 
-        if tooltip._questID then
-            lineData.rightText = formatString:format(TooltipTypes.quest, tooltip._questID)
-            lineData.rightColor = Color.gray
-        end
-    end)
+            if tooltip._questID then
+                lineData.rightText = formatString:format(TooltipTypes.quest, tooltip._questID)
+                lineData.rightColor = Color.gray
+            end
+        end)
+    end
     local function QuestTooltipHook(sender, self, questID, isGroup)
         AddToTooltip(_G.GameTooltip, TooltipTypes.item, questID)
         _G.GameTooltip:Show()
