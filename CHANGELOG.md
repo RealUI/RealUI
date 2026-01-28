@@ -1,3 +1,74 @@
+## [2.6.0] ##
+### Modified AddOns ###
+  * Aurora 12.0.0.0
+  * RealUI_Bugs
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Inventory
+  * RealUI_CombatText (disabled)
+  * RealUI_Skins
+  * RealUI_Tooltips (disabled)
+
+### Information ###
+  * This is the first release for Midnight - World of Warcraft 12.0
+  * This release is a major update to the Blizzard UI - with many changes to the core and modules
+  * Certain features have been disabled or removed due to changes in the Blizzard API
+  * This version may be stable enoough for general use, but there are still some issues to be resolved
+  * Report issues at GitHub or connect with us on Discord
+
+### Changed ###
+  * (beta6) build
+  * fix: dont bug out if currency does not exist on a toon.. currencyInfo can be nil
+  * chg: fixes for depricated api in qol patch
+  * chg: fixes to AngleStatusBar and oUF tags [Naessah]
+  * chg: castbar - Use flat texture instead of gradient [Naessah]
+  *  add: infobar qol - durability repair and heartstone functionality [Naessah]
+  * chg: qol updates to tooltip objectiveprogress [Naessah]
+ * (beta5) build
+  * chg: updates to oUF unitframes and castbar [Naessah]
+  * chg: attempt to change start menu item for store...
+  * chg: api update for tooltips OutfitDetailsPanel -> CustomSetDetailsPanel
+  * add: RealUI Config button to GameMenu...
+  * chg: fix registered pet ui event
+  * chg: disable RealUI_CombatText if someone loads it
+  * add: ToggleHousingDashboard to infobar menu
+  * chg: _G.QuestMapFrame.QuestsFrame.Contents is now _G.QuestMapFrame.QuestsFrame.ScrollFrame.Contents
+  * chg: make castbars great again....
+  * (beta4) build
+  * fix: CurveConstants is _G.CurveConstants
+  * chg: dont load PredictOverride in prepatch
+  * chg: AngleStatusBar - fix so Frames still get created with Frame and StatusBar as Statusbar
+  * chg: make oUF not push errors..
+  * chg: castbar/angelbare can only be StatusBar and not "Frame" - lets hope this does not brake something else
+  * fix: RealUI. functions not available in RealUI_Bugs
+  * fix: should still be 0
+  * fix: range now works -  percent = _G.UnitHealthPercent
+  * chg: oUF color override needs init with oUF:CreateColor
+  * chg: introduction of C_CombatLog
+  * chg: don't AbbreviateName where unit names are secret.
+  * chg: use RealUI.isSecret
+  * add: RealUI.isSecret function to check if output is secret.
+  * chore: remove debug message
+  * chg: Bartender - turned on grid by default, made visibility on/off also on by default. Will add as configurable
+  * chore: updated uise of RealUI.isXX
+  * tmp: wrapper for SetColorTexture on AngleFrame so we dont barf wen colors dont exist
+  * chg: Buttonsizes for bars changed from 26 to 35
+  * add: flags for isRetail, isDragonflight, isMidnight
+  * Merge remote-tracking branch 'origin/main' into beta/midnight_1
+  * chg: remove RealUI Dev addon profiler command
+  * beta: beta toc 2.6.0
+  * fix: classColors bugs out when classToken is ADVENTURER
+  * beta: temp workaround for midnight
+  * beta: temp workaround for midnight
+  * fix: HelpPlate is now HelpPlateButton
+  * beta: temp midnight workaround
+  * beta: temp midnight workaround
+  * chg: remove notifications about profiler - it is long gone
+
+## Detailed Changes ##
+[2.6.0]: https://github.com/RealUI/RealUI/compare/2.5.10...2.6.0
+
+
 ## [2.5.10] ##
 ### Modified AddOns ###
   * Aurora 11.2.7.2
@@ -21,7 +92,7 @@
   * fix: bug in CUSTOM_CLASS_COLORS/LOCALIZED_CLASS_NAMES_MALE https://github.com/Stanzilla/WoWUIBugs/issues/798
   * fix: new enum.FrameTutorialAccount replaces LE_FRAME_TUTORIAL_ACCOUNT
   * fix: duplicate guid
-  * add: housing xp tracking added
+  * add: housing xp tracking added (method from how to track xp with events found from ls-)
 
 ## Detailed Changes ##
 [2.5.8]: https://github.com/RealUI/RealUI/compare/2.5.8...2.5.9
