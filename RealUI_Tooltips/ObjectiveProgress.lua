@@ -3,13 +3,17 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals next select tonumber wipe max
 
--- Libs --
-local LOP = _G.LibStub("LibObjectiveProgress-1.0")
+-- Libs (optional: LibObjectiveProgress-1.0 may not be embedded)
+local LOP = _G.LibStub("LibObjectiveProgress-1.0", true)
+if not LOP then
+    function private.AddObjectiveProgress() end
+    return
+end
 
 local progressFormat = "%s |cFFFFFFFF(+%s%%)|r"
 local challengeData = {}
 
-function private.AddObjectiveProgress(tooltip, lineData)
+local function AddObjectiveProgressImpl(tooltip, lineData)
     local npcID = select(6, ("-"):split(_G.UnitGUID(tooltip._unitToken) or ""))
     npcID = tonumber(npcID)
 
@@ -68,5 +72,12 @@ function private.AddObjectiveProgress(tooltip, lineData)
 
     if weight and weight > 0 then
         lineData.leftText = progressFormat:format(lineData.leftText, weight)
+    end
+end
+
+function private.AddObjectiveProgress(tooltip, lineData)
+    local ok, err = _G.pcall(AddObjectiveProgressImpl, tooltip, lineData)
+    if not ok and _G.geterrorhandler then
+        _G.geterrorhandler()(err)
     end
 end
