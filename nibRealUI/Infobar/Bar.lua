@@ -277,6 +277,34 @@ local function CreateNewBlock(name, dataObj, blockInfo)
     tinsert(orderedBlocks, block)
     sort(orderedBlocks, SortBlocks)
 
+    -- Create secure frame overlay for blocks that need secure actions
+    if dataObj.useSecureActions then
+        local secureFrame = _G.CreateFrame("Button", nil, block, "SecureActionButtonTemplate")
+        secureFrame:SetAllPoints(block)
+        secureFrame:EnableMouse(true)
+        secureFrame:RegisterForClicks(_G.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp")
+        block.secureFrame = secureFrame
+
+        -- Hook the secure frame events to the block's handlers
+        secureFrame:SetScript("OnEnter", function(self)
+            -- Show highlight on block
+            if block.highlight then
+                block.highlight:Show()
+            end
+            BlockMixin.OnEnter(block)
+        end)
+        secureFrame:SetScript("OnLeave", function(self)
+            -- Hide highlight on block
+            if block.highlight then
+                block.highlight:Hide()
+            end
+            BlockMixin.OnLeave(block)
+        end)
+
+        -- Keep block mouse enabled for fallback, but secure frame takes priority
+        block:EnableMouse(true)
+    end
+
     local bg = block:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(1, 1, 1, 0.25)
     bg:SetAllPoints(block)
@@ -370,8 +398,15 @@ local function CreateNewBlock(name, dataObj, blockInfo)
 
     block:SetScript("OnUpdate", block.OnUpdate)
     block:AdjustElements(blockInfo)
+    if block.secureFrame then
+        block.secureFrame:SetAllPoints(block)
+    end
     block:SetClampedToScreen(true)
     block:SetFrameLevel(Infobar.frame:GetFrameLevel() + 2)
+    if block.secureFrame then
+        block.secureFrame:SetFrameLevel(block:GetFrameLevel() + 5)
+        block.secureFrame:SetFrameStrata(block:GetFrameStrata())
+    end
     return block
 end
 

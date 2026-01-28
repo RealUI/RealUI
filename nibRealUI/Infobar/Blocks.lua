@@ -1343,8 +1343,30 @@ function Infobar:CreateBlocks()
                 }
             end,
             OnClick = function(block, ...)
-                Infobar:debug("Durability: OnClick", block.side, ...)
-                if not _G.InCombatLockdown() then
+                local button = ...
+                Infobar:debug("Durability: OnClick", block.side, button, ...)
+
+                if button == "RightButton" then
+                    -- Get configured repair mount or use default
+                    if not RealUI.db.profile.infobar then
+                        RealUI.db.profile.infobar = {}
+                    end
+
+                    local repairMountID = RealUI.db.profile.infobar.repairMount
+                    if not repairMountID then
+                        repairMountID = 280 -- Traveler's Tundra Mammoth (Horde)
+                        if _G.UnitFactionGroup("player") == "Alliance" then
+                            repairMountID = 284 -- Traveler's Tundra Mammoth (Alliance)
+                        end
+                    end
+
+                    if _G.C_MountJournal and _G.C_MountJournal.GetMountInfoByID then
+                        local _, _, _, _, isUsable = _G.C_MountJournal.GetMountInfoByID(repairMountID)
+                        if isUsable and not _G.InCombatLockdown() then
+                            _G.C_MountJournal.SummonByID(repairMountID)
+                        end
+                    end
+                elseif not _G.InCombatLockdown() then
                     _G.ToggleCharacter("PaperDollFrame")
                 end
             end,
@@ -1370,6 +1392,11 @@ function Infobar:CreateBlocks()
                         end
                     end
                 end
+
+                -- Add click hints
+                tooltip:AddLine(" ")
+                tooltip:AddLine("|cffFFFFFFLeft Click:|r Open Character Panel")
+                tooltip:AddLine("|cffFFFFFFRight Click:|r Summon Repair Mount")
 
                 tooltip:Show()
             end,
@@ -2418,6 +2445,7 @@ function Infobar:CreateBlocks()
             icon = [[Interface\MoneyFrame\UI-GoldIcon]],
             iconCoords = {.08, .92, .08, .92},
             text = "Currency",
+            useSecureActions = true,  -- Enable secure frame for Mobile Warbank
             OnEnable = function(block)
                 Infobar:debug("currency: OnEnable", block.side)
                 if RealUI.realmInfo.realmNormalized then
@@ -2457,12 +2485,34 @@ function Infobar:CreateBlocks()
                 else
                     self:RegisterMessage("CurrencyDBInitialized", block.dataObj.OnEnable, block)
                 end
+
+                -- Set up secure frame actions
+                if block.secureFrame then
+                    -- Left-click: Toggle all bags
+                    block.secureFrame:SetAttribute("type1", "macro")
+                    block.secureFrame:SetAttribute("macrotext1", "/run ToggleAllBags()")
+
+                    -- Right-click: Cast Mobile Warbank
+                    local spellName = "Mobile Warbank"
+                    if _G.C_Spell and _G.C_Spell.GetSpellName then
+                        local fetchedName = _G.C_Spell.GetSpellName(460905)
+                        if fetchedName then
+                            spellName = fetchedName
+                        end
+                    end
+                    block.secureFrame:SetAttribute("type2", "spell")
+                    block.secureFrame:SetAttribute("spell2", spellName)
+                end
             end,
             OnClick = function(block, ...)
-                Infobar:debug("currency: OnClick", block.side, ...)
+                local button = ...
+                Infobar:debug("currency: OnClick", block.side, button, ...)
+
+                -- Secure frame handles left and right clicks
+                -- This handler is only for fallback or when secure frame isn't active
                 if _G.IsAltKeyDown() then
                     UpdateState(block)
-                else
+                elseif button == "MiddleButton" then
                     if not _G.InCombatLockdown() then
                         _G.ToggleCharacter("TokenFrame")
                     end
@@ -2563,6 +2613,10 @@ function Infobar:CreateBlocks()
 
                 hintLine = tooltip:AddLine(L["Currency_Cycle"])
                 tooltip:SetLineTextColor(hintLine, Color.green:GetRGB())
+
+                -- Add right-click hint for Mobile Warbank
+                local warbankLine = tooltip:AddLine("|cffFFFFFFRight Click:|r Cast Mobile Warbank")
+                tooltip:SetLineTextColor(warbankLine, Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2682,6 +2736,248 @@ function Infobar:CreateBlocks()
 
                 block.dataObj.text = blockText:format(fps.cur, color, latency)
             end,
+        })
+    end
+
+    do -- Hearthstone
+        local hearthstones = {
+            -- Standard Items/Toys
+            [6948] = {name = "Hearthstone", type = "item"},
+            [110560] = {name = "Garrison Hearthstone", type = "toy"},
+            [140192] = {name = "Dalaran Hearthstone", type = "toy"},
+            [141605] = {name = "Flight Master's Whistle", type = "item"},
+
+            -- Class/Racial Teleports
+            [556] = {name = "Astral Recall", type = "spell"},
+
+            -- Alternate Hearthstones
+            [54452] = {name = "Ethereal Portal", type = "toy"},
+            [64488] = {name = "The Innkeeper's Daughter", type = "toy"},
+            [93672] = {name = "Dark Portal", type = "toy"},
+            [142542] = {name = "Tome of Town Portal", type = "toy"},
+            [162973] = {name = "Greatfather Winter's Hearthstone", type = "toy"},
+            [163045] = {name = "Headless Horseman's Hearthstone", type = "toy"},
+            [165669] = {name = "Lunar Elder's Hearthstone", type = "toy"},
+            [165670] = {name = "Peddlefeet's Lovely Hearthstone", type = "toy"},
+            [165802] = {name = "Noble Gardener's Hearthstone", type = "toy"},
+            [166746] = {name = "Fire Eater's Hearthstone", type = "toy"},
+            [166747] = {name = "Brewfest Reveler's Hearthstone", type = "toy"},
+            [168907] = {name = "Holographic Digitalization Hearthstone", type = "toy"},
+            [172179] = {name = "Eternal Traveler's Hearthstone", type = "toy"},
+            [180817] = {name = "Cypher of Relocation", type = "toy"},
+            [246565] = {name = "Cosmic Hearthstone", type = "toy"},
+
+            -- Covenant Hearthstones
+            [180290] = {name = "Night Fae Hearthstone", type = "toy"},
+            [182773] = {name = "Necrolord Hearthstone", type = "toy"},
+            [183716] = {name = "Venthyr Sinstone", type = "toy"},
+            [184353] = {name = "Kyrian Hearthstone", type = "toy"},
+
+            -- Shadowlands+
+            [188952] = {name = "Dominated Hearthstone", type = "toy"},
+            [190196] = {name = "Enlightened Hearthstone", type = "toy"},
+            [190237] = {name = "Broker Translocation Matrix", type = "toy"},
+            [193588] = {name = "Timewalker's Hearthstone", type = "toy"},
+
+            -- Dragonflight
+            [200630] = {name = "Ohn'ir Windsage's Hearthstone", type = "toy"},
+            [206195] = {name = "Path of the Naaru", type = "toy"},
+            [208704] = {name = "Deepdweller's Earthen Hearthstone", type = "toy"},
+            [209035] = {name = "Hearthstone of the Flame", type = "toy"},
+            [212337] = {name = "Stone of the Hearth", type = "toy"},
+
+            -- The War Within
+            [228940] = {name = "Notorious Thread's Hearthstone", type = "toy"},
+        }
+
+        local function UseHearthstone(itemID)
+            if not itemID or not hearthstones[itemID] then return end
+            local hsData = hearthstones[itemID]
+
+            if hsData.type == "spell" then
+                -- Spells can't be cast from non-secure frames
+                RealUI:Notification("Hearthstone", false, hsData.name .. " requires a secure action. Please use a macro or keybind instead.")
+                return
+            elseif hsData.type == "toy" then
+                -- Check if player has the toy before using it
+                if _G.C_ToyBox and _G.C_ToyBox.PlayerHasToy(itemID) then
+                    _G.C_ToyBox.UseToy(itemID)
+                end
+            else
+                -- Use item
+                if _G.GetItemCount(itemID) > 0 then
+                    _G.UseItemByName(itemID)
+                end
+            end
+        end
+
+        local function GetHearthstoneCooldown(itemID)
+            if not itemID or not hearthstones[itemID] then return false, "N/A" end
+            local hsData = hearthstones[itemID]
+
+            local startTime, duration
+            if hsData.type == "spell" then
+                if _G.C_Spell and _G.C_Spell.GetSpellCooldown then
+                    local cooldownInfo = _G.C_Spell.GetSpellCooldown(itemID)
+                    if cooldownInfo then
+                        startTime, duration = cooldownInfo.startTime, cooldownInfo.duration
+                    end
+                elseif _G.GetSpellCooldown then
+                    startTime, duration = _G.GetSpellCooldown(itemID)
+                end
+            else
+                -- Both toys and items use GetItemCooldown
+                if _G.C_Container and _G.C_Container.GetItemCooldown then
+                    startTime, duration = _G.C_Container.GetItemCooldown(itemID)
+                elseif _G.GetItemCooldown then
+                    startTime, duration = _G.GetItemCooldown(itemID)
+                end
+            end
+
+            if not startTime or not duration then return true, "Ready" end
+
+            local cooldownTime = startTime + duration - _G.GetTime()
+            if duration <= 1.5 or cooldownTime <= 0 then
+                return true, "Ready"
+            end
+
+            local min = _G.math.floor(cooldownTime / 60)
+            local sec = _G.math.floor(cooldownTime % 60)
+            return false, _G.string.format("%02d:%02d", min, sec)
+        end
+
+        LDB:NewDataObject("hearthstone", {
+            name = "Hearthstone",
+            type = "RealUI",
+            icon = fa["home"],
+            iconFont = iconFont,
+            text = "",
+            value = 1,
+            useSecureActions = true,  -- Enable secure frame for this block
+            OnEnable = function(block)
+                -- Initialize infobar table if it doesn't exist
+                if not RealUI.db.profile.infobar then
+                    RealUI.db.profile.infobar = {}
+                end
+
+                -- Default to standard hearthstone and Dalaran Hearthstone
+                if not RealUI.db.profile.infobar.hearthstone then
+                    RealUI.db.profile.infobar.hearthstone = {
+                        primary = 6948,   -- Hearthstone
+                        secondary = 140192, -- Dalaran Hearthstone
+                    }
+                end
+                block.hearthstone = RealUI.db.profile.infobar.hearthstone
+
+                -- Set up secure frame attributes
+                if block.secureFrame then
+                    local primaryID = block.hearthstone.primary
+                    local secondaryID = block.hearthstone.secondary
+                    local primaryData = hearthstones[primaryID]
+                    local secondaryData = hearthstones[secondaryID]
+
+                    if primaryData then
+                        if primaryData.type == "spell" then
+                            local spellName = _G.GetSpellInfo and _G.GetSpellInfo(primaryID) or primaryData.name
+                            block.secureFrame:SetAttribute("type1", "spell")
+                            block.secureFrame:SetAttribute("spell1", spellName)
+                        else
+                            -- Toys and items are both item actions; use item ID for reliability
+                            block.secureFrame:SetAttribute("type1", "item")
+                            block.secureFrame:SetAttribute("item1", "item:" .. primaryID)
+                        end
+                    end
+
+                    if secondaryData then
+                        if secondaryData.type == "spell" then
+                            local spellName = _G.GetSpellInfo and _G.GetSpellInfo(secondaryID) or secondaryData.name
+                            block.secureFrame:SetAttribute("type2", "spell")
+                            block.secureFrame:SetAttribute("spell2", spellName)
+                        else
+                            -- Toys and items are both item actions; use item ID for reliability
+                            block.secureFrame:SetAttribute("type2", "item")
+                            block.secureFrame:SetAttribute("item2", "item:" .. secondaryID)
+                        end
+                    end
+                end
+            end,
+            -- OnClick is handled by the secure frame automatically
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+
+                -- Ensure hearthstone data is initialized
+                if not block.hearthstone then
+                    if not RealUI.db.profile.infobar then
+                        RealUI.db.profile.infobar = {}
+                    end
+                    if not RealUI.db.profile.infobar.hearthstone then
+                        RealUI.db.profile.infobar.hearthstone = {
+                            primary = 6948,
+                            secondary = 140192,
+                        }
+                    end
+                    block.hearthstone = RealUI.db.profile.infobar.hearthstone
+                end
+
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
+                SetupTooltip(tooltip, block)
+
+                local lineNum = tooltip:AddHeader()
+                tooltip:SetCell(lineNum, 1, "Hearthstone", nil, 2)
+
+                tooltip:AddLine(" ")
+
+                -- Show bind location
+                local bindLoc = _G.GetBindLocation()
+                if bindLoc and bindLoc ~= "" then
+                    lineNum = tooltip:AddLine("Bound to:", bindLoc)
+                    tooltip:SetCellTextColor(lineNum, 2, 0.1, 1, 0.1)
+                    tooltip:AddLine(" ")
+                end
+
+                -- Primary hearthstone
+                local primaryHS = hearthstones[block.hearthstone.primary]
+                if primaryHS then
+                    local ready, cooldownText = GetHearthstoneCooldown(block.hearthstone.primary)
+                    lineNum = tooltip:AddLine(primaryHS.name, cooldownText)
+                    if ready then
+                        tooltip:SetCellTextColor(lineNum, 2, 0.1, 1, 0.1)
+                    else
+                        tooltip:SetCellTextColor(lineNum, 2, 1, 0.1, 0.1)
+                    end
+                end
+
+                -- Secondary hearthstone
+                local secondaryHS = hearthstones[block.hearthstone.secondary]
+                if secondaryHS then
+                    local ready, cooldownText = GetHearthstoneCooldown(block.hearthstone.secondary)
+                    lineNum = tooltip:AddLine(secondaryHS.name, cooldownText)
+                    if ready then
+                        tooltip:SetCellTextColor(lineNum, 2, 0.1, 1, 0.1)
+                    else
+                        tooltip:SetCellTextColor(lineNum, 2, 1, 0.1, 0.1)
+                    end
+                end
+
+                tooltip:AddLine(" ")
+                tooltip:AddLine("|cffFFFFFFLeft Click:|r Use " .. (primaryHS and primaryHS.name or "Primary"))
+                tooltip:AddLine("|cffFFFFFFRight Click:|r Use " .. (secondaryHS and secondaryHS.name or "Secondary"))
+
+                tooltip:Show()
+            end,
+            OnEvent = function(block, event, ...)
+                Infobar:debug("Hearthstone: OnEvent", event, ...)
+                local bindLoc = _G.GetBindLocation()
+                if bindLoc and bindLoc ~= "" then
+                    block.dataObj.text = bindLoc
+                else
+                    block.dataObj.text = "Home"
+                end
+            end,
+            events = {
+                "HEARTHSTONE_BOUND",
+                "PLAYER_ENTERING_WORLD",
+            },
         })
     end
 end

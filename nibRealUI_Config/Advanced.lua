@@ -375,6 +375,231 @@ do -- RealUI
         else
             allIcons = nil
         end
+
+        -- Hearthstone Block Settings
+        infobar.args.hearthstoneSettings = {
+            name = "Hearthstone Settings",
+            type = "group",
+            inline = true,
+            order = 70,
+            args = {
+                header = {
+                    name = "Hearthstone",
+                    type = "header",
+                    order = 1,
+                },
+                primaryHS = {
+                    name = "Primary Hearthstone",
+                    desc = "Select which hearthstone to use on left-click",
+                    type = "select",
+                    values = function()
+                        return {
+                            -- Standard Hearthstones
+                            [6948] = "Hearthstone",
+                            [110560] = "Garrison Hearthstone",
+                            [140192] = "Dalaran Hearthstone",
+                            [141605] = "Flight Master's Whistle",
+
+                            -- Class/Racial Teleports
+                            [556] = "Astral Recall (Shaman)",
+
+                            -- Alternate Hearthstones
+                            [54452] = "Ethereal Portal",
+                            [64488] = "The Innkeeper's Daughter",
+                            [93672] = "Dark Portal",
+                            [142542] = "Tome of Town Portal",
+                            [162973] = "Greatfather Winter's Hearthstone",
+                            [163045] = "Headless Horseman's Hearthstone",
+                            [165669] = "Lunar Elder's Hearthstone",
+                            [165670] = "Peddlefeet's Lovely Hearthstone",
+                            [165802] = "Noble Gardener's Hearthstone",
+                            [166746] = "Fire Eater's Hearthstone",
+                            [166747] = "Brewfest Reveler's Hearthstone",
+                            [168907] = "Holographic Digitalization Hearthstone",
+                            [172179] = "Eternal Traveler's Hearthstone",
+                            [180817] = "Cypher of Relocation",
+                            [246565] = "Cosmic Hearthstone",
+
+                            -- Covenant Hearthstones
+                            [180290] = "Night Fae Hearthstone",
+                            [182773] = "Necrolord Hearthstone",
+                            [183716] = "Venthyr Sinstone",
+                            [184353] = "Kyrian Hearthstone",
+
+                            -- Shadowlands+
+                            [188952] = "Dominated Hearthstone",
+                            [190196] = "Enlightened Hearthstone",
+                            [190237] = "Broker Translocation Matrix",
+                            [193588] = "Timewalker's Hearthstone",
+
+                            -- Dragonflight
+                            [200630] = "Ohn'ir Windsage's Hearthstone",
+                            [206195] = "Path of the Naaru",
+                            [208704] = "Deepdweller's Earthen Hearthstone",
+                            [209035] = "Hearthstone of the Flame",
+                            [212337] = "Stone of the Hearth",
+
+                            -- The War Within
+                            [228940] = "Notorious Thread's Hearthstone",
+                        }
+                    end,
+                    get = function()
+                        if not RealUI.db.profile.infobar then
+                            RealUI.db.profile.infobar = {}
+                        end
+                        if not RealUI.db.profile.infobar.hearthstone then
+                            RealUI.db.profile.infobar.hearthstone = {
+                                primary = 6948,
+                                secondary = 140192,
+                            }
+                        end
+                        return RealUI.db.profile.infobar.hearthstone.primary or 6948
+                    end,
+                    set = function(info, value)
+                        if not RealUI.db.profile.infobar then
+                            RealUI.db.profile.infobar = {}
+                        end
+                        if not RealUI.db.profile.infobar.hearthstone then
+                            RealUI.db.profile.infobar.hearthstone = {}
+                        end
+                        RealUI.db.profile.infobar.hearthstone.primary = value
+                    end,
+                    order = 10,
+                },
+                secondaryHS = {
+                    name = "Secondary Hearthstone",
+                    desc = "Select which hearthstone to use on right-click",
+                    type = "select",
+                    values = function()
+                        return {
+                            -- Standard Hearthstones
+                            [6948] = "Hearthstone",
+                            [110560] = "Garrison Hearthstone",
+                            [140192] = "Dalaran Hearthstone",
+                            [141605] = "Flight Master's Whistle",
+
+                            -- Class/Racial Teleports
+                            [556] = "Astral Recall (Shaman)",
+
+                            -- Alternate Hearthstones
+                            [54452] = "Ethereal Portal",
+                            [64488] = "The Innkeeper's Daughter",
+                            [93672] = "Dark Portal",
+                            [142542] = "Tome of Town Portal",
+                            [162973] = "Greatfather Winter's Hearthstone",
+                            [163045] = "Headless Horseman's Hearthstone",
+                            [165669] = "Lunar Elder's Hearthstone",
+                            [165670] = "Peddlefeet's Lovely Hearthstone",
+                            [165802] = "Noble Gardener's Hearthstone",
+                            [166746] = "Fire Eater's Hearthstone",
+                            [166747] = "Brewfest Reveler's Hearthstone",
+                            [168907] = "Holographic Digitalization Hearthstone",
+                            [172179] = "Eternal Traveler's Hearthstone",
+                            [180817] = "Cypher of Relocation",
+                            [246565] = "Cosmic Hearthstone",
+
+                            -- Covenant Hearthstones
+                            [180290] = "Night Fae Hearthstone",
+                            [182773] = "Necrolord Hearthstone",
+                            [183716] = "Venthyr Sinstone",
+                            [184353] = "Kyrian Hearthstone",
+
+                            -- Shadowlands+
+                            [188952] = "Dominated Hearthstone",
+                            [190196] = "Enlightened Hearthstone",
+                            [190237] = "Broker Translocation Matrix",
+                            [193588] = "Timewalker's Hearthstone",
+
+                            -- Dragonflight
+                            [200630] = "Ohn'ir Windsage's Hearthstone",
+                            [206195] = "Path of the Naaru",
+                            [208704] = "Deepdweller's Earthen Hearthstone",
+                            [209035] = "Hearthstone of the Flame",
+                            [212337] = "Stone of the Hearth",
+
+                            -- The War Within
+                            [228940] = "Notorious Thread's Hearthstone",
+                        }
+                    end,
+                    get = function()
+                        if not RealUI.db.profile.infobar then
+                            RealUI.db.profile.infobar = {}
+                        end
+                        if not RealUI.db.profile.infobar.hearthstone then
+                            RealUI.db.profile.infobar.hearthstone = {
+                                primary = 6948,
+                                secondary = 140192,
+                            }
+                        end
+                        return RealUI.db.profile.infobar.hearthstone.secondary or 140192
+                    end,
+                    set = function(info, value)
+                        if not RealUI.db.profile.infobar then
+                            RealUI.db.profile.infobar = {}
+                        end
+                        if not RealUI.db.profile.infobar.hearthstone then
+                            RealUI.db.profile.infobar.hearthstone = {}
+                        end
+                        RealUI.db.profile.infobar.hearthstone.secondary = value
+                    end,
+                    order = 20,
+                },
+            }
+        }
+
+        -- Durability Block Settings
+        infobar.args.durabilitySettings = {
+            name = "Durability Settings",
+            type = "group",
+            inline = true,
+            order = 80,
+            args = {
+                header = {
+                    name = "Repair Mount",
+                    type = "header",
+                    order = 1,
+                },
+                repairMount = {
+                    name = "Repair Mount",
+                    desc = "Select which repair mount to summon on right-click of the Durability block",
+                    type = "select",
+                    values = function()
+                        local mounts = {}
+                        local repairMountIDs = {280, 284, 460, 2237, 1039}
+                        for _, mountID in ipairs(repairMountIDs) do
+                            if _G.C_MountJournal and _G.C_MountJournal.GetMountInfoByID then
+                                local name, _, _, _, isUsable = _G.C_MountJournal.GetMountInfoByID(mountID)
+                                if name and isUsable then
+                                    mounts[mountID] = name
+                                end
+                            end
+                        end
+                        if next(mounts) == nil then
+                            mounts[280] = "Traveler's Tundra Mammoth (Horde)"
+                            mounts[284] = "Traveler's Tundra Mammoth (Alliance)"
+                        end
+                        return mounts
+                    end,
+                    get = function()
+                        if not RealUI.db.profile.infobar then
+                            RealUI.db.profile.infobar = {}
+                        end
+                        if not RealUI.db.profile.infobar.repairMount then
+                            local faction = _G.UnitFactionGroup("player")
+                            RealUI.db.profile.infobar.repairMount = (faction == "Alliance") and 284 or 280
+                        end
+                        return RealUI.db.profile.infobar.repairMount
+                    end,
+                    set = function(info, value)
+                        if not RealUI.db.profile.infobar then
+                            RealUI.db.profile.infobar = {}
+                        end
+                        RealUI.db.profile.infobar.repairMount = value
+                    end,
+                    order = 10,
+                },
+            }
+        }
     end
     local screenSaver do
         local MODNAME = "ScreenSaver"
