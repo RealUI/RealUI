@@ -18,13 +18,18 @@
 
 ### Changed ###
   * (beta6) build
+  * fix: PostUpdate max is secret error
+  * chg: fix errors on boss fights from unitframes
+  * chg: fix secret crash on castbar getalpha
+  * fix: remove taints and secrets errors on castbars, in combat updates to LDB etc.
+  * chg: Make tooltips secrets safe...
   * fix: dont bug out if currency does not exist on a toon.. currencyInfo can be nil
   * chg: fixes for depricated api in qol patch
   * chg: fixes to AngleStatusBar and oUF tags [Naessah]
   * chg: castbar - Use flat texture instead of gradient [Naessah]
-  *  add: infobar qol - durability repair and heartstone functionality [Naessah]
+  * add: infobar qol - durability repair and heartstone functionality [Naessah]
   * chg: qol updates to tooltip objectiveprogress [Naessah]
- * (beta5) build
+  * (beta5) build
   * chg: updates to oUF unitframes and castbar [Naessah]
   * chg: attempt to change start menu item for store...
   * chg: api update for tooltips OutfitDetailsPanel -> CustomSetDetailsPanel
