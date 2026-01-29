@@ -17,7 +17,10 @@
   * Report issues at GitHub or connect with us on Discord
 
 ### Changed ###
-  * (beta6) build
+  * chg: make sure LibRangeCheck-3.0 is from local as other is not yet published
+  * removed: removed RealUI_CombatText from packaging
+  * chg: fix for Moneyframe nil errors
+  * fix: Tooltips bugs in raid
   * fix: PostUpdate max is secret error
   * chg: fix errors on boss fights from unitframes
   * chg: fix secret crash on castbar getalpha
@@ -29,7 +32,6 @@
   * chg: castbar - Use flat texture instead of gradient [Naessah]
   * add: infobar qol - durability repair and heartstone functionality [Naessah]
   * chg: qol updates to tooltip objectiveprogress [Naessah]
-  * (beta5) build
   * chg: updates to oUF unitframes and castbar [Naessah]
   * chg: attempt to change start menu item for store...
   * chg: api update for tooltips OutfitDetailsPanel -> CustomSetDetailsPanel
@@ -39,7 +41,6 @@
   * add: ToggleHousingDashboard to infobar menu
   * chg: _G.QuestMapFrame.QuestsFrame.Contents is now _G.QuestMapFrame.QuestsFrame.ScrollFrame.Contents
   * chg: make castbars great again....
-  * (beta4) build
   * fix: CurveConstants is _G.CurveConstants
   * chg: dont load PredictOverride in prepatch
   * chg: AngleStatusBar - fix so Frames still get created with Frame and StatusBar as Statusbar
