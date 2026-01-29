@@ -3,7 +3,7 @@
 ## Category: RealUI
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe, Hanshi
-## Version: 2.6.0-beta
+## Version: 2.6.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_InventoryDB
