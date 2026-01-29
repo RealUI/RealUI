@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals _G time next select tonumber tostring tinsert type pairs
+-- luacheck: globals _G pcall time next select tonumber tostring tinsert type pairs
 
 -- Libs --
 local Aurora = _G.Aurora
@@ -569,5 +569,20 @@ function Tooltips:OnInitialize()
         private._moneyHooked = true
         private._origGameTooltip_OnTooltipAddMoney = _G.GameTooltip_OnTooltipAddMoney
         _G.GameTooltip_OnTooltipAddMoney = SafeTooltip_OnTooltipAddMoney
+    end
+
+    if not private._moneyFrameUpdateHooked and type(_G.MoneyFrame_Update) == "function" then
+        private._moneyFrameUpdateHooked = true
+        private._origMoneyFrame_Update = _G.MoneyFrame_Update
+        _G.MoneyFrame_Update = function(frameName, money, forceShow)
+            if RealUI.isSecret(frameName) or RealUI.isSecret(money) or RealUI.isSecret(forceShow) then
+                return
+            end
+
+            local ok, result = pcall(private._origMoneyFrame_Update, frameName, money, forceShow)
+            if ok then
+                return result
+            end
+        end
     end
 end

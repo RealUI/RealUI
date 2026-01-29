@@ -97,7 +97,10 @@ function ItemSlotMixin:Update()
     self.readable = itemInfo.isReadable
 
     if self == _G.GameTooltip:GetOwner() then
-        self:UpdateTooltip()
+        local right = self.GetRight and self:GetRight()
+        if right then
+            self:UpdateTooltip()
+        end
     end
 
     self:UpdateItemContext()
