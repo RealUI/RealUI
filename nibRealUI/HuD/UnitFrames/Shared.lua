@@ -152,11 +152,10 @@ local function CreateHealthBar(parent, info, isAngled)
         if not (ndb.settings.reverseUnitFrameBars) then
             Health:SetReverseFill(true)
             Health.PostUpdate = function(dialog, unit, cur, max)
-                if RealUI.isSecret(max) or type(max) ~= "number" then
+                if RealUI.isSecret(cur) or RealUI.isSecret(max) or type(cur) ~= "number" or type(max) ~= "number" then
                     return
                 end
-                dialog:SetValue(max * 0.75)
-                dialog:SetValue(max - dialog:GetValue())
+                dialog:SetValue(max - cur)
             end
         end
     end
