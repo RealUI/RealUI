@@ -107,7 +107,7 @@ function RealUI.UpdateUIScale(newScale)
     uiScaleChanging = true
     private.debug("update uiScale", uiScale)
 
-    if (cvarScale ~= uiScale and not private.skinsDB.isPixelScal) then
+    if (cvarScale ~= uiScale and not private.skinsDB.isPixelScale) then
         _G.SetCVar("uiScale", max(uiScale, 0.64))
     end
     if parentScale ~= uiScale then
