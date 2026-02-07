@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals assert next
+-- luacheck: globals _G assert next
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -424,6 +424,25 @@ end
 
 function CastBars:OnDisable()
     -- Enable default Cast Bars
-    _G.CastingBarFrame:GetScript("OnLoad")(_G.CastingBarFrame)
-    _G.PetCastingBarFrame:GetScript("OnLoad")(_G.PetCastingBarFrame)
+    if not _G.CastingBarFrame or not _G.PetCastingBarFrame then
+        if _G.C_AddOns and _G.C_AddOns.LoadAddOn then
+            _G.C_AddOns.LoadAddOn("Blizzard_CastingBarUI")
+        else
+            _G.LoadAddOn("Blizzard_CastingBarUI")
+        end
+    end
+
+    if _G.CastingBarFrame and _G.CastingBarFrame.GetScript then
+        local onLoad = _G.CastingBarFrame:GetScript("OnLoad")
+        if onLoad then
+            onLoad(_G.CastingBarFrame)
+        end
+    end
+
+    if _G.PetCastingBarFrame and _G.PetCastingBarFrame.GetScript then
+        local onLoad = _G.PetCastingBarFrame:GetScript("OnLoad")
+        if onLoad then
+            onLoad(_G.PetCastingBarFrame)
+        end
+    end
 end
