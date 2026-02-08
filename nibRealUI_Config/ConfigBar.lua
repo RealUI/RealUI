@@ -674,6 +674,30 @@ do -- UnitFrames
                 UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y = value
             end,
         }
+        if unitSlug == "player" then
+            unit.args.reverseFill = {
+                name = L["UnitFrames_ReverseFill"],
+                desc = L["UnitFrames_ReverseFillDesc"],
+                type = "toggle",
+                order = 25,
+                get = function() return UnitFrames.db.profile.units.player.reverseFill end,
+                set = function(info, value)
+                    UnitFrames.db.profile.units.player.reverseFill = value
+                    UnitFrames:RefreshUnits("ReverseFill")
+                end,
+            }
+            unit.args.reversePercent = {
+                name = L["UnitFrames_ReversePercent"],
+                desc = L["UnitFrames_ReversePercentDesc"],
+                type = "toggle",
+                order = 26,
+                get = function() return UnitFrames.db.profile.units.player.reversePercent end,
+                set = function(info, value)
+                    UnitFrames.db.profile.units.player.reversePercent = value
+                    UnitFrames:RefreshUnits("ReversePercent")
+                end,
+            }
+        end
         if unitSlug == "player" or unitSlug == "target" then
             unit.args.anchorWidth = {
                 name = L["UnitFrames_AnchorWidth"],

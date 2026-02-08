@@ -23,7 +23,7 @@ end
 local Lerp = _G.Lerp
 local DEFAULT_STATUSBAR_TEXTURE = [[Interface\TargetingFrame\UI-StatusBar]]
 local DEFAULT_PLAIN_TEXTURE = [[Interface\Buttons\WHITE8x8]]
-local StatusBar_SetValue, StatusBar_SetMinMaxValues, StatusBar_SetStatusBarTexture, StatusBar_GetStatusBarTexture, StatusBar_GetValue, StatusBar_GetMinMaxValues do
+local StatusBar_SetValue, StatusBar_SetMinMaxValues, StatusBar_SetStatusBarTexture, StatusBar_GetStatusBarTexture, StatusBar_GetValue, StatusBar_GetMinMaxValues, StatusBar_SetReverseFill do
     local temp = _G.CreateFrame("StatusBar")
     StatusBar_SetValue = temp.SetValue
     StatusBar_SetMinMaxValues = temp.SetMinMaxValues
@@ -31,6 +31,7 @@ local StatusBar_SetValue, StatusBar_SetMinMaxValues, StatusBar_SetStatusBarTextu
     StatusBar_GetStatusBarTexture = temp.GetStatusBarTexture
     StatusBar_GetValue = temp.GetValue
     StatusBar_GetMinMaxValues = temp.GetMinMaxValues
+    StatusBar_SetReverseFill = temp.SetReverseFill
     temp:Hide()
 end
 
@@ -420,8 +421,9 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
         meta.value = value
 
         -- For reverseMissing with secrets, manually control fill visibility
+        local isZero = nil
         if meta.reverseMissing then
-            local isZero = false
+            isZero = false
             pcall(function()
                 isZero = (value == 0)
             end)
@@ -454,14 +456,21 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
         else
             if meta.reverseMissing then
                 -- For reverseMissing, hide fill at full health (value=0)
-                self.fill:SetShown(value > 0)
+                self.fill:SetShown(not isZero)
             else
                 self.fill:SetShown(width > 0)
             end
     end
         return
     end
-    if value > meta.maxVal then value = meta.maxVal end
+    if type(meta.maxVal) == "number" then
+        local ok, isGreater = pcall(function()
+            return value > meta.maxVal
+        end)
+        if ok and isGreater then
+            value = meta.maxVal
+        end
+    end
     if meta.smooth and not ignoreSmooth then
         smoothBars[self] = value
     else
@@ -566,6 +575,9 @@ end
 -- Setting this to true will make the bars fill from right to left
 function AngleStatusBarMixin:SetReverseFill(isReverseFill)
     bars[self].isReverseFill = isReverseFill
+    if StatusBar_SetReverseFill then
+        StatusBar_SetReverseFill(self, isReverseFill)
+    end
     self.fill:ClearAllPoints()
     self.fill:SetPoint("TOP")
     self.fill:SetPoint("BOTTOM")

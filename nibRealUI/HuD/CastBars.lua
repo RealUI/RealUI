@@ -122,11 +122,7 @@ function CastBars:UpdateSettings(unit)
     local unitDB = db[unit]
     local size = castbarSizes[unit]
 
-    local reverse = unitDB.reverse
-    if unit == "player" then
-        reverse = true
-    end
-    castbar:SetReverseFill(reverse)
+    castbar:SetReverseFill(unitDB.reverse)
     castbar:SetSize(size.x * unitDB.scale, size.y * unitDB.scale)
     castbar.Icon:SetSize(size.icon * unitDB.scale, size.icon * unitDB.scale)
 

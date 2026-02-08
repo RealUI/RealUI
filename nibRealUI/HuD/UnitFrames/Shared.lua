@@ -27,6 +27,23 @@ RealUI.ReversePowers = {
     ["FURY"] = true,
     ["PAIN"] = true,
 }
+local function GetReverseFill(unit, info)
+    local unitDB = db and db.units and db.units[unit]
+    if unitDB and unitDB.reverseFill ~= nil then
+        return unitDB.reverseFill
+    end
+    if info and info.point then
+        return info.point == "RIGHT"
+    end
+    return false
+end
+local function GetReverseMissing(unit)
+    local unitDB = db and db.units and db.units[unit]
+    if unitDB and unitDB.reverseMissing ~= nil then
+        return unitDB.reverseMissing
+    end
+    return true
+end
 local function GetVertices(info, useOther)
     local side = info.point
     if useOther then
@@ -128,8 +145,8 @@ local function CreateHealthBar(parent, info, isAngled)
         Health:SetAngleVertex(info.leftVertex, info.rightVertex)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
-        Health:SetReverseFill(info.point == "RIGHT")
-        Health:SetReverseMissing(true)
+        Health:SetReverseFill(GetReverseFill(parent.unit, info))
+        Health:SetReverseMissing(GetReverseMissing(parent.unit))
         Health:SetFlatTexture(true)
 
         Health.step, Health.warn = CreateSteps(parent, height, info)
@@ -369,8 +386,8 @@ local function CreatePowerBar(parent, info, isAngled)
         Power:SetSize(width, height)
         Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
-        Power:SetReverseFill(info.point == "RIGHT")
-        Power:SetReverseMissing(true)
+        Power:SetReverseFill(GetReverseFill(parent.unit, info))
+        Power:SetReverseMissing(GetReverseMissing(parent.unit))
         Power:SetFlatTexture(true)
 
         Power.step, Power.warn = CreateSteps(parent, height, info)

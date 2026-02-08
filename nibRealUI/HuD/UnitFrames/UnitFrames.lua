@@ -26,20 +26,44 @@ local units = {
 function UnitFrames:RefreshUnits(event)
     for i = 1, #units do
         local unit = _G["RealUI" .. units[i] .. "Frame"]
+        local unitKey = unit.unit
+        local unitData = UnitFrames[unitKey]
+        local reverseFill = (db.units[unitKey] and db.units[unitKey].reverseFill ~= nil) and db.units[unitKey].reverseFill
+            or (unitData and unitData.health and unitData.health.point == "RIGHT")
+        local reverseMissing = db.units[unitKey] and db.units[unitKey].reverseMissing
+        local reversePercent = db.units[unitKey] and db.units[unitKey].reversePercent
         unit.Health.colorClass = db.overlay.classColor
 
-        if unit.Health.GetReverseMissing and unit.Health:GetReverseMissing() then
+        if reversePercent ~= nil then
+            unit.Health:SetReversePercent(reversePercent)
+        elseif unit.Health.GetReverseMissing and unit.Health:GetReverseMissing() then
             unit.Health:SetReversePercent(true)
         else
-        unit.Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+            unit.Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
         end
 
         if unit.Power then
             unit.Power:UpdateReverse(ndb.settings.reverseUnitFrameBars)
+            if unit.Power.SetReverseFill then
+                unit.Power:SetReverseFill(reverseFill)
+            end
+            if unit.Power.SetReverseMissing then
+                unit.Power:SetReverseMissing(reverseMissing)
+            end
+            if reversePercent ~= nil and unit.Power.SetReversePercent then
+                unit.Power:SetReversePercent(reversePercent)
+            end
         end
 
         if unit.DruidMana then
-            unit.DruidMana:SetReverseFill(ndb.settings.reverseUnitFrameBars)
+            unit.DruidMana:SetReverseFill(reverseFill)
+        end
+
+        if unit.Health and unit.Health.SetReverseFill then
+            unit.Health:SetReverseFill(reverseFill)
+        end
+        if unit.Health and unit.Health.SetReverseMissing then
+            unit.Health:SetReverseMissing(reverseMissing)
         end
 
         unit:UpdateAllElements(event)
@@ -123,6 +147,9 @@ function UnitFrames:OnInitialize()
                     size = {x = 259, y = 28},
                     position = {x = 0, y = 0},
                     healthHeight = 0.6, --percentage of the unit height used by the healthbar
+                    reverseFill = true,
+                    reverseMissing = false,
+                    reversePercent = false,
                 },
                 target = {
                     size = {x = 259, y = 28},
