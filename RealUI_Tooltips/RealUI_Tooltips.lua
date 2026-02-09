@@ -585,4 +585,28 @@ function Tooltips:OnInitialize()
             end
         end
     end
+
+    if not private._setTooltipMoneyHooked and type(_G.SetTooltipMoney) == "function" then
+        private._setTooltipMoneyHooked = true
+        private._origSetTooltipMoney = _G.SetTooltipMoney
+        _G.SetTooltipMoney = function(frame, money, moneyType, prefixText, suffixText)
+            if RealUI.isSecret(frame) or RealUI.isSecret(money) or RealUI.isSecret(moneyType)
+                or RealUI.isSecret(prefixText) or RealUI.isSecret(suffixText) then
+                return
+            end
+
+            local ok, result = pcall(private._origSetTooltipMoney, frame, money, moneyType, prefixText, suffixText)
+            if ok then
+                return result
+            end
+
+            if type(frame) == "table" and type(frame.AddLine) == "function" then
+                local prefix = prefixText
+                if not prefix or prefix == "" then
+                    prefix = suffixText
+                end
+                AddTooltipMoneyText(frame, money, prefix)
+            end
+        end
+    end
 end
