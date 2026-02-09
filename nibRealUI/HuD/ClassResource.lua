@@ -92,19 +92,21 @@ end
 
 function ClassResource:CreateClassPower(unitFrame, unit)
     self:debug("CreateClassPower", unit)
-    local ClassPower = _G.CreateFrame("Frame", nil, unitFrame)
-    ClassPower:SetSize(16, 16)
+    local ClassPower = {}
+    local holder = _G.CreateFrame("Frame", nil, unitFrame)
+    holder:SetSize(16, 16)
+    ClassPower.frame = holder
 
     local texture, size = powerTextures[power.token], pointDB.size
     for index = 1, power.max do
         local name, icon = "ClassPower"..index
         if playerClass == "WARLOCK" then
-            icon = unitFrame:CreateAngle("StatusBar", name, ClassPower)
+            icon = unitFrame:CreateAngle("StatusBar", name, holder)
             icon:SetSize(size.width, size.height)
             icon:SetAngleVertex(2, 3)
             icon:SetMinMaxValues(0, 1)
         else
-            icon = _G.CreateFrame("StatusBar", name, ClassPower)
+            icon = _G.CreateFrame("StatusBar", name, holder)
             icon:SetSize(size.width, size.height)
 
             local bg = icon:CreateTexture(nil, "BACKGROUND")
@@ -117,7 +119,7 @@ function ClassResource:CreateClassPower(unitFrame, unit)
             icon:SetPoint("CENTER")
             tex = texture[index]
         else
-            PositionIcon(icon, index, ClassPower[index-1])
+            PositionIcon(icon, index, ClassPower[index - 1])
             tex = texture
         end
 
@@ -131,11 +133,11 @@ function ClassResource:CreateClassPower(unitFrame, unit)
         ClassPower[index] = icon
     end
 
-    CombatFader:RegisterFrameForFade(MODNAME, ClassPower)
+    CombatFader:RegisterFrameForFade(MODNAME, holder)
     if self.isRunes then
-        ClassPower:SetPoint("CENTER", -160, -40.5)
+        holder:SetPoint("CENTER", -160, -40.5)
     else
-        FramePoint:PositionFrame(self, ClassPower, {"class", "points", "position"})
+        FramePoint:PositionFrame(self, holder, {"class", "points", "position"})
     end
 
     local lastChargedIndex
@@ -183,6 +185,16 @@ function ClassResource:CreateClassPower(unitFrame, unit)
                     icon:Show()
                 else
                     icon:Hide()
+                end
+            else
+                icon:Show()
+            end
+        end
+
+        if curPoints > 0 then
+            for i = 1, ceil(curPoints) do
+                if element[i] then
+                    element[i]:Show()
                 end
             end
         end
@@ -270,8 +282,7 @@ function ClassResource:CreateStagger(unitFrame, unit)
 end
 
 function ClassResource:Setup(unitFrame, unit)
-    -- local isEnabled = ClassResource:IsEnabled()
-    local isEnabled = false
+    local isEnabled = ClassResource:IsEnabled()
     -- Points
     if isEnabled then
         if playerClass == "DEATHKNIGHT" then
@@ -297,8 +308,9 @@ function ClassResource:ToggleConfigMode(isConfigMode)
 
     if isConfigMode then
         local pts, bar = self.points, self.bar
-        if pts and pts.SetAlpha then
-            pts:SetAlpha(1)
+        local ptsFrame = pts and pts.frame
+        if ptsFrame and ptsFrame.SetAlpha then
+            ptsFrame:SetAlpha(1)
             for i = 1, power.max do
                 if self.isRunes then
                     if pts[i] and pts[i].SetValue then
