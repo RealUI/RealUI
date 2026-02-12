@@ -2,7 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local abs = _G.math.abs
-local tinsert, next, type = _G.table.insert, _G.next, _G.type
+local tinsert, next, type = _G.table.insert, _G.next, _G.type -- luacheck: ignore
 
 -- Libs --
 local oUF = private.oUF
