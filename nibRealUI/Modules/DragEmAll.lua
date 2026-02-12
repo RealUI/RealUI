@@ -220,6 +220,23 @@ local addonFrames = {
 }
 
 local frames = {}
+
+local function CanHookFrame(frame)
+    if not frame then
+        return false
+    end
+
+    if frame.IsForbidden and frame:IsForbidden() then
+        return false
+    end
+
+    if frame.IsProtected and frame:IsProtected() then
+        return false
+    end
+
+    return true
+end
+
 function DragEmAll:HookFrames(list)
     for frameName, children in next, list do
         self:HookFrame(frameName, children)
@@ -238,6 +255,10 @@ function DragEmAll:HookFrame(frameName, children)
         tinsert(children, frameName)
 
         frameName = parentName
+    end
+
+    if not CanHookFrame(frame) then
+        return
     end
 
     for i, childName in next, children do
