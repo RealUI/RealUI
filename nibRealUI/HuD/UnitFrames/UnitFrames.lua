@@ -30,16 +30,15 @@ function UnitFrames:RefreshUnits(event)
         local unitData = UnitFrames[unitKey]
         local reverseFill = (db.units[unitKey] and db.units[unitKey].reverseFill ~= nil) and db.units[unitKey].reverseFill
             or (unitData and unitData.health and unitData.health.point == "RIGHT")
-        local reverseMissing = db.units[unitKey] and db.units[unitKey].reverseMissing
+        local reverseMissing = not ndb.settings.reverseUnitFrameBars
         local reversePercent = db.units[unitKey] and db.units[unitKey].reversePercent
+        local reversePercentOverride = reversePercent == true
         unit.Health.colorClass = db.overlay.classColor
 
-        if reversePercent ~= nil then
-            unit.Health:SetReversePercent(reversePercent)
-        elseif unit.Health.GetReverseMissing and unit.Health:GetReverseMissing() then
+        if reversePercentOverride then
             unit.Health:SetReversePercent(true)
         else
-            unit.Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+            unit.Health:SetReversePercent(false)
         end
 
         if unit.Power then
@@ -50,8 +49,8 @@ function UnitFrames:RefreshUnits(event)
             if unit.Power.SetReverseMissing then
                 unit.Power:SetReverseMissing(reverseMissing)
             end
-            if reversePercent ~= nil and unit.Power.SetReversePercent then
-                unit.Power:SetReversePercent(reversePercent)
+            if reversePercentOverride and unit.Power.SetReversePercent then
+                unit.Power:SetReversePercent(true)
             end
         end
 

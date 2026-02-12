@@ -40,6 +40,15 @@ local function hasSecretRange(meta)
     return meta and (meta.hasSecretRange or RealUI.isSecret(meta.minVal) or RealUI.isSecret(meta.maxVal))
 end
 
+local function HideNativeStatusBarTexture(self)
+    if not StatusBar_GetStatusBarTexture or not self then return end
+    local nativeTex = StatusBar_GetStatusBarTexture(self)
+    if nativeTex and self.fill and nativeTex ~= self.fill then
+        nativeTex:Hide()
+        self.__nativeStatusBarTexture = nativeTex
+    end
+end
+
 local function SetBarValue(self, value)
     local meta = bars[self]
     if not meta then return end
@@ -55,15 +64,32 @@ local function SetBarValue(self, value)
     local minWidth, maxWidth, width = meta.minWidth, meta.maxWidth, meta.maxWidth -- luacheck: ignore
     local left, right, top, bottom = 0, 1, 0, 1
 
-    -- For reverseMissing mode, oUF already passes us the MISSING value, not current value
-    -- So we don't need to invert it again
+    -- For reverseMissing mode on angled bars, treat incoming values as "current" by default.
+    -- oUF's Health/Power elements pass current values, and relying on auto-detection at
+    -- value==0/max is ambiguous and can leave bars full-colored on load.
     local displayValue = value
     local percent = value / meta.maxVal
     if meta.reverseMissing and not isMaxed then
-        -- oUF already inverted, so just use value as-is
+        local resolvedSource = meta.reverseMissingSource
+
+        -- If the caller explicitly configured the source ("current" or "missing"), treat it as
+        -- authoritative. Auto-detection is ambiguous at value==0/max and can cause the bar to
+        -- flip back to showing current health (colored when full) during certain update sequences.
+        if resolvedSource ~= "current" and resolvedSource ~= "missing" then
+            -- Default to current unless something else explicitly sets a source.
+            resolvedSource = "current"
+        end
+
+        if resolvedSource == "current" then
+            displayValue = meta.maxVal - value
+            percent = displayValue / meta.maxVal
+        end
         -- We want normal fill behavior (more missing = larger bar)
         isReversePerc = false
     end
+
+    -- Store displayValue so SetStatusBarColor can access it
+    meta.displayValue = displayValue
 
         if isReversePerc then
             if isMaxed then
@@ -109,8 +135,14 @@ local function SetBarValue(self, value)
         self.fill:SetTexCoord(left, right, top, bottom)
     end
     if meta.reverseMissing then
-        -- For reverseMissing, show fill only when there's missing health/power
-        self.fill:SetShown(displayValue > 0)
+        -- For reverseMissing, fill represents missing health/power.
+        -- Use alpha instead of SetShown: in 12.x the engine can still render the StatusBar
+        -- texture even when :Hide() was called.
+        local shouldShow = displayValue > 0
+        self.fill:Show()
+        self.fill:SetAlpha(shouldShow and 1 or 0)
+        -- Defensive: never let a native/internal texture show through.
+        HideNativeStatusBarTexture(self)
     elseif isReversePerc then
             self.fill:SetShown(value < meta.maxVal)
         else
@@ -137,12 +169,16 @@ local smoothBars do
             if hasSecretRange(meta) then
                 smoothBars[bar] = nil
             else
-            local effectiveTargetValue = Clamp(targetValue, bar:GetMinMaxValues())
-            local newValue = FrameDeltaLerp(bar:GetValue(), effectiveTargetValue, .25)
-            if IsCloseEnough(bar, newValue, effectiveTargetValue) then
-                smoothBars[bar] = nil
-            end
-            SetBarValue(bar, newValue)
+                local effectiveTargetValue = Clamp(targetValue, bar:GetMinMaxValues())
+                local newValue = FrameDeltaLerp(bar:GetValue(), effectiveTargetValue, .25)
+
+                if IsCloseEnough(bar, newValue, effectiveTargetValue) then
+                    -- Snap to exact target so reverseMissing can reach true 0 missing (and hide fill).
+                    newValue = effectiveTargetValue
+                    smoothBars[bar] = nil
+                end
+
+                SetBarValue(bar, newValue)
         end
     end
     end
@@ -301,20 +337,34 @@ function AngleStatusBarMixin:SetStatusBarColor(r, g, b, a)
 
     local meta = bars[self]
     local color = meta.fillColor
+    if r == nil then
+        r = color.r or 1
+        g = color.g or 1
+        b = color.b or 1
+        a = color.a or 1
+    else
+        a = a or color.a or 1
+    end
     color.r, color.g, color.b, color.a = r, g, b, a
 
     if meta.reverseMissing then
         -- Reverse missing mode: fill shows missing portion in color
-        -- At 100% → fill minimal (no missing) → bar looks empty
-        -- At 0% → fill maximal (all missing) → bar fully colored
-        if meta.hasBG and self.bg then
-            self.bg:SetColorTexture(0, 0, 0, 0.3)
-        end
+        -- SetBarValue controls visibility via alpha, we just set the color
+
+        -- Apply the color to the fill (which represents missing health/power).
         if not meta.texture or meta.texture == "" then
             self.fill:SetColorTexture(r, g, b, a)
         else
             self.fill:SetVertexColor(r, g, b, a)
         end
+
+        -- Force the background to stay pure black (not colored).
+        -- oUF may try to color it via this function; we override that here.
+        if meta.hasBG and self.bg then
+            self.bg:SetColorTexture(0, 0, 0, 1)
+        end
+
+        -- visibility is controlled by SetBarValue via alpha
     elseif meta.invertFill then
         if meta.hasBG and self.bg then
             self.bg:SetColorTexture(r, g, b, a)
@@ -344,9 +394,15 @@ function AngleStatusBarMixin:SetStatusBarTexture(texture, layer)
     local texType = type(texture)
     if texType == "string" or texType == "number" then
         bars[self].texture = texture
-        self.fill:SetTexture(texture)
-        if StatusBar_SetStatusBarTexture then
-            StatusBar_SetStatusBarTexture(self, self.fill, layer)
+        if self.fill then
+            self.fill:SetTexture(texture)
+            if StatusBar_SetStatusBarTexture then
+                StatusBar_SetStatusBarTexture(self, self.fill, layer)
+            end
+            HideNativeStatusBarTexture(self)
+        elseif StatusBar_SetStatusBarTexture then
+            -- Fallback: keep the native StatusBar usable even if fill isn't constructed.
+            StatusBar_SetStatusBarTexture(self, texture, layer)
         end
 
         if layer then
@@ -357,19 +413,20 @@ function AngleStatusBarMixin:SetStatusBarTexture(texture, layer)
         if StatusBar_SetStatusBarTexture then
             StatusBar_SetStatusBarTexture(self, self.fill, layer)
         end
+        HideNativeStatusBarTexture(self)
     end
 
 end
 function AngleStatusBarMixin:GetStatusBarTexture()
-    -- If no texture is assigned yet, return nil so oUF can apply a default.
-    if StatusBar_GetStatusBarTexture then
-        local tex = StatusBar_GetStatusBarTexture(self)
-        if tex and tex:GetTexture() then
-            return tex
-        end
+    -- Always return our managed fill texture.
+    -- oUF directly colors the result of GetStatusBarTexture(); if the native StatusBar has
+    -- a separate internal texture, oUF can end up coloring that while our code shows/hides
+    -- `self.fill`, which looks like a permanently full colored bar.
+    if self.fill then
+        return self.fill
     end
-    if self.fill and self.fill:GetTexture() then
-    return self.fill
+    if StatusBar_GetStatusBarTexture then
+        return StatusBar_GetStatusBarTexture(self)
     end
     return nil
 end
@@ -384,8 +441,11 @@ function AngleStatusBarMixin:SetMinMaxValues(minVal, maxVal)
         meta.minVal = nil
         meta.maxVal = nil
         meta.hasSecretRange = true
+        meta.skipSmoothOnce = true
         return
     end
+
+    local oldMaxVal = meta.maxVal
     if StatusBar_SetMinMaxValues then
         StatusBar_SetMinMaxValues(self, minVal, maxVal)
     end
@@ -393,11 +453,18 @@ function AngleStatusBarMixin:SetMinMaxValues(minVal, maxVal)
     meta.minVal = minVal
     meta.maxVal = maxVal
 
+    if oldMaxVal ~= maxVal then
+        -- Avoid smoothing the first update after a range change.
+        -- On reload, the bar starts at 0 (initialization) and smoothing would animate to full,
+        -- which looks like a full-color bar in reverseMissing mode.
+        meta.skipSmoothOnce = true
+    end
+
     local targetValue = smoothBars[self]
     if targetValue then
         local ratio = 1
-        if maxVal ~= 0 and meta.maxVal and meta.maxVal ~= 0 then
-            ratio = maxVal / meta.maxVal
+        if oldMaxVal and oldMaxVal ~= 0 and maxVal ~= 0 then
+            ratio = maxVal / oldMaxVal
         end
         smoothBars[self] = targetValue * ratio
     end
@@ -415,25 +482,13 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
             smoothBars[self] = nil
         end
         if StatusBar_SetValue then
-            -- oUF already inverts the value for reverseMissing, so use it as-is
+            -- Use the native StatusBar for secret values, then correct the visuals below.
             StatusBar_SetValue(self, value)
         end
         meta.value = value
 
-        -- For reverseMissing with secrets, manually control fill visibility
-        local isZero = nil
-        if meta.reverseMissing then
-            isZero = false
-            pcall(function()
-                isZero = (value == 0)
-            end)
-            if isZero then
-                self.fill:Hide()
-                return
-            else
-                self.fill:Show()
-            end
-        end
+        -- Keep any native/internal texture hidden; oUF can still color it.
+        HideNativeStatusBarTexture(self)
 
         local width = self.fill:GetWidth()
         if meta.isTrapezoid and not RealUI.isSecret(width) then
@@ -454,9 +509,17 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
         -- For secret values, let the native StatusBar control visibility
             -- Don't manually show/hide
         else
-            if meta.reverseMissing then
-                -- For reverseMissing, hide fill at full health (value=0)
-                self.fill:SetShown(not isZero)
+            if meta.reverseMissing and meta.minWidth and meta.maxWidth and (meta.maxWidth - meta.minWidth) > 0 then
+                -- With secret values we can't safely do arithmetic on value/max, but the native
+                -- StatusBar will still size the texture. Invert the visual fill to represent
+                -- missing health/power.
+                local currentPercent = (width - meta.minWidth) / (meta.maxWidth - meta.minWidth)
+                currentPercent = _G.max(0, _G.min(1, currentPercent))
+                local missingPercent = 1 - currentPercent
+                local desiredWidth = Lerp(meta.minWidth, meta.maxWidth, missingPercent)
+                self.fill:SetWidth(desiredWidth)
+                self.fill:Show()
+                self.fill:SetAlpha((missingPercent > 0) and 1 or 0)
             else
                 self.fill:SetShown(width > 0)
             end
@@ -471,11 +534,18 @@ function AngleStatusBarMixin:SetValue(value, ignoreSmooth)
             value = meta.maxVal
         end
     end
+
+    if meta.skipSmoothOnce then
+        meta.skipSmoothOnce = nil
+        ignoreSmooth = true
+    end
     if meta.smooth and not ignoreSmooth then
         smoothBars[self] = value
     else
         SetBarValue(self, value)
     end
+
+    HideNativeStatusBarTexture(self)
 end
 function AngleStatusBarMixin:GetValue()
     return bars[self].value
@@ -507,8 +577,8 @@ function AngleStatusBarMixin:GetVisualPercent()
     end
 
     -- Fallback: Try to calculate from visual width
-    -- For reverseMissing mode, if fill is hidden, we're at 100% (no missing health)
-    if meta.reverseMissing and self.fill and not self.fill:IsShown() then
+    -- For reverseMissing mode, if fill is invisible, we're at 100% (no missing health)
+    if meta.reverseMissing and self.fill and ((not self.fill:IsShown()) or (self.fill.GetAlpha and self.fill:GetAlpha() == 0)) then
         return 1 -- 100% health
     end
 
@@ -551,16 +621,33 @@ function AngleStatusBarMixin:GetInvertFill()
 end
 
 function AngleStatusBarMixin:SetReverseMissing(isReverseMissing)
-    bars[self].reverseMissing = isReverseMissing
+    local meta = bars[self]
+    meta.reverseMissing = isReverseMissing
+    meta.reverseMissingResolved = nil
+    meta.skipSmoothOnce = true
+    if smoothBars[self] then
+        smoothBars[self] = nil
+    end
     if isReverseMissing then
-        self:SetReversePercent(true)
         if self.bg then
             self.bg:Show()
         end
     end
+
+    HideNativeStatusBarTexture(self)
 end
 function AngleStatusBarMixin:GetReverseMissing()
     return bars[self].reverseMissing
+end
+
+function AngleStatusBarMixin:SetReverseMissingSource(source)
+    local meta = bars[self]
+    meta.reverseMissingSource = source
+    if source == "current" or source == "missing" then
+        meta.reverseMissingResolved = source
+    else
+        meta.reverseMissingResolved = nil
+    end
 end
 
 function AngleStatusBarMixin:SetFlatTexture(isFlat)
@@ -685,6 +772,16 @@ local function CreateAngleStatusBar(name, parent)
     fill:SetPoint("BOTTOM")
     fill:SetPoint("LEFT")
     bar.fill = fill
+
+    -- Make sure the StatusBar's native texture is our managed `fill` texture.
+    -- This prevents creation/use of an internal StatusBar texture region that oUF might
+    -- color (and that we would not be hiding in reverseMissing mode).
+    if StatusBar_SetStatusBarTexture then
+        StatusBar_SetStatusBarTexture(bar, fill)
+    end
+
+    -- Hide any native/internal texture region if one was created anyway.
+    HideNativeStatusBarTexture(bar)
     return bar
 end
 
@@ -814,86 +911,4 @@ function AngleStatusBar:AttachFrame(frame, point, bar, relPoint, xOffset, yOffse
     end
 
     frame:SetPoint(point, bar, relPoint, xOffset, yOffset)
-end
-
-local function TestASB(reverseFill, reversePer) -- luacheck: ignore
-    local testBars = {}
-    local info = {
-        {
-            leftVertex = 2,
-            rightVertex = 3,
-        },
-        {
-            leftVertex = 2,
-            rightVertex = 4,
-        },
-        {
-            leftVertex = 1,
-            rightVertex = 3,
-        },
-        {
-            leftVertex = 1,
-            rightVertex = 4,
-        },
-    }
-    local width, height = 100, 10
-    local val, minVal, maxVal = 10, 0, 250
-    for i = 1, #info do
-        local barInfo = info[i]
-        local test = AngleStatusBar:CreateAngle("StatusBar", "ASBTest"..i, _G.UIParent)
-        test:SetSize(width, height)
-        test:SetAngleVertex(barInfo.leftVertex, barInfo.rightVertex)
-        test:SetStatusBarColor(1, 0, 0, 1)
-        if i == 1 then
-            test:SetPoint("TOP", _G.UIParent, "CENTER", 0, 0)
-        else
-            test:SetPoint("TOP", testBars[i-1], "BOTTOM", 0, -10)
-        end
-
-        test:SetMinMaxValues(minVal, maxVal)
-        test:SetValue(val, true)
-        test:SetReverseFill(reverseFill)
-        test:SetReversePercent(reversePer)
-        tinsert(testBars, test)
-        --test:Show()
-        --test.bar:Show()
-    end
-
-    -- Normal status bar as a baseline
-    local status = _G.CreateFrame("StatusBar", "RealUITestStatus", _G.UIParent)
-    status:SetPoint("TOP", testBars[#info], "BOTTOM", 0, -10)
-    status:SetSize(width, height)
-
-    local bg = status:CreateTexture(nil, "BACKGROUND")
-    bg:SetColorTexture(1, 1, 1, 0.5)
-    bg:SetAllPoints(status)
-
-    local tex = status:CreateTexture(nil, "ARTWORK")
-    local color = {1,0,0}
-    tex:SetColorTexture(color[1], color[2], color[3])
-    status:SetStatusBarTexture(tex)
-
-    status:SetMinMaxValues(minVal, maxVal)
-    status:SetValue(val)
-    status:SetReverseFill(reverseFill)
-
-    tinsert(testBars, status)
-
-    -- /run RealUI:TestASBSet("Value", 50)
-    -- /run RealUI:TestASBSet("ReverseFill", true)
-    -- /run RealUI:TestASBSet("ReversePercent", true)
-    -- /run RealUI:TestASBSet("AngleVertex", 1, 4)
-    function RealUI:TestASBSet(method, ...)
-        for i = 1, #testBars do
-            local bar = testBars[i]
-            if bar["Set"..method] then
-                bar["Set"..method](bar, ...)
-            end
-        end
-    end
-end
-
--------------
-function AngleStatusBar:OnInitialize()
-    -- TestASB(true, 50)
 end

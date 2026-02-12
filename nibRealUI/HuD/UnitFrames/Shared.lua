@@ -42,7 +42,10 @@ local function GetReverseMissing(unit)
     if unitDB and unitDB.reverseMissing ~= nil then
         return unitDB.reverseMissing
     end
-    return true
+    if ndb and ndb.settings and ndb.settings.reverseUnitFrameBars ~= nil then
+        return not ndb.settings.reverseUnitFrameBars
+    end
+    return false
 end
 local function GetVertices(info, useOther)
     local side = info.point
@@ -141,12 +144,40 @@ local function CreateHealthBar(parent, info, isAngled)
         end
 
         Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
-        Health:SetReversePercent(not ndb.settings.reverseUnitFrameBars)
+        Health.debugUnit = parent.unit
+        Health:SetReversePercent(false)
         Health:SetAngleVertex(info.leftVertex, info.rightVertex)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
         Health:SetReverseFill(GetReverseFill(parent.unit, info))
-        Health:SetReverseMissing(GetReverseMissing(parent.unit))
+        Health:SetReverseMissing(not ndb.settings.reverseUnitFrameBars)
+        if Health.SetReverseMissingSource then
+            Health:SetReverseMissingSource("current")
+        end
+            Health.PreUpdate = function(self)
+                self.debugUnit = parent.unit
+                local reversePercentOverride = db.units[parent.unit] and db.units[parent.unit].reversePercent == true
+                self:SetReverseMissing(not ndb.settings.reverseUnitFrameBars)
+                if self.SetReverseMissingSource then
+                    self:SetReverseMissingSource("current")
+                end
+                if reversePercentOverride then
+                    self:SetReversePercent(true)
+                else
+                    self:SetReversePercent(false)
+                end
+
+                -- Set color based on class since we're in reverseMissing mode
+                -- SetBarValue's SetShown will control visibility
+                local frame = self.__owner
+                if frame and parent.unit and _G.UnitIsPlayer(parent.unit) then
+                    local _, class = _G.UnitClass(parent.unit)
+                    local color = frame.colors.class[class]
+                    if color then
+                        self:SetStatusBarColor(color:GetRGB())
+                    end
+                end
+            end
         Health:SetFlatTexture(true)
 
         Health.step, Health.warn = CreateSteps(parent, height, info)
@@ -388,6 +419,9 @@ local function CreatePowerBar(parent, info, isAngled)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
         Power:SetReverseFill(GetReverseFill(parent.unit, info))
         Power:SetReverseMissing(GetReverseMissing(parent.unit))
+        if Power.SetReverseMissingSource then
+            Power:SetReverseMissingSource("current")
+        end
         Power:SetFlatTexture(true)
 
         Power.step, Power.warn = CreateSteps(parent, height, info)
