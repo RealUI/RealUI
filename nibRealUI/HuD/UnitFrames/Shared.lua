@@ -64,7 +64,18 @@ local function IsSafeTrue(value)
     if RealUI.isSecret(value) then
         return false
     end
-    return value and true or false
+
+    local ok, result = _G.pcall(function()
+        if value then
+            return true
+        end
+        return false
+    end)
+    if ok then
+        return result
+    end
+
+    return false
 end
 
 local function CreateSteps(parent, height, info)
