@@ -60,6 +60,13 @@ local function GetVertices(info, useOther)
     end
 end
 
+local function IsSafeTrue(value)
+    if RealUI.isSecret(value) then
+        return false
+    end
+    return value and true or false
+end
+
 local function CreateSteps(parent, height, info)
     local stepHeight = round(height / 2)
     local step, warn = {}, {}
@@ -170,7 +177,7 @@ local function CreateHealthBar(parent, info, isAngled)
                 -- Set color based on class since we're in reverseMissing mode
                 -- SetBarValue's SetShown will control visibility
                 local frame = self.__owner
-                if frame and parent.unit and _G.UnitIsPlayer(parent.unit) then
+                if frame and parent.unit and IsSafeTrue(_G.UnitIsPlayer(parent.unit)) then
                     local _, class = _G.UnitClass(parent.unit)
                     local color = frame.colors.class[class]
                     if color then
@@ -236,7 +243,7 @@ local CreateHealthStatus do
 
     local function UpdatePvP(self, event, unit)
         local PvPIndicator, color = self.PvPIndicator
-        if _G.UnitIsPVP(unit) then
+        if IsSafeTrue(_G.UnitIsPVP(unit)) then
             local reaction = _G.UnitReaction(unit, "player")
             if not reaction then
                 -- Can be nil if the target is out of range
@@ -484,19 +491,13 @@ local CreatePowerStatus do
         combat = {1, 0, 0},
         resting = {0, 1, 0},
     }
-    local function AsSafeBoolean(value)
-        if RealUI.isSecret(value) then
-            return false
-        end
-        return value and true or false
-    end
     local function UpdateStatus(self, event)
         local unit, color = self.unit
-        local isAFK = AsSafeBoolean(_G.UnitIsAFK(unit))
-        local isConnected = AsSafeBoolean(_G.UnitIsConnected(unit))
-        local isLeader = AsSafeBoolean(_G.UnitIsGroupLeader(unit))
-        local inCombat = AsSafeBoolean(_G.UnitAffectingCombat(unit))
-        local isResting = AsSafeBoolean(_G.IsResting())
+        local isAFK = IsSafeTrue(_G.UnitIsAFK(unit))
+        local isConnected = IsSafeTrue(_G.UnitIsConnected(unit))
+        local isLeader = IsSafeTrue(_G.UnitIsGroupLeader(unit))
+        local inCombat = IsSafeTrue(_G.UnitAffectingCombat(unit))
+        local isResting = IsSafeTrue(_G.IsResting())
 
         if isAFK then
             self.LeaderIndicator.status = "afk"
@@ -572,12 +573,15 @@ end
 local CreateEndBox do
     local function UpdateEndBox(self, ...)
         local unit = self.unit
+        local isPlayer = IsSafeTrue(_G.UnitIsPlayer(unit))
+        local isPlayerControlled = IsSafeTrue(_G.UnitPlayerControlled(unit))
+        local isTapDenied = IsSafeTrue(_G.UnitIsTapDenied(unit))
 
         local color
-        if _G.UnitIsPlayer(unit) or _G.UnitPlayerControlled(unit) and not _G.UnitIsPlayer(unit) then
+        if isPlayer or (isPlayerControlled and not isPlayer) then
             local _, classToken = _G.UnitClass(unit)
             color = self.colors.class[classToken]
-        elseif not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) then
+        elseif not isPlayerControlled and isTapDenied then
             color = self.colors.tapped
         elseif _G.UnitReaction(unit, "player") then
             color = self.colors.reaction[_G.UnitReaction(unit, "player")]

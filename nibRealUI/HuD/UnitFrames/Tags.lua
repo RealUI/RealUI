@@ -13,6 +13,13 @@ local RealUI = private.RealUI
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
+local function IsSafeTrue(value)
+    if RealUI.isSecret(value) then
+        return false
+    end
+    return value and true or false
+end
+
 
 local ES_PADDING = {
     ["||"] = -1,
@@ -79,7 +86,10 @@ end
 -- Name
 tags.Methods["realui:name"] = function(unit, realUnit)
     local isDead = false
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
+    local dead = IsSafeTrue(_G.UnitIsDead(unit))
+    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
+    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
+    if dead or ghost or not connected then
         isDead = true
     end
 
@@ -128,7 +138,10 @@ tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
 
 -- Health AbsValue
 tags.Methods["realui:healthValue"] = function(unit)
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return 0 end
+    local dead = IsSafeTrue(_G.UnitIsDead(unit))
+    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
+    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
+    if dead or ghost or not connected then return 0 end
     return RealUI.ReadableNumber(_G.UnitHealth(unit))
 end
 tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
@@ -136,7 +149,10 @@ tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_
 -- Health %
 tags.Methods["realui:healthPercent"] = function(unit)
     local percent
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
+    local dead = IsSafeTrue(_G.UnitIsDead(unit))
+    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
+    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
+    if dead or ghost or not connected then
         percent = 0
     else
         if _G.UnitHealthPercent and _G.CurveConstants and _G.CurveConstants.ScaleTo100 then
@@ -211,7 +227,10 @@ tags.Events["realui:health"] = tags.Events["realui:healthValue"]
 
 -- Power AbsValue
 tags.Methods["realui:powerValue"] = function(unit)
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then return 0 end
+    local dead = IsSafeTrue(_G.UnitIsDead(unit))
+    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
+    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
+    if dead or ghost or not connected then return 0 end
     return RealUI.ReadableNumber(_G.UnitPower(unit))
 end
 tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
@@ -219,7 +238,10 @@ tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPL
 -- Power %
 tags.Methods["realui:powerPercent"] = function(unit)
     local percent
-    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not(_G.UnitIsConnected(unit)) then
+    local dead = IsSafeTrue(_G.UnitIsDead(unit))
+    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
+    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
+    if dead or ghost or not connected then
         percent = 0
     else
         local powerType = _G.UnitPowerType(unit)
@@ -302,7 +324,7 @@ tags.Methods["realui:threat"] = function(unit)
     local color = tags.Methods["threatcolor"](unit)
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
 
-    if percentage and not _G.UnitIsDeadOrGhost(unit) then
+    if percentage and not IsSafeTrue(_G.UnitIsDeadOrGhost(unit)) then
         if isTanking then
             percentage = _G.UnitThreatPercentageOfLead("player", "target")
         end
@@ -331,7 +353,7 @@ local rangeColors = {
 local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
 tags.Methods["realui:range"] = function(unit)
     local _, maxRange = rangeCheck:GetRange("target")
-    if maxRange and not _G.UnitIsUnit("target", "player") then
+    if maxRange and not IsSafeTrue(_G.UnitIsUnit("target", "player")) then
         local section
         if maxRange <= 5 then
             section = 5
