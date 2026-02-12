@@ -11,6 +11,13 @@ local interval = 0.1
 local hasInitialized
 local f, icon, sep, title, text = _G.CreateFrame("Frame", "RealUIUINotifications", _G.UIParent)
 
+local function IsSafeTrue(value)
+    if RealUI.isSecret(value) then
+        return false
+    end
+    return value and true or false
+end
+
 -- Banner show/hide animations
 
 local bannerShown = false
@@ -129,7 +136,8 @@ local function handleIncoming()
 end
 
 handler:SetScript("OnEvent", function(dialog, _, unit)
-    if unit == "player" and not _G.UnitIsAFK("player") then
+    local isAFK = IsSafeTrue(_G.UnitIsAFK("player"))
+    if unit == "player" and not isAFK then
         handleIncoming()
         dialog:UnregisterEvent("PLAYER_FLAGS_CHANGED")
     end
@@ -139,7 +147,8 @@ end)
 
 function RealUI:Notification(name, showWhileAFK, message, clickFunc, texture, ...)
     if not hasInitialized then self:InitNotifications() end
-    if _G.UnitIsAFK("player") and not showWhileAFK then
+    local isAFK = IsSafeTrue(_G.UnitIsAFK("player"))
+    if isAFK and not showWhileAFK then
         _G.tinsert(incoming, {name, message, clickFunc, texture, ...})
         handler:RegisterEvent("PLAYER_FLAGS_CHANGED")
     elseif bannerShown or #incoming ~= 0 then

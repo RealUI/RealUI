@@ -11,16 +11,24 @@ local db
 local MODNAME = "ScreenSaver"
 local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
+local function IsSafeTrue(value)
+    if RealUI.isSecret(value) then
+        return false
+    end
+    return value and true or false
+end
+
 -- Update AFK status
 function ScreenSaver:UpdateTimer(...)
-    self:debug("UpdateTimer", _G.UnitIsAFK("player"))
-    if _G.UnitIsAFK("player") then
+    local isAFK = IsSafeTrue(_G.UnitIsAFK("player"))
+    self:debug("UpdateTimer", isAFK)
+    if isAFK then
         if not db.afkStart then
             db.afkStart = _G.GetServerTime()
             self.frame.alphaIn:Play()
         end
 
-        if _G.UnitAffectingCombat("player") and db.combatwarning then
+        if IsSafeTrue(_G.UnitAffectingCombat("player")) and db.combatwarning then
             _G.PlaySound(15262, "MASTER") -- Aggro_Enter_Warning_State
         end
     else
