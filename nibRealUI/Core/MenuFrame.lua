@@ -186,6 +186,10 @@ function MenuItemMixin:GetButtonWidth()
 end
 function MenuItemMixin:OnClick(mouseButton, ...)
     local menuItemInfo = self.info
+    if not menuItemInfo then
+        return
+    end
+
     local isChecked = self:SetCheckedState(menuItemInfo.checked, true)
 
     if menuItemInfo.func then
@@ -197,6 +201,10 @@ function MenuItemMixin:OnClick(mouseButton, ...)
     end
 end
 function MenuItemMixin:OnEnter(mouseButton, ...)
+    if not self.menu or not self.menu.level then
+        return
+    end
+
     if self.arrow:IsShown() then
         MenuFrame:Open(self, nil, self.info.menuList, self.menu.level + 1)
     else
@@ -261,6 +269,7 @@ function MenuFrameMixin:Update(menuList)
     for index, menuItemInfo in ipairs(menuList) do
         local menuItem = menuItems:Acquire()
         menuItem:SetParent(self)
+        menuItem.menu = self
         menuItem:Update(menuItemInfo)
 
         local itemWidth = menuItem:GetButtonWidth()
@@ -274,7 +283,6 @@ function MenuFrameMixin:Update(menuList)
             menuItem:SetPoint("TOPLEFT", self.items[index - 1], "BOTTOMLEFT")
         end
         menuItem:SetPoint("RIGHT", self)
-        menuItem.menu = self
 
         tinsert(self.items, menuItem)
     end
