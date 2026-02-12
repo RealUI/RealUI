@@ -1,3 +1,35 @@
+## [2.6.1] ##
+### Modified AddOns ###
+  * Aurora 12.0.1.0
+  * RealUI_Bugs
+  * nibRealUI
+  * nibRealUI_Config
+  * RealUI_Inventory
+  * RealUI_CombatText (disabled)
+  * RealUI_Skins
+  * RealUI_Tooltips
+
+### Information ###
+  * This is the second release for Midnight - World of Warcraft 12.0.1
+  * This release is a major update to the Blizzard UI - with many changes to the core and modules
+  * Certain features have been disabled or removed due to changes in the Blizzard API
+  * This version may be stable enoough for general use, but there are still some issues to be resolved
+  * Report issues at GitHub or connect with us on Discord
+
+### Changed ###
+  * chore: on unitframes
+  * chg: patch for reverse missing.
+  * fix: sometimes moneyFrameWidth is secret for some reason!?
+  * fix: Classpower is fixed for Midnight
+  * chg: make player unit frame grow from center/decrease to center as default.. and it is configurable..
+  * chg: attempt to index field 'CastingBarFrame'  error
+  * chg: Guarded Health.PostUpdate against secret/nonnumeric values.
+  * chg: Fixed a typo that caused uiScale CVar to be set unconditionally
+
+## Detailed Changes ##
+[2.6.1]: https://github.com/RealUI/RealUI/compare/2.6.0...2.6.1
+
+
 ## [2.6.0] ##
 ### Modified AddOns ###
   * Aurora 12.0.0.0
