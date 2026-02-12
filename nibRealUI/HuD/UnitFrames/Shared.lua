@@ -484,14 +484,25 @@ local CreatePowerStatus do
         combat = {1, 0, 0},
         resting = {0, 1, 0},
     }
+    local function AsSafeBoolean(value)
+        if RealUI.isSecret(value) then
+            return false
+        end
+        return value and true or false
+    end
     local function UpdateStatus(self, event)
         local unit, color = self.unit
+        local isAFK = AsSafeBoolean(_G.UnitIsAFK(unit))
+        local isConnected = AsSafeBoolean(_G.UnitIsConnected(unit))
+        local isLeader = AsSafeBoolean(_G.UnitIsGroupLeader(unit))
+        local inCombat = AsSafeBoolean(_G.UnitAffectingCombat(unit))
+        local isResting = AsSafeBoolean(_G.IsResting())
 
-        if _G.UnitIsAFK(unit) then
+        if isAFK then
             self.LeaderIndicator.status = "afk"
-        elseif not(_G.UnitIsConnected(unit)) then
+        elseif not isConnected then
             self.LeaderIndicator.status = "offline"
-        elseif _G.UnitIsGroupLeader(unit) then
+        elseif isLeader then
             self.LeaderIndicator.status = "leader"
         else
             self.LeaderIndicator.status = false
@@ -505,9 +516,9 @@ local CreatePowerStatus do
             self.LeaderIndicator:Hide()
         end
 
-        if _G.UnitAffectingCombat(unit) then
+        if inCombat then
             self.CombatIndicator.status = "combat"
-        elseif _G.IsResting(unit) then
+        elseif isResting then
             self.CombatIndicator.status = "resting"
         else
             self.CombatIndicator.status = false
