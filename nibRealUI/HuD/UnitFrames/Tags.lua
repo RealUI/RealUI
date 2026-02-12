@@ -157,8 +157,15 @@ tags.Methods["realui:healthPercent"] = function(unit)
                 if frame and frame.unit == unit and frame.Health then
                     local cur = frame.Health.cur
                     local max = frame.Health.max
-                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) and max > 0 then
-                        percent = cur / max
+                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) then
+                        local ok, ratio = pcall(function()
+                            if max > 0 then
+                                return cur / max
+                            end
+                        end)
+                        if ok and ratio and not RealUI.isSecret(ratio) then
+                            percent = ratio
+                        end
                     elseif frame.Health.GetVisualPercent then
                         local visPercent = frame.Health:GetVisualPercent()
                         if visPercent then
@@ -171,8 +178,15 @@ tags.Methods["realui:healthPercent"] = function(unit)
         end
         if not percent then
             percent = 0
-        elseif percent <= 1 then
-            percent = percent * 100
+        else
+            local ok = pcall(function()
+                if percent <= 1 then
+                    percent = percent * 100
+                end
+            end)
+            if not ok then
+                percent = 0
+            end
         end
     end
     UnitFrames:debug("realui:healthPercent", percent)
@@ -227,8 +241,15 @@ tags.Methods["realui:powerPercent"] = function(unit)
                 if frame and frame.unit == unit and frame.Power then
                     local cur = frame.Power.cur
                     local max = frame.Power.max
-                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) and max > 0 then
-                        percent = cur / max
+                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) then
+                        local ok, ratio = pcall(function()
+                            if max > 0 then
+                                return cur / max
+                            end
+                        end)
+                        if ok and ratio and not RealUI.isSecret(ratio) then
+                            percent = ratio
+                        end
                     elseif frame.Power.GetVisualPercent then
                         local visPercent = frame.Power:GetVisualPercent()
                         if visPercent then
@@ -241,8 +262,15 @@ tags.Methods["realui:powerPercent"] = function(unit)
         end
         if not percent then
             percent = 0
-        elseif percent <= 1 then
-            percent = percent * 100
+        else
+            local ok = pcall(function()
+                if percent <= 1 then
+                    percent = percent * 100
+                end
+            end)
+            if not ok then
+                percent = 0
+            end
         end
     end
     local _, ptoken = _G.UnitPowerType(unit)

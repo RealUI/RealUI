@@ -566,14 +566,23 @@ function AngleStatusBarMixin:GetVisualPercent()
         canUseNative = false
     end
 
-    if canUseNative and max > 0 then
-        local percent = value / max
-        -- For reverseMissing mode, the value is already the missing amount
-        -- So we need to invert to get current %
-        if meta.reverseMissing then
-            percent = 1 - percent
+    if canUseNative then
+        local ok, percent = pcall(function()
+            if not max or max <= 0 then
+                return nil
+            end
+
+            local p = value / max
+            if meta.reverseMissing then
+                p = 1 - p
+            end
+
+            return p
+        end)
+
+        if ok and percent ~= nil and not RealUI.isSecret(percent) then
+            return percent
         end
-        return percent
     end
 
     -- Fallback: Try to calculate from visual width
