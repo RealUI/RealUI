@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------
-r344 | funkehdude | 2025-11-21 01:08:07 +0000 (Fri, 21 Nov 2025) | 1 line
+r352 | funkehdude | 2026-02-11 22:47:33 +0000 (Wed, 11 Feb 2026) | 1 line
 Changed paths:
-   M /trunk/!BugGrabber.toc
+   M /trunk/BugGrabber.lua
 
-Bump version
+Another secrets parsing fix
 ------------------------------------------------------------------------
 

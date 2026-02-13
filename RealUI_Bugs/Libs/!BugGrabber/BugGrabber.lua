@@ -256,16 +256,15 @@ do
 	local GetErrorData
 	do
 		local GetCallstackHeight, GetErrorCallstackHeight, debugstack, debuglocals = GetCallstackHeight, GetErrorCallstackHeight, debugstack, debuglocals
-		function GetErrorData() -- This code is lifted from Blizzard's error handler, and adapted to compensate for GetErrorCallstackHeight sometimes being nil
+		function GetErrorData(changeLevelForForbiddenTable) -- This code is lifted from Blizzard's error handler, and adapted to compensate for GetErrorCallstackHeight sometimes being nil
 			local currentStackHeight = GetCallstackHeight()
 			local errorCallStackHeight = GetErrorCallstackHeight()
-			if errorCallStackHeight then
+			if errorCallStackHeight and not changeLevelForForbiddenTable then -- Compensate for debuglocals() killing execution when there's a very specific error
 				local errorStackOffset = errorCallStackHeight - 1
 				local debugStackLevel = currentStackHeight - errorStackOffset
 
 				local stack = debugstack(debugStackLevel)
 				local locals = debuglocals(debugStackLevel)
-
 				return stack, locals
 			else
 				local stack = debugstack(3)
@@ -339,7 +338,11 @@ do
 					counter = 1,
 				}
 			else
-				local stack, locals = GetErrorData()
+				local changeLevelForForbiddenTable = false
+				if errorMessage:find(" a forbidden table", nil, true) then
+					changeLevelForForbiddenTable = true
+				end
+				local stack, locals = GetErrorData(changeLevelForForbiddenTable)
 				local tbl = {}
 
 				-- Scan for version numbers in the stack
