@@ -1,3 +1,24 @@
+## [2.6.2] ##
+### Modified AddOns ###
+  * nibRealUI
+  * RealUI_Bugs
+  * Aurora 12.0.1.1
+  * BugGrabber v12.0.1
+  * oUF
+
+### Changed ###
+  * fix: patched DragEmAll to avoid protected-call taint.
+  * chg: updated the safe-boolean helper
+  * chg: more secret units
+  * chg: safe guards about booleans that might be secrets
+  * fix: UnitFrames/Shared.lua: attempt to perform boolean test on a secret boolean value (tainted by 'RealUI_Core-2.6.1')
+  * fix: AngleStatusBar.lua - attempt to compare a secret number value (tainted by 'RealUI_Core-2.6.1')
+  * fix: MenuFrame.lua: attempt to index field 'menu' (a nil value)
+
+## Detailed Changes ##
+[2.6.2]: https://github.com/RealUI/RealUI/compare/2.6.1...2.6.2
+
+
 ## [2.6.1] ##
 ### Modified AddOns ###
   * Aurora 12.0.1.0
