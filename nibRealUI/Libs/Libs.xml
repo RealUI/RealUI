@@ -1,6 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
-    <!-- Libs -->
+    <!-- Core Libraries -->
     <!--@non-debug@
     <Script file="LibChatAnims\LibChatAnims.lua"/>
     <Script file="AceAddon-3.0\AceAddon-3.0.lua"/>
@@ -18,9 +18,12 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Include file="LibQTip-1.0\lib.xml" />
     <Include file="oUF\oUF.xml"/>
     @end-non-debug@-->
-    <Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
 
-    <!-- Fixes -->
+    <!-- Always loaded libraries -->
+    <Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
+    <Script file="LibRangeCheck-3.0\LibRangeCheck-3.0\LibRangeCheck-3.0.lua"/>
+
+    <!-- Core Fixes and Enhancements -->
     <Script file="Fixes\BlizzBugsSuck.lua"/>
     <Script file="Fixes\InspectFix.lua"/>
     <Script file="Fixes\LibStrataFix.lua"/>

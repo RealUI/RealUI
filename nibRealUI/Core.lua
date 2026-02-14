@@ -3,6 +3,10 @@ local ADDON_NAME, private = ...
 -- Lua Globals --
 -- luacheck: globals next type strsplit tonumber
 
+-- RealUI Core System
+-- This file contains the main RealUI core functionality including version management,
+-- profile system, layout management, and module coordination
+
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
@@ -11,17 +15,42 @@ local debug = RealUI.GetDebug("Core")
 
 local LDS = _G.LibStub("LibDualSpec-1.0")
 
+-- Enhanced Version Management System
 local version = _G.C_AddOns.GetAddOnMetadata(ADDON_NAME, "Version")
 RealUI.verinfo = {strsplit(".", version)}
 for i = 1, 3 do
-    RealUI.verinfo[i] = tonumber(RealUI.verinfo[i])
+    RealUI.verinfo[i] = tonumber(RealUI.verinfo[i]) or 0
 end
 RealUI.verinfo.string = version
+RealUI.verinfo.build = select(4, _G.GetBuildInfo())
+RealUI.verinfo.gameVersion = _G.GetBuildInfo()
 
+-- Version comparison utilities
+function RealUI:CompareVersions(ver1, ver2)
+    for i = 1, 3 do
+        local v1 = ver1[i] or 0
+        local v2 = ver2[i] or 0
+        if v1 > v2 then
+            return 1
+        elseif v1 < v2 then
+            return -1
+        end
+    end
+    return 0
+end
+
+function RealUI:IsNewerVersion(newVer, oldVer)
+    return self:CompareVersions(newVer, oldVer) > 0
+end
+
+-- Configuration Mode Management
 RealUI.configModeModules = {}
+RealUI.isConfigMode = false
+
+-- Layout Position Defaults
 RealUI.defaultPositions = {
     [1] = {
-        -- DPS/Tank
+        -- DPS/Tank Layout
         ["HuDX"] = 0,
         ["HuDY"] = -38,
         ["UFHorizontal"] = 200,
@@ -36,7 +65,7 @@ RealUI.defaultPositions = {
         ["BossY"] = 314
     },
     [2] = {
-        -- Healing
+        -- Healing Layout
         ["HuDX"] = 0,
         ["HuDY"] = -38,
         ["UFHorizontal"] = 200,
@@ -52,6 +81,7 @@ RealUI.defaultPositions = {
     }
 }
 
+-- Profile to Layout Mapping
 private.profileToLayout = {
     ["RealUI"] = 1,
     ["RealUI-Healing"] = 2
@@ -61,9 +91,10 @@ private.layoutToProfile = {
     "RealUI-Healing"
 }
 
--- Offset some UI Elements for Large/Small HuD size settings
+-- HuD Size Offset Configuration
 RealUI.hudSizeOffsets = {
     [1] = {
+        -- Small HuD
         ["UFHorizontal"] = 0,
         ["SpellAlertWidth"] = 0,
         ["ActionBarsY"] = 0,
@@ -71,6 +102,7 @@ RealUI.hudSizeOffsets = {
         ["CastBarTargetY"] = 0
     },
     [2] = {
+        -- Large HuD
         ["UFHorizontal"] = 100,
         ["SpellAlertWidth"] = 100,
         ["ActionBarsY"] = -20,
@@ -183,28 +215,6 @@ function RealUI:UpdateLayout(layout)
     end
 end
 
-local function UpdateSpec(...)
-    if _G.IsPlayerInitialSpec() then
-        LDS.currentSpec = RealUI.charInfo.specs.current.index
-
-        for addonDB, addonName in LDS:IterateDatabases() do
-            addonDB:CheckDualSpecState()
-        end
-
-        return
-    end
-
-    local specInfo = RealUI.charInfo.specs
-    local new = _G.C_SpecializationInfo.GetSpecialization()
-    if specInfo.current.index ~= new then
-        specInfo.current = RealUI.charInfo.specs[new]
-
-        if dbc.layout.spec[specInfo.current.index] ~= dbc.layout.current then
-            RealUI:UpdateLayout(dbc.layout.spec[specInfo.current.index])
-        end
-    end
-end
-
 -- Version info retrieval
 function RealUI:GetVerString()
     return RealUI.verinfo.string
@@ -304,9 +314,36 @@ function RealUI:ReloadUIDialog()
 end
 
 function RealUI:OnInitialize()
-    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", defaults, private.layoutToProfile[1])
+    debug("OnInitialize starting...")
+
+    -- Initialize Version Manager first
+    if self.VersionManager then
+        self.VersionManager:Initialize()
+    end
+
+    -- Initialize Profile System
+    if self.ProfileSystem then
+        self.ProfileSystem:Initialize()
+    end
+
+    -- Initialize Dual-Spec System
+    if self.DualSpecSystem then
+        self.DualSpecSystem:Initialize()
+    end
+
+    -- Initialize Configuration Persistence System
+    if self.ConfigPersistence then
+        self.ConfigPersistence:Initialize()
+    end
+
+    -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
+    local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
+    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
+
+    -- Enhance database with LibDualSpec-1.0 support
     LDS:EnhanceDatabase(self.db, "RealUI")
 
+    -- Create healing profile and set up dual-spec profiles
     self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
     for specIndex = 1, #RealUI.charInfo.specs do
         local spec = RealUI.charInfo.specs[specIndex]
@@ -315,21 +352,35 @@ function RealUI:OnInitialize()
         end
     end
 
-    self.db:SetProfile(private.layoutToProfile[1]) -- set back to default
+    -- Set back to default profile
+    self.db:SetProfile(private.layoutToProfile[1])
 
-    debug("OnInitialize", self.db.keys, self.db.char.init.installStage)
+    -- Initialize ProfileSystem with the database
+    if self.ProfileSystem then
+        self.ProfileSystem:Initialize(self.db)
+    end
+
+    -- Post-initialize DualSpecSystem with database
+    if self.DualSpecSystem then
+        self.DualSpecSystem:PostInitialize()
+    end
+
+    debug("Database initialized", self.db.keys, self.db.char.init.installStage)
+
+    -- Set up database references
     db = self.db.profile
     dbc = self.db.char
     dbg = self.db.global
     self.media = db.media
 
-    -- Vars
+    -- Character identification
     self.key = ("%s - %s"):format(self.charInfo.name, self.charInfo.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 
+    -- Handle legacy character data migration
     if _G.nibRealUICharacter then
-        debug("Keys", self.db.keys.char, _G.nibRealUIDB.profileKeys[self.db.keys.char])
+        debug("Migrating legacy character data", self.db.keys.char, _G.nibRealUIDB.profileKeys[self.db.keys.char])
         if db.registeredChars[self.key] then
             dbc.init.installStage = _G.nibRealUICharacter.installStage
             dbc.init.initialized = _G.nibRealUICharacter.initialized
@@ -338,22 +389,60 @@ function RealUI:OnInitialize()
         _G.nibRealUICharacter = nil
     end
 
-    -- Open before login to stop taint
-    --_G.ToggleFrame(_G.SpellBookFrame)
+    -- Enhanced version tracking and migration detection
+    local currentVersion = RealUI.verinfo
+    local savedVersion = dbg.verinfo
 
-    -- Profile change
-    debug("Char", dbc.init.installStage)
+    if savedVersion and savedVersion.string and self.VersionManager then
+        local versionChange = self.VersionManager:GetVersionType(savedVersion, currentVersion)
+        if versionChange ~= "none" then
+            debug("Version change detected:", savedVersion.string, "->", currentVersion.string, "Type:", versionChange)
+            dbg.versionChange = versionChange
+
+            -- Run any necessary migrations using ConfigPersistence
+            if self.ConfigPersistence then
+                local configVersion = dbg.configVersion or 0
+                local success, err = self.ConfigPersistence:RunMigrations(tostring(configVersion), tostring(1))
+                if not success then
+                    debug("Configuration migration failed:", err)
+                end
+            end
+
+            -- Run version-specific migrations
+            local success, err = self.VersionManager:RunMigrations(savedVersion, currentVersion)
+            if not success then
+                debug("Version migration failed:", err)
+            end
+        end
+    end
+
+    -- Update saved version info
+    dbg.verinfo = {
+        [1] = currentVersion[1],
+        [2] = currentVersion[2],
+        [3] = currentVersion[3],
+        string = currentVersion.string,
+        build = currentVersion.build,
+        gameVersion = currentVersion.gameVersion
+    }
+
+    -- Check library integration
+    local libsOk, missingLibs = self:CheckLibraryIntegration()
+    if not libsOk then
+        debug("Missing libraries detected:", table.concat(missingLibs, ", "))
+    end
+
+    -- Register profile change callbacks
+    debug("Registering profile callbacks")
     self.db.RegisterCallback(self, "OnNewProfile", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
 
-    -- Register events
-    self:RegisterEvent("UNIT_LEVEL", UpdateSpec)
-    self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", UpdateSpec)
-    self:RegisterEvent("PLAYER_TALENT_UPDATE", UpdateSpec)
-    self:RegisterEvent("TRAIT_CONFIG_UPDATED", UpdateSpec)
+    -- Register game events for specialization tracking (handled by DualSpecSystem)
+    -- Events are now registered in DualSpecSystem:Initialize()
 
+    -- Register font recheck system
     self:RegisterEvent(
         "ADDON_LOADED",
         function()
@@ -386,7 +475,7 @@ function RealUI:OnInitialize()
         end
     )
 
-    -- Chat Commands
+    -- Register chat commands
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
     self:RegisterChatCommand(
@@ -424,7 +513,7 @@ function RealUI:OnInitialize()
         end
     )
 
-    -- Position Chat Frame
+    -- Initialize chat frame positioning if needed
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
         _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
@@ -436,23 +525,32 @@ function RealUI:OnInitialize()
         dbc.init.needchatmoved = false
     end
 
-    -- Synch user's settings
+    -- Configure user settings synchronization for first-time users
     if dbg.tags.firsttime then
         _G.SetCVar("synchronizeSettings", 1)
         _G.SetCVar("synchronizeConfig", 1)
         _G.SetCVar("synchronizeBindings", 1)
         _G.SetCVar("synchronizeMacros", 1)
     end
+
+    -- Ensure quest text contrast is properly set
     if ((_G.GetCVarNumberOrDefault("questTextContrast")) ~= 4) then
         _G.SetCVar("questTextContrast", 4)
     end
-    -- Done
+
+    -- Mark framework as initialized
+    RealUI.isInitialized = true
+
+    -- Initialization complete message
     _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
     if not dbg.tags.slashRealUITyped and dbc.init.installStage == -1 then
         _G.print(L["Slash_RealUI"]:format("|cFFFF8000/realui|r"))
     end
-    -- Check AccountStatus
+
+    -- Display account status information
     _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
+
+    debug("OnInitialize completed successfully")
 end
 
 local onLoadMessages = {
@@ -469,20 +567,22 @@ local onLoadMessages = {
     }
 }
 function RealUI:OnEnable()
-    debug("OnEnable", dbc.init.installStage)
+    debug("OnEnable starting", dbc.init.installStage)
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
 
     if dbc.init.installStage == -1 then
+        -- Apply low resolution optimizations if needed
         if self:IsUsingLowResDisplay() and not dbg.tags.lowResOptimized then
             self:SetLowResOptimizations()
         end
 
+        -- Handle tutorial system
         if dbg.tutorial.stage > -1 then
             self:InitTutorial()
         else
-            -- Helpful messages
+            -- Display helpful messages for completed installations
             for name, messageInfo in next, onLoadMessages do
                 if not dbg.messages[name] then
                     self:Notification(name, true, messageInfo.text, messageInfo.func, messageInfo.icon)
@@ -491,6 +591,8 @@ function RealUI:OnEnable()
                     end
                 end
             end
+
+            -- Localization contribution message
             if not _G.LOCALE_enUS then
                 _G.print(
                     "Want to contribute? You can help localize RealUI into your native language at bit.ly/RealUILocale"
@@ -499,17 +601,29 @@ function RealUI:OnEnable()
         end
     end
 
-    -- WoW Debugging settings - notify if enabled as they have a performance impact and user may have left them on
+    -- Performance debugging notifications
     if _G.GetCVar("taintLog") ~= "0" then
         _G.print(L["Slash_Taint"])
     end
 
-    UpdateSpec()
+    -- Initialize specialization tracking (handled by DualSpecSystem)
+    if self.DualSpecSystem and self.DualSpecSystem:IsInitialized() then
+        local currentSpec = self.DualSpecSystem:GetCurrentSpec()
+        if currentSpec then
+            debug("Current specialization:", currentSpec)
+        end
+    end
 
-    -- Update styling
+    -- Update frame styling
     self:UpdateFrameStyle()
+
+    -- Mark framework as enabled
+    RealUI.isEnabled = true
+
+    debug("OnEnable completed successfully")
 end
 
+-- Enhanced Module Management System
 do
     local prototype = {
         isRetail = RealUI.isRetail,
@@ -528,6 +642,7 @@ do
     RealUI:SetDefaultModulePrototype(prototype)
 end
 
+-- Module State Management
 function RealUI:GetModuleEnabled(module)
     return self.db.profile.modules[module]
 end
@@ -542,4 +657,57 @@ function RealUI:SetModuleEnabled(module, value)
         end
         return value
     end
+end
+
+-- Framework Status Functions
+function RealUI:IsFrameworkReady()
+    return self.isInitialized and self.isEnabled
+end
+
+function RealUI:GetFrameworkStatus()
+    return {
+        initialized = self.isInitialized,
+        enabled = self.isEnabled,
+        version = self.verinfo,
+        layout = self.cLayout,
+        installStage = dbc and dbc.init.installStage or 0
+    }
+end
+
+-- Enhanced Library Integration Check
+function RealUI:CheckLibraryIntegration()
+    local libraries = {
+        "AceAddon-3.0",
+        "AceConsole-3.0",
+        "AceEvent-3.0",
+        "AceTimer-3.0",
+        "LibDualSpec-1.0"
+    }
+
+    local missing = {}
+    for _, lib in ipairs(libraries) do
+        if not _G.LibStub:GetLibrary(lib, true) then
+            table.insert(missing, lib)
+        end
+    end
+
+    if #missing > 0 then
+        debug("Missing libraries:", table.concat(missing, ", "))
+        return false, missing
+    end
+
+    return true, {}
+end
+
+-- Namespace Management
+function RealUI:RegisterNamespace(name, namespace)
+    if not self.namespaces then
+        self.namespaces = {}
+    end
+    self.namespaces[name] = namespace
+    debug("Registered namespace:", name)
+end
+
+function RealUI:GetNamespace(name)
+    return self.namespaces and self.namespaces[name]
 end

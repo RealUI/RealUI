@@ -3,6 +3,10 @@ local ADDON_NAME, private = ...
 -- Lua Globals --
 -- luacheck: globals select
 
+-- Core RealUI Framework Initialization
+-- This file handles the initial setup of the RealUI namespace and core dependencies
+
+-- Ensure RealUI_Skins is loaded before proceeding
 local loaded = _G.C_AddOns.LoadAddOn("RealUI_Skins")
 local tries = 1
 while not loaded do
@@ -30,14 +34,17 @@ while not loaded do
     end
 end
 
--- RealUI --
+-- Initialize RealUI Core Object with AceAddon-3.0 framework
 private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
 local RealUI = private.RealUI
 
+-- Version and Build Detection
 RealUI.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 RealUI.isMidnight = RealUI.isRetail and select(4, _G.GetBuildInfo()) >= 120000
 RealUI.isBetaBuild = RealUI.isRetail and select(4, _G.GetBuildInfo()) == 120001
 RealUI.isDragonflight = select(4, _G.GetBuildInfo()) >= 100002 or select(4, _G.GetBuildInfo()) <= 110000
+
+-- Realm Information Management
 RealUI.realmInfo = {
     realm = _G.GetRealmName(),
     connectedRealms = _G.GetAutoCompleteRealms(),
@@ -48,6 +55,7 @@ if RealUI.realmInfo.connectedRealms[1] then
     RealUI.realmInfo.isConnected = true
 end
 
+-- Realm Normalization Handler
 local function CheckforRealm()
     RealUI.realmInfo.realmNormalized = _G.GetNormalizedRealmName()
     if RealUI.realmInfo.realmNormalized then
@@ -62,6 +70,7 @@ local function CheckforRealm()
     return false
 end
 
+-- Ensure realm information is available
 if not CheckforRealm() then
     local frame = _G.CreateFrame("Frame")
     frame:SetScript("OnUpdate", function(dialog)
@@ -69,6 +78,7 @@ if not CheckforRealm() then
     end)
 end
 
+-- Character Information Management
 local classLocale, classToken, classID = _G.UnitClass("player")
 RealUI.charInfo = {
     name = _G.UnitName("player"),
@@ -85,6 +95,7 @@ RealUI.charInfo = {
     }
 }
 
+-- Specialization Information Setup
 for specIndex = 1, _G.C_SpecializationInfo.GetNumSpecializationsForClassID(classID) do
     local id, name, _, iconID, role, isRecommended = _G.GetSpecializationInfoForClassID(classID, specIndex)
     RealUI.charInfo.specs[specIndex] = {
@@ -101,12 +112,14 @@ for specIndex = 1, _G.C_SpecializationInfo.GetNumSpecializationsForClassID(class
     end
 end
 
--- Disable cargBags
+-- Addon Compatibility Management
+-- Disable cargBags if RealUI_Inventory is enabled
 local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.charInfo.name) == _G.Enum.AddOnEnableState.All;
 if enabled == true then
     _G.C_AddOns.DisableAddOn("cargBags_Nivaya")
 end
 
+-- Global Constants and Utilities
 RealUI.globals = {
     anchorPoints = {
         "TOPLEFT",    "TOP",    "TOPRIGHT",
@@ -128,4 +141,8 @@ RealUI.globals = {
         "TOOLTIP"
     }
 }
+
+-- Framework Status
+RealUI.isInitialized = false
+RealUI.isEnabled = false
 
