@@ -197,9 +197,15 @@ end
 -- Layout Updates
 function RealUI:UpdateLayout(layout)
     layout = layout or dbc.layout.current
+
+    -- Use LayoutManager if available
+    if self.LayoutManager and self.LayoutManager:IsValidLayout(layout) then
+        return self.LayoutManager:SwitchToLayout(layout)
+    end
+
+    -- Fallback to legacy layout handling
     dbc.layout.current = layout
 
-    -- TODO: convert layouts to profiles
     -- Set Current and Not-Current layout variables
     self.cLayout = layout
     self.ncLayout = layout == 1 and 2 or 1
@@ -336,6 +342,11 @@ function RealUI:OnInitialize()
         self.ConfigPersistence:Initialize()
     end
 
+    -- Initialize Layout Manager
+    if self.LayoutManager then
+        self.LayoutManager:Initialize()
+    end
+
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
@@ -377,6 +388,12 @@ function RealUI:OnInitialize()
     self.key = ("%s - %s"):format(self.charInfo.name, self.charInfo.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
+
+    -- Post-initialize LayoutManager with database
+    if self.LayoutManager then
+        self.LayoutManager:LoadLayoutState()
+        self.LayoutManager:ValidateCurrentLayout()
+    end
 
     -- Handle legacy character data migration
     if _G.nibRealUICharacter then
@@ -510,6 +527,45 @@ function RealUI:OnInitialize()
         "rc",
         function()
             _G.DoReadyCheck()
+        end
+    )
+
+    -- LayoutManager test commands
+    self:RegisterChatCommand(
+        "layoutstatus",
+        function()
+            if self.LayoutManager then
+                self.LayoutManager:PrintStatus()
+            else
+                print("LayoutManager not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "layoutswitch",
+        function(input)
+            if self.LayoutManager then
+                local layoutId = tonumber(input)
+                if layoutId then
+                    local success = self.LayoutManager:SwitchToLayout(layoutId)
+                    print("Layout switch to", layoutId, success and "succeeded" or "failed")
+                else
+                    print("Usage: /layoutswitch <1|2>")
+                end
+            else
+                print("LayoutManager not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "layouttoggle",
+        function()
+            if self.LayoutManager then
+                local success = self.LayoutManager:ToggleLayout()
+                print("Layout toggle", success and "succeeded" or "failed")
+            else
+                print("LayoutManager not available")
+            end
         end
     )
 

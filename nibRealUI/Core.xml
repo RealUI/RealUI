@@ -5,6 +5,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\ProfileSystem.lua"/>
     <Script file="Core\DualSpecSystem.lua"/>
     <Script file="Core\ConfigPersistence.lua"/>
+    <Script file="Core\LayoutManager.lua"/>
     <Script file="Core\MiniPatches.lua"/>
     <Include file="Core\AddonData.xml"/>
     <Script file="Core\AddonControl.lua"/>
