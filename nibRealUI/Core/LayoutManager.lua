@@ -272,6 +272,11 @@ function LayoutManager:PerformLayoutSwitch(layoutId)
     RealUI.cLayout = layoutId
     RealUI.ncLayout = (layoutId == LAYOUT_DPS_TANK) and LAYOUT_HEALING or LAYOUT_DPS_TANK
 
+    -- Update HuD positioning for the new layout
+    if RealUI.HuDPositioning then
+        RealUI.HuDPositioning:CalculatePositions()
+    end
+
     -- Switch to the appropriate profile if profile system is available
     if RealUI.ProfileSystem and config.profile then
         local success = RealUI.ProfileSystem:SwitchProfile(config.profile)

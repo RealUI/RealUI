@@ -170,6 +170,14 @@ end
 
 -- Move HuD Up if using a Low Resolution display
 function RealUI:SetLowResOptimizations(...)
+    -- Use HuD positioning system if available
+    if self.HuDPositioning then
+        self.HuDPositioning:ApplyResolutionOptimizations()
+        dbg.tags.lowResOptimized = true
+        return
+    end
+
+    -- Fallback to legacy optimization
     local dbp, dp = db.positions, self.defaultPositions
     if (dbp[RealUI.cLayout]["HuDY"] == dp[RealUI.cLayout]["HuDY"]) then
         dbp[RealUI.cLayout]["HuDY"] = -5
@@ -185,11 +193,23 @@ function RealUI:SetLowResOptimizations(...)
 end
 
 function RealUI:IsUsingLowResDisplay()
+    -- Use HuD positioning system if available
+    if self.HuDPositioning then
+        return self.HuDPositioning:IsLowResolution()
+    end
+
+    -- Fallback to legacy detection
     local _, pysHeight = _G.GetPhysicalScreenSize()
     return pysHeight < 1080
 end
 
 function RealUI:IsUsingHighResDisplay()
+    -- Use HuD positioning system if available
+    if self.HuDPositioning then
+        return self.HuDPositioning:IsHighResolution()
+    end
+
+    -- Fallback to legacy detection
     local _, pysHeight = _G.GetPhysicalScreenSize()
     return pysHeight >= 1440
 end
@@ -209,6 +229,11 @@ function RealUI:UpdateLayout(layout)
     -- Set Current and Not-Current layout variables
     self.cLayout = layout
     self.ncLayout = layout == 1 and 2 or 1
+
+    -- Update HuD positioning for the new layout
+    if self.HuDPositioning then
+        self.HuDPositioning:CalculatePositions()
+    end
 
     if self.isConfigMode and _G.Grid2Options then
         self:ScheduleTimer(
@@ -345,6 +370,11 @@ function RealUI:OnInitialize()
     -- Initialize Layout Manager
     if self.LayoutManager then
         self.LayoutManager:Initialize()
+    end
+
+    -- Initialize HuD Positioning System
+    if self.HuDPositioning then
+        self.HuDPositioning:Initialize()
     end
 
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
@@ -569,6 +599,57 @@ function RealUI:OnInitialize()
         end
     )
 
+    -- HuD Positioning test commands
+    self:RegisterChatCommand(
+        "hudstatus",
+        function()
+            if self.HuDPositioning then
+                self.HuDPositioning:PrintStatus()
+            else
+                print("HuDPositioning not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "hudsize",
+        function(input)
+            if self.HuDPositioning then
+                local sizeId = tonumber(input)
+                if sizeId then
+                    local success = self.HuDPositioning:SetHuDSize(sizeId)
+                    print("HuD size change to", sizeId, success and "succeeded" or "failed")
+                else
+                    print("Usage: /hudsize <1|2|3>")
+                    print("1 = Small, 2 = Large, 3 = Extra Large")
+                end
+            else
+                print("HuDPositioning not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "hudrecalc",
+        function()
+            if self.HuDPositioning then
+                self.HuDPositioning:CalculatePositions()
+                print("HuD positions recalculated")
+            else
+                print("HuDPositioning not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "hudoptimize",
+        function()
+            if self.HuDPositioning then
+                local optimized = self.HuDPositioning:ApplyResolutionOptimizations()
+                print("Resolution optimizations", optimized and "applied" or "not needed")
+            else
+                print("HuDPositioning not available")
+            end
+        end
+    )
+
     -- Initialize chat frame positioning if needed
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
@@ -624,6 +705,11 @@ local onLoadMessages = {
 }
 function RealUI:OnEnable()
     debug("OnEnable starting", dbc.init.installStage)
+
+    -- Post-initialize HuD positioning system with database
+    if self.HuDPositioning and not self.HuDPositioning:GetHuDState().initialized then
+        self.HuDPositioning:Initialize()
+    end
 
     -- Check if Installation/Patch is necessary
     self:InstallProcedure()
