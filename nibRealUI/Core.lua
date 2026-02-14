@@ -377,6 +377,16 @@ function RealUI:OnInitialize()
         self.HuDPositioning:Initialize()
     end
 
+    -- Initialize Frame Movement System
+    if self.FrameMover then
+        self.FrameMover:Initialize()
+    end
+
+    -- Initialize Configuration Mode System
+    if self.ConfigMode then
+        self.ConfigMode:Initialize()
+    end
+
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
@@ -595,6 +605,38 @@ function RealUI:OnInitialize()
                 print("Layout toggle", success and "succeeded" or "failed")
             else
                 print("LayoutManager not available")
+            end
+        end
+    )
+
+    -- Frame positioning and movement commands
+    self:RegisterChatCommand(
+        "framemover",
+        function(input)
+            if self.FrameMover then
+                if input == "status" then
+                    self.FrameMover:PrintStatus()
+                elseif input == "config" then
+                    self.FrameMover:ToggleConfigMode()
+                elseif input == "reset" then
+                    self.FrameMover:ResetAllPositions()
+                    print("All frame positions reset")
+                else
+                    print("Usage: /framemover <status|config|reset>")
+                end
+            else
+                print("FrameMover not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "configmode",
+        function()
+            if self.ConfigMode then
+                local success = self.ConfigMode:ToggleConfigMode()
+                print("Config mode", self.ConfigMode:IsConfigModeActive() and "enabled" or "disabled")
+            else
+                print("ConfigMode not available")
             end
         end
     )

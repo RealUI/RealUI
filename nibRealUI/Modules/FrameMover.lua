@@ -11,6 +11,16 @@ local db
 local MODNAME = "FrameMover"
 local FrameMover = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 
+-- Integration with new FrameMover system
+local function InitializeFrameMoverIntegration()
+    if RealUI.FrameMover and RealUI.FrameMover.Initialize then
+        RealUI.FrameMover:Initialize()
+    end
+    if RealUI.ConfigMode and RealUI.ConfigMode.Initialize then
+        RealUI.ConfigMode:Initialize()
+    end
+end
+
 local EnteredWorld
 local FrameList = {
     addons = {
@@ -192,6 +202,9 @@ function FrameMover:PLAYER_ENTERING_WORLD()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
 
     if not EnteredWorld then
+        -- Initialize new FrameMover system integration
+        InitializeFrameMoverIntegration()
+
         Hook_Raven()
         Hook_VSI()
 
