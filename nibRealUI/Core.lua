@@ -934,6 +934,81 @@ function RealUI:OnInitialize()
         end
     )
 
+    -- Resolution Optimizer commands
+    self:RegisterChatCommand(
+        "resoptimizer",
+        function(input)
+            if self.ResolutionOptimizer then
+                if input == "status" then
+                    self.ResolutionOptimizer:PrintStatus()
+                elseif input == "optimize" then
+                    local success = self.ResolutionOptimizer:ApplyOptimizations(true)
+                    print("Resolution optimization", success and "applied" or "failed")
+                elseif input == "reset" then
+                    local success = self.ResolutionOptimizer:ResetOptimizations()
+                    print("Resolution optimizations", success and "reset" or "failed")
+                else
+                    print("Usage: /resoptimizer <status|optimize|reset>")
+                end
+            else
+                print("ResolutionOptimizer not available")
+            end
+        end
+    )
+
+    -- Compatibility Manager commands
+    self:RegisterChatCommand(
+        "compat",
+        function(input)
+            if self.CompatibilityManager then
+                if input == "status" then
+                    self.CompatibilityManager:PrintStatus()
+                elseif input == "check" then
+                    self.CompatibilityManager:CheckCompatibility()
+                    print("Compatibility check complete")
+                elseif input == "safemode on" then
+                    local success = self.CompatibilityManager:EnableSafeMode()
+                    print("Safe mode", success and "enabled" or "already active")
+                elseif input == "safemode off" then
+                    local success = self.CompatibilityManager:DisableSafeMode()
+                    print("Safe mode", success and "disabled" or "not active")
+                else
+                    print("Usage: /compat <status|check|safemode on|safemode off>")
+                end
+            else
+                print("CompatibilityManager not available")
+            end
+        end
+    )
+
+    -- Profile Manager commands
+    self:RegisterChatCommand(
+        "profilemgr",
+        function(input)
+            if self.ProfileManager then
+                if input == "status" then
+                    self.ProfileManager:PrintStatus()
+                elseif input == "backup" then
+                    local success = self.ProfileManager:CreateBackup("manual")
+                    print("Backup", success and "created" or "failed")
+                elseif input == "restore" then
+                    local success = self.ProfileManager:RestoreBackup(1)
+                    print("Backup", success and "restored" or "failed")
+                elseif input == "backups" then
+                    local backups = self.ProfileManager:GetBackups()
+                    print("Available backups:")
+                    for _, backup in ipairs(backups) do
+                        print(("%d. %s - %s"):format(backup.index, backup.label, backup.date))
+                    end
+                else
+                    print("Usage: /profilemgr <status|backup|restore|backups>")
+                end
+            else
+                print("ProfileManager not available")
+            end
+        end
+    )
+
     -- Initialize chat frame positioning if needed
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
