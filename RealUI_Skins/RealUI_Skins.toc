@@ -3,7 +3,7 @@
 ## Category: RealUI
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe, Hanshi
-## Version: 2.6.2
+## Version: 3.0.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: nibRealUI

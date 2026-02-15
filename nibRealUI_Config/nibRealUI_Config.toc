@@ -3,7 +3,7 @@
 ## Category: RealUI
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe, Hanshi
-## Version: 2.6.2
+## Version: 3.0.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: nibRealUI

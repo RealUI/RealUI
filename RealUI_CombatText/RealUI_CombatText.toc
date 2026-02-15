@@ -3,7 +3,7 @@
 ## Category: RealUI
 ## Notes: Scrolling combat text designed for RealUI
 ## Author: Gethe, Hanshi
-## Version: 2.6.2
+## Version: 3.0.0
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## RequiredDeps: nibRealUI
 ## SavedVariables: RealUI_CombatTextDB
