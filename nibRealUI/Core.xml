@@ -11,6 +11,8 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\HuDPositioning.lua"/>
     <Script file="Core\FrameMover.lua"/>
     <Script file="Core\ConfigMode.lua"/>
+    <Script file="Core\PerformanceMonitor.lua"/>
+    <Script file="Core\PerformanceMonitorTest.lua"/>
     <Script file="Core\MiniPatches.lua"/>
     <Include file="Core\AddonData.xml"/>
     <Script file="Core\AddonControl.lua"/>

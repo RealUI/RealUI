@@ -392,6 +392,11 @@ function RealUI:OnInitialize()
         self.ConfigMode:Initialize()
     end
 
+    -- Initialize Performance Monitor System
+    if self.PerformanceMonitor then
+        self.PerformanceMonitor:Initialize()
+    end
+
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
@@ -733,6 +738,40 @@ function RealUI:OnInitialize()
                 print("Resolution optimizations", optimized and "applied" or "not needed")
             else
                 print("HuDPositioning not available")
+            end
+        end
+    )
+
+    -- Performance Monitor commands
+    self:RegisterChatCommand(
+        "perfmon",
+        function(input)
+            if self.PerformanceMonitor then
+                if input == "start" then
+                    local success = self.PerformanceMonitor:StartMonitoring()
+                    print("Performance monitoring", success and "started" or "already active")
+                elseif input == "stop" then
+                    local success = self.PerformanceMonitor:StopMonitoring()
+                    print("Performance monitoring", success and "stopped" or "not active")
+                elseif input == "status" then
+                    self.PerformanceMonitor:PrintStatus()
+                elseif input == "gc" then
+                    local freed, time = self.PerformanceMonitor:PerformGarbageCollection()
+                    print(("Garbage collection: freed %s in %s"):format(
+                        self.PerformanceMonitor:FormatBytes(freed),
+                        self.PerformanceMonitor:FormatTime(time)
+                    ))
+                elseif input == "alerts on" then
+                    self.PerformanceMonitor:SetAlertsEnabled(true)
+                    print("Performance alerts enabled")
+                elseif input == "alerts off" then
+                    self.PerformanceMonitor:SetAlertsEnabled(false)
+                    print("Performance alerts disabled")
+                else
+                    print("Usage: /perfmon <start|stop|status|gc|alerts on|alerts off>")
+                end
+            else
+                print("PerformanceMonitor not available")
             end
         end
     )
