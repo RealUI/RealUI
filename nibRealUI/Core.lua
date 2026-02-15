@@ -397,6 +397,16 @@ function RealUI:OnInitialize()
         self.PerformanceMonitor:Initialize()
     end
 
+    -- Initialize Feedback System
+    if self.FeedbackSystem then
+        self.FeedbackSystem:Initialize()
+    end
+
+    -- Initialize Diagnostic Tools
+    if self.DiagnosticTools then
+        self.DiagnosticTools:Initialize()
+    end
+
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
@@ -558,7 +568,16 @@ function RealUI:OnInitialize()
             _G.C_UI.Reload()
         end
     )
-    self:RegisterChatCommand("taintLogging", "Taint_Logging_Toggle")
+    self:RegisterChatCommand(
+        "taintLogging",
+        function()
+            if self.DiagnosticTools then
+                self.DiagnosticTools:ToggleTaintLogging()
+            else
+                self:Taint_Logging_Toggle()
+            end
+        end
+    )
     self:RegisterChatCommand(
         "findSpell",
         function(input)
@@ -843,6 +862,74 @@ function RealUI:OnInitialize()
                 end
             else
                 print("CharacterInit not available")
+            end
+        end
+    )
+
+    -- Diagnostic Tools commands
+    self:RegisterChatCommand(
+        "diagnostic",
+        function(input)
+            if self.DiagnosticTools then
+                self.DiagnosticTools:RunDiagnostic(input or "all")
+            else
+                print("DiagnosticTools not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "healthcheck",
+        function()
+            if self.DiagnosticTools then
+                self.DiagnosticTools:PrintHealthCheck()
+            else
+                print("DiagnosticTools not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "systemstatus",
+        function()
+            if self.DiagnosticTools then
+                self.DiagnosticTools:PrintSystemStatus()
+            else
+                print("DiagnosticTools not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "exportdiag",
+        function()
+            if self.DiagnosticTools then
+                self.DiagnosticTools:ExportDiagnosticReport()
+            else
+                print("DiagnosticTools not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "troubleshoot",
+        function(input)
+            if self.FeedbackSystem then
+                if input and input ~= "" then
+                    self.FeedbackSystem:ShowTroubleshootingGuide(input)
+                else
+                    print("Usage: /troubleshoot <guide_key>")
+                    print("Available guides: combat_lockdown, addon_conflict, profile_corruption, performance_issues")
+                end
+            else
+                print("FeedbackSystem not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "feedbackhistory",
+        function(input)
+            if self.FeedbackSystem then
+                local count = tonumber(input) or 10
+                self.FeedbackSystem:PrintHistory(count)
+            else
+                print("FeedbackSystem not available")
             end
         end
     )
