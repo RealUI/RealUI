@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next type
+-- luacheck: globals next type _G
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -42,6 +42,20 @@ function InstallWizard:IsFirstTime()
     return not charInit.initialized
 end
 
+-- Check if this is an upgrade from previous version
+function InstallWizard:IsUpgrade()
+    if not RealUI.db or not RealUI.db.char then
+        return false
+    end
+
+    local charInit = RealUI.db.char.init
+    if charInit and charInit.hadPreviousVersion then
+        return true, charInit.previousVersion
+    end
+
+    return false, nil
+end
+
 -- Get current installation stage
 function InstallWizard:GetCurrentStage()
     if not RealUI.db or not RealUI.db.char then
@@ -76,8 +90,14 @@ function InstallWizard:Initialize()
     installState.currentStage = self:GetCurrentStage()
     installState.needsResume = self:NeedsResume()
 
+    -- Check if this is an upgrade
+    local isUpgrade, oldVersion = self:IsUpgrade()
+    installState.isUpgrade = isUpgrade
+    installState.oldVersion = oldVersion
+
     debug("Initialized - FirstTime:", installState.isFirstTime,
-          "Stage:", installState.currentStage, "NeedsResume:", installState.needsResume)
+          "Stage:", installState.currentStage, "NeedsResume:", installState.needsResume,
+          "IsUpgrade:", installState.isUpgrade, "OldVersion:", tostring(installState.oldVersion))
 
     return installState
 end
@@ -112,9 +132,47 @@ function InstallWizard:Complete()
         RealUI.db.char.init.initialized = true
     end
 
+    -- Disable old tutorial system
+    local dbg = RealUI.db and RealUI.db.global
+    if dbg and dbg.tutorial then
+        dbg.tutorial.stage = -1
+        debug("Disabled old tutorial system")
+    end
+
+    -- Apply first-time account CVars if this is first time
+    if dbg and dbg.tags and dbg.tags.firsttime then
+        debug("Applying first-time account CVars")
+        self:ApplyAccountCVars()
+        dbg.tags.firsttime = false
+        dbg.tutorial = dbg.tutorial or {}
+        dbg.tutorial.stage = -1
+    end
+
+    -- Apply RealUI addon profiles (from old setup system)
+    if RealUI.AddRealUIProfiles then
+        debug("Adding RealUI profiles to addons")
+        RealUI:AddRealUIProfiles()
+    end
+
+    if RealUI.SetProfilesToRealUI then
+        debug("Setting addon profiles to RealUI")
+        RealUI:SetProfilesToRealUI()
+    end
+
+    -- Set profile keys for all addons
+    if RealUI.SetProfileKeys then
+        debug("Setting profile keys")
+        RealUI:SetProfileKeys()
+    end
+
     -- Perform character initialization
     if RealUI.CharacterInit then
         RealUI.CharacterInit:Setup()
+    end
+
+    -- Complete setup in SetupSystem
+    if RealUI.SetupSystem then
+        RealUI.SetupSystem:CompleteSetup()
     end
 
     debug("Installation completed")
@@ -123,7 +181,70 @@ function InstallWizard:Complete()
     if RealUI.InstallUI then
         RealUI.InstallUI:Hide()
     end
+
+    -- Show completion message
+    print("|cff00ff00RealUI 3.0.0 setup completed successfully!|r")
+    print("|cff00ff00Type /realui to access configuration.|r")
 end
+
+-- Apply account-wide CVars (first-time setup only)
+function InstallWizard:ApplyAccountCVars()
+    local accountCVars = {
+        -- Sound
+        ["Sound_EnableErrorSpeech"] = 0,
+
+        -- Screenshots
+        ["screenshotQuality"] = "10",              -- Highest quality
+
+        -- Help
+        ["showTutorials"] = 0,                     -- Turn off Tutorials
+        ["UberTooltips"] = 1,                      -- Turn on Enhanced Tooltips
+        ["scriptErrors"] = 1,                      -- Turn on Display Lua Errors
+
+        -- Controls
+        ["deselectOnClick"] = 1,                   -- Turn off Sticky Targeting (inverted)
+
+        -- Combat
+        ["spellActivationOverlayOpacity"] = 0.75,  -- Spell Alert Opacity
+
+        -- Social
+        ["chatBubbles"] = 0,                       -- Turn off Chat Bubbles
+        ["chatBubblesParty"] = 0,                  -- Turn off Party Chat Bubbles
+        ["chatStyle"] = "classic",                 -- Chat Style = "Classic"
+        ["whisperMode"] = "inline",                -- Whisper Mode = "In-line"
+
+        -- ActionBars
+        ["countdownForCooldowns"] = 0,             -- Disable Blizz cooldown count
+
+        -- Quests
+        ["autoQuestWatch"] = 1,                    -- Auto Track Quests
+
+        -- Names
+        ["UnitNameNPC"] = 1,                       -- Turn on NPC Names
+        ["UnitNamePlayerPVPTitle"] = 0,            -- Turn off PvP Player Titles
+        ["UnitNameEnemyGuardianName"] = 1,         -- Turn on Enemy Pet Names
+        ["UnitNameEnemyTotemName"] = 1,            -- Turn on Enemy Totem Names
+
+        -- Camera
+        ["cameraSmoothStyle"] = 0,                 -- Never adjust the camera
+
+        -- Quality of Life
+        ["guildShowOffline"] = 0,                  -- Hide Offline Guild Members
+        ["profanityFilter"] = 0,                   -- Turn off Profanity Filter
+    }
+
+    -- Check if RealUI_CombatText is loaded
+    if _G.C_AddOns and _G.C_AddOns.IsAddOnLoaded("RealUI_CombatText") and not RealUI.isMidnight then
+        accountCVars["enableFloatingCombatText"] = 0   -- Turn off Combat Text
+    end
+
+    for cvar, value in next, accountCVars do
+        _G.SetCVar(cvar, value)
+    end
+
+    debug("Account CVars applied")
+end
+
 
 -- Advance to next stage
 function InstallWizard:NextStage()

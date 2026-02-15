@@ -5,6 +5,7 @@ local ADDON_NAME, private = ...
 
 local RealUI = private.RealUI
 local debug = RealUI.GetDebug("PerformanceMonitorTest")
+local GetTime = _G.GetTime
 
 -- Test Memory Tracking
 local function TestMemoryTracking()

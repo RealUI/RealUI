@@ -12,7 +12,7 @@ local HBD --= _G.LibStub("HereBeDragons-2.0")
 
 do --[[ AddOns\Blizzard_WorldMap.lua ]]
     local colorStr = Color.highlight.colorStr
-    local round, ticker = _G.RealUI.Round
+    local round, ticker = _G.RealUI.Scale.Round
 
     local coordinateFormat = ("|c%s%s"):format(colorStr, "%s: |cffffffff%s, %s|r")
     local coordinateUnavailable = ("|c%s%s: |cffffffff%s|r"):format(colorStr, _G.PLAYER, _G.UNAVAILABLE)

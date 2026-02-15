@@ -1188,7 +1188,7 @@ function ModuleFramework:Shutdown()
     messageQueue = {}
     messageHandlers = {}
     eventCoordinator = {}
-    singMessages = false
+    isProcessingMessages = false
 
     -- Clean up state history
     moduleStateHistory = {}

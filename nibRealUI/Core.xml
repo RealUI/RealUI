@@ -23,6 +23,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\InstallWizard.lua"/>
     <Script file="Core\InstallUI.lua"/>
     <Script file="Core\CharacterInit.lua"/>
+    <Script file="Core\SetupSystem.lua"/>
     <Script file="Core\Notifications.lua"/>
     <Script file="Core\FeedbackSystem.lua"/>
     <Script file="Core\DiagnosticTools.lua"/>

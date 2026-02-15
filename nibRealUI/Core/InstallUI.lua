@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next type
+-- luacheck: globals next type _G
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -19,7 +19,7 @@ local InstallUI = _G.CreateFrame("Frame", "RealUIInstallWizard", _G.UIParent)
 RealUI.InstallUI = InstallUI
 
 InstallUI:SetPoint("CENTER")
-InstallUI:SetSize(550, 400)
+InstallUI:SetSize(550, 500)
 InstallUI:SetFrameStrata("DIALOG")
 InstallUI:Hide()
 
@@ -29,13 +29,26 @@ InstallUI:SetBackdropBorderColor(1, 1, 1, 1)
 
 -- Title
 local title = InstallUI:CreateFontString(nil, "ARTWORK", "GameFont_Gigantic")
-title:SetPoint("TOP", 0, -25)
+title:SetPoint("TOP", 0, -20)
 title:SetText("RealUI Installation")
 InstallUI.title = title
 
+-- Logo
+local logo = InstallUI:CreateTexture(nil, "ARTWORK")
+logo:SetTexture([[Interface\AddOns\nibRealUI\Media\Logo]])
+logo:SetSize(120, 120)
+logo:SetPoint("TOP", 0, -55)
+InstallUI.logo = logo
+
+-- Version string
+local versionText = InstallUI:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+versionText:SetPoint("TOP", logo, "BOTTOM", 0, -3)
+versionText:SetText("Version " .. (RealUI.verinfo and RealUI.verinfo.string or ""))
+InstallUI.versionText = versionText
+
 -- Stage content frame
 local content = _G.CreateFrame("Frame", nil, InstallUI)
-content:SetPoint("TOPLEFT", 20, -80)
+content:SetPoint("TOPLEFT", 20, -200)
 content:SetPoint("BOTTOMRIGHT", -20, 60)
 InstallUI.content = content
 
@@ -108,6 +121,19 @@ RealUI is a comprehensive UI replacement that provides:
 • Automatic specialization-based layout switching
 
 Click "Next" to begin the setup process, or "Skip" to use default settings.
+]],
+        upgradeText = [[
+Welcome to RealUI 3.0.0!
+
+You're upgrading from a previous version. This wizard will help you configure the new version.
+
+What's new in 3.0.0:
+• Enhanced setup system with better upgrade detection
+• Improved configuration migration
+• New modular architecture
+• Better performance and stability
+
+Your previous settings have been migrated where possible. Click "Next" to review and complete the setup.
 ]],
         showPrev = false,
         showNext = true,
@@ -196,9 +222,31 @@ function InstallUI:UpdateStage(stage)
         return
     end
 
-    -- Update title and text
-    self.title:SetText(stageInfo.title)
-    self.stageText:SetText(stageInfo.text)
+    -- Check if this is an upgrade
+    local isUpgrade = false
+    local oldVersion = nil
+    if RealUI.InstallWizard then
+        local state = RealUI.InstallWizard:GetState()
+        isUpgrade = state.isUpgrade
+        oldVersion = state.oldVersion
+    end
+
+    -- Update title
+    local title = stageInfo.title
+    if isUpgrade and stage == 0 then
+        title = "Welcome to RealUI 3.0.0!"
+    end
+    self.title:SetText(title)
+
+    -- Update text based on upgrade status
+    local text = stageInfo.text
+    if isUpgrade and stageInfo.upgradeText then
+        text = stageInfo.upgradeText
+        if oldVersion then
+            text = text:gsub("previous version", oldVersion)
+        end
+    end
+    self.stageText:SetText(text)
 
     -- Call onShow handler if available
     if stageInfo.onShow then

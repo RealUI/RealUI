@@ -427,6 +427,11 @@ function RealUI:OnInitialize()
         self.FinalMigrations:Initialize()
     end
 
+    -- Initialize Setup System
+    if self.SetupSystem then
+        self.SetupSystem:Initialize()
+    end
+
     -- Note: DeploymentValidator moved to after database initialization
 
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
@@ -896,6 +901,35 @@ function RealUI:OnInitialize()
         end
     )
 
+    -- Setup System commands
+    self:RegisterChatCommand(
+        "realuisetup",
+        function(input)
+            if self.SetupSystem then
+                if input == "run" or input == "" then
+                    self.SetupSystem:StartSetup()
+                elseif input == "check" then
+                    local state = self.SetupSystem:GetState()
+                    print("Setup needed:", state.needsSetup)
+                    print("Is upgrade:", state.isUpgrade)
+                    print("Old version:", tostring(state.oldVersion))
+                    print("Detected old config:", state.detectedOldConfig)
+                elseif input == "migrate" then
+                    local success, errors = self.SetupSystem:MigrateOldSettings()
+                    if success then
+                        print("Migration completed successfully")
+                    else
+                        print("Migration completed with errors:", table.concat(errors or {}, ", "))
+                    end
+                else
+                    print("Usage: /realuisetup <run|check|migrate>")
+                end
+            else
+                print("SetupSystem not available")
+            end
+        end
+    )
+
     -- Diagnostic Tools commands
     self:RegisterChatCommand(
         "diagnostic",
@@ -1108,6 +1142,20 @@ function RealUI:OnEnable()
     -- Post-initialize HuD positioning system with database
     if self.HuDPositioning and not self.HuDPositioning:GetHuDState().initialized then
         self.HuDPositioning:Initialize()
+    end
+
+    -- Check if setup is needed for 3.0.0
+    if self.SetupSystem then
+        local setupState = self.SetupSystem:GetState()
+        if setupState.needsSetup then
+            debug("Setup needed, checking and running setup system")
+            self.SetupSystem:CheckAndRun()
+
+            -- Show upgrade notification if this is an upgrade
+            if setupState.isUpgrade then
+                self.SetupSystem:ShowUpgradeNotification()
+            end
+        end
     end
 
     -- Check if Installation/Patch is necessary

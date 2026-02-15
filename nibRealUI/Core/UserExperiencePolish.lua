@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs
@@ -68,6 +68,7 @@ function UXPolish:EnableAccessibility()
     -- Ensure sufficient contrast
     if RealUI.db and RealUI.db.profile.colors then
         -- Colors are already managed by Aurora/RealUI_Skins
+        debug("Color contrast managed by Aurora/RealUI_Skins")
     end
 
     -- Add keyboard navigation support
@@ -269,8 +270,8 @@ function UXPolish:EnhanceErrorHandling()
     -- Wrap critical functions with user-friendly error handlers
     if RealUI.LayoutManager then
         local originalSwitch = RealUI.LayoutManager.SwitchToLayout
-        RealUI.LayoutManager.SwitchToLayout = function(self, layoutId)
-            local success, result = pcall(originalSwitch, self, layoutId)
+        RealUI.LayoutManager.SwitchToLayout = function(layoutMgr, layoutId)
+            local success, result = pcall(originalSwitch, layoutMgr, layoutId)
             if not success then
                 UXPolish:ProvideGuidance("layout_switch_failed")
                 if RealUI.ErrorRecovery then

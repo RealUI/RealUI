@@ -356,7 +356,7 @@ function DeploymentValidator:Initialize()
     end
 
     -- Prepare for deployment
-    local success, prepErrors = self:PrepareDeployment()
+    local success, _ = self:PrepareDeployment()
 
     if not success then
         debug("Deployment preparation failed")

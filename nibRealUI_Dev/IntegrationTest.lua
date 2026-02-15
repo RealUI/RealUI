@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals print

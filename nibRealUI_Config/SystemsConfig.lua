@@ -93,7 +93,6 @@ local function CreateSystemsConfig()
         for name, info in pairs(modules) do
             order = order + 1
             local state = RealUI.ModuleFramework:GetModuleState(name)
-            local isEnabled = (state == "enabled")
 
             systemsConfig.args.moduleFramework.args.modules.args[name] = {
                 name = name,
@@ -103,7 +102,7 @@ local function CreateSystemsConfig()
                     local currentState = RealUI.ModuleFramework:GetModuleState(name)
                     return currentState == "enabled"
                 end,
-                set = function(info, value)
+                set = function(_, value)
                     if value then
                         RealUI.ModuleFramework:EnableModule(name)
                     else

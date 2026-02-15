@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next type
+-- luacheck: globals next type pairs _G
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -245,6 +245,9 @@ function CharacterInit:Setup()
     -- Initialize character data
     self:Initialize()
 
+    -- Apply initial settings (from old setup system)
+    self:ApplyInitialSettings()
+
     -- Apply role-based defaults
     self:ApplyRoleDefaults()
 
@@ -259,3 +262,52 @@ function CharacterInit:Setup()
 
     debug("Full character setup completed")
 end
+
+-- Apply initial character settings (from old setup system)
+function CharacterInit:ApplyInitialSettings()
+    debug("Applying initial settings")
+
+    -- Lock chat frames
+    for i = 1, 10 do
+        local cf = _G["ChatFrame"..i]
+        if cf then
+            _G.FCF_SetLocked(cf, 1)
+        end
+    end
+
+    -- Set all chat channels to color player names by class
+    for k, v in next, _G.CHAT_CONFIG_CHAT_LEFT do
+        _G.ToggleChatColorNamesByClassGroup(true, v.type)
+    end
+    for iCh = 1, 15 do
+        _G.ToggleChatColorNamesByClassGroup(true, "CHANNEL"..iCh)
+    end
+
+    -- Make Chat windows transparent
+    _G.SetChatWindowAlpha(1, 0)
+    _G.SetChatWindowAlpha(2, 0)
+
+    -- Character-specific CVars
+    local characterCVars = {
+        -- Nameplates
+        ["nameplateMotion"] = 1,          -- Stacking Nameplates
+        ["nameplateShowAll"] = 1,         -- Always show nameplates
+        ["nameplateShowSelf"] = 0,        -- Hide Personal Resource Display
+
+        -- Combat
+        ["displaySpellActivationOverlays"] = 1,    -- Turn on Spell Alerts
+
+        -- Raid/Party
+        ["useCompactPartyFrames"] = 1,    -- Raid-style party frames
+
+        -- Quality of Life
+        ["autoLootDefault"] = 1,          -- Turn on Auto Loot
+    }
+
+    for cvar, value in next, characterCVars do
+        _G.SetCVar(cvar, value)
+    end
+
+    debug("Initial settings applied")
+end
+

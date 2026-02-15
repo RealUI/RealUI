@@ -159,9 +159,9 @@ function ProfileManager:ExportProfile(profileName)
     end
 
     -- Encode for export
-    local encoded, err = self:EncodeProfile(serialized)
+    local encoded, encodeErr = self:EncodeProfile(serialized)
     if not encoded then
-        return nil, err
+        return nil, encodeErr
     end
 
     -- Cache export
@@ -185,9 +185,9 @@ function ProfileManager:ImportProfile(encoded, targetProfileName)
     end
 
     -- Deserialize profile
-    local profileData, err = self:DeserializeProfile(serialized)
+    local profileData, deserializeErr = self:DeserializeProfile(serialized)
     if not profileData then
-        return false, err
+        return false, deserializeErr
     end
 
     -- Validate profile data

@@ -5,7 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
-local L = RealUI.L
+local L = RealUI.L -- luacheck: ignore
 
 local FeedbackSystem = {}
 private.FeedbackSystem = FeedbackSystem
