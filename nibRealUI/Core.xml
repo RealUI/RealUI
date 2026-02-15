@@ -5,6 +5,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\ProfileSystem.lua"/>
     <Script file="Core\DualSpecSystem.lua"/>
     <Script file="Core\ConfigPersistence.lua"/>
+    <Script file="Core\ModuleFramework.lua"/>
     <Script file="Core\LayoutManager.lua"/>
     <Script file="Core\HuDPositioning.lua"/>
     <Script file="Core\FrameMover.lua"/>

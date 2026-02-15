@@ -223,6 +223,14 @@ function FrameMover:RefreshMod()
 end
 
 function FrameMover:OnInitialize()
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "utility", {}, {
+            description = "Frame positioning and movement system",
+            version = "1.0.0"
+        })
+    end
+
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {

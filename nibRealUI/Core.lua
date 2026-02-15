@@ -347,6 +347,11 @@ end
 function RealUI:OnInitialize()
     debug("OnInitialize starting...")
 
+    -- Initialize Module Framework first
+    if self.ModuleFramework then
+        self.ModuleFramework:Initialize()
+    end
+
     -- Initialize Version Manager first
     if self.VersionManager then
         self.VersionManager:Initialize()
@@ -641,7 +646,47 @@ function RealUI:OnInitialize()
         end
     )
 
-    -- HuD Positioning test commands
+    -- ModuleFramework test commands
+    self:RegisterChatCommand(
+        "moduleinfo",
+        function(input)
+            if self.ModuleFramework then
+                if input and input ~= "" then
+                    local info = self.ModuleFramework:GetModuleInfo(input)
+                    if info then
+                        print("Module:", info.name, "Type:", info.type, "State:", info.state, "Enabled:", info.enabled)
+                        if #info.dependencies > 0 then
+                            print("Dependencies:", table.concat(info.dependencies, ", "))
+                        end
+                    else
+                        print("Module not found:", input)
+                    end
+                else
+                    local status = self.ModuleFramework:GetFrameworkStatus()
+                    print("ModuleFramework Status:")
+                    print("Initialized:", status.initialized)
+                    print("Total Modules:", status.totalModules)
+                    print("Enabled Modules:", status.enabledModules)
+                end
+            else
+                print("ModuleFramework not available")
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "modulelist",
+        function()
+            if self.ModuleFramework then
+                local modules = self.ModuleFramework:GetRegisteredModules()
+                print("Registered Modules:")
+                for name, info in pairs(modules) do
+                    print("-", name, "(" .. info.type .. ")", "State:", info.state)
+                end
+            else
+                print("ModuleFramework not available")
+            end
+        end
+    )
     self:RegisterChatCommand(
         "hudstatus",
         function()
@@ -807,40 +852,57 @@ function RealUI:OnEnable()
     debug("OnEnable completed successfully")
 end
 
--- Enhanced Module Management System
-do
-    local prototype = {
-        isRetail = RealUI.isRetail,
-        isDragonflight = RealUI.isDragonflight,
-        isMidnight = RealUI.isMidnight,
-        debug = function(dialog, ...)
-            return RealUI.Debug(dialog.moduleName, ...)
-        end,
-        OnProfileUpdate = function(dialog, ...)
-            dialog:SetEnabledState(dialog.db.profile.modules[dialog.moduleName])
-            if dialog.RefreshMod then
-                dialog:RefreshMod(...)
-            end
-        end
-    }
-    RealUI:SetDefaultModulePrototype(prototype)
-end
+-- Enhanced Module Management System (handled by ModuleFramework)
+-- The module prototype is now set up in ModuleFramework:Initialize()
 
--- Module State Management
+-- Enhanced Module State Management (using ModuleFramework)
 function RealUI:GetModuleEnabled(module)
+    if self.ModuleFramework and self.ModuleFramework:IsModuleRegistered(module) then
+        return self.ModuleFramework:IsModuleEnabled(module)
+    end
+
+    -- Fallback to database check
     return self.db.profile.modules[module]
 end
 
 function RealUI:SetModuleEnabled(module, value)
-    if self.db.profile.modules[module] ~= value then
-        self.db.profile.modules[module] = value
-        if value then
-            self:EnableModule(module)
-        else
-            self:DisableModule(module)
-        end
+    local currentValue = self:GetModuleEnabled(module)
+    if currentValue == value then
         return value
     end
+
+    -- Update database
+    if self.db.profile.modules[module] ~= value then
+        self.db.profile.modules[module] = value
+    end
+
+    -- Use ModuleFramework if available
+    if self.ModuleFramework and self.ModuleFramework:IsModuleRegistered(module) then
+        if value then
+            return self.ModuleFramework:EnableModule(module)
+        else
+            return self.ModuleFramework:DisableModule(module)
+        end
+    end
+
+    -- Fallback to direct module control
+    if value then
+        self:EnableModule(module)
+    else
+        self:DisableModule(module)
+    end
+
+    return value
+end
+
+-- Enhanced Module Registration
+function RealUI:RegisterRealUIModule(moduleName, moduleType, dependencies, options)
+    if not self.ModuleFramework then
+        debug("ModuleFramework not available for module registration:", moduleName)
+        return false
+    end
+
+    return self.ModuleFramework:RegisterModule(moduleName, moduleType, dependencies, options)
 end
 
 -- Framework Status Functions

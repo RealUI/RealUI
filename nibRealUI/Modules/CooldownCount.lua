@@ -167,6 +167,14 @@ function CooldownCount:RefreshMod()
 end
 
 function CooldownCount:OnInitialize()
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "enhancement", {}, {
+            description = "Cooldown display enhancements",
+            version = "1.0.0"
+        })
+    end
+
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {

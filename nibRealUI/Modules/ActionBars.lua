@@ -489,6 +489,15 @@ end
 
 function ActionBars:OnInitialize()
     self:debug("OnInitialize")
+
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "core", {}, {
+            description = "Action bar positioning and styling system",
+            version = "1.0.0"
+        })
+    end
+
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
