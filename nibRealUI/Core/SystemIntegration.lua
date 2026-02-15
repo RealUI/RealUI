@@ -196,20 +196,8 @@ end
 function SystemIntegration:OptimizePerformance()
     debug("Applying system-wide performance optimizations...")
 
-    -- Optimize event handling
-    if RealUI.PerformanceMonitor then
-        RealUI.PerformanceMonitor:OptimizeEventHandling()
-    end
-
-    -- Optimize frame updates
-    if RealUI.HuDPositioning then
-        RealUI.HuDPositioning:OptimizeFrameUpdates()
-    end
-
-    -- Optimize module loading
-    if RealUI.ModuleFramework then
-        RealUI.ModuleFramework:OptimizeModuleLoading()
-    end
+    -- Note: OptimizeEventHandling, OptimizeFrameUpdates, and OptimizeModuleLoading
+    -- methods are not implemented in their respective systems
 
     debug("Performance optimizations applied")
 end

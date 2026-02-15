@@ -427,10 +427,7 @@ function RealUI:OnInitialize()
         self.FinalMigrations:Initialize()
     end
 
-    -- Initialize Deployment Validator
-    if self.DeploymentValidator then
-        self.DeploymentValidator:Initialize()
-    end
+    -- Note: DeploymentValidator moved to after database initialization
 
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
@@ -473,6 +470,11 @@ function RealUI:OnInitialize()
     self.key = ("%s - %s"):format(self.charInfo.name, self.charInfo.realm)
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
+
+    -- Initialize Deployment Validator (after database is ready)
+    if self.DeploymentValidator then
+        self.DeploymentValidator:Initialize()
+    end
 
     -- Post-initialize LayoutManager with database
     if self.LayoutManager then

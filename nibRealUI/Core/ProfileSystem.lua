@@ -297,9 +297,26 @@ function ProfileSystem:RegisterCharacter(charKey, profileName)
     charKey = charKey or RealUI.key
     profileName = profileName or self:GetCurrentProfile()
 
+    -- Ensure charKey is available
+    if not charKey then
+        debug("Character key not yet available, deferring registration")
+        return false
+    end
+
     debug("Registering character:", charKey, "with profile:", profileName)
 
+    -- Ensure charInfo is available
+    if not RealUI.charInfo or not RealUI.charInfo.class or not RealUI.charInfo.class.token or not RealUI.charInfo.realm then
+        debug("Character info not yet available, deferring registration")
+        return false
+    end
+
     local profile = self.db.profile
+    if not profile then
+        debug("Profile not available")
+        return false
+    end
+
     if not profile.registeredChars then
         profile.registeredChars = {}
     end

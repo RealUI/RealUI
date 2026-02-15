@@ -363,6 +363,185 @@ function ns.commands:reset()
     _G.ReloadUI()
 end
 
+-- Test ModuleFramework
+function ns.commands:testmodules()
+    local RealUI = _G.RealUI
+    if not RealUI.ModuleFramework then
+        _G.print("ModuleFramework not available")
+        return
+    end
+
+    _G.print("=== Module Framework Test ===")
+    local status = RealUI.ModuleFramework:GetFrameworkStatus()
+    _G.print("Initialized:", status.initialized)
+    _G.print("Total Modules:", status.totalModules)
+    _G.print("Enabled Modules:", status.enabledModules)
+    _G.print("Disabled Modules:", status.disabledModules)
+
+    local modules = RealUI.ModuleFramework:GetRegisteredModules()
+    _G.print("\nRegistered Modules:")
+    for name, info in pairs(modules) do
+        local state = RealUI.ModuleFramework:GetModuleState(name)
+        _G.print(("  %s: %s [%s]"):format(name, info.type, state))
+    end
+end
+
+-- Test PerformanceMonitor
+function ns.commands:testperf()
+    local RealUI = _G.RealUI
+    if not RealUI.PerformanceMonitor then
+        _G.print("PerformanceMonitor not available")
+        return
+    end
+
+    _G.print("=== Performance Monitor Test ===")
+    local perfData = RealUI.PerformanceMonitor:GetPerformanceData()
+    if perfData then
+        _G.print("Memory:")
+        _G.print(("  Current: %.2f MB"):format((perfData.memory.current or 0) / 1024))
+        _G.print(("  Peak: %.2f MB"):format((perfData.memory.peak or 0) / 1024))
+        _G.print("CPU:")
+        _G.print(("  Current: %.2f ms"):format(perfData.cpu.current or 0))
+        _G.print(("  Peak: %.2f ms"):format(perfData.cpu.peak or 0))
+        _G.print("Framerate:")
+        _G.print(("  Current: %.1f FPS"):format(perfData.framerate.current or 0))
+        _G.print(("  Min: %.1f FPS"):format(perfData.framerate.min or 0))
+    end
+end
+
+-- Test ProfileSystem
+function ns.commands:testprofile()
+    local RealUI = _G.RealUI
+    if not RealUI.ProfileSystem then
+        _G.print("ProfileSystem not available")
+        return
+    end
+
+    _G.print("=== Profile System Test ===")
+    local current = RealUI.ProfileSystem:GetCurrentProfile()
+    _G.print("Current Profile:", current)
+
+    local profiles = RealUI.ProfileSystem:GetProfileList()
+    _G.print("\nAvailable Profiles:")
+    for _, name in ipairs(profiles) do
+        _G.print("  " .. name)
+    end
+
+    local chars = RealUI.ProfileSystem:GetRegisteredCharacters()
+    _G.print("\nRegistered Characters:")
+    for key, info in pairs(chars) do
+        _G.print(("  %s: %s"):format(key, info.profile))
+    end
+end
+
+-- Test LayoutManager
+function ns.commands:testlayout()
+    local RealUI = _G.RealUI
+    if not RealUI.LayoutManager then
+        _G.print("LayoutManager not available")
+        return
+    end
+
+    _G.print("=== Layout Manager Test ===")
+    local current = RealUI.LayoutManager:GetCurrentLayout()
+    local name = RealUI.LayoutManager:GetCurrentLayoutName()
+    _G.print("Current Layout:", current, "-", name)
+
+    local state = RealUI.LayoutManager:GetLayoutState()
+    _G.print("Auto-switch enabled:", state.autoSwitchEnabled)
+    _G.print("Last switch time:", state.lastSwitchTime)
+
+    local configs = RealUI.LayoutManager:GetAllLayoutConfigurations()
+    _G.print("\nLayout Configurations:")
+    for id, config in pairs(configs) do
+        _G.print(("  Layout %d: %s"):format(id, config.name))
+    end
+end
+
+-- Test ResolutionOptimizer
+function ns.commands:testresolution()
+    local RealUI = _G.RealUI
+    if not RealUI.ResolutionOptimizer then
+        _G.print("ResolutionOptimizer not available")
+        return
+    end
+
+    _G.print("=== Resolution Optimizer Test ===")
+    local width, height = RealUI.ResolutionOptimizer:GetScreenDimensions()
+    _G.print(("Screen: %dx%d"):format(width, height))
+
+    local profile, category = RealUI.ResolutionOptimizer:GetOptimizationProfile()
+    if profile then
+        _G.print("Category:", category)
+        _G.print("Description:", profile.description)
+        _G.print("HuD Size:", profile.hudSize)
+    end
+end
+
+-- Test CompatibilityManager
+function ns.commands:testcompat()
+    local RealUI = _G.RealUI
+    if not RealUI.CompatibilityManager then
+        _G.print("CompatibilityManager not available")
+        return
+    end
+
+    _G.print("=== Compatibility Manager Test ===")
+    local issues = RealUI.CompatibilityManager:CheckCompatibility()
+    if #issues > 0 then
+        _G.print("Compatibility Issues Found:")
+        for _, issue in ipairs(issues) do
+            _G.print(("  [%s] %s: %s"):format(issue.severity, issue.addon, issue.message))
+        end
+    else
+        _G.print("No compatibility issues detected")
+    end
+end
+
+-- Test DeploymentValidator
+function ns.commands:testdeploy()
+    local RealUI = _G.RealUI
+    if not RealUI.DeploymentValidator then
+        _G.print("DeploymentValidator not available")
+        return
+    end
+
+    _G.print("=== Deployment Validator Test ===")
+    local passed, errors = RealUI.DeploymentValidator:RunValidation()
+    _G.print("Validation:", passed and "PASSED" or "FAILED")
+
+    if not passed and errors then
+        _G.print("\nValidation Errors:")
+        for _, error in ipairs(errors) do
+            _G.print(("  %s: %s"):format(error.check, error.message))
+        end
+    end
+
+    local state = RealUI.DeploymentValidator:GetValidationState()
+    _G.print("\nValidation State:")
+    _G.print("  Validated:", state.validated)
+    _G.print("  Passed:", state.passed)
+    _G.print("  Errors:", #state.errors)
+    _G.print("  Warnings:", #state.warnings)
+end
+
+-- Run all tests
+function ns.commands:testall()
+    ns.commands:testmodules()
+    _G.print("\n")
+    ns.commands:testperf()
+    _G.print("\n")
+    ns.commands:testprofile()
+    _G.print("\n")
+    ns.commands:testlayout()
+    _G.print("\n")
+    ns.commands:testresolution()
+    _G.print("\n")
+    ns.commands:testcompat()
+    _G.print("\n")
+    ns.commands:testdeploy()
+end
+
 
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"

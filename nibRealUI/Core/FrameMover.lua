@@ -343,6 +343,11 @@ function FrameMover:ValidatePosition(frameId, x, y)
         return x, y
     end
 
+    -- Return nil if position is not provided
+    if not x or not y then
+        return x, y
+    end
+
     local frameInfo = moveableFrameRegistry[frameId]
     if not frameInfo then
         return x, y
@@ -353,13 +358,13 @@ function FrameMover:ValidatePosition(frameId, x, y)
 
     -- Apply boundary constraints
     if frameInfo.minBounds then
-        validX = math.max(validX, frameInfo.minBounds.x)
-        validY = math.max(validY, frameInfo.minBounds.y)
+        validX = math.max(validX, frameInfo.minBounds.x or validX)
+        validY = math.max(validY, frameInfo.minBounds.y or validY)
     end
 
     if frameInfo.maxBounds then
-        validX = math.min(validX, frameInfo.maxBounds.x)
-        validY = math.min(validY, frameInfo.maxBounds.y)
+        validX = math.min(validX, frameInfo.maxBounds.x or validX)
+        validY = math.min(validY, frameInfo.maxBounds.y or validY)
     end
 
     -- Apply screen boundary checking

@@ -126,9 +126,19 @@ Based on your current role, we recommend:
                 local recommendedLayout = charInfo.role == "HEALER" and 2 or 1
                 local layoutName = recommendedLayout == 2 and "Healing" or "DPS/Tank"
 
+                local baseText = [[
+RealUI provides two different layouts optimized for different roles:
+
+Layout 1 (DPS/Tank): Optimized for damage dealing and tanking
+Layout 2 (Healing): Optimized for healing with better raid frame visibility
+
+The system can automatically switch layouts based on your specialization.
+
+Based on your current role, we recommend:
+]]
                 local extraText = ("\n\nYour role: %s\nRecommended layout: Layout %d (%s)"):format(
                     charInfo.role, recommendedLayout, layoutName)
-                self.stageText:SetText(stageContent[1].text .. extraText)
+                self.stageText:SetText(baseText .. extraText)
             end
         end
     },

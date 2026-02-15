@@ -86,14 +86,14 @@ function RealUI.UpdateUIScale(newScale)
     private.debug("pixel scale", pixelScale, uiMod)
 
     local oldScale = private.skinsDB.customScale
-    local cvarScale, parentScale = tonumber(RealUI.Round(_G.GetCVar("uiscale"),2)), RealUI.Round(_G.UIParent:GetScale(), 2)
+    local cvarScale, parentScale = tonumber(RealUI.Scale.Round(_G.GetCVar("uiscale"),2)), RealUI.Scale.Round(_G.UIParent:GetScale(), 2)
     private.debug("current scale", oldScale, cvarScale, parentScale)
     if parentScale == 1 then -- bail if UIParent is scaled to 1... we don't want to mess with that
         return
     end
     -- Get Scale
     if private.skinsDB.isPixelScale then
-        newScale = RealUI.Round(pixelScale,2)
+        newScale = RealUI.Scale.Round(pixelScale,2)
     end
     if not newScale then
         newScale = oldScale
@@ -101,7 +101,7 @@ function RealUI.UpdateUIScale(newScale)
     private.debug("newScale", newScale)
     local uiScale = newScale
     if private.skinsDB.isHighRes then
-        uiScale = RealUI.Round(uiScale * 2, 2)
+        uiScale = RealUI.Scale.Round(uiScale * 2, 2)
     end
 
     uiScaleChanging = true
@@ -287,6 +287,11 @@ end
 --[[ Copy Scale API from Aurora until the entire UI is upgraded. ]]--
 function ScaleAPI.GetUIScale()
     return uiMod or 1
+end
+
+function ScaleAPI.Round(value, places)
+    local mult = 10 ^ (places or 0)
+    return floor(value * mult + 0.5) / mult
 end
 
 function ScaleAPI.Value(value, getFloat)

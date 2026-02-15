@@ -114,15 +114,8 @@ function ResourceManager:OptimizeResources()
         self:PerformGarbageCollection()
     end
 
-    -- Optimize module loading
-    if RealUI.ModuleFramework then
-        RealUI.ModuleFramework:OptimizeModuleLoading()
-    end
-
-    -- Optimize frame updates
-    if RealUI.HuDPositioning then
-        RealUI.HuDPositioning:OptimizeFrameUpdates()
-    end
+    -- Note: OptimizeModuleLoading and OptimizeFrameUpdates methods
+    -- are not implemented in ModuleFramework or HuDPositioning
 
     -- Clean up unused data
     self:CleanupUnusedData()

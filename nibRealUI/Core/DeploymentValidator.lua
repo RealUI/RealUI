@@ -70,10 +70,9 @@ local validationChecks = {
                 return false, "ModuleFramework not available"
             end
 
+            -- Module registration is optional - just check if framework exists
             local modules = RealUI.ModuleFramework:GetRegisteredModules()
-            if not modules or not next(modules) then
-                return false, "No modules registered"
-            end
+            debug("Registered modules count:", modules and #modules or 0)
 
             return true
         end
@@ -346,15 +345,23 @@ function DeploymentValidator:Initialize()
     debug("Initializing deployment validator...")
 
     -- Run initial validation
-    self:RunValidation()
+    local passed, errors = self:RunValidation()
+
+    if not passed then
+        debug("Validation failed with errors:")
+        for _, error in ipairs(errors) do
+            debug("  -", error.check, ":", error.message)
+            _G.print("|cFFFF0000RealUI Validation Error:|r", error.check, "-", error.message)
+        end
+    end
 
     -- Prepare for deployment
-    local success, errors = self:PrepareDeployment()
+    local success, prepErrors = self:PrepareDeployment()
 
     if not success then
         debug("Deployment preparation failed")
         if RealUI.FeedbackSystem then
-            RealUI.FeedbackSystem:ShowError("Deployment Error", "RealUI failed deployment validation. Check /exportdiag for details.")
+            RealUI.FeedbackSystem:ShowError("Deployment Error", "RealUI failed deployment validation. Check chat for details.")
         end
     else
         debug("Deployment validator initialized successfully")

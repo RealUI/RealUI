@@ -243,12 +243,14 @@ function DiagnosticTools:GetSystemStatus()
 
     -- Add performance data if available
     if RealUI.PerformanceMonitor then
-        local perfState = RealUI.PerformanceMonitor:GetMonitoringState()
-        status.performance = {
-            monitoring = perfState.monitoring,
-            memoryUsage = perfState.memoryUsage,
-            cpuUsage = perfState.cpuUsage
-        }
+        local perfData = RealUI.PerformanceMonitor:GetPerformanceData()
+        if perfData then
+            status.performance = {
+                monitoring = true,
+                memoryUsage = perfData.memory and perfData.memory.current,
+                cpuUsage = perfData.cpu and perfData.cpu.current
+            }
+        end
     end
 
     -- Add module data if available

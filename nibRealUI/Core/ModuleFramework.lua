@@ -58,7 +58,7 @@ local modulePrototype = {
         self.debug(self, "OnProfileUpdate", event, profile)
 
         -- Update enabled state based on profile
-        local shouldBeEnabled = self.db and self.db.profile.modules[self.moduleName]
+        local shouldBeEnabled = self.db and self.db.profile and self.db.profile.modules and self.db.profile.modules[self.moduleName]
         if shouldBeEnabled ~= nil then
             self:SetEnabledState(shouldBeEnabled)
         end
@@ -117,6 +117,10 @@ local modulePrototype = {
         end
     end
 }
+
+-- Set the module prototype immediately before any modules are registered
+-- This must happen at file load time, not during Initialize()
+RealUI:SetDefaultModulePrototype(modulePrototype)
 
 -- Module Registration Functions
 function ModuleFramework:RegisterModule(moduleName, moduleType, dependencies, options)
@@ -1081,8 +1085,8 @@ function ModuleFramework:Initialize()
         return true
     end
 
-    -- Set up the enhanced module prototype
-    RealUI:SetDefaultModulePrototype(modulePrototype)
+    -- Note: SetDefaultModulePrototype is now called at file load time
+    -- to ensure it's set before any modules are registered
 
     -- Register for profile updates
     if RealUI.db then

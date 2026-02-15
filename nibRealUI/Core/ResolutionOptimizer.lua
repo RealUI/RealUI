@@ -11,7 +11,7 @@ local debug = RealUI.GetDebug("ResolutionOptimizer")
 -- Handles automatic layout adjustments for different screen sizes
 -- Provides low-resolution and high-resolution display enhancements
 
-local ResolutionOptimizer = RealUI:NewModule("ResolutionOptimizer", "AceEvent-3.0")
+local ResolutionOptimizer = RealUI:NewModule("ResolutionOptimizer", "AceEvent-3.0", "AceTimer-3.0")
 
 -- Resolution thresholds
 local RESOLUTION_THRESHOLDS = {
@@ -148,9 +148,13 @@ function ResolutionOptimizer:ApplyOptimizations(force)
         return false
     end
 
-    debug("Applying optimizations for", category, "-", profile.description)
-
+    -- Check if this is the same category as last time (stored in DB)
     local dbg = self.db.global
+    local previousCategory = dbg.tags and dbg.tags.resolutionCategory
+    local categoryChanged = (previousCategory ~= category)
+
+    debug("Applying optimizations for", category, "-", profile.description, "Changed:", categoryChanged)
+
     local dbc = self.db.char
     local db = self.db.profile
 
@@ -185,20 +189,18 @@ function ResolutionOptimizer:ApplyOptimizations(force)
     self.lastOptimizationTime = _G.GetTime()
 
     -- Notify other systems
-    if RealUI.LayoutManager then
-        RealUI.LayoutManager:RefreshLayout()
-    end
+    -- Note: RefreshLayout method does not exist in LayoutManager
 
     if RealUI.HuDPositioning then
         RealUI.HuDPositioning:CalculatePositions()
     end
 
-    -- Notify user
-    if RealUI.FeedbackSystem then
-        RealUI.FeedbackSystem:ShowNotification(
+    -- Notify user only if category actually changed
+    if categoryChanged and RealUI.FeedbackSystem then
+        RealUI.FeedbackSystem:ShowFeedback(
+            "info",
             "Resolution Optimizations Applied",
-            ("Display optimized for %s"):format(profile.description),
-            "info"
+            ("Display optimized for %s"):format(profile.description)
         )
     end
 

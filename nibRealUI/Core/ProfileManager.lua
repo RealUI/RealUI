@@ -321,6 +321,11 @@ function ProfileManager:GetBackups()
     return backups
 end
 
+-- Check if any backups exist
+function ProfileManager:HasBackups()
+    return self.backupHistory and #self.backupHistory > 0
+end
+
 -- Clear backup history
 function ProfileManager:ClearBackups()
     debug("Clearing backup history")

@@ -12,7 +12,7 @@ local debug = RealUI.GetDebug("CompatibilityManager")
 -- Provides graceful handling of conflicting addons
 -- Implements safe mode operation for problematic environments
 
-local CompatibilityManager = RealUI:NewModule("CompatibilityManager", "AceEvent-3.0")
+local CompatibilityManager = RealUI:NewModule("CompatibilityManager", "AceEvent-3.0", "AceTimer-3.0")
 
 -- Known addon compatibility database
 local ADDON_COMPATIBILITY = {
@@ -286,7 +286,9 @@ function CompatibilityManager:IntegrateGrid2(integration)
         -- Position Grid2 frames according to RealUI layout
         self:ScheduleTimer(function()
             if RealUI.FrameMover then
-                RealUI.FrameMover:RegisterFrame("Grid2", _G.Grid2LayoutFrame)
+                -- Note: RegisterMoveableFrame requires frameInfo structure, not just a frame
+                -- Skipping Grid2 frame registration for now
+                debug("Grid2 frame registration skipped - requires proper frameInfo structure")
             end
         end, 1.0)
 
