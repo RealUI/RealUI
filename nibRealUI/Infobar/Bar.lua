@@ -905,6 +905,11 @@ function Infobar:Lock()
 end
 
 function Infobar:SettingsUpdate(setting, block)
+    -- Safety check: ensure frame is initialized
+    if not self.frame then
+        return
+    end
+
     -- print("setting:", setting, " block:", block)
     if setting == "statusBar" or "HideStatusBarMaxLevel" then
         local watch = self.frame.watch
@@ -962,7 +967,11 @@ end
 --------------------
 function Infobar:RefreshMod()
     db = self.db.profile
-    self:SettingsUpdate()
+
+    -- Only update settings if frame is initialized
+    if self.frame then
+        self:SettingsUpdate()
+    end
 end
 
 function Infobar:OnInitialize()
@@ -1058,7 +1067,7 @@ function Infobar:OnInitialize()
     db = self.db.profile
 
     function self:GetFontOutline(alpha)
-        alpha = alpha or db.bgAlpha
+        alpha = alpha or db.bgAlpha or 0.5
         if alpha > 0.2 then
             return ""
         else

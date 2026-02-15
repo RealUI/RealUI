@@ -119,6 +119,13 @@ end
 function CastBars:UpdateSettings(unit)
     CastBars:debug("Set config cast", unit)
     local castbar = CastBars[unit]
+
+    -- Safety check: ensure castbar exists
+    if not castbar then
+        CastBars:debug("Castbar not found for unit:", unit)
+        return
+    end
+
     local unitDB = db[unit]
     local size = castbarSizes[unit]
 

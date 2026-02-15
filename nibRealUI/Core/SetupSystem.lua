@@ -195,6 +195,12 @@ function SetupSystem:MigrateOldSettings()
 
     debug("Migrating settings from previous version...")
 
+    -- Ensure database is initialized
+    if not RealUI.db or not RealUI.db.global or not RealUI.db.profile then
+        debug("Database not fully initialized, cannot migrate")
+        return false, {"Database not fully initialized"}
+    end
+
     local success = true
     local errors = {}
 
@@ -227,6 +233,16 @@ function SetupSystem:MigrateOldSettings()
             for _, err in ipairs(charErrors) do
                 table.insert(errors, err)
             end
+        end
+    end
+
+    -- Migrate namespaced module settings (like Infobar)
+    local namespaceSuccess, namespaceErrors = self:MigrateNamespacedModules()
+    if not namespaceSuccess then
+        debug("Failed to migrate namespaced modules:", table.concat(namespaceErrors or {}, ", "))
+        success = false
+        for _, err in ipairs(namespaceErrors or {}) do
+            table.insert(errors, err)
         end
     end
 
@@ -284,13 +300,36 @@ function SetupSystem:MigrateProfileSettings(oldProfiles)
     end
 
     local errors = {}
+    local currentProfile = RealUI.db:GetCurrentProfile()
+
+    -- Temporarily unregister profile callbacks to prevent RefreshMod calls during migration
+    local callbacks = {}
+    if RealUI.db.callbacks then
+        -- Save all profile-related callbacks
+        if RealUI.db.callbacks.OnProfileChanged then
+            callbacks.OnProfileChanged = RealUI.db.callbacks.OnProfileChanged
+            RealUI.db.callbacks.OnProfileChanged = {}
+        end
+        if RealUI.db.callbacks.OnNewProfile then
+            callbacks.OnNewProfile = RealUI.db.callbacks.OnNewProfile
+            RealUI.db.callbacks.OnNewProfile = {}
+        end
+        if RealUI.db.callbacks.OnProfileCopied then
+            callbacks.OnProfileCopied = RealUI.db.callbacks.OnProfileCopied
+            RealUI.db.callbacks.OnProfileCopied = {}
+        end
+        if RealUI.db.callbacks.OnProfileReset then
+            callbacks.OnProfileReset = RealUI.db.callbacks.OnProfileReset
+            RealUI.db.callbacks.OnProfileReset = {}
+        end
+    end
 
     -- Migrate RealUI and RealUI-Healing profiles
     for profileName, profileData in pairs(oldProfiles) do
         if profileName == "RealUI" or profileName == "RealUI-Healing" then
             debug("Migrating profile:", profileName)
 
-            -- Set to this profile temporarily
+            -- Set to this profile temporarily (callbacks are disabled)
             RealUI.db:SetProfile(profileName)
 
             -- Migrate media settings
@@ -321,13 +360,48 @@ function SetupSystem:MigrateProfileSettings(oldProfiles)
                     end
                 end
             end
+
+            -- Ensure critical module settings have defaults if missing
+            self:EnsureModuleDefaults(RealUI.db.profile)
         end
     end
 
-    -- Restore default profile
-    RealUI.db:SetProfile("RealUI")
+    -- Restore original profile (callbacks still disabled)
+    RealUI.db:SetProfile(currentProfile)
+
+    -- Restore profile callbacks
+    if callbacks.OnProfileChanged then
+        RealUI.db.callbacks.OnProfileChanged = callbacks.OnProfileChanged
+    end
+    if callbacks.OnNewProfile then
+        RealUI.db.callbacks.OnNewProfile = callbacks.OnNewProfile
+    end
+    if callbacks.OnProfileCopied then
+        RealUI.db.callbacks.OnProfileCopied = callbacks.OnProfileCopied
+    end
+    if callbacks.OnProfileReset then
+        RealUI.db.callbacks.OnProfileReset = callbacks.OnProfileReset
+    end
+
+    debug("Profile migration completed, callbacks restored")
 
     return true, errors
+end
+
+-- Ensure module settings have proper defaults
+function SetupSystem:EnsureModuleDefaults(profile)
+    debug("Ensuring module defaults...")
+
+    -- Note: Most modules use RegisterNamespace for their settings,
+    -- so they have their own database with defaults.
+    -- profile.modules only contains enabled/disabled state (boolean values).
+
+    -- For modules that store settings directly in profile.modules,
+    -- we would check and set defaults here. Currently, most modules
+    -- use their own namespaces, so this function is a placeholder
+    -- for future use if needed.
+
+    debug("Module defaults check completed")
 end
 
 -- Migrate character settings
@@ -360,7 +434,7 @@ function SetupSystem:MigrateCharacterSettings(oldChar)
 end
 
 -- Start setup wizard
-function SetupSystem:StartSetup()
+function SetupSystem:StartSetup(forceShow)
     debug("Starting setup wizard...")
 
     -- Initialize InstallWizard if available
@@ -378,8 +452,8 @@ function SetupSystem:StartSetup()
         -- The InstallWizard will handle the UI
     end
 
-    -- Start the wizard
-    local started = RealUI.InstallWizard:Start()
+    -- Start the wizard (force show if requested)
+    local started = RealUI.InstallWizard:Start(forceShow)
 
     if started then
         debug("Setup wizard started successfully")
@@ -492,3 +566,48 @@ function SetupSystem:ShowUpgradeNotification()
     end
 end
 
+
+-- Migrate namespaced module settings
+function SetupSystem:MigrateNamespacedModules()
+    debug("Migrating namespaced module settings...")
+
+    if not _G.nibRealUIDB or not _G.nibRealUIDB.namespaces then
+        debug("No namespaced module data to migrate")
+        return true, {}
+    end
+
+    local errors = {}
+
+    -- List of modules that use namespaces
+    local namespacedModules = {
+        "Infobar",
+        -- Add other namespaced modules here as needed
+    }
+
+    for _, moduleName in ipairs(namespacedModules) do
+        if _G.nibRealUIDB.namespaces[moduleName] then
+            debug("Migrating namespace for module:", moduleName)
+
+            -- The namespace data is already in the saved variables
+            -- AceDB will automatically load it when the module initializes
+            -- We just need to ensure it exists and has valid structure
+
+            local namespaceData = _G.nibRealUIDB.namespaces[moduleName]
+
+            -- Validate namespace structure
+            if type(namespaceData) ~= "table" then
+                debug("Invalid namespace data for", moduleName)
+                table.insert(errors, "Invalid namespace data for " .. moduleName)
+            else
+                debug("Namespace data validated for", moduleName)
+            end
+        end
+    end
+
+    if #errors > 0 then
+        return false, errors
+    end
+
+    debug("Namespaced module migration completed")
+    return true, {}
+end

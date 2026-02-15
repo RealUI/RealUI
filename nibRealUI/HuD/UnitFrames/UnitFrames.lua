@@ -26,46 +26,52 @@ local units = {
 function UnitFrames:RefreshUnits(event)
     for i = 1, #units do
         local unit = _G["RealUI" .. units[i] .. "Frame"]
-        local unitKey = unit.unit
-        local unitData = UnitFrames[unitKey]
-        local reverseFill = (db.units[unitKey] and db.units[unitKey].reverseFill ~= nil) and db.units[unitKey].reverseFill
-            or (unitData and unitData.health and unitData.health.point == "RIGHT")
-        local reverseMissing = not ndb.settings.reverseUnitFrameBars
-        local reversePercent = db.units[unitKey] and db.units[unitKey].reversePercent
-        local reversePercentOverride = reversePercent == true
-        unit.Health.colorClass = db.overlay.classColor
 
-        if reversePercentOverride then
-            unit.Health:SetReversePercent(true)
+        -- Safety check: ensure unit frame exists
+        if unit then
+            local unitKey = unit.unit
+            local unitData = UnitFrames[unitKey]
+            local reverseFill = (db.units[unitKey] and db.units[unitKey].reverseFill ~= nil) and db.units[unitKey].reverseFill
+                or (unitData and unitData.health and unitData.health.point == "RIGHT")
+            local reverseMissing = not ndb.settings.reverseUnitFrameBars
+            local reversePercent = db.units[unitKey] and db.units[unitKey].reversePercent
+            local reversePercentOverride = reversePercent == true
+            unit.Health.colorClass = db.overlay.classColor
+
+            if reversePercentOverride then
+                unit.Health:SetReversePercent(true)
+            else
+                unit.Health:SetReversePercent(false)
+            end
+
+            if unit.Power then
+                unit.Power:UpdateReverse(ndb.settings.reverseUnitFrameBars)
+                if unit.Power.SetReverseFill then
+                    unit.Power:SetReverseFill(reverseFill)
+                end
+                if unit.Power.SetReverseMissing then
+                    unit.Power:SetReverseMissing(reverseMissing)
+                end
+                if reversePercentOverride and unit.Power.SetReversePercent then
+                    unit.Power:SetReversePercent(true)
+                end
+            end
+
+            if unit.DruidMana then
+                unit.DruidMana:SetReverseFill(reverseFill)
+            end
+
+            if unit.Health and unit.Health.SetReverseFill then
+                unit.Health:SetReverseFill(reverseFill)
+            end
+            if unit.Health and unit.Health.SetReverseMissing then
+                unit.Health:SetReverseMissing(reverseMissing)
+            end
+
+            unit:UpdateAllElements(event)
         else
-            unit.Health:SetReversePercent(false)
+            self:debug("Unit frame not found:", units[i])
         end
-
-        if unit.Power then
-            unit.Power:UpdateReverse(ndb.settings.reverseUnitFrameBars)
-            if unit.Power.SetReverseFill then
-                unit.Power:SetReverseFill(reverseFill)
-            end
-            if unit.Power.SetReverseMissing then
-                unit.Power:SetReverseMissing(reverseMissing)
-            end
-            if reversePercentOverride and unit.Power.SetReversePercent then
-                unit.Power:SetReversePercent(true)
-            end
-        end
-
-        if unit.DruidMana then
-            unit.DruidMana:SetReverseFill(reverseFill)
-        end
-
-        if unit.Health and unit.Health.SetReverseFill then
-            unit.Health:SetReverseFill(reverseFill)
-        end
-        if unit.Health and unit.Health.SetReverseMissing then
-            unit.Health:SetReverseMissing(reverseMissing)
-        end
-
-        unit:UpdateAllElements(event)
     end
 end
 

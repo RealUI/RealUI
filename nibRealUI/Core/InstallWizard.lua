@@ -103,7 +103,20 @@ function InstallWizard:Initialize()
 end
 
 -- Start installation wizard
-function InstallWizard:Start()
+function InstallWizard:Start(forceShow)
+    -- Allow forcing the wizard to show (for manual /realui setup command)
+    if forceShow then
+        debug("Forcing installation wizard to show")
+        self:SetStage(InstallWizard.STAGE_WELCOME)
+
+        -- Show installation wizard UI
+        if RealUI.InstallUI then
+            RealUI.InstallUI:Show()
+        end
+
+        return true
+    end
+
     if not installState.isFirstTime and not installState.needsResume then
         debug("Installation not needed")
         return false

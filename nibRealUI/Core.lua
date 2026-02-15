@@ -275,7 +275,23 @@ function RealUI:Taint_Logging_Toggle()
     _G.ReloadUI()
 end
 
-function RealUI:ChatCommand_Config()
+function RealUI:ChatCommand_Config(input)
+    -- Handle subcommands
+    if input and input ~= "" then
+        local command = input:lower():match("^(%S+)")
+
+        if command == "setup" then
+            -- Run setup wizard (force show)
+            if self.SetupSystem then
+                self.SetupSystem:StartSetup(true)
+            else
+                print("Setup system not available")
+            end
+            return
+        end
+    end
+
+    -- Default behavior: open config
     RealUI.Debug("Config", "/real")
     dbg.tags.slashRealUITyped = true
     RealUI.LoadConfig("HuD")
@@ -907,7 +923,7 @@ function RealUI:OnInitialize()
         function(input)
             if self.SetupSystem then
                 if input == "run" or input == "" then
-                    self.SetupSystem:StartSetup()
+                    self.SetupSystem:StartSetup(true)
                 elseif input == "check" then
                     local state = self.SetupSystem:GetState()
                     print("Setup needed:", state.needsSetup)

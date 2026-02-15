@@ -209,6 +209,12 @@ end
 -- Set Button positions
 function MinimapAdv:UpdateButtonsPosition()
     self:debug("UpdateButtonsPosition")
+
+    -- Safety check: ensure frames are initialized
+    if not MMFrames or not MMFrames.config then
+        return
+    end
+
     local mapPoints = GetPositionData()
 
     local anchor = mapPoints.anchor
@@ -491,8 +497,13 @@ function MinimapPOIMixin:OnLeave()
     _G.GameTooltip:Hide()
 end
 function MinimapPOIMixin:OnClick()
-    _G.QuestPOIButton_OnClick(self)
-    _G.QuestMapFrame_OpenToQuestDetails(self.questID)
+    -- Safety check: ensure QuestPOI functions exist
+    if _G.QuestPOIButton_OnClick then
+        _G.QuestPOIButton_OnClick(self)
+    end
+    if _G.QuestMapFrame_OpenToQuestDetails then
+        _G.QuestMapFrame_OpenToQuestDetails(self.questID)
+    end
 end
 
 function MinimapPOIMixin:UpdateAlpha()
@@ -580,7 +591,10 @@ local function AddPOIsForZone(zoneInfo, numNumericQuests)
                             poiButton.yCoord = yCoord
                             poiButton.instanceID = instanceID
                             if isSuperTracked then
-                                _G.QuestPOI_SelectButton(poiButton)
+                                -- Safety check: ensure QuestPOI_SelectButton exists
+                                if _G.QuestPOI_SelectButton then
+                                    _G.QuestPOI_SelectButton(poiButton)
+                                end
                             end
                         end
                     end
@@ -647,10 +661,20 @@ function MinimapAdv:RemoveAllPOIs()
             poiButton:Remove()
         end
     end
-    _G.QuestPOI_ClearSelection(_G.Minimap)
+
+    -- Safety check: ensure QuestPOI_ClearSelection exists
+    if _G.QuestPOI_ClearSelection then
+        _G.QuestPOI_ClearSelection(_G.Minimap)
+    end
 end
 
 function MinimapAdv:InitializePOI()
+    -- Safety check: ensure QuestPOI_Initialize exists
+    if not _G.QuestPOI_Initialize then
+        self:debug("QuestPOI_Initialize not available, skipping POI initialization")
+        return false
+    end
+
     _G.QuestPOI_Initialize(_G.Minimap, function(poiButton)
         _G.Mixin(poiButton, MinimapPOIMixin)
         poiButton:SetScript("OnEnter", poiButton.OnEnter)
@@ -661,12 +685,17 @@ function MinimapAdv:InitializePOI()
         poiButton:UpdateAlpha()
     end)
     poiTable = _G.Minimap.poiTable
+    return true
 end
 
 function MinimapAdv:UpdatePOIEnabled()
     if db.poi.enabled then
         if not poiTable then
-            self:InitializePOI()
+            local success = self:InitializePOI()
+            if not success then
+                self:debug("POI initialization failed, disabling POI")
+                return
+            end
         end
 
         self:RegisterEvent("QUEST_POI_UPDATE", "POIUpdate")
@@ -773,6 +802,12 @@ end
 ]]--
 function MinimapAdv:DungeonDifficultyUpdate()
     self:debug("DungeonDifficultyUpdate")
+
+    -- Safety check: ensure frames are initialized
+    if not MMFrames or not MMFrames.info or not MMFrames.info.DungeonDifficulty then
+        return
+    end
+
     -- If in a Party/Raid then show Dungeon Difficulty text
     MMFrames.info.DungeonDifficulty.text:SetText("")
     local instanceName, instanceType, difficulty, _, maxPlayers, _, _, _, currPlayers = _G.GetInstanceInfo()
@@ -897,6 +932,11 @@ end
 -- MINIMAP UPDATES --
 ---------------------
 function MinimapAdv:Update()
+    -- Safety check: ensure frames are initialized
+    if not MMFrames or not MMFrames.info then
+        return
+    end
+
     UpdateProcessing = true     -- Stops individual update functions from calling UpdateInfoPosition
     self:ZoneChange()
     self:DungeonDifficultyUpdate()
@@ -1290,6 +1330,12 @@ local hostilePvPTypes = {
 }
 function MinimapAdv:ZoneChange(event, ...)
     self:debug("ZoneChange", event, ...)
+
+    -- Safety check: ensure frames are initialized
+    if not MMFrames or not MMFrames.info or not MMFrames.info.zoneIndicator then
+        return
+    end
+
     local r, g, b = 0.5, 0.5, 0.5
     local pvpType = _G.C_PvP.GetZonePVPInfo()
     if pvpType == "sanctuary" then
@@ -1750,7 +1796,12 @@ end
 ----------
 function MinimapAdv:RefreshMod()
     db = self.db.profile
-    self:Update()
+
+    -- Only update if frames are initialized
+    if MMFrames and MMFrames.info then
+        self:Update()
+    end
+
     self:UpdatePOIEnabled()
 end
 
