@@ -113,6 +113,15 @@ end
 
 -- Determine if this is an upgrade from old version
 function SetupSystem:IsUpgrade()
+    -- First check if setup has already been completed for current version
+    if RealUI.db and RealUI.db.global then
+        local completedVersion = RealUI.db.global[SetupSystem.SETUP_VERSION_KEY]
+        if completedVersion == SetupSystem.CURRENT_VERSION then
+            debug("Setup already completed for current version, not an upgrade")
+            return false, nil
+        end
+    end
+
     local hasOldConfig, oldVersion = self:DetectOldConfiguration()
 
     if not hasOldConfig then
@@ -125,10 +134,16 @@ function SetupSystem:IsUpgrade()
         local currentVer = self:ParseVersion(SetupSystem.CURRENT_VERSION)
 
         if oldVer and currentVer then
-            -- Check if upgrading from 2.x to 3.x (major version change)
+            -- Check if upgrading from older version (major version change)
             if oldVer[1] < currentVer[1] then
                 debug("Detected major version upgrade:", oldVersion, "->", SetupSystem.CURRENT_VERSION)
                 return true, oldVersion
+            end
+
+            -- If versions are the same, not an upgrade
+            if oldVer[1] == currentVer[1] and oldVer[2] == currentVer[2] and oldVer[3] == currentVer[3] then
+                debug("Same version detected, not an upgrade")
+                return false, nil
             end
         end
     end
@@ -480,11 +495,17 @@ function SetupSystem:CompleteSetup()
     if RealUI.db.char and RealUI.db.char.init then
         RealUI.db.char.init.initialized = true
         RealUI.db.char.init.installStage = -1
+        -- Clear the upgrade flag
+        RealUI.db.char.init.hadPreviousVersion = false
+        RealUI.db.char.init.previousVersion = nil
     end
 
-    -- Clear migration flag
+    -- Clear migration and upgrade flags in state
     setupState.migrationRequired = false
     setupState.needsSetup = false
+    setupState.isUpgrade = false
+    setupState.oldVersion = nil
+    setupState.detectedOldConfig = false
 
     debug("Setup completed for version", SetupSystem.CURRENT_VERSION)
 
@@ -530,6 +551,15 @@ function SetupSystem:ShowUpgradeNotification()
         return
     end
 
+    -- Don't show if setup is already complete for this version
+    if RealUI.db and RealUI.db.global then
+        local completedVersion = RealUI.db.global[SetupSystem.SETUP_VERSION_KEY]
+        if completedVersion == SetupSystem.CURRENT_VERSION then
+            debug("Setup already completed for this version, skipping notification")
+            return
+        end
+    end
+
     local oldVer = setupState.oldVersion or "previous version"
     local message = ("Welcome to RealUI %s! You've been upgraded from %s.\n\nPlease run the setup wizard to configure your new installation."):format(
         SetupSystem.CURRENT_VERSION,
@@ -548,7 +578,7 @@ function SetupSystem:ShowUpgradeNotification()
                 {
                     text = "Run Setup",
                     callback = function()
-                        SetupSystem:StartSetup()
+                        SetupSystem:StartSetup(true)
                     end
                 },
                 {
