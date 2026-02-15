@@ -776,6 +776,77 @@ function RealUI:OnInitialize()
         end
     )
 
+    -- Installation Wizard commands
+    self:RegisterChatCommand(
+        "installwizard",
+        function(input)
+            if self.InstallWizard then
+                if input == "start" then
+                    local success = self.InstallWizard:Start()
+                    print("Installation wizard", success and "started" or "not needed")
+                elseif input == "reset" then
+                    self.InstallWizard:Reset()
+                    print("Installation wizard reset")
+                elseif input == "complete" then
+                    self.InstallWizard:Complete()
+                    print("Installation marked as complete")
+                else
+                    print("Usage: /installwizard <start|reset|complete>")
+                end
+            else
+                print("InstallWizard not available")
+            end
+        end
+    )
+
+    -- Tutorial System commands
+    self:RegisterChatCommand(
+        "tutorial",
+        function(input)
+            if self.TutorialSystem then
+                if input == "start" then
+                    self.TutorialSystem:Start()
+                    print("Tutorial started")
+                elseif input == "skip" then
+                    self.TutorialSystem:Skip()
+                    print("Tutorial skipped")
+                elseif input == "reset" then
+                    self.TutorialSystem:Reset()
+                    print("Tutorial reset")
+                elseif input == "help" then
+                    self.TutorialSystem:ShowSetupInstructions()
+                else
+                    print("Usage: /tutorial <start|skip|reset|help>")
+                end
+            else
+                print("TutorialSystem not available")
+            end
+        end
+    )
+
+    -- Character initialization commands
+    self:RegisterChatCommand(
+        "charinit",
+        function(input)
+            if self.CharacterInit then
+                if input == "setup" then
+                    self.CharacterInit:Setup()
+                    print("Character setup completed")
+                elseif input == "reset" then
+                    self.CharacterInit:Reset()
+                    print("Character initialization reset")
+                elseif input == "info" then
+                    local info = self.CharacterInit:GetCharacterInfo()
+                    print("Character:", info.fullName, "Role:", info.role, "Level:", info.level)
+                else
+                    print("Usage: /charinit <setup|reset|info>")
+                end
+            else
+                print("CharacterInit not available")
+            end
+        end
+    )
+
     -- Initialize chat frame positioning if needed
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()

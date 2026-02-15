@@ -19,6 +19,10 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\Settings.lua"/>
     <Script file="Core\Positioners.lua"/>
     <Script file="Core\Tutorial.lua"/>
+    <Script file="Core\TutorialSystem.lua"/>
+    <Script file="Core\InstallWizard.lua"/>
+    <Script file="Core\InstallUI.lua"/>
+    <Script file="Core\CharacterInit.lua"/>
     <Script file="Core\Notifications.lua"/>
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>

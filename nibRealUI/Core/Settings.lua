@@ -386,10 +386,33 @@ function RealUI:InstallProcedure()
     db.registeredChars[self.key] = true
     dbg.minipatches = nil
 
+    -- Initialize installation wizard if available
+    if self.InstallWizard then
+        self.InstallWizard:Initialize()
+    end
+
+    -- Initialize character initialization system if available
+    if self.CharacterInit then
+        self.CharacterInit:Initialize()
+    end
+
+    -- Initialize tutorial system if available
+    if self.TutorialSystem then
+        self.TutorialSystem:Initialize()
+    end
+
     -- Primary Stages
     debug("Stage", dbc.init.installStage)
     if dbc.init.installStage > -1 then
-        PrimaryInstallation()
+        -- Check if we should use the new installation wizard
+        if self.InstallWizard and (self.InstallWizard:IsFirstTime() or self.InstallWizard:NeedsResume()) then
+            -- Delay showing the wizard to allow UI to fully load
+            _G.C_Timer.After(1, function()
+                self.InstallWizard:Start()
+            end)
+        else
+            PrimaryInstallation()
+        end
     else
         MiniPatchInstallation(newVer)
     end
