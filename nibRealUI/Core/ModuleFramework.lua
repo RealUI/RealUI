@@ -274,6 +274,152 @@ function ModuleFramework:IsModuleDisabled(moduleName)
 end
 
 -- Enhanced Module Enable/Disable with Dependency Handling
+
+-- Enhanced Module Loading and Unloading Mechanisms
+function ModuleFramework:LoadModule(moduleName)
+    if not registeredModules[moduleName] then
+        debug("Cannot load unregistered module:", moduleName)
+        return false
+    end
+
+    local currentState = self:GetModuleState(moduleName)
+    if currentState == MODULE_STATES.ENABLED then
+        debug("Module already loaded and enabled:", moduleName)
+        return true
+    end
+
+    debug("Loading module:", moduleName)
+    self:SetModuleState(moduleName, MODULE_STATES.INITIALIZING)
+
+    -- Load dependencies first
+    local dependencies = moduleDependencies[moduleName] or {}
+    for _, depName in ipairs(dependencies) do
+        if not self:IsModuleEnabled(depName) then
+            debug("Loading dependency:", depName, "for module:", moduleName)
+            local success = self:LoadModule(depName)
+            if not success then
+                debug("Failed to load dependency:", depName, "for module:", moduleName)
+                self:SetModuleState(moduleName, MODULE_STATES.ERROR)
+                return false
+            end
+        end
+    end
+
+    -- Get or create the module object
+    local moduleObj = RealUI:GetModule(moduleName, true)
+    if not moduleObj then
+        debug("Module object not found:", moduleName)
+        self:SetModuleState(moduleName, MODULE_STATES.ERROR)
+        return false
+    end
+
+    -- Initialize module if needed
+    local success, err = pcall(function()
+        if not moduleObj:IsEnabled() then
+            -- Call module-specific initialization if available
+            if moduleObj.OnModuleLoad then
+                moduleObj:OnModuleLoad()
+            end
+
+            -- Enable the module
+            moduleObj:Enable()
+        end
+    end)
+
+    if success then
+        self:SetModuleState(moduleName, MODULE_STATES.ENABLED)
+        debug("Module loaded successfully:", moduleName)
+
+        -- Update profile setting
+        if RealUI.db and RealUI.db.profile.modules then
+            RealUI.db.profile.modules[moduleName] = true
+        end
+
+        -- Notify other modules of successful load
+        self:BroadcastModuleMessage("ModuleFramework", "MODULE_LOADED", moduleName)
+
+        return true
+    else
+        debug("Failed to load module:", moduleName, "error:", err)
+        self:SetModuleState(moduleName, MODULE_STATES.ERROR)
+        return false
+    end
+end
+
+function ModuleFramework:UnloadModule(moduleName)
+    if not registeredModules[moduleName] then
+        debug("Cannot unload unregistered module:", moduleName)
+        return false
+    end
+
+    local currentState = self:GetModuleState(moduleName)
+    if currentState == MODULE_STATES.DISABLED or currentState == MODULE_STATES.REGISTERED then
+        debug("Module already unloaded:", moduleName)
+        return true
+    end
+
+    debug("Unloading module:", moduleName)
+    self:SetModuleState(moduleName, MODULE_STATES.DISABLING)
+
+    -- Unload dependent modules first
+    for name, deps in pairs(moduleDependencies) do
+        for _, depName in ipairs(deps) do
+            if depName == moduleName and self:IsModuleEnabled(name) then
+                debug("Unloading dependent module:", name, "for module:", moduleName)
+                local success = self:UnloadModule(name)
+                if not success then
+                    debug("Failed to unload dependent module:", name, "for module:", moduleName)
+                end
+            end
+        end
+    end
+
+    -- Get the module object
+    local moduleObj = RealUI:GetModule(moduleName, true)
+    if not moduleObj then
+        debug("Module object not found:", moduleName)
+        self:SetModuleState(moduleName, MODULE_STATES.ERROR)
+        return false
+    end
+
+    -- Unload the module with proper cleanup
+    local success, err = pcall(function()
+        if moduleObj:IsEnabled() then
+            -- Call module-specific cleanup before unloading
+            if moduleObj.OnModuleUnload then
+                moduleObj:OnModuleUnload()
+            end
+
+            -- Perform resource cleanup
+            if moduleObj.CleanupResources then
+                moduleObj:CleanupResources()
+            end
+
+            -- Disable the module
+            moduleObj:Disable()
+        end
+    end)
+
+    if success then
+        self:SetModuleState(moduleName, MODULE_STATES.DISABLED)
+        debug("Module unloaded successfully:", moduleName)
+
+        -- Update profile setting
+        if RealUI.db and RealUI.db.profile.modules then
+            RealUI.db.profile.modules[moduleName] = false
+        end
+
+        -- Notify other modules of successful unload
+        self:BroadcastModuleMessage("ModuleFramework", "MODULE_UNLOADED", moduleName)
+
+        return true
+    else
+        debug("Failed to unload module:", moduleName, "error:", err)
+        self:SetModuleState(moduleName, MODULE_STATES.ERROR)
+        return false
+    end
+end
+
 function ModuleFramework:EnableModule(moduleName)
     if not registeredModules[moduleName] then
         debug("Cannot enable unregistered module:", moduleName)
@@ -652,7 +798,36 @@ function ModuleFramework:GetSystemPerformanceStats()
     return stats
 end
 
--- Inter-Module Communication
+-- Enhanced Inter-Module Communication and Event Coordination
+local messageHandlers = {}
+local eventCoordinator = {}
+local messageQueue = {}
+local isProcessingMessages = false
+
+function ModuleFramework:RegisterMessageHandler(moduleName, messageType, handler)
+    if not registeredModules[moduleName] then
+        debug("Cannot register message handler for unregistered module:", moduleName)
+        return false
+    end
+
+    if not messageHandlers[moduleName] then
+        messageHandlers[moduleName] = {}
+    end
+
+    messageHandlers[moduleName][messageType] = handler
+    debug("Registered message handler:", moduleName, "->", messageType)
+    return true
+end
+
+function ModuleFramework:UnregisterMessageHandler(moduleName, messageType)
+    if messageHandlers[moduleName] then
+        messageHandlers[moduleName][messageType] = nil
+        debug("Unregistered message handler:", moduleName, "->", messageType)
+        return true
+    end
+    return false
+end
+
 function ModuleFramework:SendModuleMessage(fromModule, toModule, message, ...)
     debug("Module message:", fromModule, "->", toModule, ":", message)
 
@@ -661,8 +836,26 @@ function ModuleFramework:SendModuleMessage(fromModule, toModule, message, ...)
         return false
     end
 
-    -- Send message through RealUI's message system
-    RealUI:SendMessage("REALUI_MODULE_MESSAGE", fromModule, toModule, message, ...)
+    -- Check if target module is enabled
+    if not self:IsModuleEnabled(toModule) then
+        debug("Target module not enabled:", toModule)
+        return false
+    end
+
+    -- Queue message for processing
+    table.insert(messageQueue, {
+        from = fromModule,
+        to = toModule,
+        message = message,
+        args = {...},
+        timestamp = time()
+    })
+
+    -- Process messages if not already processing
+    if not isProcessingMessages then
+        self:ProcessMessageQueue()
+    end
+
     return true
 end
 
@@ -674,13 +867,208 @@ function ModuleFramework:BroadcastModuleMessage(fromModule, message, ...)
         return false
     end
 
+    local sentCount = 0
     -- Broadcast to all enabled modules
     for name in pairs(registeredModules) do
         if name ~= fromModule and self:IsModuleEnabled(name) then
-            self:SendModuleMessage(fromModule, name, message, ...)
+            if self:SendModuleMessage(fromModule, name, message, ...) then
+                sentCount = sentCount + 1
+            end
         end
     end
 
+    debug("Broadcast sent to", sentCount, "modules")
+    return sentCount > 0
+end
+
+function ModuleFramework:ProcessMessageQueue()
+    if isProcessingMessages then
+        return
+    end
+
+    isProcessingMessages = true
+
+    while #messageQueue > 0 do
+        local msg = table.remove(messageQueue, 1)
+
+        -- Check if message handler exists
+        if messageHandlers[msg.to] and messageHandlers[msg.to][msg.message] then
+            local success, err = pcall(messageHandlers[msg.to][msg.message], msg.from, msg.message, unpack(msg.args))
+            if not success then
+                debug("Message handler error:", msg.to, msg.message, err)
+            end
+        else
+            -- Fallback to RealUI's message system
+            RealUI:SendMessage("REALUI_MODULE_MESSAGE", msg.from, msg.to, msg.message, unpack(msg.args))
+        end
+    end
+
+    isProcessingMessages = false
+end
+
+-- Event Coordination System
+function ModuleFramework:RegisterEventCoordinator(eventName, coordinatorFunc)
+    eventCoordinator[eventName] = coordinatorFunc
+    debug("Registered event coordinator for:", eventName)
+    return true
+end
+
+function ModuleFramework:UnregisterEventCoordinator(eventName)
+    eventCoordinator[eventName] = nil
+    debug("Unregistered event coordinator for:", eventName)
+    return true
+end
+
+function ModuleFramework:CoordinateEvent(eventName, ...)
+    debug("Coordinating event:", eventName)
+
+    if eventCoordinator[eventName] then
+        local success, err = pcall(eventCoordinator[eventName], eventName, ...)
+        if not success then
+            debug("Event coordinator error:", eventName, err)
+            return false
+        end
+    end
+
+    -- Broadcast event to all enabled modules
+    return self:BroadcastModuleMessage("ModuleFramework", "EVENT_COORDINATED", eventName, ...)
+end
+
+-- Module State Persistence and Restoration
+local moduleStateHistory = {}
+local maxHistoryEntries = 10
+
+function ModuleFramework:SaveModuleState(moduleName, stateData)
+    if not registeredModules[moduleName] then
+        debug("Cannot save state for unregistered module:", moduleName)
+        return false
+    end
+
+    if not moduleStateHistory[moduleName] then
+        moduleStateHistory[moduleName] = {}
+    end
+
+    -- Add new state entry
+    table.insert(moduleStateHistory[moduleName], {
+        timestamp = time(),
+        state = self:GetModuleState(moduleName),
+        data = stateData or {},
+        enabled = self:IsModuleEnabled(moduleName)
+    })
+
+    -- Limit history size
+    while #moduleStateHistory[moduleName] > maxHistoryEntries do
+        table.remove(moduleStateHistory[moduleName], 1)
+    end
+
+    debug("Saved state for module:", moduleName)
+    return true
+end
+
+function ModuleFramework:RestoreModuleState(moduleName, historyIndex)
+    if not moduleStateHistory[moduleName] then
+        debug("No state history for module:", moduleName)
+        return false
+    end
+
+    historyIndex = historyIndex or #moduleStateHistory[moduleName]
+    local stateEntry = moduleStateHistory[moduleName][historyIndex]
+
+    if not stateEntry then
+        debug("Invalid history index for module:", moduleName, historyIndex)
+        return false
+    end
+
+    debug("Restoring state for module:", moduleName, "from index:", historyIndex)
+
+    -- Restore enabled state
+    if stateEntry.enabled and not self:IsModuleEnabled(moduleName) then
+        self:EnableModule(moduleName)
+    elseif not stateEntry.enabled and self:IsModuleEnabled(moduleName) then
+        self:DisableModule(moduleName)
+    end
+
+    -- Call module-specific state restoration if available
+    local moduleObj = RealUI:GetModule(moduleName, true)
+    if moduleObj and moduleObj.RestoreState then
+        local success, err = pcall(moduleObj.RestoreState, moduleObj, stateEntry.data)
+        if not success then
+            debug("Module state restoration error:", moduleName, err)
+            return false
+        end
+    end
+
+    return true
+end
+
+function ModuleFramework:GetModuleStateHistory(moduleName)
+    return moduleStateHistory[moduleName] or {}
+end
+
+function ModuleFramework:ClearModuleStateHistory(moduleName)
+    if moduleName then
+        moduleStateHistory[moduleName] = nil
+        debug("Cleared state history for module:", moduleName)
+    else
+        moduleStateHistory = {}
+        debug("Cleared all module state history")
+    end
+    return true
+end
+
+-- Persistent Module Configuration
+function ModuleFramework:SaveModuleConfiguration()
+    if not RealUI.db or not RealUI.db.profile then
+        debug("Database not available for configuration save")
+        return false
+    end
+
+    local config = {
+        moduleStates = {},
+        dependencies = moduleDependencies,
+        loadOrder = moduleLoadOrder,
+        timestamp = time()
+    }
+
+    -- Save current module states
+    for name in pairs(registeredModules) do
+        config.moduleStates[name] = {
+            state = self:GetModuleState(name),
+            enabled = self:IsModuleEnabled(name)
+        }
+    end
+
+    RealUI.db.profile.moduleFrameworkConfig = config
+    debug("Module configuration saved")
+    return true
+end
+
+function ModuleFramework:LoadModuleConfiguration()
+    if not RealUI.db or not RealUI.db.profile or not RealUI.db.profile.moduleFrameworkConfig then
+        debug("No saved module configuration found")
+        return false
+    end
+
+    local config = RealUI.db.profile.moduleFrameworkConfig
+    debug("Loading module configuration from:", config.timestamp)
+
+    -- Restore module states
+    for name, stateInfo in pairs(config.moduleStates) do
+        if registeredModules[name] then
+            if stateInfo.enabled and not self:IsModuleEnabled(name) then
+                self:EnableModule(name)
+            elseif not stateInfo.enabled and self:IsModuleEnabled(name) then
+                self:DisableModule(name)
+            end
+        end
+    end
+
+    -- Restore load order if available
+    if config.loadOrder then
+        moduleLoadOrder = config.loadOrder
+    end
+
+    debug("Module configuration loaded successfully")
     return true
 end
 
@@ -712,6 +1100,16 @@ function ModuleFramework:Initialize()
         debug("Dependency validation failed, issues:", #issues)
     end
 
+    -- Load saved module configuration if available
+    self:LoadModuleConfiguration()
+
+    -- Initialize message processing system
+    messageQueue = {}
+    isProcessingMessages = false
+
+    -- Initialize state history system
+    moduleStateHistory = {}
+
     isInitialized = true
     debug("ModuleFramework initialized successfully")
     return true
@@ -720,14 +1118,26 @@ end
 function ModuleFramework:Shutdown()
     debug("Shutting down ModuleFramework")
 
-    -- Disable all modules in reverse load order
+    -- Save current module configuration before shutdown
+    self:SaveModuleConfiguration()
+
+    -- Unload all modules in reverse load order
     local loadOrder = self:GetLoadOrder()
     for i = #loadOrder, 1, -1 do
         local moduleName = loadOrder[i]
         if self:IsModuleEnabled(moduleName) then
-            self:DisableModule(moduleName)
+            self:UnloadModule(moduleName)
         end
     end
+
+    -- Clean up message system
+    messageQueue = {}
+    messageHandlers = {}
+    eventCoordinator = {}
+    singMessages = false
+
+    -- Clean up state history
+    moduleStateHistory = {}
 
     -- Clean up registration data
     registeredModules = {}
@@ -742,6 +1152,11 @@ end
 function ModuleFramework:OnProfileUpdate(event, profile)
     debug("OnProfileUpdate", event, profile)
 
+    -- Save current state before profile change
+    for moduleName in pairs(registeredModules) do
+        self:SaveModuleState(moduleName)
+    end
+
     -- Update all modules with the profile change
     for moduleName in pairs(registeredModules) do
         local moduleObj = RealUI:GetModule(moduleName, true)
@@ -749,9 +1164,12 @@ function ModuleFramework:OnProfileUpdate(event, profile)
             moduleObj:OnProfileUpdate(event, profile)
         end
     end
+
+    -- Save configuration after profile update
+    self:SaveModuleConfiguration()
 end
 
--- Utility Functions
+-- Enhanced Utility Functions
 function ModuleFramework:IsInitialized()
     return isInitialized
 end
@@ -762,7 +1180,9 @@ function ModuleFramework:GetFrameworkStatus()
         totalModules = self:GetSystemPerformanceStats().totalModules,
         enabledModules = self:GetSystemPerformanceStats().enabledModules,
         loadOrder = moduleLoadOrder,
-        hasValidDependencies = self:ValidateDependencies()
+        hasValidDependencies = self:ValidateDependencies(),
+        messageQueueSize = #messageQueue,
+        stateHistoryEntries = self:GetStateHistoryCount()
     }
 end
 
@@ -772,8 +1192,87 @@ function ModuleFramework:GetDebugInfo()
         modules = self:GetRegisteredModules(),
         performance = self:GetSystemPerformanceStats(),
         loadOrder = moduleLoadOrder,
-        dependencies = moduleDependencies
+        dependencies = moduleDependencies,
+        messageHandlers = messageHandlers,
+        eventCoordinators = eventCoordinator,
+        stateHistory = moduleStateHistory
     }
+end
+
+function ModuleFramework:GetStateHistoryCount()
+    local count = 0
+    for _, history in pairs(moduleStateHistory) do
+        count = count + #history
+    end
+    return count
+end
+
+-- Module Loading Batch Operations
+function ModuleFramework:LoadAllModules()
+    debug("Loading all registered modules")
+    local loadOrder = self:GetLoadOrder()
+    local successCount = 0
+    local failureCount = 0
+
+    for _, moduleName in ipairs(loadOrder) do
+        if self:LoadModule(moduleName) then
+            successCount = successCount + 1
+        else
+            failureCount = failureCount + 1
+        end
+    end
+
+    debug("Batch load completed:", successCount, "success,", failureCount, "failures")
+    return successCount, failureCount
+end
+
+function ModuleFramework:UnloadAllModules()
+    debug("Unloading all modules")
+    local loadOrder = self:GetLoadOrder()
+    local successCount = 0
+    local failureCount = 0
+
+    -- Unload in reverse order
+    for i = #loadOrder, 1, -1 do
+        local moduleName = loadOrder[i]
+        if self:UnloadModule(moduleName) then
+            successCount = successCount + 1
+        else
+            failureCount = failureCount + 1
+        end
+    end
+
+    debug("Batch unload completed:", successCount, "success,", failureCount, "failures")
+    return successCount, failureCount
+end
+
+-- Resource Management and Cleanup
+function ModuleFramework:PerformResourceCleanup()
+    debug("Performing resource cleanup")
+
+    -- Clean up message queue
+    local oldQueueSize = #messageQueue
+    messageQueue = {}
+
+    -- Clean up old state history entries
+    local cleanedEntries = 0
+    for moduleName, history in pairs(moduleStateHistory) do
+        while #history > maxHistoryEntries do
+            table.remove(history, 1)
+            cleanedEntries = cleanedEntries + 1
+        end
+    end
+
+    -- Force garbage collection for modules
+    for moduleName in pairs(registeredModules) do
+        local moduleObj = RealUI:GetModule(moduleName, true)
+        if moduleObj and moduleObj.CleanupResources then
+            moduleObj:CleanupResources()
+        end
+    end
+
+    debug("Resource cleanup completed:", oldQueueSize, "messages cleared,", cleanedEntries, "history entries cleaned")
+    return true
 end
 
 -- Constants Export
