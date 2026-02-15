@@ -1107,6 +1107,9 @@ function ModuleFramework:Initialize()
     -- Load saved module configuration if available
     self:LoadModuleConfiguration()
 
+    -- Note: Module enabling moved to EnableModulesFromDatabase()
+    -- which is called after database is initialized
+
     -- Initialize message processing system
     messageQueue = {}
     isProcessingMessages = false
@@ -1119,6 +1122,53 @@ function ModuleFramework:Initialize()
     return true
 end
 
+-- Enable modules based on database settings (called after database is ready)
+function ModuleFramework:EnableModulesFromDatabase()
+    if not RealUI.db or not RealUI.db.profile or not RealUI.db.profile.modules then
+        debug("Database not available for module enabling")
+        return false
+    end
+
+    debug("Enabling modules from database settings")
+    local enabledCount = 0
+    local totalCount = 0
+    local failedModules = {}
+
+    for moduleName in pairs(registeredModules) do
+        totalCount = totalCount + 1
+        local shouldEnable = RealUI.db.profile.modules[moduleName]
+        if shouldEnable == nil then
+            -- Use wildcard default if specific setting doesn't exist
+            shouldEnable = RealUI.db.profile.modules["*"]
+        end
+
+        if shouldEnable then
+            debug("Attempting to enable module:", moduleName)
+
+            -- Check if module exists in Ace3
+            local moduleObj = RealUI:GetModule(moduleName, true)
+            if not moduleObj then
+                debug("WARNING: Module object not found for:", moduleName)
+                table.insert(failedModules, moduleName)
+            else
+                if self:EnableModule(moduleName) then
+                    enabledCount = enabledCount + 1
+                    debug("Successfully enabled:", moduleName)
+                else
+                    debug("Failed to enable:", moduleName)
+                    table.insert(failedModules, moduleName)
+                end
+            end
+        end
+    end
+
+    debug("Enabled", enabledCount, "of", totalCount, "modules")
+    if #failedModules > 0 then
+        debug("Failed modules:", table.concat(failedModules, ", "))
+    end
+
+    return true
+end
 function ModuleFramework:Shutdown()
     debug("Shutting down ModuleFramework")
 

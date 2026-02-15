@@ -92,12 +92,16 @@ local function CreateSystemsConfig()
         local order = 10
         for name, info in pairs(modules) do
             order = order + 1
+            local state = RealUI.ModuleFramework:GetModuleState(name)
+            local isEnabled = (state == "enabled")
+
             systemsConfig.args.moduleFramework.args.modules.args[name] = {
                 name = name,
-                desc = ("Type: %s\nState: %s"):format(info.type, RealUI.ModuleFramework:GetModuleState(name)),
+                desc = ("Type: %s\nState: %s"):format(info.type, state),
                 type = "toggle",
                 get = function()
-                    return RealUI.ModuleFramework:IsModuleEnabled(name)
+                    local currentState = RealUI.ModuleFramework:GetModuleState(name)
+                    return currentState == "enabled"
                 end,
                 set = function(info, value)
                     if value then
@@ -105,6 +109,10 @@ local function CreateSystemsConfig()
                     else
                         RealUI.ModuleFramework:DisableModule(name)
                     end
+                    -- Refresh the config to show updated state
+                    _G.C_Timer.After(0.1, function()
+                        _G.LibStub("AceConfigRegistry-3.0"):NotifyChange("RealUI")
+                    end)
                 end,
                 order = order,
             }

@@ -476,6 +476,9 @@ function RealUI:OnInitialize()
         self.DeploymentValidator:Initialize()
     end
 
+    -- Note: Module enabling moved to PLAYER_LOGIN to ensure all modules are registered first
+    -- Modules register themselves in OnInitialize which happens during addon loading
+
     -- Post-initialize LayoutManager with database
     if self.LayoutManager then
         self.LayoutManager:LoadLayoutState()
@@ -1096,6 +1099,11 @@ local onLoadMessages = {
 }
 function RealUI:OnEnable()
     debug("OnEnable starting", dbc.init.installStage)
+
+    -- Enable modules from database (after all modules have registered)
+    if self.ModuleFramework then
+        self.ModuleFramework:EnableModulesFromDatabase()
+    end
 
     -- Post-initialize HuD positioning system with database
     if self.HuDPositioning and not self.HuDPositioning:GetHuDState().initialized then

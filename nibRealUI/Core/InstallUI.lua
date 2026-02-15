@@ -7,6 +7,11 @@ local _, private = ...
 local RealUI = private.RealUI
 local debug = RealUI.GetDebug("InstallUI")
 
+-- Aurora --
+local Aurora = _G.Aurora
+local Base = Aurora.Base
+local Color = Aurora.Color
+
 -- Installation UI
 -- Provides visual interface for the installation wizard
 
@@ -17,6 +22,10 @@ InstallUI:SetPoint("CENTER")
 InstallUI:SetSize(550, 400)
 InstallUI:SetFrameStrata("DIALOG")
 InstallUI:Hide()
+
+-- Add backdrop with texture
+Base.SetBackdrop(InstallUI, Color.frame, 0.95)
+InstallUI:SetBackdropBorderColor(1, 1, 1, 1)
 
 -- Title
 local title = InstallUI:CreateFontString(nil, "ARTWORK", "GameFont_Gigantic")
