@@ -30,6 +30,14 @@ end
 
 ----------
 function SpellAlerts:OnInitialize()
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "enhancement", {}, {
+            description = "Spell alert system with positioning integration",
+            version = "1.0.0"
+        })
+    end
+
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 

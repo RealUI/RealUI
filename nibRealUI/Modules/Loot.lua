@@ -510,6 +510,14 @@ function Loot:RefreshMod()
 end
 
 function Loot:OnInitialize()
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "enhancement", {}, {
+            description = "Loot frame enhancements and positioning",
+            version = "1.0.0"
+        })
+    end
+
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {

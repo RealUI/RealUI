@@ -132,6 +132,14 @@ function WorldMarker:RefreshMod()
 end
 
 function WorldMarker:OnInitialize()
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "enhancement", {}, {
+            description = "World marker and utility enhancements",
+            version = "1.0.0"
+        })
+    end
+
     local frame = _G.CreateFrame("Frame", "RealUI_WorldMarker", _G.Minimap)
     frame:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 1, 1)
     frame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMRIGHT", 1, -1)

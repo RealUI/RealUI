@@ -126,6 +126,14 @@ end
 
 ----------
 function EventNotifier:OnInitialize()
+    -- Register with ModuleFramework
+    if RealUI.ModuleFramework then
+        RealUI:RegisterRealUIModule(MODNAME, "enhancement", {}, {
+            description = "Game event detection and notification system",
+            version = "1.0.0"
+        })
+    end
+
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = { --TODO: convert to global
