@@ -29,6 +29,12 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\ResolutionOptimizer.lua"/>
     <Script file="Core\CompatibilityManager.lua"/>
     <Script file="Core\ProfileManager.lua"/>
+    <Script file="Core\SystemIntegration.lua"/>
+    <Script file="Core\ErrorRecovery.lua"/>
+    <Script file="Core\ResourceManager.lua"/>
+    <Script file="Core\UserExperiencePolish.lua"/>
+    <Script file="Core\DeploymentValidator.lua"/>
+    <Script file="Core\FinalMigrations.lua"/>
     <Script file="Core\AdvancedFeaturesTest.lua"/>
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>

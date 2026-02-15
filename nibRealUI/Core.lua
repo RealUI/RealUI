@@ -407,6 +407,31 @@ function RealUI:OnInitialize()
         self.DiagnosticTools:Initialize()
     end
 
+    -- Initialize Error Recovery System
+    if self.ErrorRecovery then
+        self.ErrorRecovery:Initialize()
+    end
+
+    -- Initialize Resource Manager
+    if self.ResourceManager then
+        self.ResourceManager:Initialize()
+    end
+
+    -- Initialize User Experience Polish
+    if self.UXPolish then
+        self.UXPolish:Initialize()
+    end
+
+    -- Initialize Final Migrations
+    if self.FinalMigrations then
+        self.FinalMigrations:Initialize()
+    end
+
+    -- Initialize Deployment Validator
+    if self.DeploymentValidator then
+        self.DeploymentValidator:Initialize()
+    end
+
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
     self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
@@ -1036,6 +1061,11 @@ function RealUI:OnInitialize()
 
     -- Mark framework as initialized
     RealUI.isInitialized = true
+
+    -- Initialize System Integration (must be last)
+    if self.SystemIntegration then
+        self.SystemIntegration:Initialize()
+    end
 
     -- Initialization complete message
     _G.print(("RealUI %s loaded."):format(RealUI:GetVerString(true)))
