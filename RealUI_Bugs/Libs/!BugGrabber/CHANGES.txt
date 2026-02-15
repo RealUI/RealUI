@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------
-r352 | funkehdude | 2026-02-11 22:47:33 +0000 (Wed, 11 Feb 2026) | 1 line
+r354 | funkehdude | 2026-02-15 01:50:46 +0000 (Sun, 15 Feb 2026) | 1 line
 Changed paths:
    M /trunk/BugGrabber.lua
 
-Another secrets parsing fix
+Another fix for "attempted to index a forbidden table" not having stack info
 ------------------------------------------------------------------------
 
