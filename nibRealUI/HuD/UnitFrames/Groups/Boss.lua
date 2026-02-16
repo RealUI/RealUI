@@ -106,7 +106,8 @@ local function CreateAuras(parent)
         -- Cast by NPC
         if UnitFrames.db.profile.boss.showNPCAuras then
             local guid = _G.UnitGUID(sourceUnit)
-            if guid and not RealUI.isSecret(guid) then
+            -- Check if guid is secret before attempting string operations
+            if guid and not RealUI.isSecret(guid) and type(guid) == "string" then
                 local unitType = _G.strsplit("-", guid)
                 local isNPC = (unitType == "Creature")
                 return isNPC
