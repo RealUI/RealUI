@@ -33,6 +33,11 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
         end
 
         local scanningTooltip = _G.RealUIScanningTooltip
+        if not scanningTooltip then
+            scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
+            scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
+        end
+
         function GetNumSockets(itemLink)
             scanningTooltip:ClearLines()
             local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
