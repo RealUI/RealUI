@@ -91,7 +91,12 @@ local function CreateAuras(parent)
     auras.FilterAura = function(dialog, unit, data)
         --    name, texture, count, debuffType, duration, expiration, caster
         local duration, expiration, sourceUnit = data.duration, data.expirationTime, data.sourceUnit
-        if not sourceUnit or RealUI.isSecret(sourceUnit) or type(sourceUnit) ~= "string" then return false end
+
+        -- Early return if sourceUnit is nil, secret, or not a string
+        if not sourceUnit then return false end
+        if RealUI.isSecret(sourceUnit) then return false end
+        if type(sourceUnit) ~= "string" then return false end
+
         UnitFrames:debug("Boss:FilterAura", dialog, unit, duration, expiration, sourceUnit)
 
 
@@ -100,13 +105,15 @@ local function CreateAuras(parent)
 
         -- Cast by NPC
         if UnitFrames.db.profile.boss.showNPCAuras then
-            local guid, isNPC = _G.UnitGUID(sourceUnit), false
-            if guid then
+            local guid = _G.UnitGUID(sourceUnit)
+            if guid and not RealUI.isSecret(guid) then
                 local unitType = _G.strsplit("-", guid)
-                isNPC = (unitType == "Creature")
+                local isNPC = (unitType == "Creature")
+                return isNPC
             end
-            return isNPC
         end
+
+        return false
     end
     auras.PostCreateButton = function(dialog, button)
         UnitFrames:debug("Boss:PostCreateButton", dialog, button)
