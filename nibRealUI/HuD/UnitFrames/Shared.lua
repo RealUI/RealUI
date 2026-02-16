@@ -446,7 +446,8 @@ local function CreatePowerBar(parent, info, isAngled)
         local powerType
         function Power:UpdateReverse()
             if not ndb.settings then
-                _G.print("settings is missings..")
+                -- Settings not initialized yet, skip update
+                return
             end
             if Power.GetReverseMissing and Power:GetReverseMissing() then
                 Power:SetReversePercent(true)
