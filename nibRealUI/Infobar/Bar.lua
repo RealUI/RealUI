@@ -917,7 +917,9 @@ function Infobar:SettingsUpdate(setting, block)
         for i = 1, 2 do
             watch[i]:SetShown(db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()))
         end
-        block:OnEvent("SettingsUpdate")
+        if block then
+            block:OnEvent("SettingsUpdate")
+        end
     elseif setting == "bgAlpha" then
         self.frame:SetBackdropColor(Aurora.Color.frame, db.bgAlpha)
         self.frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
