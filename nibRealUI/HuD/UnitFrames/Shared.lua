@@ -174,7 +174,8 @@ local function CreateHealthBar(parent, info, isAngled)
         end
             Health.PreUpdate = function(self)
                 self.debugUnit = parent.unit
-                local reversePercentOverride = db.units[parent.unit] and db.units[parent.unit].reversePercent == true
+                -- Check if db.units exists before accessing it
+                local reversePercentOverride = db.units and db.units[parent.unit] and db.units[parent.unit].reversePercent == true
                 self:SetReverseMissing(not ndb.settings.reverseUnitFrameBars)
                 if self.SetReverseMissingSource then
                     self:SetReverseMissingSource("current")
