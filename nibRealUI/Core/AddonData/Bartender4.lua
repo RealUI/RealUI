@@ -94,9 +94,23 @@ function private.AddOns.Bartender4()
                 },
             }, -- [5]
             {
+                ["showgrid"] = true,
+                ["rows"] = 4,
+                ["visibility"] = {
+                    ["custom"] = false,
+                    ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;[mod:ctrl][cursor]show;fade",
+                },
+                ["version"] = 3,
+                ["position"] = {
+                    ["y"] = -360,
+                    ["x"] = 210,
+                    ["point"] = "CENTER",
+                },
+                ["padding"] = -9,
                 ["enabled"] = false,
             }, -- [6]
             {
+                ["showgrid"] = true,
                 ["enabled"] = false,
             }, -- [7]
         },
@@ -186,9 +200,20 @@ function private.AddOns.Bartender4()
                 },
             }, -- [5]
             {
-                ["enabled"] = false,
-            }, -- [6]
-            {
+                ["version"] = 3,
+                ["padding"] = -9,
+                ["showgrid"] = true,
+                ["rows"] = 3,
+                ["hidemacrotext"] = true,
+                ["visibility"] = {
+                    ["custom"] = false,
+                    ["customdata"] = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;show",
+                },
+                ["position"] = {
+                    ["point"] = "BOTTOM",
+                    ["x"] = 0,
+                    ["y"] = 120,
+                },
                 ["enabled"] = false,
             }, -- [7]
         },

@@ -497,6 +497,45 @@ function ActionBars:RefreshMod()
 
     self:RefreshDoodads()
     self:ApplyABSettings()
+    self:UpdateNagaBarState()
+end
+
+function ActionBars:ToggleNagaBar(enable)
+    if not BT4 then return end
+
+    local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
+    if not(BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
+
+    -- Array index [6] = Bartender Bar 2 (the one we want for Naga)
+    local bar6 = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][6]
+    if bar6 then
+        bar6.enabled = enable
+
+        -- Apply the change and refresh
+        local bt4bar = BT4ActionBars and BT4ActionBars.actionbars[6]
+        if bt4bar then
+            if enable then
+                bt4bar:Enable()
+                if bt4bar.UpdateButtonLayout then
+                    bt4bar:UpdateButtonLayout()
+                end
+            else
+                bt4bar:Disable()
+            end
+
+            -- Force Bartender to apply config
+            if BT4ActionBars.ApplyConfig then
+                BT4ActionBars:ApplyConfig()
+            end
+        end
+    end
+
+    RealUI:Print("Razer Naga Action Bar (Bartender Bar 2)", enable and "enabled" or "disabled")
+end
+
+function ActionBars:UpdateNagaBarState()
+    if not db then return end
+    self:ToggleNagaBar(db.enableNagaBar)
 end
 
 function ActionBars:OnProfileUpdate(...)
@@ -519,6 +558,7 @@ function ActionBars:OnInitialize()
     self.db:RegisterDefaults({
         profile = {
             showDoodads = true,
+            enableNagaBar = false,  -- Razer Naga action bar (Bar 2)
             [1] = {     -- DPS/Tank
                 centerPositions = 2,    -- 1 top, 2 bottom
                 sidePositions = 1,      -- 2 Right, 0 Left

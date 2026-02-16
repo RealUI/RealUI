@@ -205,6 +205,17 @@ do -- Other
                         end,
                         order = 20,
                     },
+                    enableNagaBar = {
+                        name = "Enable Razer Naga Action Bar",
+                        desc = "Enable Bartender4 Bar 2 for use with Razer Naga or similar multi-button mice. This bar appears at the bottom center of the screen.",
+                        type = "toggle",
+                        get = function() return ActionBars.db.profile.enableNagaBar end,
+                        set = function(info, value)
+                            ActionBars.db.profile.enableNagaBar = value
+                            ActionBars:ToggleNagaBar(value)
+                        end,
+                        order = 25,
+                    },
                     header = {
                         name = L["General_Position"],
                         type = "header",

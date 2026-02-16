@@ -360,6 +360,7 @@ end
 
 function ns.commands:reset()
     _G.nibRealUIDB = nil
+    _G.Bartender4DB = nil
     _G.ReloadUI()
 end
 
