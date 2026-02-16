@@ -527,54 +527,55 @@ end
 
 function ActionBars:ToggleNagaBar(enable)
     if not BT4 then return end
+    if not BT4ActionBars then return end
 
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
     -- Array index [6] = Bartender Bar 2 (the one we want for Naga)
-    local bar6 = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][6]
-    if bar6 then
-        bar6.enabled = enable
+    local bar6Config = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][6]
+    if bar6Config then
+        if enable then
+            -- Configure bar 6 with proper settings before enabling
+            bar6Config.enabled = true
+            bar6Config.rows = 4
+            bar6Config.padding = fixedSettings.buttonPadding - 10
+            bar6Config.showgrid = true
+            bar6Config.version = 3
+            bar6Config.WoW10Layout = true  -- Prevent WoW 10.0 migration from changing our values
 
-        -- Apply the change and refresh
-        local bt4bar = BT4ActionBars and BT4ActionBars.actionbars[6]
-        if bt4bar then
-            if enable then
-                -- Configure bar 6 with proper settings before enabling
-                bar6.rows = 4
-                bar6.padding = fixedSettings.buttonPadding - 10
-                bar6.showgrid = true
-                bar6.version = 3
+            -- Set position
+            bar6Config.position = {
+                ["y"] = -360,
+                ["x"] = 210,
+                ["point"] = "CENTER",
+                ["scale"] = 1,
+                ["growHorizontal"] = "RIGHT",
+                ["growVertical"] = "DOWN",
+            }
 
-                -- Set position
-                bar6.position = {
-                    ["y"] = -360,
-                    ["x"] = 210,
-                    ["point"] = "CENTER",
-                    ["scale"] = 1,
-                    ["growHorizontal"] = "RIGHT",
-                    ["growVertical"] = "DOWN",
-                }
+            -- Use Bartender4's EnableBar method which handles bar creation
+            BT4ActionBars:EnableBar(6)
 
-                bt4bar:Enable()
-                bt4bar:SetButtons()
-                if bt4bar.UpdateButtonLayout then
-                    bt4bar:UpdateButtonLayout()
-                end
+            -- Force the bar to apply the config we just set
+            local bt4bar = BT4ActionBars.actionbars[6]
+            if bt4bar then
+                bt4bar:ApplyConfig(bar6Config)
 
-                -- Force a second layout update after a short delay to ensure proper sizing
+                -- Force button layout update after a short delay
                 _G.C_Timer.After(0.1, function()
                     if bt4bar.UpdateButtonLayout then
                         bt4bar:UpdateButtonLayout()
                     end
                 end)
-            else
-                bt4bar:Disable()
             end
+        else
+            bar6Config.enabled = false
 
-            -- Force Bartender to apply config
-            if BT4ActionBars.ApplyConfig then
-                BT4ActionBars:ApplyConfig()
+            -- Disable the bar if it exists
+            local bt4bar = BT4ActionBars.actionbars[6]
+            if bt4bar then
+                BT4ActionBars:DisableBar(6)
             end
         end
     end
