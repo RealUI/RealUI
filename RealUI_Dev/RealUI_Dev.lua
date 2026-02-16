@@ -252,14 +252,14 @@ end)
 
 local auroraAddons = {
     "Aurora",
-    "nibRealUI_Dev",
+    "RealUI_Dev",
     "RealUI_Bugs",
 }
 
 local realuiAddons = {
-    "nibRealUI",
-    "nibRealUI_Config",
-    "nibRealUI_Dev",
+    "RealUI",
+    "RealUI_Config",
+    "RealUI_Dev",
     "RealUI_Bugs",
     "RealUI_Chat",
     "RealUI_CombatText",
@@ -360,6 +360,9 @@ end
 
 function ns.commands:reset()
     _G.nibRealUIDB = nil
+    _G.nibRealUICharacter = nil
+    _G.RealUIDB = nil
+    _G.RealUICharacter = nil
     _G.Bartender4DB = nil
     _G.ReloadUI()
 end

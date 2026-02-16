@@ -1,0 +1,29 @@
+## Interface: 120000 120001
+## Title: RealUI
+## Category: RealUI_Core
+## Notes: The essential core of RealUI - A comprehensive interface suite with modular design
+## Author: Nibelheim, Gethe, Hanshi
+## Version: 3.0.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## LoadWith: RealUI_Bugs, Bartender4
+## RequiredDeps: RealUI_Bugs, RealUI_Skins, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
+## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-1.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, Raven, LibSharedMedia-3.0, AceDB-3.0, LibStub, nibRealUI
+## SavedVariables: RealUIDB, nibRealUIDB
+## SavedVariablesPerCharacter: RealUICharacter, nibRealUICharacter
+## X-oUF: oUFembed
+## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
+## X-RealUI-Core: true
+## X-RealUI-LoadPriority: 1
+## Globe-Pre: RealUI_Bugs, RealUI_Skins, Blizzard_Deprecated
+
+Libs\Libs.xml
+Util.lua
+Init.lua
+
+Locale.xml
+
+Core.lua
+GameMenu.lua
+Core.xml
+Modules.xml
+HuD.xml

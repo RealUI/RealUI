@@ -1,0 +1,12 @@
+-- nibRealUI Migration Stub
+-- This addon exists solely to load the old nibRealUIDB and nibRealUICharacter
+-- SavedVariables so they can be migrated to the new RealUI addon.
+--
+-- When WoW loads this addon, it will load the SavedVariables from:
+-- WTF/Account/[AccountName]/SavedVariables/nibRealUI.lua
+--
+-- The variables are automatically made available globally by WoW's SavedVariables
+-- system, so the RealUI addon can access them for migration.
+
+-- This file intentionally left minimal - no code needed
+-- The TOC file's SavedVariables declaration does all the work

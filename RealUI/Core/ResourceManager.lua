@@ -38,7 +38,7 @@ function ResourceManager:GetMemoryUsage()
 
     -- Add memory from related addons
     local relatedAddons = {
-        "nibRealUI_Config",
+        "RealUI_Config",
         "RealUI_Bugs",
         "RealUI_Chat",
         "RealUI_CombatText",
@@ -64,7 +64,7 @@ function ResourceManager:GetCPUUsage()
 
     -- Add CPU from related addons
     local relatedAddons = {
-        "nibRealUI_Config",
+        "RealUI_Config",
         "RealUI_Bugs",
         "RealUI_Chat",
         "RealUI_CombatText",

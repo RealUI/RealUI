@@ -22,7 +22,7 @@ while not loaded do
                 dialog:SetPoint("CENTER")
             end,
             OnAccept = function(dialog, data)
-                _G.C_AddOns.DisableAddOn("nibRealUI")
+                _G.C_AddOns.DisableAddOn(ADDON_NAME)
                 _G.ReloadUI()
             end,
             timeout = 0,

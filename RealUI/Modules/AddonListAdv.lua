@@ -61,8 +61,8 @@ local RealUISet = {
     "Kui_Nameplates",
     "Kui_Nameplates_Core",
     "Masque",
-    "nibRealUI",
-    "nibRealUI_Config",
+    "RealUI",
+    "RealUI_Config",
     "Raven",
     "Raven_Options",
     "RealUI_Bugs",
@@ -362,8 +362,8 @@ function AddonListAdv:OnInitialize()
             end
         end
 
-        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("nibRealUI")})
-        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("nibRealUI_Config")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI")})
+        AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Config")})
         AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Bugs")})
         AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Skins")})
         AddOptDeps({_G.C_AddOns.GetAddOnOptionalDependencies("RealUI_Tooltips")})

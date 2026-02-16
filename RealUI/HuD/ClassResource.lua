@@ -16,14 +16,14 @@ local ClassResource = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0")
 local playerClass = RealUI.charInfo.class.token
 local power
 local powerTextures = {
-    circle = [[Interface\Addons\nibRealUI\Media\PointTracking\Point]],
-    SOUL_SHARDS = [[Interface\Addons\nibRealUI\Media\PointTracking\SoulShard]],
+    circle = [[Interface\Addons\RealUI\Media\PointTracking\Point]],
+    SOUL_SHARDS = [[Interface\Addons\RealUI\Media\PointTracking\SoulShard]],
     HOLY_POWER = {
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower1]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower2]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower3]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower4]],
-        [[Interface\Addons\nibRealUI\Media\PointTracking\HolyPower5]]
+        [[Interface\Addons\RealUI\Media\PointTracking\HolyPower1]],
+        [[Interface\Addons\RealUI\Media\PointTracking\HolyPower2]],
+        [[Interface\Addons\RealUI\Media\PointTracking\HolyPower3]],
+        [[Interface\Addons\RealUI\Media\PointTracking\HolyPower4]],
+        [[Interface\Addons\RealUI\Media\PointTracking\HolyPower5]]
     }
 }
 

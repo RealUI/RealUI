@@ -315,16 +315,16 @@ function RealUI.LoadConfig(app, section, ...)
             true,
             L["Alert_CantOpenInCombat"],
             nil,
-            [[Interface\AddOns\nibRealUI\Media\Notification_Alert]]
+            [[Interface\AddOns\RealUI\Media\Notification_Alert]]
         )
     end
     debug("is loaded", configLoaded)
     if not configLoaded then
         local reason
-        configLoaded, reason = _G.C_AddOns.LoadAddOn("nibRealUI_Config")
+        configLoaded, reason = _G.C_AddOns.LoadAddOn("RealUI_Config")
         debug("LoadAddOn", configLoaded, reason)
         if not configLoaded then
-            _G.error(_G.ADDON_LOAD_FAILED:format("nibRealUI_Config", _G["ADDON_" .. reason]))
+            _G.error(_G.ADDON_LOAD_FAILED:format("RealUI_Config", _G["ADDON_" .. reason]))
         end
     end
     debug("ToggleConfig", RealUI.ToggleConfig)
@@ -457,11 +457,18 @@ function RealUI:OnInitialize()
         self.SetupSystem:Initialize()
     end
 
+    -- Perform SavedVariables Migration (before database initialization)
+    if self.SavedVariablesMigration then
+        local success, reason = self.SavedVariablesMigration:PerformMigration()
+        -- Store result for later notification
+        self.migrationResult = {success = success, reason = reason}
+    end
+
     -- Note: DeploymentValidator moved to after database initialization
 
     -- Initialize AceDB-3.0 database with enhanced defaults from ProfileSystem
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
-    self.db = _G.LibStub("AceDB-3.0"):New("nibRealUIDB", profileDefaults, private.layoutToProfile[1])
+    self.db = _G.LibStub("AceDB-3.0"):New("RealUIDB", profileDefaults, private.layoutToProfile[1])
 
     -- Enhance database with LibDualSpec-1.0 support
     LDS:EnhanceDatabase(self.db, "RealUI")
@@ -1181,6 +1188,14 @@ function RealUI:OnEnable()
                 self.SetupSystem:ShowUpgradeNotification()
             end
         end
+    end
+
+    -- Show migration notification if migration was performed
+    if self.migrationResult and self.SavedVariablesMigration then
+        self.SavedVariablesMigration:ShowMigrationNotification(
+            self.migrationResult.success,
+            self.migrationResult.reason
+        )
     end
 
     -- Check if Installation/Patch is necessary

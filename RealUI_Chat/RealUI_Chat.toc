@@ -1,11 +1,11 @@
 ## Interface: 120000 120001
 ## Title: RealUI Chat
-## Category: RealUI
+## Category: RealUI_Core
 ## Notes: Useful chat mods
 ## Author: Gethe, Hanshi
 ## Version: 3.0.0
-## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
-## RequiredDeps: nibRealUI
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## RequiredDeps: RealUI
 ## SavedVariables: RealUI_ChatDB
 
 Libs\Libs.xml

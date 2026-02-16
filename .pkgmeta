@@ -1,53 +1,53 @@
-package-as: nibRealUI
+package-as: RealUI
 
 ignore:
     - utils
     - CONTRIBUTING.md
     - *.sublime*
     - package.bat
-    - nibRealUI_Dev
+    - RealUI_Dev
     - RealUI_Chat
     - RealUI_CombatText
 
 externals:
-    nibRealUI/Libs/AceAddon-3.0:
+    RealUI/Libs/AceAddon-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceAddon-3.0
-    nibRealUI/Libs/AceBucket-3.0:
+    RealUI/Libs/AceBucket-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
-    nibRealUI/Libs/AceConsole-3.0:
+    RealUI/Libs/AceConsole-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConsole-3.0
-    nibRealUI/Libs/AceEvent-3.0:
+    RealUI/Libs/AceEvent-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
-    nibRealUI/Libs/AceHook-3.0:
+    RealUI/Libs/AceHook-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceHook-3.0
-    nibRealUI/Libs/AceTimer-3.0:
+    RealUI/Libs/AceTimer-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceTimer-3.0
-    nibRealUI/Libs/HereBeDragons:
+    RealUI/Libs/HereBeDragons:
         url: https://repos.wowace.com/wow/herebedragons
         tag: latest
-    nibRealUI/Libs/LibChatAnims:
+    RealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
-    nibRealUI/Libs/LibDualSpec-1.0:
+    RealUI/Libs/LibDualSpec-1.0:
         url: https://repos.wowace.com/wow/libdualspec-1-0
         tag: latest
-    nibRealUI/Libs/LibIconFonts:
+    RealUI/Libs/LibIconFonts:
         url: https://github.com/Gethe/LibIconFonts.git
         tag: latest
-    nibRealUI/Libs/LibQTip-1.0:
+    RealUI/Libs/LibQTip-1.0:
         url: https://repos.wowace.com/wow/libqtip-1-0
-    nibRealUI/Libs/LibWindow-1.1:
+    RealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
-    nibRealUI/Libs/oUF:
+    RealUI/Libs/oUF:
         url: https://github.com/arnvid/oUF.git
-    nibRealUI_Config/Libs/AceConfig-3.0:
+    RealUI_Config/Libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
-    nibRealUI_Config/Libs/AceDBOptions-3.0:
+    RealUI_Config/Libs/AceDBOptions-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceDBOptions-3.0
-    nibRealUI_Config/Libs/AceGUI-3.0:
+    RealUI_Config/Libs/AceGUI-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceGUI-3.0
-    nibRealUI_Config/Libs/AceGUI-3.0-SharedMediaWidgets:
+    RealUI_Config/Libs/AceGUI-3.0-SharedMediaWidgets:
         url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
         tag: latest
 
@@ -76,12 +76,13 @@ manual-changelog:
     markup-type: markdown
 
 move-folders:
-    nibRealUI/nibRealUI: nibRealUI
-    nibRealUI/nibRealUI_Config: nibRealUI_Config
-    nibRealUI/RealUI_Bugs: RealUI_Bugs
-    nibRealUI/RealUI_CombatText: RealUI_CombatText
-    nibRealUI/RealUI_Inventory: RealUI_Inventory
-    nibRealUI/RealUI_Skins: RealUI_Skins
-    nibRealUI/RealUI_Tooltips: RealUI_Tooltips
+    RealUI/RealUI: RealUI
+    RealUI/nibRealUI: nibRealUI
+    RealUI/RealUI_Config: RealUI_Config
+    RealUI/RealUI_Bugs: RealUI_Bugs
+    RealUI/RealUI_CombatText: RealUI_CombatText
+    RealUI/RealUI_Inventory: RealUI_Inventory
+    RealUI/RealUI_Skins: RealUI_Skins
+    RealUI/RealUI_Tooltips: RealUI_Tooltips
     Aurora: RealUI_Skins/Aurora
-    nibRealUI/!RealUI_Preloads: "!RealUI_Preloads"
+    RealUI/!RealUI_Preloads: "!RealUI_Preloads"

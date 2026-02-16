@@ -35,7 +35,7 @@ InstallUI.title = title
 
 -- Logo
 local logo = InstallUI:CreateTexture(nil, "ARTWORK")
-logo:SetTexture([[Interface\AddOns\nibRealUI\Media\Logo]])
+logo:SetTexture([[Interface\AddOns\RealUI\Media\Logo]])
 logo:SetSize(120, 120)
 logo:SetPoint("TOP", 0, -55)
 InstallUI.logo = logo

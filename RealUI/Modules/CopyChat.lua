@@ -45,10 +45,10 @@ local function CreateCopyButton(self)
     self.Copy:SetSize(16, 16)
     self.Copy:SetPoint('TOPRIGHT', self, -5, -5)
 
-    self.Copy:SetNormalTexture([[Interface\AddOns\nibRealUI\Media\CopyPaste]])
+    self.Copy:SetNormalTexture([[Interface\AddOns\RealUI\Media\CopyPaste]])
     self.Copy:GetNormalTexture():SetSize(16, 16)
 
-    self.Copy:SetHighlightTexture([[Interface\AddOns\nibRealUI\Media\CopyPaste]])
+    self.Copy:SetHighlightTexture([[Interface\AddOns\RealUI\Media\CopyPaste]])
     self.Copy:GetHighlightTexture():SetAllPoints(self.Copy:GetNormalTexture())
 
     local tab = _G[self:GetName()..'Tab']

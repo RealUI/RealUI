@@ -15,7 +15,7 @@ local InterfaceTweaks = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 local modules, moduleEvents = {}, {}
 local moduleAddons = {
-    nibRealUI = {
+    RealUI = {
         function()
             for tag, info in next, modules do
                 if info.setEnabled then

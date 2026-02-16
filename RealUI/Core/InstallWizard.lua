@@ -204,6 +204,46 @@ function InstallWizard:Complete()
 
     debug("Installation completed")
 
+    -- Force ActionBars to apply settings and update button layouts
+    local ActionBars = RealUI:GetModule("ActionBars", true)
+    if ActionBars and ActionBars:IsEnabled() then
+        -- Apply settings now that installStage is -1
+        ActionBars:ApplyABSettings()
+
+        -- Force all bars to update their button layouts with multiple attempts
+        local updateAttempts = {0.2, 0.5, 1.0}
+        for _, delay in ipairs(updateAttempts) do
+            _G.C_Timer.After(delay, function()
+                local BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
+                if not BT4 then return end
+
+                local BT4ActionBars = BT4:GetModule("ActionBars", true)
+
+                -- Force all action bars (1-6) button layout update
+                if BT4ActionBars then
+                    for i = 1, 6 do
+                        if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
+                            local bar = BT4ActionBars.actionbars[i]
+                            if bar.UpdateButtonLayout then
+                                bar:UpdateButtonLayout()
+                            end
+                        end
+                    end
+                end
+
+                -- Force pet bar button layout update if it exists
+                if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
+                    _G.BT4BarPetBar:UpdateButtonLayout()
+                end
+
+                -- Force stance bar button layout update if it exists
+                if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
+                    _G.BT4BarStanceBar:UpdateButtonLayout()
+                end
+            end)
+        end
+    end
+
     -- Hide installation wizard UI
     if RealUI.InstallUI then
         RealUI.InstallUI:Hide()

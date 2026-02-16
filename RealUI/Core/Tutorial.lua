@@ -396,7 +396,7 @@ function RealUI:InitTutorial()
 
     -- Logo
     local rLogo = _G.UIParent:CreateTexture("RealUITutorialLogo", "ARTWORK")
-    rLogo:SetTexture([[Interface\AddOns\nibRealUI\Media\Logo]])
+    rLogo:SetTexture([[Interface\AddOns\RealUI\Media\Logo]])
     rLogo:SetSize(160, 160)
     rLogo:SetPoint("BOTTOM", _G.UIParent, "CENTER", 0, 32)
 

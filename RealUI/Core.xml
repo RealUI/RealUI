@@ -36,6 +36,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\UserExperiencePolish.lua"/>
     <Script file="Core\DeploymentValidator.lua"/>
     <Script file="Core\FinalMigrations.lua"/>
+    <Script file="Core\SavedVariablesMigration.lua"/>
     <Script file="Core\AdvancedFeaturesTest.lua"/>
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>

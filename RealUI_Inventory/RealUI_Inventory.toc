@@ -1,11 +1,11 @@
 ## Interface: 120000 120001
 ## Title: RealUI Inventory
-## Category: RealUI
+## Category: RealUI_Core
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe, Hanshi
 ## Version: 3.0.0
-## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
-## RequiredDeps: nibRealUI
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## RequiredDeps: RealUI
 ## SavedVariables: RealUI_InventoryDB
 
 RealUI_Inventory.lua

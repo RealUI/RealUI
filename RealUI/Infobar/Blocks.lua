@@ -2323,24 +2323,28 @@ function Infobar:CreateBlocks()
             end,
             GetText = function(Money)
                 if RealUI.realmInfo.realmNormalized then
-                    return GetMoneyString(currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name].money)
-                else
-                    return _G.SEARCH_LOADING_TEXT
+                    local realmData = currencyDB[RealUI.realmInfo.realmNormalized]
+                    if realmData and realmData[RealUI.charInfo.faction] and realmData[RealUI.charInfo.faction][RealUI.charInfo.name] then
+                        return GetMoneyString(realmData[RealUI.charInfo.faction][RealUI.charInfo.name].money)
+                    end
                 end
+                return _G.SEARCH_LOADING_TEXT
             end,
             GetIcon = function(Money)
                 if RealUI.realmInfo.realmNormalized then
-                    local gold, silver = SplitMoney(currencyDB[RealUI.realmInfo.realmNormalized][RealUI.charInfo.faction][RealUI.charInfo.name].money)
-                    if gold > 0 then
-                        return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
-                    elseif silver > 0 then
-                        return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
-                    else
-                        return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
+                    local realmData = currencyDB[RealUI.realmInfo.realmNormalized]
+                    if realmData and realmData[RealUI.charInfo.faction] and realmData[RealUI.charInfo.faction][RealUI.charInfo.name] then
+                        local gold, silver = SplitMoney(realmData[RealUI.charInfo.faction][RealUI.charInfo.name].money)
+                        if gold > 0 then
+                            return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
+                        elseif silver > 0 then
+                            return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
+                        else
+                            return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
+                        end
                     end
-                else
-                    return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
                 end
+                return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
             end,
             IsValid = function(Money)
                 return true

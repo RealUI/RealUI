@@ -189,8 +189,19 @@ function CooldownCount:OnInitialize()
 end
 
 function CooldownCount:OnEnable()
+    -- Use a fallback font since RealUI_Skins is a separate addon
+    local fontPath = "Fonts\\FRIZQT__.TTF" -- Default WoW font
+
+    -- Try to get font from RealUI_Skins if it's loaded
+    if C_AddOns.IsAddOnLoaded("RealUI_Skins") then
+        local skinsDB = _G.RealUI_SkinsDB
+        if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.normal then
+            fontPath = skinsDB.profile.fonts.normal.path or fontPath
+        end
+    end
+
     CD_FONT = {
-        font = RealUI.GetOptions("Skins").profile.fonts.normal.path,
+        font = fontPath,
         size = 10,
         flags = "OUTLINE"
     }

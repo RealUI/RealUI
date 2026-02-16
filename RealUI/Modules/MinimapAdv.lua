@@ -28,15 +28,15 @@ _G.BINDING_NAME_REALUIMINIMAPFARM = "Toggle Farm Mode"
 local infoTexts = {}
 
 local Textures = {
-    SquareMask = [[Interface\AddOns\nibRealUI\Media\Minimap\SquareMinimapMask]],
-    Minimize = [[Interface\Addons\nibRealUI\Media\Minimap\Minimize]],
-    Maximize = [[Interface\Addons\nibRealUI\Media\Minimap\Maximize]],
-    Config = [[Interface\Addons\nibRealUI\Media\Minimap\Config]],
-    Tracking = [[Interface\Addons\nibRealUI\Media\Minimap\Tracking]],
-    Expand = [[Interface\Addons\nibRealUI\Media\Minimap\Expand]],
-    Collapse = [[Interface\Addons\nibRealUI\Media\Minimap\Collapse]],
-    ZoneIndicator = [[Interface\Addons\nibRealUI\Media\Minimap\ZoneIndicator]],
-    TooltipIcon = [[Interface\Addons\nibRealUI\Media\Minimap\TooltipIcon]],
+    SquareMask = [[Interface\AddOns\RealUI\Media\Minimap\SquareMinimapMask]],
+    Minimize = [[Interface\Addons\RealUI\Media\Minimap\Minimize]],
+    Maximize = [[Interface\Addons\RealUI\Media\Minimap\Maximize]],
+    Config = [[Interface\Addons\RealUI\Media\Minimap\Config]],
+    Tracking = [[Interface\Addons\RealUI\Media\Minimap\Tracking]],
+    Expand = [[Interface\Addons\RealUI\Media\Minimap\Expand]],
+    Collapse = [[Interface\Addons\RealUI\Media\Minimap\Collapse]],
+    ZoneIndicator = [[Interface\Addons\RealUI\Media\Minimap\ZoneIndicator]],
+    TooltipIcon = [[Interface\Addons\RealUI\Media\Minimap\TooltipIcon]],
 }
 
 local MMFrames = MinimapAdv.Frames

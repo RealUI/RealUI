@@ -1,10 +1,10 @@
 ## Interface: 120000 120001
 ## Title: RealUI Bugs
-## Category: RealUI
+## Category: RealUI_Core
 ## Notes: Bug catcher
 ## Author: Gethe, Hanshi
 ## Version: 3.0.0
-## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: Blizzard_ChatFrame
 ## OptionalDeps: Ace3, LibTextDump-1.0
 ## SavedVariables: RealUI_Storage, RealUI_Debug

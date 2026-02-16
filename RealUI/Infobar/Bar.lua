@@ -1084,8 +1084,19 @@ function Infobar:OnEnable()
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
 
+    -- Use a fallback font since RealUI_Skins is a separate addon
+    local fontPath = "Fonts\\FRIZQT__.TTF" -- Default WoW font
+
+    -- Try to get font from RealUI_Skins if it's loaded
+    if C_AddOns.IsAddOnLoaded("RealUI_Skins") then
+        local skinsDB = _G.RealUI_SkinsDB
+        if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.chat then
+            fontPath = skinsDB.profile.fonts.chat.path or fontPath
+        end
+    end
+
     blockFont = {
-        font = RealUI.GetOptions("Skins").profile.fonts.chat.path,
+        font = fontPath,
         size = RealUI.Round(BAR_HEIGHT * 0.6),
         outline = self:GetFontOutline()
     }

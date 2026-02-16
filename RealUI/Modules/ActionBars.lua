@@ -18,12 +18,12 @@ local EnteredWorld = false
 
 local Textures = {
     petBar = {
-        center = [[Interface\Addons\nibRealUI\Media\Doodads\PetBar_Center]],
-        sides = [[Interface\Addons\nibRealUI\Media\Doodads\PetBar_Sides]],
+        center = [[Interface\Addons\RealUI\Media\Doodads\PetBar_Center]],
+        sides = [[Interface\Addons\RealUI\Media\Doodads\PetBar_Sides]],
     },
     stanceBar = {
-        center = [[Interface\Addons\nibRealUI\Media\Doodads\StanceBar_Center]],
-        sides = [[Interface\Addons\nibRealUI\Media\Doodads\StanceBar_Sides]],
+        center = [[Interface\Addons\RealUI\Media\Doodads\StanceBar_Center]],
+        sides = [[Interface\Addons\RealUI\Media\Doodads\StanceBar_Sides]],
     },
 }
 
@@ -207,6 +207,8 @@ function ActionBars:ApplyABSettings(tag)
 
             ActionBars:debug(id, "Points", x, y, point)
             bar["padding"] = fixedSettings.buttonPadding - 10
+            bar["buttons"] = BTBar.numbuttons or BTBar.button_count or 12
+            bar["rows"] = 1  -- Default to 1 row for horizontal bars
             bar["position"] = {
                 ["x"] = x,
                 ["y"] = y,
@@ -216,6 +218,16 @@ function ActionBars:ApplyABSettings(tag)
                 ["growVertical"] = "DOWN",
             }
             BTBar:SetButtons()
+
+            -- Force the bar to apply config immediately
+            BTBar:ApplyConfig(bar)
+
+            -- Force button layout update after a short delay
+            _G.C_Timer.After(0.1, function()
+                if BTBar.UpdateButtonLayout then
+                    BTBar:UpdateButtonLayout()
+                end
+            end)
         else
             BarSizes[id] = 0
         end
@@ -278,7 +290,16 @@ function ActionBars:ApplyABSettings(tag)
                 profilePetBar["padding"] = pbP - 8
             end
             local BT4PetBar = BT4:GetModule("PetBar", true)
-            if BT4PetBar then BT4PetBar:ApplyConfig() end
+            if BT4PetBar then
+                BT4PetBar:ApplyConfig()
+
+                -- Force button layout update after a short delay
+                _G.C_Timer.After(0.1, function()
+                    if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
+                        _G.BT4BarPetBar:UpdateButtonLayout()
+                    end
+                end)
+            end
         -- end
     end
 
@@ -351,6 +372,29 @@ function ActionBars:ApplyABSettings(tag)
     if RealUI:GetModuleEnabled(MODNAME) then
         self:RefreshDoodads()
     end
+
+    -- Force all bars to update their button layouts after config is applied
+    -- This ensures proper padding and scale on first load after install wizard
+    _G.C_Timer.After(0.2, function()
+        if BT4ActionBars then
+            for i = 1, 6 do
+                if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
+                    local bar = BT4ActionBars.actionbars[i]
+                    if bar.UpdateButtonLayout then
+                        bar:UpdateButtonLayout()
+                    end
+                end
+            end
+        end
+
+        if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
+            _G.BT4BarPetBar:UpdateButtonLayout()
+        end
+
+        if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
+            _G.BT4BarStanceBar:UpdateButtonLayout()
+        end
+    end)
 end
 
 ----
@@ -463,20 +507,33 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     self:ApplyABSettings()
 
     -- Delay button layout updates to ensure Bartender4 is fully initialized
-    _G.C_Timer.After(0.5, function()
-        -- Force stance bar button layout update if it exists
-        if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
-            _G.BT4BarStanceBar:UpdateButtonLayout()
-        end
-
-        -- Force naga bar (bar 6) button layout update if enabled
-        if BT4ActionBars and BT4ActionBars.actionbars[6] and not BT4ActionBars.actionbars[6].disabled then
-            local bar6 = BT4ActionBars.actionbars[6]
-            if bar6.UpdateButtonLayout then
-                bar6:UpdateButtonLayout()
+    -- Use multiple attempts with increasing delays to handle first-time setup
+    local updateAttempts = {0.2, 0.5, 1.0}
+    for _, delay in ipairs(updateAttempts) do
+        _G.C_Timer.After(delay, function()
+            -- Force all action bars (1-6) button layout update
+            if BT4ActionBars then
+                for i = 1, 6 do
+                    if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
+                        local bar = BT4ActionBars.actionbars[i]
+                        if bar.UpdateButtonLayout then
+                            bar:UpdateButtonLayout()
+                        end
+                    end
+                end
             end
-        end
-    end)
+
+            -- Force pet bar button layout update if it exists
+            if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
+                _G.BT4BarPetBar:UpdateButtonLayout()
+            end
+
+            -- Force stance bar button layout update if it exists
+            if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
+                _G.BT4BarStanceBar:UpdateButtonLayout()
+            end
+        end)
+    end
 
     if EnteredWorld then return end
 

@@ -149,7 +149,7 @@ end
 function RealUI:AddFrameStripes(Frame)
     local bg = Frame:GetBackdropTexture("bg")
     local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
-    stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+    stripes:SetTexture([[Interface\AddOns\RealUI\Media\StripesThin]], true, true)
     stripes:SetAlpha(private.skinsDB.stripeAlpha)
     stripes:SetAllPoints(bg)
     stripes:SetHorizTile(true)
@@ -259,7 +259,7 @@ function private.OnLoad()
     end
 
 
-    function private.AddOns.nibRealUI()
+    function private.AddOns.RealUI()
         local Skins = RealUI:NewModule("Skins")
         Skins.db = skinsDB
 

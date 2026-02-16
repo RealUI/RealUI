@@ -234,7 +234,7 @@ function UXPolish:ImproveConfigInterface()
     -- Add confirmation dialogs for destructive actions
     -- Add undo/redo support for configuration changes
 
-    -- These are handled by the configuration addon (nibRealUI_Config)
+    -- These are handled by the configuration addon (RealUI_Config)
     -- but we can provide helper functions here
 
     RealUI.configHelpers = {

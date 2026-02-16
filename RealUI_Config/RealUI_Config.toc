@@ -1,12 +1,12 @@
 ## Interface: 120000 120001
 ## Title: RealUI Config
-## Category: RealUI
+## Category: RealUI_Core
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe, Hanshi
 ## Version: 3.0.0
-## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
-## RequiredDeps: nibRealUI
+## RequiredDeps: RealUI
 ## LoadOnDemand: 1
 
 Libs\Libs.xml
