@@ -316,7 +316,7 @@ do -- Other
                             },
                             vertical = {
                                 name = L["HuD_Vertical"],
-                                desc = L["HuD_VerticalDesc"],
+                                desc = L["HuD_VerticalActionBarDesc"],
                                 type = "range",
                                 width = "full",
                                 min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
