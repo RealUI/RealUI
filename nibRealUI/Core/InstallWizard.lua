@@ -13,6 +13,20 @@ local debug = RealUI.GetDebug("InstallWizard")
 local InstallWizard = {}
 RealUI.InstallWizard = InstallWizard
 
+-- StaticPopup dialog for reload after setup
+_G.StaticPopupDialogs["REALUI_SETUP_RELOAD"] = {
+    text = "|cff00ff00RealUI setup is complete!|r\n\nA UI reload is required to apply all settings properly.\n\n|cffff8000Please reload your UI now.|r",
+    button1 = "Reload UI",
+    button2 = "Later",
+    OnAccept = function()
+        _G.ReloadUI()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = false,
+    preferredIndex = 3,
+}
+
 -- Installation stage constants
 InstallWizard.STAGE_COMPLETE = -1
 InstallWizard.STAGE_WELCOME = 0
@@ -197,7 +211,9 @@ function InstallWizard:Complete()
 
     -- Show completion message
     print("|cff00ff00RealUI 3.0.0 setup completed successfully!|r")
-    print("|cff00ff00Type /realui to access configuration.|r")
+
+    -- Show reload UI dialog
+    _G.StaticPopup_Show("REALUI_SETUP_RELOAD")
 end
 
 -- Apply account-wide CVars (first-time setup only)

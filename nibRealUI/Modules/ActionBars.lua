@@ -334,7 +334,16 @@ function ActionBars:ApplyABSettings(tag)
                     ["growVertical"] = "DOWN"
                 }
             end
-            if BT4Stance then BT4Stance:ApplyConfig() end
+            if BT4Stance then
+                BT4Stance:ApplyConfig()
+                -- Force button layout update to ensure correct size on first load
+                -- Use a small delay to ensure Bartender4 has processed the config
+                _G.C_Timer.After(0.1, function()
+                    if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
+                        _G.BT4BarStanceBar:UpdateButtonLayout()
+                    end
+                end)
+            end
         end
     end
 
@@ -453,6 +462,22 @@ function ActionBars:PLAYER_ENTERING_WORLD()
 
     self:ApplyABSettings()
 
+    -- Delay button layout updates to ensure Bartender4 is fully initialized
+    _G.C_Timer.After(0.5, function()
+        -- Force stance bar button layout update if it exists
+        if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
+            _G.BT4BarStanceBar:UpdateButtonLayout()
+        end
+
+        -- Force naga bar (bar 6) button layout update if enabled
+        if BT4ActionBars and BT4ActionBars.actionbars[6] and not BT4ActionBars.actionbars[6].disabled then
+            local bar6 = BT4ActionBars.actionbars[6]
+            if bar6.UpdateButtonLayout then
+                bar6:UpdateButtonLayout()
+            end
+        end
+    end)
+
     if EnteredWorld then return end
 
     self:RegisterEvent("PET_UI_UPDATE", function()
@@ -515,10 +540,34 @@ function ActionBars:ToggleNagaBar(enable)
         local bt4bar = BT4ActionBars and BT4ActionBars.actionbars[6]
         if bt4bar then
             if enable then
+                -- Configure bar 6 with proper settings before enabling
+                bar6.rows = 4
+                bar6.padding = fixedSettings.buttonPadding - 10
+                bar6.showgrid = true
+                bar6.version = 3
+
+                -- Set position
+                bar6.position = {
+                    ["y"] = -360,
+                    ["x"] = 210,
+                    ["point"] = "CENTER",
+                    ["scale"] = 1,
+                    ["growHorizontal"] = "RIGHT",
+                    ["growVertical"] = "DOWN",
+                }
+
                 bt4bar:Enable()
+                bt4bar:SetButtons()
                 if bt4bar.UpdateButtonLayout then
                     bt4bar:UpdateButtonLayout()
                 end
+
+                -- Force a second layout update after a short delay to ensure proper sizing
+                _G.C_Timer.After(0.1, function()
+                    if bt4bar.UpdateButtonLayout then
+                        bt4bar:UpdateButtonLayout()
+                    end
+                end)
             else
                 bt4bar:Disable()
             end
