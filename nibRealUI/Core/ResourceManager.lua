@@ -204,7 +204,7 @@ function ResourceManager:HandleResourceWarning(warning)
 
     -- Notify user if critical
     if warning.level == "critical" then
-        if RealUI.FeedbackSystem then
+        if RealUI.FeedbackSystem and RealUI.FeedbackSystem.ShowWarning then
             local message = ("High %s usage detected: %.2f %s"):format(
                 warning.type,
                 warning.value,
