@@ -600,6 +600,11 @@ function AngleStatusBarMixin:GetVisualPercent()
     local minWidth = meta.minWidth
     local maxWidth = meta.maxWidth
 
+    -- Check if minWidth or maxWidth are secret/tainted
+    if RealUI.isSecret(minWidth) or RealUI.isSecret(maxWidth) then
+        return nil
+    end
+
     if not minWidth or not maxWidth then return 0 end
     if maxWidth == minWidth then return 1 end -- Avoid division by zero
 
