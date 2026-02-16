@@ -83,8 +83,16 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
             local itemLevel = RealUI.GetItemLevel(itemLink)
             if itemLevel > 1 then
                 local quality = _G.GetInventoryItemQuality("player", slotID)
-                local color = _G.ITEM_QUALITY_COLORS[quality]
-                self.ilvl:SetTextColor(color.r, color.g, color.b)
+                if quality then
+                    local color = _G.ITEM_QUALITY_COLORS[quality]
+                    if color then
+                        self.ilvl:SetTextColor(color.r, color.g, color.b)
+                    else
+                        self.ilvl:SetTextColor(1, 1, 1) -- Default to white
+                    end
+                else
+                    self.ilvl:SetTextColor(1, 1, 1) -- Default to white if quality is nil
+                end
                 self.ilvl:SetText(itemLevel)
                 self.ilvl:Show()
 
