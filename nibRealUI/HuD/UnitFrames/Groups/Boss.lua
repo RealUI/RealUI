@@ -87,6 +87,8 @@ local function CreateAuras(parent)
     auras.activeBuffs = auras.activeBuffs or {}
     auras.allDebuffs = auras.allDebuffs or {}
     auras.activeDebuffs = auras.activeDebuffs or {}
+    auras.sortedBuffs = auras.sortedBuffs or {}
+    auras.sortedDebuffs = auras.sortedDebuffs or {}
 
     auras.FilterAura = function(dialog, unit, data)
         --    name, texture, count, debuffType, duration, expiration, caster
