@@ -235,6 +235,15 @@ function RealUI:UpdateLayout(layout)
         self.HuDPositioning:CalculatePositions()
     end
 
+    -- Update ActionBars for the new layout
+    local ActionBars = self:GetModule("ActionBars", true)
+    if ActionBars and ActionBars:IsEnabled() then
+        ActionBars:ApplyABSettings()
+    end
+
+    -- Update Positioners
+    self:UpdatePositioners()
+
     if self.isConfigMode and _G.Grid2Options then
         self:ScheduleTimer(
             function()

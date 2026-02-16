@@ -294,6 +294,12 @@ function LayoutManager:PerformLayoutSwitch(layoutId)
         RealUI:UpdateLayout(layoutId)
     end
 
+    -- Ensure ActionBars are updated for the new layout
+    local ActionBars = RealUI:GetModule("ActionBars", true)
+    if ActionBars and ActionBars:IsEnabled() then
+        ActionBars:ApplyABSettings()
+    end
+
     return true
 end
 

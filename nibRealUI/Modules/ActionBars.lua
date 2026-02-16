@@ -46,8 +46,24 @@ function ActionBars:ApplyABSettings(tag)
     if not ndbc then return end
     if ndbc.init.installStage ~= -1 or not RealUI:DoesAddonMove("Bartender4") then return end
 
+    -- Initialize BT4 if not already done
+    if not BT4 then
+        BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
+        if BT4 then
+            BT4DB = _G.Bartender4DB
+            BT4Profile = BT4DB and BT4DB["profileKeys"] and BT4DB["profileKeys"][RealUI.key]
+            BT4ActionBars = BT4:GetModule("ActionBars", true)
+            BT4Stance = BT4:GetModule("StanceBar", true)
+            BT4Pet = BT4:GetModule("PetBar", true)
+        end
+    end
+
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
+
+    -- Refresh db reference to ensure we have the latest settings
+    db = self.db.profile
+    ndb = RealUI.db.profile
 
     local barSettings = db[RealUI.cLayout]
     local numTopBars = barSettings.centerPositions - 1
@@ -179,7 +195,8 @@ function ActionBars:ApplyABSettings(tag)
             end
 
             local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
-            local bar, point = profileActionBars["actionbars"][id]
+            local bar = profileActionBars["actionbars"][id]
+            local point
             if isVertBar then
                 point = BarPositions[id]
                 bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
