@@ -54,6 +54,12 @@ end
 
 function RealUI:UpdatePositioners()
     Positioners:debug("UpdatePositioners")
+    -- Safety check: ensure db is initialized
+    if not db or not db.positioners then
+        Positioners:debug("UpdatePositioners: db not initialized yet")
+        return
+    end
+
     local positioners = {}
     for k, v in next, db.positioners do
         positioners[k] = v
