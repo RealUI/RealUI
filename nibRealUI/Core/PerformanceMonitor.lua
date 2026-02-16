@@ -134,17 +134,29 @@ end
 
 -- Memory Usage Tracking
 
+-- Cache RealUI addon indices to avoid scanning all addons every time
+local realUIAddonIndices = nil
+
 function PerformanceMonitor:GetMemoryUsage()
     -- Get addon memory usage in bytes
     _G.UpdateAddOnMemoryUsage()
-    local memory = 0
 
-    -- Sum up all RealUI addon memory
-    for i = 1, _G.C_AddOns.GetNumAddOns() do
-        local name = _G.C_AddOns.GetAddOnInfo(i)
-        if name and (name:match("^RealUI") or name:match("^nibRealUI")) then
-            memory = memory + (_G.GetAddOnMemoryUsage(i) * 1024) -- Convert KB to bytes
+    -- Build cache of RealUI addon indices on first run
+    if not realUIAddonIndices then
+        realUIAddonIndices = {}
+        local numAddons = _G.C_AddOns.GetNumAddOns()
+        for i = 1, numAddons do
+            local name = _G.C_AddOns.GetAddOnInfo(i)
+            if name and (name:match("^RealUI") or name:match("^nibRealUI")) then
+                table.insert(realUIAddonIndices, i)
+            end
         end
+    end
+
+    -- Sum up RealUI addon memory using cached indices
+    local memory = 0
+    for _, index in ipairs(realUIAddonIndices) do
+        memory = memory + (_G.GetAddOnMemoryUsage(index) * 1024) -- Convert KB to bytes
     end
 
     return memory
