@@ -27,59 +27,71 @@ local THRESHOLDS = {
     MEMORY_CRITICAL = 100 * 1024, -- 100 MB
     CPU_WARNING = 50, -- 50ms per frame
     CPU_CRITICAL = 100, -- 100ms per frame
+    MEMORY_CHECK_INTERVAL = 120, -- 2 minutes
+    CPU_CHECK_INTERVAL = 120, -- 2 minutes
     GC_INTERVAL = 300, -- 5 minutes
     OPTIMIZATION_INTERVAL = 600 -- 10 minutes
 }
 
+local RELATED_ADDONS = {
+    "RealUI_Config",
+    "RealUI_Bugs",
+    "RealUI_Chat",
+    "RealUI_CombatText",
+    "RealUI_Inventory",
+    "RealUI_Skins",
+    "RealUI_Tooltips"
+}
+
 -- Get current memory usage
 function ResourceManager:GetMemoryUsage()
+    local now = _G.GetTime()
+    if now - (resourceState.lastMemoryCheck or 0) < THRESHOLDS.MEMORY_CHECK_INTERVAL then
+        return resourceState.memoryUsage
+    end
+
     _G.UpdateAddOnMemoryUsage()
     local memory = _G.GetAddOnMemoryUsage(ADDON_NAME)
 
-    -- Add memory from related addons
-    local relatedAddons = {
-        "RealUI_Config",
-        "RealUI_Bugs",
-        "RealUI_Chat",
-        "RealUI_CombatText",
-        "RealUI_Inventory",
-        "RealUI_Skins",
-        "RealUI_Tooltips"
-    }
-
-    for _, addon in ipairs(relatedAddons) do
+    for _, addon in ipairs(RELATED_ADDONS) do
         if _G.C_AddOns.IsAddOnLoaded(addon) then
             memory = memory + _G.GetAddOnMemoryUsage(addon)
         end
     end
 
     resourceState.memoryUsage = memory
+    resourceState.lastMemoryCheck = now
     return memory
 end
 
 -- Get current CPU usage
 function ResourceManager:GetCPUUsage()
+    if not resourceState.cpuMonitoringAvailable then
+        local scriptProfile = _G.GetCVar and _G.GetCVar("scriptProfile")
+        resourceState.cpuMonitoringAvailable = scriptProfile == "1"
+    end
+
+    if not resourceState.cpuMonitoringAvailable then
+        resourceState.cpuUsage = 0
+        return 0
+    end
+
+    local now = _G.GetTime()
+    if now - (resourceState.lastCPUCheck or 0) < THRESHOLDS.CPU_CHECK_INTERVAL then
+        return resourceState.cpuUsage
+    end
+
     _G.UpdateAddOnCPUUsage()
     local cpu = _G.GetAddOnCPUUsage(ADDON_NAME)
 
-    -- Add CPU from related addons
-    local relatedAddons = {
-        "RealUI_Config",
-        "RealUI_Bugs",
-        "RealUI_Chat",
-        "RealUI_CombatText",
-        "RealUI_Inventory",
-        "RealUI_Skins",
-        "RealUI_Tooltips"
-    }
-
-    for _, addon in ipairs(relatedAddons) do
+    for _, addon in ipairs(RELATED_ADDONS) do
         if _G.C_AddOns.IsAddOnLoaded(addon) then
             cpu = cpu + _G.GetAddOnCPUUsage(addon)
         end
     end
 
     resourceState.cpuUsage = cpu
+    resourceState.lastCPUCheck = now
     return cpu
 end
 
