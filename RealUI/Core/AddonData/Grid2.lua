@@ -1562,7 +1562,7 @@ function private.Profiles.Grid2()
     db.enabled = true
     for specIndex = 1, #RealUI.charInfo.specs do
         local profile = private.layoutToProfile[1]
-        _G.print("RealUI.charInfo.specs[specIndex].role: ", RealUI.charInfo.specs[specIndex].role)
+        -- _G.print("RealUI.charInfo.specs[specIndex].role: ", RealUI.charInfo.specs[specIndex].role)
         if RealUI.charInfo.specs[specIndex].role == "HEALER" then
             profile = private.layoutToProfile[2]
         end

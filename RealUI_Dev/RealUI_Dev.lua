@@ -269,8 +269,7 @@ local realuiAddons = {
 
     "HereBeDragons",
     "Grid2RaidDebuffs",
-    "Kui_Nameplates",
-    "Kui_Nameplates_Core",
+    -- "Platynator",
 }
 
 local function AddOptDeps(list, optDeps)
@@ -364,6 +363,8 @@ function ns.commands:reset()
     _G.RealUIDB = nil
     _G.RealUICharacter = nil
     _G.Bartender4DB = nil
+    _G.PLATYNATOR_CONFIG = {}
+    _G.PLATYNATOR_CURRENT_PROFILE = {}
     _G.ReloadUI()
 end
 

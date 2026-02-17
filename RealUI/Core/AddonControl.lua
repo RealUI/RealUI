@@ -24,11 +24,15 @@ local RealUIAddOns = {
 
     ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
     ["Kui_Nameplates_Core"] =    {isAce = false, db = "KuiNameplatesCoreCharacterSaved", profKey = "profile"},
+
+    -- ["Platynator"] =    {isAce = false, db = "PLATYNATOR_CONFIG", profKey = "Profiles"},
+
 }
 local RealUIAddOnsOrder = {
     "DBM",
     "Masque",
     "Bartender4",
+    -- "Platynator",
     "Raven",
     "Skada",
 }
@@ -55,6 +59,16 @@ end
 
 -- Set Profile Keys of all AddOns
 function RealUI:SetProfileKeys()
+    -- Ensure db is initialized
+    if not db then
+        local module = self:GetModule(MODNAME, true)
+        if module and module.db then
+            db = module.db.profile
+        else
+            return -- Module not initialized yet
+        end
+    end
+
     -- Refresh Key
     self.key = ("%s - %s"):format(_G.UnitName("player"), _G.GetRealmName())
 
@@ -76,6 +90,16 @@ end
 -- Change Profile on AddOns using a Layout profile
 function RealUI:SetProfileLayout()
     if _G.InCombatLockdown() then return end
+    -- Ensure db is initialized
+    if not db then
+        local module = self:GetModule(MODNAME, true)
+        if module and module.db then
+            db = module.db.profile
+        else
+            return -- Module not initialized yet
+        end
+    end
+
     for addon, data in next, RealUIAddOns do
         if db.addonControl[addon].profiles.base.use and db.addonControl[addon].profiles.layout.use and data.isAce then
             local profile = GetProfileInfo(addon)
@@ -304,6 +328,15 @@ end
 _G.SLASH_AC1 = "/ac"
 
 function RealUI:ToggleAddonPositionControl(addon, val)
+    if not db then
+        local module = self:GetModule(MODNAME, true)
+        if module and module.db then
+            db = module.db.profile
+        else
+            return
+        end
+    end
+
     db.addonControl[addon].control.position = val
     if val then
         db.addonControl[addon].profiles.base.use = val
@@ -311,6 +344,15 @@ function RealUI:ToggleAddonPositionControl(addon, val)
 end
 
 function RealUI:GetAddonControlSettings(addon)
+    if not db then
+        local module = self:GetModule(MODNAME, true)
+        if module and module.db then
+            db = module.db.profile
+        else
+            return {}
+        end
+    end
+
     return {
         position = db.addonControl[addon].control.position,
         base = db.addonControl[addon].profiles.base.use,

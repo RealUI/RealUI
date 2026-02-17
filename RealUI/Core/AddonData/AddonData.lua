@@ -16,7 +16,10 @@ function RealUI:AddRealUIProfileToAddOn(addonName)
 end
 
 function RealUI:AddRealUIProfiles()
+    -- self:Print("AddRealUIProfiles called")
     for addonName, func in next, private.AddOns do
+        local isLoaded = _G.C_AddOns.IsAddOnLoaded(addonName)
+        -- self:Print("AddRealUIProfiles", addonName, "loaded:", isLoaded)
         self:AddRealUIProfileToAddOn(addonName)
     end
 end

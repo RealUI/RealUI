@@ -209,6 +209,8 @@ function ActionBars:ApplyABSettings(tag)
             bar["padding"] = fixedSettings.buttonPadding - 10
             bar["buttons"] = BTBar.numbuttons or BTBar.button_count or 12
             bar["rows"] = 1  -- Default to 1 row for horizontal bars
+            bar["alpha"] = bar["alpha"] or 1  -- Ensure alpha is set
+            bar["buttonOffset"] = bar["buttonOffset"] or 0  -- Ensure buttonOffset is set
             bar["position"] = {
                 ["x"] = x,
                 ["y"] = y,
@@ -217,10 +219,12 @@ function ActionBars:ApplyABSettings(tag)
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
             }
-            BTBar:SetButtons()
 
-            -- Force the bar to apply config immediately
+            -- Apply config with the bar parameter (this sets self.config inside ApplyConfig)
             BTBar:ApplyConfig(bar)
+
+            -- Then set buttons
+            BTBar:SetButtons()
 
             -- Force button layout update after a short delay
             _G.C_Timer.After(0.1, function()
