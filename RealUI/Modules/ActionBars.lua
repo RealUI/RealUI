@@ -121,7 +121,7 @@ function ActionBars:ApplyABSettings(tag)
             -- Side Bars
             local BarPositions = {}
             if isVertBar then
-                x = isRightBar and -36 or -8
+                x = isRightBar and 8 or -8
 
                 if sidePositions[4] == sidePositions[5] then
                     -- Link Side Bar settings
@@ -223,7 +223,7 @@ function ActionBars:ApplyABSettings(tag)
                     ["y"] = y,
                     ["point"] = point,
                     ["scale"] = 1,
-                    ["growHorizontal"] = "RIGHT",
+                    ["growHorizontal"] = isRightBar and "LEFT" or "RIGHT",
                     ["growVertical"] = "DOWN",
                 }
 
