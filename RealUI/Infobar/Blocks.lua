@@ -607,6 +607,9 @@ local function SetupTextTable()
 
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         Infobar:debug("CellProto:SetupCell")
+        if not self.textTable then
+            self:InitializeCell()
+        end
         local textTable = self.textTable
         local width = Scale.Value(data.width or TABLE_WIDTH)
         extData[data] = extData[data] or {}
