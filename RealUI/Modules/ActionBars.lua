@@ -215,7 +215,7 @@ function ActionBars:ApplyABSettings(tag)
                 ActionBars:debug(id, "Points", x, y, point)
                 bar["padding"] = fixedSettings.buttonPadding - 10
                 bar["buttons"] = BTBar.numbuttons or BTBar.button_count or 12
-                bar["rows"] = 1  -- Default to 1 row for horizontal bars
+                bar["rows"] = isVertBar and 12 or 1
                 bar["alpha"] = bar["alpha"] or 1  -- Ensure alpha is set
                 bar["buttonOffset"] = bar["buttonOffset"] or 0  -- Ensure buttonOffset is set
                 bar["position"] = {
