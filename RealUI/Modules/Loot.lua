@@ -78,7 +78,7 @@ local function GroupLootFrameOnEvent(self, event, ...)
         end
     elseif event == "MODIFIER_STATE_CHANGED" then
         local key, state = ...
-        if (key == "LSHIFT" or key == "RSHIFT") and not _G.GameTooltip:IsEquippedItem() then
+        if (key == "LSHIFT" or key == "RSHIFT") then
             if state == 1 then
                 _G.GameTooltip_ShowCompareItem()
             else
