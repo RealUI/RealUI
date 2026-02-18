@@ -7,7 +7,309 @@ local _, private = ...
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
-local qTip = _G.LibStub("LibQTip-1.0")
+local qTipLib = _G.LibStub("LibQTip-2.0")
+
+local qTipKeyMap = setmetatable({}, { __mode = "k" })
+
+local function ToTooltipKey(key)
+    if type(key) == "string" then
+        return key
+    end
+
+    if key == nil then
+        error("attempt to use a nil key", 3)
+    end
+
+    local mappedKey = qTipKeyMap[key]
+    if not mappedKey then
+        mappedKey = tostring(key)
+        qTipKeyMap[key] = mappedKey
+    end
+
+    return mappedKey
+end
+
+local function IsFontObject(value)
+    return type(value) == "table" and type(value.IsObjectType) == "function" and value:IsObjectType("Font")
+end
+
+local function IsFontArg(value)
+    if value == nil then
+        return true
+    end
+
+    if IsFontObject(value) then
+        return true
+    end
+
+    if type(value) == "string" then
+        local globalFont = _G[value]
+        return IsFontObject(globalFont)
+    end
+
+    return false
+end
+
+local function IsJustification(value)
+    return value == "LEFT" or value == "CENTER" or value == "RIGHT"
+end
+
+local function ParseSetCellArgs(...)
+    local index = 1
+    local current = select(index, ...)
+    local font, justification, colSpan, provider
+
+    if IsFontArg(current) then
+        font = current
+        index = index + 1
+        current = select(index, ...)
+    end
+
+    if current == nil or IsJustification(current) then
+        justification = current
+        index = index + 1
+        current = select(index, ...)
+    end
+
+    if current == nil or type(current) == "number" then
+        colSpan = current
+        index = index + 1
+        current = select(index, ...)
+    end
+
+    if current == nil or (type(current) == "table" and type(current.AcquireCell) == "function") then
+        provider = current
+        index = index + 1
+    end
+
+    return font, justification, colSpan, provider, index
+end
+
+local function EnsureLegacyTooltipMethods(tooltip)
+    if tooltip.__RealUIQTipCompat then
+        return tooltip
+    end
+
+    tooltip.__RealUIQTipCompat = true
+
+    function tooltip:AddLine(...)
+        local line = self:AddRow()
+        local lineNum = line.Index
+        local colNum = 1
+        local columnCount = self:GetColumnCount()
+
+        for columnIndex = 1, columnCount do
+            local value = select(columnIndex, ...)
+            if value ~= nil then
+                local _, nextCol = self:SetCell(lineNum, columnIndex, value)
+                colNum = nextCol or (columnCount + 1)
+            end
+        end
+
+        return lineNum, colNum <= columnCount and colNum or nil
+    end
+
+    function tooltip:AddHeader(...)
+        local line = self:AddHeadingRow()
+        local lineNum = line.Index
+        local colNum = 1
+        local columnCount = self:GetColumnCount()
+
+        for columnIndex = 1, columnCount do
+            local value = select(columnIndex, ...)
+            if value ~= nil then
+                local _, nextCol = self:SetCell(lineNum, columnIndex, value, self:GetDefaultHeadingFont())
+                colNum = nextCol or (columnCount + 1)
+            end
+        end
+
+        return lineNum, colNum <= columnCount and colNum or nil
+    end
+
+    function tooltip:SetFont(font)
+        self:SetDefaultFont(font)
+    end
+
+    function tooltip:SetHeaderFont(font)
+        self:SetDefaultHeadingFont(font)
+    end
+
+    function tooltip:SetCell(lineNum, colNum, value, ...)
+        local row = self:GetRow(lineNum)
+
+        if value == nil then
+            local existingCell = row.Cells[colNum]
+            if existingCell and existingCell.SetText then
+                existingCell:SetText("")
+            end
+            return lineNum, colNum
+        end
+
+        local font, justification, colSpan, provider, extraArgIndex = ParseSetCellArgs(...)
+        local cell = row:GetCell(colNum, provider)
+        local leftPadding = select(extraArgIndex, ...)
+        local rightPadding = select(extraArgIndex + 1, ...)
+        local maxWidth = select(extraArgIndex + 2, ...)
+        local minWidth = select(extraArgIndex + 3, ...)
+
+        if colSpan then
+            cell:SetColSpan(colSpan)
+        end
+
+        if justification then
+            cell:SetJustifyH(justification)
+        end
+
+        if provider and type(cell.SetupCell) == "function" then
+            local setupWidth, setupHeight = cell:SetupCell(self, value, justification, font, select(extraArgIndex, ...))
+            if setupWidth and setupWidth > 0 then
+                local effectiveColSpan = colSpan or 1
+                if effectiveColSpan < 1 then
+                    effectiveColSpan = 1
+                end
+
+                local widthPerColumn = setupWidth / effectiveColSpan
+                local rightColumn = min(self:GetColumnCount(), colNum + effectiveColSpan - 1)
+                for columnIndex = colNum, rightColumn do
+                    local column = self:GetColumn(columnIndex)
+                    if widthPerColumn > column.Width then
+                        column.Width = widthPerColumn
+                        column:SetWidth(widthPerColumn)
+                    end
+                end
+            end
+
+            if setupHeight and row.Height and setupHeight > row.Height then
+                row.Height = setupHeight
+                row:SetHeight(setupHeight)
+            end
+        else
+            if font then
+                cell:SetFontObject(font)
+            end
+
+            if leftPadding ~= nil and cell.SetLeftPadding then
+                cell:SetLeftPadding(leftPadding)
+            end
+
+            if rightPadding ~= nil and cell.SetRightPadding then
+                cell:SetRightPadding(rightPadding)
+            end
+
+            if maxWidth ~= nil and cell.SetMaxWidth then
+                cell:SetMaxWidth(maxWidth)
+            end
+
+            if minWidth ~= nil and cell.SetMinWidth then
+                cell:SetMinWidth(minWidth)
+            end
+
+            cell:SetText(value)
+        end
+
+        local columnCount = self:GetColumnCount()
+        local rightColumn = colNum
+        if colSpan and colSpan > 0 then
+            rightColumn = min(columnCount, colNum + colSpan - 1)
+        elseif colSpan and colSpan <= 0 then
+            rightColumn = max(colNum, columnCount + colSpan)
+        end
+
+        if rightColumn < columnCount then
+            return lineNum, rightColumn + 1
+        end
+
+        return lineNum, nil
+    end
+
+    function tooltip:SetCellTextColor(lineNum, colNum, r, g, b, a)
+        local row = self:GetRow(lineNum)
+        local cell = row.Cells[colNum]
+        if cell then
+            cell:SetTextColor(r, g, b, a)
+        end
+    end
+
+    function tooltip:SetLineTextColor(lineNum, r, g, b, a)
+        local row = self:GetRow(lineNum)
+        if row then
+            for columnIndex = 1, #row.Cells do
+                local cell = row.Cells[columnIndex]
+                if cell then
+                    cell:SetTextColor(r, g, b, a)
+                end
+            end
+        end
+    end
+
+    function tooltip:SetLineScript(lineNum, scriptType, handler, arg)
+        local row = self:GetRow(lineNum)
+        if row then
+            row:SetScript(scriptType, handler, arg)
+        end
+    end
+
+    function tooltip:UpdateScrolling(maxHeight)
+        if maxHeight then
+            self:SetMaxHeight(maxHeight)
+        end
+        return self:UpdateLayout()
+    end
+
+    return tooltip
+end
+
+local function CompatCreateCellProvider(baseProvider)
+    local values = qTipLib:CreateCellProvider(baseProvider)
+    local newCellProvider = values.newCellProvider
+    local newCellPrototype = values.newCellPrototype
+    local baseCellPrototype = values.baseCellPrototype
+
+    if newCellPrototype and not newCellPrototype.__RealUIQTipCompatProvider then
+        newCellPrototype.__RealUIQTipCompatProvider = true
+
+        if newCellPrototype.OnCreation == nil then
+            newCellPrototype.OnCreation = function(self)
+                if type(self.InitializeCell) == "function" then
+                    self:InitializeCell()
+                end
+            end
+        end
+
+        if newCellPrototype.OnRelease == nil then
+            newCellPrototype.OnRelease = function(self)
+                if type(self.ReleaseCell) == "function" then
+                    self:ReleaseCell()
+                end
+            end
+        end
+
+        if newCellPrototype.GetContentHeight == nil and type(newCellPrototype.getContentHeight) == "function" then
+            newCellPrototype.GetContentHeight = newCellPrototype.getContentHeight
+        end
+    end
+
+    return newCellProvider, newCellPrototype, baseCellPrototype
+end
+
+local qTip = {}
+
+function qTip:Acquire(key, ...)
+    local tooltip = qTipLib:AcquireTooltip(ToTooltipKey(key), ...)
+    return EnsureLegacyTooltipMethods(tooltip)
+end
+
+function qTip:Release(tooltip)
+    qTipLib:ReleaseTooltip(tooltip)
+end
+
+function qTip:IsAcquired(key)
+    return qTipLib:IsAcquiredTooltip(ToTooltipKey(key))
+end
+
+function qTip:CreateCellProvider(baseProvider)
+    return CompatCreateCellProvider(baseProvider)
+end
 
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
 fa.path = _G.LibStub("LibSharedMedia-3.0"):Fetch("font", "Font Awesome")

@@ -7,7 +7,7 @@
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: RealUI_Bugs, Bartender4
 ## RequiredDeps: RealUI_Bugs, RealUI_Skins, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
-## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-1.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, Raven, LibSharedMedia-3.0, AceDB-3.0, LibStub, nibRealUI
+## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-2.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, Raven, LibSharedMedia-3.0, AceDB-3.0, LibStub, nibRealUI
 ## SavedVariables: RealUIDB, nibRealUIDB
 ## SavedVariablesPerCharacter: RealUICharacter, nibRealUICharacter
 ## X-oUF: oUFembed

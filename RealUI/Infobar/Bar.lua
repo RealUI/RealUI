@@ -6,7 +6,37 @@ local _, private = ...
 
 -- Libs --
 local LDB = _G.LibStub("LibDataBroker-1.1")
-local qTip = _G.LibStub("LibQTip-1.0")
+local qTipLib = _G.LibStub("LibQTip-2.0")
+local qTipKeyMap = setmetatable({}, { __mode = "k" })
+
+local function ToTooltipKey(key)
+    if type(key) == "string" then
+        return key
+    end
+
+    if key == nil then
+        error("attempt to use a nil key", 3)
+    end
+
+    local mappedKey = qTipKeyMap[key]
+    if not mappedKey then
+        mappedKey = tostring(key)
+        qTipKeyMap[key] = mappedKey
+    end
+
+    return mappedKey
+end
+
+local qTip = {}
+
+function qTip:Release(tooltip)
+    qTipLib:ReleaseTooltip(tooltip)
+end
+
+function qTip:IsAcquired(key)
+    return qTipLib:IsAcquiredTooltip(ToTooltipKey(key))
+end
+
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 
