@@ -11,6 +11,8 @@ local db
 local MODNAME = "ScreenSaver"
 local ScreenSaver = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
+local afkStart  -- session-local: does not persist across reloads
+
 local function IsSafeTrue(value)
     if RealUI.isSecret(value) then
         return false
@@ -34,8 +36,8 @@ function ScreenSaver:UpdateTimer(...)
     local isAFK = IsSafeTrue(_G.UnitIsAFK("player"))
     self:debug("UpdateTimer", isAFK)
     if isAFK then
-        if not db.afkStart then
-            db.afkStart = _G.GetServerTime()
+        if not afkStart then
+            afkStart = _G.GetServerTime()
             self.frame.alphaIn:Play()
         end
 
@@ -43,7 +45,7 @@ function ScreenSaver:UpdateTimer(...)
             _G.PlaySound(15262, "MASTER") -- Aggro_Enter_Warning_State
         end
     else
-        db.afkStart = nil
+        afkStart = nil
         self.frame.alphaOut:Play()
     end
 end
@@ -58,9 +60,9 @@ function ScreenSaver:CreateFrames()
     self.frame = frame
 
     frame:SetScript("OnUpdate", function(this, elapsed)
-        self:debug("OnUpdate", db.afkStart)
-        if db.afkStart then
-            local timeStr = _G.SecondsToClock(_G.GetServerTime() - db.afkStart)
+        self:debug("OnUpdate", afkStart)
+        if afkStart then
+            local timeStr = _G.SecondsToClock(_G.GetServerTime() - afkStart)
             this.time:SetFormattedText(_G.MARKED_AFK_MESSAGE, timeStr)
         end
     end)
@@ -119,8 +121,8 @@ end
 
 -- Hide bar when the player starts moving (mirrors old "Auto Cancel Away Mode" behaviour)
 function ScreenSaver:OnMovement()
-    if db.afkStart then
-        db.afkStart = nil
+    if afkStart then
+        afkStart = nil
         self.frame.alphaOut:Play()
     end
 end
@@ -136,7 +138,6 @@ function ScreenSaver:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
         profile = {
-            afkStart = nil,
             combatwarning = true,
         },
     })
