@@ -4,7 +4,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="AddonData\Bartender4.lua"/>
     <Script file="AddonData\DBM.lua"/>
     <Script file="AddonData\Grid2.lua"/>
-    <!-- <Script file="AddonData\Platynator.lua"/> -->
+    <Script file="AddonData\Platynator.lua"/>
     <Script file="AddonData\Masque.lua"/>
     <Script file="AddonData\Raven.lua"/>
     <Script file="AddonData\Skada.lua"/>
