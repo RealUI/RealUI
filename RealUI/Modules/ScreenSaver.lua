@@ -117,6 +117,14 @@ function ScreenSaver:CreateFrames()
     frame.time = timeText
 end
 
+-- Hide bar when the player starts moving (mirrors old "Auto Cancel Away Mode" behaviour)
+function ScreenSaver:OnMovement()
+    if db.afkStart then
+        db.afkStart = nil
+        self.frame.alphaOut:Play()
+    end
+end
+
 ----
 function ScreenSaver:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
@@ -142,6 +150,7 @@ function ScreenSaver:OnEnable()
     self:RegisterEvent("PLAYER_FLAGS_CHANGED", "UpdateTimer")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateTimer")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "UpdateTimer")
+    self:RegisterEvent("PLAYER_STARTED_MOVING", "OnMovement")
 
     ScreenSaver:RefreshMod()
 end
@@ -150,6 +159,7 @@ function ScreenSaver:OnDisable()
     self:UnregisterEvent("PLAYER_FLAGS_CHANGED")
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
     self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+    self:UnregisterEvent("PLAYER_STARTED_MOVING")
 
     self.frame:Hide()
 end
