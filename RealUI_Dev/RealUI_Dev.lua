@@ -4,7 +4,9 @@ local ADDON_NAME, ns = ...
 -- luacheck: globals next select
 
 -- RealUI --
-local debug = _G.RealUI.GetDebug("Dev")
+_G.RealUI = _G.RealUI or {}
+local getDebug = _G.RealUI.GetDebug
+local debug = (type(getDebug) == "function" and getDebug("Dev")) or function() end
 
 _G.RealUI.isDev = true
 ns.isClassic = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_CLASSIC
@@ -337,7 +339,8 @@ function ns.commands:nudgeFrame()
         if keys[key] then
             keys[key](frame)
 
-            if _G.RealUI.GetOptions("DragEmAll", {"global", frame}) then
+            local getOptions = _G.RealUI and _G.RealUI.GetOptions
+            if type(getOptions) == "function" and getOptions("DragEmAll", {"global", frame}) then
                 -- FIXMELATER: Throws errors at random...|
                 _G.LibStub("LibWindow-1.1").SavePosition(frame)
             end
