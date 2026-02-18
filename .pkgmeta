@@ -34,8 +34,8 @@ externals:
     RealUI/Libs/LibIconFonts:
         url: https://github.com/Gethe/LibIconFonts.git
         tag: latest
-    RealUI/Libs/LibQTip-1.0:
-        url: https://repos.wowace.com/wow/libqtip-1-0
+    RealUI/Libs/LibQTip-2.0:
+        url: https://repos.wowace.com/wow/libqtip-2-0
     RealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
