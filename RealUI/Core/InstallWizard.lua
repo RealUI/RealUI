@@ -42,6 +42,23 @@ local installState = {
     stageData = {}
 }
 
+local function ApplyStartupDisplayOptimization()
+    if RealUI.IsUsingHighResDisplay and RealUI:IsUsingHighResDisplay() then
+        local skinsOptions = RealUI.GetOptions and RealUI.GetOptions("Skins")
+        local skinsDB = skinsOptions and skinsOptions.profile
+
+        if skinsDB and not skinsDB.isHighRes and RealUI.UpdateUIScale then
+            skinsDB.isHighRes = true
+            RealUI.UpdateUIScale(skinsDB.customScale)
+            debug("Applied startup high-res scaling for install wizard")
+        end
+    end
+
+    if RealUI.ResolutionOptimizer and RealUI.ResolutionOptimizer.ReOptimize then
+        RealUI.ResolutionOptimizer:ReOptimize()
+    end
+end
+
 -- Check if this is first-time setup
 function InstallWizard:IsFirstTime()
     if not RealUI.db or not RealUI.db.char then
@@ -123,6 +140,8 @@ function InstallWizard:Start(forceShow)
         debug("Forcing installation wizard to show")
         self:SetStage(InstallWizard.STAGE_WELCOME)
 
+        ApplyStartupDisplayOptimization()
+
         -- Show installation wizard UI
         if RealUI.InstallUI then
             RealUI.InstallUI:Show()
@@ -142,6 +161,8 @@ function InstallWizard:Start(forceShow)
         debug("Starting new installation")
         self:SetStage(InstallWizard.STAGE_WELCOME)
     end
+
+    ApplyStartupDisplayOptimization()
 
     -- Show installation wizard UI
     if RealUI.InstallUI then

@@ -380,8 +380,14 @@ function private.Profiles.Bartender4()
         db:SetDualSpecProfile(profile, specIndex)
     end
 
-    local pro = db[RealUI.charInfo.specs.current.index] or db
-    if type(pro) == "string" and pro ~= _G.Bartender4.db:GetCurrentProfile() then
-        _G.Bartender4.db:SetProfile(pro)
+    -- Switch to the correct profile for the current spec.
+    -- (db[specIndex] is not a valid AceDB lookup; compute the target directly.)
+    local currentSpec = RealUI.charInfo.specs.current
+    local targetProfile = private.layoutToProfile[1]  -- Default: "RealUI" (DPS/Tank)
+    if currentSpec and currentSpec.role == _G.Enum.LFGRole.Healer then
+        targetProfile = private.layoutToProfile[2]    -- "RealUI-Healing"
+    end
+    if db:GetCurrentProfile() ~= targetProfile then
+        db:SetProfile(targetProfile)
     end
 end

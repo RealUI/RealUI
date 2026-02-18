@@ -33,6 +33,72 @@ local layoutToProfile = {
     "RealUI-Healing"
 }
 
+local function EnsureBartenderActionBarsProfiles()
+    local bt4db = _G.Bartender4DB
+    if type(bt4db) ~= "table" then return end
+
+    local namespaces = bt4db.namespaces
+    if type(namespaces) ~= "table" then return end
+
+    local actionBarsNamespace = namespaces.ActionBars
+    if type(actionBarsNamespace) ~= "table" then return end
+
+    local profiles = actionBarsNamespace.profiles
+    if type(profiles) ~= "table" then
+        profiles = {}
+        actionBarsNamespace.profiles = profiles
+    end
+
+    local defaultEnabled = {
+        [1] = true,
+        [2] = true,
+        [3] = true,
+        [4] = true,
+        [5] = true,
+        [6] = true,
+        [7] = false,
+        [8] = false,
+        [9] = false,
+        [10] = false,
+        [13] = false,
+        [14] = false,
+        [15] = false,
+    }
+
+    local function EnsureProfile(profileName)
+        local profile = profiles[profileName]
+        if type(profile) ~= "table" then
+            profile = {}
+            profiles[profileName] = profile
+        end
+
+        if type(profile.actionbars) ~= "table" then
+            profile.actionbars = {}
+        end
+
+        for barID, enabled in pairs(defaultEnabled) do
+            if type(profile.actionbars[barID]) ~= "table" then
+                profile.actionbars[barID] = { enabled = enabled }
+            end
+        end
+    end
+
+    for profileName in pairs(profiles) do
+        EnsureProfile(profileName)
+    end
+
+    for _, profileName in ipairs(layoutToProfile) do
+        EnsureProfile(profileName)
+    end
+
+    if type(bt4db.profileKeys) == "table" then
+        local currentProfileName = bt4db.profileKeys[RealUI.key]
+        if type(currentProfileName) == "string" and currentProfileName ~= "" then
+            EnsureProfile(currentProfileName)
+        end
+    end
+end
+
 -- Enhanced Specialization Detection Functions
 function DualSpecSystem:GetCurrentSpecialization()
     if _G.IsPlayerInitialSpec() then
@@ -305,6 +371,8 @@ function DualSpecSystem:SetupLibDualSpec()
 
     debug("Setting up LibDualSpec integration")
 
+    EnsureBartenderActionBarsProfiles()
+
     -- Enhance database with LibDualSpec support
     LDS:EnhanceDatabase(RealUI.db, "RealUI")
 
@@ -338,7 +406,7 @@ function DualSpecSystem:SetupLibDualSpec()
         self:SetSpecProfile(specIndex, profileName)
     end
 
-    isbDualSpecSetup = true
+    isLibDualSpecSetup = true
     debug("LibDualSpec setup cocessfully")
     return true
 end
@@ -545,15 +613,14 @@ local function UpdateSpec()
     debug("UpdateSpec called")
 
     if _G.IsPlayerInitialSpec() then
-        debug("Player is in initial spec state, updating LibDualSpec")
+        debug("Player is in initial spec state, seeding LDS currentSpec only")
+        -- Only seed LDS.currentSpec here. Do NOT call CheckDualSpecState on
+        -- all databases — Bartender4's ActionBars namespace may not be fully
+        -- initialized yet, causing .actionbars to be nil on profile switch.
+        -- Bartender4 manages its own LibDualSpec state; RealUI's DB will be
+        -- handled when spec actually fires later.
+        EnsureBartenderActionBarsProfiles()
         LDS.currentSpec = RealUI.charInfo.specs.current.index
-
-        -- Update all databases with dual-spec support
-        for addonDB, addonName in LDS:IterateDatabases() do
-            debug("Updating database for addon:", addonName)
-            addonDB:CheckDualSpecState()
-        end
-
         return
     end
 

@@ -61,6 +61,11 @@ function ActionBars:ApplyABSettings(tag)
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
+    if BT4ActionBars and BT4ActionBars.db and BT4ActionBars.db.profile
+        and BT4ActionBars.db.profile.actionbars and BT4ActionBars.ApplyConfig then
+        BT4ActionBars:ApplyConfig()
+    end
+
     -- Refresh db reference to ensure we have the latest settings
     db = self.db.profile
     ndb = RealUI.db.profile
@@ -195,43 +200,59 @@ function ActionBars:ApplyABSettings(tag)
             end
 
             local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
-            local bar = profileActionBars["actionbars"][id]
-            local point
-            if isVertBar then
-                point = BarPositions[id]
-                bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
-            else
-                point = BarPositions[id] == "TOP" and "CENTER" or "BOTTOM"
-                bar["flyoutDirection"] = BarPositions[id] == "TOP" and "DOWN" or "UP"
-            end
-
-            ActionBars:debug(id, "Points", x, y, point)
-            bar["padding"] = fixedSettings.buttonPadding - 10
-            bar["buttons"] = BTBar.numbuttons or BTBar.button_count or 12
-            bar["rows"] = 1  -- Default to 1 row for horizontal bars
-            bar["alpha"] = bar["alpha"] or 1  -- Ensure alpha is set
-            bar["buttonOffset"] = bar["buttonOffset"] or 0  -- Ensure buttonOffset is set
-            bar["position"] = {
-                ["x"] = x,
-                ["y"] = y,
-                ["point"] = point,
-                ["scale"] = 1,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-
-            -- Apply config with the bar parameter (this sets self.config inside ApplyConfig)
-            BTBar:ApplyConfig(bar)
-
-            -- Then set buttons
-            BTBar:SetButtons()
-
-            -- Force button layout update after a short delay
-            _G.C_Timer.After(0.1, function()
-                if BTBar.UpdateButtonLayout then
-                    BTBar:UpdateButtonLayout()
+            local barDB = profileActionBars["actionbars"][id]
+            local bar = BTBar.config
+            if bar then
+                local point
+                if isVertBar then
+                    point = BarPositions[id]
+                    bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
+                else
+                    point = BarPositions[id] == "TOP" and "CENTER" or "BOTTOM"
+                    bar["flyoutDirection"] = BarPositions[id] == "TOP" and "DOWN" or "UP"
                 end
-            end)
+
+                ActionBars:debug(id, "Points", x, y, point)
+                bar["padding"] = fixedSettings.buttonPadding - 10
+                bar["buttons"] = BTBar.numbuttons or BTBar.button_count or 12
+                bar["rows"] = 1  -- Default to 1 row for horizontal bars
+                bar["alpha"] = bar["alpha"] or 1  -- Ensure alpha is set
+                bar["buttonOffset"] = bar["buttonOffset"] or 0  -- Ensure buttonOffset is set
+                bar["position"] = {
+                    ["x"] = x,
+                    ["y"] = y,
+                    ["point"] = point,
+                    ["scale"] = 1,
+                    ["growHorizontal"] = "RIGHT",
+                    ["growVertical"] = "DOWN",
+                }
+
+                -- Persist key values to Bartender profile table
+                if barDB then
+                    barDB["flyoutDirection"] = bar["flyoutDirection"]
+                    barDB["padding"] = bar["padding"]
+                    barDB["buttons"] = bar["buttons"]
+                    barDB["rows"] = bar["rows"]
+                    barDB["alpha"] = bar["alpha"]
+                    barDB["buttonOffset"] = bar["buttonOffset"]
+                    barDB["position"] = bar["position"]
+                end
+
+                -- Apply using the bar's complete live config table to preserve defaults
+                BTBar:ApplyConfig()
+
+                -- Then set buttons
+                BTBar:SetButtons()
+
+                -- Force button layout update after a short delay
+                _G.C_Timer.After(0.1, function()
+                    if BTBar.UpdateButtonLayout then
+                        BTBar:UpdateButtonLayout()
+                    end
+                end)
+            else
+                BarSizes[id] = 0
+            end
         else
             BarSizes[id] = 0
         end

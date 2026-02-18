@@ -18,6 +18,23 @@ local Color = Aurora.Color
 local InstallUI = _G.CreateFrame("Frame", "RealUIInstallWizard", _G.UIParent)
 RealUI.InstallUI = InstallUI
 
+local function GetWizardDisplayScale()
+    local uiParentScale = (_G.UIParent and _G.UIParent:GetScale()) or 1
+    if uiParentScale <= 0 then
+        return 1
+    end
+
+    local targetScale = 1 / uiParentScale
+    local _, screenHeight = _G.GetPhysicalScreenSize()
+
+    if screenHeight and screenHeight >= 2160 then
+        targetScale = _G.max(targetScale, 1.15)
+    end
+
+    targetScale = _G.min(_G.max(targetScale, 1), 1.6)
+    return RealUI.Scale.Round(targetScale, 2)
+end
+
 InstallUI:SetPoint("CENTER")
 InstallUI:SetSize(550, 500)
 InstallUI:SetFrameStrata("DIALOG")
@@ -284,7 +301,13 @@ end
 
 -- Show installation UI
 function InstallUI:Show()
-    _G.FrameUtil.RegisterFrameForEvents(self, {"PLAYER_REGEN_DISABLED"})
+    _G.FrameUtil.RegisterFrameForEvents(self, {
+        "PLAYER_REGEN_DISABLED",
+        "UI_SCALE_CHANGED",
+        "DISPLAY_SIZE_CHANGED",
+    })
+
+    self:SetScale(GetWizardDisplayScale())
 
     local stage = RealUI.InstallWizard and RealUI.InstallWizard:GetCurrentStage() or 0
     self:UpdateStage(stage)
@@ -294,7 +317,11 @@ end
 
 -- Hide installation UI
 function InstallUI:Hide()
-    _G.FrameUtil.UnregisterFrameForEvents(self, {"PLAYER_REGEN_DISABLED"})
+    _G.FrameUtil.UnregisterFrameForEvents(self, {
+        "PLAYER_REGEN_DISABLED",
+        "UI_SCALE_CHANGED",
+        "DISPLAY_SIZE_CHANGED",
+    })
     _G.getmetatable(self).__index.Hide(self)
 end
 
@@ -303,6 +330,8 @@ InstallUI:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_REGEN_DISABLED" then
         -- Hide during combat
         self:Hide()
+    elseif event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" then
+        self:SetScale(GetWizardDisplayScale())
     end
 end)
 
