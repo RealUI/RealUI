@@ -23,16 +23,11 @@ local RealUIAddOns = {
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
 
     ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
-    ["Kui_Nameplates_Core"] =    {isAce = false, db = "KuiNameplatesCoreCharacterSaved", profKey = "profile"},
-
-    -- ["Platynator"] =    {isAce = false, db = "PLATYNATOR_CONFIG", profKey = "Profiles"},
-
 }
 local RealUIAddOnsOrder = {
     "DBM",
     "Masque",
     "Bartender4",
-    -- "Platynator",
     "Raven",
     "Skada",
 }
@@ -409,16 +404,6 @@ function AddonControl:OnInitialize()
                     control = {
                         position = true,
                         style = false,
-                    },
-                },
-                ["Kui_Nameplates_Core"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI"},
-                        layout =        {use = false,   key = "Healing"},
-                    },
-                    control = {
-                        position = false,
-                        style = true,
                     },
                 },
                 ["Bartender4"] = {
