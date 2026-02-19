@@ -47,7 +47,8 @@ do --[[ AddOns\Blizzard_WorldMap.lua ]]
 
     -- Create a monitoring frame that doesn't taint WorldMapFrame
     local monitorFrame = _G.CreateFrame("Frame")
-    monitorFrame:Hide()
+    local currentCoords, currentMapFrame
+    local isTracking = false
 
     function Hook.StartCoordinateTracking(coords, mapFrame)
         if ticker then
@@ -56,7 +57,7 @@ do --[[ AddOns\Blizzard_WorldMap.lua ]]
         ticker = _G.C_Timer.NewTicker(0.1, function()
             updateCoords(coords, mapFrame)
         end)
-        monitorFrame:Show()
+        isTracking = true
     end
 
     function Hook.StopCoordinateTracking()
@@ -64,13 +65,18 @@ do --[[ AddOns\Blizzard_WorldMap.lua ]]
             ticker:Cancel()
             ticker = nil
         end
-        monitorFrame:Hide()
+        isTracking = false
     end
 
-    -- Monitor WorldMapFrame visibility without hooking its scripts
+    -- Monitor WorldMapFrame visibility without hooking its scripts or using events
     monitorFrame:SetScript("OnUpdate", function(self)
         local mapFrame = _G.WorldMapFrame
-        if mapFrame and not mapFrame:IsShown() then
+        if not mapFrame then return end
+
+        local isShown = mapFrame:IsShown()
+        if isShown and not isTracking and currentCoords then
+            Hook.StartCoordinateTracking(currentCoords, currentMapFrame)
+        elseif not isShown and isTracking then
             Hook.StopCoordinateTracking()
         end
     end)
@@ -100,17 +106,9 @@ _G.hooksecurefunc(private.AddOns, "Blizzard_WorldMap", function()
         mouse = mouse
     }
 
-    -- Use an event frame to track map visibility without tainting
-    local eventFrame = _G.CreateFrame("Frame")
-    eventFrame:RegisterEvent("WORLD_MAP_OPEN")
-    eventFrame:RegisterEvent("WORLD_MAP_CLOSE")
-    eventFrame:SetScript("OnEvent", function(self, event)
-        if event == "WORLD_MAP_OPEN" then
-            Hook.StartCoordinateTracking(coords, WorldMapFrame)
-        elseif event == "WORLD_MAP_CLOSE" then
-            Hook.StopCoordinateTracking()
-        end
-    end)
+    -- Store the coords and mapFrame reference for the monitor
+    currentCoords = coords
+    currentMapFrame = WorldMapFrame
 
     -- Start tracking if map is already open
     if WorldMapFrame:IsShown() then
