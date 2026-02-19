@@ -5,7 +5,6 @@ local wipe = table.wipe
 local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
 local DisableAddOn = C_AddOns.DisableAddOn
 local GetAddOnEnableState = C_AddOns.GetAddOnEnableState
-local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 local GetNumAddOns = C_AddOns.GetNumAddOns
 local playerName = UnitNameUnmodified("player")
 
@@ -121,9 +120,6 @@ local function fetchFromDatabase(database, target)
 	for i, err in next, database do
 		if err.message == target then
 			-- This error already exists
-			err.counter = err.counter + 1
-			err.session = addon:GetSessionId()
-
 			return table.remove(database, i)
 		end
 	end
@@ -165,92 +161,9 @@ local function slashHandler(index)
 end
 
 -----------------------------------------------------------------------
--- Error catching
+-- Error Handler
 --
 
-local findVersions -- Function set below
-do
-	local function scanObject(o)
-		local version, revision = nil, nil
-		for k, v in next, o do
-			if type(k) == "string" and (type(v) == "string" or type(v) == "number") then
-				local low = k:lower()
-				if not version and low:find("version") then
-					version = v
-				elseif not revision and low:find("revision") then
-					revision = v
-				end
-			end
-			if version and revision then break end
-		end
-		return version, revision
-	end
-
-	local matchCache = setmetatable({}, { __index = function(self, object)
-		if type(object) ~= "string" or #object < 3 then return end
-		local found = nil
-		-- First see if it's a library
-		if LibStub then
-			local _, minor = LibStub(object, true)
-			found = minor
-		end
-		-- Then see if we can get some addon metadata
-		if not found and IsAddOnLoaded(object) then
-			found = GetAddOnMetadata(object, "X-Curse-Packaged-Version")
-			if not found then
-				found = GetAddOnMetadata(object, "Version")
-			end
-		end
-		-- Perhaps it's a global object?
-		if not found then
-			local o = _G[object] or _G[object:upper()]
-			if type(o) == "table" then
-				local v, r = scanObject(o)
-				if v or r then
-					found = tostring(v) .. "." .. tostring(r)
-				end
-			elseif o then
-				found = o
-			end
-		end
-		if not found then
-			found = _G[object:upper() .. "_VERSION"]
-		end
-		if type(found) == "string" or type(found) == "number" then
-			self[object] = found
-			return found
-		end
-	end })
-
-	local tmp = {}
-	local function replacer(start, object, tail)
-		-- Have we matched this object before on the same line?
-		-- (another pattern could re-match a previous match...)
-		if tmp[object] then return end
-		local found = matchCache[object]
-		if found then
-			tmp[object] = true
-			return (type(start) == "string" and start or "") .. object .. "-" .. found .. (type(tail) == "string" and tail or "")
-		end
-	end
-
-	local matchers = {
-		"(\\)([^\\]+)(%.lua)",       -- \Anything-except-backslashes.lua
-		"^()([^\\]+)(\\)",           -- Start-of-the-line-until-first-backslash\
-		"()(%a+%-%d%.?%d?)()",       -- Anything-#.#, where .# is optional
-		"()(Lib%u%a+%-?%d?%.?%d?)()" -- LibXanything-#.#, where X is any capital letter and -#.# is optional
-	}
-	function findVersions(line)
-		if not line or line:find("FrameXML\\") then return line end
-		for i = 1, 4 do
-			line = line:gsub(matchers[i], replacer)
-		end
-		wipe(tmp)
-		return line
-	end
-end
-
--- Error handler
 local grabError
 do
 	local GetErrorData
@@ -313,52 +226,46 @@ do
 			return
 		end
 
-		local sanitizedMessage = findVersions(errorMessage)
-
 		-- Insert the error into the correct database if it's not there
 		-- already. If it is, just increment the counter.
 		local found
 		if db then
-			found = fetchFromDatabase(db, sanitizedMessage)
+			found = fetchFromDatabase(db, errorMessage)
 		else
-			found = fetchFromDatabase(loadErrors, sanitizedMessage)
+			found = fetchFromDatabase(loadErrors, errorMessage)
 		end
-		-- XXX Note that fetchFromDatabase will set the error objects
-		-- XXX session ID to the current one, if found - and it will also
-		-- XXX increment the counter on it. This is probably wrong, it should
-		-- XXX be done here instead, as "fetchFromDatabase" implies a simple
-		-- XXX :Get procedure.
 
 		local errorObject = found
 
-		if not errorObject then
+		if not errorObject then -- New error
 			-- Store the error
 			if isSimple then
 				errorObject = {
-					message = sanitizedMessage,
+					message = errorMessage,
 					session = addon:GetSessionId(),
 					time = date("%Y/%m/%d %H:%M:%S"),
 					counter = 1,
 				}
 			else
 				local stack, locals = GetErrorData()
-				local tbl = {}
-
-				-- Scan for version numbers in the stack
-				if stack then
-					for line in stack:gmatch("(.-)\n") do
-						tbl[#tbl+1] = findVersions(line)
-					end
-				end
 				errorObject = {
-					message = sanitizedMessage,
-					stack = stack and table.concat(tbl, "\n") or "Debugstack was nil.",
+					message = errorMessage,
+					stack = stack or "Debugstack was nil.",
 					locals = locals or "Debuglocals was nil.",
 					session = addon:GetSessionId(),
 					time = date("%Y/%m/%d %H:%M:%S"),
 					counter = 1,
 				}
 			end
+		else -- Old error
+			if errorObject.session ~= addon:GetSessionId() then -- Error from a different session, update it
+				local stack, locals = GetErrorData()
+				errorObject.stack = stack or "Debugstack was nil."
+				errorObject.locals = locals or "Debuglocals was nil."
+				errorObject.session = addon:GetSessionId()
+				errorObject.time = date("%Y/%m/%d %H:%M:%S")
+			end
+			errorObject.counter = errorObject.counter + 1
 		end
 
 		if not isBugGrabbedRegistered then
