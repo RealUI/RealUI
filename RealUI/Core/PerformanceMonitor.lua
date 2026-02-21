@@ -137,20 +137,34 @@ end
 -- Cache RealUI addon indices to avoid scanning all addons every time
 local realUIAddonIndices = nil
 
+-- Throttle timestamps to avoid calling expensive Update* APIs too frequently
+local lastMemoryUpdateTime = 0
+local lastCPUUpdateTime = 0
+local UPDATE_MIN_INTERVAL = 10 -- seconds
+
+local function BuildAddonIndexCache()
+    realUIAddonIndices = {}
+    local numAddons = _G.C_AddOns.GetNumAddOns()
+    for i = 1, numAddons do
+        local name = _G.C_AddOns.GetAddOnInfo(i)
+        if name and (name:match("^RealUI") or name:match("^nibRealUI")) then
+            table.insert(realUIAddonIndices, i)
+        end
+    end
+end
+
 function PerformanceMonitor:GetMemoryUsage()
-    -- Get addon memory usage in bytes
-    _G.UpdateAddOnMemoryUsage()
+    -- UpdateAddOnMemoryUsage() scans all loaded addons and can be slow;
+    -- throttle it so it runs at most once every UPDATE_MIN_INTERVAL seconds.
+    local currentTime = GetTime()
+    if currentTime - lastMemoryUpdateTime >= UPDATE_MIN_INTERVAL then
+        _G.UpdateAddOnMemoryUsage()
+        lastMemoryUpdateTime = currentTime
+    end
 
     -- Build cache of RealUI addon indices on first run
     if not realUIAddonIndices then
-        realUIAddonIndices = {}
-        local numAddons = _G.C_AddOns.GetNumAddOns()
-        for i = 1, numAddons do
-            local name = _G.C_AddOns.GetAddOnInfo(i)
-            if name and (name:match("^RealUI") or name:match("^nibRealUI")) then
-                table.insert(realUIAddonIndices, i)
-            end
-        end
+        BuildAddonIndexCache()
     end
 
     -- Sum up RealUI addon memory using cached indices
@@ -223,16 +237,21 @@ end
 -- CPU Usage Monitoring
 
 function PerformanceMonitor:GetCPUUsage()
-    -- Get addon CPU usage in milliseconds
-    _G.UpdateAddOnCPUUsage()
-    local cpu = 0
+    -- UpdateAddOnCPUUsage() scans all loaded addons and can be slow;
+    -- throttle it and reuse the same cached index list as memory tracking.
+    local currentTime = GetTime()
+    if currentTime - lastCPUUpdateTime >= UPDATE_MIN_INTERVAL then
+        _G.UpdateAddOnCPUUsage()
+        lastCPUUpdateTime = currentTime
+    end
 
-    -- Sum up all RealUI addon CPU time
-    for i = 1, _G.C_AddOns.GetNumAddOns() do
-        local name = _G.C_AddOns.GetAddOnInfo(i)
-        if name and (name:match("^RealUI") or name:match("^nibRealUI")) then
-            cpu = cpu + _G.GetAddOnCPUUsage(i)
-        end
+    if not realUIAddonIndices then
+        BuildAddonIndexCache()
+    end
+
+    local cpu = 0
+    for _, index in ipairs(realUIAddonIndices) do
+        cpu = cpu + _G.GetAddOnCPUUsage(index)
     end
 
     return cpu
@@ -368,13 +387,17 @@ function PerformanceMonitor:CheckAutomaticGarbageCollection(memory)
 end
 
 function PerformanceMonitor:PerformGarbageCollection()
-    local beforeMemory = self:GetMemoryUsage()
+    -- Use the cached memory value as the baseline to avoid an extra
+    -- UpdateAddOnMemoryUsage() call immediately before GC.
+    local beforeMemory = performanceData.memory.current
     local beforeTime = GetTime()
 
     -- Perform garbage collection
     collectgarbage("collect")
 
     local afterTime = GetTime()
+    -- Force a fresh memory read after GC by resetting the throttle timestamp.
+    lastMemoryUpdateTime = 0
     local afterMemory = self:GetMemoryUsage()
     local gcTime = (afterTime - beforeTime) * 1000 -- Convert to milliseconds
     local memoryFreed = beforeMemory - afterMemory
@@ -442,8 +465,17 @@ function PerformanceMonitor:GetAllModulePerformance()
 end
 
 function PerformanceMonitor:TrackModuleResourceUsage(moduleName)
-    _G.UpdateAddOnMemoryUsage()
-    _G.UpdateAddOnCPUUsage()
+    -- Reuse the throttled update calls from GetMemoryUsage / GetCPUUsage
+    -- so that we don't unconditionally scan all addons here as well.
+    local currentTime = GetTime()
+    if currentTime - lastMemoryUpdateTime >= UPDATE_MIN_INTERVAL then
+        _G.UpdateAddOnMemoryUsage()
+        lastMemoryUpdateTime = currentTime
+    end
+    if currentTime - lastCPUUpdateTime >= UPDATE_MIN_INTERVAL then
+        _G.UpdateAddOnCPUUsage()
+        lastCPUUpdateTime = currentTime
+    end
 
     -- Find the addon index for this module
     for i = 1, _G.C_AddOns.GetNumAddOns() do
@@ -462,7 +494,7 @@ function PerformanceMonitor:TrackModuleResourceUsage(moduleName)
 
             moduleResourceUsage[moduleName].memory = memory
             moduleResourceUsage[moduleName].cpu = cpu
-            moduleResourceUsage[moduleName].lastUpdate = GetTime()
+            moduleResourceUsage[moduleName].lastUpdate = currentTime
 
             return memory, cpu
         end
