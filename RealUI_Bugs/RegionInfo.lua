@@ -102,11 +102,15 @@ function private.SetFramestack(self, highlightFrame)
         local line = _G["FrameStackTooltipTextLeft"..i]
         local text = line:GetText()
         if text then
-            if text:find("<%d+>") then
+            local ok, hasDigit = pcall(string.find, text, "<%d+>")
+            if ok and hasDigit then
                 lineNum = i + 1
                 break
-            elseif text:find("fsobj") then
-                fsobj = line:GetText()
+            else
+                local ok2, hasFsobj = pcall(string.find, text, "fsobj")
+                if ok2 and hasFsobj then
+                    fsobj = line:GetText()
+                end
             end
         end
     end
