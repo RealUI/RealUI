@@ -14,8 +14,8 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="LibWindow-1.1\LibWindow-1.1.lua"/>
     <Script file="HereBeDragons\HereBeDragons-2.0.lua"/>
     <Script file="HereBeDragons\HereBeDragons-Pins-2.0.lua"/>
-    <Include file="LibIconFonts\lib.xml" />
-    <Include file="LibQTip-2.0\LibQTip-2.0.xml" />
+    <Include file="LibIconFonts\lib.xml"/>
+    <Include file="LibQTip-2.0\Manifest.xml"/>
     <Include file="oUF\oUF.xml"/>
     @end-non-debug@-->
 
