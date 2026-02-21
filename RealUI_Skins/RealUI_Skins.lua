@@ -76,7 +76,6 @@ end
 
 local uiMod, uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
-    _G.print("RealUI.UpdateUIScale")
     if uiScaleChanging then return end
 
     -- https://www.reddit.com/r/wow/comments/95o2qn/how_to_pixel_perfect_ui/
