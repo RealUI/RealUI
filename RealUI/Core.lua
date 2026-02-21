@@ -160,7 +160,8 @@ do
             -- Dynamic UI settings
             settings = {
                 hudSize = 2,
-                reverseUnitFrameBars = false
+                reverseUnitFrameBars = false,
+                performanceMonitorEnabled = false
             }
         }
     }
@@ -296,6 +297,16 @@ function RealUI:ChatCommand_Config(input)
             else
                 print("Setup system not available")
             end
+            return
+        elseif command == "reset" then
+            _G.nibRealUIDB = nil
+            _G.nibRealUICharacter = nil
+            _G.RealUIDB = nil
+            _G.RealUICharacter = nil
+            _G.Bartender4DB = nil
+            _G.PLATYNATOR_CONFIG = {}
+            _G.PLATYNATOR_CURRENT_PROFILE = {}
+            _G.ReloadUI()
             return
         end
     end
@@ -854,7 +865,7 @@ function RealUI:OnInitialize()
                     self.PerformanceMonitor:SetAlertsEnabled(false)
                     print("Performance alerts disabled")
                 else
-                    print("Usage: /perfmon <start|stop|status|gc|alerts on|alerts off>")
+                    print("Usage: /perfmon <start||stop||status||gc||alerts on||alerts off>")
                 end
             else
                 print("PerformanceMonitor not available")

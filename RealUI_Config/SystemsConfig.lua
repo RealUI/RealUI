@@ -130,6 +130,29 @@ local function CreateSystemsConfig()
                     type = "header",
                     order = 1,
                 },
+                enabled = {
+                    name = L["Sys_PerformanceMonitorEnabled"],
+                    desc = L["Sys_PerformanceMonitorEnabledDesc"],
+                    type = "toggle",
+                    order = 5,
+                    get = function()
+                        return RealUI.db and RealUI.db.profile.settings.performanceMonitorEnabled
+                    end,
+                    set = function(_, value)
+                        if RealUI.db then
+                            RealUI.db.profile.settings.performanceMonitorEnabled = value
+                        end
+                        if value then
+                            if not RealUI.PerformanceMonitor:IsMonitoring() then
+                                RealUI.PerformanceMonitor:StartMonitoring()
+                            end
+                        else
+                            if RealUI.PerformanceMonitor:IsMonitoring() then
+                                RealUI.PerformanceMonitor:StopMonitoring()
+                            end
+                        end
+                    end,
+                },
                 stats = {
                     name = "Current Statistics",
                     type = "group",
