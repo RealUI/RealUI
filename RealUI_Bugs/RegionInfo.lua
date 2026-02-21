@@ -115,6 +115,7 @@ function private.SetFramestack(self, highlightFrame)
         end
     end
 
+    if not lineNum then return end
     _G["FrameStackTooltipTextLeft"..lineNum]:SetText("\n")
 
     local assets = GetTextureInfo(self, self.highlightFrame)
