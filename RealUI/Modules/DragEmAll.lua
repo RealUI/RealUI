@@ -171,8 +171,7 @@ local addonFrames = {
     },
     --Blizzard_PartyPoseUI = {},
     Blizzard_PlayerSpells = {
-        -- PlayerSpellsFrame =  {"PlayerSpellsFrame","SpellBookFrame", "TalentsFrame","SpecFrame"}
-        PlayerSpellsFrame =  {}
+        PlayerSpellsFrame = {}
     },
     Blizzard_PlayerChoice = {
         PlayerChoiceFrame = {"PlayerChoiceFrame"}
@@ -243,7 +242,7 @@ function DragEmAll:HookFrames(list)
     end
 end
 
-function DragEmAll:HookFrame(frameName, children)
+function DragEmAll:HookFrame(frameName, children, force)
     local frame = _G[frameName]
     if not frame then return end
 
@@ -257,7 +256,12 @@ function DragEmAll:HookFrame(frameName, children)
         frameName = parentName
     end
 
-    if not CanHookFrame(frame) then
+    -- force bypasses the IsProtected check for frames we know are safe to hook
+    -- but whose secure attributes were set before ADDON_LOADED fired (e.g. PlayerSpellsFrame).
+    -- IsForbidden frames are always skipped regardless of force.
+    if not force and not CanHookFrame(frame) then
+        return
+    elseif force and frame.IsForbidden and frame:IsForbidden() then
         return
     end
 
@@ -363,6 +367,18 @@ local function ResetFrames()
 end
 
 function DragEmAll:ADDON_LOADED(event, name)
+    if name == "Blizzard_PlayerSpells" then
+        -- PlayerSpellsFrameMixin:OnLoad() calls ShowUIPanel() during frame creation,
+        -- which triggers SetAttributeNoHandler() on the frame before ADDON_LOADED fires.
+        -- This makes IsProtected() == true and CanHookFrame() skip it.
+        -- We bypass the protection check via force=true: SetMovable/RegisterForDrag/HookScript
+        -- are not restricted by frame protection (only IsForbidden frames block Lua access).
+        -- The existing hooksecurefunc("ShowUIPanel", UpdateFrames) already handles restoring
+        -- the saved position after the panel manager repositions the frame on each open.
+        self:HookFrame("PlayerSpellsFrame", {}, true)
+        return
+    end
+
     local frameList = addonFrames[name]
     if frameList then
         self:HookFrames(frameList)
@@ -400,7 +416,13 @@ function DragEmAll:OnEnable()
     -- Hook prior loaded addons
     for addon, frameList in next, addonFrames do
         if _G.C_AddOns.IsAddOnLoaded(addon) then
-            self:HookFrames(frameList)
+            if addon == "Blizzard_PlayerSpells" then
+                -- PlayerSpellsFrame calls ShowUIPanel during OnLoad, setting secure attributes
+                -- before our code runs, making IsProtected() == true. Force-hook it directly.
+                self:HookFrame("PlayerSpellsFrame", {}, true)
+            else
+                self:HookFrames(frameList)
+            end
         end
     end
 
