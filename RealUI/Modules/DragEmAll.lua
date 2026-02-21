@@ -62,7 +62,7 @@ local addonFrames = {
     ]]
 
     Blizzard_AchievementUI = {
-         AchievementFrame = {"AchievementFrameHeader", "AchievementFrameCategoriesContainer"},
+        AchievementFrame = {},
     },
     Blizzard_AlliedRacesUI = {
         AlliedRacesFrame = {}
@@ -378,6 +378,15 @@ function DragEmAll:ADDON_LOADED(event, name)
         self:HookFrame("PlayerSpellsFrame", {}, true)
         return
     end
+    if name == "Blizzard_ProfessionsBook" then
+        -- ProfessionsBookFrame is registered in UIPanelWindows (area = "left"), so
+        -- ShowUIPanel dispatches to secure code that calls SetAttributeNoHandler(),
+        -- making IsProtected() == true. This can happen before ADDON_LOADED if the
+        -- frame was visible during a UI reload. Force-hook it directly; the existing
+        -- hooksecurefunc("ShowUIPanel", UpdateFrames) restores the saved position.
+        self:HookFrame("ProfessionsBookFrame", {}, true)
+        return
+    end
 
     local frameList = addonFrames[name]
     if frameList then
@@ -420,6 +429,10 @@ function DragEmAll:OnEnable()
                 -- PlayerSpellsFrame calls ShowUIPanel during OnLoad, setting secure attributes
                 -- before our code runs, making IsProtected() == true. Force-hook it directly.
                 self:HookFrame("PlayerSpellsFrame", {}, true)
+            elseif addon == "Blizzard_ProfessionsBook" then
+                -- ProfessionsBookFrame is in UIPanelWindows; if it was shown before OnEnable
+                -- runs (e.g. UI reload while open), IsProtected() == true. Force-hook it.
+                self:HookFrame("ProfessionsBookFrame", {}, true)
             else
                 self:HookFrames(frameList)
             end
