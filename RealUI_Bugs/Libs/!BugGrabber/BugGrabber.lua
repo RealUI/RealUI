@@ -177,9 +177,6 @@ do
 				local debugStackLevel = currentStackHeight - errorStackOffset
 
 				local stack = debugstack(debugStackLevel)
-				if debugStackLevel > 3 then
-					debugStackLevel = 3 -- XXX temp until Blizz fixes debuglocals() killing execution when there are some specific errors
-				end
 				local locals = debuglocals(debugStackLevel)
 				return stack, locals
 			else
@@ -258,13 +255,14 @@ do
 				}
 			end
 		else -- Old error
-			if errorObject.session ~= addon:GetSessionId() then -- Error from a different session, update it
+			local session = addon:GetSessionId()
+			if errorObject.session ~= session then -- Error from a different session, update it
 				local stack, locals = GetErrorData()
 				errorObject.stack = stack or "Debugstack was nil."
 				errorObject.locals = locals or "Debuglocals was nil."
-				errorObject.session = addon:GetSessionId()
-				errorObject.time = date("%Y/%m/%d %H:%M:%S")
+				errorObject.session = session
 			end
+			errorObject.time = date("%Y/%m/%d %H:%M:%S")
 			errorObject.counter = errorObject.counter + 1
 		end
 
@@ -495,7 +493,10 @@ do
 end
 events.ADDON_ACTION_BLOCKED = events.ADDON_ACTION_FORBIDDEN
 function events:LUA_WARNING(_, warningText, pre11_1_5warningText) -- XXX changed in 11.1.5, need to wait until it's ported to all classic versions
-	grabError(pre11_1_5warningText or warningText, true)
+	local text = pre11_1_5warningText or warningText
+	if not text then text = "" end
+	text = "LUA_WARNING: " .. text
+	grabError(text, true)
 end
 
 UIParent:UnregisterEvent("LUA_WARNING") -- XXX pre-11.1.5
