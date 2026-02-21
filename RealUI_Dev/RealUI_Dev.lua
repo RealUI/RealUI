@@ -360,17 +360,6 @@ function ns.commands:combatEvents()
     end)
 end
 
-function ns.commands:reset()
-    _G.nibRealUIDB = nil
-    _G.nibRealUICharacter = nil
-    _G.RealUIDB = nil
-    _G.RealUICharacter = nil
-    _G.Bartender4DB = nil
-    _G.PLATYNATOR_CONFIG = {}
-    _G.PLATYNATOR_CURRENT_PROFILE = {}
-    _G.ReloadUI()
-end
-
 -- Test ModuleFramework
 function ns.commands:testmodules()
     local RealUI = _G.RealUI
