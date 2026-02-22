@@ -327,9 +327,6 @@ function RealUI.SetPixelPoint(frame)
 end
 
 local function OnDragStart(frame, button)
-    -- ClearAllPoints changed in 11.2.0
-    -- FIXME
-    -- frame:ClearAllPoints()
     frame:StartMoving()
 end
 local function OnDragStop(frame, button)
