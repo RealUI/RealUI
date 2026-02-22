@@ -587,8 +587,13 @@ function AngleStatusBarMixin:GetVisualPercent()
 
     -- Fallback: Try to calculate from visual width
     -- For reverseMissing mode, if fill is invisible, we're at 100% (no missing health)
-    if meta.reverseMissing and self.fill and ((not self.fill:IsShown()) or (self.fill.GetAlpha and self.fill:GetAlpha() == 0)) then
-        return 1 -- 100% health
+    if meta.reverseMissing and self.fill then
+        local ok, isHidden = pcall(function()
+            return (not self.fill:IsShown()) or (self.fill.GetAlpha and self.fill:GetAlpha() == 0)
+        end)
+        if ok and isHidden then
+            return 1 -- 100% health
+        end
     end
 
     local currentWidth = self.fill:GetWidth()
