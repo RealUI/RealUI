@@ -305,7 +305,6 @@ function AngleFrameMixin:SetBackgroundColor(r, g, b, a)
     end
     local color = bars[self].bgColor
     color.r, color.g, color.b, color.a = r, g, b, a
-    ---FIXBETA
     if (color.r) and (color.g) and (color.b) then
         self.bg:SetColorTexture(r, g, b, a)
     end

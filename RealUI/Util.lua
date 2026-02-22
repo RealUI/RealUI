@@ -32,9 +32,7 @@ function RealUI.GetSafeVals(min, max)
     end
 end
 function RealUI.ReadableNumber(value)
-    -- FIXBETA
     if RealUI.isSecret(value) then
-        -- _G.print("ReadableNumber: Secret value detected.", value)
         return value
     end
     local retString = _G.tostring(value)
