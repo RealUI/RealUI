@@ -26,7 +26,6 @@ function RealUI.Debug(mod, ...)
         local arg = select(i, ...)
         text = text .. tostring(arg) .. "     "
     end
-    -- FIXBETA needs a rewrite
     if not _G.issecretvalue(text) then
         if modDebug.prevLine == text then
             modDebug.numDuped = modDebug.numDuped + 1

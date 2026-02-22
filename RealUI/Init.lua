@@ -41,7 +41,7 @@ local RealUI = private.RealUI
 -- Version and Build Detection
 RealUI.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
 RealUI.isMidnight = RealUI.isRetail and select(4, _G.GetBuildInfo()) >= 120000
-RealUI.isBetaBuild = RealUI.isRetail and select(4, _G.GetBuildInfo()) == 120001
+RealUI.isBetaBuild = RealUI.isRetail and select(4, _G.GetBuildInfo()) == 130000
 RealUI.isDragonflight = select(4, _G.GetBuildInfo()) >= 100002 or select(4, _G.GetBuildInfo()) <= 110000
 
 -- Realm Information Management

@@ -99,8 +99,8 @@ end
 function VersionManager:CheckGameCompatibility()
     local gameVersion = select(4, _G.GetBuildInfo())
     local supportedVersions = {
-        [120000] = true, -- Midnight
-        [120001] = true, -- Midnight Beta
+        [120000] = true, -- Midnight Prepatch
+        [120001] = true, -- Midnight Release
     }
 
     if not supportedVersions[gameVersion] then
