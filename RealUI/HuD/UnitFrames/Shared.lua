@@ -168,7 +168,7 @@ local function CreateHealthBar(parent, info, isAngled)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
         Health:SetReverseFill(GetReverseFill(parent.unit, info))
-        Health:SetReverseMissing(not ndb.settings.reverseUnitFrameBars)
+        Health:SetReverseMissing(GetReverseMissing(parent.unit))
         if Health.SetReverseMissingSource then
             Health:SetReverseMissingSource("current")
         end
@@ -176,7 +176,7 @@ local function CreateHealthBar(parent, info, isAngled)
                 self.debugUnit = parent.unit
                 -- Check if db.units exists before accessing it
                 local reversePercentOverride = db.units and db.units[parent.unit] and db.units[parent.unit].reversePercent == true
-                self:SetReverseMissing(not ndb.settings.reverseUnitFrameBars)
+                self:SetReverseMissing(GetReverseMissing(parent.unit))
                 if self.SetReverseMissingSource then
                     self:SetReverseMissingSource("current")
                 end
@@ -216,7 +216,7 @@ local function CreateHealthBar(parent, info, isAngled)
             bottom = -1,
         })
 
-        if not (ndb.settings.reverseUnitFrameBars) then
+        if not (ndb and ndb.settings and ndb.settings.reverseUnitFrameBars) then
             Health:SetReverseFill(true)
             Health.PostUpdate = function(dialog, unit, cur, max)
                 if RealUI.isSecret(cur) or RealUI.isSecret(max) or type(cur) ~= "number" or type(max) ~= "number" then
