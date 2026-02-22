@@ -116,7 +116,6 @@ function Inventory:OnInitialize()
     private.Update()
 
     self.Update = private.Update
-    -- FIXBETA
     _G.C_Timer.After(1, function()
         -- Disable tutorials
         _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
