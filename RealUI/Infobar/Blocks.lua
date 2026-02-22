@@ -928,15 +928,25 @@ function Infobar:CreateBlocks()
                     _G.HousingFramesUtil.ToggleHousingDashboard()
                 end,
             },
-            -- FIXMELATER -- This taints like a ....
-            -- {text = _G.BLIZZARD_STORE,
-            --     func = function()
-            --         StoreMicroButton:Click()
-            --     end,
-            --     disabled = function( ... )
-            --         return ((not _G.C_StorePublic.IsEnabled()) or _G.IsTrialAccount())
-            --     end,
-            -- },
+            {text = _G.BLIZZARD_STORE,
+                func = function()
+                    if _G.InCombatLockdown() then return end
+                    -- C_StorePublic.EventStoreUISetShown is protected so ToggleStoreUI taints.
+                    -- For the new CatalogShop, skip straight to SetAttribute which runs secure.
+                    if _G.C_CatalogShop and _G.C_CatalogShop.IsShop2Enabled() then
+                        local isShown = _G.CatalogShopInboundInterface.IsShown()
+                        if not isShown then
+                            securecall("CloseAllWindows")
+                        end
+                        _G.CatalogShopFrame:SetAttribute("action", isShown and "Hide" or "Show")
+                    else
+                        securecall("ToggleStoreUI")
+                    end
+                end,
+                disabled = function( ... )
+                    return ((not _G.C_StorePublic.IsEnabled()) or _G.IsTrialAccount())
+                end,
+            },
             {text = _G.HELP_BUTTON,
                 func = ToggleUI,
                 arg1 = "ToggleHelpFrame",
