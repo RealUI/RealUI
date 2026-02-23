@@ -106,11 +106,34 @@ function RealUI.UpdateUIScale(newScale)
     uiScaleChanging = true
     private.debug("update uiScale", uiScale)
 
-    if (cvarScale ~= uiScale and not private.skinsDB.isPixelScale) then
-        _G.SetCVar("uiScale", max(uiScale, 0.64))
-    end
+    --[[ UIParent:SetScale() from addon code taints C_ActionBar.GetActionBarPage() and related
+        action bar page APIs, causing ADDON_ACTION_BLOCKED errors on MultiBar:ShowBase() during
+        combat. Prefer SetCVar("uiScale") which lets the engine apply the scale securely.
+        SetCVar has a minimum of 0.64, so UIParent:SetScale() is only used as a fallback for
+        sub-0.64 scales (high-DPI without isHighRes). SetCVar may taint the ObjectiveTracker
+        but that is far less disruptive than broken action bars in combat. ]]
     if parentScale ~= uiScale then
-        _G.UIParent:SetScale(uiScale)
+        if uiScale >= 0.64 then
+            if cvarScale ~= uiScale then
+                _G.SetCVar("uiScale", uiScale)
+            end
+        else
+            -- Scale is below CVar minimum; set CVar as close as possible, then SetScale
+            if cvarScale ~= 0.64 then
+                _G.SetCVar("uiScale", 0.64)
+            end
+            if _G.InCombatLockdown() then
+                local deferFrame = _G.CreateFrame("Frame")
+                deferFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+                deferFrame:SetScript("OnEvent", function(self)
+                    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                    self:SetScript("OnEvent", nil)
+                    _G.UIParent:SetScale(uiScale)
+                end)
+            else
+                _G.UIParent:SetScale(uiScale)
+            end
+        end
     end
 
     private.skinsDB.customScale = newScale
