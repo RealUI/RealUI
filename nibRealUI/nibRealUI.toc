@@ -3,7 +3,7 @@
 ## Category: RealUI
 ## Notes: The essential core of RealUI
 ## Author: Nibelheim, Gethe, Hanshi
-## Version: 2.6.2
+## Version: 2.6.3
 ## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
 ## LoadWith: RealUI_Bugs, Bartender4
 ## RequiredDeps: RealUI_Bugs Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
