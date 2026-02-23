@@ -138,6 +138,9 @@ local addonFrames = {
         GuildBankFrame = {"GuildBankEmblemFrame"}
     },
     --Blizzard_GuildControlUI = {},
+    Blizzard_HousingDashboard = {
+        HousingDashboardFrame = {}
+    },
     Blizzard_GuildUI = {
         GuildFrame = {"GuildRosterFrame", "TitleMouseover" }
     },
