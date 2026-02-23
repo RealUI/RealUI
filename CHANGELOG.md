@@ -1,5 +1,14 @@
 ## [2.6.2] ##
 ### Modified AddOns ###
+  * Aurora 12.0.1.6
+  * oUF
+
+## Detailed Changes ##
+[2.6.3]: https://github.com/RealUI/RealUI/compare/2.6.2...2.6.3
+
+
+## [2.6.2] ##
+### Modified AddOns ###
   * nibRealUI
   * RealUI_Bugs
   * Aurora 12.0.1.1
