@@ -30,6 +30,7 @@ tests\BankMoneyVisibilityTest.lua
 tests\BankMoneyEventTest.lua
 tests\BankMoneyLockTest.lua
 tests\BankBugExplorationTest.lua
+tests\BankPreservationTest.lua
 tests\BankSearchOverlayTest.lua
 tests\BankSortDispatchTest.lua
 tests\FrameMovementTest.lua

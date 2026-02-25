@@ -188,17 +188,23 @@ local eventWhitelist = {
     ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 _G.C_Timer.NewTicker(1, function()
-    for varName, isTainted in next, taintCheck do
-        if not isTainted then
-            local isSecure, taint = _G.issecurevariable(varName)
-            if not isSecure then
-                _G.print(varName, "is tainted by", taint, lastEvent)
-                debug(varName, "is tainted by", taint, lastEvent)
-                debug(_G.debugstack())
-                taintCheck[varName] = true
+    -- Use securecallfunction so the taint check itself does not
+    -- propagate taint into the timer execution context, which
+    -- would spread to Blizzard frames (e.g. TextStatusBar) that
+    -- happen to update in the same frame.
+    _G.securecallfunction(function()
+        for varName, isTainted in next, taintCheck do
+            if not isTainted then
+                local isSecure, taint = _G.issecurevariable(varName)
+                if not isSecure then
+                    _G.print(varName, "is tainted by", taint, lastEvent)
+                    debug(varName, "is tainted by", taint, lastEvent)
+                    debug(_G.debugstack())
+                    taintCheck[varName] = true
+                end
             end
         end
-    end
+    end)
 end)
 
 

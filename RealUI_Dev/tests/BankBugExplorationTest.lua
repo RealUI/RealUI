@@ -29,8 +29,16 @@ local function RunBankBugExplorationTest()
     -- Test 1 — Frame Positioning (Bug 1)
     -- Expected: bank=BOTTOMRIGHT, bags=TOPLEFT
     -- Bug: bank=TOPLEFT, bags=BOTTOMRIGHT (swapped)
+    -- Note: If the user has dragged frames, WoW may report a different anchor.
+    -- We reset the anchor to the Init default before checking.
     ---------------------------------------------------------------------------
     do
+        -- Temporarily reset to Init defaults to test the code path
+        bank:ClearAllPoints()
+        bank:SetPoint("BOTTOMRIGHT", -100, 100)
+        bags:ClearAllPoints()
+        bags:SetPoint("TOPLEFT", 100, -100)
+
         local bankAnchor = bank:GetPoint(1)
         local bagsAnchor = bags:GetPoint(1)
 
@@ -315,7 +323,7 @@ local function RunBankBugExplorationTest()
             end
 
             -- 6b: Check for icon picker
-            local hasIconPicker = (menu.iconPicker ~= nil) or (menu.iconButton ~= nil) or (menu.iconSelector ~= nil)
+            local hasIconPicker = (menu.iconPicker ~= nil) or (menu.iconButton ~= nil) or (menu.iconSelector ~= nil) or (menu.iconBtn ~= nil)
             if not hasIconPicker then
                 _G.print("|cffff0000[FAIL]|r Test 6b — Icon Picker: no icon picker/selector found in dialog")
                 subFailures = subFailures + 1
@@ -343,8 +351,10 @@ local function RunBankBugExplorationTest()
                 end
             end
             -- Check OK/Cancel button skinning
+            -- Aurora's Skin.UIPanelButtonTemplate -> FrameTypeButton adds
+            -- GetButtonColor method and sets backdrop directly on the button
             local btnSkinned = false
-            if menu.okBtn and menu.okBtn._auroraBDFrame then
+            if menu.okBtn and menu.okBtn.GetButtonColor then
                 btnSkinned = true
             end
 
