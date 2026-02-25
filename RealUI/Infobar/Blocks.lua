@@ -173,13 +173,15 @@ local function EnsureLegacyTooltipMethods(tooltip)
                 for columnIndex = colNum, rightColumn do
                     local column = self:GetColumn(columnIndex)
                     if widthPerColumn > column.Width then
+                        self.Width = (self.Width or 0) + widthPerColumn - column.Width
                         column.Width = widthPerColumn
                         column:SetWidth(widthPerColumn)
                     end
                 end
             end
 
-            if setupHeight and row.Height and setupHeight > row.Height then
+            if setupHeight and row.Height ~= nil and setupHeight > row.Height then
+                self.Height = (self.Height or 0) + setupHeight - row.Height
                 row.Height = setupHeight
                 row:SetHeight(setupHeight)
             end
@@ -734,6 +736,14 @@ local function SetupTextTable()
     function TextTableCellPrototype:getContentHeight()
         Infobar:debug("CellProto:getContentHeight")
         return self.textTable:GetHeight()
+    end
+
+    function TextTableCellPrototype:GetContentHeight()
+        Infobar:debug("CellProto:GetContentHeight")
+        if self.textTable then
+            return self.textTable:GetHeight()
+        end
+        return 0
     end
 end
 
