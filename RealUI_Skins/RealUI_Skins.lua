@@ -44,7 +44,7 @@ local defaults = {
 
 RealUI.textures = private.textures
 
-local moddedFrames, pixelScale = {}
+local moddedFrames, pixelScale = {}, 768 / (select(2, _G.GetPhysicalScreenSize()))
 local function ResetScale(frame)
     -- Frames that are sized via ModValue become HUGE with retina scale.
     if private.skinsDB.isHighRes then
@@ -74,7 +74,8 @@ end
 ]]
 
 
-local uiMod, uiScaleChanging
+local uiMod = (select(2, _G.GetPhysicalScreenSize()) / 768)
+local uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
     if uiScaleChanging then return end
 
