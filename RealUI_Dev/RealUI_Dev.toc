@@ -8,6 +8,32 @@
 ## RequiredDeps: RealUI_Bugs
 
 RealUI_Dev.lua
-test.lua
+tests\Test.lua
+tests\BankLifecycleTest.lua
+tests\BankBagsVisibilityTest.lua
+tests\BankBagUpdateTest.lua
+tests\BankFreeSlotCountTest.lua
+tests\BankFilterConsistencyTest.lua
+tests\BankItemSortOrderTest.lua
+tests\BankEmptyFilterBagsTest.lua
+tests\BankTypeSwitcherTest.lua
+tests\BankDefaultTypeTest.lua
+tests\BankTypeSwitchTest.lua
+tests\BankTabSidebarTest.lua
+tests\BankTabSelectionTest.lua
+tests\BankPurchaseButtonTest.lua
+tests\BankTabSettingsTest.lua
+tests\BankLockStateTest.lua
+tests\BankClickActionsTest.lua
+tests\BankAutoDepositTest.lua
+tests\BankMoneyVisibilityTest.lua
+tests\BankMoneyEventTest.lua
+tests\BankMoneyLockTest.lua
+tests\BankBugExplorationTest.lua
+tests\BankSearchOverlayTest.lua
+tests\BankSortDispatchTest.lua
+tests\FrameMovementTest.lua
+tests\HuDPositioningTest.lua
+tests\IntegrationTest.lua
 
 ../Aurora/dev/test.lua

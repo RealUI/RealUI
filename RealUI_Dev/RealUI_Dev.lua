@@ -540,6 +540,60 @@ function ns.commands:testall()
 end
 
 
+-- Run all bank property tests (inventory-bank-rewrite spec)
+function ns.commands:banktestall()
+    local bankTests = {
+        { name = "banklifecycle",        label = "Property 1: Bank lifecycle round-trip" },
+        { name = "bankbagsvisibility",   label = "Property 2: Bags track bank visibility" },
+        { name = "banktypeswitcher",     label = "Property 3: Bank type switcher shows viewable types" },
+        { name = "bankdefaulttype",      label = "Property 4: Default bank type is first available" },
+        { name = "banktypeswitch",       label = "Property 5: Bank type switch updates display and highlight" },
+        { name = "banktabsidebar",       label = "Property 6: Tab sidebar reflects purchased tabs" },
+        { name = "banktabselection",     label = "Property 7: Tab selection displays correct items" },
+        { name = "bankpurchasebutton",   label = "Property 8: Purchase button visibility" },
+        { name = "bankfilterconsistency",label = "Property 9: Item filter assignment consistency" },
+        { name = "bankitemsortorder",    label = "Property 10: Item sort order" },
+        { name = "bankemptyfilterbags",  label = "Property 11: Empty filter bags are hidden" },
+        { name = "bankfreeslots",        label = "Property 12: Free slot count accuracy" },
+        { name = "bankclickactions",     label = "Property 13: Click actions dispatch correctly" },
+        { name = "banklockstate",        label = "Property 14: Lock state reflects ITEM_LOCK_CHANGED" },
+        { name = "bankbagupdate",        label = "Property 15: BAG_UPDATE triggers refresh for active tab only" },
+        { name = "bankautodeposit",      label = "Property 16: Auto-deposit button visibility" },
+        { name = "bankmoneyvisibility",  label = "Property 17: Money frame visibility matches transfer support" },
+        { name = "bankmoneyevent",       label = "Property 18: Money event refreshes correct bank type" },
+        { name = "bankmoneylock",        label = "Property 19: Money buttons disabled when bank is locked" },
+        { name = "banksearchoverlay",    label = "Property 20: Search overlay matches isFiltered flag" },
+        { name = "banksortdispatch",     label = "Property 21: Sort dispatches correct function per bank type" },
+        { name = "banktabsettings",      label = "Property 22: Tab settings refresh on BANK_TAB_SETTINGS_UPDATED" },
+    }
+
+    _G.print("|cff00ccff[Bank Test Suite]|r Running all 22 property tests...")
+    _G.print("---")
+
+    local passed, failed = 0, 0
+    for _, test in _G.ipairs(bankTests) do
+        local cmd = ns.commands[test.name]
+        if cmd then
+            local ok = cmd(ns.commands)
+            if ok == false then
+                failed = failed + 1
+            else
+                passed = passed + 1
+            end
+        else
+            _G.print(("|cffff9900[SKIP]|r %s — command not found"):format(test.label))
+            failed = failed + 1
+        end
+    end
+
+    _G.print("---")
+    if failed == 0 then
+        _G.print(("|cff00ff00[SUITE PASS]|r All %d bank property tests passed"):format(passed))
+    else
+        _G.print(("|cffff0000[SUITE FAIL]|r %d passed, %d failed"):format(passed, failed))
+    end
+end
+
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)
