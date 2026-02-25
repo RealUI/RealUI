@@ -35,7 +35,7 @@ local real_seterrorhandler = seterrorhandler
 -- Global config variables
 --
 
-MAX_BUGGRABBER_ERRORS = 1000
+MAX_BUGGRABBER_ERRORS = 500
 
 -- If we get more errors than this per second, we stop all capturing
 BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE = 10
@@ -191,6 +191,7 @@ do
 	local GetTime, date = GetTime, date
 	local msgsAllowedLastTime = GetTime()
 	local lastWarningTime = 0
+	local issecretvalue = issecretvalue or function() return false end
 	function grabError(errorMessage, isSimple)
 		-- Flood protection --
 		msgsAllowed = msgsAllowed + (GetTime()-msgsAllowedLastTime)*BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
@@ -213,26 +214,21 @@ do
 			msgsAllowed = BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
 		end
 		msgsAllowed = msgsAllowed - 1
-
-		-- Grab it --
 		errorMessage = tostring(errorMessage)
 
-		local looping = errorMessage:find("BugGrabber") and true or nil
-		if looping then
-			print(errorMessage)
+		if issecretvalue(errorMessage) or errorMessage:find("BugGrabber", nil, true) then
+			print("|cffffff00BugGrabber|r:", errorMessage)
 			return
 		end
 
 		-- Insert the error into the correct database if it's not there
 		-- already. If it is, just increment the counter.
-		local found
+		local errorObject
 		if db then
-			found = fetchFromDatabase(db, errorMessage)
+			errorObject = fetchFromDatabase(db, errorMessage)
 		else
-			found = fetchFromDatabase(loadErrors, errorMessage)
+			errorObject = fetchFromDatabase(loadErrors, errorMessage)
 		end
-
-		local errorObject = found
 
 		if not errorObject then -- New error
 			-- Store the error
@@ -257,9 +253,11 @@ do
 		else -- Old error
 			local session = addon:GetSessionId()
 			if errorObject.session ~= session then -- Error from a different session, update it
-				local stack, locals = GetErrorData()
-				errorObject.stack = stack or "Debugstack was nil."
-				errorObject.locals = locals or "Debuglocals was nil."
+				if not isSimple then
+					local stack, locals = GetErrorData()
+					errorObject.stack = stack or "Debugstack was nil."
+					errorObject.locals = locals or "Debuglocals was nil."
+				end
 				errorObject.session = session
 			end
 			errorObject.time = date("%Y/%m/%d %H:%M:%S")

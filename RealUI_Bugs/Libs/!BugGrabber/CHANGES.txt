@@ -1,8 +1,9 @@
 ------------------------------------------------------------------------
-r360 | funkehdude | 2026-02-20 16:39:02 +0000 (Fri, 20 Feb 2026) | 1 line
+r362 | funkehdude | 2026-02-22 19:59:09 +0000 (Sun, 22 Feb 2026) | 1 line
 Changed paths:
+   M /trunk/.luacheckrc
    M /trunk/BugGrabber.lua
 
-Tweak LUA_WARNING text
+Reduce error limit, reject secret values
 ------------------------------------------------------------------------
 
