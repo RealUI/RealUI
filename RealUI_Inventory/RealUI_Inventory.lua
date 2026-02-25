@@ -33,6 +33,10 @@ end
 function private.GetBagTypeForBagID(bagID)
     if bagID >= _G.Enum.BagIndex.Backpack and bagID <= _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS then
         return "main"
+    elseif bagID >= _G.Enum.BagIndex.CharacterBankTab_1 and bagID <= _G.Enum.BagIndex.CharacterBankTab_6 then
+        return "bank"
+    elseif bagID >= _G.Enum.BagIndex.AccountBankTab_1 and bagID <= _G.Enum.BagIndex.AccountBankTab_5 then
+        return "bank"
     else
         return "bank"
     end

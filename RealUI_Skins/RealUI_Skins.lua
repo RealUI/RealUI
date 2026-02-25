@@ -196,6 +196,7 @@ function private.OnLoad()
 
     -- Set flags
     private.disabled.bags = true
+    private.disabled.banks = true
     private.disabled.mainmenubar = true
     private.disabled.pixelScale = not private.skinsDB.isPixelScale
 

@@ -169,9 +169,9 @@ do
         local filter = _G.Mixin(info, FilterMixin)
 
         private.CreateFilterBag(Inventory.main, filter)
-        -- if filter.tag ~= "new" then
-        --     private.CreateFilterBag(Inventory.bank, filter)
-        -- end
+        if filter.tag ~= "new" then
+            private.CreateFilterBag(Inventory.bank, filter)
+        end
 
         Inventory:AddFilter(filter)
         return filter
@@ -280,7 +280,7 @@ tinsert(private.filterList, {
     rank = 20,
     filter = function(slot)
         local bagID, slotIndex = slot:GetBagAndSlot()
-        local isSet = private.equipSetItems[bagID][slotIndex]
+        local isSet = private.equipSetItems[bagID] and private.equipSetItems[bagID][slotIndex]
         return isSet
     end,
 })

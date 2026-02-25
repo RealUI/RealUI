@@ -176,19 +176,46 @@ inventorySlots.mixin = InventorySlotMixin
 
 
 local BankSlotMixin = _G.CreateFromMixins(ItemSlotMixin)
+function BankSlotMixin:OnLoad()
+    ItemSlotMixin.OnLoad(self)
+
+    Skin.ContainerFrameItemButtonTemplate(self)
+    if self.IconBorder then
+        self.IconBorder:SetAlpha(0)
+    end
+    if self.IconOverlay then
+        self.IconOverlay:SetAlpha(0)
+    end
+    -- Suppress NormalTexture quality glow
+    _G.hooksecurefunc(self, "SetNormalTexture", function(btn)
+        local tex = btn:GetNormalTexture()
+        if tex then
+            tex:SetAlpha(0)
+        end
+    end)
+    -- Suppress the emptyBackgroundAtlas slot texture that ItemButton uses
+    if self.emptyBackgroundAtlas then
+        self.emptyBackgroundAtlas = nil
+    end
+end
 function BankSlotMixin:Update()
     ItemSlotMixin.Update(self)
-
-    _G.BankFrameItemButton_UpdateLocked(self)
-end
-function BankSlotMixin:GetInventorySlot()
-    local _, slotIndex = self:GetBagAndSlot()
-    return _G.BankButtonIDToInvSlotID(slotIndex, self.isBag)
+    -- After every update, force-hide all known overlay textures that
+    -- Blizzard's C code or template scripts may have re-shown.
+    if self.IconBorder then self.IconBorder:SetAlpha(0) end
+    if self.IconOverlay then self.IconOverlay:Hide() end
+    if self.IconOverlay2 then self.IconOverlay2:Hide() end
+    local normalTex = self:GetNormalTexture()
+    if normalTex then normalTex:SetAlpha(0) end
 end
 local bankSlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
-bankSlots.frameTemplate = "BankItemButtonGenericTemplate"
+bankSlots.frameTemplate = "ContainerFrameItemButtonTemplate"
 bankSlots.parent = "RealUIBank"
 bankSlots.mixin = BankSlotMixin
+
+private.ReleaseAllBankSlots = function()
+    bankSlots:ReleaseAll()
+end
 
 
 function private.UpdateSlots(bagID)
@@ -252,11 +279,11 @@ function private.GetFirstFreeSlot(bagID)
 end
 
 function private.GetSlotTypeForBag(bagID)
-    if bagID == _G.BANK_CONTAINER or bagID == _G.Enum.BagIndex.Reagentbank then
+    if bagID >= _G.Enum.BagIndex.Backpack and bagID <= _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS then
+        return inventorySlots
+    else
         return bankSlots
     end
-
-    return inventorySlots
 end
 
 --[[ Bag Slots ]]--
@@ -313,19 +340,10 @@ function BagSlotMixin:Init(bagID)
             local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
             self.inventorySlot = "ReagentBag"..slotID.."Slot"
             self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-        -- elseif bagID >= _G.Enum.BagIndex.AccountBankTab_1 and bagID <= _G.Enum.BagIndex.AccountBankTab_5 then
-        --     local slotID = bagID - _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS
-        --     self.inventorySlot = "AccountBankTab_1"..slotID.."Slot"
-        --     self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
         else
-            -- Bank bag
-            -- FIXME
-            _G.print("BagSlotMixin:Init", self.inventorySlot, self.inventoryID, self.fallbackTexture)
-            -- local slotID = bagID - _G.NUM_BAG_SLOTS
-            -- self.inventorySlot = "Bag"..slotID
-            -- self.inventoryID, self.fallbackTexture = _G.GetInventorySlotInfo(self.inventorySlot)
-            -- self.inventoryID = _G.BankButtonIDToInvSlotID(slotID, 1)
-            -- self.bankSlotID = slotID
+            -- Bank tab bag slots (Character/Account) — WoW 12+ uses C_Bank APIs for tab icons,
+            -- no traditional inventory slot IDs. Use tab icon from C_Bank.FetchPurchasedBankTabData() instead.
+            self.fallbackTexture = [[Interface\PaperDoll\UI-Backpack-EmptySlot]]
         end
     else
         self.fallbackTexture = [[Interface\Buttons\Button-Backpack-Up]]
@@ -336,20 +354,44 @@ end
 function BagSlotMixin:GetItemContextMatchResult()
     return _G.ItemButtonUtil.GetItemContextMatchResultForContainer(self:GetID())
 end
+function BagSlotMixin:GetBankTabInfo(bagID)
+    for bankType, config in next, private.bankTypeConfig do
+        for _, tabBagID in ipairs(config.tabRange) do
+            if tabBagID == bagID then
+                local purchasedTabs = _G.C_Bank.FetchPurchasedBankTabData(bankType)
+                if purchasedTabs then
+                    for _, tabData in ipairs(purchasedTabs) do
+                        if tabData.ID == bagID then
+                            return bankType, tabData.icon
+                        end
+                    end
+                end
+                return bankType, nil  -- Tab exists in range but not purchased
+            end
+        end
+    end
+    return nil, nil
+end
 function BagSlotMixin:Update()
     if self.isBag then
-        local textureName = _G.GetInventoryItemTexture("player", self.inventoryID)
-        _G.SetItemButtonTexture(self, textureName or self.fallbackTexture)
+        if self.inventoryID then
+            local textureName = _G.GetInventoryItemTexture("player", self.inventoryID)
+            _G.SetItemButtonTexture(self, textureName or self.fallbackTexture)
 
-        local quality = _G.GetInventoryItemQuality("player", self.inventoryID)
-        _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", self.inventoryID), true)
+            local quality = _G.GetInventoryItemQuality("player", self.inventoryID)
+            _G.SetItemButtonQuality(self, quality, _G.GetInventoryItemID("player", self.inventoryID), true)
+        end
 
         if self.bagType == "bank" then
-            -- C_Bank.FetchNumPurchasedBankTabs(Enum.BankType.Character)
-            if self.bankSlotID <= _G.GetNumBankSlots() then
+            -- WoW 12+: Bank tabs use C_Bank APIs for icons and purchase state
+            local bagID = self:GetID()
+            local bankType, tabIcon = self:GetBankTabInfo(bagID)
+            if tabIcon then
+                _G.SetItemButtonTexture(self, tabIcon)
                 _G.SetItemButtonTextureVertexColor(self, 1.0, 1.0, 1.0)
                 self.tooltipText = _G.BANK_BAG
             else
+                _G.SetItemButtonTexture(self, self.fallbackTexture)
                 _G.SetItemButtonTextureVertexColor(self, 1.0, 0.1, 0.1)
                 self.tooltipText = _G.BANK_BAG_PURCHASE
             end
@@ -401,8 +443,8 @@ function BagSlotMixin:OnLeave()
     _G.ResetCursor()
 end
 function BagSlotMixin:OnClick(button)
-    local hadItem = self.isBag and _G.PutItemInBag(self.inventoryID)
-    local needsPurchase = self.bankSlotID and self.bankSlotID > _G.GetNumBankSlots()
+    local hadItem = self.isBag and self.inventoryID and _G.PutItemInBag(self.inventoryID)
+    local needsPurchase = false  -- WoW 12+: bank tab purchase handled via TabSidebar purchase button
     if not hadItem and not needsPurchase then
         if self.highlight:IsShown() then
             searchBags[self:GetID()] = false
