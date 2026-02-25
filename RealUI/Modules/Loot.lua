@@ -157,6 +157,18 @@ function Loot:UpdateGroupLoot()
             frame.greed:SetPoint("RIGHT", frame.pass, "LEFT", -1, -4)
             frame.greed:SetScript("OnClick", GroupLootButtonOnClick)
 
+            frame.transmog = _G.CreateFrame("Button", nil, frame)
+            frame.transmog.type = 4
+            frame.transmog.roll = "transmog"
+            frame.transmog:SetWidth(28)
+            frame.transmog:SetHeight(28)
+            frame.transmog:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Coin-Up")
+            frame.transmog:SetPushedTexture("Interface\\Buttons\\UI-GroupLoot-Coin-Down")
+            frame.transmog:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Coin-Highlight")
+            frame.transmog:SetPoint("CENTER", frame.greed, "CENTER", 0, 0)
+            frame.transmog:SetScript("OnClick", GroupLootButtonOnClick)
+            frame.transmog:Hide()
+
             frame.disenchant = _G.CreateFrame("Button", nil, frame)
             frame.disenchant.type = 3
             frame.disenchant.roll = "disenchant"
@@ -199,15 +211,28 @@ function Loot:UpdateGroupLoot()
             _G.tinsert(grouplootframes, frame)
         end
 
-        local texture, name, _, quality, _, Needable, Greedable, Disenchantable = _G.GetLootRollItemInfo(value.rollId)
+        local texture, name, _, quality, _, Needable, Greedable, Disenchantable, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(value.rollId)
+
+        if not name then
+            _G.tremove(grouplootlist, index)
+            break
+        end
 
         if Disenchantable then frame.disenchant:Enable() else frame.disenchant:Disable() end
         if Needable then frame.need:Enable() else frame.need:Disable() end
-        if Greedable then frame.greed:Enable() else frame.greed:Disable() end
+
+        if canTransmog then
+            frame.transmog:Show()
+            frame.greed:Hide()
+        else
+            frame.transmog:Hide()
+            frame.greed:Show()
+            if Greedable then frame.greed:Enable() else frame.greed:Disable() end
+            frame.greed:GetNormalTexture():SetDesaturated(not Greedable);
+        end
 
         frame.disenchant:GetNormalTexture():SetDesaturated(not Disenchantable);
         frame.need:GetNormalTexture():SetDesaturated(not Needable);
-        frame.greed:GetNormalTexture():SetDesaturated(not Greedable);
 
         frame.text:SetText(_G.ITEM_QUALITY_COLORS[quality].hex..name)
 
