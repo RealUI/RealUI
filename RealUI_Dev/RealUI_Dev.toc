@@ -35,6 +35,21 @@ tests\BankSearchOverlayTest.lua
 tests\BankSortDispatchTest.lua
 tests\FrameMovementTest.lua
 tests\HuDPositioningTest.lua
+tests\AngleStatusBarVertexTest.lua
+tests\AngleStatusBarRoundTripTest.lua
+tests\AngleStatusBarFillMaxTest.lua
+tests\TagsHealthCompositionTest.lua
+tests\TagsPowerCompositionTest.lua
+tests\TagsBannedPatternTest.lua
+tests\TagsLineLimitTest.lua
+tests\TagsNumericFormatTest.lua
+tests\TagsSecretSafeTest.lua
+tests\UnitFramesClassColorTest.lua
+tests\CastBarInterruptibleColorTest.lua
+tests\CastBarChannelingTickTest.lua
+tests\CombatFaderOpacityTest.lua
+tests\PositionerResizeTest.lua
+tests\DeprecatedAPIAbsenceTest.lua
 tests\IntegrationTest.lua
 
 ../Aurora/dev/test.lua

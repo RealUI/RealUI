@@ -600,6 +600,53 @@ function ns.commands:banktestall()
     end
 end
 
+-- Run all HuD property tests (hud-rewrite spec)
+function ns.commands:hudtestall()
+    local hudTests = {
+        { name = "anglevertex",     label = "Property 1: AngleStatusBar vertex configuration" },
+        { name = "angleroundtrip",  label = "Property 2: AngleStatusBar StatusBar interface round-trip" },
+        { name = "classcolor",      label = "Property 3: Class color config propagation" },
+        { name = "taghealthcomp",   label = "Property 4: Health tag string composition" },
+        { name = "tagpowercomp",    label = "Property 5: Power tag string composition" },
+        { name = "anglefillmax",    label = "Property 6: Bar fill visible at max value" },
+        { name = "posresize",       label = "Property 7: Positioner resize for valid anchor widths" },
+        { name = "castbarcolor",    label = "Property 8: Cast bar interruptible color" },
+        { name = "channelingticks", label = "Property 9: Channeling tick calculation" },
+        { name = "combatfade",      label = "Property 10: Combat fader opacity per state" },
+        { name = "deprecated",      label = "Property 11: Deprecated API absence" },
+        { name = "tagbanned",       label = "Property 12: Tags module banned pattern absence" },
+        { name = "taglinelimit",    label = "Property 13: Tag function line count limit" },
+        { name = "tagnumformat",    label = "Property 14: Tag numeric format round-trip" },
+        { name = "tagsecret",       label = "Property 15: Secret-safe tag isolation" },
+    }
+
+    _G.print("|cff00ccff[HuD Test Suite]|r Running all 15 property tests...")
+    _G.print("---")
+
+    local passed, failed = 0, 0
+    for _, test in _G.ipairs(hudTests) do
+        local cmd = ns.commands[test.name]
+        if cmd then
+            local ok = cmd(ns.commands)
+            if ok == false then
+                failed = failed + 1
+            else
+                passed = passed + 1
+            end
+        else
+            _G.print(("|cffff9900[SKIP]|r %s — command not found"):format(test.label))
+            failed = failed + 1
+        end
+    end
+
+    _G.print("---")
+    if failed == 0 then
+        _G.print(("|cff00ff00[SUITE PASS]|r All %d HuD property tests passed"):format(passed))
+    else
+        _G.print(("|cffff0000[SUITE FAIL]|r %d passed, %d failed"):format(passed, failed))
+    end
+end
+
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)
