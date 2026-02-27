@@ -38,16 +38,15 @@ function UnitFrames:RefreshUnits(event)
                 frame.Health.colorClass = db.overlay.classColor
                 frame.Health.colorHealth = not db.overlay.classColor
 
-                -- Update fill direction based on per-unit config, then point default
-                -- "Colored when full" global toggle disabled pending reimplementation
-                local reverseFill
+                -- Update fill direction: natural direction based on side, reverseFill toggles it
+                local natural = false
+                if unitData and unitData.health and unitData.health.point then
+                    natural = unitData.health.point == "RIGHT"
+                end
                 local unitDB = db.units[unitKey]
-                if unitDB and unitDB.reverseFill ~= nil then
-                    reverseFill = unitDB.reverseFill
-                elseif unitData and unitData.health and unitData.health.point then
-                    reverseFill = unitData.health.point == "RIGHT"
-                else
-                    reverseFill = false
+                local reverseFill = natural
+                if unitDB and unitDB.reverseFill then
+                    reverseFill = not natural
                 end
 
                 if frame.Health.SetReverseFill then
@@ -63,14 +62,14 @@ function UnitFrames:RefreshUnits(event)
 
             -- Update power fill direction and retag power text
             if frame.Power then
-                local reverseFill
+                local natural = false
+                if unitData and unitData.power and unitData.power.point then
+                    natural = unitData.power.point == "RIGHT"
+                end
                 local unitDB = db.units[unitKey]
-                if unitDB and unitDB.reverseFill ~= nil then
-                    reverseFill = unitDB.reverseFill
-                elseif unitData and unitData.power and unitData.power.point then
-                    reverseFill = unitData.power.point == "RIGHT"
-                else
-                    reverseFill = false
+                local reverseFill = natural
+                if unitDB and unitDB.reverseFill then
+                    reverseFill = not natural
                 end
 
                 if frame.Power.SetReverseFill then

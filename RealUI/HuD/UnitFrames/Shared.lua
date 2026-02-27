@@ -30,28 +30,21 @@ RealUI.ReversePowers = {
 }
 
 local function GetReverseFill(unit, info)
-    local unitDB = db and db.units and db.units[unit]
-    -- Per-unit override takes priority
-    if unitDB and unitDB.reverseFill ~= nil then
-        return unitDB.reverseFill
-    end
-    -- "Colored when full" global toggle is disabled pending reimplementation.
-    -- When implemented, it should change the visual mode (full→empty vs empty→full),
-    -- not reverse the fill direction.
-    --[[ DISABLED:
-    local profileDB = RealUI.db.profile
-    if profileDB and profileDB.settings and profileDB.settings.reverseUnitFrameBars then
-        if info and info.point then
-            return info.point ~= "RIGHT"
-        end
-        return true
-    end
-    ]]
-    -- Default based on bar side: RIGHT side fills right-to-left, LEFT side fills left-to-right
+    -- Natural fill direction based on bar side:
+    -- Player (RIGHT side): natural=true → fill anchored RIGHT, grows right→left
+    -- Target (LEFT side): natural=false → fill anchored LEFT, grows left→right
+    local natural = false
     if info and info.point then
-        return info.point == "RIGHT"
+        natural = info.point == "RIGHT"
     end
-    return false
+
+    -- Per-unit toggle flips the natural direction
+    local unitDB = db and db.units and db.units[unit]
+    if unitDB and unitDB.reverseFill then
+        return not natural
+    end
+
+    return natural
 end
 
 local function GetVertices(info, useOther)
