@@ -13,6 +13,7 @@ local RealUI = private.RealUI
 local db, ndb
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 local CombatFader = RealUI:GetModule("CombatFader")
 local round = RealUI.Round
 
@@ -27,26 +28,32 @@ RealUI.ReversePowers = {
     ["FURY"] = true,
     ["PAIN"] = true,
 }
+
 local function GetReverseFill(unit, info)
     local unitDB = db and db.units and db.units[unit]
+    -- Per-unit override takes priority
     if unitDB and unitDB.reverseFill ~= nil then
         return unitDB.reverseFill
     end
+    -- "Colored when full" global toggle is disabled pending reimplementation.
+    -- When implemented, it should change the visual mode (full→empty vs empty→full),
+    -- not reverse the fill direction.
+    --[[ DISABLED:
+    local profileDB = RealUI.db.profile
+    if profileDB and profileDB.settings and profileDB.settings.reverseUnitFrameBars then
+        if info and info.point then
+            return info.point ~= "RIGHT"
+        end
+        return true
+    end
+    ]]
+    -- Default based on bar side: RIGHT side fills right-to-left, LEFT side fills left-to-right
     if info and info.point then
         return info.point == "RIGHT"
     end
     return false
 end
-local function GetReverseMissing(unit)
-    local unitDB = db and db.units and db.units[unit]
-    if unitDB and unitDB.reverseMissing ~= nil then
-        return unitDB.reverseMissing
-    end
-    if ndb and ndb.settings and ndb.settings.reverseUnitFrameBars ~= nil then
-        return not ndb.settings.reverseUnitFrameBars
-    end
-    return false
-end
+
 local function GetVertices(info, useOther)
     local side = info.point
     if useOther then
@@ -60,99 +67,6 @@ local function GetVertices(info, useOther)
     end
 end
 
-local function IsSafeTrue(value)
-    if RealUI.isSecret(value) then
-        return false
-    end
-
-    local ok, result = _G.pcall(function()
-        if value then
-            return true
-        end
-        return false
-    end)
-    if ok then
-        return result
-    end
-
-    return false
-end
-
-local function CreateSteps(parent, height, info)
-    local stepHeight = round(height / 2)
-    local step, warn = {}, {}
-
-    for i = 1, 2 do
-        local leftVertex, rightVertex = GetVertices(info)
-        local s = parent:CreateAngle("Frame", nil, parent.overlay)
-        s:SetSize(2, stepHeight)
-        s:SetAngleVertex(leftVertex, rightVertex)
-        s:SetBackgroundColor(.5, .5, .5)
-        step[i] = s
-
-        local w = parent:CreateAngle("Frame", nil, parent.overlay)
-        w:SetSize(2, height)
-        w:SetAngleVertex(leftVertex, rightVertex)
-        w:SetBackgroundColor(.5, .5, .5)
-        warn[i] = w
-    end
-    return step, warn
-end
-local function PositionSteps(self, vert)
-    local width, height = self:GetSize()
-    local isRight = self:GetReverseFill()
-    local point, relPoint = vert..(isRight and "RIGHT" or "LEFT"), vert..(isRight and "LEFT" or "RIGHT")
-    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
-    for i = 1, 2 do
-        local xOfs = round(stepPoints[i] * (width - 10))
-        if self:GetReversePercent() then
-            xOfs = (xOfs + height) * (isRight and 1 or -1)
-            self.step[i]:SetPoint(point, self, relPoint, xOfs, 0)
-            self.warn[i]:SetPoint(point, self, relPoint, xOfs, 0)
-        else
-            xOfs = xOfs * (isRight and -1 or 1)
-            self.step[i]:SetPoint(point, self, xOfs, 0)
-            self.warn[i]:SetPoint(point, self, xOfs, 0)
-        end
-    end
-end
-local function UpdateSteps(self, unit, cur, max)
-    -- FIXBETA
-    if RealUI.isSecret(max) then
-        max = 100
-    end
-    if RealUI.isSecret(cur) then
-        cur = max
-    end
-    UnitFrames:debug("UnitFrames:UpdateSteps", unit, cur, max)
-    --cur = max * .25
-    --self:SetValue(cur)
-    local percent = RealUI.GetSafeVals(cur, max)
-    local stepPoints = UnitFrames.steppoints[self.barType][RealUI.charInfo.class.token] or UnitFrames.steppoints.default
-    for i = 1, 2 do
-        --print(percent, unit, cur, max, self.colorClass)
-        if self:GetReversePercent() then
-            --print("step reverse")
-            if percent > stepPoints[i] then
-                self.step[i]:SetAlpha(1)
-                self.warn[i]:SetAlpha(0)
-            else
-                self.step[i]:SetAlpha(0)
-                self.warn[i]:SetAlpha(1)
-            end
-        else
-            --print("step normal")
-            if percent < stepPoints[i] then
-                self.step[i]:SetAlpha(0)
-                self.warn[i]:SetAlpha(1)
-            else
-                self.step[i]:SetAlpha(1)
-                self.warn[i]:SetAlpha(0)
-            end
-        end
-    end
-end
-
 local function CreateHealthBar(parent, info, isAngled)
     local Health
     if isAngled then
@@ -162,46 +76,14 @@ local function CreateHealthBar(parent, info, isAngled)
         end
 
         Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
-        Health.debugUnit = parent.unit
-        Health:SetReversePercent(false)
         Health:SetAngleVertex(info.leftVertex, info.rightVertex)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
         Health:SetReverseFill(GetReverseFill(parent.unit, info))
-        Health:SetReverseMissing(GetReverseMissing(parent.unit))
-        if Health.SetReverseMissingSource then
-            Health:SetReverseMissingSource("current")
+
+        Health.PreUpdate = function(self)
+            self:SetReverseFill(GetReverseFill(parent.unit, info))
         end
-            Health.PreUpdate = function(self)
-                self.debugUnit = parent.unit
-                -- Check if db.units exists before accessing it
-                local reversePercentOverride = db.units and db.units[parent.unit] and db.units[parent.unit].reversePercent == true
-                self:SetReverseMissing(GetReverseMissing(parent.unit))
-                if self.SetReverseMissingSource then
-                    self:SetReverseMissingSource("current")
-                end
-                if reversePercentOverride then
-                    self:SetReversePercent(true)
-                else
-                    self:SetReversePercent(false)
-                end
-
-                -- Set color based on class since we're in reverseMissing mode
-                -- SetBarValue's SetShown will control visibility
-                local frame = self.__owner
-                if frame and parent.unit and IsSafeTrue(_G.UnitIsPlayer(parent.unit)) then
-                    local _, class = _G.UnitClass(parent.unit)
-                    local color = frame.colors.class[class]
-                    if color then
-                        self:SetStatusBarColor(color:GetRGB())
-                    end
-                end
-            end
-        Health:SetFlatTexture(true)
-
-        Health.step, Health.warn = CreateSteps(parent, height, info)
-        Health.PositionSteps = PositionSteps
-        Health.PostUpdate = UpdateSteps
     else
         Health = _G.CreateFrame("StatusBar", nil, parent.overlay)
         Health:SetPoint("TOPLEFT", parent)
@@ -215,18 +97,9 @@ local function CreateHealthBar(parent, info, isAngled)
             top = -1,
             bottom = -1,
         })
-
-        if not (ndb and ndb.settings and ndb.settings.reverseUnitFrameBars) then
-            Health:SetReverseFill(true)
-            Health.PostUpdate = function(dialog, unit, cur, max)
-                if RealUI.isSecret(cur) or RealUI.isSecret(max) or type(cur) ~= "number" or type(max) ~= "number" then
-                    return
-                end
-                dialog:SetValue(max - cur)
-            end
-        end
     end
 
+    -- Tag health text using composed tag strings
     if info.text then
         Health.text = Health:CreateFontString(nil, "OVERLAY")
         if info.point then
@@ -235,17 +108,40 @@ local function CreateHealthBar(parent, info, isAngled)
             Health.text:SetPoint("CENTER")
         end
         Health.text:SetFontObject("SystemFont_Shadow_Med1")
-        parent:Tag(Health.text, info.text)
+        local statusText = db.misc.statusText
+        parent:Tag(Health.text, UnitFrames.GetHealthTagString(statusText))
     end
 
     Health.barType = "health"
     Health.colorClass = db.overlay.classColor
     Health.colorTapping = true
     Health.colorDisconnected = true
-    Health.colorHealth = true
+    Health.colorHealth = not db.overlay.classColor
+    Health.colorReaction = true
 
     parent.Health = Health
+
+    -- Create Health sub-widgets for prediction (angled units only)
+    if isAngled then
+        local HealingAll = parent:CreateAngle("StatusBar", nil, Health)
+        HealingAll:SetAngleVertex(info.leftVertex, info.rightVertex)
+        HealingAll:SetReverseFill(Health:GetReverseFill())
+        HealingAll:SetStatusBarColor(0.33, 0.33, 1, db.overlay.bar.opacity.absorb)
+        local healMeta = AngleStatusBar:GetBarMeta(HealingAll)
+        if healMeta then healMeta.isPredictionWidget = true end
+        Health.HealingAll = HealingAll
+
+        local DamageAbsorb = parent:CreateAngle("StatusBar", nil, Health)
+        DamageAbsorb:SetAngleVertex(info.leftVertex, info.rightVertex)
+        DamageAbsorb:SetReverseFill(Health:GetReverseFill())
+        DamageAbsorb:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
+        local absorbMeta = AngleStatusBar:GetBarMeta(DamageAbsorb)
+        if absorbMeta then absorbMeta.isPredictionWidget = true end
+        Health.DamageAbsorb = DamageAbsorb
+    end
 end
+
+
 local CreateHealthStatus do
     local classification = {
         rareelite = {r=1, g=0.5, b=0},
@@ -254,14 +150,13 @@ local CreateHealthStatus do
     }
 
     local function UpdatePvP(self, event, unit)
-        local PvPIndicator, color = self.PvPIndicator
-        if IsSafeTrue(_G.UnitIsPVP(unit)) then
+        local PvPIndicator = self.PvPIndicator
+        if _G.UnitIsPVP(unit) then
             local reaction = _G.UnitReaction(unit, "player")
             if not reaction then
-                -- Can be nil if the target is out of range
-                reaction = _G.UnitIsFriend(unit,"player") and 5 or 2
+                reaction = _G.UnitIsFriend(unit, "player") and 5 or 2
             end
-            color = self.colors.reaction[reaction]
+            local color = self.colors.reaction[reaction]
             PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         else
             PvPIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
@@ -303,128 +198,6 @@ local CreateHealthStatus do
     end
 end
 
-local CreateHealthPredictBar do
-    -- FIXBETA
-    local function PredictOverride(self, event, unit)
-        if(self.unit ~= unit) then return end
-
-        local hp = self.HealthPrediction
-        local healthBar = self.Health
-
-        local myIncomingHeal = _G.UnitGetIncomingHeals(unit, 'player') or 0
-        local allIncomingHeal = _G.UnitGetIncomingHeals(unit) or 0
-        local totalAbsorb = _G.UnitGetTotalAbsorbs(unit) or 0
-        local myCurrentHealAbsorb = _G.UnitGetTotalHealAbsorbs(unit) or 0
-        local health, maxHealth = _G.UnitHealth(unit), _G.UnitHealthMax(unit)
-
-        if (health < myCurrentHealAbsorb) then
-            myCurrentHealAbsorb = health
-        end
-
-        if (health - myCurrentHealAbsorb + allIncomingHeal > maxHealth * hp.maxOverflow) then
-            allIncomingHeal = maxHealth * hp.maxOverflow - health + myCurrentHealAbsorb
-        end
-
-        local otherIncomingHeal = 0
-        if (allIncomingHeal < myIncomingHeal) then
-            myIncomingHeal = allIncomingHeal
-        else
-            otherIncomingHeal = allIncomingHeal - myIncomingHeal
-        end
-
-        local overAbsorb, atMax
-        if healthBar:GetReversePercent() ~= nil then
-            if (totalAbsorb >= health) then
-                overAbsorb = true
-
-                if (allIncomingHeal > myCurrentHealAbsorb) then
-                    totalAbsorb = _G.max(0, health - myCurrentHealAbsorb + allIncomingHeal)
-                else
-                    totalAbsorb = _G.max(0, health)
-                end
-            end
-            atMax = health == maxHealth
-        else
-            if (health - myCurrentHealAbsorb + allIncomingHeal + totalAbsorb >= maxHealth or health + totalAbsorb >= maxHealth) then
-                if (totalAbsorb > 0) then
-                    overAbsorb = true
-                end
-
-                if (allIncomingHeal > myCurrentHealAbsorb) then
-                    totalAbsorb = _G.max(0, maxHealth - (health - myCurrentHealAbsorb + allIncomingHeal))
-                else
-                    totalAbsorb = _G.max(0, maxHealth - health)
-                end
-            end
-        end
-
-        if (myCurrentHealAbsorb > allIncomingHeal) then
-            myCurrentHealAbsorb = myCurrentHealAbsorb - allIncomingHeal
-        else
-            myCurrentHealAbsorb = 0
-        end
-
-        if (hp.myBar) then
-            hp.myBar:SetMinMaxValues(0, maxHealth)
-            hp.myBar:SetValue(myIncomingHeal)
-        end
-
-        if (hp.otherBar) then
-            hp.otherBar:SetMinMaxValues(0, maxHealth)
-            hp.otherBar:SetValue(otherIncomingHeal)
-        end
-
-        if (hp.absorbBar) then
-            hp.absorbBar:SetMinMaxValues(0, maxHealth)
-            hp.absorbBar:SetValue(totalAbsorb)
-            hp.absorbBar:ClearAllPoints()
-            local fill = healthBar:GetStatusBarTexture()
-            if healthBar:GetReverseFill() then
-                if atMax then
-                    hp.absorbBar:SetPoint("TOPRIGHT", healthBar)
-                else
-                    hp.absorbBar:SetPoint("TOPRIGHT", fill, "TOPLEFT", fill:GetHeight(), 0)
-                end
-                if overAbsorb then
-                    hp.absorbBar:SetPoint("TOPLEFT", healthBar)
-                end
-            else
-                if atMax then
-                    hp.absorbBar:SetPoint("TOPLEFT", healthBar)
-                else
-                    hp.absorbBar:SetPoint("TOPLEFT", fill, "TOPRIGHT", -fill:GetHeight(), 0)
-                end
-                if overAbsorb then
-                    hp.absorbBar:SetPoint("TOPRIGHT", healthBar)
-                end
-            end
-        end
-
-        if (hp.healAbsorbBar) then
-            hp.healAbsorbBar:SetMinMaxValues(0, maxHealth)
-            hp.healAbsorbBar:SetValue(myCurrentHealAbsorb)
-        end
-    end
-    function CreateHealthPredictBar(parent, info, isAngled)
-        local absorbBar
-        local width, height = parent.Health:GetSize()
-        if isAngled then
-            absorbBar = parent:CreateAngle("StatusBar", nil, parent.Health)
-            absorbBar:SetSize(width, height)
-            absorbBar:SetBackgroundColor(0, 0, 0, 0)
-            absorbBar:SetBackgroundBorderColor(0, 0, 0, 0)
-            absorbBar:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-            absorbBar:SetAngleVertex(info.leftVertex, info.rightVertex)
-            absorbBar:SetReverseFill(parent.Health:GetReverseFill())
-            absorbBar:SetFrameLevel(parent.Health:GetFrameLevel())
-        end
-
-        parent.HealthPrediction = {
-            absorbBar = absorbBar,
-            Override = PredictOverride,
-        }
-    end
-end
 
 local function CreatePowerBar(parent, info, isAngled)
     local Power
@@ -437,36 +210,6 @@ local function CreatePowerBar(parent, info, isAngled)
         Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
         Power:SetReverseFill(GetReverseFill(parent.unit, info))
-        Power:SetReverseMissing(GetReverseMissing(parent.unit))
-        if Power.SetReverseMissingSource then
-            Power:SetReverseMissingSource("current")
-        end
-        Power:SetFlatTexture(true)
-
-        Power.step, Power.warn = CreateSteps(parent, height, info)
-        local powerType
-        function Power:UpdateReverse()
-            if not ndb.settings then
-                -- Settings not initialized yet, skip update
-                return
-            end
-            if Power.GetReverseMissing and Power:GetReverseMissing() then
-                Power:SetReversePercent(true)
-            elseif ndb.settings.reverseUnitFrameBars then
-                Power:SetReversePercent(RealUI.ReversePowers[powerType])
-            else
-                Power:SetReversePercent(not RealUI.ReversePowers[powerType])
-            end
-        end
-        Power.PositionSteps = PositionSteps
-        function Power:PostUpdate(unit, cur, min, max)
-            UpdateSteps(self, unit, cur, max)
-            local _, pType = _G.UnitPowerType(parent.unit)
-            if pType ~= powerType then
-                powerType = pType
-                Power:UpdateReverse()
-            end
-        end
     else
         Power = _G.CreateFrame("StatusBar", nil, parent.overlay)
         Power:SetPoint("TOPLEFT", parent.Health, "BOTTOMLEFT", 0, -1)
@@ -482,11 +225,18 @@ local function CreatePowerBar(parent, info, isAngled)
         })
     end
 
+    -- Tag power text using composed tag strings
     if info.text then
         Power.text = Power:CreateFontString(nil, "OVERLAY")
-        Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
+        if info.point then
+            Power.text:SetPoint("TOP"..info.point, Power, "BOTTOM"..info.point, 2, -3)
+        else
+            Power.text:SetPoint("CENTER")
+        end
         Power.text:SetFontObject("SystemFont_Shadow_Med1")
-        parent:Tag(Power.text, "[realui:power]")
+        local statusText = db.misc.statusText
+        local _, powerType = _G.UnitPowerType(parent.unit)
+        parent:Tag(Power.text, UnitFrames.GetPowerTagString(statusText, powerType))
     end
 
     Power.barType = "power"
@@ -495,6 +245,7 @@ local function CreatePowerBar(parent, info, isAngled)
 
     parent.Power = Power
 end
+
 
 local CreatePowerStatus do
     local status = {
@@ -505,12 +256,12 @@ local CreatePowerStatus do
         resting = {0, 1, 0},
     }
     local function UpdateStatus(self, event)
-        local unit, color = self.unit
-        local isAFK = IsSafeTrue(_G.UnitIsAFK(unit))
-        local isConnected = IsSafeTrue(_G.UnitIsConnected(unit))
-        local isLeader = IsSafeTrue(_G.UnitIsGroupLeader(unit))
-        local inCombat = IsSafeTrue(_G.UnitAffectingCombat(unit))
-        local isResting = IsSafeTrue(_G.IsResting())
+        local unit = self.unit
+        local isAFK = _G.UnitIsAFK(unit)
+        local isConnected = _G.UnitIsConnected(unit)
+        local isLeader = _G.UnitIsGroupLeader(unit)
+        local inCombat = _G.UnitAffectingCombat(unit)
+        local isResting = _G.IsResting()
 
         if isAFK then
             self.LeaderIndicator.status = "afk"
@@ -523,7 +274,7 @@ local CreatePowerStatus do
         end
 
         if self.LeaderIndicator.status then
-            color = status[self.LeaderIndicator.status]
+            local color = status[self.LeaderIndicator.status]
             self.LeaderIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
             self.LeaderIndicator:Show()
         else
@@ -542,7 +293,7 @@ local CreatePowerStatus do
             self.CombatIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
             self.CombatIndicator:Show()
         elseif self.CombatIndicator.status then
-            color = status[self.CombatIndicator.status]
+            local color = status[self.CombatIndicator.status]
             self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
             self.CombatIndicator:Show()
         else
@@ -583,12 +334,13 @@ local CreatePowerStatus do
     end
 end
 
+
 local CreateEndBox do
     local function UpdateEndBox(self, ...)
         local unit = self.unit
-        local isPlayer = IsSafeTrue(_G.UnitIsPlayer(unit))
-        local isPlayerControlled = IsSafeTrue(_G.UnitPlayerControlled(unit))
-        local isTapDenied = IsSafeTrue(_G.UnitIsTapDenied(unit))
+        local isPlayer = _G.UnitIsPlayer(unit)
+        local isPlayerControlled = _G.UnitPlayerControlled(unit)
+        local isTapDenied = _G.UnitIsTapDenied(unit)
 
         local color
         if isPlayer or (isPlayerControlled and not isPlayer) then
@@ -648,6 +400,7 @@ local CreateEndBox do
     end
 end
 
+
 -- Init
 local function Shared(self, unit)
     unit = unit:match("(%a+)%d*")
@@ -692,12 +445,6 @@ local function Shared(self, unit)
     if unitData.health then
         CreateHealthBar(self, unitData.health, isAngled)
         CreateHealthStatus(self, unitData.health, isAngled)
-        -- FIXBETA -- disable if Midnight as we have no fix
-        if not RealUI.isMidnight then
-            if unitData.health.predict then
-                CreateHealthPredictBar(self, unitData.health, isAngled)
-            end
-        end
     end
 
     if unitData.power then
@@ -711,13 +458,12 @@ local function Shared(self, unit)
 
     unitData.create(self)
 
-    -- FIXBETA
-    if unitData.hasCastBars and RealUI:GetModuleEnabled("CastBars") then
+    -- Create CastBars for units that had them before the rewrite
+    if (unit == "player" or unit == "target" or unit == "focus") and RealUI:GetModuleEnabled("CastBars") then
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit, unitData)
     end
 
     function self.PreUpdate(frame, event)
-        --print("isAngled", isAngled, unit)
         if isAngled then
             frame.Health:SetSmooth(false)
             if frame.Power then
@@ -733,10 +479,8 @@ local function Shared(self, unit)
     function self.PostUpdate(frame, event)
         if isAngled then
             frame.Health:SetSmooth(true)
-            frame.Health:PositionSteps(unitData.issmall and "BOTTOM" or "TOP")
             if frame.Power then
                 frame.Power:SetSmooth(true)
-                frame.Power:PositionSteps("BOTTOM")
             end
             frame.EndBox.Update(frame, event)
         end
@@ -761,4 +505,3 @@ function UnitFrames:InitializeLayout()
         end
     end)
 end
-

@@ -8,6 +8,7 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local FramePoint = RealUI:GetModule("FramePoint")
 UnitFrames.focustarget = {
     create = function(dialog)
         dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
@@ -29,4 +30,5 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local focustarget = oUF:Spawn("focustarget", "RealUIFocusTargetFrame")
     focustarget:SetPoint("TOPLEFT", "RealUIFocusFrame", "BOTTOMLEFT", db.positions[UnitFrames.layoutSize].focustarget.x, db.positions[UnitFrames.layoutSize].focustarget.y)
+    FramePoint:PositionFrame(UnitFrames, focustarget, {"profile", "units", "focustarget", "framePoint"})
 end)

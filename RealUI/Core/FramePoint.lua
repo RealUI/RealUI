@@ -70,9 +70,12 @@ end
 function FramePoint:RestorePosition(mod)
     local module = modules[mod]
     for frame, meta in next, module.frames do
-        frame:ClearAllPoints()
-        frame:SetPoint("CENTER", meta.dragFrame)
-        LibWin.RestorePosition(meta.dragFrame)
+        local config = RealUI.GetOptions(mod.moduleName, meta.optionPath)
+        if config and config.x then
+            frame:ClearAllPoints()
+            frame:SetPoint("CENTER", meta.dragFrame)
+            LibWin.RestorePosition(meta.dragFrame)
+        end
     end
 end
 
@@ -143,10 +146,28 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
     name:SetText(frame:GetDebugName())
     name:SetPoint("CENTER")
 
+    -- Copy the frame's original anchor onto the dragFrame as the default position.
+    -- This ensures the dragFrame starts where the frame was placed by its unit file.
+    -- LibWin.RestorePosition will override this only if saved data exists.
+    local numPoints = frame:GetNumPoints()
+    if numPoints > 0 then
+        local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint(1)
+        if point and relativeTo then
+            dragFrame:SetPoint(point, relativeTo, relativePoint, xOfs or 0, yOfs or 0)
+        end
+    end
+
+    frame:ClearAllPoints()
     frame:SetPoint("CENTER", dragFrame)
 
-    LibWin.RegisterConfig(dragFrame, RealUI.GetOptions(mod.moduleName, optionPath))
-    LibWin.RestorePosition(dragFrame)
+    local config = RealUI.GetOptions(mod.moduleName, optionPath)
+    LibWin.RegisterConfig(dragFrame, config)
+
+    -- Only call RestorePosition if LibWindow has actual saved data.
+    -- An empty table means the user never moved the frame, so keep the inherited anchor.
+    if config and _G.next(config) ~= nil then
+        LibWin.RestorePosition(dragFrame)
+    end
 
     modules[mod].frames[frame] = {
         optionPath = optionPath,

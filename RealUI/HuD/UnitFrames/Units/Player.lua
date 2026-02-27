@@ -8,6 +8,7 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local function CreateTotems(parent)
     -- DestroyTotem is protected, so we hack the default
@@ -108,8 +109,7 @@ UnitFrames.player = {
         leftVertex = 1,
         rightVertex = 4,
         point = "RIGHT",
-        text = "[realui:health]",
-        predict = true,
+        text = true,
     },
     power = {
         leftVertex = 2,
@@ -118,7 +118,6 @@ UnitFrames.player = {
         text = true,
     },
     isBig = true,
-    hasCastBars = true,
 }
 
 -- Init
@@ -129,4 +128,5 @@ _G.tinsert(UnitFrames.units, function(...)
     player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT", db.positions[UnitFrames.layoutSize].player.x, db.positions[UnitFrames.layoutSize].player.y)
     player:RegisterEvent("PLAYER_FLAGS_CHANGED", player.AwayIndicator.Override)
     player:RegisterEvent("UPDATE_SHAPESHIFT_FORM", player.PostUpdate, true)
+    FramePoint:PositionFrame(UnitFrames, player, {"profile", "units", "player", "framePoint"})
 end)

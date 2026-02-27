@@ -8,6 +8,7 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local FramePoint = RealUI:GetModule("FramePoint")
 UnitFrames.pet = {
     create = function(dialog)
         dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
@@ -29,4 +30,5 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local pet = oUF:Spawn("pet", "RealUIPetFrame")
     pet:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].pet.x, db.positions[UnitFrames.layoutSize].pet.y)
+    FramePoint:PositionFrame(UnitFrames, pet, {"profile", "units", "pet", "framePoint"})
 end)

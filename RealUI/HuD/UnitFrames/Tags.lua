@@ -1,11 +1,16 @@
 local _, private = ...
 
--- Lua Globals --
--- luacheck: globals strlenutf8
-
 -- Libs --
 local oUF = private.oUF
+if not oUF then
+    _G.print("|cffff0000[RealUI Tags] ERROR: private.oUF is nil — tags will not register|r")
+    return
+end
 local tags = oUF.Tags
+if not tags then
+    _G.print("|cffff0000[RealUI Tags] ERROR: oUF.Tags is nil — tags will not register|r")
+    return
+end
 local Color = _G.Aurora.Color
 
 -- RealUI --
@@ -13,113 +18,109 @@ local RealUI = private.RealUI
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
-local function IsSafeTrue(value)
-    if RealUI.isSecret(value) then
-        return false
+----------------------------------
+------ Tag String Composers ------
+----------------------------------
+function UnitFrames.GetHealthTagString(statusText)
+    if statusText == "perc" or statusText == "smart" then
+        return "[realui:healthcolor][realui:healthPercent<$%]"
+    elseif statusText == "value" or statusText == "abs" then
+        return "[realui:healthcolor][realui:healthValue]"
+    elseif statusText == "both" then
+        return "[realui:healthcolor][realui:healthPercent<$%] - [realui:healthcolor][realui:healthValue]"
     end
-
-    local ok, result = _G.pcall(function()
-        if value then
-            return true
-        end
-        return false
-    end)
-    if ok then
-        return result
-    end
-
-    return false
+    -- Fallback to percentage if unknown statusText
+    return "[realui:healthcolor][realui:healthPercent<$%]"
 end
 
-
-local ES_PADDING = {
-    ["||"] = -1,
-    ["|c"] = 9,
-    ["|C"] = 9,
-    ["|r"] = 1,
-    ["|R"] = 1,
-}
-
-local function utf8shorten(str, length)
-    if strlenutf8(str) <= length then
-        return str
+function UnitFrames.GetPowerTagString(statusText, powerType)
+    if powerType ~= "MANA" then
+        return "[powercolor][realui:powerValue]"
     end
-
-    local index, output, z, y = 1, "", "" -- y and z are next-to-last and last seen characters
-    for char in str:gmatch(".[\128-\191]*") do
-        if char == "|" then
-            length = length + 1 -- we want to peak at the next character
-        end
-
-        y = z
-        z = char
-        length = length + (ES_PADDING[y .. z] or 0)
-
-        if index <= length then
-            output = output .. char
-            index = index + 1
-        end
-
-        if index > length then
-            break
-        end
+    if statusText == "perc" or statusText == "smart" then
+        return "[powercolor][realui:powerPercent<$%]"
+    elseif statusText == "value" or statusText == "abs" then
+        return "[powercolor][realui:powerValue]"
+    elseif statusText == "both" then
+        return "[powercolor][realui:powerPercent<$%] - [powercolor][realui:powerValue]"
     end
-
-    return output
-end
-local function AbbreviateName(name, maxLength)
-    if not name then return "" end
-    local maxNameLength = maxLength or 12
-    local length = strlenutf8(name)
-    local words, newName = {_G.strsplit(" ", name)}
-    if #words > 2 and strlenutf8(name) > maxNameLength then
-        local i = 2
-        repeat
-            length = length - (strlenutf8(words[i]) - 2)
-            words[i] = utf8shorten(words[i], 1) .. "."
-            i = i + 1
-        until length <= maxNameLength or i > #words
-
-        newName = _G.strjoin(" ", _G.unpack(words))
-    else
-        newName = name
-    end
-
-    if strlenutf8(newName) > maxNameLength then
-        newName = utf8shorten(newName, (maxNameLength + 2))..".."
-    end
-    return newName
+    -- Fallback to percentage if unknown statusText
+    return "[powercolor][realui:powerPercent<$%]"
 end
 
 ------------------
 ------ Tags ------
 ------------------
--- Name
-tags.Methods["realui:name"] = function(unit, realUnit)
-    local isDead = false
-    local dead = IsSafeTrue(_G.UnitIsDead(unit))
-    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
-    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
-    if dead or ghost or not connected then
-        isDead = true
+
+-- Health Color
+tags.Methods["realui:healthcolor"] = function(unit)
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
+        return "|cff3f3f3f"
     end
+    return ("|c%s"):format(RealUI.GetColorString(oUF.colors.health))
+end
+tags.Events["realui:healthcolor"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_CONNECTION"
 
-    local unitTag = unit:match("^(%w-)%d") or unit
+-- Health Percent
+tags.Methods["realui:healthPercent"] = function(unit)
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
+        return "0"
+    end
+    return _G.string.format('%d', _G.UnitHealthPercent(unit, true, _G.CurveConstants.ScaleTo100))
+end
+tags.Events["realui:healthPercent"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
-    --local enUS,  zhTW,  zhCN,  ruRU,  koKR = "Account Level Mount", "帳號等級坐騎", "战网通行证通用坐骑", "Средство передвижения для всех персонажей учетной записи", "계정 공유 탈것"
+-- Health Absolute Value
+tags.Methods["realui:healthValue"] = function(unit)
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
+        return "0"
+    end
+    local health = _G.UnitHealth(unit)
+    if not _G.issecretvalue(health) then
+        return RealUI.ReadableNumber(health)
+    end
+    return _G.string.format('%d', health)
+end
+tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
+
+-- Power Percent
+tags.Methods["realui:powerPercent"] = function(unit)
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
+        return "0"
+    end
+    local powerType = _G.UnitPowerType(unit)
+    return _G.string.format('%d', _G.UnitPowerPercent(unit, powerType, true, _G.CurveConstants.ScaleTo100))
+end
+tags.Events["realui:powerPercent"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
+
+-- Power Absolute Value
+tags.Methods["realui:powerValue"] = function(unit)
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
+        return "0"
+    end
+    local power = _G.UnitPower(unit)
+    if not _G.issecretvalue(power) then
+        return RealUI.ReadableNumber(power)
+    end
+    return _G.string.format('%d', power)
+end
+tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
+
+-- Name
+tags.Methods["realui:name"] = function(unit)
     local name = _G.UnitName(unit) or ""
-    if not RealUI.isSecret(name) then
-        name = AbbreviateName(name, UnitFrames[unitTag].nameLength)
+    local unitTag = unit:match("^(%w-)%d") or unit
+    if not _G.issecretvalue(name) then
+        local maxLen = UnitFrames[unitTag] and UnitFrames[unitTag].nameLength
+        if maxLen and #name > maxLen then
+            name = name:sub(1, maxLen) .. "..."
+        end
     end
     local nameColor = "|cffffffff"
-    if isDead then
+    if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         nameColor = "|cff3f3f3f"
     elseif UnitFrames.db.profile.overlay.classColorNames then
-        --print("Class color names", unit)
-        local raidcolor = tags.Methods.raidcolor(unit)
-        if raidcolor then
-            nameColor = raidcolor
-        end
+        nameColor = tags.Methods.raidcolor(unit) or nameColor
     end
     return ("%s%s|r"):format(nameColor, name)
 end
@@ -129,222 +130,29 @@ tags.Events["realui:name"] = "UNIT_NAME_UPDATE"
 tags.Methods["realui:level"] = function(unit, realUnit)
     local level = tags.Methods.level(unit, realUnit)
     if level == "??" then
-        return ("|c%s%s|r"):format(RealUI.GetColorString(_G.QuestDifficultyColors.impossible), level)
-    else
-        return ("|c%s%s|r"):format(RealUI.GetColorString(_G.GetQuestDifficultyColor(level)), level)
+        return ("|cff%02x%02x%02x%s|r"):format(255, 0, 0, level)
     end
+    local color = _G.GetCreatureDifficultyColor(level)
+    return ("|cff%02x%02x%02x%s|r"):format(color.r * 255, color.g * 255, color.b * 255, level)
 end
-tags.Events["realui:level"] = "UNIT_NAME_UPDATE"
+tags.Events["realui:level"] = "UNIT_LEVEL PLAYER_LEVEL_UP"
 
 -- PvP Timer
-tags.Methods["realui:pvptimer"] = function(unit)
-    --print("Tag:pvptimer", unit)
+tags.Methods["realui:pvptimer"] = function()
     if not _G.IsPVPTimerRunning() then return "" end
-
-    return _G.SecondsToClock(_G.floor(_G.GetPVPTimer() / 1000))
+    return _G.SecondsToClock(_G.math.floor(_G.GetPVPTimer() / 1000))
 end
 tags.Events["realui:pvptimer"] = "UNIT_FACTION PLAYER_FLAGS_CHANGED"
-
-
-
--- Health AbsValue
-tags.Methods["realui:healthValue"] = function(unit)
-    local dead = IsSafeTrue(_G.UnitIsDead(unit))
-    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
-    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
-    if dead or ghost or not connected then return 0 end
-    return RealUI.ReadableNumber(_G.UnitHealth(unit))
-end
-tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
-
--- Health %
-tags.Methods["realui:healthPercent"] = function(unit)
-    local percent
-    local dead = IsSafeTrue(_G.UnitIsDead(unit))
-    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
-    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
-    if dead or ghost or not connected then
-        percent = 0
-    else
-        if _G.UnitHealthPercent and _G.CurveConstants and _G.CurveConstants.ScaleTo100 then
-            percent = _G.UnitHealthPercent(unit, true, _G.CurveConstants.ScaleTo100)
-            if RealUI.isSecret(percent) then
-                percent = nil
-            end
-        end
-        if not percent and _G.UnitHealthPercent then
-            percent = _G.UnitHealthPercent(unit, true)
-            if RealUI.isSecret(percent) then
-                percent = nil
-            end
-        end
-        if (not percent or percent == 0) and oUF and oUF.objects then
-            for i = 1, #oUF.objects do
-                local frame = oUF.objects[i]
-                if frame and frame.unit == unit and frame.Health then
-                    local cur = frame.Health.cur
-                    local max = frame.Health.max
-                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) then
-                        local ok, ratio = pcall(function()
-                            if max > 0 then
-                                return cur / max
-                            end
-                        end)
-                        if ok and ratio and not RealUI.isSecret(ratio) then
-                            percent = ratio
-                        end
-                    elseif frame.Health.GetVisualPercent then
-                        local visPercent = frame.Health:GetVisualPercent()
-                        if visPercent then
-                            percent = visPercent
-                        end
-                    end
-                    break
-                end
-            end
-        end
-        if not percent then
-            percent = 0
-        else
-            local ok = pcall(function()
-                if percent <= 1 then
-                    percent = percent * 100
-                end
-            end)
-            if not ok then
-                percent = 0
-            end
-        end
-    end
-    UnitFrames:debug("realui:healthPercent", percent)
-    return ("%d|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.health))
-end
-tags.Events["realui:healthPercent"] = tags.Events["realui:healthValue"]
-
--- Health
-tags.Methods["realui:health"] = function(unit)
-    local statusText = UnitFrames.db.profile.misc.statusText
-    if statusText == "both" then
-        return tags.Methods["realui:healthPercent"](unit).." - "..tags.Methods["realui:healthValue"](unit)
-    elseif statusText == "perc" then
-        return tags.Methods["realui:healthPercent"](unit)
-    else
-        return tags.Methods["realui:healthValue"](unit)
-    end
-end
-tags.Events["realui:health"] = tags.Events["realui:healthValue"]
-
-
-
--- Power AbsValue
-tags.Methods["realui:powerValue"] = function(unit)
-    local dead = IsSafeTrue(_G.UnitIsDead(unit))
-    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
-    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
-    if dead or ghost or not connected then return 0 end
-    return RealUI.ReadableNumber(_G.UnitPower(unit))
-end
-tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
-
--- Power %
-tags.Methods["realui:powerPercent"] = function(unit)
-    local percent
-    local dead = IsSafeTrue(_G.UnitIsDead(unit))
-    local ghost = IsSafeTrue(_G.UnitIsGhost(unit))
-    local connected = IsSafeTrue(_G.UnitIsConnected(unit))
-    if dead or ghost or not connected then
-        percent = 0
-    else
-        local powerType = _G.UnitPowerType(unit)
-        if _G.UnitPowerPercent and _G.CurveConstants and _G.CurveConstants.ScaleTo100 then
-            percent = _G.UnitPowerPercent(unit, powerType, true, _G.CurveConstants.ScaleTo100)
-            if RealUI.isSecret(percent) then
-                percent = nil
-            end
-        end
-        if not percent and _G.UnitPowerPercent then
-            percent = _G.UnitPowerPercent(unit, powerType, true)
-            if RealUI.isSecret(percent) then
-                percent = nil
-            end
-        end
-        if (not percent or percent == 0) and oUF and oUF.objects then
-            for i = 1, #oUF.objects do
-                local frame = oUF.objects[i]
-                if frame and frame.unit == unit and frame.Power then
-                    local cur = frame.Power.cur
-                    local max = frame.Power.max
-                    if cur and max and not RealUI.isSecret(cur) and not RealUI.isSecret(max) then
-                        local ok, ratio = pcall(function()
-                            if max > 0 then
-                                return cur / max
-                            end
-                        end)
-                        if ok and ratio and not RealUI.isSecret(ratio) then
-                            percent = ratio
-                        end
-                    elseif frame.Power.GetVisualPercent then
-                        local visPercent = frame.Power:GetVisualPercent()
-                        if visPercent then
-                            percent = visPercent
-                        end
-                    end
-                    break
-                end
-            end
-        end
-        if not percent then
-            percent = 0
-        else
-            local ok = pcall(function()
-                if percent <= 1 then
-                    percent = percent * 100
-                end
-            end)
-            if not ok then
-                percent = 0
-            end
-        end
-    end
-    local _, ptoken = _G.UnitPowerType(unit)
-    return ("%d|c%s%%|r"):format(percent, RealUI.GetColorString(oUF.colors.power[ptoken]))
-end
-tags.Events["realui:powerPercent"] = tags.Events["realui:powerValue"]
-
--- Power
-tags.Methods["realui:power"] = function(unit)
-    local _, ptoken = _G.UnitPowerType(unit)
-    local statusText = UnitFrames.db.profile.misc.statusText
-    if ptoken == "MANA" then
-        if statusText == "both" then
-            return tags.Methods["realui:powerPercent"](unit).." - "..tags.Methods["realui:powerValue"](unit)
-        elseif statusText == "perc" then
-            return tags.Methods["realui:powerPercent"](unit)
-        else
-            return tags.Methods["realui:powerValue"](unit)
-        end
-    else
-        return tags.Methods["realui:powerValue"](unit)
-    end
-end
-tags.Events["realui:power"] = tags.Events["realui:powerValue"]
-
 
 -- Colored Threat Percent
 tags.Methods["realui:threat"] = function(unit)
     local color = tags.Methods["threatcolor"](unit)
     local isTanking, _, _, percentage = _G.UnitDetailedThreatSituation("player", "target")
-
-    if percentage and not IsSafeTrue(_G.UnitIsDeadOrGhost(unit)) then
+    if percentage and not _G.UnitIsDeadOrGhost(unit) then
         if isTanking then
             percentage = _G.UnitThreatPercentageOfLead("player", "target")
         end
-
         if percentage and percentage ~= 0 then
-            UnitFrames:debug("threat", color, isTanking, percentage)
-            -- if RealUI.isDev then
-            --     _G.print(("Current threat: - %s%1.0f%%|r"):format(color, percentage))
-            -- end
             return ("%s%1.0f%%|r"):format(color, percentage)
         end
     end
@@ -361,24 +169,33 @@ local rangeColors = {
     [100] = Color.red,
 }
 
-local rangeCheck = _G.LibStub("LibRangeCheck-3.0")
-tags.Methods["realui:range"] = function(unit)
+local rangeCheck
+do
+    local ok, lib = _G.pcall(_G.LibStub, "LibRangeCheck-3.0")
+    if ok then rangeCheck = lib end
+end
+tags.Methods["realui:range"] = function()
+    if not rangeCheck then return end
     local _, maxRange = rangeCheck:GetRange("target")
-    if maxRange and not IsSafeTrue(_G.UnitIsUnit("target", "player")) then
+    if maxRange and not _G.UnitIsUnit("target", "player") then
         local section
-        if maxRange <= 5 then
-            section = 5
-        elseif maxRange <= 30 then
-            section = 30
-        elseif maxRange <= 35 then
-            section = 35
-        elseif maxRange <= 40 then
-            section = 40
-        elseif maxRange <= 50 then
-            section = 50
-        else
-            section = 100
+        if maxRange <= 5 then section = 5
+        elseif maxRange <= 30 then section = 30
+        elseif maxRange <= 35 then section = 35
+        elseif maxRange <= 40 then section = 40
+        elseif maxRange <= 50 then section = 50
+        else section = 100
         end
-        return ("|c%s%d|r"):format(rangeColors[section].colorStr, maxRange)
+        local color = rangeColors[section]
+        if color and color.colorStr then
+            return ("|c%s%d|r"):format(color.colorStr, maxRange)
+        end
     end
+end
+
+-- Diagnostic: confirm tags registered
+if tags.Methods["realui:healthValue"] then
+    _G.print("|cff00ff00[RealUI Tags] All tags registered successfully|r")
+else
+    _G.print("|cffff0000[RealUI Tags] ERROR: tags.Methods['realui:healthValue'] is nil after registration|r")
 end

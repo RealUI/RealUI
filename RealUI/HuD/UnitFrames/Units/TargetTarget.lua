@@ -8,6 +8,7 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local FramePoint = RealUI:GetModule("FramePoint")
 UnitFrames.targettarget = {
     create = function(dialog)
         dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
@@ -28,4 +29,5 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local targettarget = oUF:Spawn("targettarget", "RealUITargetTargetFrame")
     targettarget:SetPoint("BOTTOMRIGHT", "RealUITargetFrame", db.positions[UnitFrames.layoutSize].targettarget.x, db.positions[UnitFrames.layoutSize].targettarget.y)
+    FramePoint:PositionFrame(UnitFrames, targettarget, {"profile", "units", "targettarget", "framePoint"})
 end)

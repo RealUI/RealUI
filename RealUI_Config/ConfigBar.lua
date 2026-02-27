@@ -93,7 +93,7 @@ do -- Other
                         end,
                         set = function(info, value)
                             RealUI.db.char.layout.spec[RealUI.charInfo.specs.current.index] = value
-                            if RealUI.isSecret(value) then
+                            if _G.issecretvalue(value) then
                                 _G.print("Layout_Layout value is secret. Changing layout skipped.")
                                 _G.print("Please report this to the RealUI author.")
                             end
@@ -394,6 +394,10 @@ do -- UnitFrames
                         end,
                         order = 15,
                     },
+                    -- "Colored when full" — intended to make bars start full and drain.
+                    -- Not yet implemented correctly; disabled for now.
+                    -- FIXMELATER: Implement as a visual mode, not a reverse fill toggle.
+                    --[[
                     reverseBars = {
                         name = L["HuD_ReverseBars"],
                         type = "toggle",
@@ -404,6 +408,7 @@ do -- UnitFrames
                         end,
                         order = 20,
                     },
+                    ]]
                     statusText = {
                         name = _G.STATUS_TEXT,
                         desc = _G.OPTION_TOOLTIP_STATUS_TEXT_DISPLAY,
@@ -685,15 +690,15 @@ do -- UnitFrames
                 UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y = value
             end,
         }
-        if unitSlug == "player" then
+        if unitSlug == "player" or unitSlug == "target" then
             unit.args.reverseFill = {
                 name = L["UnitFrames_ReverseFill"],
                 desc = L["UnitFrames_ReverseFillDesc"],
                 type = "toggle",
                 order = 25,
-                get = function() return UnitFrames.db.profile.units.player.reverseFill end,
+                get = function() return UnitFrames.db.profile.units[unitSlug].reverseFill end,
                 set = function(info, value)
-                    UnitFrames.db.profile.units.player.reverseFill = value
+                    UnitFrames.db.profile.units[unitSlug].reverseFill = value
                     UnitFrames:RefreshUnits("ReverseFill")
                 end,
             }
@@ -702,10 +707,34 @@ do -- UnitFrames
                 desc = L["UnitFrames_ReversePercentDesc"],
                 type = "toggle",
                 order = 26,
-                get = function() return UnitFrames.db.profile.units.player.reversePercent end,
+                get = function() return UnitFrames.db.profile.units[unitSlug].reversePercent end,
                 set = function(info, value)
-                    UnitFrames.db.profile.units.player.reversePercent = value
+                    UnitFrames.db.profile.units[unitSlug].reversePercent = value
                     UnitFrames:RefreshUnits("ReversePercent")
+                end,
+            }
+        end
+        if unitSlug == "target" then
+            unit.args.buffCount = {
+                name = L["UnitFrames_BuffCount"],
+                type = "range",
+                min = 0, max = 40, step = 1,
+                order = 35,
+                get = function() return UnitFrames.db.profile.units.target.buffCount end,
+                set = function(info, value)
+                    UnitFrames.db.profile.units.target.buffCount = value
+                    UnitFrames:RefreshUnits("BuffCount")
+                end,
+            }
+            unit.args.debuffCount = {
+                name = L["UnitFrames_DebuffCount"],
+                type = "range",
+                min = 0, max = 40, step = 1,
+                order = 36,
+                get = function() return UnitFrames.db.profile.units.target.debuffCount end,
+                set = function(info, value)
+                    UnitFrames.db.profile.units.target.debuffCount = value
+                    UnitFrames:RefreshUnits("DebuffCount")
                 end,
             }
         end
@@ -715,7 +744,7 @@ do -- UnitFrames
                 desc = L["UnitFrames_AnchorWidthDesc"],
                 type = "range",
                 width = "full",
-                min = round(uiWidth * 0.1),
+                min = 0,
                 max = round(uiWidth * 0.5),
                 step = 1,
                 bigStep = 4,
@@ -855,6 +884,18 @@ do -- CastBars
             end,
             order = order,
             args = {
+                scale = {
+                    name = L["General_Scale"] or "Scale",
+                    type = "range",
+                    min = 0.5, max = 2.0, step = 0.05,
+                    isPercent = true,
+                    order = 0.5,
+                    get = function() return CastBars.db.profile[unit].scale end,
+                    set = function(info, value)
+                        CastBars.db.profile[unit].scale = value
+                        CastBars:UpdateSettings(unit)
+                    end,
+                },
                 reverse = {
                     name = L["HuD_ReverseBars"],
                     type = "toggle",

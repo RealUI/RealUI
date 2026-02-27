@@ -8,6 +8,7 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local FramePoint = RealUI:GetModule("FramePoint")
 UnitFrames.focus = {
     create = function(dialog)
         dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
@@ -20,7 +21,6 @@ UnitFrames.focus = {
         rightVertex = 4,
         point = "RIGHT"
     },
-    hasCastBars = true,
 }
 
 -- Init
@@ -29,4 +29,5 @@ _G.tinsert(UnitFrames.units, function(...)
 
     local focus = oUF:Spawn("focus", "RealUIFocusFrame")
     focus:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame", db.positions[UnitFrames.layoutSize].focus.x, db.positions[UnitFrames.layoutSize].focus.y)
+    FramePoint:PositionFrame(UnitFrames, focus, {"profile", "units", "focus", "framePoint"})
 end)

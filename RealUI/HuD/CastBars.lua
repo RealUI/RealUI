@@ -7,6 +7,7 @@ local _, private = ...
 local RealUI = private.RealUI
 local db
 
+local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 local ASB = RealUI:GetModule("AngleStatusBar")
 
@@ -203,7 +204,7 @@ local function PlayFlash(anim)
     anim.bar:SetStatusBarColor(anim.color:GetRGB())
 
     local fromAlpha = anim.bar:GetAlpha()
-    if RealUI.isSecret(fromAlpha) or type(fromAlpha) ~= "number" then
+    if _G.issecretvalue(fromAlpha) or type(fromAlpha) ~= "number" then
         fromAlpha = 1
     elseif fromAlpha < 0 then
         fromAlpha = 0
@@ -228,7 +229,15 @@ local function PostCastStart(self, unit)
         self.flashAnim:Stop()
     end
 
-    if not RealUI.isSecret(self.notInterruptible) and self.notInterruptible then
+    -- Reset tracking for new cast
+
+    -- notInterruptible can be a secret boolean (for other players' casts).
+    -- Secret booleans cannot be tested, compared, or even == checked in Lua.
+    -- Use issecretvalue() to detect them, then fall back to interruptible color.
+    local notInt = self.notInterruptible
+    if _G.issecretvalue(notInt) or notInt == nil then
+        self:SetStatusBarColor(interruptible:GetRGB())
+    elseif notInt then
         self:SetStatusBarColor(uninterruptible:GetRGB())
     else
         self:SetStatusBarColor(interruptible:GetRGB())
@@ -245,8 +254,8 @@ end
 --local function PostCastUpdate(self, unit)
 --    CastBars:debug("PostCastUpdate", unit)
 --end
-local function PostCastStop(self, unit, spellID)
-    CastBars:debug("PostCastStop", unit, spellID)
+local function PostCastStop(self, unit, empowerComplete)
+    CastBars:debug("PostCastStop", unit, empowerComplete)
     self.holdTime = self.timeToHold
     self.Text:SetText(_G.SUCCESS)
     self:Show()
@@ -256,8 +265,8 @@ local function PostCastStop(self, unit, spellID)
     end
     self.flashAnim:Play()
 end
-local function PostCastFail(self, unit, spellID)
-    CastBars:debug("PostCastFail", unit, spellID)
+local function PostCastFail(self, unit)
+    CastBars:debug("PostCastFail", unit)
     self.flashAnim.color = Color.red
     if _G.InCombatLockdown and _G.InCombatLockdown() then
         return
@@ -266,7 +275,11 @@ local function PostCastFail(self, unit, spellID)
 end
 local function PostCastInterruptible(self, unit)
     CastBars:debug("PostCastInterruptible", unit)
-    if not RealUI.isSecret(self.notInterruptible) and self.notInterruptible then
+    -- notInterruptible can be a secret boolean, use issecretvalue() first
+    local notInt = self.notInterruptible
+    if _G.issecretvalue(notInt) or notInt == nil then
+        self:SetStatusBarColor(interruptible:GetRGB())
+    elseif notInt then
         self:SetStatusBarColor(uninterruptible:GetRGB())
     else
         self:SetStatusBarColor(interruptible:GetRGB())
@@ -281,7 +294,6 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     local Castbar = unitFrame.Castbar
     Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
     Castbar:SetStatusBarColor(interruptible:GetRGB())
-    Castbar:SetFlatTexture(true) -- Use flat texture instead of gradient
     -- Castbar:smoothing       (false)
     -- Castbar:SetSmooth(false)
     Castbar:SetReverseFill(unitDB.reverse)
@@ -328,9 +340,138 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     Castbar.PostCastFail = PostCastFail
     Castbar.PostCastInterruptible = PostCastInterruptible
 
+    -- Custom OnUpdate that syncs the native timer to AngleStatusBar fill.
+    -- oUF checks element.OnUpdate before falling back to its default onUpdate,
+    -- so setting this property ensures oUF uses our function.
+    --
+    -- Blizzard's own CastingBarMixin:OnUpdate manually tracks self.value via
+    -- elapsed and calls SetValue each frame. oUF instead uses SetTimerDuration
+    -- which drives the native StatusBar C++ timer, but that doesn't call our
+    -- SetBarValue. We follow Blizzard's pattern: query UnitCastingInfo/
+    -- UnitChannelInfo for startTime/endTime (works for ALL units), compute
+    -- the current value, and drive SetBarValue directly.
+    Castbar.OnUpdate = function(self, elapsed)
+        if self.casting or self.channeling or self.empowering then
+            local ownerUnit = self.__owner and self.__owner.unit
+            local startTime, endTime, duration, value
+
+            -- Try oUF's cached values first (player casts)
+            if self.startTime and self.endTime then
+                startTime = self.startTime
+                endTime = self.endTime
+            elseif ownerUnit then
+                -- Query the API directly for non-player casts.
+                -- startTime/endTime may be secret numbers for enemy units,
+                -- so we must check with issecretvalue before arithmetic.
+                if self.casting then
+                    local _, _, _, st, et = _G.UnitCastingInfo(ownerUnit)
+                    if st and et and not _G.issecretvalue(st) and not _G.issecretvalue(et) then
+                        startTime = st / 1000
+                        endTime = et / 1000
+                    end
+                elseif self.channeling or self.empowering then
+                    local _, _, _, st, et = _G.UnitChannelInfo(ownerUnit)
+                    if st and et and not _G.issecretvalue(st) and not _G.issecretvalue(et) then
+                        startTime = st / 1000
+                        endTime = et / 1000
+                    end
+                end
+            end
+
+            if startTime and endTime then
+                local now = _G.GetTime()
+                duration = endTime - startTime
+                if duration > 0 then
+                    if self.channeling then
+                        value = endTime - now
+                    else
+                        value = now - startTime
+                    end
+                    if value < 0 then value = 0 end
+                    if value > duration then value = duration end
+
+                    -- Drive the AngleStatusBar fill
+                    local meta = ASB:GetBarMeta(self)
+                    if meta then
+                        meta.minVal = 0
+                        meta.maxVal = duration
+                        ASB:SetBarValue(self, value)
+                    end
+
+                    -- Update Time text
+                    if self.Time then
+                        local remaining = self.channeling and value or (duration - value)
+                        if self.delay and self.delay ~= 0 then
+                            self.Time:SetFormattedText('%.1f|cffff0000%s%.2f|r', remaining, self.channeling and '-' or '+', self.delay)
+                        else
+                            self.Time:SetFormattedText('%.1f', remaining)
+                        end
+                    end
+                end
+            else
+                -- Secret times fallback for enemy casts.
+                -- The native C++ timer engine (driven by oUF's SetTimerDuration)
+                -- is already sizing self.fill since fill IS the native StatusBar
+                -- texture. Read back the computed width for trapezoid vertex offsets.
+                local meta = ASB:GetBarMeta(self)
+                if meta then
+                    local width = self.fill:GetWidth()
+                    if not _G.issecretvalue(width) and width > 0.001 then
+                        self.fill:SetShown(true)
+                        if meta.isTrapezoid then
+                            if width < (meta.minWidth * 2) then
+                                local vertexOfs = width / 2
+                                self.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
+                                self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
+                                self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
+                                meta.isLess = true
+                            elseif meta.isLess then
+                                self.fill:SetPoint(meta.isTrapezoid)
+                                self.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
+                                self.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
+                                meta.isLess = false
+                            end
+                        end
+                    else
+                        -- Width is secret or zero — just show fill, native handles it
+                        self.fill:SetShown(true)
+                    end
+                end
+
+                -- Update Time text — SetFormattedText handles secret numbers
+                local nativeGetTimer = _G.getmetatable(self).__index.GetTimerDuration
+                if nativeGetTimer and self.Time then
+                    local ok, durationObj = _G.pcall(nativeGetTimer, self)
+                    if ok and durationObj then
+                        local ok2, remaining = _G.pcall(function() return durationObj:GetRemainingDuration() end)
+                        if ok2 and remaining then
+                            self.Time:SetFormattedText('%.1f', remaining)
+                        end
+                    end
+                end
+            end
+        elseif self.holdTime and self.holdTime > 0 then
+            self.holdTime = self.holdTime - elapsed
+        else
+            -- Reset and hide (same as oUF's default)
+            self.castID = nil
+            self.casting = nil
+            self.channeling = nil
+            self.empowering = nil
+            self.notInterruptible = nil
+            self.spellID = nil
+            self.spellName = nil
+            for _, pip in _G.next, self.Pips do
+                pip:Hide()
+            end
+            self:Hide()
+        end
+    end
+
     unitFrame.Castbar = Castbar
     self[unit] = Castbar
     self:UpdateSettings(unit)
+    CombatFader:RegisterFrameForFade(MODNAME, Castbar)
     FramePoint:PositionFrame(self, Castbar, {"profile", unit, "position"})
 end
 
@@ -413,11 +554,22 @@ function CastBars:OnInitialize()
                 reverse = true,
                 debug = false
             },
+            combatfade = {
+                enabled = true,
+                opacity = {
+                    incombat = 1,
+                    harmtarget = 0.85,
+                    target = 0.75,
+                    hurt = 0.6,
+                    outofcombat = 0.25,
+                },
+            },
         },
     })
     db = self.db.profile
 
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
+    CombatFader:RegisterModForFade(MODNAME, "profile", "combatfade")
     FramePoint:RegisterMod(self, nil, OnDragStop)
 end
 

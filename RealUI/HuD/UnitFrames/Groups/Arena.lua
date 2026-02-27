@@ -1,8 +1,5 @@
 local _, private = ...
 
--- Lua Globals --
-local floor = _G.math.floor
-
 -- Libs --
 local oUF = private.oUF
 local Base = _G.Aurora.Base
@@ -11,55 +8,43 @@ local Color = _G.Aurora.Color
 -- RealUI --
 local RealUI = private.RealUI
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local FramePoint = RealUI:GetModule("FramePoint")
 
---[[ Utils ]]--
-local function TimeFormat(t)
-    local h, m, hplus, mplus, s, f
-
-    h = floor(t / 3600)
-    m = floor((t - (h * 3600)) / 60)
-    s = floor(t - (h * 3600) - (m * 60))
-
-    hplus = floor((t + 3599.99) / 3600)
-    mplus = floor((t - (h * 3600) + 59.99) / 60) -- provides compatibility with tooltips
-
-    if t >= 3600 then
-        f = ("%.0fh"):format(hplus)
-    elseif t >= 60 then
-        f = ("%.0fm"):format(mplus)
+--[[ Trinket Cooldown ]]--
+local function TimeFormat(seconds)
+    if seconds >= 3600 then
+        return ("%.0fh"):format(_G.math.ceil(seconds / 3600))
+    elseif seconds >= 60 then
+        return ("%.0fm"):format(_G.math.ceil(seconds / 60))
     else
-        f = ("%.0fs"):format(s)
+        return ("%.0fs"):format(seconds)
     end
-
-    return f
 end
 
 local function UpdateCC(self, event, unit)
     local spellID, startTime, duration = _G.C_PvP.GetArenaCrowdControlInfo(unit)
     if spellID then
-        UnitFrames:debug("UpdateCC", startTime, duration)
         if startTime ~= 0 and duration ~= 0 then
             self.Trinket:SetCooldown(startTime / 1000.0, duration / 1000.0)
             if not self.hasAnnounced then
-                if UnitFrames.db.profile.arena.announceUse then
-                    local chat = UnitFrames.db.profile.arena.announceChat
+                local arenaDB = UnitFrames.db.profile.arena
+                if arenaDB.announceUse then
+                    local chat = arenaDB.announceChat
                     if chat == "GROUP" then
                         chat = "INSTANCE_CHAT"
                     end
-                    _G.C_ChatInfo.SendChatMessage("Trinket used by: ".._G.GetUnitName(unit, true), chat)
-                elseif RealUI.isDev then
-                    _G.print("Trinket used by: ".._G.GetUnitName(unit, true))
+                    _G.C_ChatInfo.SendChatMessage("Trinket used by: " .. _G.GetUnitName(unit, true), chat)
                 end
                 self.hasAnnounced = true
             end
         else
-            self.Trinket:Clear();
+            self.Trinket:Clear()
             self.hasAnnounced = false
         end
     end
 end
 
---[[ Parts ]]--
+--[[ Trinket Indicator ]]--
 local function CreateTrinket(parent)
     local iconSize = parent:GetHeight()
 
@@ -72,23 +57,31 @@ local function CreateTrinket(parent)
             dialog.elapsed = 0
             if dialog.startTime and dialog.endTime then
                 local now = _G.GetTime()
-                dialog.timer:SetValue(dialog.endTime - now)
-                dialog.text:SetText(TimeFormat(_G.ceil(dialog.endTime - now)))
+                local remaining = dialog.endTime - now
+                if remaining <= 0 then
+                    dialog.timer:Hide()
+                    dialog.text:SetText("")
+                    dialog.startTime = nil
+                    dialog.endTime = nil
+                    return
+                end
+                dialog.timer:SetValue(remaining)
+                dialog.text:SetText(TimeFormat(remaining))
 
-                local per = (dialog.endTime - now) / (dialog.endTime - dialog.startTime)
+                local per = remaining / (dialog.endTime - dialog.startTime)
                 if per > 0.5 then
-                    dialog.timer:SetStatusBarColor(1 - ((per*2)-1), 1, 0)
+                    dialog.timer:SetStatusBarColor(1 - ((per * 2) - 1), 1, 0)
                 else
-                    dialog.timer:SetStatusBarColor(1, (per*2), 0)
+                    dialog.timer:SetStatusBarColor(1, per * 2, 0)
                 end
             else
                 dialog.timer:Hide()
-                dialog.text:SetText()
+                dialog.text:SetText("")
             end
         end
     end)
     trinket.elapsed = 0
-    trinket.interval = 1/4
+    trinket.interval = 1 / 4
 
     trinket.icon = trinket:CreateTexture(nil, "BACKGROUND")
     trinket.icon:SetAllPoints()
@@ -98,7 +91,7 @@ local function CreateTrinket(parent)
     local timer = _G.CreateFrame("StatusBar", nil, trinket)
     timer:SetMinMaxValues(0, 1)
     timer:SetStatusBarTexture(RealUI.textures.plain)
-    timer:SetStatusBarColor(1,1,1,1)
+    timer:SetStatusBarColor(1, 1, 1, 1)
     trinket.timer = timer
 
     timer:SetPoint("TOPLEFT", trinket, "BOTTOMLEFT", 0, 2)
@@ -125,25 +118,20 @@ local function CreateTrinket(parent)
         self.timer:Show()
         self.timer:SetMinMaxValues(0, self.endTime - self.startTime)
     end
+
     function trinket:Clear()
         self.startTime = nil
         self.endTime = nil
     end
+
     parent.Trinket = trinket
 end
 
 UnitFrames.arena = {
     create = function(dialog)
-        --print("CreateArena", dialog.unit)
         CreateTrinket(dialog)
-        -- FIXBETA
-        -- local color = dialog.colors.health
-        -- dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
-        -- dialog.Health:SetStatusBarColor(color[1], color[2], color[3], color[4])
-        -- function dialog.Health.PostUpdateArenaPreparation(this, event, specID)
-        --     local _, _, _, specIcon = _G.GetSpecializationInfoByID(specID)
-        --     this.Trinket.icon:SetTexture(specIcon)
-        -- end
+
+        dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
 
         dialog.Name = dialog.Health:CreateFontString(nil, "OVERLAY")
         dialog.Name:SetPoint("RIGHT", dialog.Health, -1, 0)
@@ -151,31 +139,31 @@ UnitFrames.arena = {
         dialog.Name:SetJustifyH("RIGHT")
         dialog:Tag(dialog.Name, "[realui:name]")
 
-        dialog.RaidTargetIndicator = dialog:CreateTexture(nil, 'OVERLAY')
+        dialog.RaidTargetIndicator = dialog:CreateTexture(nil, "OVERLAY")
         dialog.RaidTargetIndicator:SetSize(20, 20)
         dialog.RaidTargetIndicator:SetPoint("CENTER", dialog)
 
         dialog:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
     end,
     health = {
-        text = "[realui:healthPercent]",
+        text = true,
     },
     power = {
     },
 }
 
 -- Init
-_G.tinsert(UnitFrames.units, function(...)
+_G.tinsert(UnitFrames.units, function()
     local db = UnitFrames.db.profile
     if not db.arena.enabled then return end
 
-    -- Bosses and arenas are mutually excusive, so we'll just use some boss stuff for both for now.
-    for i = 1, _G.MAX_BOSS_FRAMES do
+    for i = 1, 5 do
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
         if i == 1 then
             arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
         else
-            arena:SetPoint("TOP", "RealUIArenaFrame"..(i-1), "BOTTOM", 0, -db.boss.gap)
+            arena:SetPoint("TOP", _G["RealUIArenaFrame" .. i - 1], "BOTTOM", 0, -db.boss.gap)
         end
+        FramePoint:PositionFrame(UnitFrames, arena, {"profile", "units", "arena", "framePoint"})
     end
 end)

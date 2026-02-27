@@ -47,9 +47,9 @@ local function PositionRune(rune, index)
     local size = pointDB.size
     local gap, middle, mod = size.gap + 2, (power.max / 2) + 0.5
     if index < middle then
-        mod = index - _G.min(middle)
+        mod = index - _G.floor(middle)
     else
-        mod = index - _G.max(middle)
+        mod = index - _G.ceil(middle)
     end
     rune:SetPoint("CENTER", (size.width + gap) * mod, 0)
 end

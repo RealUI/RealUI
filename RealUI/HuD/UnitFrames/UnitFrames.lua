@@ -8,6 +8,7 @@ local RealUI = private.RealUI
 local db, ndb
 
 local CombatFader = RealUI:GetModule("CombatFader")
+local FramePoint = RealUI:GetModule("FramePoint")
 
 local MODNAME = "UnitFrames"
 local UnitFrames = RealUI:NewModule(MODNAME, "AceEvent-3.0")
@@ -25,52 +26,118 @@ local units = {
 
 function UnitFrames:RefreshUnits(event)
     for i = 1, #units do
-        local unit = _G["RealUI" .. units[i] .. "Frame"]
-
-        -- Safety check: ensure unit frame exists
-        if unit then
-            local unitKey = unit.unit
-            local unitData = UnitFrames[unitKey]
-            local reverseFill = (db.units[unitKey] and db.units[unitKey].reverseFill ~= nil) and db.units[unitKey].reverseFill
-                or (unitData and unitData.health and unitData.health.point == "RIGHT")
-            local reverseMissing = not ndb.settings.reverseUnitFrameBars
-            local reversePercent = db.units[unitKey] and db.units[unitKey].reversePercent
-            local reversePercentOverride = reversePercent == true
-            unit.Health.colorClass = db.overlay.classColor
-
-            if reversePercentOverride then
-                unit.Health:SetReversePercent(true)
-            else
-                unit.Health:SetReversePercent(false)
-            end
-
-            if unit.Power then
-                unit.Power:UpdateReverse(ndb.settings.reverseUnitFrameBars)
-                if unit.Power.SetReverseFill then
-                    unit.Power:SetReverseFill(reverseFill)
-                end
-                if unit.Power.SetReverseMissing then
-                    unit.Power:SetReverseMissing(reverseMissing)
-                end
-                if reversePercentOverride and unit.Power.SetReversePercent then
-                    unit.Power:SetReversePercent(true)
-                end
-            end
-
-            if unit.DruidMana then
-                unit.DruidMana:SetReverseFill(reverseFill)
-            end
-
-            if unit.Health and unit.Health.SetReverseFill then
-                unit.Health:SetReverseFill(reverseFill)
-            end
-            if unit.Health and unit.Health.SetReverseMissing then
-                unit.Health:SetReverseMissing(reverseMissing)
-            end
-
-            unit:UpdateAllElements(event)
-        else
+        local frame = _G["RealUI" .. units[i] .. "Frame"]
+        if not frame then
             self:debug("Unit frame not found:", units[i])
+        else
+            local unitKey = frame.unit
+            local unitData = UnitFrames[unitKey]
+
+            -- Update class color settings
+            if frame.Health then
+                frame.Health.colorClass = db.overlay.classColor
+                frame.Health.colorHealth = not db.overlay.classColor
+
+                -- Update fill direction based on per-unit config, then point default
+                -- "Colored when full" global toggle disabled pending reimplementation
+                local reverseFill
+                local unitDB = db.units[unitKey]
+                if unitDB and unitDB.reverseFill ~= nil then
+                    reverseFill = unitDB.reverseFill
+                elseif unitData and unitData.health and unitData.health.point then
+                    reverseFill = unitData.health.point == "RIGHT"
+                else
+                    reverseFill = false
+                end
+
+                if frame.Health.SetReverseFill then
+                    frame.Health:SetReverseFill(reverseFill)
+                end
+
+                -- Retag health text
+                if frame.Health.text then
+                    frame:Untag(frame.Health.text)
+                    frame:Tag(frame.Health.text, UnitFrames.GetHealthTagString(db.misc.statusText))
+                end
+            end
+
+            -- Update power fill direction and retag power text
+            if frame.Power then
+                local reverseFill
+                local unitDB = db.units[unitKey]
+                if unitDB and unitDB.reverseFill ~= nil then
+                    reverseFill = unitDB.reverseFill
+                elseif unitData and unitData.power and unitData.power.point then
+                    reverseFill = unitData.power.point == "RIGHT"
+                else
+                    reverseFill = false
+                end
+
+                if frame.Power.SetReverseFill then
+                    frame.Power:SetReverseFill(reverseFill)
+                end
+
+                if frame.Power.text then
+                    frame:Untag(frame.Power.text)
+                    local _, powerType = _G.UnitPowerType(unitKey)
+                    frame:Tag(frame.Power.text, UnitFrames.GetPowerTagString(db.misc.statusText, powerType))
+                end
+            end
+
+            -- Update aura counts on target frame
+            if unitKey == "target" then
+                if frame.Debuffs and db.units.target then
+                    frame.Debuffs.num = db.units.target.debuffCount
+                end
+                if frame.Buffs and db.units.target then
+                    frame.Buffs.num = db.units.target.buffCount
+                end
+            end
+
+            frame:UpdateAllElements(event)
+        end
+    end
+
+    -- Refresh boss frames
+    for i = 1, 5 do
+        local frame = _G["RealUIBossFrame" .. i]
+        if frame then
+            if frame.Health then
+                frame.Health.colorClass = db.overlay.classColor
+                frame.Health.colorHealth = not db.overlay.classColor
+
+                if frame.Health.text then
+                    frame:Untag(frame.Health.text)
+                    frame:Tag(frame.Health.text, UnitFrames.GetHealthTagString(db.misc.statusText))
+                end
+            end
+
+            if frame.Debuffs then
+                frame.Debuffs.num = db.boss.debuffCount
+            end
+            if frame.Buffs then
+                frame.Buffs.num = db.boss.buffCount
+            end
+
+            frame:UpdateAllElements(event)
+        end
+    end
+
+    -- Refresh arena frames
+    for i = 1, 5 do
+        local frame = _G["RealUIArenaFrame" .. i]
+        if frame then
+            if frame.Health then
+                frame.Health.colorClass = db.overlay.classColor
+                frame.Health.colorHealth = not db.overlay.classColor
+
+                if frame.Health.text then
+                    frame:Untag(frame.Health.text)
+                    frame:Tag(frame.Health.text, UnitFrames.GetHealthTagString(db.misc.statusText))
+                end
+            end
+
+            frame:UpdateAllElements(event)
         end
     end
 end
@@ -152,38 +219,49 @@ function UnitFrames:OnInitialize()
                     size = {x = 259, y = 28},
                     position = {x = 0, y = 0},
                     healthHeight = 0.6, --percentage of the unit height used by the healthbar
-                    reverseFill = true,
+                    reverseFill = false,
                     reverseMissing = false,
                     reversePercent = false,
+                    framePoint = {},
                 },
                 target = {
                     size = {x = 259, y = 28},
                     position = {x = 0, y = 0},
                     healthHeight = 0.6, --percentage of the unit height used by the healthbar
+                    reverseFill = false,
+                    framePoint = {},
+                    debuffCount = 16,
+                    buffCount = 16,
                 },
                 targettarget = {
                     size = {x = 138, y = 10},
                     position = {x = 0, y = 0},
+                    framePoint = {},
                 },
                 focus = {
                     size = {x = 138, y = 10},
                     position = {x = 0, y = 0},
+                    framePoint = {},
                 },
                 focustarget = {
                     size = {x = 126, y = 10},
                     position = {x = 0, y = 0},
+                    framePoint = {},
                 },
                 pet = {
                     size = {x = 126, y = 10},
                     position = {x = 0, y = 0},
+                    framePoint = {},
                 },
                 arena = {
                     size = {x = 135, y = 22},
                     position = {x = 0, y = 0},
+                    framePoint = {},
                 },
                 boss = {
                     size = {x = 135, y = 22},
                     position = {x = 0, y = 0},
+                    framePoint = {},
                 },
                 party = {
                     size = {x = 100, y = 50},
@@ -242,6 +320,17 @@ function UnitFrames:OnInitialize()
     self.layoutSize = ndb.settings.hudSize
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
     CombatFader:RegisterModForFade(MODNAME, "profile", "misc", "combatfade")
+    FramePoint:RegisterMod(self)
+end
+
+function UnitFrames:ResetPositions()
+    -- Clear saved FramePoint positions for all units, restoring defaults
+    for unitKey, unitConf in _G.next, db.units do
+        if unitConf.framePoint then
+            _G.wipe(unitConf.framePoint)
+        end
+    end
+    FramePoint:RestorePosition(self)
 end
 
 function UnitFrames:OnEnable()

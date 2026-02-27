@@ -46,7 +46,6 @@ local modulePrototype = {
     -- Version compatibility
     isRetail = RealUI.isRetail,
     isDragonflight = RealUI.isDragonflight,
-    isMidnight = RealUI.isMidnight,
 
     -- Debug functionality
     debug = function(self, ...)
