@@ -745,6 +745,15 @@ function DockMixin:UpdateBlocks(forceUpdate)
         return
     end
 
+    if _G.InCombatLockdown() then
+        -- Defer until combat ends to avoid taint
+        Infobar:RegisterEvent("PLAYER_REGEN_ENABLED", function()
+            Infobar:UnregisterEvent("PLAYER_REGEN_ENABLED")
+            self:UpdateBlocks(true)
+        end)
+        return
+    end
+
     local lastBlock
     for index, block in ipairs(self.DOCKED_BLOCKS) do
         if forceUpdate then

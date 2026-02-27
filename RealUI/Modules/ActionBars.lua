@@ -246,7 +246,7 @@ function ActionBars:ApplyABSettings(tag)
 
                 -- Force button layout update after a short delay
                 _G.C_Timer.After(0.1, function()
-                    if BTBar.UpdateButtonLayout then
+                    if not _G.InCombatLockdown() and BTBar.UpdateButtonLayout then
                         BTBar:UpdateButtonLayout()
                     end
                 end)
@@ -320,7 +320,7 @@ function ActionBars:ApplyABSettings(tag)
 
                 -- Force button layout update after a short delay
                 _G.C_Timer.After(0.1, function()
-                    if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
+                    if not _G.InCombatLockdown() and _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
                         _G.BT4BarPetBar:UpdateButtonLayout()
                     end
                 end)
@@ -385,7 +385,7 @@ function ActionBars:ApplyABSettings(tag)
                 -- Force button layout update to ensure correct size on first load
                 -- Use a small delay to ensure Bartender4 has processed the config
                 _G.C_Timer.After(0.1, function()
-                    if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
+                    if not _G.InCombatLockdown() and _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
                         _G.BT4BarStanceBar:UpdateButtonLayout()
                     end
                 end)
@@ -401,6 +401,8 @@ function ActionBars:ApplyABSettings(tag)
     -- Force all bars to update their button layouts after config is applied
     -- This ensures proper padding and scale on first load after install wizard
     _G.C_Timer.After(0.2, function()
+        if _G.InCombatLockdown() then return end
+
         if BT4ActionBars then
             for i = 1, 6 do
                 if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
@@ -536,6 +538,8 @@ function ActionBars:PLAYER_ENTERING_WORLD()
     local updateAttempts = {0.2, 0.5, 1.0}
     for _, delay in ipairs(updateAttempts) do
         _G.C_Timer.After(delay, function()
+            if _G.InCombatLockdown() then return end
+
             -- Force all action bars (1-6) button layout update
             if BT4ActionBars then
                 for i = 1, 6 do
