@@ -647,6 +647,40 @@ function ns.commands:hudtestall()
     end
 end
 
+-- Run all HuD fix tests (hud-rewrite-fixes spec)
+function ns.commands:hudfixtestall()
+    local fixTests = {
+        { name = "hudfixexplore",   label = "Property 1: Bug condition exploration (8 defects)" },
+        { name = "hudfixpreserve",  label = "Property 2: Preservation (7 baseline checks)" },
+    }
+
+    _G.print("|cff00ccff[HuD Fix Test Suite]|r Running all hud-rewrite-fixes tests...")
+    _G.print("---")
+
+    local passed, failed = 0, 0
+    for _, test in _G.ipairs(fixTests) do
+        local cmd = ns.commands[test.name]
+        if cmd then
+            local ok = cmd(ns.commands)
+            if ok == false then
+                failed = failed + 1
+            else
+                passed = passed + 1
+            end
+        else
+            _G.print(("|cffff9900[SKIP]|r %s — command not found"):format(test.label))
+            failed = failed + 1
+        end
+    end
+
+    _G.print("---")
+    if failed == 0 then
+        _G.print(("|cff00ff00[SUITE PASS]|r All %d HuD fix tests passed"):format(passed))
+    else
+        _G.print(("|cffff0000[SUITE FAIL]|r %d passed, %d failed"):format(passed, failed))
+    end
+end
+
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)

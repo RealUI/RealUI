@@ -48,8 +48,13 @@ tests\UnitFramesClassColorTest.lua
 tests\CastBarInterruptibleColorTest.lua
 tests\CastBarChannelingTickTest.lua
 tests\CombatFaderOpacityTest.lua
+tests\HuDFixExplorationTest.lua
+tests\HuDFixPreservationTest.lua
 tests\PositionerResizeTest.lua
 tests\DeprecatedAPIAbsenceTest.lua
+tests\AdvancedFeaturesTest.lua
+tests\ModuleFrameworkTest.lua
+tests\PerformanceMonitorTest.lua
 tests\IntegrationTest.lua
 
 ../Aurora/dev/test.lua

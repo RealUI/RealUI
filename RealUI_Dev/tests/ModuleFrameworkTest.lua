@@ -1,9 +1,9 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, ns = ...
 
 -- Simple test for ModuleFramework functionality
 -- This file demonstrates the new loading and coordination features
 
-local RealUI = private.RealUI
+local RealUI = _G.RealUI
 local debug = RealUI.GetDebug("ModuleFrameworkTest")
 
 -- Test Module Registration and Loading
@@ -115,13 +115,7 @@ local function RunTests()
     end
 end
 
--- Schedule tests to run after initialization
-if RealUI.isInitialized then
-    RunTests()
-else
-    RealUI:RegisterEvent("ADDON_LOADED", function(event, addonName)
-        if addonName == ADDON_NAME then
-            RealUI:ScheduleTimer(RunTests, 2)
-        end
-    end)
+-- Register slash command
+function ns.commands:moduleframework()
+    return RunTests()
 end

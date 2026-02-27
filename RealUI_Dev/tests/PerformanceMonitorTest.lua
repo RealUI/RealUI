@@ -1,9 +1,9 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, ns = ...
 
 -- Simple test for PerformanceMonitor functionality
 -- This file demonstrates the performance monitoring and resource management features
 
-local RealUI = private.RealUI
+local RealUI = _G.RealUI
 local debug = RealUI.GetDebug("PerformanceMonitorTest")
 local GetTime = _G.GetTime
 
@@ -240,13 +240,7 @@ local function RunTests()
     end
 end
 
--- Schedule tests to run after initialization
-if RealUI.isInitialized then
-    RunTests()
-else
-    RealUI:RegisterEvent("ADDON_LOADED", function(event, addonName)
-        if addonName == ADDON_NAME then
-            RealUI:ScheduleTimer(RunTests, 2)
-        end
-    end)
+-- Register slash command
+function ns.commands:perfmonitor()
+    return RunTests()
 end

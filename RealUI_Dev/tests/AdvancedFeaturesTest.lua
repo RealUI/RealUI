@@ -1,9 +1,9 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, ns = ...
 
 -- Test for Advanced Features (Task 9)
 -- Tests ResolutionOptimizer, CompatibilityManager, and ProfileManager
 
-local RealUI = private.RealUI
+local RealUI = _G.RealUI
 local debug = RealUI.GetDebug("AdvancedFeaturesTest")
 
 -- Test Resolution Optimizer
@@ -124,16 +124,7 @@ local function RunAllTests()
     return allPassed
 end
 
--- Register test command
-if RealUI.RegisterChatCommand then
-    RealUI:RegisterChatCommand(
-        "testadvanced",
-        function()
-            RunAllTests()
-        end
-    )
+-- Register slash command
+function ns.commands:advancedfeatures()
+    return RunAllTests()
 end
-
--- Auto-run tests on initialization (optional, can be disabled)
--- Uncomment the line below to auto-run tests
--- RealUI:ScheduleTimer(RunAllTests, 5)
