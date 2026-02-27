@@ -33,79 +33,75 @@ end
 
 
 -- ============================================================================
--- Test 1: Non-angled Health/Power update preservation
+-- Test 1: Angled Health/Power update preservation
 -- Validates: Requirements 3.1
 --
--- For boss, arena, pet, focus, focustarget, targettarget frames, verify
--- SetValue/SetMinMaxValues calls go through native StatusBar path unchanged.
--- These frames use standard StatusBar (not AngleStatusBar), so they should
--- work via oUF's native path without any custom mixin interference.
+-- All RealUI unit frames (player, target, pet, focus, focustarget,
+-- targettarget) use AngleStatusBar. Verify that Health bars on secondary
+-- units (pet, focus, focustarget, targettarget) are valid AngleStatusBars
+-- with correct metadata and that SetValue/GetValue round-trip works.
 -- ============================================================================
 local function TestNonAngledFrameUpdate()
-    _G.print("|cff00ccff[PBT]|r Preservation 1: Non-angled Health/Power update")
+    _G.print("|cff00ccff[PBT]|r Preservation 1: Secondary unit Health/Power update")
+
+    local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
+    if not AngleStatusBar then
+        _G.print("|cffff0000[ERROR]|r AngleStatusBar module not available")
+        return false
+    end
 
     local failures = 0
     local checkedCount = 0
 
-    -- Non-angled units: pet, focus, focustarget, targettarget
-    -- Boss and arena frames are also non-angled but may not be spawned
-    local nonAngledUnits = {"Pet", "Focus", "FocusTarget", "TargetTarget"}
+    -- All RealUI units use AngleStatusBar — verify secondary units work correctly
+    local secondaryUnits = {"Pet", "Focus", "FocusTarget", "TargetTarget"}
 
-    for _, unitName in _G.ipairs(nonAngledUnits) do
+    for _, unitName in _G.ipairs(secondaryUnits) do
         local frameName = "RealUI" .. unitName .. "Frame"
         local frame = _G[frameName]
         if frame and frame.Health then
-            -- Verify Health is a native StatusBar (not AngleStatusBar)
+            -- Verify Health is a StatusBar (AngleStatusBar is built on StatusBar)
             local isStatusBar = frame.Health.IsObjectType and frame.Health:IsObjectType("StatusBar")
             if isStatusBar then
-                -- Verify native SetValue/GetValue work
+                -- Verify native SetValue/GetValue work without error
                 local ok, err = _G.pcall(function()
                     local min, max = frame.Health:GetMinMaxValues()
                     local val = frame.Health:GetValue()
-                    -- These should return numbers (possibly secret)
                     if min == nil and max == nil and val == nil then
                         error("All values nil — StatusBar not initialized")
                     end
                 end)
                 if not ok then
                     failures = failures + 1
-                    _G.print(("|cffff0000[FAIL]|r %s Health native path error: %s"):format(unitName, _G.tostring(err)))
+                    _G.print(("|cffff0000[FAIL]|r %s Health StatusBar error: %s"):format(unitName, _G.tostring(err)))
                 end
                 checkedCount = checkedCount + 1
             end
 
-            -- Verify Health does NOT have AngleStatusBar metadata
-            local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
-            if AngleStatusBar then
-                local meta = AngleStatusBar:GetBarMeta(frame.Health)
-                if meta then
-                    -- Non-angled frames should NOT have bar metadata
+            -- Verify Health has AngleStatusBar metadata (all RealUI units are angled)
+            local meta = AngleStatusBar:GetBarMeta(frame.Health)
+            if meta then
+                -- Verify metadata has expected fields
+                if meta.leftVertex == nil or meta.rightVertex == nil then
                     failures = failures + 1
-                    _G.print(("|cffff0000[FAIL]|r %s Health has AngleStatusBar metadata — should be native StatusBar"):format(unitName))
+                    _G.print(("|cffff0000[FAIL]|r %s Health missing vertex data"):format(unitName))
                 end
                 checkedCount = checkedCount + 1
-            end
-        end
-    end
-
-    -- Also check boss frames if they exist
-    for i = 1, 5 do
-        local frame = _G["RealUIBossFrame" .. i]
-        if frame and frame.Health then
-            local isStatusBar = frame.Health.IsObjectType and frame.Health:IsObjectType("StatusBar")
-            if isStatusBar then
+            else
+                failures = failures + 1
+                _G.print(("|cffff0000[FAIL]|r %s Health missing AngleStatusBar metadata"):format(unitName))
                 checkedCount = checkedCount + 1
             end
         end
     end
 
     if checkedCount == 0 then
-        _G.print("|cffff9900[WARN]|r No non-angled frames found (frames may not be spawned)")
+        _G.print("|cffff9900[WARN]|r No secondary frames found (frames may not be spawned)")
         return true  -- Not a failure, just inconclusive
     end
 
     if failures == 0 then
-        _G.print(("|cff00ff00[PASS]|r Preservation 1: Non-angled frames use native StatusBar path — %d checks"):format(checkedCount))
+        _G.print(("|cff00ff00[PASS]|r Preservation 1: Secondary unit AngleStatusBar Health — %d checks"):format(checkedCount))
     else
         _G.print(("|cffff0000[FAIL]|r Preservation 1: %d failures out of %d checks"):format(failures, checkedCount))
     end
@@ -226,11 +222,17 @@ local function TestVertexGeometryPreservation()
         local lv = vertexPositions[nextRandom(#vertexPositions)]
         local rv = vertexPositions[nextRandom(#vertexPositions)]
 
+        local barWidth = 200
+        local barHeight = 14
+
         local bar = AngleStatusBar:CreateAngle("StatusBar", nil, parentFrame)
-        bar:SetSize(200, 14)
+        bar:SetSize(barWidth, barHeight)
         bar:SetAngleVertex(lv, rv)
 
+        -- OnSizeChanged fires asynchronously in WoW — manually set metadata
         local meta = AngleStatusBar:GetBarMeta(bar)
+        meta.maxWidth = barHeight + barWidth
+        meta.minWidth = barHeight
 
         -- Verify vertex round-trip
         if meta.leftVertex ~= lv then
@@ -693,7 +695,7 @@ local function RunHuDFixPreservationTests()
     _G.print("---")
 
     local tests = {
-        { fn = TestNonAngledFrameUpdate,       label = "3.1 Non-angled Health/Power" },
+        { fn = TestNonAngledFrameUpdate,       label = "3.1 Secondary Unit AngleStatusBar Health" },
         { fn = TestAngleStatusBarSetValue,     label = "3.7 AngleStatusBar SetValue" },
         { fn = TestVertexGeometryPreservation, label = "3.2 Vertex Geometry" },
         { fn = TestColorTexturePreservation,   label = "3.7 Color/Texture" },

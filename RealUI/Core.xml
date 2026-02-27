@@ -6,13 +6,11 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\DualSpecSystem.lua"/>
     <Script file="Core\ConfigPersistence.lua"/>
     <Script file="Core\ModuleFramework.lua"/>
-    <Script file="Core\ModuleFrameworkTest.lua"/>
     <Script file="Core\LayoutManager.lua"/>
     <Script file="Core\HuDPositioning.lua"/>
     <Script file="Core\FrameMover.lua"/>
     <Script file="Core\ConfigMode.lua"/>
     <Script file="Core\PerformanceMonitor.lua"/>
-    <Script file="Core\PerformanceMonitorTest.lua"/>
     <Script file="Core\MiniPatches.lua"/>
     <Include file="Core\AddonData.xml"/>
     <Script file="Core\AddonControl.lua"/>
@@ -37,7 +35,6 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\DeploymentValidator.lua"/>
     <Script file="Core\FinalMigrations.lua"/>
     <Script file="Core\SavedVariablesMigration.lua"/>
-    <Script file="Core\AdvancedFeaturesTest.lua"/>
     <Script file="Core\AngleStatusBar.lua"/>
     <Script file="Core\CombatFader.lua"/>
     <Script file="Core\FramePoint.lua"/>
