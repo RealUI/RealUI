@@ -46,6 +46,9 @@ RealUI.textures = private.textures
 
 local moddedFrames, pixelScale = {}, 768 / (select(2, _G.GetPhysicalScreenSize()))
 local function ResetScale(frame)
+    if _G.InCombatLockdown() and frame.IsProtected and frame:IsProtected() then
+        return
+    end
     -- Frames that are sized via ModValue become HUGE with retina scale.
     if private.skinsDB.isHighRes then
         frame:SetScale(private.skinsDB.customScale)
