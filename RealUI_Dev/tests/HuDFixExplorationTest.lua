@@ -285,8 +285,7 @@ end
 -- The "Colored when full" global toggle (reverseUnitFrameBars) has been
 -- DISABLED pending reimplementation as a visual mode (full→empty drain).
 -- It should NOT affect fill direction. With the toggle disabled, the target
--- (LEFT side) should get the point-based default: "LEFT" == "RIGHT" => false,
--- even when reverseUnitFrameBars is set to true.
+-- (LEFT side) should get the natural default: "LEFT" == "RIGHT" => false.
 -- ============================================================================
 local function TestGlobalReverseToggle()
     _G.print("|cff00ccff[PBT]|r Test 5: Global reverseUnitFrameBars toggle (Defect 1.7)")
@@ -317,12 +316,12 @@ local function TestGlobalReverseToggle()
 
         local reverseFill = targetFrame.Health:GetReverseFill()
         -- Global toggle is DISABLED. Target is on LEFT side.
-        -- Falls through to point-based default: "LEFT" == "RIGHT" => false
+        -- Natural direction: "LEFT" == "RIGHT" => false, reverseFill nil => false
         if reverseFill == false then
-            _G.print("|cff00ff00[PASS]|r Global toggle disabled — target fill is false (point-based default)")
+            _G.print("|cff00ff00[PASS]|r Global toggle disabled — target fill is false (natural default for LEFT side)")
             passed = true
         else
-            _G.print("|cffff0000[FAIL]|r Target Health reverseFill =", _G.tostring(reverseFill), "— global toggle should be disabled but still affecting fill")
+            _G.print("|cffff0000[FAIL]|r Target Health reverseFill =", _G.tostring(reverseFill), "— expected false for LEFT side natural default")
             passed = false
         end
     else
