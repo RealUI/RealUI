@@ -256,11 +256,11 @@ local CreatePowerStatus do
         local inCombat = _G.UnitAffectingCombat(unit)
         local isResting = _G.IsResting()
 
-        if isAFK then
+        if isAFK == true then
             self.LeaderIndicator.status = "afk"
-        elseif not isConnected then
+        elseif isConnected ~= true then
             self.LeaderIndicator.status = "offline"
-        elseif isLeader then
+        elseif isLeader == true then
             self.LeaderIndicator.status = "leader"
         else
             self.LeaderIndicator.status = false
@@ -274,9 +274,9 @@ local CreatePowerStatus do
             self.LeaderIndicator:Hide()
         end
 
-        if inCombat then
+        if inCombat == true then
             self.CombatIndicator.status = "combat"
-        elseif isResting then
+        elseif isResting == true then
             self.CombatIndicator.status = "resting"
         else
             self.CombatIndicator.status = false

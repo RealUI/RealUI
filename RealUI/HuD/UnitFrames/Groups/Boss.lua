@@ -19,9 +19,9 @@ local function FilterAura(_, _, data)
     -- Cast by NPC
     if bossDB.showNPCAuras then
         local sourceUnit = data.sourceUnit
-        if sourceUnit then
-            local guid = _G.UnitGUID(sourceUnit)
-            if guid then
+        if sourceUnit and type(sourceUnit) == "string" then
+            local ok, guid = pcall(_G.UnitGUID, sourceUnit)
+            if ok and guid then
                 local unitType = _G.strsplit("-", guid)
                 if unitType == "Creature" then return true end
             end
