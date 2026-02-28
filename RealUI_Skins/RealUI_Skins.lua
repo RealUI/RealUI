@@ -117,43 +117,13 @@ function RealUI.UpdateUIScale(newScale)
         sub-0.64 scales (high-DPI without isHighRes). SetCVar may taint the ObjectiveTracker
         but that is far less disruptive than broken action bars in combat. ]]
     if parentScale ~= uiScale then
-        if uiScale >= 0.64 then
-            if cvarScale ~= uiScale then
-                if _G.InCombatLockdown() then
-                    local deferCVar = _G.CreateFrame("Frame")
-                    deferCVar:RegisterEvent("PLAYER_REGEN_ENABLED")
-                    deferCVar:SetScript("OnEvent", function(self)
-                        self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-                        self:SetScript("OnEvent", nil)
-                        _G.SetCVar("uiScale", uiScale)
-                    end)
-                else
-                    _G.C_Timer.After(0, function()
-                        _G.SetCVar("uiScale", uiScale)
-                    end)
-                end
-            end
-        else
-            -- Scale is below CVar minimum; set CVar as close as possible, then SetScale
-            if cvarScale ~= 0.64 then
-                _G.C_Timer.After(0, function()
-                    _G.SetCVar("uiScale", 0.64)
-                end)
-            end
-            if _G.InCombatLockdown() then
-                local deferFrame = _G.CreateFrame("Frame")
-                deferFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-                deferFrame:SetScript("OnEvent", function(self)
-                    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-                    self:SetScript("OnEvent", nil)
-                    _G.UIParent:SetScale(uiScale)
-                end)
-            else
-                _G.C_Timer.After(0, function()
-                    _G.UIParent:SetScale(uiScale)
-                end)
-            end
-        end
+        private.debug("Skipping engine UI scale change to avoid taint; desired uiScale:", uiScale)
+        -- Store the desired engine UI scale instead of changing it here. Changing
+        -- the `uiScale` CVar or calling `UIParent:SetScale` from addon code can
+        -- taint protected Blizzard frame behavior (ObjectiveTracker / WorldMap)
+        -- and lead to ADDON_ACTION_BLOCKED. Leave the global scale unchanged
+        -- and only apply per-frame scaling via `RealUI.RegisterModdedFrame`.
+        private.desiredUIScale = uiScale
     end
 
     private.skinsDB.customScale = newScale

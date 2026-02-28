@@ -17,6 +17,17 @@ local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 local CombatFader = RealUI:GetModule("CombatFader")
 local round = RealUI.Round
 
+local function SafeShow(frame, show)
+    if not frame then return end
+    if _G.InCombatLockdown() and frame.IsProtected and frame:IsProtected() then
+        _G.C_Timer.After(0, function()
+            if show then frame:Show() else frame:Hide() end
+        end)
+    else
+        if show then frame:Show() else frame:Hide() end
+    end
+end
+
 -- Power types where the default state is empty
 RealUI.ReversePowers = {
     ["RAGE"] = true,
@@ -256,11 +267,11 @@ local CreatePowerStatus do
         local inCombat = _G.UnitAffectingCombat(unit)
         local isResting = _G.IsResting()
 
-        if isAFK == true then
+        if isAFK then
             self.LeaderIndicator.status = "afk"
-        elseif isConnected ~= true then
+        elseif not isConnected then
             self.LeaderIndicator.status = "offline"
-        elseif isLeader == true then
+        elseif isLeader then
             self.LeaderIndicator.status = "leader"
         else
             self.LeaderIndicator.status = false
@@ -269,14 +280,14 @@ local CreatePowerStatus do
         if self.LeaderIndicator.status then
             local color = status[self.LeaderIndicator.status]
             self.LeaderIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
-            self.LeaderIndicator:Show()
+            SafeShow(self.LeaderIndicator, true)
         else
-            self.LeaderIndicator:Hide()
+            SafeShow(self.LeaderIndicator, false)
         end
 
-        if inCombat == true then
+        if inCombat then
             self.CombatIndicator.status = "combat"
-        elseif isResting == true then
+        elseif isResting then
             self.CombatIndicator.status = "resting"
         else
             self.CombatIndicator.status = false
@@ -284,13 +295,13 @@ local CreatePowerStatus do
 
         if self.LeaderIndicator.status and not self.CombatIndicator.status then
             self.CombatIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
-            self.CombatIndicator:Show()
+            SafeShow(self.CombatIndicator, true)
         elseif self.CombatIndicator.status then
             local color = status[self.CombatIndicator.status]
             self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
-            self.CombatIndicator:Show()
+            SafeShow(self.CombatIndicator, true)
         else
-            self.CombatIndicator:Hide()
+            SafeShow(self.CombatIndicator, false)
         end
     end
 
@@ -387,8 +398,8 @@ local CreateEndBox do
             parent.EndBox[2] = powerBox
 
             -- hide the line between the two boxes
-            healthBox.bottom:Hide()
-            powerBox.top:Hide()
+            SafeShow(healthBox.bottom, false)
+            SafeShow(powerBox.top, false)
         end
     end
 end
