@@ -48,6 +48,8 @@ tests\UnitFramesClassColorTest.lua
 tests\CastBarInterruptibleColorTest.lua
 tests\CastBarChannelingTickTest.lua
 tests\CombatFaderOpacityTest.lua
+tests\HealerProfileExplorationTest.lua
+tests\HealerProfilePreservationTest.lua
 tests\HuDFixExplorationTest.lua
 tests\HuDFixPreservationTest.lua
 tests\PositionerResizeTest.lua
