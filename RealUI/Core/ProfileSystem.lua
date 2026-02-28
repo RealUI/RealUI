@@ -128,8 +128,10 @@ function ProfileSystem:SwitchProfile(profileName)
     debug("Switching to profile:", profileName)
     self.db:SetProfile(profileName)
 
-    -- Trigger profile update callbacks
-    RealUI:OnProfileUpdate("OnProfileChanged", self.db, profileName)
+    -- NOTE: Do NOT call RealUI:OnProfileUpdate here.
+    -- AceDB:SetProfile already fires the "OnProfileChanged" callback
+    -- which is registered in Core.lua to call OnProfileUpdate automatically.
+    -- Calling it again would cause double module updates and positioning conflicts.
 
     return true
 end
@@ -174,8 +176,9 @@ function ProfileSystem:ResetProfile(profileName)
 
     self.db:ResetProfile()
 
-    -- Trigger profile reset callbacks
-    RealUI:OnProfileUpdate("OnProfileReset", self.db, profileName)
+    -- NOTE: Do NOT call RealUI:OnProfileUpdate here.
+    -- AceDB:ResetProfile already fires the "OnProfileReset" callback
+    -- which is registered in Core.lua to call OnProfileUpdate automatically.
 
     return true
 end

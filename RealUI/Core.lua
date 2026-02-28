@@ -13,7 +13,7 @@ local L = RealUI.L
 local db, dbc, dbg
 local debug = RealUI.GetDebug("Core")
 
-local LDS = _G.LibStub("LibDualSpec-1.0")
+-- NOTE: LibDualSpec-1.0 is loaded and used exclusively by DualSpecSystem
 
 -- Enhanced Version Management System
 local version = _G.C_AddOns.GetAddOnMetadata(ADDON_NAME, "Version")
@@ -219,12 +219,15 @@ end
 function RealUI:UpdateLayout(layout)
     layout = layout or dbc.layout.current
 
-    -- Use LayoutManager if available
-    if self.LayoutManager and self.LayoutManager:IsValidLayout(layout) then
+    -- Only delegate to LayoutManager if it's not already mid-switch
+    -- (prevents recursion if called from PerformLayoutSwitch or callbacks)
+    if self.LayoutManager and self.LayoutManager:IsValidLayout(layout)
+       and not self.LayoutManager:IsSwitchInProgress() then
         return self.LayoutManager:SwitchToLayout(layout)
     end
 
-    -- Fallback to legacy layout handling
+    -- Fallback to legacy layout handling (also used when LayoutManager
+    -- is mid-switch to avoid re-entry)
     dbc.layout.current = layout
 
     -- Set Current and Not-Current layout variables
@@ -353,8 +356,11 @@ function RealUI:OnProfileUpdate(event, database, profile)
         module:OnProfileUpdate(event, profile)
     end
 
-    -- Update old stuff too for now
-    RealUI:UpdateLayout(private.profileToLayout[profile])
+    -- Update layout to match the new profile, but skip if LayoutManager is
+    -- already mid-switch (PerformLayoutSwitch handles everything in that case)
+    if not (self.LayoutManager and self.LayoutManager:IsSwitchInProgress()) then
+        RealUI:UpdateLayout(private.profileToLayout[profile])
+    end
 
     if event == "OnProfileReset" then
         debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
@@ -481,20 +487,13 @@ function RealUI:OnInitialize()
     local profileDefaults = self.ProfileSystem and self.ProfileSystem:GetDatabaseDefaults() or defaults
     self.db = _G.LibStub("AceDB-3.0"):New("RealUIDB", profileDefaults, private.layoutToProfile[1])
 
-    -- Enhance database with LibDualSpec-1.0 support
-    LDS:EnhanceDatabase(self.db, "RealUI")
-
-    -- Create healing profile and set up dual-spec profiles
+    -- Create healing profile (must exist before DualSpecSystem sets up LDS)
     self.db:SetProfile(private.layoutToProfile[2]) -- create healing profile
-    for specIndex = 1, #RealUI.charInfo.specs do
-        local spec = RealUI.charInfo.specs[specIndex]
-        if spec.role == "HEALER" then
-            self.db:SetDualSpecProfile(private.layoutToProfile[2], spec.index)
-        end
-    end
+    self.db:SetProfile(private.layoutToProfile[1]) -- switch back to default
 
-    -- Set back to default profile
-    self.db:SetProfile(private.layoutToProfile[1])
+    -- NOTE: LDS:EnhanceDatabase and SetDualSpecProfile calls are handled
+    -- exclusively by DualSpecSystem:PostInitialize() -> SetupLibDualSpec()
+    -- to avoid duplicate/conflicting profile mappings.
 
     -- Initialize ProfileSystem with the database
     if self.ProfileSystem then

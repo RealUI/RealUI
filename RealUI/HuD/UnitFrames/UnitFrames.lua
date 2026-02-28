@@ -186,9 +186,119 @@ end
 function UnitFrames:RefreshMod()
     db = self.db.profile
     ndb = RealUI.db.profile
-    self.layoutSize = ndb.settings.hudSize
+    self.layoutSize = RealUI.cLayout or RealUI.db.char.layout.current or 1
+
+    -- Reposition unit frames for the new layout
+    self:RepositionFrames()
 
     self:RefreshUnits("RefreshMod")
+end
+
+function UnitFrames:OnProfileUpdate(event, profile)
+    -- Profile changed, refresh unit frames for the new profile's settings
+    self:RefreshMod()
+end
+
+function UnitFrames:RepositionFrames()
+    -- Get the positioner frame and force it to update its layout
+    local positioner = _G["RealUIPositionersUnitFrames"]
+    if positioner then
+        -- Force the positioner frame to update its size/position immediately
+        positioner:SetScript("OnUpdate", nil)  -- Clear any pending updates
+        positioner:GetCenter()  -- Force layout calculation
+    end
+
+    -- Reposition player frame
+    local player = _G["RealUIPlayerFrame"]
+    if player and db.positions[self.layoutSize] then
+        player:ClearAllPoints()
+        player:SetPoint("RIGHT", "RealUIPositionersUnitFrames", "LEFT",
+            db.positions[self.layoutSize].player.x,
+            db.positions[self.layoutSize].player.y)
+    end
+
+    -- Reposition target frame
+    local target = _G["RealUITargetFrame"]
+    if target and db.positions[self.layoutSize] then
+        target:ClearAllPoints()
+        target:SetPoint("LEFT", "RealUIPositionersUnitFrames", "RIGHT",
+            db.positions[self.layoutSize].target.x,
+            db.positions[self.layoutSize].target.y)
+    end
+
+    -- Reposition pet frame (anchored to player)
+    local pet = _G["RealUIPetFrame"]
+    if pet and db.positions[self.layoutSize] then
+        pet:ClearAllPoints()
+        pet:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame",
+            db.positions[self.layoutSize].pet.x,
+            db.positions[self.layoutSize].pet.y)
+    end
+
+    -- Reposition focus frame (anchored to player)
+    local focus = _G["RealUIFocusFrame"]
+    if focus and db.positions[self.layoutSize] then
+        focus:ClearAllPoints()
+        focus:SetPoint("BOTTOMLEFT", "RealUIPlayerFrame",
+            db.positions[self.layoutSize].focus.x,
+            db.positions[self.layoutSize].focus.y)
+    end
+
+    -- Reposition focustarget frame (anchored to focus)
+    local focustarget = _G["RealUIFocusTargetFrame"]
+    if focustarget and db.positions[self.layoutSize] then
+        focustarget:ClearAllPoints()
+        focustarget:SetPoint("TOPLEFT", "RealUIFocusFrame", "BOTTOMLEFT",
+            db.positions[self.layoutSize].focustarget.x,
+            db.positions[self.layoutSize].focustarget.y)
+    end
+
+    -- Reposition targettarget frame (anchored to target)
+    local targettarget = _G["RealUITargetTargetFrame"]
+    if targettarget and db.positions[self.layoutSize] then
+        targettarget:ClearAllPoints()
+        targettarget:SetPoint("BOTTOMRIGHT", "RealUITargetFrame",
+            db.positions[self.layoutSize].targettarget.x,
+            db.positions[self.layoutSize].targettarget.y)
+    end
+
+    -- Force all frames to update their layout immediately
+    if player then player:GetCenter() end
+    if target then target:GetCenter() end
+    if pet then pet:GetCenter() end
+    if focus then focus:GetCenter() end
+    if focustarget then focustarget:GetCenter() end
+    if targettarget then targettarget:GetCenter() end
+
+    -- Reposition boss frames
+    for i = 1, 5 do
+        local boss = _G["RealUIBossFrame" .. i]
+        if boss and db.positions[self.layoutSize] then
+            boss:ClearAllPoints()
+            if i == 1 then
+                boss:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT",
+                    db.positions[self.layoutSize].boss.x,
+                    db.positions[self.layoutSize].boss.y)
+            else
+                boss:SetPoint("TOP", _G["RealUIBossFrame" .. (i - 1)], "BOTTOM", 0, -db.boss.gap)
+            end
+        end
+    end
+
+    -- Reposition arena frames
+    for i = 1, 5 do
+        local arena = _G["RealUIArenaFrame" .. i]
+        if arena and db.positions[self.layoutSize] then
+            arena:ClearAllPoints()
+            if i == 1 then
+                arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT",
+                    db.positions[self.layoutSize].boss.x,
+                    db.positions[self.layoutSize].boss.y)
+            else
+                arena:SetPoint("TOP", _G["RealUIArenaFrame" .. (i - 1)], "BOTTOM", 0, -db.boss.gap)
+            end
+        end
+    end
 end
 
 function UnitFrames:OnInitialize()
@@ -316,7 +426,7 @@ function UnitFrames:OnInitialize()
     db = self.db.profile
     ndb = RealUI.db.profile
 
-    self.layoutSize = ndb.settings.hudSize
+    self.layoutSize = RealUI.cLayout or RealUI.db.char.layout.current or 1
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
     CombatFader:RegisterModForFade(MODNAME, "profile", "misc", "combatfade")
     FramePoint:RegisterMod(self)

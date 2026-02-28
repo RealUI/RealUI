@@ -87,10 +87,10 @@ function CharacterInit:ApplyRoleDefaults()
         debug("Applied", role, "defaults - Layout 1")
     end
 
-    -- Store spec-specific layout preferences
-    local spec = _G.GetSpecialization()
-    if spec then
-        charData.layout.spec[spec] = charData.layout.current
+    -- Map ALL specs to their correct layout based on role, not just current
+    for specIndex = 1, #RealUI.charInfo.specs do
+        local specRole = RealUI.charInfo.specs[specIndex].role
+        charData.layout.spec[specIndex] = (specRole == "HEALER") and 2 or 1
     end
 
     -- Update layout manager if available

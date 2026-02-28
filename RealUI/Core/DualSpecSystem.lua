@@ -248,6 +248,7 @@ function DualSpecSystem:SwitchToSpecProfile(specIndex)
     local currentProfile = RealUI.ProfileSystem:GetCurrentProfile()
     if currentProfile == targetProfile then
         debug("Already using correct profile:", targetProfile)
+        currentSpec = specIndex
         return true
     end
 
@@ -334,7 +335,11 @@ function DualSpecSystem:OnSpecializationChanged(specIndex)
             local targetLayout = dbc.layout.spec[specIndex]
             if dbc.layout.current ~= targetLayout then
                 debug("Updating layout:", dbc.layout.current, "->", targetLayout)
-                RealUI:UpdateLayout(targetLayout)
+                if RealUI.LayoutManager then
+                    RealUI.LayoutManager:SwitchToLayout(targetLayout)
+                else
+                    RealUI:UpdateLayout(targetLayout)
+                end
             end
         end
 
@@ -371,10 +376,13 @@ function DualSpecSystem:SetupLibDualSpec()
 
     debug("Setting up LibDualSpec integration")
 
-    EnsureBartenderActionBarsProfiles()
-
     -- Enhance database with LibDualSpec support
     LDS:EnhanceDatabase(RealUI.db, "RealUI")
+
+    -- NOTE: EnsureBartenderActionBarsProfiles is called AFTER LDS setup,
+    -- and only fills in missing bar entries without overwriting existing
+    -- fully-populated profile data from private.AddOns.Bartender4().
+    EnsureBartenderActionBarsProfiles()
 
     -- Create healing profile if it doesn't exist
     local profiles = RealUI.db:GetProfiles()
@@ -621,6 +629,19 @@ local function UpdateSpec()
         -- handled when spec actually fires later.
         EnsureBartenderActionBarsProfiles()
         LDS.currentSpec = RealUI.charInfo.specs.current.index
+
+        -- Schedule a deferred profile/layout sync once initial spec resolves
+        RealUI:ScheduleTimer(function()
+            if not _G.IsPlayerInitialSpec() then
+                local specIndex = _G.C_SpecializationInfo.GetSpecialization()
+                if specIndex and RealUI.DualSpecSystem:IsInitialized() then
+                    -- Always call OnSpecializationChanged to ensure currentSpec
+                    -- is set and profile/layout are correct, even if the profile
+                    -- already happens to match.
+                    RealUI.DualSpecSystem:OnSpecializationChanged(specIndex)
+                end
+            end
+        end, 2)
         return
     end
 

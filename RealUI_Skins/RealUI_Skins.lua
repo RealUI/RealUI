@@ -119,12 +119,16 @@ function RealUI.UpdateUIScale(newScale)
     if parentScale ~= uiScale then
         if uiScale >= 0.64 then
             if cvarScale ~= uiScale then
-                _G.SetCVar("uiScale", uiScale)
+                _G.C_Timer.After(0, function()
+                    _G.SetCVar("uiScale", uiScale)
+                end)
             end
         else
             -- Scale is below CVar minimum; set CVar as close as possible, then SetScale
             if cvarScale ~= 0.64 then
-                _G.SetCVar("uiScale", 0.64)
+                _G.C_Timer.After(0, function()
+                    _G.SetCVar("uiScale", 0.64)
+                end)
             end
             if _G.InCombatLockdown() then
                 local deferFrame = _G.CreateFrame("Frame")
@@ -135,7 +139,9 @@ function RealUI.UpdateUIScale(newScale)
                     _G.UIParent:SetScale(uiScale)
                 end)
             else
-                _G.UIParent:SetScale(uiScale)
+                _G.C_Timer.After(0, function()
+                    _G.UIParent:SetScale(uiScale)
+                end)
             end
         end
     end

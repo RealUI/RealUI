@@ -115,13 +115,10 @@ end
 function LayoutManager:RegisterEvents()
     debug("Registering layout manager events")
 
-    -- Register for specialization change events through RealUI
     if RealUI.RegisterEvent then
-        RealUI:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", function()
-            if layoutState.autoSwitchEnabled then
-                self:HandleSpecializationChange()
-            end
-        end)
+        -- NOTE: ACTIVE_TALENT_GROUP_CHANGED is NOT registered here.
+        -- DualSpecSystem is the single coordinator for spec-change-driven
+        -- layout switches, preventing race conditions with double-switching.
 
         -- Register for player entering world to ensure layout is set correctly
         RealUI:RegisterEvent("PLAYER_ENTERING_WORLD", function()
@@ -272,32 +269,52 @@ function LayoutManager:PerformLayoutSwitch(layoutId)
     RealUI.cLayout = layoutId
     RealUI.ncLayout = (layoutId == LAYOUT_DPS_TANK) and LAYOUT_HEALING or LAYOUT_DPS_TANK
 
+    -- Switch to the appropriate profile if not already on it.
+    -- When called from OnProfileUpdate (via spec change), the profile is
+    -- already correct so AceDB:SetProfile is a no-op. When called directly
+    -- (manual switch, CharacterInit, etc.), this ensures the profile matches.
+    if RealUI.ProfileSystem and config.profile then
+        local currentProfile = RealUI.ProfileSystem:GetCurrentProfile()
+        if currentProfile ~= config.profile then
+            local success = RealUI.ProfileSystem:SwitchProfile(config.profile)
+            if not success then
+                debug("Failed to switch profile to", config.profile)
+                return false
+            end
+        end
+    end
+
     -- Update HuD positioning for the new layout
     if RealUI.HuDPositioning then
         RealUI.HuDPositioning:CalculatePositions()
     end
 
-    -- Switch to the appropriate profile if profile system is available
-    if RealUI.ProfileSystem and config.profile then
-        local success = RealUI.ProfileSystem:SwitchProfile(config.profile)
-        if not success then
-            debug("Failed to switch profile to", config.profile)
-            return false
-        end
+    -- Update character database
+    local dbc = RealUI.db and RealUI.db.char
+    if dbc then
+        dbc.layout.current = layoutId
     end
 
     -- Update layout positions in the database
     self:UpdateDatabasePositions(layoutId)
 
-    -- Trigger layout update in core system
-    if RealUI.UpdateLayout then
-        RealUI:UpdateLayout(layoutId)
+    -- Update positioners directly (do NOT call RealUI:UpdateLayout which
+    -- would re-enter LayoutManager:SwitchToLayout causing infinite recursion)
+    if RealUI.UpdatePositioners then
+        RealUI:UpdatePositioners()
     end
 
     -- Ensure ActionBars are updated for the new layout
     local ActionBars = RealUI:GetModule("ActionBars", true)
     if ActionBars and ActionBars:IsEnabled() then
         ActionBars:ApplyABSettings()
+    end
+
+    -- Refresh UnitFrames to ensure they reposition correctly for the new layout
+    local UnitFrames = RealUI:GetModule("UnitFrames", true)
+    if UnitFrames and UnitFrames:IsEnabled() then
+        debug("Refreshing UnitFrames for layout", layoutId)
+        UnitFrames:RefreshMod()
     end
 
     return true
@@ -458,6 +475,10 @@ end
 
 function LayoutManager:IsValidLayout(layoutId)
     return layoutId and layoutConfigurations[layoutId] ~= nil
+end
+
+function LayoutManager:IsSwitchInProgress()
+    return layoutState.switchInProgress
 end
 
 function LayoutManager:GetCurrentLayout()
