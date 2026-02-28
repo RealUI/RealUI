@@ -119,9 +119,19 @@ function RealUI.UpdateUIScale(newScale)
     if parentScale ~= uiScale then
         if uiScale >= 0.64 then
             if cvarScale ~= uiScale then
-                _G.C_Timer.After(0, function()
-                    _G.SetCVar("uiScale", uiScale)
-                end)
+                if _G.InCombatLockdown() then
+                    local deferCVar = _G.CreateFrame("Frame")
+                    deferCVar:RegisterEvent("PLAYER_REGEN_ENABLED")
+                    deferCVar:SetScript("OnEvent", function(self)
+                        self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                        self:SetScript("OnEvent", nil)
+                        _G.SetCVar("uiScale", uiScale)
+                    end)
+                else
+                    _G.C_Timer.After(0, function()
+                        _G.SetCVar("uiScale", uiScale)
+                    end)
+                end
             end
         else
             -- Scale is below CVar minimum; set CVar as close as possible, then SetScale
