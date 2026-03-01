@@ -261,11 +261,17 @@ local CreatePowerStatus do
     }
     local function UpdateStatus(self, event)
         local unit = self.unit
-        local isAFK = _G.UnitIsAFK(unit)
         local isConnected = _G.UnitIsConnected(unit)
         local isLeader = _G.UnitIsGroupLeader(unit)
         local inCombat = _G.UnitAffectingCombat(unit)
         local isResting = _G.IsResting()
+
+        -- UnitIsAFK returns a restricted (secret) boolean during combat lockdown
+        -- in instanced content; skip it since you can't be AFK in combat anyway
+        local isAFK = false
+        if not inCombat then
+            isAFK = _G.UnitIsAFK(unit)
+        end
 
         if isAFK then
             self.LeaderIndicator.status = "afk"
