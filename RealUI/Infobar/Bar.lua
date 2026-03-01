@@ -1101,6 +1101,10 @@ function Infobar:OnInitialize()
                         side = "right",
                         index = 6,
                     },
+                    chromie = {
+                        side = "right",
+                        index = 7,
+                    },
                 },
             },
         },

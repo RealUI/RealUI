@@ -1155,6 +1155,86 @@ function Infobar:CreateBlocks()
         })
     end
 
+    do -- Chromie Time
+        LDB:NewDataObject("chromie", {
+            name = "Chromie Time",
+            type = "RealUI",
+            icon = fa["clock-o"],
+            iconFont = iconFont,
+            text = "",
+            OnEnable = function(block)
+                Infobar:debug("Chromie: OnEnable", block.side)
+                local function UpdateChromie()
+                    local chromieData = _G.C_ChromieTime.GetChromieTimeExpansionOptions()
+                    local activeName
+                    for _, opt in ipairs(chromieData or {}) do
+                        if opt and opt.alreadyOn then
+                            activeName = opt.name
+                            break
+                        end
+                    end
+
+                    if activeName then
+                        block.dataObj.value = 1
+                        block.dataObj.text = activeName
+                        block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = Color.green:GetRGB()
+                    else
+                        block.dataObj.value = 0
+                        block.dataObj.text = ""
+                        block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = 0.6, 0.6, 0.6
+                    end
+                end
+
+                UpdateChromie()
+                Infobar:ScheduleRepeatingTimer(UpdateChromie, 10)
+            end,
+            OnEnter = function(block, ...)
+                if qTip:IsAcquired(block) then return end
+                local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
+                SetupTooltip(tooltip, block)
+                tooltip:AddHeader("Chromie Time")
+                local chromieData = _G.C_ChromieTime.GetChromieTimeExpansionOptions()
+                for _, opt in ipairs(chromieData or {}) do
+                    if opt then
+                        if opt.alreadyOn then
+                            tooltip:AddLine(opt.name, "|cff00ff00Active|r")
+                        else
+                            tooltip:AddLine(opt.name, "|cff999999Inactive|r")
+                        end
+                    end
+                end
+                tooltip:Show()
+            end,
+            OnClick = function(block, ...)
+                if _G.IsShiftKeyDown() then
+                    _G.ToggleCalendar()
+                end
+            end,
+            OnEvent = function(block, event, ...)
+                Infobar:debug("Chromie: OnEvent", event, ...)
+                local chromieData = _G.C_ChromieTime.GetChromieTimeExpansionOptions()
+                local activeName
+                for _, opt in ipairs(chromieData or {}) do
+                    if opt and opt.alreadyOn then
+                        activeName = opt.name
+                        break
+                    end
+                end
+
+                if activeName then
+                    block.dataObj.text = activeName
+                    block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = Color.green:GetRGB()
+                else
+                    block.dataObj.text = ""
+                    block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = 0.6, 0.6, 0.6
+                end
+            end,
+            events = {
+                "PLAYER_ENTERING_WORLD",
+            },
+        })
+    end
+
     --[[ Left ]]--
     local PlayerStatus = {
         [1] = CreateTextureMarkup(_G.FRIENDS_TEXTURE_AFK, 16, 16, 15, 15, 0, 0.9375, 0, 0.9375),
