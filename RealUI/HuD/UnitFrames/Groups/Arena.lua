@@ -127,6 +127,7 @@ local function CreateTrinket(parent)
     parent.Trinket = trinket
 end
 
+
 UnitFrames.arena = {
     create = function(dialog)
         CreateTrinket(dialog)
@@ -142,8 +143,7 @@ UnitFrames.arena = {
         dialog.RaidTargetIndicator = dialog:CreateTexture(nil, "OVERLAY")
         dialog.RaidTargetIndicator:SetSize(20, 20)
         dialog.RaidTargetIndicator:SetPoint("CENTER", dialog)
-
-        dialog:RegisterEvent("ARENA_COOLDOWNS_UPDATE", UpdateCC)
+        dialog:RegisterEvent("ARENA_CROWD_CONTROL_SPELL_UPDATE", UpdateCC)
     end,
     health = {
         text = true,
