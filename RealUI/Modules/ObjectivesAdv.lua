@@ -96,6 +96,7 @@ end
 local movingTracker = false
 local function UpdatePosition()
     if movingTracker then return end
+    if not (db and db.position) then return end
 
     movingTracker = true
     _G.ObjectiveTrackerFrame:ClearAllPoints()

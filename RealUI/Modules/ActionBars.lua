@@ -624,6 +624,7 @@ function ActionBars:ToggleNagaBar(enable)
         if enable then
             -- Configure bar 6 with proper settings before enabling
             bar6Config.enabled = true
+            bar6Config.alpha = bar6Config.alpha or 1
             bar6Config.rows = 4
             bar6Config.padding = fixedSettings.buttonPadding - 10
             bar6Config.showgrid = true
