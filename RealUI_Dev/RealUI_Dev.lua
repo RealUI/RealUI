@@ -347,7 +347,6 @@ function ns.commands:nudgeFrame()
 
             local getOptions = _G.RealUI and _G.RealUI.GetOptions
             if type(getOptions) == "function" and getOptions("DragEmAll", {"global", frame}) then
-                -- FIXMELATER: Throws errors at random...|
                 _G.LibStub("LibWindow-1.1").SavePosition(frame)
             end
         end

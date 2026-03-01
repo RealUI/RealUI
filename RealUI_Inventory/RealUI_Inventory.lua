@@ -49,15 +49,11 @@ function private.SellJunk()
         if slot.sellPrice then
             slot.sellPrice = nil
             slot.JunkIcon:Hide()
-
-            _G.C_Container.UseContainerItem(slot:GetBagAndSlot()) --- FIXME
+            _G.C_Container.UseContainerItem(slot:GetBagAndSlot())
         end
     end
 
     if bag.profit > 0 then
-        -- FIXMELATER
-        -- -function GetMoneyString(money, separateThousands, checkGoldThreshold)
-        -- +function GetMoneyString(money, separateThousands, checkGoldThreshold, showZeroAsGold)
         local money = _G.GetMoneyString(bag.profit, true)
         _G.print(_G.AMOUNT_RECEIVED_COLON, money)
     end

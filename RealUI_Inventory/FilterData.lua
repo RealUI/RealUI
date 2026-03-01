@@ -25,12 +25,10 @@ function private.UpdateEquipSetItems()
             if locations[j] then
                 local locationData = _G.EquipmentManager_GetLocationData(locations[j])
                 local bag, bags, bank, slot = locationData.bag, locationData.bags, locationData.bank, locationData.slot;
-                -- FIXME: BagIndex.Bank is replaced by tabs
                 if bank and not bags then
                     if RealUI.isDev then
                         _G.print("EquipmentSet: bank bag is not supported, use tabs instead")
                     end
-                    -- bag, slot = BANK_BAG, slot - 63
                 end
                 if bag and slot then
                     equipSetItems[bag][slot] = true
