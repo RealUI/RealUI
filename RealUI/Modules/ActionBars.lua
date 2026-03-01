@@ -625,6 +625,8 @@ function ActionBars:ToggleNagaBar(enable)
             -- Configure bar 6 with proper settings before enabling
             bar6Config.enabled = true
             bar6Config.alpha = bar6Config.alpha or 1
+            bar6Config.buttons = bar6Config.buttons or 12
+            bar6Config.buttonOffset = bar6Config.buttonOffset or 0
             bar6Config.rows = 4
             bar6Config.padding = fixedSettings.buttonPadding - 10
             bar6Config.showgrid = true
@@ -641,15 +643,13 @@ function ActionBars:ToggleNagaBar(enable)
                 ["growVertical"] = "DOWN",
             }
 
-            -- Use Bartender4's EnableBar method which handles bar creation
+            -- Use Bartender4's EnableBar method which handles bar creation and applies
+            -- config via AceDB (which includes proper defaults for skin, elements, etc.)
             BT4ActionBars:EnableBar(6)
 
-            -- Force the bar to apply the config we just set
+            -- Force button layout update after a short delay
             local bt4bar = BT4ActionBars.actionbars[6]
             if bt4bar then
-                bt4bar:ApplyConfig(bar6Config)
-
-                -- Force button layout update after a short delay
                 _G.C_Timer.After(0.1, function()
                     if bt4bar.UpdateButtonLayout then
                         bt4bar:UpdateButtonLayout()
