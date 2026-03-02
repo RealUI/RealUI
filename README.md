@@ -8,9 +8,13 @@ RealUI is a minimalistic UI designed to be functional, yet also efficient and el
 Information
 -----------
 
-  * This is the first release for The War Within - World of Warcraft 11.0.2
+  * This release is for Midnight Expansion - World of Warcraft 12.0.1
   * This release is a major update to the Blizzard UI - with many changes to the core and modules
-  * Certain features have been disabled or removed due to changes in the Blizzard API
+  * Most features previously disabled have been aded back and modernized - including the HUD unit frames, nameplates, and more
+  * All new features are accessible via the new "Systems" tab in the config, and there are new dev test commands for testing each system
+  * All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensuring a seamless upgrade experience
+  * There are still some bugs and tweaks needed over the coming weeks, but this version is stable enough for general use.
+  * Report issues at GitHub or connect with us on Discord
   * This version is stable enoough for general use, but there are still some issues to be resolved
 
 
@@ -27,8 +31,9 @@ Update
 ------
 
   1. Exit WoW
-  2. Copy the `Interface` folder from the download in to your `World of Warcraft\` folder.
-  3. Launch WoW and log in
+  2. Delete all RealUI and nibRealUI folders from your `World of Warcraft\Interface\AddOns` folder
+  3. Copy the `Interface` folder from the download in to your `World of Warcraft\` folder.
+  4. Launch WoW and log in
 
 
 
