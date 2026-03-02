@@ -1033,6 +1033,30 @@ do -- Skins
             end
         end
     end
+    local blizzardSkins do
+        blizzardSkins = {
+            name = L["Appearance_Skins"] .. " - Blizzard",
+            type = "group",
+            args = {
+                note = {
+                    name = L.General_NoteReload,
+                    type = "description",
+                    order = 0,
+                },
+                Blizzard_WorldMap = {
+                    name = L["Appearance_SkipWorldMapSkin"],
+                    desc = L["Appearance_SkipWorldMapSkinDesc"],
+                    type = "toggle",
+                    width = "double",
+                    get = function() return not SkinsDB.profile.addons["Blizzard_WorldMap"] end,
+                    set = function(info, value)
+                        SkinsDB.profile.addons["Blizzard_WorldMap"] = not value
+                    end,
+                    order = 1,
+                },
+            }
+        }
+    end
     optArgs.skins = {
         name = L.Appearance_Skins,
         type = "group",
@@ -1190,6 +1214,7 @@ do -- Skins
             },
             classColors = classColors,
             addons = addons,
+            blizzardSkins = blizzardSkins,
             profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
     }
