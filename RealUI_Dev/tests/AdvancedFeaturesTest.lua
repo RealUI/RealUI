@@ -30,7 +30,7 @@ local function TestResolutionOptimizer()
     debug("Is ultra high resolution:", optimizer:IsUltraHighResolution())
 
     -- Test optimization profile
-    local profile, cat = optimizer:GetOptimizationProfile()
+    local profile = optimizer:GetOptimizationProfile()
     if profile then
         debug("Optimization profile:", profile.description)
         debug("HuD size:", profile.hudSize)

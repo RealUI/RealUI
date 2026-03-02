@@ -209,7 +209,7 @@ local function RunBankItemSortOrderTest()
         end
 
         -- Sort using Lua's sort with the same comparator as Bags.lua SortSlots
-        sort(slots, function(a, b)
+        _G.sort(slots, function(a, b)
             local qualityA = a.item:GetItemQuality()
             local qualityB = b.item:GetItemQuality()
             if qualityA ~= qualityB then
@@ -248,14 +248,12 @@ local function RunBankItemSortOrderTest()
         end)
 
         -- Verify ordering invariant: no adjacent pair should violate the order
-        local iterFailed = false
         for j = 1, #slots - 1 do
             -- Update _stackCount from the mock for verification
             slots[j]._stackCount = stackCounts[slots[j].location] or 1
             slots[j + 1]._stackCount = stackCounts[slots[j + 1].location] or 1
 
             if not CheckPairOrder(slots[j], slots[j + 1]) then
-                iterFailed = true
                 failures = failures + 1
                 _G.print(
                     ("|cffff0000[FAIL]|r iteration %d pair %d-%d: [q=%d r=%d il=%d n=%s s=%d] > [q=%d r=%d il=%d n=%s s=%d]"):format(

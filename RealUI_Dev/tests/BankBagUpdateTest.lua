@@ -71,7 +71,7 @@ local function RunBankBagUpdateTest()
     -- BankBagMixin:OnEvent delegates to MainBagMixin.OnEvent for matching BAG_UPDATE,
     -- which either calls self:Update() (via throttle) or skips based on debounce.
     -- We bypass the throttle by setting bank.time far in the past.
-    local updateCalled = false
+    local updateCalled
     local originalUpdate = bank.Update
     bank.Update = function(self, ...)
         updateCalled = true

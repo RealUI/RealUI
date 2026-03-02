@@ -23,11 +23,6 @@ local function nextRandom(max)
     return (rngState % max) + 1
 end
 
--- Generate a random float in [0, 1] with 2 decimal precision
-local function randomFloat01()
-    return nextRandom(101) / 100  -- 0.01 to 1.01, clamped below
-end
-
 -- Generate a random float clamped to [0, 1]
 local function randomColor()
     local v = (nextRandom(100) - 1) / 99  -- 0.0 to 1.0

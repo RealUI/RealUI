@@ -59,7 +59,7 @@ local function RunBankSortDispatchTest()
     local originalStaticPopup = _G.StaticPopup_Show
 
     -- Track which sort function was called
-    local sortCalled = nil
+    local sortCalled
     _G.C_Container.SortBankBags = function()
         sortCalled = "SortBankBags"
     end

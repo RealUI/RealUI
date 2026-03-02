@@ -52,7 +52,7 @@ local function RunBankLockStateTest()
     -- SetItemButtonDesaturated.
 
     -- Track SetItemButtonDesaturated calls
-    local lastDesaturateCall = nil
+    local lastDesaturateCall -- luacheck: ignore
     local originalSetItemButtonDesaturated = _G.SetItemButtonDesaturated
     _G.SetItemButtonDesaturated = function(button, locked)
         lastDesaturateCall = { button = button, locked = locked }
@@ -65,7 +65,7 @@ local function RunBankLockStateTest()
         -- Pick a random active tab and slot index
         local activeTabID = allBankTabIDs[nextRandom(#allBankTabIDs)]
         local slotIndex = nextRandom(98) -- bank tabs can have up to 98 slots
-        local isLocked = (nextRandom(2) == 1)
+        local isLocked = (nextRandom(2) == 1) -- luacheck: ignore
 
         -- Pick event bagID: sometimes matches active tab, sometimes doesn't
         local eventBagID

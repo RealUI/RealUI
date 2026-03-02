@@ -40,7 +40,7 @@ local function RunBankLifecycleTest()
     _G.print("|cff00ccff[PBT]|r Bank lifecycle round-trip — running", NUM_ITERATIONS, "iterations")
 
     -- Track C_Bank.CloseBankFrame calls
-    local closeBankCalled = false
+    local closeBankCalled
     local originalCloseBankFrame = _G.C_Bank.CloseBankFrame
     _G.C_Bank.CloseBankFrame = function(...)
         closeBankCalled = true
@@ -113,7 +113,6 @@ local function RunBankLifecycleTest()
         if Inventory.bank then
             Inventory.bank:Hide()
         end
-        closeBankCalled = false
 
         -- Fire SHOW event
         Inventory:PLAYER_INTERACTION_MANAGER_FRAME_SHOW("PLAYER_INTERACTION_MANAGER_FRAME_SHOW", interactionType)

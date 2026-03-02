@@ -13,7 +13,7 @@ local RealUI = _G.RealUI
 local NUM_ITERATIONS = 100
 
 -- All possible bank tab container IDs (Character + Account)
-local allBankTabIDs = {
+local allBankTabIDs = { -- luacheck: ignore
     _G.Enum.BagIndex.CharacterBankTab_1,
     _G.Enum.BagIndex.CharacterBankTab_2,
     _G.Enum.BagIndex.CharacterBankTab_3,
@@ -129,7 +129,7 @@ local function RunBankSearchOverlayTest()
         end
 
         -- Clear tracking
-        wipe(matchResults)
+        _G.wipe(matchResults)
 
         -- Fire INVENTORY_SEARCH_UPDATE on the bank frame
         -- Reset throttle so the event handler processes it

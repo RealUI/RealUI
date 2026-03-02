@@ -14,7 +14,7 @@ local RealUI = _G.RealUI
 
 local NUM_ITERATIONS = 100
 
-local bankTypes = {
+local bankTypes = { -- luacheck: ignore
     _G.Enum.BankType.Character,
     _G.Enum.BankType.Account,
 }
@@ -72,7 +72,7 @@ local function RunTabSelectionTest()
 
     -- Track which bagIDs were iterated during Update
     local iteratedBagIDs = {}
-    local updateCalled = false
+    local updateCalled
 
     bank.Update = function(self)
         updateCalled = true
@@ -97,7 +97,7 @@ local function RunTabSelectionTest()
         end
 
         -- Reset tracking
-        updateCalled = false
+        updateCalled = false -- luacheck: ignore
         _G.wipe(iteratedBagIDs)
 
         -- Call SetActiveTab
@@ -167,7 +167,7 @@ local function RunTabSelectionTest()
             until secondTabID ~= tabID
 
             _G.wipe(iteratedBagIDs)
-            updateCalled = false
+            updateCalled = false -- luacheck: ignore
 
             bank:SetActiveTab(secondTabID)
 

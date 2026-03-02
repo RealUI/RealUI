@@ -34,7 +34,7 @@ local function RunBankEmptyFilterBagsTest()
     local bankBags = Inventory.bank.bags
     local filterTags = {}
     for tag, _ in next, bankBags do
-        tinsert(filterTags, tag)
+        _G.tinsert(filterTags, tag)
     end
 
     if #filterTags == 0 then
@@ -52,12 +52,12 @@ local function RunBankEmptyFilterBagsTest()
         for _, tag in ipairs(filterTags) do
             local bag = bankBags[tag]
             -- Wipe existing slots and populate with random count
-            wipe(bag.slots)
+            _G.wipe(bag.slots)
 
             local numItems = nextRandom(37) - 1 -- 0..36
             for s = 1, numItems do
                 -- Insert minimal mock slot objects
-                tinsert(bag.slots, { _mockSlot = true })
+                _G.tinsert(bag.slots, { _mockSlot = true })
             end
 
             expectedVisibility[tag] = (numItems > 0)
@@ -100,7 +100,7 @@ local function RunBankEmptyFilterBagsTest()
 
     -- Clean up: wipe mock slots from bank bags
     for _, tag in ipairs(filterTags) do
-        wipe(bankBags[tag].slots)
+        _G.wipe(bankBags[tag].slots)
         bankBags[tag]:Hide()
     end
 
