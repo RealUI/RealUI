@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Preservation Property Test: Non-Bank Bag Behavior Unchanged
 -- Feature: bank-cosmetic-fixes, Property 2: Preservation

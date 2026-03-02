@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Item sort order
 -- Feature: inventory-bank-rewrite, Property 10: Item sort order

@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Test for Advanced Features (Task 9)
 -- Tests ResolutionOptimizer, CompatibilityManager, and ProfileManager

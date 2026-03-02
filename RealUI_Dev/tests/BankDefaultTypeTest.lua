@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Default bank type is first available
 -- Feature: inventory-bank-rewrite, Property 4: Default bank type is first available

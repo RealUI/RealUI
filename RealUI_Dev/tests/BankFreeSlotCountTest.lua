@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Free slot count accuracy
 -- Feature: inventory-bank-rewrite, Property 12: Free slot count accuracy

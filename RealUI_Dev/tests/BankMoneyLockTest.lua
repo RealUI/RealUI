@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Money buttons disabled when bank is locked
 -- Feature: inventory-bank-rewrite, Property 19: Money buttons disabled when bank is locked

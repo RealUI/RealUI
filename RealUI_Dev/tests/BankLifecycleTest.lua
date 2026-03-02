@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Bank lifecycle round-trip
 -- Feature: inventory-bank-rewrite, Property 1: Bank lifecycle round-trip

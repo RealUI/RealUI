@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Purchase button visibility
 -- Feature: inventory-bank-rewrite, Property 8: Purchase button visibility

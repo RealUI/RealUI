@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Search overlay matches isFiltered flag
 -- Feature: inventory-bank-rewrite, Property 20: Search overlay matches isFiltered flag

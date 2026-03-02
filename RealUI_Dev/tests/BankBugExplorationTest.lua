@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Bug Condition Exploration Test: Bank UI Bug Conditions
 -- Feature: bank-cosmetic-fixes, Property 1: Fault Condition

@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Bank type switch updates display and highlight
 -- Feature: inventory-bank-rewrite, Property 5: Bank type switch updates display and highlight

@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Sort dispatches correct function per bank type
 -- Feature: inventory-bank-rewrite, Property 21: Sort dispatches correct function per bank type

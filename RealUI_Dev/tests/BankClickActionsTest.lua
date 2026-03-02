@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Click actions dispatch correctly
 -- Feature: inventory-bank-rewrite, Property 13: Click actions dispatch correctly

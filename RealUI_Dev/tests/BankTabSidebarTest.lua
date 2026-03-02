@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Tab sidebar reflects purchased tabs with selection highlight
 -- Feature: inventory-bank-rewrite, Property 6: Tab sidebar reflects purchased tabs with selection highlight

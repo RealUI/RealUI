@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Tab selection displays correct items
 -- Feature: inventory-bank-rewrite, Property 7: Tab selection displays correct items

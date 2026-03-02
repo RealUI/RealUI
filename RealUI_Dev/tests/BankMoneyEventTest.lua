@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Money event refreshes correct bank type
 -- Feature: inventory-bank-rewrite, Property 18: Money event refreshes correct bank type

@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Lock state reflects ITEM_LOCK_CHANGED
 -- Feature: inventory-bank-rewrite, Property 14: Lock state reflects ITEM_LOCK_CHANGED

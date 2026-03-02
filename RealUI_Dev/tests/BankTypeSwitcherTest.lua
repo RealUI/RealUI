@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Bank type switcher shows viewable types
 -- Feature: inventory-bank-rewrite, Property 3: Bank type switcher shows viewable types

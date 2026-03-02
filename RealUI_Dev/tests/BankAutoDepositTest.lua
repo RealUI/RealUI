@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Auto-deposit button visibility matches bank type
 -- Feature: inventory-bank-rewrite, Property 16: Auto-deposit button visibility matches bank type

@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Empty filter bags are hidden
 -- Feature: inventory-bank-rewrite, Property 11: Empty filter bags are hidden

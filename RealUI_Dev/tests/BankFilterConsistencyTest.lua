@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Item filter assignment consistency
 -- Feature: inventory-bank-rewrite, Property 9: Item filter assignment consistency

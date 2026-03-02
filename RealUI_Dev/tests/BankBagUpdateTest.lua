@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: BAG_UPDATE triggers refresh for active tab only
 -- Feature: inventory-bank-rewrite, Property 15: BAG_UPDATE triggers refresh for active tab only

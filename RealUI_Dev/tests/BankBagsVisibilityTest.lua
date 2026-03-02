@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Bags track bank visibility
 -- Feature: inventory-bank-rewrite, Property 2: Bags track bank visibility

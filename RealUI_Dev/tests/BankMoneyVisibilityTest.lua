@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Money frame visibility matches transfer support
 -- Feature: inventory-bank-rewrite, Property 17: Money frame visibility matches transfer support

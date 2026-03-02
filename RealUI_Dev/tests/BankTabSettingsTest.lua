@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: Tab settings refresh on BANK_TAB_SETTINGS_UPDATED
 -- Feature: inventory-bank-rewrite, Property 22: Tab settings refresh on BANK_TAB_SETTINGS_UPDATED
