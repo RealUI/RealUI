@@ -1,4 +1,11 @@
-## [3.0.0-preview] ##
+## [3.0.0] - 2026-03-03 ##
+
+### Summary ###
+RealUI 3.0.0 represents a major milestone with comprehensive architectural improvements and modernization for World of Warcraft 12.0+. This release includes the addon renaming from nibRealUI to RealUI, a complete HUD unit frame rewrite, extensive taint fixes, and integration of new frameworks.
+
+Key highlights include a new module framework system with dependency management, automatic profile and layout switching, resolution optimization, compatibility management, and comprehensive error recovery. The addon now includes Platynator nameplate profiles (replacing the discontinued KUI Nameplates), full support for Banks and Warbanks introduced in WoW 11+, and numerous stability improvements addressing taint issues that caused ADDON_ACTION_BLOCKED errors.
+
+All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensuring a seamless upgrade experience. Aurora has been updated to version 12.0.1.10 with extensive WoW 12 compatibility fixes and taint protections.
 
 ### Modified AddOns ###
   * RealUI (formerly nibRealUI)
@@ -10,15 +17,17 @@
   * RealUI_Chat
   * RealUI_CombatText
   * RealUI_Tooltips
-  * Aurora (12.0.1.9)
+  * Aurora (12.0.1.10)
 
 ### Information ###
-  * This is a preview release with major architectural improvements and new systems
+  * Major release with architectural improvements and new systems
   * Introduces comprehensive module framework, performance monitoring, and advanced configuration
-  * All new systems are accessible via `/realui` config and `/realdev` test commands
+  * All new systems are accessible via `/realui` config (and `/realdev` test commands for developers)
   * Report issues at GitHub or connect with us on Discord
   * **IMPORTANT**: Addon folders have been renamed from nibRealUI to RealUI naming convention
   * Automatic migration system preserves all user settings from nibRealUIDB to RealUIDB
+  * Compatible with World of Warcraft 12.0+ (Midnight)
+  * There are still bugs and tweaks needed over the coming weeks.
 
 ### Added ###
   * Addon Renaming - Folders renamed from nibRealUI to RealUI naming convention
@@ -61,6 +70,11 @@
   * Moved core tests from RealUI to RealUI_Dev
   * Boss UID handling updated to avoid secret values
   * Work on importing Platynator defaults
+  * Aurora updated for WoW 12 compatibility with extensive API modernization
+  * Replaced deprecated WoW API calls throughout Aurora
+  * Updated ObjectiveTracker, ActionBarController, and multiple Blizzard UI skins for WoW 12
+  * Improved error handling with pcall wrappers for protected/secret values
+  * Enhanced RealUI_Skins with toggle to disable World Map skin if taint issues occur
 
 ### Fixed ###
   * HUD growth direction fix
@@ -110,6 +124,11 @@
   * "attempt to index global 'stageContent'" in InstallUI onShow handler
   * "attempt to call method 'GetAvailableProfiles'" in SystemsConfig profile dropdown
   * All 7 modules (CooldownCount, FrameMover, Loot, ActionBars, EventNotifier, SpellAlerts, WorldMarker) now properly enable on load
+  * GetUnscaledFrameRect secret number taint in UIWidget tooltip layout (Aurora)
+  * SetPassThroughButtons taint on WorldMap pins mitigated with optional skin disable (RealUI_Skins)
+  * ADDON_LOADED contamination in action bar initialization chain (Aurora)
+  * Multiple Aurora taint fixes for WoW 12 compatibility
+  * Secret value protections in chat bubbles and widget debug names (Aurora)
 
 ### Removed ###
   * KUI Nameplates - no longer being updated, replaced with Platynator
@@ -120,8 +139,17 @@
 ### Libraries Updated ###
   * LibQTip-1.0 replaced with LibQTip-2.0 (sourced from GitHub instead of WoWAce)
   * LibRangeCheck-3.0 updated to v1.0.17-9-gd53d7b0
-  * BugGrabber updated through v12.0.2 → v12.0.3 → v12.0.5 → v12.0.6
-  * AceSerializer added to pkgmeta and libs.xml
+  * BugGrabber updated through v12.0.2 → v12.0.3 → v12.0.5 → v12.0.6 → v12.0.7
+  * AceSerializer-3.0 added to pkgmeta and libs.xml
+  * oUF framework updated (13.3.0)
+  * HereBeDragons library updated to latest
+  * LibDualSpec-1.0 updated to latest
+  * LibIconFonts updated to latest
+  * LibWindow-1.1 updated to latest
+  * LibItemUpgradeInfo-1.0 updated to latest
+  * LibSharedMedia-3.0 updated to latest
+  * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+
 [3.0.0]: https://github.com/RealUI/RealUI/compare/2.6.3...3.0.0
