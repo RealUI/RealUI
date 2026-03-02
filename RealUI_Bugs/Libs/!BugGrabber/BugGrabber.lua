@@ -86,8 +86,6 @@ local loadErrors = {}
 local paused = nil
 local isBugGrabbedRegistered = nil
 local callbacks = nil
-local chatLinkFormat = "|Hbuggrabber:%s:%s:|h|cffff0000[Error %s]|r|h"
-local tableToString = "table: %s"
 
 -----------------------------------------------------------------------
 -- Callbacks
@@ -216,7 +214,7 @@ do
 		msgsAllowed = msgsAllowed - 1
 		errorMessage = tostring(errorMessage)
 
-		if issecretvalue(errorMessage) or errorMessage:find("BugGrabber", nil, true) then
+		if issecretvalue(errorMessage) or (not isSimple and errorMessage:find("BugGrabber", nil, true)) then
 			print("|cffffff00BugGrabber|r:", errorMessage)
 			return
 		end
@@ -291,39 +289,30 @@ function addon:StoreError(errorObject)
 end
 
 do
-	local function createChatHook()
-		-- Set up the ItemRef hook that allow us to link bugs.
-		local SetHyperlink = ItemRefTooltip.SetHyperlink
-		function ItemRefTooltip:SetHyperlink(link, ...)
-			local player, tableId = link:match("^buggrabber:([^:]+):([^:]+):")
-			if player then
-				addon:HandleBugLink(player, tableId, link)
-			else
-				SetHyperlink(self, link, ...)
-			end
+	EventRegistry:RegisterCallback("SetItemRef", function(_, link)
+		local player, tableId = link:match("^addon:buggrabber:([^:]+):(table: [^:]+):")
+		if player and tableId then
+			addon:HandleBugLink(player, tableId)
 		end
-	end
+	end)
 
-	-- We need to hook the chat frame when anyone requests a chat link from us,
-	-- in case some other addon has hooked :HandleBugLink to process it. If not,
-	-- we could've just created the hook in grabError when we do the print.
+	local chatLinkFormat = "|Haddon:buggrabber:%s:%s:|h|cffff0000[Error %s]|r|h"
 	function addon:GetChatLink(errorObject)
-		if createChatHook then createChatHook() createChatHook = nil end
-		local tableId = tostring(errorObject):sub(8)
-		return chatLinkFormat:format(playerName, tableId, tableId)
+		local tableId = tostring(errorObject)
+		local tableIdTrimmed = tableId:sub(8) -- Trim away "table: "
+		return chatLinkFormat:format(playerName, tableId, tableIdTrimmed)
 	end
 end
 
-function addon:GetErrorByPlayerAndID(player, id)
-	if player == playerName then return addon:GetErrorByID(id) end
+function addon:GetErrorByPlayerAndID(player, tableId)
+	if player == playerName then return addon:GetErrorByID(tableId) end
 	print(L.ERROR_UNABLE)
 end
 
-function addon:GetErrorByID(id)
-	local errorId = tableToString:format(id)
-	for _, err in next, db do
-		if tostring(err) == errorId then
-			return err
+function addon:GetErrorByID(tableId)
+	for _, errorObject in next, db do
+		if tostring(errorObject) == tableId then
+			return errorObject
 		end
 	end
 end
@@ -334,8 +323,8 @@ function addon:GetDB() return db or loadErrors end
 function addon:GetSessionId() return BugGrabberDB and BugGrabberDB.session or -1 end
 function addon:IsPaused() return paused end
 
-function addon:HandleBugLink(player, id)
-	local errorObject = addon:GetErrorByPlayerAndID(player, id)
+function addon:HandleBugLink(player, tableId)
+	local errorObject = addon:GetErrorByPlayerAndID(player, tableId)
 	if errorObject then
 		printErrorObject(errorObject)
 	end

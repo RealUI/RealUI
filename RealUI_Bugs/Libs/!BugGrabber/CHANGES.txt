@@ -1,9 +1,9 @@
 ------------------------------------------------------------------------
-r362 | funkehdude | 2026-02-22 19:59:09 +0000 (Sun, 22 Feb 2026) | 1 line
+r364 | funkehdude | 2026-02-28 11:18:56 +0000 (Sat, 28 Feb 2026) | 1 line
 Changed paths:
    M /trunk/.luacheckrc
    M /trunk/BugGrabber.lua
 
-Reduce error limit, reject secret values
+Clean up chat link handler
 ------------------------------------------------------------------------
 
