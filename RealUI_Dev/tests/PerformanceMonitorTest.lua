@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Simple test for PerformanceMonitor functionality
 -- This file demonstrates the performance monitoring and resource management features

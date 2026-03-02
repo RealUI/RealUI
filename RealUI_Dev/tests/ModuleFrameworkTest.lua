@@ -1,4 +1,4 @@
-local ADDON_NAME, ns = ...
+local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Simple test for ModuleFramework functionality
 -- This file demonstrates the new loading and coordination features

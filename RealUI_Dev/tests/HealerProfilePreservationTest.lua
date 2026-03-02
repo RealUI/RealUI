@@ -90,11 +90,8 @@ local function TestDPSOnlyCharacterProfile()
     -- 1d: Verify LayoutManager maps DPS/tank specs to layout 1
     local lm = RealUI.LayoutManager
     if lm then
-        local state = lm:GetLayoutState()
-        if state and state.specToLayoutMapping then
-            -- This is the LayoutManager's internal mapping (not char db)
-            -- It should map non-healer specs to LAYOUT_DPS_TANK (1)
-        end
+        -- NOTE: lm:GetLayoutState().specToLayoutMapping is the LayoutManager's
+        -- internal mapping (not char db). Non-healer specs map to LAYOUT_DPS_TANK (1).
 
         -- Verify layout configurations exist for layout 1
         local config = lm:GetLayoutConfiguration(1)
@@ -170,7 +167,6 @@ local function TestCombatDeferral()
     -- We check the function's bytecode for these strings.
     local onSpecChanged = dss.OnSpecializationChanged
     if not onSpecChanged then
-        failures = failures + 1
         _G.print("|cffff0000[FAIL]|r DualSpecSystem.OnSpecializationChanged not found")
         return false
     end

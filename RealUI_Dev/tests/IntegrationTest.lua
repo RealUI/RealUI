@@ -92,7 +92,7 @@ function IntegrationTest:TestCommandIntegration()
     print("Testing command integration...")
 
     -- Test that chat commands are registered
-    local testCommands = {
+    local testCommands = { -- luacheck: ignore
         "framemover",
         "configmode"
     }

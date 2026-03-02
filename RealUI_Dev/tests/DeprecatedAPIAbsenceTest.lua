@@ -58,7 +58,7 @@ local function RunDeprecatedAPIAbsenceTest()
     -- Part 1: Verify modern replacement APIs exist
     _G.print("  Part 1: Checking modern replacement APIs exist...")
     for _, entry in _G.ipairs(DEPRECATED_API_MAP) do
-        local deprecatedName, modernPath, req = entry[1], entry[2], entry[3]
+        local _, modernPath, req = entry[1], entry[2], entry[3]
         local modernFunc = resolveGlobal(modernPath)
         checkedCount = checkedCount + 1
         if modernFunc == nil then

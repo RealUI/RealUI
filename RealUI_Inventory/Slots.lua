@@ -385,7 +385,7 @@ function BagSlotMixin:Update()
         if self.bagType == "bank" then
             -- WoW 12+: Bank tabs use C_Bank APIs for icons and purchase state
             local bagID = self:GetID()
-            local bankType, tabIcon = self:GetBankTabInfo(bagID)
+            local _, tabIcon = self:GetBankTabInfo(bagID)
             if tabIcon then
                 _G.SetItemButtonTexture(self, tabIcon)
                 _G.SetItemButtonTextureVertexColor(self, 1.0, 1.0, 1.0)

@@ -308,7 +308,7 @@ local function TestGlobalReverseToggle()
     ndb.settings.reverseUnitFrameBars = true
 
     local targetFrame = _G["RealUITargetFrame"]
-    local passed = false
+    local passed
 
     if targetFrame and targetFrame.Health and targetFrame.Health.GetReverseFill then
         -- Call RefreshUnits to propagate settings
