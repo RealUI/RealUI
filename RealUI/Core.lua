@@ -1128,17 +1128,22 @@ function RealUI:OnInitialize()
     end
 
     -- Configure user settings synchronization for first-time users
-    if dbg.tags.firsttime then
-        _G.SetCVar("synchronizeSettings", 1)
-        _G.SetCVar("synchronizeConfig", 1)
-        _G.SetCVar("synchronizeBindings", 1)
-        _G.SetCVar("synchronizeMacros", 1)
-    end
+    -- Defer SetCVar calls to a new execution context so addon code does not
+    -- contaminate the ADDON_LOADED processing chain with taint that propagates
+    -- to C_ActionBar and causes ADDON_ACTION_BLOCKED on MultiBar:ShowBase().
+    _G.C_Timer.After(0, function()
+        if dbg.tags.firsttime then
+            _G.SetCVar("synchronizeSettings", 1)
+            _G.SetCVar("synchronizeConfig", 1)
+            _G.SetCVar("synchronizeBindings", 1)
+            _G.SetCVar("synchronizeMacros", 1)
+        end
 
-    -- Ensure quest text contrast is properly set
-    if ((_G.GetCVarNumberOrDefault("questTextContrast")) ~= 4) then
-        _G.SetCVar("questTextContrast", 4)
-    end
+        -- Ensure quest text contrast is properly set
+        if ((_G.GetCVarNumberOrDefault("questTextContrast")) ~= 4) then
+            _G.SetCVar("questTextContrast", 4)
+        end
+    end)
 
     -- Mark framework as initialized
     RealUI.isInitialized = true

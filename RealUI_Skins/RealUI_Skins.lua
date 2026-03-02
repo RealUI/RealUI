@@ -46,7 +46,12 @@ RealUI.textures = private.textures
 
 local moddedFrames, pixelScale = {}, 768 / (select(2, _G.GetPhysicalScreenSize()))
 local function ResetScale(frame)
-    if _G.InCombatLockdown() and frame.IsProtected and frame:IsProtected() then
+    if _G.InCombatLockdown() then
+        -- Never touch frame scale during combat; any SetScale call from addon
+        -- code can propagate taint to the action bar secure execution path.
+        return
+    end
+    if frame.IsProtected and frame:IsProtected() then
         return
     end
     -- Frames that are sized via ModValue become HUGE with retina scale.
@@ -171,7 +176,6 @@ function RealUI:AddFrameStripes(Frame)
 end
 
 function private.OnLoad()
-    _G.print("OnLoad RealUI")
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
     skinsDB:RegisterCallback("OnProfileChanged", function(db, newProfile)
         RealUI:ReloadUIDialog()
