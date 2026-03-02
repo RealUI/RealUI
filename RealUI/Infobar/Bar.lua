@@ -1130,7 +1130,7 @@ function Infobar:OnEnable()
     local fontPath = "Fonts\\FRIZQT__.TTF" -- Default WoW font
 
     -- Try to get font from RealUI_Skins if it's loaded
-    if C_AddOns.IsAddOnLoaded("RealUI_Skins") then
+    if _G.C_AddOns.IsAddOnLoaded("RealUI_Skins") then
         local skinsDB = _G.RealUI_SkinsDB
         if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.chat then
             fontPath = skinsDB.profile.fonts.chat.path or fontPath
