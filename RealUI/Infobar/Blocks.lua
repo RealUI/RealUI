@@ -946,11 +946,11 @@ function Infobar:CreateBlocks()
                     if _G.C_CatalogShop and _G.C_CatalogShop.IsShop2Enabled() then
                         local isShown = _G.CatalogShopInboundInterface.IsShown()
                         if not isShown then
-                            securecall("CloseAllWindows")
+                            _G.securecall("CloseAllWindows")
                         end
                         _G.CatalogShopFrame:SetAttribute("action", isShown and "Hide" or "Show")
                     else
-                        securecall("ToggleStoreUI")
+                        _G.securecall("ToggleStoreUI")
                     end
                 end,
                 disabled = function( ... )

@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- RealUI Configuration Persistence and Migration System
 -- This module handles settings save/load, version migration, and corruption recovery
@@ -19,7 +19,7 @@ local MAX_BACKUPS = 5
 
 -- Session tracking
 local sessionData = {
-    startTime = time(),
+    startTime = _G.time(),
     saveCount = 0,
     loadCount = 0,
     migrationCount = 0
@@ -42,9 +42,9 @@ function ConfigPersistence:SaveConfiguration()
     if dbg then
         dbg.verinfo = RealUI.verinfo
         dbg.configVersion = CURRENT_CONFIG_VERSION
-        dbg.lastSaved = time()
+        dbg.lastSaved = _G.time()
         dbg.saveCount = (dbg.saveCount or 0) + 1
-        dbg.gameVersion = select(4, GetBuildInfo())
+        dbg.gameVersion = select(4, _G.GetBuildInfo())
         dbg.sessionId = sessionData.startTime
     end
 
@@ -84,7 +84,7 @@ function ConfigPersistence:LoadConfiguration()
     if not isValid then
         debug("Configuration validation failed, attempting repair:", error)
 
-        local repaired, wasRepaired = self:RepairConfiguration(RealUI.db.sv)
+        local _, wasRepaired = self:RepairConfiguration(RealUI.db.sv)
         if wasRepaired then
             debug("Configuration repaired successfully")
             self:CreateBackup("auto_repair")
@@ -106,7 +106,7 @@ function ConfigPersistence:LoadConfiguration()
     -- Update last loaded timestamp
     local dbg = RealUI.db.global
     if dbg then
-        dbg.lastLoaded = time()
+        dbg.lastLoaded = _G.time()
         dbg.loadCount = (dbg.loadCount or 0) + 1
     end
 
@@ -257,17 +257,17 @@ function ConfigPersistence:CreateBackup(backupType, name)
     end
 
     backupType = backupType or "manual"
-    name = name or ("backup_" .. date("%Y%m%d_%H%M%S"))
+    name = name or ("backup_" .. _G.date("%Y%m%d_%H%M%S"))
 
     debug("Creating backup:", name, "type:", backupType)
 
     -- Deep copy current configuration
     local backup = {
-        timestamp = time(),
+        timestamp = _G.time(),
         type = backupType,
         version = RealUI.verinfo.string,
         configVersion = CURRENT_CONFIG_VERSION,
-        gameVersion = select(4, GetBuildInfo()),
+        gameVersion = select(4, _G.GetBuildInfo()),
         characterKey = RealUI.key,
         data = self:DeepCopy(RealUI.db.sv)
     }
@@ -319,7 +319,7 @@ function ConfigPersistence:GetBackupList()
             version = backup.version,
             gameVersion = backup.gameVersion,
             characterKey = backup.characterKey,
-            date = date("%Y-%m-%d %H:%M:%S", backup.timestamp)
+            date = _G.date("%Y-%m-%d %H:%M:%S", backup.timestamp)
         })
     end
 
@@ -407,7 +407,7 @@ function ConfigPersistence:RunMigrations(fromVersion, toVersion)
         RealUI.db.global.lastMigration = {
             from = fromVersion,
             to = toVersion,
-            timestamp = time(),
+            timestamp = _G.time(),
             success = true
         }
     end
@@ -436,7 +436,7 @@ function ConfigPersistence:RunGenericMigration(fromVersion, toVersion)
     table.insert(config.global.migrationHistory, {
         from = fromVersion,
         to = toVersion,
-        timestamp = time(),
+        timestamp = _G.time(),
         type = "generic"
     })
 
@@ -754,7 +754,7 @@ end
 function ConfigPersistence:GetSessionStatistics()
     return {
         startTime = sessionData.startTime,
-        uptime = time() - sessionData.startTime,
+        uptime = _G.time() - sessionData.startTime,
         saveCount = sessionData.saveCount,
         loadCount = sessionData.loadCount,
         migrationCount = sessionData.migrationCount,
@@ -767,7 +767,7 @@ function ConfigPersistence:Initialize()
     debug("Initializing ConfigPersistence")
 
     -- Initialize session data
-    sessionData.startTime = time()
+    sessionData.startTime = _G.time()
 
     -- Register default migrations
     self:RegisterDefaultMigrations()

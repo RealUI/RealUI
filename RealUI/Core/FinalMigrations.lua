@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs
@@ -244,7 +244,7 @@ function FinalMigrations:Initialize()
         local targetVersion = RealUI.verinfo.string
 
         if currentVersion ~= targetVersion then
-            local executed, failed = self:RunPendingMigrations(currentVersion, targetVersion)
+            local _, failed = self:RunPendingMigrations(currentVersion, targetVersion)
 
             if #failed > 0 then
                 debug("Some migrations failed")
@@ -259,7 +259,7 @@ function FinalMigrations:Initialize()
     self:CleanupDeprecatedSettings()
 
     -- Validate migrated data
-    local valid, issues = self:ValidateMigratedData()
+    local valid = self:ValidateMigratedData()
     if not valid then
         debug("Data validation failed")
         if RealUI.FeedbackSystem then

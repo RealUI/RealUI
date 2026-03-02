@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs ipairs table pcall print string _G math
@@ -14,9 +14,9 @@ local FrameMover = {}
 RealUI.FrameMover = FrameMover
 
 -- Frame Movement Constants
-local MOVEMENT_STEP = 1
+local MOVEMENT_STEP = 1 -- luacheck: ignore
 local BOUNDARY_PADDING = 10
-local SNAP_THRESHOLD = 5
+local SNAP_THRESHOLD = 5 -- luacheck: ignore
 
 -- Frame Movement State
 local frameMovementState = {

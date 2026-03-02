@@ -42,7 +42,9 @@ local fixedSettings = {
 local function IsOdd(val)
     return val % 2 == 1
 end
-function ActionBars:ApplyABSettings(tag)
+-- FIXMELATER: Refactor to calculate padding based on button size and desired spacing rather than hardcoding values
+-- To fix the complexity that we are supressing with luacheck, we would need to refactor the bar position and padding calculations to be more data-driven and less hardcoded. This would involve creating a more flexible system for defining bar layouts and their corresponding padding based on button sizes and desired spacing, rather than using fixed values in the code. This would likely reduce the number of conditional statements and make the code easier to maintain and extend in the future.
+function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     if not ndbc then return end
     if ndbc.init.installStage ~= -1 or not RealUI:DoesAddonMove("Bartender4") then return end
 

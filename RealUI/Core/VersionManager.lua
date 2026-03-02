@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- RealUI Version Management System
 -- This module handles version tracking, migration, and compatibility checks
@@ -21,7 +21,7 @@ local migrationHandlers = {}
 function VersionManager:ParseVersion(versionString)
     if not versionString then return nil end
 
-    local parts = {strsplit(".", versionString)}
+    local parts = {_G.strsplit(".", versionString)}
     local version = {}
 
     for i = 1, 3 do

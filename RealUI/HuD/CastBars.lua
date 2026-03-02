@@ -350,26 +350,26 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     -- SetBarValue. We follow Blizzard's pattern: query UnitCastingInfo/
     -- UnitChannelInfo for startTime/endTime (works for ALL units), compute
     -- the current value, and drive SetBarValue directly.
-    Castbar.OnUpdate = function(self, elapsed)
-        if self.casting or self.channeling or self.empowering then
-            local ownerUnit = self.__owner and self.__owner.unit
+    Castbar.OnUpdate = function(castbar, elapsed) -- luacheck: ignore 432
+        if castbar.casting or castbar.channeling or castbar.empowering then
+            local ownerUnit = castbar.__owner and castbar.__owner.unit
             local startTime, endTime, duration, value
 
             -- Try oUF's cached values first (player casts)
-            if self.startTime and self.endTime then
-                startTime = self.startTime
-                endTime = self.endTime
+            if castbar.startTime and castbar.endTime then
+                startTime = castbar.startTime
+                endTime = castbar.endTime
             elseif ownerUnit then
                 -- Query the API directly for non-player casts.
                 -- startTime/endTime may be secret numbers for enemy units,
                 -- so we must check with issecretvalue before arithmetic.
-                if self.casting then
+                if castbar.casting then
                     local _, _, _, st, et = _G.UnitCastingInfo(ownerUnit)
                     if st and et and not _G.issecretvalue(st) and not _G.issecretvalue(et) then
                         startTime = st / 1000
                         endTime = et / 1000
                     end
-                elseif self.channeling or self.empowering then
+                elseif castbar.channeling or castbar.empowering then
                     local _, _, _, st, et = _G.UnitChannelInfo(ownerUnit)
                     if st and et and not _G.issecretvalue(st) and not _G.issecretvalue(et) then
                         startTime = st / 1000
@@ -382,7 +382,7 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
                 local now = _G.GetTime()
                 duration = endTime - startTime
                 if duration > 0 then
-                    if self.channeling then
+                    if castbar.channeling then
                         value = endTime - now
                     else
                         value = now - startTime
@@ -391,80 +391,80 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
                     if value > duration then value = duration end
 
                     -- Drive the AngleStatusBar fill
-                    local meta = ASB:GetBarMeta(self)
+                    local meta = ASB:GetBarMeta(castbar)
                     if meta then
                         meta.minVal = 0
                         meta.maxVal = duration
-                        ASB:SetBarValue(self, value)
+                        ASB:SetBarValue(castbar, value)
                     end
 
                     -- Update Time text
-                    if self.Time then
-                        local remaining = self.channeling and value or (duration - value)
-                        if self.delay and self.delay ~= 0 then
-                            self.Time:SetFormattedText('%.1f|cffff0000%s%.2f|r', remaining, self.channeling and '-' or '+', self.delay)
+                    if castbar.Time then
+                        local remaining = castbar.channeling and value or (duration - value)
+                        if castbar.delay and castbar.delay ~= 0 then
+                            castbar.Time:SetFormattedText('%.1f|cffff0000%s%.2f|r', remaining, castbar.channeling and '-' or '+', castbar.delay)
                         else
-                            self.Time:SetFormattedText('%.1f', remaining)
+                            castbar.Time:SetFormattedText('%.1f', remaining)
                         end
                     end
                 end
             else
                 -- Secret times fallback for enemy casts.
                 -- The native C++ timer engine (driven by oUF's SetTimerDuration)
-                -- is already sizing self.fill since fill IS the native StatusBar
+                -- is already sizing castbar.fill since fill IS the native StatusBar
                 -- texture. Read back the computed width for trapezoid vertex offsets.
-                local meta = ASB:GetBarMeta(self)
+                local meta = ASB:GetBarMeta(castbar)
                 if meta then
-                    local width = self.fill:GetWidth()
+                    local width = castbar.fill:GetWidth()
                     if not _G.issecretvalue(width) and width > 0.001 then
-                        self.fill:SetShown(true)
+                        castbar.fill:SetShown(true)
                         if meta.isTrapezoid then
                             if width < (meta.minWidth * 2) then
                                 local vertexOfs = width / 2
-                                self.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
-                                self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
-                                self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
+                                castbar.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
+                                castbar.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
+                                castbar.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
                                 meta.isLess = true
                             elseif meta.isLess then
-                                self.fill:SetPoint(meta.isTrapezoid)
-                                self.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
-                                self.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
+                                castbar.fill:SetPoint(meta.isTrapezoid)
+                                castbar.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
+                                castbar.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
                                 meta.isLess = false
                             end
                         end
                     else
                         -- Width is secret or zero — just show fill, native handles it
-                        self.fill:SetShown(true)
+                        castbar.fill:SetShown(true)
                     end
                 end
 
                 -- Update Time text — SetFormattedText handles secret numbers
-                local nativeGetTimer = _G.getmetatable(self).__index.GetTimerDuration
-                if nativeGetTimer and self.Time then
-                    local ok, durationObj = _G.pcall(nativeGetTimer, self)
+                local nativeGetTimer = _G.getmetatable(castbar).__index.GetTimerDuration
+                if nativeGetTimer and castbar.Time then
+                    local ok, durationObj = _G.pcall(nativeGetTimer, castbar)
                     if ok and durationObj then
                         local ok2, remaining = _G.pcall(function() return durationObj:GetRemainingDuration() end)
                         if ok2 and remaining then
-                            self.Time:SetFormattedText('%.1f', remaining)
+                            castbar.Time:SetFormattedText('%.1f', remaining)
                         end
                     end
                 end
             end
-        elseif self.holdTime and self.holdTime > 0 then
-            self.holdTime = self.holdTime - elapsed
+        elseif castbar.holdTime and castbar.holdTime > 0 then
+            castbar.holdTime = castbar.holdTime - elapsed
         else
             -- Reset and hide (same as oUF's default)
-            self.castID = nil
-            self.casting = nil
-            self.channeling = nil
-            self.empowering = nil
-            self.notInterruptible = nil
-            self.spellID = nil
-            self.spellName = nil
-            for _, pip in _G.next, self.Pips do
+            castbar.castID = nil
+            castbar.casting = nil
+            castbar.channeling = nil
+            castbar.empowering = nil
+            castbar.notInterruptible = nil
+            castbar.spellID = nil
+            castbar.spellName = nil
+            for _, pip in _G.next, castbar.Pips do
                 pip:Hide()
             end
-            self:Hide()
+            castbar:Hide()
         end
     end
 

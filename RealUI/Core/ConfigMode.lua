@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs ipairs table pcall print string _G math
@@ -440,7 +440,7 @@ function ConfigMode:RegisterEscapeHandler()
     -- Create invisible frame to capture escape key
     if not configModeState.escapeFrame then
         local escapeFrame = _G.CreateFrame("Frame", "RealUIConfigModeEscapeHandler", _G.UIParent)
-        escapeFrame:SetScript("OnKeyDown", function(self, key)
+        escapeFrame:SetScript("OnKeyDown", function(_, key)
             if key == "ESCAPE" then
                 ConfigMode:DisableConfigMode()
             end

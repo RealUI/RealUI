@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- RealUI Dual-Specialization Support System
 -- This module handles automatic profile switching based on specialization changes
@@ -465,7 +465,7 @@ function DualSpecSystem:SaveSpecConfiguration(specIndex, configData)
     -- Store in memory
     specConfigurations[specIndex] = {
         data = configData,
-        timestamp = time(),
+        timestamp = _G.time(),
         specInfo = RealUI.charInfo.specs[specIndex]
     }
 
@@ -582,7 +582,7 @@ function DualSpecSystem:GetCurrentConfiguration()
     -- This would collect current UI state - for now return a placeholder
     -- In a full implementation, this would gather positions, settings, etc.
     return {
-        timestamp = time(),
+        timestamp = _G.time(),
         hudSize = RealUI.db and RealUI.db.profile.settings.hudSize,
         positions = RealUI.db and RealUI.db.profile.positions,
         modules = RealUI.db and RealUI.db.profile.modules

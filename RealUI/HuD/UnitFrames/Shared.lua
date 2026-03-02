@@ -10,7 +10,7 @@ local Color = _G.Aurora.Color
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
+local db, ndb -- luacheck: ignore
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 local AngleStatusBar = RealUI:GetModule("AngleStatusBar")

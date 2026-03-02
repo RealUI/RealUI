@@ -5,7 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
-local L = RealUI.L
+local L = RealUI.L -- luacheck: ignore
 
 local DiagnosticTools = {}
 private.DiagnosticTools = DiagnosticTools
@@ -84,7 +84,7 @@ end
 -- System Health Check
 function DiagnosticTools:PerformHealthCheck()
     local healthReport = {
-        timestamp = time(),
+        timestamp = _G.time(),
         checks = {},
         overallStatus = "healthy",
         warnings = {},
@@ -179,7 +179,7 @@ function DiagnosticTools:PerformHealthCheck()
     end
 
     -- Store in history
-    diagnosticState.lastHealthCheck = time()
+    diagnosticState.lastHealthCheck = _G.time()
     table.insert(diagnosticState.diagnosticHistory, 1, healthReport)
 
     -- Trim history
@@ -348,7 +348,7 @@ end
 -- Export diagnostic report
 function DiagnosticTools:ExportDiagnosticReport()
     local report = {
-        timestamp = date("%Y-%m-%d %H:%M:%S", time()),
+        timestamp = _G.date("%Y-%m-%d %H:%M:%S", _G.time()),
         systemStatus = self:GetSystemStatus(),
         healthCheck = self:PerformHealthCheck(),
         history = self:GetDiagnosticHistory(5)

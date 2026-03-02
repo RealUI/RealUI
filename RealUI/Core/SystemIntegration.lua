@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs ipairs
@@ -159,8 +159,8 @@ function SystemIntegration:InstallErrorHandlers()
 
     -- Module error handler
     local originalEnableModule = RealUI.EnableModule
-    RealUI.EnableModule = function(self, moduleName)
-        local success, err = pcall(originalEnableModule, self, moduleName)
+    RealUI.EnableModule = function(self2, moduleName) -- luacheck: ignore 432
+        local success, err = pcall(originalEnableModule, self2, moduleName)
         if not success then
             debug("Error enabling module", moduleName, ":", err)
             if RealUI.FeedbackSystem then
@@ -174,8 +174,8 @@ function SystemIntegration:InstallErrorHandlers()
     -- Layout switch error handler
     if RealUI.LayoutManager then
         local originalSwitch = RealUI.LayoutManager.SwitchToLayout
-        RealUI.LayoutManager.SwitchToLayout = function(self, layoutId)
-            local success, result = pcall(originalSwitch, self, layoutId)
+        RealUI.LayoutManager.SwitchToLayout = function(self2, layoutId) -- luacheck: ignore 432
+            local success, result = pcall(originalSwitch, self2, layoutId)
             if not success then
                 debug("Error switching layout:", result)
                 if RealUI.FeedbackSystem then

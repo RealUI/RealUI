@@ -1,5 +1,5 @@
 local _, private = ...
-local RealUI = private.RealUI
+local RealUI = private.RealUI -- luacheck: ignore
 
 -- RealUI Platynator profile export (complete profile with all designs)
 local function GetRealUIProfile()

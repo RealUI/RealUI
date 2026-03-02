@@ -148,8 +148,8 @@ function ResourceManager:CleanupUnusedData()
         end
     end
 
-    -- Clean up old performance data -- luacheck: ignore
-    if RealUI.PerformanceMonitor then
+    -- Clean up old performance data
+    if RealUI.PerformanceMonitor then -- luacheck: ignore
         -- Performance monitor handles its own cleanup
     end
 

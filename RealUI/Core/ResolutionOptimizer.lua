@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs ipairs
@@ -92,7 +92,7 @@ end
 
 -- Determine resolution category based on screen dimensions
 function ResolutionOptimizer:GetResolutionCategory()
-    local width, height = self:GetScreenDimensions()
+    local _, height = self:GetScreenDimensions()
 
     if height < RESOLUTION_THRESHOLDS.LOW_RES_HEIGHT then
         return RESOLUTION_CATEGORY.LOW
@@ -155,7 +155,7 @@ function ResolutionOptimizer:ApplyOptimizations(force)
 
     debug("Applying optimizations for", category, "-", profile.description, "Changed:", categoryChanged)
 
-    local dbc = self.db.char
+    local dbc = self.db.char -- luacheck: ignore
     local db = self.db.profile
 
     -- Apply HuD size optimization

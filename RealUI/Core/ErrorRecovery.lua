@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
 -- luacheck: globals next type pairs
@@ -268,7 +268,7 @@ function ErrorRecovery:Initialize()
     local originalErrorHandler = _G.geterrorhandler()
     _G.seterrorhandler(function(err)
         -- Log the error
-        self:LogError("lua_error", "global", tostring(err), debugstack())
+        self:LogError("lua_error", "global", tostring(err), _G.debugstack())
 
         -- Call original handler
         if originalErrorHandler then

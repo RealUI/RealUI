@@ -739,7 +739,7 @@ function RealUI:OnInitialize()
         "configmode",
         function()
             if self.ConfigMode then
-                local success = self.ConfigMode:ToggleConfigMode()
+                self.ConfigMode:ToggleConfigMode()
                 print("Config mode", self.ConfigMode:IsConfigModeActive() and "enabled" or "disabled")
             else
                 print("ConfigMode not available")

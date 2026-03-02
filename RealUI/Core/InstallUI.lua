@@ -5,7 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
-local debug = RealUI.GetDebug("InstallUI")
+local debug = RealUI.GetDebug("InstallUI") -- luacheck: ignore
 
 -- Aurora --
 local Aurora = _G.Aurora
@@ -249,11 +249,11 @@ function InstallUI:UpdateStage(stage)
     end
 
     -- Update title
-    local title = stageInfo.title
+    local stageTitle = stageInfo.title
     if isUpgrade and stage == 0 then
-        title = "Welcome to RealUI 3.0.0!"
+        stageTitle = "Welcome to RealUI 3.0.0!"
     end
-    self.title:SetText(title)
+    self.title:SetText(stageTitle)
 
     -- Update text based on upgrade status
     local text = stageInfo.text

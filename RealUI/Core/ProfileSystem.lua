@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- RealUI Profile System
 -- This module handles profile management, AceDB integration, and configuration persistence
@@ -12,7 +12,7 @@ RealUI.ProfileSystem = ProfileSystem
 -- Profile System Constants
 local PROFILE_VERSION = 1
 local DEFAULT_PROFILE_NAME = "RealUI"
-local HEALING_PROFILE_NAME = "RealUI-Healing"
+local HEALING_PROFILE_NAME = "RealUI-Healing" -- luacheck: ignore
 
 -- Database Structure and Defaults
 local function GetDefaultCharInit()
@@ -326,7 +326,7 @@ function ProfileSystem:RegisterCharacter(charKey, profileName)
 
     profile.registeredChars[charKey] = {
         profile = profileName,
-        registered = time(),
+        registered = _G.time(),
         class = RealUI.charInfo.class.token,
         realm = RealUI.charInfo.realm
     }

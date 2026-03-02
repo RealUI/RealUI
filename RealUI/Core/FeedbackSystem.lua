@@ -42,7 +42,7 @@ local function addToHistory(messageType, title, message)
         type = messageType,
         title = title,
         message = message,
-        timestamp = time()
+        timestamp = _G.time()
     })
 
     -- Trim history if too large
@@ -182,7 +182,7 @@ function FeedbackSystem:PrintHistory(count)
     print("Recent Feedback Messages:")
     local history = self:GetHistory(count)
     for i, entry in ipairs(history) do
-        local timeStr = date("%H:%M:%S", entry.timestamp)
+        local timeStr = _G.date("%H:%M:%S", entry.timestamp)
         print(("[%s] [%s] %s: %s"):format(timeStr, entry.type, entry.title, entry.message))
     end
 end

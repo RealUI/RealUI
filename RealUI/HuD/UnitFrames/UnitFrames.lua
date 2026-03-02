@@ -5,7 +5,7 @@ local oUF = private.oUF
 
 -- RealUI --
 local RealUI = private.RealUI
-local db, ndb
+local db, ndb -- luacheck: ignore
 
 local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
