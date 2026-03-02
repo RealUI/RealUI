@@ -1,0 +1,17 @@
+## Interface: 120001
+## Title: RealUI Config
+## Category: RealUI_Core
+## Notes: Graphical configuration for RealUI
+## Author: Gethe, Hanshi
+## Version: 3.0.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
+## RequiredDeps: RealUI
+## LoadOnDemand: 1
+
+Libs\Libs.xml
+
+Config.lua
+ConfigBar.lua
+Advanced.lua
+SystemsConfig.lua

@@ -1,0 +1,43 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
+    <!-- Core Framework -->
+    <Script file="Core\VersionManager.lua"/>
+    <Script file="Core\ProfileSystem.lua"/>
+    <Script file="Core\DualSpecSystem.lua"/>
+    <Script file="Core\ConfigPersistence.lua"/>
+    <Script file="Core\ModuleFramework.lua"/>
+    <Script file="Core\LayoutManager.lua"/>
+    <Script file="Core\HuDPositioning.lua"/>
+    <Script file="Core\FrameMover.lua"/>
+    <Script file="Core\ConfigMode.lua"/>
+    <Script file="Core\PerformanceMonitor.lua"/>
+    <Script file="Core\MiniPatches.lua"/>
+    <Include file="Core\AddonData.xml"/>
+    <Script file="Core\AddonControl.lua"/>
+    <Script file="Core\Settings.lua"/>
+    <Script file="Core\Positioners.lua"/>
+    <Script file="Core\Tutorial.lua"/>
+    <Script file="Core\TutorialSystem.lua"/>
+    <Script file="Core\InstallWizard.lua"/>
+    <Script file="Core\InstallUI.lua"/>
+    <Script file="Core\CharacterInit.lua"/>
+    <Script file="Core\SetupSystem.lua"/>
+    <Script file="Core\Notifications.lua"/>
+    <Script file="Core\FeedbackSystem.lua"/>
+    <Script file="Core\DiagnosticTools.lua"/>
+    <Script file="Core\ResolutionOptimizer.lua"/>
+    <Script file="Core\CompatibilityManager.lua"/>
+    <Script file="Core\ProfileManager.lua"/>
+    <Script file="Core\SystemIntegration.lua"/>
+    <Script file="Core\ErrorRecovery.lua"/>
+    <Script file="Core\ResourceManager.lua"/>
+    <Script file="Core\UserExperiencePolish.lua"/>
+    <Script file="Core\DeploymentValidator.lua"/>
+    <Script file="Core\FinalMigrations.lua"/>
+    <Script file="Core\SavedVariablesMigration.lua"/>
+    <Script file="Core\AngleStatusBar.lua"/>
+    <Script file="Core\CombatFader.lua"/>
+    <Script file="Core\FramePoint.lua"/>
+    <Script file="Core\MenuFrame.lua"/>
+    <Script file="Core\Currency.lua"/>
+</Ui>

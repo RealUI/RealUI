@@ -31,16 +31,29 @@ Inventory:RawHook("ToggleAllBags", "ToggleBags", true)
 Inventory:RawHook("OpenAllBags", "OpenBags", true)
 Inventory:RawHook("OpenBag", "OpenBags", true)
 
--- FIXME
--- function Inventory:OpenBank()
---     self.bank:Show()
--- end
--- function Inventory:CloseBank()
---     self.bank:Hide()
--- end
--- _G.BankFrame:UnregisterAllEvents()
--- _G.BankFrame:SetScript("OnShow", nil)
--- _G.BankFrame:SetParent(_G.RealUI.UIHider)
+function Inventory:OpenBank()
+    if not self.bank then return end
+    if not _G.C_Bank.CanViewBank(_G.Enum.BankType.Character) and not _G.C_Bank.CanViewBank(_G.Enum.BankType.Account) then
+        return
+    end
+    self.bank:Show()
+    if not self.main:IsShown() then
+        self.openedBagsForBank = true
+        self:OpenBags()
+    end
+end
+function Inventory:CloseBank()
+    if not self.bank then return end
+    self.bank:Hide()
+    if self.openedBagsForBank then
+        self.openedBagsForBank = false
+        self:CloseBags()
+    end
+end
+
+_G.BankFrame:UnregisterAllEvents()
+_G.BankFrame:SetScript("OnShow", nil)
+_G.BankFrame:SetParent(_G.RealUI.UIHider)
 
 local function MERCHANT_SHOW(event, ...)
     local bag = Inventory.main.bags.junk
@@ -71,16 +84,9 @@ local bagEvents = {
     [_G.Enum.PlayerInteractionType.MailInfo] = -1,
     [_G.Enum.PlayerInteractionType.TradePartner] = 0,
     [_G.Enum.PlayerInteractionType.Auctioneer] = 0,
-    [_G.Enum.PlayerInteractionType.Banker] = 0,
     [_G.Enum.PlayerInteractionType.GuildBanker] = 0,
-    [_G.Enum.PlayerInteractionType.AccountBanker] = 0,
     [_G.Enum.PlayerInteractionType.Merchant] = 0,
 }
--- local bankEvents = {
---     [_G.Enum.PlayerInteractionType.Banker] = 0,
---     [_G.Enum.PlayerInteractionType.GuildBanker] = 0,
---     [_G.Enum.PlayerInteractionType.AccountBanker] = 0,
--- }
 
 local bankInteractionType = {
     [_G.Enum.PlayerInteractionType.AccountBanker] = true,
@@ -93,13 +99,9 @@ function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_SHOW(event, id)
         self:OpenBags()
     end
 
-    -- FIXME
-    -- if bankEvents[id] and bankEvents[id] >= 0 then
-    --     self:OpenBank()
-    -- end
-
     if bankInteractionType[id] then
         self.atBank = true
+        self:OpenBank()
     elseif id == _G.Enum.PlayerInteractionType.Merchant then
         MERCHANT_SHOW()
     end
@@ -110,11 +112,8 @@ function Inventory:PLAYER_INTERACTION_MANAGER_FRAME_HIDE(event, id)
         self:CloseBags()
     end
 
-    -- if bankEvents[id] and bankEvents[id] <= 0 then
-    --     self:CloseBank()
-    -- end
-
     if bankInteractionType[id] then
+        self:CloseBank()
         self.atBank = false
     elseif id == _G.Enum.PlayerInteractionType.Merchant then
         MERCHANT_CLOSED()

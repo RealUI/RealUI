@@ -1,0 +1,62 @@
+## Interface: 120001
+## Title: RealUI Dev
+## Category: RealUI_Core
+## Notes: Development assistant for RealUI
+## Version: 3.0.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## LoadWith: RealUI_Bugs
+## RequiredDeps: RealUI_Bugs
+
+RealUI_Dev.lua
+tests\Test.lua
+tests\BankLifecycleTest.lua
+tests\BankBagsVisibilityTest.lua
+tests\BankBagUpdateTest.lua
+tests\BankFreeSlotCountTest.lua
+tests\BankFilterConsistencyTest.lua
+tests\BankItemSortOrderTest.lua
+tests\BankEmptyFilterBagsTest.lua
+tests\BankTypeSwitcherTest.lua
+tests\BankDefaultTypeTest.lua
+tests\BankTypeSwitchTest.lua
+tests\BankTabSidebarTest.lua
+tests\BankTabSelectionTest.lua
+tests\BankPurchaseButtonTest.lua
+tests\BankTabSettingsTest.lua
+tests\BankLockStateTest.lua
+tests\BankClickActionsTest.lua
+tests\BankAutoDepositTest.lua
+tests\BankMoneyVisibilityTest.lua
+tests\BankMoneyEventTest.lua
+tests\BankMoneyLockTest.lua
+tests\BankBugExplorationTest.lua
+tests\BankPreservationTest.lua
+tests\BankSearchOverlayTest.lua
+tests\BankSortDispatchTest.lua
+tests\FrameMovementTest.lua
+tests\HuDPositioningTest.lua
+tests\AngleStatusBarVertexTest.lua
+tests\AngleStatusBarRoundTripTest.lua
+tests\AngleStatusBarFillMaxTest.lua
+tests\TagsHealthCompositionTest.lua
+tests\TagsPowerCompositionTest.lua
+tests\TagsBannedPatternTest.lua
+tests\TagsLineLimitTest.lua
+tests\TagsNumericFormatTest.lua
+tests\TagsSecretSafeTest.lua
+tests\UnitFramesClassColorTest.lua
+tests\CastBarInterruptibleColorTest.lua
+tests\CastBarChannelingTickTest.lua
+tests\CombatFaderOpacityTest.lua
+tests\HealerProfileExplorationTest.lua
+tests\HealerProfilePreservationTest.lua
+tests\HuDFixExplorationTest.lua
+tests\HuDFixPreservationTest.lua
+tests\PositionerResizeTest.lua
+tests\DeprecatedAPIAbsenceTest.lua
+tests\AdvancedFeaturesTest.lua
+tests\ModuleFrameworkTest.lua
+tests\PerformanceMonitorTest.lua
+tests\IntegrationTest.lua
+
+../Aurora/dev/test.lua

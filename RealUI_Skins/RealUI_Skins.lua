@@ -44,8 +44,16 @@ local defaults = {
 
 RealUI.textures = private.textures
 
-local moddedFrames, pixelScale = {}
+local moddedFrames, pixelScale = {}, 768 / (select(2, _G.GetPhysicalScreenSize()))
 local function ResetScale(frame)
+    if _G.InCombatLockdown() then
+        -- Never touch frame scale during combat; any SetScale call from addon
+        -- code can propagate taint to the action bar secure execution path.
+        return
+    end
+    if frame.IsProtected and frame:IsProtected() then
+        return
+    end
     -- Frames that are sized via ModValue become HUGE with retina scale.
     if private.skinsDB.isHighRes then
         frame:SetScale(private.skinsDB.customScale)
@@ -74,9 +82,9 @@ end
 ]]
 
 
-local uiMod, uiScaleChanging
+local uiMod = (select(2, _G.GetPhysicalScreenSize()) / 768)
+local uiScaleChanging
 function RealUI.UpdateUIScale(newScale)
-    _G.print("RealUI.UpdateUIScale")
     if uiScaleChanging then return end
 
     -- https://www.reddit.com/r/wow/comments/95o2qn/how_to_pixel_perfect_ui/
@@ -86,14 +94,14 @@ function RealUI.UpdateUIScale(newScale)
     private.debug("pixel scale", pixelScale, uiMod)
 
     local oldScale = private.skinsDB.customScale
-    local cvarScale, parentScale = tonumber(RealUI.Round(_G.GetCVar("uiscale"),2)), RealUI.Round(_G.UIParent:GetScale(), 2)
+    local cvarScale, parentScale = tonumber(RealUI.Scale.Round(_G.GetCVar("uiscale"),2)), RealUI.Scale.Round(_G.UIParent:GetScale(), 2)
     private.debug("current scale", oldScale, cvarScale, parentScale)
     if parentScale == 1 then -- bail if UIParent is scaled to 1... we don't want to mess with that
         return
     end
     -- Get Scale
     if private.skinsDB.isPixelScale then
-        newScale = RealUI.Round(pixelScale,2)
+        newScale = RealUI.Scale.Round(pixelScale,2)
     end
     if not newScale then
         newScale = oldScale
@@ -101,17 +109,26 @@ function RealUI.UpdateUIScale(newScale)
     private.debug("newScale", newScale)
     local uiScale = newScale
     if private.skinsDB.isHighRes then
-        uiScale = RealUI.Round(uiScale * 2, 2)
+        uiScale = RealUI.Scale.Round(uiScale * 2, 2)
     end
 
     uiScaleChanging = true
     private.debug("update uiScale", uiScale)
 
-    if (cvarScale ~= uiScale and not private.skinsDB.isPixelScale) then
-        _G.SetCVar("uiScale", max(uiScale, 0.64))
-    end
+    --[[ UIParent:SetScale() from addon code taints C_ActionBar.GetActionBarPage() and related
+        action bar page APIs, causing ADDON_ACTION_BLOCKED errors on MultiBar:ShowBase() during
+        combat. Prefer SetCVar("uiScale") which lets the engine apply the scale securely.
+        SetCVar has a minimum of 0.64, so UIParent:SetScale() is only used as a fallback for
+        sub-0.64 scales (high-DPI without isHighRes). SetCVar may taint the ObjectiveTracker
+        but that is far less disruptive than broken action bars in combat. ]]
     if parentScale ~= uiScale then
-        _G.UIParent:SetScale(uiScale)
+        private.debug("Skipping engine UI scale change to avoid taint; desired uiScale:", uiScale)
+        -- Store the desired engine UI scale instead of changing it here. Changing
+        -- the `uiScale` CVar or calling `UIParent:SetScale` from addon code can
+        -- taint protected Blizzard frame behavior (ObjectiveTracker / WorldMap)
+        -- and lead to ADDON_ACTION_BLOCKED. Leave the global scale unchanged
+        -- and only apply per-frame scaling via `RealUI.RegisterModdedFrame`.
+        private.desiredUIScale = uiScale
     end
 
     private.skinsDB.customScale = newScale
@@ -149,7 +166,7 @@ end
 function RealUI:AddFrameStripes(Frame)
     local bg = Frame:GetBackdropTexture("bg")
     local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
-    stripes:SetTexture([[Interface\AddOns\nibRealUI\Media\StripesThin]], true, true)
+    stripes:SetTexture([[Interface\AddOns\RealUI\Media\StripesThin]], true, true)
     stripes:SetAlpha(private.skinsDB.stripeAlpha)
     stripes:SetAllPoints(bg)
     stripes:SetHorizTile(true)
@@ -159,7 +176,6 @@ function RealUI:AddFrameStripes(Frame)
 end
 
 function private.OnLoad()
-    _G.print("OnLoad RealUI")
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
     skinsDB:RegisterCallback("OnProfileChanged", function(db, newProfile)
         RealUI:ReloadUIDialog()
@@ -174,6 +190,7 @@ function private.OnLoad()
 
     -- Set flags
     private.disabled.bags = true
+    private.disabled.banks = true
     private.disabled.mainmenubar = true
     private.disabled.pixelScale = not private.skinsDB.isPixelScale
 
@@ -259,7 +276,7 @@ function private.OnLoad()
     end
 
 
-    function private.AddOns.nibRealUI()
+    function private.AddOns.RealUI()
         local Skins = RealUI:NewModule("Skins")
         Skins.db = skinsDB
 
@@ -287,6 +304,11 @@ end
 --[[ Copy Scale API from Aurora until the entire UI is upgraded. ]]--
 function ScaleAPI.GetUIScale()
     return uiMod or 1
+end
+
+function ScaleAPI.Round(value, places)
+    local mult = 10 ^ (places or 0)
+    return floor(value * mult + 0.5) / mult
 end
 
 function ScaleAPI.Value(value, getFloat)

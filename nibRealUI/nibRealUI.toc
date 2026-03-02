@@ -1,27 +1,10 @@
-## Interface: 120000 120001
-## Title: RealUI
-## Category: RealUI
-## Notes: The essential core of RealUI
+## Interface: 120001
+## Title: nibRealUI (Migration Stub)
+## Notes: Loads legacy SavedVariables for migration to RealUI 3.0
 ## Author: Nibelheim, Gethe, Hanshi
-## Version: 2.6.3
-## IconTexture: Interface\AddOns\nibRealUI\Media\Icon
-## LoadWith: RealUI_Bugs, Bartender4
-## RequiredDeps: RealUI_Bugs Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
-## OptionalDeps: Bartender4, Grid2, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-1.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, Raven
+## Version: 3.0.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter
-## X-oUF: oUFembed
-## X-Website: http://www.wowinterface.com/downloads/fileinfo.php?id=16068
-## Globe-Pre: RealUI_Bugs, RealUI_Skins, Blizzard_Deprecated
 
-Libs\Libs.xml
-Util.lua
-Init.lua
-
-Locale.xml
-
-Core.lua
-GameMenu.lua
-Core.xml
-Modules.xml
-HuD.xml
+nibRealUI.lua

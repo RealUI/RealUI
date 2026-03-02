@@ -1,453 +1,155 @@
-## [2.6.2] ##
+## [3.0.0] - 2026-03-03 ##
+
+### Summary ###
+RealUI 3.0.0 represents a major milestone with comprehensive architectural improvements and modernization for World of Warcraft 12.0+. This release includes the addon renaming from nibRealUI to RealUI, a complete HUD unit frame rewrite, extensive taint fixes, and integration of new frameworks.
+
+Key highlights include a new module framework system with dependency management, automatic profile and layout switching, resolution optimization, compatibility management, and comprehensive error recovery. The addon now includes Platynator nameplate profiles (replacing the discontinued KUI Nameplates), full support for Banks and Warbanks introduced in WoW 11+, and numerous stability improvements addressing taint issues that caused ADDON_ACTION_BLOCKED errors.
+
+All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensuring a seamless upgrade experience. Aurora has been updated to version 12.0.1.10 with extensive WoW 12 compatibility fixes and taint protections.
+
 ### Modified AddOns ###
-  * Aurora 12.0.1.6
-  * oUF
-
-## Detailed Changes ##
-[2.6.3]: https://github.com/RealUI/RealUI/compare/2.6.2...2.6.3
-
-
-## [2.6.2] ##
-### Modified AddOns ###
-  * nibRealUI
+  * RealUI (formerly nibRealUI)
+  * RealUI_Config (formerly nibRealUI_Config)
+  * RealUI_Dev (formerly nibRealUI_Dev)
   * RealUI_Bugs
-  * Aurora 12.0.1.1
-  * BugGrabber v12.0.1
-  * oUF
-
-### Changed ###
-  * fix: patched DragEmAll to avoid protected-call taint.
-  * chg: updated the safe-boolean helper
-  * chg: more secret units
-  * chg: safe guards about booleans that might be secrets
-  * fix: UnitFrames/Shared.lua: attempt to perform boolean test on a secret boolean value (tainted by 'RealUI_Core-2.6.1')
-  * fix: AngleStatusBar.lua - attempt to compare a secret number value (tainted by 'RealUI_Core-2.6.1')
-  * fix: MenuFrame.lua: attempt to index field 'menu' (a nil value)
-
-## Detailed Changes ##
-[2.6.2]: https://github.com/RealUI/RealUI/compare/2.6.1...2.6.2
-
-
-## [2.6.1] ##
-### Modified AddOns ###
-  * Aurora 12.0.1.0
-  * RealUI_Bugs
-  * nibRealUI
-  * nibRealUI_Config
+  * RealUI_Skins
   * RealUI_Inventory
-  * RealUI_CombatText (disabled)
-  * RealUI_Skins
-  * RealUI_Tooltips
-
-### Information ###
-  * This is the second release for Midnight - World of Warcraft 12.0.1
-  * This release is a major update to the Blizzard UI - with many changes to the core and modules
-  * Certain features have been disabled or removed due to changes in the Blizzard API
-  * This version may be stable enoough for general use, but there are still some issues to be resolved
-  * Report issues at GitHub or connect with us on Discord
-
-### Changed ###
-  * chore: on unitframes
-  * chg: patch for reverse missing.
-  * fix: sometimes moneyFrameWidth is secret for some reason!?
-  * fix: Classpower is fixed for Midnight
-  * chg: make player unit frame grow from center/decrease to center as default.. and it is configurable..
-  * chg: attempt to index field 'CastingBarFrame'  error
-  * chg: Guarded Health.PostUpdate against secret/nonnumeric values.
-  * chg: Fixed a typo that caused uiScale CVar to be set unconditionally
-
-## Detailed Changes ##
-[2.6.1]: https://github.com/RealUI/RealUI/compare/2.6.0...2.6.1
-
-
-## [2.6.0] ##
-### Modified AddOns ###
-  * Aurora 12.0.0.0
-  * RealUI_Bugs
-  * nibRealUI
-  * nibRealUI_Config
-  * RealUI_Inventory
-  * RealUI_CombatText (disabled)
-  * RealUI_Skins
-  * RealUI_Tooltips (disabled)
-
-### Information ###
-  * This is the first release for Midnight - World of Warcraft 12.0
-  * This release is a major update to the Blizzard UI - with many changes to the core and modules
-  * Certain features have been disabled or removed due to changes in the Blizzard API
-  * This version may be stable enoough for general use, but there are still some issues to be resolved
-  * Report issues at GitHub or connect with us on Discord
-
-### Changed ###
-  * chg: make sure LibRangeCheck-3.0 is from local as other is not yet published
-  * removed: removed RealUI_CombatText from packaging
-  * chg: fix for Moneyframe nil errors
-  * fix: Tooltips bugs in raid
-  * fix: PostUpdate max is secret error
-  * chg: fix errors on boss fights from unitframes
-  * chg: fix secret crash on castbar getalpha
-  * fix: remove taints and secrets errors on castbars, in combat updates to LDB etc.
-  * chg: Make tooltips secrets safe...
-  * fix: dont bug out if currency does not exist on a toon.. currencyInfo can be nil
-  * chg: fixes for depricated api in qol patch
-  * chg: fixes to AngleStatusBar and oUF tags [Naessah]
-  * chg: castbar - Use flat texture instead of gradient [Naessah]
-  * add: infobar qol - durability repair and heartstone functionality [Naessah]
-  * chg: qol updates to tooltip objectiveprogress [Naessah]
-  * chg: updates to oUF unitframes and castbar [Naessah]
-  * chg: attempt to change start menu item for store...
-  * chg: api update for tooltips OutfitDetailsPanel -> CustomSetDetailsPanel
-  * add: RealUI Config button to GameMenu...
-  * chg: fix registered pet ui event
-  * chg: disable RealUI_CombatText if someone loads it
-  * add: ToggleHousingDashboard to infobar menu
-  * chg: _G.QuestMapFrame.QuestsFrame.Contents is now _G.QuestMapFrame.QuestsFrame.ScrollFrame.Contents
-  * chg: make castbars great again....
-  * fix: CurveConstants is _G.CurveConstants
-  * chg: dont load PredictOverride in prepatch
-  * chg: AngleStatusBar - fix so Frames still get created with Frame and StatusBar as Statusbar
-  * chg: make oUF not push errors..
-  * chg: castbar/angelbare can only be StatusBar and not "Frame" - lets hope this does not brake something else
-  * fix: RealUI. functions not available in RealUI_Bugs
-  * fix: should still be 0
-  * fix: range now works -  percent = _G.UnitHealthPercent
-  * chg: oUF color override needs init with oUF:CreateColor
-  * chg: introduction of C_CombatLog
-  * chg: don't AbbreviateName where unit names are secret.
-  * chg: use RealUI.isSecret
-  * add: RealUI.isSecret function to check if output is secret.
-  * chore: remove debug message
-  * chg: Bartender - turned on grid by default, made visibility on/off also on by default. Will add as configurable
-  * chore: updated uise of RealUI.isXX
-  * tmp: wrapper for SetColorTexture on AngleFrame so we dont barf wen colors dont exist
-  * chg: Buttonsizes for bars changed from 26 to 35
-  * add: flags for isRetail, isDragonflight, isMidnight
-  * Merge remote-tracking branch 'origin/main' into beta/midnight_1
-  * chg: remove RealUI Dev addon profiler command
-  * beta: beta toc 2.6.0
-  * fix: classColors bugs out when classToken is ADVENTURER
-  * beta: temp workaround for midnight
-  * beta: temp workaround for midnight
-  * fix: HelpPlate is now HelpPlateButton
-  * beta: temp midnight workaround
-  * beta: temp midnight workaround
-  * chg: remove notifications about profiler - it is long gone
-
-## Detailed Changes ##
-[2.6.0]: https://github.com/RealUI/RealUI/compare/2.5.10...2.6.0
-
-
-## [2.5.10] ##
-### Modified AddOns ###
-  * Aurora 11.2.7.2
-  * nibRealUI
-  * RealUI_Inventory
-
-### Changed ###
-  * chg: moved from NUM_CHAT_WINDOWS to Constants.ChatFrameConstants.MaxChatWindows
-
-## Detailed Changes ##
-[2.5.9]: https://github.com/RealUI/RealUI/compare/2.5.9...2.5.10
-
-## [2.5.9] ##
-### Modified AddOns ###
-  * Aurora 11.2.7.1
-  * nibRealUI
-  * nibRealUI_Config
-  * RealUI_Inventory
-
-### Changed ###
-  * fix: bug in CUSTOM_CLASS_COLORS/LOCALIZED_CLASS_NAMES_MALE https://github.com/Stanzilla/WoWUIBugs/issues/798
-  * fix: new enum.FrameTutorialAccount replaces LE_FRAME_TUTORIAL_ACCOUNT
-  * fix: duplicate guid
-  * add: housing xp tracking added (method from how to track xp with events found from ls-)
-
-## Detailed Changes ##
-[2.5.8]: https://github.com/RealUI/RealUI/compare/2.5.8...2.5.9
-
-
-
-## [2.5.8] ##
-### Modified AddOns ###
-  * Aurora 11.2.7.0
-  * nibRealUI
-
-### Changed ###
-  * fix: SetCVarBitfield throws error  LE_FRAME_TUTORIAL_ACCOUNT_*
-  * chg: fix for ZoneAbilityFrame spellButton
-  * chg: fix for double tap dragem..
-  * BugGrabber - version: v11.2.5
-
-## Detailed Changes ##
-[2.5.7]: https://github.com/RealUI/RealUI/compare/2.5.7...2.5.8
-
-
-## [2.5.7] ##
-### Modified AddOns ###
-  * Aurora 11.2.5.2
-  * nibRealUI
-
-### Changed ###
-  * chg: fix an missing _G in EventRegistry
-  * chg: make PlayerChoiceFrame moveable.
-  * chg: fix for SUPER_TRACKING in Minimap
-  * chore: removed some FIXLATERs
-  * chg: OrderHall_CheckCommandBar removed from remix
-
-## Detailed Changes ##
-[2.5.6]: https://github.com/RealUI/RealUI/compare/2.5.6...2.5.7
-
-## [2.5.6] ##
-### Modified AddOns ###
-  * Aurora 11.2.5.1
-  * nibRealUI
-
-### Changed ###
-  * chg: infobar - blocks - removed druplicate ToggleHelpFrame
-  * BugGrabber - version: v11.2.2
-
-## Detailed Changes ##
-[2.5.5]: https://github.com/RealUI/RealUI/compare/2.5.5...2.5.6
-
-
-## [2.5.5] ##
-### Modified AddOns ###
-  * Aurora 11.2.5.0
-  * nibRealUI
-
-### Changed ###
-  * chg: make WeeklyRewardsFrame moveable
-  * chg: make CommunitiesGuildLogFrame moveable
-
-## Detailed Changes ##
-[2.5.4]: https://github.com/RealUI/RealUI/compare/2.5.4...2.5.5
-
-
-## [2.5.4] ##
-### Modified AddOns ###
-  * Aurora 11.2.0.6
-  * oUF
-  * nibRealUI
-  * RealUI_Bugs
-  * RealUI_Skins
-  * RealUI_Dev
-
-### Changed ###
-  * chg: Blizzard_PlayerSpells dragable
-  * chg: renable part of blocks disabled to debug c stack overflow
-  * add: make Blizzard_ProfessionsBook dragable..
-  * chg: make CurrencyTransferMenu draggable
-  * fix: C stack overflow fix in relation to GUILD_ROSTER_UPDATE
-  * chg: add calendar back to minimenu, and remove store as it taints
-  * chg: Patch 11.1.5 removed the ability to disable the profiler. It is now permanently enabled.
-  * revert: blocks onupdate function
-  * chg: more selfies replaced
-  * chg: missed one self -> dialog
-  * chg: Blizzard stopped using function(self) replaced function(dialog)
-
-## Detailed Changes ##
-[2.5.3]: https://github.com/RealUI/RealUI/compare/2.5.3...2.5.4
-
-
-## [2.5.3] ##
-### Modified AddOns ###
-  * Aurora 11.2.0.1
-  * oUF
-  * RealUI_Skins
-  * nibRealUI
-  * RealUI_Bugs
-  * RealUI_Dev
-
-### Changed ###
-  * chg: BugGrabber - version: v11.1.5
-  * tmp: RealUI_Inventory workarounds
-  * add: reminder about LibWindow-1.1
-  * Removed commented code
-  * chg: Minimap use GetQuestsOnMapCached
-  * cleanup: C_Container unused code
-  * chg: re-enabled   RealUI_Inventory
-  * chg: ClearAllPoints changed in 11.2.0 - breaks moving certain windows
-  * chg: Minor RealUI_Inventory changes
-  * fix: RealUI_Inventory bugging out with EquipmentSets
-  * chg: RealUI.C_Container removed and replaced with _G.C_Container
-  * chg: Masque - api version update
-  * chg: make RealUI_Inventory load, bags ok - banks disabled
-  * fix: LFGFrame hook.
-  * chg: skin for AddonCompartmentFrame
-  * add: Adding skeleton for account wide money in infobar
-  * chg: toc update for 11.2.0
-  * fix: CommunitiesFrame is moveable again
-  * chg: BNet_GetValidatedCharacterName -> FriendsFrame_GetFormattedCharacterName
-  * chg: replace BNet_GetValidatedCharacterName with FriendsFrame_GetFormattedCharacterName - 11.2
-  * chg: addons enabled is now boolean
-  * chg: SendChatMessage -> C_ChatInfo.SendChatMessage
-  * chg: naming chg from self following blizzard standards
-  * chg: add debug info for blizzbugs
-  * chg: GameFontNormalCenter replaced by GameFontNormal
-  * chg: IsAzeriteItemLocationBankBag ->  IsAzeriteItemLocationBankTab
-  * chg: other changes related to C_SpecializationInfo implementation.
-  * chg: GetSpecialization ->  C_SpecializationInfo.GetSpecialization
-  * chg: Blizzard_VoidStorageUI removed in retail.
-
-## Detailed Changes ##
-[2.5.2]: https://github.com/RealUI/RealUI/compare/2.5.2...2.5.3
-
-
-## [2.5.2] ##
-### Modified AddOns ###
-  * Aurora 11.1.5.0
-  * RealUI_Skins
-  * nibRealUI
-  * RealUI_Tooltips
-
-### Changed ###
-  * fix: HelpPlate_GetButton was remove from the API
-  * revert: RealUI_Inventory error that sneaked in on mouse over npcs
-
-
-## Detailed Changes ##
-[2.5.1]: https://github.com/RealUI/RealUI/compare/2.5.1...2.5.2
-
-
-## [2.5.0] ##
-### Modified AddOns ###
-  * Aurora 11.1.0.1
-  * RealUI_Skins
-  * nibRealUI
-  * nibRealUI_Dev
-
-### Information ###
-  * This is the first release for The War Within - World of Warcraft 11.1.0
-  * Certain features have been disabled or removed due to changes in the Blizzard API
-  * This version is stable enoough for general use, but there are still some issues to be resolved
-
-### Changed ###
-  * chg: make addonprofiler off on RealUI releases and configurable with RealUI_Dev
-  * fix: UpdateUIScale add some sanity checks and round only to 2 decimals
-  * fix: SetSpecialization to C_SpecializationInfo.SetSpecialization (tnx Squishses)
-  * chg: Some debug code
-
-## Detailed Changes ##
-[2.4.2]: https://github.com/RealUI/RealUI/compare/2.4.2...2.5.0
-
-## [2.4.2] ##
-### Modified AddOns ###
-  * Aurora 11.0.5.3
-
-### Changed ###
-  * fix: Aurora chg of UIDropDownMenuTemplate replaced with DropdownButton
-
-## Detailed Changes ##
-[2.4.1]: https://github.com/RealUI/RealUI/compare/2.4.2...2.4.1
-
-
-## [2.4.1] ##
-### Modified AddOns ###
+  * RealUI_Chat
   * RealUI_CombatText
-  * RealUI_Inventory
-  * RealUI_Skins
   * RealUI_Tooltips
-  * nibRealUI
-  * nibRealUI_Config
+  * Aurora (12.0.1.10)
 
 ### Information ###
-  * This is the second release for The War Within - World of Warcraft 11.0.5
-  * This release is a major update to the Blizzard UI - with many changes to the core and modules
-  * Certain features have been disabled or removed due to changes in the Blizzard API
-  * This version is stable enoough for general use, but there are still some issues to be resolved
+  * Major release with architectural improvements and new systems
+  * Introduces comprehensive module framework, performance monitoring, and advanced configuration
+  * All new systems are accessible via `/realui` config (and `/realdev` test commands for developers)
+  * Report issues at GitHub or connect with us on Discord
+  * **IMPORTANT**: Addon folders have been renamed from nibRealUI to RealUI naming convention
+  * Automatic migration system preserves all user settings from nibRealUIDB to RealUIDB
+  * Compatible with World of Warcraft 12.0+ (Midnight)
+  * There are still bugs and tweaks needed over the coming weeks.
 
 ### Added ###
-  * add: Show Tracking in Farm Mode (configurable)
+  * Addon Renaming - Folders renamed from nibRealUI to RealUI naming convention
+  * SavedVariables Migration - Automatic migration from nibRealUIDB to RealUIDB preserving all user settings
+  * Module Framework System - Comprehensive module management with dependency handling and lifecycle control
+  * Performance Monitor - Real-time tracking of memory, CPU, and FPS with alerting system
+  * Profile System - Enhanced profile management with backup/restore and character registration
+  * Layout Manager - Automatic layout switching based on specialization with manual override
+  * Resolution Optimizer - Automatic HuD optimization for different screen resolutions
+  * Compatibility Manager - Addon conflict detection and safe mode operation
+  * Deployment Validator - System validation checks to ensure proper initialization
+  * Resource Manager - Memory and resource optimization system
+  * Error Recovery - Enhanced error handling and recovery mechanisms
+  * Configuration UI - New "Systems" tab in config with controls for all new systems
+  * Dev Commands - `/realdev testmodules`, `testperf`, `testprofile`, `testlayout`, `testresolution`, `testcompat`, `testdeploy`, and `testall`
+  * HUD Test Suite - Comprehensive test suite for HuD positioning and unit frames
+  * RealUI_Dev test suite for Bank addon (20+ test files covering bags, filters, slots, lifecycle, etc.)
+  * Platynator profiles added to setup - replaces KUI Nameplates (thanks to zENK for the profile)
+  * DragEmAll support for Blizzard_HousingDashboard, Blizzard_Professions, Blizzard_ProfessionsBook
+  * DragEmAll force move for Blizzard_PlayerSpells and similar frames
+  * Razer Naga Action Bar (BTBar2) configurable
+  * General_Scale string added to enUS locale
+  * GitHub Copilot instructions file
+  * RealUI_Inventory support for Banks and Warbanks (post WoW 11)
+  * Store menu item restored on Infobar
 
 ### Changed ###
-  * chg: dragemall changes to stop blocking communties frame
-  * chg: removed RealUI.C_Container
-  * chg: removed unused xml
-  * chg: updated masque skin for 11.0.0 and new api
-  * chg: AddonCompartmentFrame now anchored to coords
-  * chg: removed compability realui.enum.bankindex replaced with _G.Enum.BagIndex..
-  * chg: SpellActivationOverlay_ShowAllOverlays and SpellActivationOverlay_HideOverlays replaced.
-  * chg: removed debug threat spam :)
-  * chg: GetNumGuildMembers no longer gives back onlineandmobile users - replacing block entry
-  * chg: CreateObjectPool is now securepools - replace with CreateUnsecuredObjectPool
-  * chg: removed RealUI.Enum,BagIndex
+  * Rewrite of the HUD unit frame system
+  * Converted nibRealUI to RealUI with full migration support
+  * InstallWizard now requires a reload on setup
+  * Screen optimization on small screens with high resolution before starting wizard
+  * Updated HuD Vertical ActionBar description
+  * Moved reset command from `/realdev` to `/realui`
+  * Performance monitor no longer on by default - optional addition
+  * DragEmAll updated to add force move capability
+  * IsEquippedItem API usage removed (deprecated by Blizzard)
+  * Updated .pkgmeta configuration
+  * Next beta target set to 13.0.0
+  * Removed unused code and comments throughout
+  * Moved core tests from RealUI to RealUI_Dev
+  * Boss UID handling updated to avoid secret values
+  * Work on importing Platynator defaults
+  * Aurora updated for WoW 12 compatibility with extensive API modernization
+  * Replaced deprecated WoW API calls throughout Aurora
+  * Updated ObjectiveTracker, ActionBarController, and multiple Blizzard UI skins for WoW 12
+  * Improved error handling with pcall wrappers for protected/secret values
+  * Enhanced RealUI_Skins with toggle to disable World Map skin if taint issues occur
 
 ### Fixed ###
-a497c0ff fix: GetContainerItemInfo changed .
-  * fix: spec button on block were broken due to changed api
-  * fix: look up bankInteractionType with variable..
-  * fix: POIButton:add was removed - add coordinates directly
-  * fix: missing _G in Inventory
-  * fix: MinimapAdv - GarrisonEnums, ObjectiveTrackerPOI, and cleanups.
-  * fix: CompartmentFramePosition on minimap to follow anchorto
+  * HUD growth direction fix
+  * HUD unit tests fix
+  * In-combat lockdowns to stop taints and errors
+  * In-combat taint issues
+  * Loot roll windows
+  * uiScaleChanging keeps tainting stuff
+  * uiScale was broken and tainted UI
+  * Block tooltips
+  * Three unguarded ndb.settings accesses causing crash on spec change
+  * Taint error in GetVisualPercent
+  * Dragging for Blizzard_Professions
+  * DragEmAll for Blizzard_ProfessionsBook
+  * Error in regioninfo of RealUI_Bugs
+  * PerformanceMonitor fixes
+  * Performance Monitor caused script timeout by scanning all installed addons on every memory check
+  * Secret string value tainted by RealUI_Bugs
+  * World map taint error causing ADDON_ACTION_BLOCKED when opening map (RealUI_Skins)
+  * WorldMapFrame update
+  * RealUI_Dev throws error on certain early loads
+  * Screensaver should not start on auto on reload
+  * Turn off ScreenSaver on movement
+  * LibQTip-2 frame initialization before use
+  * ResourceManager.lua script ran too long
+  * Side bars positioning and vertical orientation
+  * RealUI Config bar positioning issue
+  * Checks for minWidth and maxWidth being secret/tainted
+  * Safety check for db and db.positioners initialization
+  * Nil check for db.units before accessing unit-specific settings (Shared.lua)
+  * UpdateReverse function nil check for ndb.settings during profile switching
+  * Error in Infobar module when switching profiles/specs
+  * Nil checks for item quality and color when not yet available
+  * oUF auras element sortedBuffs and sortedDebuffs table initialization
+  * Boss being nil
+  * ShowWarning method being nil
+  * scanningTooltip being nil
+  * Upgrade notification error
+  * Update system bugs
+  * Detection of older version
+  * Modules not being loaded properly
+  * Missed AceSerializer in pkgmeta and libs.xml
+  * Database integrity validation errors during deployment
+  * "attempt to index a nil value" errors in ModuleFramework OnProfileUpdate
+  * "attempt to call method 'ScheduleTimer'" errors in ResolutionOptimizer and CompatibilityManager
+  * "bad argument #1 to 'max' (number expected, got nil)" in FrameMover position validation
+  * "attempt to index global 'stageContent'" in InstallUI onShow handler
+  * "attempt to call method 'GetAvailableProfiles'" in SystemsConfig profile dropdown
+  * All 7 modules (CooldownCount, FrameMover, Loot, ActionBars, EventNotifier, SpellAlerts, WorldMarker) now properly enable on load
+  * GetUnscaledFrameRect secret number taint in UIWidget tooltip layout (Aurora)
+  * SetPassThroughButtons taint on WorldMap pins mitigated with optional skin disable (RealUI_Skins)
+  * ADDON_LOADED contamination in action bar initialization chain (Aurora)
+  * Multiple Aurora taint fixes for WoW 12 compatibility
+  * Secret value protections in chat bubbles and widget debug names (Aurora)
 
-### Disabled ###
+### Removed ###
+  * KUI Nameplates - no longer being updated, replaced with Platynator
+  * Debug message on scaling
+  * nibRealUI_Dev replaced by RealUI_Dev
+  * Kui_Nameplates addon data file
 
-## Detailed Changes ##
-[2.4.1]: https://github.com/RealUI/RealUI/compare/2.4.0...2.4.1
-
-
-## [2.4.0] ##
-### Modified AddOns ###
-  * RealUI_Bugs
-  * RealUI_CombatText
-  * RealUI_Inventory
-  * RealUI_Skins
-  * RealUI_Tooltips
-  * nibRealUI
-  * nibRealUI_Config
-  * nibRealUI_Dev
-
-
-### Information ###
-  * This is the first release for The War Within - World of Warcraft 11.0.2
-  * This release is a major update to the Blizzard UI - with many changes to the core and modules
-  * Certain features have been disabled or removed due to changes in the Blizzard API
-  * This version is stable enoough for general use, but there are still some issues to be resolved
-
-### Added ###
-  * add: talents to blocks micro menu
-  * objectivetracker dvelve support
-  * updatespec fire on additional events
-  * add: extra command rc for readycheck
-  * add: add debug code for missing blockInfo
-  * add: RealUI.Enum.BagIndex now includes Warband bank flags
-
-### Changed ###
-  * EnumerateInactive no longer exists
-  * support for new objectivetracker hide/collapse - added blocks
-  * chg: realui minimap module updated for 11.0.2
-  * chg: C_Reputation updates
-  * chg: C_Bank api updates
-  * chg: apis that moved to C_Spell
-  * chg: IterateModules - name field deprecated
-  * chg: upgraded BugGrabber
-  * chg: discord link updated
-
-### Fixed ###
-  * AddonCompartmentFrame is not a happy camper.. placing it in the map for now
-  * added GuildBanker and AccountBanker
-  * registercommands for readycheck and reload are now functions
-  * fix for updated api on ObjectiveTrackerFrame
-  * fix: class resource bar throwing error on certain classes
-  * fix: RealUI_Inventory numActiveObjects error on looting in combat
-  * fix: RealUI_Inventory - added more events, freeslots fix
-  * fix minimap tracking, removal of compartmentframe
-  * TOGGLETALENTS and ToggleProfessionsBook on block bar mini menu
-  * fix rl command
-  * fix: mssing fields from GetWatchedFactionData and change of ToggleTalentFrame to PlayerSpellsUtil.TogglePlayerSpellsFrame
-  * fix: TaintLess [24-02-20] to TaintLess [24-07-27]
-  * fix: bags using Enum.BagIndex, fix a possible nil
-  * fix: CVar countdownForCooldowns is reversed.
-  * fix: RealUI_Inventory - fix of filters broken by 11.0
-  * fix: changes to C_Reputation.GetWatchedFactionData
-  * fix: typo and removed unused code
-  * fix: CollectionWardrobeUtil replaced by C_TransmogCollection
-
-### Disabled ###
-  * AddonListAdv:OnEnable change in api
-  * ZAFFrame.SpellButtonContainer.contentFramePool
-
+### Libraries Updated ###
+  * LibQTip-1.0 replaced with LibQTip-2.0 (sourced from GitHub instead of WoWAce)
+  * LibRangeCheck-3.0 updated to v1.0.17-9-gd53d7b0
+  * BugGrabber updated through v12.0.2 → v12.0.3 → v12.0.5 → v12.0.6 → v12.0.7
+  * AceSerializer-3.0 added to pkgmeta and libs.xml
+  * oUF framework updated (13.3.0)
+  * HereBeDragons library updated to latest
+  * LibDualSpec-1.0 updated to latest
+  * LibIconFonts updated to latest
+  * LibWindow-1.1 updated to latest
+  * LibItemUpgradeInfo-1.0 updated to latest
+  * LibSharedMedia-3.0 updated to latest
+  * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
-[2.4.0]: https://github.com/RealUI/RealUI/compare/2.3.16...2.4.0
+
+[3.0.0]: https://github.com/RealUI/RealUI/compare/2.6.3...3.0.0

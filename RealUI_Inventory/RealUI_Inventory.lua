@@ -33,6 +33,10 @@ end
 function private.GetBagTypeForBagID(bagID)
     if bagID >= _G.Enum.BagIndex.Backpack and bagID <= _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS then
         return "main"
+    elseif bagID >= _G.Enum.BagIndex.CharacterBankTab_1 and bagID <= _G.Enum.BagIndex.CharacterBankTab_6 then
+        return "bank"
+    elseif bagID >= _G.Enum.BagIndex.AccountBankTab_1 and bagID <= _G.Enum.BagIndex.AccountBankTab_5 then
+        return "bank"
     else
         return "bank"
     end
@@ -45,15 +49,11 @@ function private.SellJunk()
         if slot.sellPrice then
             slot.sellPrice = nil
             slot.JunkIcon:Hide()
-
-            _G.C_Container.UseContainerItem(slot:GetBagAndSlot()) --- FIXME
+            _G.C_Container.UseContainerItem(slot:GetBagAndSlot())
         end
     end
 
     if bag.profit > 0 then
-        -- FIXMELATER
-        -- -function GetMoneyString(money, separateThousands, checkGoldThreshold)
-        -- +function GetMoneyString(money, separateThousands, checkGoldThreshold, showZeroAsGold)
         local money = _G.GetMoneyString(bag.profit, true)
         _G.print(_G.AMOUNT_RECEIVED_COLON, money)
     end
@@ -116,7 +116,6 @@ function Inventory:OnInitialize()
     private.Update()
 
     self.Update = private.Update
-    -- FIXBETA
     _G.C_Timer.After(1, function()
         -- Disable tutorials
         _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
