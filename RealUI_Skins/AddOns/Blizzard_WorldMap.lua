@@ -93,54 +93,76 @@ end
 --[[ do AddOns\Blizzard_WorldMap.xml
 end ]]
 
-_G.hooksecurefunc(private.AddOns, "Blizzard_WorldMap", function()
-    -- Read references ONCE during initialisation.  Do NOT store
-    -- WorldMapFrame itself in any closure or upvalue used by the ticker.
-    local scrollContainer = _G.WorldMapFrame.ScrollContainer
-    local titleContainer  = _G.WorldMapFrame.BorderFrame.TitleContainer
-    Hook.SetCachedScrollContainer(scrollContainer)
+-- Coordinate overlay is registered independently of Aurora's WorldMap skin
+-- so that coordinates continue to work even when the skin is disabled
+-- (to avoid the SetPassThroughButtons taint).
+do
+    local function initCoordOverlay()
+        -- Read references ONCE during initialisation.  Do NOT store
+        -- WorldMapFrame itself in any closure or upvalue used by the ticker.
+        local scrollContainer = _G.WorldMapFrame.ScrollContainer
+        local titleContainer  = _G.WorldMapFrame.BorderFrame.TitleContainer
+        Hook.SetCachedScrollContainer(scrollContainer)
 
-    -- Create coordinate display as a standalone overlay parented to UIParent.
-    -- Adding children or font strings directly to WorldMapFrame / BorderFrame
-    -- modifies the C-side frame hierarchy from addon code, which the engine's
-    -- taint tracking propagates into the secure pin creation path and
-    -- eventually blocks SetPassThroughButtons.
-    local overlay = _G.CreateFrame("Frame", nil, _G.UIParent)
-    overlay:SetFrameStrata("HIGH")
-    overlay:SetFrameLevel(200)
-    overlay:Hide()
-    Hook.SetCoordOverlay(overlay)
+        -- Create coordinate display as a standalone overlay parented to UIParent.
+        -- Adding children or font strings directly to WorldMapFrame / BorderFrame
+        -- modifies the C-side frame hierarchy from addon code, which the engine's
+        -- taint tracking propagates into the secure pin creation path and
+        -- eventually blocks SetPassThroughButtons.
+        local overlay = _G.CreateFrame("Frame", nil, _G.UIParent)
+        overlay:SetFrameStrata("HIGH")
+        overlay:SetFrameLevel(200)
+        overlay:Hide()
+        Hook.SetCoordOverlay(overlay)
 
-    local player = overlay:CreateFontString(nil, "OVERLAY")
-    player:SetPoint("LEFT", titleContainer, -20, 0)
-    player:SetFontObject(_G.SystemFont_Shadow_Med1)
-    player:SetJustifyH("LEFT")
-    player:SetText("")
+        local player = overlay:CreateFontString(nil, "OVERLAY")
+        player:SetPoint("LEFT", titleContainer, -20, 0)
+        player:SetFontObject(_G.SystemFont_Shadow_Med1)
+        player:SetJustifyH("LEFT")
+        player:SetText("")
 
-    local mouse = overlay:CreateFontString(nil, "OVERLAY")
-    mouse:SetPoint("LEFT", titleContainer, 100, 0)
-    mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
-    mouse:SetJustifyH("LEFT")
-    mouse:SetText("")
+        local mouse = overlay:CreateFontString(nil, "OVERLAY")
+        mouse:SetPoint("LEFT", titleContainer, 100, 0)
+        mouse:SetFontObject(_G.SystemFont_Shadow_Med1)
+        mouse:SetJustifyH("LEFT")
+        mouse:SetText("")
 
-    local coords = {
-        player = player,
-        mouse = mouse,
-    }
+        local coords = {
+            player = player,
+            mouse = mouse,
+        }
 
-    -- Detect map opening via WORLD_MAP_OPEN game event.  The ticker's
-    -- self-check on ScrollContainer:IsShown() handles stopping when the
-    -- map closes, so no WORLD_MAP_CLOSE / HookScript / child frame is
-    -- needed – all of which would inject addon code into WorldMapFrame's
-    -- show/hide processing and taint the pin creation path.
-    local eventFrame = _G.CreateFrame("Frame")
-    eventFrame:RegisterEvent("WORLD_MAP_OPEN")
-    eventFrame:SetScript("OnEvent", function()
-        Hook.StartCoordinateTracking(coords)
+        -- Detect map opening via WORLD_MAP_OPEN game event.  The ticker's
+        -- self-check on ScrollContainer:IsShown() handles stopping when the
+        -- map closes, so no WORLD_MAP_CLOSE / HookScript / child frame is
+        -- needed – all of which would inject addon code into WorldMapFrame's
+        -- show/hide processing and taint the pin creation path.
+        local eventFrame = _G.CreateFrame("Frame")
+        eventFrame:RegisterEvent("WORLD_MAP_OPEN")
+        eventFrame:SetScript("OnEvent", function()
+            Hook.StartCoordinateTracking(coords)
+        end)
+
+        -- Start tracking if map is already open at load time
+        if _G.WorldMapFrame:IsShown() then
+            Hook.StartCoordinateTracking(coords)
+        end
+    end
+
+    -- Register via ADDON_LOADED so this works regardless of whether
+    -- Aurora's WorldMap skin is enabled or disabled.
+    local loader = _G.CreateFrame("Frame")
+    loader:RegisterEvent("ADDON_LOADED")
+    loader:SetScript("OnEvent", function(self, event, addonName)
+        if addonName ~= "Blizzard_WorldMap" then return end
+        self:UnregisterEvent("ADDON_LOADED")
+        initCoordOverlay()
     end)
 
-    -- Start tracking if map is already open at load time
-    if _G.WorldMapFrame:IsShown() then
-        Hook.StartCoordinateTracking(coords)
+    -- Blizzard_WorldMap may already be loaded
+    local isLoaded, isFinished = _G.C_AddOns.IsAddOnLoaded("Blizzard_WorldMap")
+    if isLoaded and isFinished then
+        loader:UnregisterEvent("ADDON_LOADED")
+        initCoordOverlay()
     end
-end)
+end
