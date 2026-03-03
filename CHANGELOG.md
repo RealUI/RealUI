@@ -1,3 +1,15 @@
+## [3.0.1] - 2026-03-03 ##
+
+### Summary ###
+Hotfix for taint introduced in aurora 12.0.1.10
+
+### Modified AddOns ###
+  * Aurora (12.0.1.11)
+
+### Fixed ###
+  * fix: Revert GetUnscaledFrameRect global replacement — overwriting this global taints every LayoutFrame call, causing massive CooldownViewer combat taint (aurora).
+
+
 ## [3.0.0] - 2026-03-03 ##
 
 ### Summary ###
@@ -151,5 +163,5 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
-
+[3.0.1]: https://github.com/RealUI/RealUI/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/RealUI/RealUI/compare/2.6.3...3.0.0
