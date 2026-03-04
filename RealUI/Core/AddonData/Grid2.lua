@@ -81,6 +81,9 @@ function private.AddOns.Grid2()
         ["orientation"] = "HORIZONTAL",
     }
 
+    if not namespaces.Grid2RaidDebuffs then
+        namespaces.Grid2RaidDebuffs = {}
+    end
     if not namespaces.Grid2RaidDebuffs.profiles then
         namespaces.Grid2RaidDebuffs.profiles = {}
     end
