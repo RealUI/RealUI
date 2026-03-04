@@ -267,9 +267,9 @@ local CreatePowerStatus do
         local isResting = _G.IsResting()
 
         -- UnitIsAFK returns a restricted (secret) boolean during combat lockdown
-        -- in instanced content; skip it since you can't be AFK in combat anyway
+        -- in instanced content; skip it in either case
         local isAFK = false
-        if not inCombat then
+        if not inCombat and not _G.IsInInstance() then
             isAFK = _G.UnitIsAFK(unit)
         end
 
