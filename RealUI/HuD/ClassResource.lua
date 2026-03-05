@@ -318,12 +318,12 @@ function ClassResource:ToggleConfigMode(isConfigMode)
                     end
                 else
                     if pts[i] and pts[i].SetShown then
-                        pts[i]:SetShown(isConfigMode)
-                    end
-                    if pts.PostUpdate then
-                        pts:PostUpdate(isConfigMode and 3 or 0, isConfigMode and 5 or 0, true, power.type)
+                        pts[i]:SetShown(true)
                     end
                 end
+            end
+            if not self.isRunes and pts.PostUpdate then
+                pts:PostUpdate(3, 5, true, power.type)
             end
         end
         if bar and bar.SetMinMaxValues and bar.PostUpdate then
@@ -332,6 +332,16 @@ function ClassResource:ToggleConfigMode(isConfigMode)
             bar:PostUpdate(maxHealth * 0.4, maxHealth)
         end
     else
+        -- Explicitly undo the SetShown(true) calls from config mode
+        -- before ForceUpdate restores the correct display state
+        local pts = self.points
+        if pts then
+            for i = 1, power.max do
+                if pts[i] and pts[i].Hide then
+                    pts[i]:Hide()
+                end
+            end
+        end
         ClassResource:ForceUpdate()
     end
 end
