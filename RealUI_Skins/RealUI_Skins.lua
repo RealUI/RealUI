@@ -286,7 +286,11 @@ function private.OnLoad()
 
         -- Since we load Blizzard_WorldMap before RealUI_Skins, this frame is created before we
         -- get to hook the creation functions. As such, we need to run this to finish it's skin.
-        Skin.NavBarTemplate(_G.WorldMapFrame.NavBar)
+        -- Only apply when the WorldMap skin is enabled; modifying NavBar from
+        -- addon code contributes to the SetPassThroughButtons taint.
+        if private.skinsDB.addons["Blizzard_WorldMap"] then
+            Skin.NavBarTemplate(_G.WorldMapFrame.NavBar)
+        end
 
         --f.f = "f" -- error for testing RealUI_Bugs
     end
