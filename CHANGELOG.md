@@ -1,3 +1,21 @@
+## [3.0.2] - 2026-03-06 ##
+### Summary ###
+Stability patch addressing taint issues and minor fixes. Includes a LibStrata taint fix, a WorldMap skin toggle to avoid SetPassThroughButtons taint on map pins, a fix for secret value leaking through isAFK, and a Grid2RaidDebuffs namespace guard. Also fixes combo points display not clearing when leaving layout mode.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Skins
+  * Aurora (12.0.1.12)
+
+### Fixed ###
+  * chg: l Blizzard_Worldmap handling placed back to Aurora
+  * fix: taintfix in LibStrata
+  * Clear combo points display when leaving layout mode [#116] [CalebHolt]
+  * fix: Add option to disable Aurora's WorldMap skin — a taint bug causes SetPassThroughButtons ADDON_ACTION_BLOCKED on map pins when any addon modifies WorldMapFrame children. Toggle available in RealUI Config → Skins → Appearance.
+  * Merge branch 'develop' of github.com:RealUI/RealUI into develop
+  * (origin/main, origin/HEAD) fix: another instance of isAFK getting a secret
+  * fix: make sure namespaces.Grid2RaidDebuffs exists.. if not create it
+
 ## [3.0.1] - 2026-03-03 ##
 
 ### Summary ###
