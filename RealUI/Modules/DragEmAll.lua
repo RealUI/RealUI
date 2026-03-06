@@ -219,13 +219,9 @@ local addonFrames = {
     Blizzard_WeeklyRewards = {
         WeeklyRewardsFrame = {}
     },
-    -- WorldMapFrame is excluded: HookScript / SetMovable / RegisterForDrag
-    -- modify C-side frame state that the engine's taint tracking propagates
-    -- into the secure map-pin code path (AcquirePin → SetPassThroughButtons),
-    -- causing ADDON_ACTION_BLOCKED attributed to RealUI_Skins.
-    -- Blizzard_WorldMap = {
-    --     WorldMapFrame = {}
-    -- },
+    Blizzard_WorldMap = {
+        WorldMapFrame = {}
+    },
 }
 
 local frames = {}

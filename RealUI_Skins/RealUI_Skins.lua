@@ -284,13 +284,12 @@ function private.OnLoad()
             private.AddOns.Ace3()
         end
 
-        -- Since we load Blizzard_WorldMap before RealUI_Skins, this frame is created before we
-        -- get to hook the creation functions. As such, we need to run this to finish it's skin.
-        -- Only apply when the WorldMap skin is enabled; modifying NavBar from
-        -- addon code contributes to the SetPassThroughButtons taint.
-        if private.skinsDB.addons["Blizzard_WorldMap"] then
-            Skin.NavBarTemplate(_G.WorldMapFrame.NavBar)
-        end
+        -- NavBar skinning for the WorldMap is now handled entirely by the
+        -- taint-safe Skin.WorldMapNavBarTemplate in Aurora's Blizzard_WorldMap
+        -- skin.  Skin.NavBarTemplate uses FrameTypeButton which writes Lua
+        -- functions directly onto button tables and calls HookScript, creating
+        -- addon-owned state that propagates taint into the secure pin path
+        -- (AcquirePin → SetPassThroughButtons).  Do NOT call it here.
 
         --f.f = "f" -- error for testing RealUI_Bugs
     end
