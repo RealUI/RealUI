@@ -74,9 +74,9 @@ end
 local CheckHelper
 
 local function CheckOne(frame, parent, context, recurse)
-  local p = parent.GetFrameLevel and parent:GetFrameLevel()
-  local c = frame.GetFrameLevel and frame:GetFrameLevel()
-  if not c or not p then return end
+  local pOk, p = pcall(parent.GetFrameLevel, parent)
+  local cOk, c = pcall(frame.GetFrameLevel, frame)
+  if not (pOk and cOk and p and c) then return end
   if c <= p then
     SetLevel(frame, p+1, context)
     if lib.debug and (frame:GetFrameLevel() <= parent:GetFrameLevel()) then
