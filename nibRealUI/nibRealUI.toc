@@ -2,7 +2,7 @@
 ## Title: nibRealUI (Migration Stub)
 ## Notes: Loads legacy SavedVariables for migration to RealUI 3.0
 ## Author: Nibelheim, Gethe, Hanshi
-## Version: 3.0.2
+## Version: 3.0.3
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter

@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe, Hanshi
-## Version: 3.0.2
+## Version: 3.0.3
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: RealUI

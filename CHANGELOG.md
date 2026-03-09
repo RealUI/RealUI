@@ -1,3 +1,11 @@
+## [3.0.3] - 2026-03-06 ##
+### Summary ###
+Just a quick hotfix for a issue resolved in aurora 12.0.1.13 that was causing taint issues on the world map. This patch includes a fix for the GetUnscaledFrameRect global replacement that was introduced in aurora.
+
+### Modified AddOns ###
+  * Aurora (12.0.1.13)
+
+
 ## [3.0.2] - 2026-03-06 ##
 ### Summary ###
 Stability patch addressing taint issues and minor fixes. Includes a LibStrata taint fix, a WorldMap skin toggle to avoid SetPassThroughButtons taint on map pins, a fix for secret value leaking through isAFK, and a Grid2RaidDebuffs namespace guard. Also fixes combo points display not clearing when leaving layout mode.
@@ -181,5 +189,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.3]: https://github.com/RealUI/RealUI/compare/3.0.2...3.0.3
+[3.0.2]: https://github.com/RealUI/RealUI/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/RealUI/RealUI/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/RealUI/RealUI/compare/2.6.3...3.0.0
