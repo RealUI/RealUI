@@ -41,22 +41,6 @@ local classificationTypes = {
     worldboss = (" |cffFF0000%s|r"):format(_G.BOSS)
 }
 
---[[
-local function GetUnit(self)
-    Tooltips:debug("GetUnit", self and self:GetName())
-    local _, unit = _G.GameTooltip:GetUnit()
-
-    if not unit then
-        local focus = _G.GetMouseFocus()
-        if focus then
-            -- focus might somehow be a FontString, which doesn't have GetAttribute
-            unit = focus.unit or (focus.GetAttribute and focus:GetAttribute("unit"))
-        end
-    end
-
-    return unit or "mouseover"
-end
-]]
 local function IsSafeUnitToken(unit)
     return type(unit) == "string" and not RealUI.isSecret(unit) and unit ~= ""
 end
@@ -82,79 +66,6 @@ local function IsNonSecretString(value)
     return type(value) == "string" and not RealUI.isSecret(value)
 end
 
-local function GetHighlightRGB()
-    local c = _G.HIGHLIGHT_FONT_COLOR
-    if c and type(c.r) == "number" and type(c.g) == "number" and type(c.b) == "number" then
-        return c.r, c.g, c.b
-    end
-    return 1, 1, 1
-end
-
-local function GetSafeGlobalString(key, fallback)
-    local value = _G[key]
-    if IsNonSecretString(value) and value ~= "" then
-        return value
-    end
-    return fallback
-end
-
-local function FormatMoneyIcons(amount)
-    local gold = math.floor(amount / 10000)
-    local silver = math.floor((amount % 10000) / 100)
-    local copper = amount % 100
-
-    local parts = {}
-    if gold > 0 then
-        parts[#parts + 1] = ("%d|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t"):format(gold)
-    end
-    if gold > 0 or silver > 0 then
-        parts[#parts + 1] = ("%d|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:2:0|t"):format(silver)
-    end
-    parts[#parts + 1] = ("%d|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:2:0|t"):format(copper)
-    return table.concat(parts, " ")
-end
-
-local function AddTooltipMoneyText(tooltip, amount, prefix)
-    if RealUI.isSecret(amount) or type(amount) ~= "number" then
-        return
-    end
-
-    local moneyText = FormatMoneyIcons(amount)
-    if prefix then
-        local r, g, b = GetHighlightRGB()
-        tooltip:AddDoubleLine(prefix, moneyText, r, g, b, 1, 1, 1)
-    else
-        tooltip:AddLine(moneyText, 1, 1, 1)
-    end
-end
-
-local function SafeTooltip_OnTooltipAddMoney(self, cost, maxcost)
-    if RealUI.isSecret(cost) or type(cost) ~= "number" then
-        return
-    end
-
-    if _G.GameTooltip_ClearMoney then
-        pcall(_G.GameTooltip_ClearMoney, self)
-    end
-
-    if maxcost ~= nil and (RealUI.isSecret(maxcost) or type(maxcost) ~= "number") then
-        maxcost = nil
-    end
-
-    local sellPrice = GetSafeGlobalString("SELL_PRICE", "Sell Price")
-    local minimum = GetSafeGlobalString("MINIMUM", "Minimum")
-    local maximum = GetSafeGlobalString("MAXIMUM", "Maximum")
-
-    if maxcost ~= nil and maxcost >= 1 then
-        local r, g, b = GetHighlightRGB()
-        self:AddLine(("%s:"):format(sellPrice), r, g, b)
-        local indent = string.rep(" ", 4)
-        AddTooltipMoneyText(self, cost, ("%s%s:"):format(indent, minimum))
-        AddTooltipMoneyText(self, maxcost, ("%s%s:"):format(indent, maximum))
-    else
-        AddTooltipMoneyText(self, cost, string.format("%s:", sellPrice))
-    end
-end
 local function GetUnitColor(unit)
     if not IsSafeUnitToken(unit) then
         return Color.white
@@ -174,7 +85,6 @@ local function GetUnitColor(unit)
         end
     end
 
-    --print("unit color", color:GetRGB())
     return color
 end
 local function GetUnitName(unit)
@@ -201,7 +111,6 @@ local function GetUnitName(unit)
         else
             local relationship = _G.UnitRealmRelationship(unit)
             if not RealUI.isSecret(relationship) then
-                --print("relationship", relationship)
                 if relationship == _G.LE_REALM_RELATION_VIRTUAL then
                     unitName = unitName.._G.INTERACTIVE_SERVER_LABEL
                 elseif relationship == _G.LE_REALM_RELATION_COALESCED then
@@ -342,26 +251,6 @@ local factionIcon = {
     },
 }
 
---[[
-local follow = {
-    args = true,
-    lines = true,
-}
-local function PrintDataArgs(note, data, isRec)
-    if not isRec then
-        print(note)
-        note = "data"
-    end
-
-    for k, v in next, data do
-        print("    "..note, k, v)
-        if follow[k] then
-            PrintDataArgs("    "..k, v, true)
-        end
-    end
-end
-]]
-
 local LineTypeEnums = _G.Enum.TooltipDataLineType
 local TooltipTypeEnums = _G.Enum.TooltipDataType
 if _G.issecure and _G.issecure() then
@@ -447,8 +336,6 @@ if _G.issecure and _G.issecure() then
             tooltip.factionIcon:Hide()
         end
 
-        --private.AddObjectiveProgress(tooltip, unitToken, previousLine)
-
         local unitTarget = unitToken.."target"
         if IsNonSecretTrue(_G.UnitExists(unitTarget)) then
             local text
@@ -476,7 +363,6 @@ if _G.issecure and _G.issecure() then
             return
         end
 
-        --PrintDataArgs("AddTooltipPostCall:Item", tooltipData)
         local _, link = _G.TooltipUtil.GetDisplayedItem(tooltip)
         if Tooltips.db.global.showTransmog and link then
             local itemAppearanceID, itemModifiedAppearanceID = _G.C_TransmogCollection.GetItemInfo(link)
@@ -507,25 +393,6 @@ if _G.issecure and _G.issecure() then
     end)
 end
 
---[[
-private.AddHook("OnTooltipSetUnit", function(dialog)
-    Tooltips:debug("--- OnTooltipSetUnit ---")
-    local unit = GetUnit(dialog)
-    if not _G.UnitExists(unit) then return end
-    Tooltips:debug("unit:", unit)
-
-
-    private.AddObjectiveProgress(dialog, unit, previousLine)
-
-    AddDynamicInfo(unit, _G.UnitIsPlayer(unit))
-
-    if _G.UnitIsDeadOrGhost(unit) then
-        _G.GameTooltipStatusBar:Hide()
-    end
-end, true)
-
-]]
-
 local frameColor = Aurora.Color.frame
 private.AddHook("OnTooltipCleared", function(tooltip)
     tooltip._unitToken = nil
@@ -541,72 +408,11 @@ end, true)
 
 function Tooltips:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
-
-    --[[
-    FramePoint:RegisterMod(self)
-    FramePoint:PositionFrame(self, tooltipAnchor, {"global", "position"})
-    Tooltips:PositionAnchor()
-
-    if RealUI.realmInfo.realmNormalized then
-        private.SetupCurrency()
-    else
-        self:RegisterMessage("CurrencyDBInitialized", private.SetupCurrency)
-    end
-
-    if self.db.global.multiTip then
-        private.SetupMultiTip()
-    end
-    ]]
     if self.db.global.showIDs then
         private.SetupIDTips()
     end
     private.questCache = self.db.global.questCache
     for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
         private.HookTooltip(tooltip)
-    end
-
-    if not private._moneyHooked and type(_G.GameTooltip_OnTooltipAddMoney) == "function" then
-        private._moneyHooked = true
-        private._origGameTooltip_OnTooltipAddMoney = _G.GameTooltip_OnTooltipAddMoney
-        _G.GameTooltip_OnTooltipAddMoney = SafeTooltip_OnTooltipAddMoney
-    end
-
-    if not private._moneyFrameUpdateHooked and type(_G.MoneyFrame_Update) == "function" then
-        private._moneyFrameUpdateHooked = true
-        private._origMoneyFrame_Update = _G.MoneyFrame_Update
-        _G.MoneyFrame_Update = function(frameName, money, forceShow)
-            if RealUI.isSecret(frameName) or RealUI.isSecret(money) or RealUI.isSecret(forceShow) then
-                return
-            end
-
-            local ok, result = pcall(private._origMoneyFrame_Update, frameName, money, forceShow)
-            if ok then
-                return result
-            end
-        end
-    end
-
-    if not private._setTooltipMoneyHooked and type(_G.SetTooltipMoney) == "function" then
-        private._setTooltipMoneyHooked = true
-        private._origSetTooltipMoney = _G.SetTooltipMoney
-        _G.SetTooltipMoney = function(frame, money, moneyType, prefixText, suffixText)
-            if RealUI.isSecret(frame) or RealUI.isSecret(money) or RealUI.isSecret(moneyType)
-                or RealUI.isSecret(prefixText) or RealUI.isSecret(suffixText) then
-                return
-            end
-
-            local ok, result = pcall(private._origSetTooltipMoney, frame, money, moneyType, prefixText, suffixText)
-            if ok then
-                return result
-            end
-
-            if type(frame) == "table" and type(frame.AddLine) == "function" then
-                local prefix = prefixText
-                if not prefix or prefix == "" then
-                    prefix = suffixText
-                end
-                AddTooltipMoneyText(frame, money, prefix)
-            end
-        end
     end
 end
