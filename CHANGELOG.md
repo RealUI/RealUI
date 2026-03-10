@@ -1,3 +1,17 @@
+## [3.0.4] - 2026-03-10 ##
+### Summary ###
+Fixed infobar reputation block crashing when no faction is tracked, updated to use newer reputation APIs, and hardened Major Faction renown display. Removed tooltip money hooks that were causing "reported addon" blocks on gear upgrades. Aurora 12.0.1.14 fixes UIWidget taint by routing widget setup calls through securecallfunction.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Tooltips
+  * Aurora (12.0.1.14)
+
+### Fixed ###
+  * fix: Reputation on infobar
+  * fix: reported addon block on gear upgrade
+
+
 ## [3.0.3] - 2026-03-06 ##
 ### Summary ###
 Just a quick hotfix for a issue resolved in aurora 12.0.1.13 that was causing taint issues on the world map. This patch includes a fix for the GetUnscaledFrameRect global replacement that was introduced in aurora.
@@ -189,6 +203,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.4]: https://github.com/RealUI/RealUI/compare/3.0.3...3.0.4
 [3.0.3]: https://github.com/RealUI/RealUI/compare/3.0.2...3.0.3
 [3.0.2]: https://github.com/RealUI/RealUI/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/RealUI/RealUI/compare/3.0.0...3.0.1

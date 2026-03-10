@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: Useful tooltip mods
 ## Author: Gethe, Hanshi
-## Version: 3.0.3
+## Version: 3.0.4
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## OptionalDeps: LibObjectiveProgress-1.0
