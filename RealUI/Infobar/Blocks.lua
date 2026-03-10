@@ -1919,7 +1919,13 @@ function Infobar:CreateBlocks()
             end,
             GetStats = function(Rep)
                 local watchedFactionData = _G.C_Reputation.GetWatchedFactionData()
-                local curRep, minRep, maxRep, factionID, reaction, name = watchedFactionData.currentStanding, watchedFactionData.currentReactionThreshold, watchedFactionData.nextReactionThreshold, watchedFactionData.factionID, watchedFactionData.reaction, watchedFactionData.name
+                if not watchedFactionData then
+                    return 0, 1, "", false
+                end
+
+                local factionID = watchedFactionData.factionID
+                local factionData = _G.C_Reputation.GetFactionDataByID(factionID) or watchedFactionData
+                local curRep, minRep, maxRep, reaction, name = factionData.currentStanding, factionData.currentReactionThreshold, factionData.nextReactionThreshold, factionData.reaction, factionData.name
 
                 -- local name, reaction, minRep, maxRep, curRep, factionID = _G.C_Reputation.GetWatchedFactionInfo()
                 Rep.factionStandingtext = _G["FACTION_STANDING_LABEL"..reaction]
@@ -1927,11 +1933,11 @@ function Infobar:CreateBlocks()
                 Rep.factionID = factionID
 
                 local repInfo = _G.C_GossipInfo.GetFriendshipReputation(factionID)
-                local friendshipID = repInfo.friendshipFactionID
+                local friendshipID = repInfo and repInfo.friendshipFactionID or 0
                 local hasReward = false
                 Rep.isMajorFaction = false
 
-                if _G.C_Reputation.IsFactionParagon(factionID) then
+                if _G.C_Reputation.IsFactionParagonForCurrentPlayer(factionID) then
                     local currentValue, threshold, _, hasRewardPending = _G.C_Reputation.GetFactionParagonInfo(factionID)
                     minRep, maxRep = 0, threshold
                     curRep = currentValue % threshold
@@ -1942,6 +1948,7 @@ function Infobar:CreateBlocks()
                 elseif ( _G.C_Reputation.IsMajorFaction(factionID) ) then
                     local majorFactionData = _G.C_MajorFactions.GetMajorFactionData(factionID)
                     minRep, maxRep = 0, majorFactionData.renownLevelThreshold
+                    curRep = majorFactionData.renownReputationEarned or curRep
                     Rep.isMajorFaction = true
                 elseif friendshipID > 0 then
                     if repInfo.nextThreshold then
@@ -1962,6 +1969,9 @@ function Infobar:CreateBlocks()
                 -- Normalize values
                 maxRep = maxRep - minRep
                 curRep = curRep - minRep
+                if maxRep <= 0 then
+                    maxRep, curRep = 1, 1
+                end
                 return curRep, maxRep, name, hasReward
             end,
             GetColor = function(Rep)
@@ -1979,6 +1989,7 @@ function Infobar:CreateBlocks()
                 tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
                 tooltip:SetCellTextColor(lineNum, 2, r, g, b)
 
+
                 local repStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(curRep), RealUI.ReadableNumber(maxRep), (curRep/maxRep)*100)
                 lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
                 tooltip:SetCellTextColor(lineNum, 1, r, g, b)
@@ -1992,14 +2003,16 @@ function Infobar:CreateBlocks()
                 tooltip:AddLine(" ")
             end,
             OnClick = function(Rep)
-                if Rep.isMajorFaction then
+                if Rep.isMajorFaction and Rep.factionID > 0 then
                     if not _G.MajorFactionRenownFrame then
                         _G.MajorFactions_LoadUI()
                     end
-                    _G.HideUIPanel(_G.MajorFactionRenownFrame)
-                    if Rep.factionID > 0 then
+                    if _G.MajorFactionRenownFrame then
+                        _G.HideUIPanel(_G.MajorFactionRenownFrame)
                         _G.EventRegistry:TriggerEvent("MajorFactionRenownMixin.MajorFactionRenownRequest", Rep.factionID)
                         _G.ShowUIPanel(_G.MajorFactionRenownFrame)
+                    else
+                        _G.ToggleCharacter("ReputationFrame")
                     end
                 else
                     _G.ToggleCharacter("ReputationFrame")
