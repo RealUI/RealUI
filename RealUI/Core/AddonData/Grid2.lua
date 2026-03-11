@@ -1575,6 +1575,8 @@ function private.Profiles.Grid2()
 
     local pro = db[RealUI.charInfo.specs.current.index] or db
     if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
-        _G.Grid2.db:SetProfile(pro)
+        -- pcall to protect against Grid2Options errors when its profile
+        -- dialog frame hasn't been created yet (e.g. during fresh install)
+        pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
     end
 end

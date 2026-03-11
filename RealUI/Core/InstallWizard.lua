@@ -187,13 +187,43 @@ function InstallWizard:Complete()
         debug("Disabled old tutorial system")
     end
 
-    -- Apply first-time account CVars if this is first time
+    -- Apply first-time CVars if this is first time
     if dbg and dbg.tags and dbg.tags.firsttime then
         debug("Applying first-time account CVars")
         self:ApplyAccountCVars()
+        debug("Applying first-time character CVars")
+        self:ApplyCharacterCVars()
         dbg.tags.firsttime = false
         dbg.tutorial = dbg.tutorial or {}
         dbg.tutorial.stage = -1
+    end
+
+    -- Chat frame setup
+    for i = 1, 10 do
+        local cf = _G["ChatFrame"..i]
+        if cf then _G.FCF_SetLocked(cf, 1) end
+    end
+
+    -- Class-color player names in all chat channels
+    for _, v in next, _G.CHAT_CONFIG_CHAT_LEFT do
+        _G.ToggleChatColorNamesByClassGroup(true, v.type)
+    end
+    for iCh = 1, 15 do
+        _G.ToggleChatColorNamesByClassGroup(true, "CHANNEL"..iCh)
+    end
+
+    -- Chat window transparency
+    _G.SetChatWindowAlpha(1, 0)
+    _G.SetChatWindowAlpha(2, 0)
+    _G.DEFAULT_CHATFRAME_ALPHA = 0
+
+    -- Update version info for minipatch system
+    if dbg then
+        dbg.verinfo = {}
+        for k, v in next, RealUI.verinfo do
+            dbg.verinfo[k] = v
+        end
+        debug("Updated verinfo")
     end
 
     -- Apply RealUI addon profiles (from old setup system)
@@ -333,6 +363,31 @@ function InstallWizard:ApplyAccountCVars()
     end
 
     debug("Account CVars applied")
+end
+
+-- Apply character-specific CVars (first-time setup only)
+function InstallWizard:ApplyCharacterCVars()
+    local characterCVars = {
+        -- Nameplates
+        ["nameplateMotion"] = 1,                       -- Stacking Nameplates
+        ["nameplateShowAll"] = 1,                      -- Always show nameplates
+        ["nameplateShowSelf"] = 0,                     -- Hide Personal Resource Display
+
+        -- Combat
+        ["displaySpellActivationOverlays"] = 1,        -- Turn on Spell Alerts
+
+        -- Raid/Party
+        ["useCompactPartyFrames"] = 1,                 -- Raid-style party frames
+
+        -- Quality of Life
+        ["autoLootDefault"] = 1,                       -- Turn on Auto Loot
+    }
+
+    for cvar, value in next, characterCVars do
+        _G.SetCVar(cvar, value)
+    end
+
+    debug("Character CVars applied")
 end
 
 
