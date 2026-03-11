@@ -32,7 +32,8 @@ InstallWizard.STAGE_COMPLETE = -1
 InstallWizard.STAGE_WELCOME = 0
 InstallWizard.STAGE_LAYOUT = 1
 InstallWizard.STAGE_CHAT = 2
-InstallWizard.STAGE_FINISH = 3
+InstallWizard.STAGE_QOL = 3
+InstallWizard.STAGE_FINISH = 4
 
 -- Installation state
 local installState = {
@@ -254,6 +255,27 @@ function InstallWizard:Complete()
     end
 
     debug("Installation completed")
+
+    -- Apply wizard choices: Naga bar
+    local enableNaga = installState.stageData.enableNagaBar
+    if enableNaga ~= nil then
+        local ActionBarsModule = RealUI:GetModule("ActionBars", true)
+        if ActionBarsModule and ActionBarsModule.db then
+            ActionBarsModule.db.profile.enableNagaBar = enableNaga
+            if ActionBarsModule:IsEnabled() then
+                ActionBarsModule:UpdateNagaBarState()
+            end
+        end
+    end
+
+    -- Apply wizard choices: Repair mount
+    local repairMountID = installState.stageData.repairMountID
+    if repairMountID and repairMountID > 0 then
+        if not RealUI.db.global.qol then
+            RealUI.db.global.qol = {}
+        end
+        RealUI.db.global.qol.repairMountID = repairMountID
+    end
 
     -- Force ActionBars to apply settings and update button layouts
     local ActionBars = RealUI:GetModule("ActionBars", true)

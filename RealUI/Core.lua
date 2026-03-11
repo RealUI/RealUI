@@ -138,7 +138,10 @@ do
             messages = {},
             verinfo = {},
             patchedTOC = 0,
-            currency = {}
+            currency = {},
+            qol = {
+                repairMountID = 0
+            }
         },
         char = {
             init = charInit,
