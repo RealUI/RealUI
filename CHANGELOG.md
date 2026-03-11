@@ -1,3 +1,17 @@
+## [3.0.5] - 2026-03-11 ##
+### Summary ###
+Completed the migration from the old setup system to InstallWizard. The legacy installation window and Settings.lua setup code have been fully removed, eliminating a race condition between the two systems. The wizard gains a new Quality of Life stage with a repair mount selector (Tundra Mammoth, Grand Expedition Yak, Mighty Caravan Brutosaur) and a Razer Naga action bar toggle on the Layout stage. First-time character CVars and chat frame setup are now applied directly by InstallWizard on completion. Grid2 profile switching is wrapped in pcall to prevent errors during fresh installs.
+
+### Modified AddOns ###
+  * RealUI
+
+### Added ###
+  * add: new feawtures and qol seletions added to the install wizard
+
+### Fixed ###
+  * fix: removed last parts of the old setup system, migrated everything to InstallWizard - and removed a race condition
+
+
 ## [3.0.4] - 2026-03-10 ##
 ### Summary ###
 Fixed infobar reputation block crashing when no faction is tracked, updated to use newer reputation APIs, and hardened Major Faction renown display. Removed tooltip money hooks that were causing "reported addon" blocks on gear upgrades. Aurora 12.0.1.14 fixes UIWidget taint by routing widget setup calls through securecallfunction.
@@ -203,6 +217,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.5]: https://github.com/RealUI/RealUI/compare/3.0.4...3.0.5
 [3.0.4]: https://github.com/RealUI/RealUI/compare/3.0.3...3.0.4
 [3.0.3]: https://github.com/RealUI/RealUI/compare/3.0.2...3.0.3
 [3.0.2]: https://github.com/RealUI/RealUI/compare/3.0.1...3.0.2
