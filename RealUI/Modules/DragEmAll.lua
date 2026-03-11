@@ -283,10 +283,19 @@ function DragEmAll:HookFrame(frameName, children, force)
         end
     end
 
-    frame:EnableMouse(true)
-    frame:SetMovable(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetClampedToScreen(false)
+    -- Protected frames (force-hooked) may block EnableMouse/SetMovable;
+    -- wrap in pcall so we don't trigger ADDON_ACTION_BLOCKED.
+    if force then
+        pcall(frame.EnableMouse, frame, true)
+        pcall(frame.SetMovable, frame, true)
+        pcall(frame.RegisterForDrag, frame, "LeftButton")
+        pcall(frame.SetClampedToScreen, frame, false)
+    else
+        frame:EnableMouse(true)
+        frame:SetMovable(true)
+        frame:RegisterForDrag("LeftButton")
+        frame:SetClampedToScreen(false)
+    end
     frame:HookScript("OnDragStart", FramePoint.OnDragStart)
     frame:HookScript("OnDragStop", FramePoint.OnDragStop)
 
