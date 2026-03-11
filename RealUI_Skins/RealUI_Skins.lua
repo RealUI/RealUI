@@ -320,6 +320,9 @@ function ScaleAPI.Value(value, getFloat)
 end
 
 function ScaleAPI.Size(self, width, height)
+    if _G.InCombatLockdown() and self.IsProtected and self:IsProtected() then
+        return
+    end
     if not (width and height) then
         width, height = self:GetSize()
     end
