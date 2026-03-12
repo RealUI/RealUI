@@ -76,6 +76,9 @@ local function GroupLootFrameOnEvent(self, event, ...)
             self.rollId = nil
             Loot:UpdateGroupLoot()
         end
+    elseif event == "CANCEL_ALL_LOOT_ROLLS" then
+        _G.wipe(grouplootlist)
+        Loot:UpdateGroupLoot()
     elseif event == "MODIFIER_STATE_CHANGED" then
         local key, state = ...
         if (key == "LSHIFT" or key == "RSHIFT") then
@@ -128,6 +131,7 @@ function Loot:UpdateGroupLoot()
             frame:SetHeight(24)
             frame:SetPoint("BOTTOM", RealUIGroupLootFrame, 0, ((index-1)*(GroupLootIconSize+3)))
             frame:RegisterEvent("CANCEL_LOOT_ROLL")
+            frame:RegisterEvent("CANCEL_ALL_LOOT_ROLLS")
             frame:RegisterEvent("MODIFIER_STATE_CHANGED")
             frame:SetScript("OnEvent", GroupLootFrameOnEvent)
             frame:SetScript("OnMouseUp", GroupLootFrameOnClick)
@@ -265,6 +269,12 @@ function Loot:InitializeGroupLoot()
         glf:Hide()
         glf:SetScript("OnShow", function(frame) frame:Hide() end)
     end
+
+    -- Prevent Blizzard's GroupLootContainer from processing rolls,
+    -- otherwise it accumulates hidden frames that never get cleaned up
+    _G.GroupLootContainer:UnregisterAllEvents()
+    _G.GroupLootContainer:Hide()
+    _G.GroupLootContainer_AddRoll = function() end
 end
 
 --------------
