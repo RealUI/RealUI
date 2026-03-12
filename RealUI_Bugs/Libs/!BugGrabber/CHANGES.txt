@@ -1,9 +1,9 @@
 ------------------------------------------------------------------------
-r364 | funkehdude | 2026-02-28 11:18:56 +0000 (Sat, 28 Feb 2026) | 1 line
+r368 | funkehdude | 2026-03-12 06:07:21 +0000 (Thu, 12 Mar 2026) | 1 line
 Changed paths:
    M /trunk/.luacheckrc
    M /trunk/BugGrabber.lua
 
-Clean up chat link handler
+Reset the session count when wiping the DB
 ------------------------------------------------------------------------
 

@@ -1,7 +1,6 @@
 
 local _G = _G
 local type, table, next, tostring, tonumber, print = type, table, next, tostring, tonumber, print
-local wipe = table.wipe
 local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
 local DisableAddOn = C_AddOns.DisableAddOn
 local GetAddOnEnableState = C_AddOns.GetAddOnEnableState
@@ -164,10 +163,10 @@ end
 
 local grabError
 do
-	local GetErrorData
+	local GetErrorStack
 	do
-		local GetCallstackHeight, GetErrorCallstackHeight, debugstack, debuglocals = GetCallstackHeight, GetErrorCallstackHeight, debugstack, debuglocals
-		function GetErrorData() -- This code is lifted from Blizzard's error handler, and adapted to compensate for GetErrorCallstackHeight sometimes being nil
+		local GetCallstackHeight, GetErrorCallstackHeight, debugstack = GetCallstackHeight, GetErrorCallstackHeight, debugstack
+		function GetErrorStack() -- This code is lifted from Blizzard's error handler, and adapted to compensate for GetErrorCallstackHeight sometimes being nil
 			local currentStackHeight = GetCallstackHeight()
 			local errorCallStackHeight = GetErrorCallstackHeight()
 			if errorCallStackHeight then
@@ -175,13 +174,19 @@ do
 				local debugStackLevel = currentStackHeight - errorStackOffset
 
 				local stack = debugstack(debugStackLevel)
-				local locals = debuglocals(debugStackLevel)
-				return stack, locals
+				return stack, debugStackLevel
 			else
 				local stack = debugstack(3)
-				local locals = debuglocals(3)
-				return stack, locals
+				return stack, 3
 			end
+		end
+	end
+	local GetErrorLocals
+	do
+		local debuglocals = debuglocals
+		function GetErrorLocals(level)
+			local locals = debuglocals(level)
+			return locals
 		end
 	end
 
@@ -237,36 +242,39 @@ do
 					time = date("%Y/%m/%d %H:%M:%S"),
 					counter = 1,
 				}
+				addon:StoreError(errorObject)
 			else
-				local stack, locals = GetErrorData()
 				errorObject = {
 					message = errorMessage,
-					stack = stack or "Debugstack was nil.",
-					locals = locals or "Debuglocals was nil.",
 					session = addon:GetSessionId(),
 					time = date("%Y/%m/%d %H:%M:%S"),
 					counter = 1,
 				}
+				addon:StoreError(errorObject) -- Always store the error before checking stack/locals incase something goes wrong whilst calling them
+				local stack, level = GetErrorStack()
+				errorObject.stack = stack or "Debugstack was nil."
+				local locals = GetErrorLocals(level)
+				errorObject.locals = locals or "Debuglocals was nil."
 			end
 		else -- Old error
 			local session = addon:GetSessionId()
-			if errorObject.session ~= session then -- Error from a different session, update it
-				if not isSimple then
-					local stack, locals = GetErrorData()
-					errorObject.stack = stack or "Debugstack was nil."
-					errorObject.locals = locals or "Debuglocals was nil."
-				end
-				errorObject.session = session
-			end
 			errorObject.time = date("%Y/%m/%d %H:%M:%S")
 			errorObject.counter = errorObject.counter + 1
+			addon:StoreError(errorObject)
+			if errorObject.session ~= session then -- Error from a different session, update it
+				errorObject.session = session
+				if not isSimple then
+					local stack, level = GetErrorStack()
+					errorObject.stack = stack or "Debugstack was nil."
+					local locals = GetErrorLocals(level)
+					errorObject.locals = locals or "Debuglocals was nil."
+				end
+			end
 		end
 
 		if not isBugGrabbedRegistered then
 			print(L.ERROR_DETECTED:format(addon:GetChatLink(errorObject)))
 		end
-
-		addon:StoreError(errorObject)
 
 		triggerEvent("BugGrabber_BugGrabbed", errorObject)
 	end
@@ -318,7 +326,7 @@ function addon:GetErrorByID(tableId)
 end
 
 function addon:GetErrorID(errorObject) return tostring(errorObject):sub(8) end
-function addon:Reset() if BugGrabberDB then wipe(BugGrabberDB.errors) end end
+function addon:Reset() if BugGrabberDB then db = {} BugGrabberDB.errors = db BugGrabberDB.session = 1 end end
 function addon:GetDB() return db or loadErrors end
 function addon:GetSessionId() return BugGrabberDB and BugGrabberDB.session or -1 end
 function addon:IsPaused() return paused end
@@ -358,7 +366,7 @@ local function initDatabase()
 		local exists = fetchFromDatabase(db, err.message)
 		addon:StoreError(exists or err)
 	end
-	wipe(loadErrors)
+	loadErrors = nil
 
 	if type(sv.lastSanitation) ~= "number" or sv.lastSanitation ~= 3 then
 		for i, v in next, db do
