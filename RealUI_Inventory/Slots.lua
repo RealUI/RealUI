@@ -11,6 +11,11 @@ local Skin = Aurora.Skin
 -- RealUI --
 local Inventory = private.Inventory
 
+-- Hidden frame used to reparent suppressed overlay textures so they never render.
+private.overlayDump = private.overlayDump or _G.CreateFrame("Frame")
+private.overlayDump:Hide()
+private.noop = private.noop or function() end
+
 local function SlotFactory(pool)
     local numActive = pool:GetNumActive()
     --print("CreateSlot", numActive, pool.parent, pool.parent:GetDebugName(), pool.parent:GetName())
@@ -197,6 +202,25 @@ function BankSlotMixin:OnLoad()
     if self.emptyBackgroundAtlas then
         self.emptyBackgroundAtlas = nil
     end
+
+    -- Completely disable the Blizzard item-context dark overlay for bank slots.
+    -- The overlay is shown by UpdateItemContextOverlay (called from PostOnShow,
+    -- SetMatchesSearch, and OnItemContextChanged). Overriding the method to a
+    -- no-op prevents all code paths from ever showing it. We also reparent the
+    -- overlay texture to a hidden frame so even C-side SetShown calls are moot.
+    self.UpdateItemContextOverlay = private.noop
+    self.itemContextMatchResult = _G.ItemButtonUtil.ItemContextMatchResult.DoesNotApply
+    if self.ItemContextOverlay then
+        self.ItemContextOverlay:Hide()
+        self.ItemContextOverlay:ClearAllPoints()
+        self.ItemContextOverlay:SetParent(private.overlayDump)
+    end
+
+    -- BattlepayItemTexture (store-item-highlight blue glow) is visible by
+    -- default in ContainerFrameItemButtonTemplate. Hide it immediately.
+    if self.BattlepayItemTexture then
+        self.BattlepayItemTexture:Hide()
+    end
 end
 function BankSlotMixin:Update()
     ItemSlotMixin.Update(self)
@@ -207,6 +231,25 @@ function BankSlotMixin:Update()
     if self.IconOverlay2 then self.IconOverlay2:Hide() end
     local normalTex = self:GetNormalTexture()
     if normalTex then normalTex:SetAlpha(0) end
+
+    -- BattlepayItemTexture (store-item-highlight blue glow) is visible by
+    -- default in ContainerFrameItemButtonTemplate. Bank items are never
+    -- store-purchased, so always hide it.
+    self.BattlepayItemTexture:Hide()
+end
+function BankSlotMixin:GetItemContextMatchResult()
+    -- Always return DoesNotApply so the Blizzard item-context system
+    -- (vendor/trade highlights) never darkens bank slot icons.
+    -- PostOnShow → UpdateItemContextMatching reads this and skips the overlay.
+    return _G.ItemButtonUtil.ItemContextMatchResult.DoesNotApply
+end
+function BankSlotMixin:UpdateItemContext()
+    -- Skip UpdateItemContextMatching() for bank slots — the Blizzard item
+    -- context system (vendor/trade highlights) applies a dark overlay to
+    -- non-matching items which is unwanted in the bank frame.
+    local info = _G.C_Container.GetContainerItemInfo(self:GetBagAndSlot())
+    local isFiltered = info and info.isFiltered
+    self:SetMatchesSearch(not isFiltered)
 end
 local bankSlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "ContainerFrameItemButtonTemplate"
@@ -259,6 +302,9 @@ function private.GetSlot(bagID, slotIndex)
         slot.location:SetBagAndSlot(bagID, slotIndex)
         if slot.location:IsValid() then
             slot:SetID(slotIndex)
+            if slot.SetBagID then
+                slot:SetBagID(bagID)
+            end
             slot.item = _G.Item:CreateFromItemLocation(slot.location)
             return slot
         else

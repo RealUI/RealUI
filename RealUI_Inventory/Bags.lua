@@ -158,10 +158,48 @@ local BagMixin do
         sort(self.slots, SortSlots)
 
         if self.isPrimary then
-            tinsert(self.slots, self.dropTarget)
+            -- For the bank frame, position the dropTarget explicitly after the
+            -- slot grid rather than treating it as a regular slot.  This avoids
+            -- inconsistent placement that depends on the number of items in the
+            -- active tab.  Inventory bags continue to use the old behaviour.
+            if self.bagType ~= "bank" then
+                tinsert(self.slots, self.dropTarget)
+            end
         end
 
         local slotWidth, slotHeight = self:ArrangeSlots()
+
+        -- Bank: anchor the free-slot counter below the last row of slots so it
+        -- stays in a predictable position regardless of item count.
+        if self.isPrimary and self.bagType == "bank" then
+            self.dropTarget:ClearAllPoints()
+            local numSlots = #self.slots
+            if numSlots > 0 then
+                local lastSlot = self.slots[numSlots]
+                -- Place it right after the last slot in the grid row
+                if numSlots % SLOTS_PER_ROW == 0 then
+                    -- Last row is full — start a new row
+                    -- Find the first slot of the last row to use as corner
+                    local cornerSlot = self.slots[numSlots - SLOTS_PER_ROW + 1]
+                    self.dropTarget:SetPoint("TOPLEFT", cornerSlot, "BOTTOMLEFT", 0, -SLOT_SPACING)
+                else
+                    self.dropTarget:SetPoint("TOPLEFT", lastSlot, "TOPRIGHT", SLOT_SPACING, 0)
+                end
+            else
+                -- No items at all — place at the top-left of the frame
+                self.dropTarget:SetPoint("TOPLEFT", self, self.marginSide, -self.marginTop)
+            end
+            self.dropTarget:Show()
+
+            -- Recalculate frame height to account for the dropTarget row
+            local dropRow = math.ceil((numSlots + 1) / SLOTS_PER_ROW)
+            local totalRows = math.max(dropRow, 1)
+            local slotSize = self.dropTarget:GetWidth()
+            local gapOffsetH = SLOT_SPACING * (SLOTS_PER_ROW - 1)
+            local gapOffsetV = SLOT_SPACING * (totalRows - 1)
+            slotWidth = (slotSize * SLOTS_PER_ROW) + gapOffsetH
+            slotHeight = (slotSize * totalRows) + gapOffsetV
+        end
         self:SetSize(slotWidth + (self.marginSide * 2), slotHeight + (self.marginTop + self.marginBottom))
 
         local _, screenHeight, _, scaledHieght = RealUI.GetInterfaceSize()
@@ -390,23 +428,45 @@ function BankBagMixin:Init()
     }
 
     self:ClearAllPoints()
-    self:SetPoint("BOTTOMRIGHT", -100, 100)
     self:SetUserPlaced(false)
+    -- Position the bank frame to the right of center, vertically centered.
+    -- Using CENTER anchor on UIParent gives a predictable position that works
+    -- across resolutions and UI scales.
+    self:SetPoint("CENTER", _G.UIParent, "CENTER", 200, 0)
 end
 function BankBagMixin:OnShow()
     MainBagMixin.OnShow(self)
     _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPEN)
+
+    -- Let WoW remember the user's last drag position across sessions.
+    -- The Init anchor is only used on the very first open.
+
     if self.bankTypeSwitcher then
         self.bankTypeSwitcher:Refresh()
     end
 
     -- Deferred re-fetch: server may not have sent custom tab names/icons yet
     -- on initial bank open. Re-refresh the sidebar after a short delay to pick
-    -- up freshly arrived C_Bank data.
+    -- up freshly arrived C_Bank data, then force an Update so items display.
     if self.tabSidebar and self.activeBankType then
         _G.C_Timer.After(0.5, function()
             if self:IsShown() and self.activeBankType then
                 self.tabSidebar:Refresh(self.activeBankType)
+                -- Force item display in case the initial Update() ran before
+                -- the tab selection chain or ContinuableContainer resolved.
+                self:Update()
+
+                -- Re-apply deposit button visibility for the active bank type
+                -- in case the initial SetBankType ran before the UI was fully
+                -- laid out (anchor chain not yet resolved on first open).
+                if self.deposit then
+                    local config = private.bankTypeConfig[self.activeBankType]
+                    if config and config.supportsAutoDeposit then
+                        self.deposit:Show()
+                    else
+                        self.deposit:Hide()
+                    end
+                end
             end
         end)
     end
@@ -823,7 +883,7 @@ private.bankTypeConfig = {
             _G.Enum.BagIndex.CharacterBankTab_6,
         },
         sortFunc = function() _G.C_Container.SortBankBags() end,
-        supportsAutoDeposit = false,
+        supportsAutoDeposit = true,
     },
     [_G.Enum.BankType.Account] = {
         tabRange = {
@@ -1117,22 +1177,22 @@ function BankTypeSwitcherMixin:Init(bankFrame)
     self.buttons = {}
 
     local bankTypes = {
-        { type = _G.Enum.BankType.Character, icon = "user", label = "Character" },
-        { type = _G.Enum.BankType.Account, icon = "users", label = "Warband" },
+        { type = _G.Enum.BankType.Character, icon = "user" },
+        { type = _G.Enum.BankType.Account, icon = "users" },
     }
 
     local prevButton
     for _, info in ipairs(bankTypes) do
-        local btn = CreateFeatureButton(bankFrame, info.label, info.icon,
+        local btn = CreateFeatureButton(bankFrame, nil, info.icon,
         function()
             self:SetActiveType(info.type)
         end)
         btn.bankType = info.type
 
         if not prevButton then
-            btn:SetPoint("BOTTOMLEFT", bankFrame.searchButton, "TOPLEFT", 0, 5)
+            btn:SetPoint("LEFT", bankFrame.showBags, "RIGHT", 6, 0)
         else
-            btn:SetPoint("LEFT", prevButton.text, "RIGHT", 10, 0)
+            btn:SetPoint("LEFT", prevButton, "RIGHT", 6, 0)
         end
 
         self.buttons[info.type] = btn
@@ -1302,7 +1362,8 @@ local function CreateBag(bagType)
     main.bagIDs = info.bagIDs
     Inventory[bagType] = main
     tinsert(_G.UISpecialFrames, info.name)
-    local showBags = CreateFeatureButton(main, _G.BAGSLOTTEXT, "shopping-bag",
+    local showBagsLabel = bagType ~= "bank" and _G.BAGSLOTTEXT or nil
+    local showBags = CreateFeatureButton(main, showBagsLabel, "shopping-bag",
     function(dialog, button)
         if bagType == "bank" and button == "RightButton" then
             -- Tab purchasing is handled by the sidebar "+" button which uses
@@ -1351,8 +1412,10 @@ local function CreateBag(bagType)
 
         local bagSlots = private.bagSlots[bagType]
         if show then
-            self:SetText("")
-            self:SetHitRectInsets(-5, -5, -5, -5)
+            if bagType ~= "bank" and self.text then
+                self:SetText("")
+                self:SetHitRectInsets(-5, -5, -5, -5)
+            end
 
             if bagSlots[firstBag] then
                 bagSlots[firstBag]:SetPoint("TOPLEFT", main.showBags, "TOPRIGHT", 5, 0)
@@ -1363,8 +1426,10 @@ local function CreateBag(bagType)
                 end
             end
         else
-            self:SetText(_G.BAGSLOTTEXT)
-            self:SetHitRectInsets(-5, -50, -5, -5)
+            if bagType ~= "bank" and self.text then
+                self:SetText(_G.BAGSLOTTEXT)
+                self:SetHitRectInsets(-5, -50, -5, -5)
+            end
 
             if bagSlots[firstBag] then
                 bagSlots[firstBag]:SetPoint("TOPLEFT", _G.UIParent, "TOPRIGHT", 5, 0)
@@ -1424,20 +1489,33 @@ local function CreateBag(bagType)
         local deposit = CreateFeatureButton(main, nil, "download",
         function()
             _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPTION)
-            if _G.C_Bank.HasRefundableItemsInBags() then
+            local bankType = main:GetActiveBankType() or _G.Enum.BankType.Account
+            -- Refundable items check only applies to Account (Warband) bank
+            if bankType == _G.Enum.BankType.Account
+                and _G.C_Bank.HasRefundableItemsInBags and _G.C_Bank.HasRefundableItemsInBags() then
                 _G.StaticPopup_Show("ACCOUNT_BANK_DEPOSIT_ALL_NO_REFUND_CONFIRM")
             else
-                _G.C_Bank.AutoDepositItemsIntoBank(_G.Enum.BankType.Account)
+                _G.C_Bank.AutoDepositItemsIntoBank(bankType)
             end
         end,
         function(dialog)
             _G.GameTooltip:SetOwner(dialog, "ANCHOR_BOTTOMRIGHT")
-            _G.GameTooltip_SetTitle(_G.GameTooltip, _G.ACCOUNT_BANK_DEPOSIT_BUTTON_LABEL or "Deposit Warbound Items", nil, true)
+            local bankType = main:GetActiveBankType()
+            local label
+            if bankType == _G.Enum.BankType.Character then
+                label = _G.REAGENT_BANK_DEPOSIT or "Deposit All Reagents"
+            else
+                label = _G.ACCOUNT_BANK_DEPOSIT_BUTTON_LABEL or "Deposit Warbound Items"
+            end
+            _G.GameTooltip_SetTitle(_G.GameTooltip, label, nil, true)
             _G.GameTooltip:Show()
         end)
 
-        deposit:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
-        deposit:Hide() -- Hidden by default; shown when Warband Bank is active
+        -- Anchor chain: restack → close, deposit → restack
+        -- This way restack is always stable next to close. When deposit is
+        -- hidden (e.g. if a future bank type doesn't support it), restack
+        -- stays correctly positioned without overlapping the switcher.
+        deposit:SetFrameLevel(close:GetFrameLevel())
         main.deposit = deposit
 
         local restackButton = CreateFeatureButton(main, nil, "repeat",
@@ -1462,8 +1540,10 @@ local function CreateBag(bagType)
             _G.GameTooltip:Show()
         end)
 
-        restackButton:SetPoint("TOPRIGHT", deposit, "TOPLEFT", -5, 0)
+        restackButton:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
         main.restackButton = restackButton
+
+        deposit:SetPoint("TOPRIGHT", restackButton, "TOPLEFT", -5, 0)
     end
 
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
@@ -1491,8 +1571,8 @@ local function CreateBag(bagType)
     searchButton.text:SetPoint("LEFT", searchButton, "RIGHT", 1, 1)
     main.searchButton = searchButton
 
-    -- Create bank type switcher and tab sidebar AFTER searchButton exists,
-    -- so BankTypeSwitcherMixin can anchor to bankFrame.searchButton
+    -- Create bank type switcher and tab sidebar AFTER showBags exists,
+    -- so BankTypeSwitcherMixin can anchor to bankFrame.showBags.text
     if bagType == "bank" then
         local bankTypeSwitcher = _G.CreateFrame("Frame", nil, main)
         _G.Mixin(bankTypeSwitcher, BankTypeSwitcherMixin)
