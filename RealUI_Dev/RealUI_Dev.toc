@@ -58,5 +58,8 @@ tests\AdvancedFeaturesTest.lua
 tests\ModuleFrameworkTest.lua
 tests\PerformanceMonitorTest.lua
 tests\IntegrationTest.lua
+tests\BankLayoutExplorationTest.lua
+tests\BankLayoutPreservationTest.lua
+tests\BankSlotOverlayDiag.lua
 
 ../Aurora/dev/test.lua
