@@ -193,6 +193,72 @@ local function CreateSystemsConfig()
         }
     end
 
+    -- GC Tuning Configuration
+    do
+        local gcModeValues = {
+            smooth  = "Smooth (recommended) — frequent small GC passes, reduces large stutter spikes",
+            default = "Default — standard Lua GC behavior, may cause occasional large pauses",
+            combat  = "Combat Pause — disables GC during combat, runs cleanup after. Risky at high memory",
+        }
+
+        systemsConfig.args.gcTuning = {
+            name = "GC Tuning",
+            type = "group",
+            order = 25,
+            args = {
+                header = {
+                    name = "Garbage Collection Tuning",
+                    type = "header",
+                    order = 1,
+                },
+                desc = {
+                    name = "Controls how Lua's garbage collector runs. This affects microstutter caused by memory cleanup. Changes take effect immediately and are saved across sessions.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 2,
+                },
+                mode = {
+                    name = "GC Mode",
+                    desc = "Smooth: smaller, more frequent GC passes (best for most users).\nDefault: standard Lua behavior, can cause 30-80ms stalls at high memory.\nCombat Pause: stops GC during combat entirely — zero GC stutter in combat but memory grows unchecked. Use with caution above 500MB addon memory.",
+                    type = "select",
+                    width = "full",
+                    values = gcModeValues,
+                    sorting = { "smooth", "default", "combat" },
+                    get = function()
+                        if _G.AuroraConfig then
+                            return _G.AuroraConfig.gcMode or "smooth"
+                        end
+                        return "smooth"
+                    end,
+                    set = function(_, value)
+                        if _G.AuroraConfig then
+                            _G.AuroraConfig.gcMode = value
+                        end
+                        -- Apply immediately via Aurora's public API
+                        if _G.Aurora and _G.Aurora.ApplyGCMode then
+                            _G.Aurora.ApplyGCMode(value)
+                        end
+                    end,
+                    order = 10,
+                },
+                currentInfo = {
+                    name = function()
+                        local mem = _G.collectgarbage("count")
+                        return ("Current addon memory: %.1f MB"):format(mem / 1024)
+                    end,
+                    type = "description",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                note = {
+                    name = "\n|cffffcc00Note:|r If you use many addons (500MB+), 'Smooth' is recommended. 'Combat Pause' can cause a large stutter when combat ends as all deferred garbage is collected at once.",
+                    type = "description",
+                    order = 30,
+                },
+            },
+        }
+    end
+
     -- Profile System Configuration
     if RealUI.ProfileSystem then
         systemsConfig.args.profiles = {
