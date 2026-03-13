@@ -1,3 +1,34 @@
+## [3.0.6] - 2026-03-13 ##
+### Summary ###
+Bug-fix and hardening pass. Fixes Grid2 setup crashes, Inventory bank errors, loot roll windows, and several combat taint sources. BugGrabber updated to v12.0.9. New stutter diagnostics and Inventory test coverage in RealUI_Dev.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+  * RealUI_Dev
+  * RealUI_Inventory
+  * RealUI_Skins
+  * RealUI_Bugs
+  * RealUI_Dev
+  * RealUI_Inventory
+  * RealUI_Skins
+  * Aurora (12.0.1.15)
+
+### Added ###
+  * add: stutter diagnostics to realui dev
+  * add: extra tests and diag for RealUI_Inventory
+
+### Changed ###
+  * chg: BugGrabber v12.0.7-> v12.0.9
+
+### Fixed ###
+  * fix: setup issues with grid2 crashing and fubaring the setup
+  * fix: RealUI_Inventory fix up for errors and faults on Character/Warband Bank
+  * fix: loot window not closing after roll ++
+  * fix: dont ScaleAPI.size in combat.
+  * fix: Protected frames (force-hooked) may block EnableMouse/SetMovable
+
+
 ## [3.0.5] - 2026-03-11 ##
 ### Summary ###
 Completed the migration from the old setup system to InstallWizard. The legacy installation window and Settings.lua setup code have been fully removed, eliminating a race condition between the two systems. The wizard gains a new Quality of Life stage with a repair mount selector (Tundra Mammoth, Grand Expedition Yak, Mighty Caravan Brutosaur) and a Razer Naga action bar toggle on the Layout stage. First-time character CVars and chat frame setup are now applied directly by InstallWizard on completion. Grid2 profile switching is wrapped in pcall to prevent errors during fresh installs.
@@ -217,6 +248,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.6]: https://github.com/RealUI/RealUI/compare/3.0.5...3.0.6
 [3.0.5]: https://github.com/RealUI/RealUI/compare/3.0.4...3.0.5
 [3.0.4]: https://github.com/RealUI/RealUI/compare/3.0.3...3.0.4
 [3.0.3]: https://github.com/RealUI/RealUI/compare/3.0.2...3.0.3
