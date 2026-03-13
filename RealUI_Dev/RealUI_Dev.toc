@@ -61,5 +61,6 @@ tests\IntegrationTest.lua
 tests\BankLayoutExplorationTest.lua
 tests\BankLayoutPreservationTest.lua
 tests\BankSlotOverlayDiag.lua
+tests\StutterDiagnostic.lua
 
 ../Aurora/dev/test.lua
