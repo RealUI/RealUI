@@ -587,7 +587,7 @@ end
 -- =============================================================================
 -- Main test runner
 -- =============================================================================
-function RealUI_PreservationTests()
+local function RealUI_PreservationTests()
     passCount, failCount = 0, 0
 
     print("=== RealUI Bank Bugfix — Preservation Tests ===")

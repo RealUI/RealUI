@@ -1567,7 +1567,7 @@ function private.Profiles.Grid2()
         -- pcall protects against Grid2 errors during early init (e.g.
         -- GridLayout:UpdateFrame calling SetClampedToScreen with a bad
         -- value before Grid2 is fully bootstrapped on a fresh install).
-        local ok, err = pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
+        local ok, _err = pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
         if not ok then
             -- Defer the profile switch until Grid2 is ready
             RealUI:ScheduleTimer(function()

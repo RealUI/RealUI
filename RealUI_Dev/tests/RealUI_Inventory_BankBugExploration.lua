@@ -185,17 +185,16 @@ local function TestBug1_5(bankFrame)
 
     -- Check the first switcher button's anchor point
     local anchoredToSearch = false
-    for _, btn in next, switcher.buttons do
+    local btn = switcher.buttons and switcher.buttons[1]
+    if btn then
         local numPoints = btn:GetNumPoints()
         for i = 1, numPoints do
-            local point, relativeTo, relativePoint, xOfs, yOfs = btn:GetPoint(i)
+            local _point, relativeTo, _relativePoint, _xOfs, _yOfs = btn:GetPoint(i)
             if relativeTo == bankFrame.searchButton then
                 anchoredToSearch = true
                 break
             end
         end
-        -- Only need to check the first button (the anchor chain starts there)
-        break
     end
 
     Assert(not anchoredToSearch,
@@ -321,7 +320,7 @@ local function TestBug1_9(bankFrame)
                 -- It creates ItemLocation from GetBagID() and GetID()
                 local tooltipBagID = slot:GetBagID()
                 local tooltipSlotID = slot:GetID()
-                local tooltipLocation = _G.ItemLocation:CreateFromBagAndSlot(tooltipBagID, tooltipSlotID)
+                local _tooltipLocation = _G.ItemLocation:CreateFromBagAndSlot(tooltipBagID, tooltipSlotID)
 
                 -- Compare with the actual slot.location
                 local locationsMatch = (tooltipBagID == locationBagID and tooltipSlotID == locationSlotIndex)
@@ -355,7 +354,7 @@ end
 -- =============================================================================
 -- Main test runner
 -- =============================================================================
-function RealUI_BankBugExploration()
+local function RealUI_BankBugExploration()
     passCount, failCount = 0, 0
 
     print("=== RealUI Bank Bug Exploration Tests ===")
