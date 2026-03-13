@@ -15,27 +15,23 @@ function private.AddOns.Grid2()
         ["layouts"] = {
             ["solo"] = "None",
         },
-        ["extraThemes"] = {
-        },
         ["FrameLock"] = true,
+        ["clamp"] = true,
         ["PosX"] = -0.000104980466403504,
         ["anchor"] = "CENTER",
         ["BorderTexture"] = "None",
-        ["ClickThrough"] = true,
     }
     Grid2Layout["RealUI"] = {
         ["BackgroundTexture"] = "None",
         ["layouts"] = {
             ["solo"] = "None",
         },
-        ["extraThemes"] = {
-        },
         ["FrameLock"] = true,
+        ["clamp"] = true,
         ["PosX"] = -1.525878872143950e-05,
         ["anchor"] = "BOTTOM",
         ["groupAnchor"] = "BOTTOMLEFT",
         ["PosY"] = 38.4000015830993,
-        ["ClickThrough"] = true,
         ["BorderTexture"] = "None",
     }
 
@@ -45,8 +41,6 @@ function private.AddOns.Grid2()
             ["a"] = 0,
         },
         ["frameBorder"] = 1,
-        ["extraThemes"] = {
-        },
         ["frameBorderDistance"] = 0,
         ["frameHeight"] = 30,
         ["barTexture"] = "Plain",
@@ -58,16 +52,12 @@ function private.AddOns.Grid2()
             ["a"] = 0.5,
         },
         ["frameWidth"] = 70,
-        ["fontFlags"] = "OUTLINE",
     }
     Grid2Frame["RealUI"] = {
         ["frameColor"] = {
             ["a"] = 0,
         },
         ["frameBorder"] = 1,
-        ["extraThemes"] = {
-        },
-        ["fontFlags"] = "OUTLINE",
         ["frameHeight"] = 30,
         ["barTexture"] = "Plain",
         ["frameTexture"] = "Plain",
@@ -1565,7 +1555,6 @@ function private.Profiles.Grid2()
     db.enabled = true
     for specIndex = 1, #RealUI.charInfo.specs do
         local profile = private.layoutToProfile[1]
-        -- _G.print("RealUI.charInfo.specs[specIndex].role: ", RealUI.charInfo.specs[specIndex].role)
         if RealUI.charInfo.specs[specIndex].role == "HEALER" then
             profile = private.layoutToProfile[2]
         end
@@ -1575,8 +1564,17 @@ function private.Profiles.Grid2()
 
     local pro = db[RealUI.charInfo.specs.current.index] or db
     if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
-        -- pcall to protect against Grid2Options errors when its profile
-        -- dialog frame hasn't been created yet (e.g. during fresh install)
-        pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
+        -- pcall protects against Grid2 errors during early init (e.g.
+        -- GridLayout:UpdateFrame calling SetClampedToScreen with a bad
+        -- value before Grid2 is fully bootstrapped on a fresh install).
+        local ok, err = pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
+        if not ok then
+            -- Defer the profile switch until Grid2 is ready
+            RealUI:ScheduleTimer(function()
+                if _G.Grid2 and _G.Grid2.db then
+                    pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
+                end
+            end, 2)
+        end
     end
 end

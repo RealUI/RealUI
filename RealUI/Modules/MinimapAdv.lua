@@ -85,26 +85,29 @@ end
 local function GetPositionData()
     -- Get Normal or Expanded data
     local mapPoints
+    local pos = db.position or { anchorto = "TOPLEFT", x = 7, y = -7, size = 134, scale = 1 }
 
     if isInFarmMode then
+        local expandPos = db.expand and db.expand.position or pos
+        local expandApp = db.expand and db.expand.appearance or { scale = 1.4, opacity = 0.5 }
         mapPoints = {
-            xofs = db.expand.position.x,
-            yofs = db.expand.position.y,
-            anchor = db.expand.position.anchorto,
-            scale = db.expand.appearance.scale,
-            opacity = db.expand.appearance.opacity,
-            isTop = db.position.anchorto:find("TOP"),
-            isLeft = db.position.anchorto:find("LEFT"),
+            xofs = expandPos.x,
+            yofs = expandPos.y,
+            anchor = expandPos.anchorto,
+            scale = expandApp.scale,
+            opacity = expandApp.opacity,
+            isTop = pos.anchorto:find("TOP"),
+            isLeft = pos.anchorto:find("LEFT"),
         }
     else
         mapPoints = {
-            xofs = db.position.x,
-            yofs = db.position.y,
-            anchor = db.position.anchorto,
-            scale = db.position.scale,
+            xofs = pos.x,
+            yofs = pos.y,
+            anchor = pos.anchorto,
+            scale = pos.scale,
             opacity = 1,
-            isTop = db.position.anchorto:find("TOP"),
-            isLeft = db.position.anchorto:find("LEFT"),
+            isTop = pos.anchorto:find("TOP"),
+            isLeft = pos.anchorto:find("LEFT"),
         }
     end
 
@@ -1281,7 +1284,7 @@ end
 local function Garrison_OnEnter(self)
     MinimapAdv:debug("Garrison_OnEnter")
     if not self.title then return end
-    local isLeft = db.position.anchorto:find("LEFT")
+    local isLeft = (db.position and db.position.anchorto or "TOPLEFT"):find("LEFT")
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
     _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
@@ -1703,12 +1706,13 @@ local function CreateFrames()
     local isTop
     local isLeft
     -- FIXLATER to make configurable
+    local anchorto = db.position and db.position.anchorto or "TOPLEFT"
     if isInFarmMode then
-        isTop = db.position.anchorto:find("TOP")
-        isLeft = db.position.anchorto:find("LEFT")
+        isTop = anchorto:find("TOP")
+        isLeft = anchorto:find("LEFT")
     else
-        isTop = db.position.anchorto:find("TOP")
-        isLeft = db.position.anchorto:find("LEFT")
+        isTop = anchorto:find("TOP")
+        isLeft = anchorto:find("LEFT")
     end
     -- Set position relative to anchorto
     local CompartmentFramePosition = _G.format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")

@@ -146,8 +146,9 @@ end
 -- Move all UI Frames
 function FrameMover:MoveUIFrames()
     for uiSlug, ui in next, FrameList.uiframes do
-        if db.uiframes[uiSlug].move and ui.frames then
-            MoveFrameGroup(ui.frames, db.uiframes[uiSlug].frames)
+        local uiConfig = db.uiframes[uiSlug]
+        if uiConfig and uiConfig.move and ui.frames then
+            MoveFrameGroup(ui.frames, uiConfig.frames)
         end
     end
 end

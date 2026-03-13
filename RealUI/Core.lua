@@ -353,7 +353,12 @@ function RealUI:OnProfileUpdate(event, database, profile)
     dbc = database.char
     dbg = database.global
 
-    RealUI:SetProfilesToRealUI()
+    -- Only push profiles to third-party addons if the install wizard has
+    -- completed (installStage == -1).  During initial setup the wizard
+    -- calls AddRealUIProfiles + SetProfilesToRealUI explicitly at the end.
+    if dbc.init.installStage == -1 then
+        RealUI:SetProfilesToRealUI()
+    end
 
     for _, module in self:IterateModules() do
         module:OnProfileUpdate(event, profile)

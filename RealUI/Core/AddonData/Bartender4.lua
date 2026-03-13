@@ -370,7 +370,24 @@ end
 
 function private.Profiles.Bartender4()
     local db = _G.Bartender4.db
+
+    -- Guard: every call below (SetDualSpecEnabled, SetDualSpecProfile,
+    -- SetProfile) can fire AceDB's OnProfileChanged callback which runs
+    -- BT4ActionBars:ApplyConfig().  That function indexes self.actionbars,
+    -- which is nil until BT4ActionBars:OnEnable() populates it.
+    -- If bars aren't ready yet, defer the entire function.
+    local actionBarsModule = _G.Bartender4:GetModule("ActionBars", true)
+    if not actionBarsModule or not actionBarsModule.actionbars then
+        RealUI:ScheduleTimer(function()
+            if _G.Bartender4 and _G.Bartender4.db then
+                private.Profiles.Bartender4()
+            end
+        end, 1)
+        return
+    end
+
     db:SetDualSpecEnabled(true)
+
     for specIndex = 1, #RealUI.charInfo.specs do
         local profile = private.layoutToProfile[1]
         if RealUI.charInfo.specs[specIndex].role == "HEALER" then
@@ -381,7 +398,6 @@ function private.Profiles.Bartender4()
     end
 
     -- Switch to the correct profile for the current spec.
-    -- (db[specIndex] is not a valid AceDB lookup; compute the target directly.)
     local currentSpec = RealUI.charInfo.specs.current
     local targetProfile = private.layoutToProfile[1]  -- Default: "RealUI" (DPS/Tank)
     if currentSpec and currentSpec.role == "HEALER" then

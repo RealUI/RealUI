@@ -847,10 +847,11 @@ function Infobar:CreateBar()
     end)
 
     -- Stripes
-    Base.SetBackdrop(frame, Aurora.Color.frame, db.bgAlpha)
-    frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
+    local bgAlpha = db.bgAlpha or 0.5
+    Base.SetBackdrop(frame, Aurora.Color.frame, bgAlpha)
+    frame:SetBackdropBorderColor(Aurora.Color.frame, bgAlpha)
     RealUI:AddFrameStripes(frame)
-    frame._stripes:SetAlpha(db.bgAlpha)
+    frame._stripes:SetAlpha(bgAlpha)
 
     -- Watch bars
     local watch = {}
