@@ -124,9 +124,9 @@ end
 private.AddOns["DBM-GUI"] = function()
     Util.Mixin(_G.DBM_GUI, Hook.DBM_GUI)
 
-    ----====####$$$$%%%%$$$$####====----
+    ----====####################====----
     --             DBM-GUI            --
-    ----====####$$$$%%%%$$$$####====----
+    ----====####################====----
     Util.Mixin(_G.DBM_GUI_OptionsFrame, Hook.DBM_GUI_OptionsFrame)
 
     Skin.FrameTypeFrame(_G.DBM_GUI_OptionsFrame)
@@ -176,9 +176,9 @@ private.AddOns["DBM-GUI"] = function()
         CheckChildren(panel.frame)
     end
 
-    ----====####$$$$%%%%$$$$####====----
+    ----====####################====----
     --        DBM-GUI_DropDown        --
-    ----====####$$$$%%%%$$$$####====----
+    ----====####################====----
     Skin.OptionsFrameListTemplate(_G.DBM_GUI_DropDown)
 
     for index, button in next, _G.DBM_GUI_DropDown.buttons do

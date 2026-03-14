@@ -12,14 +12,14 @@ if not private.oUF then
 end
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --          Compatibility          --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --             Numbers             --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 function RealUI.Round(value, places)
     local mult = 10 ^ (places or 0)
     return floor(value * mult + 0.5) / mult
@@ -52,9 +52,9 @@ function RealUI.ReadableNumber(value)
 end
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --              Color              --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 local hexColor = "ff%02x%02x%02x"
 function RealUI.GetColorString(red, green, blue)
     if type(red) == "table" then
@@ -213,9 +213,9 @@ function RealUI.ColorDesaturate(delta, r, g, b)
 end
 
 
-----====####$$$$%%%%$$$$####====----
+----====####################====----
 --         Character Info         --
-----====####$$$$%%%%$$$$####====----
+----====####################====----
 local scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
 scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
 
@@ -292,9 +292,9 @@ function RealUI:FindSpellID(spellName, affectedUnit, auraType)
 end
 
 
-----====####$$$$%%%%$$$$####====----
+----====####################====----
 --          Widget Utils          --
-----====####$$$$%%%%$$$$####====----
+----====####################====----
 RealUI.UIHider = _G.CreateFrame("Frame")
 RealUI.UIHider:Hide()
 
@@ -342,9 +342,9 @@ function RealUI.MakeFrameDraggable(frame, noClamp)
 end
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --          Miscellaneous          --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 function RealUI.ShallowCopy(oldTable)
     local newTable = {}
     for k, v in next, oldTable do
