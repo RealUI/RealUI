@@ -197,9 +197,10 @@ function CombatFader:AddFadeConfig(mod, configDB, startOrder, inline)
             },
             config = {
                 name = "",
+                desc = "These settings are disabled when the parent module is off or Combat Fading is not enabled.",
                 type = "group",
                 inline = true,
-                disabled = function() return not RealUI.GetOptions(mod, modules[mod].path).enabled end,
+                disabled = function() return not RealUI:GetModuleEnabled(mod) or not RealUI.GetOptions(mod, modules[mod].path).enabled end,
                 order = 30,
                 args = args,
             }

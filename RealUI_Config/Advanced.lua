@@ -51,6 +51,65 @@ options.RealUI = {
 local optArgs = options.RealUI.args
 _G.LibStub("LibDualSpec-1.0"):EnhanceOptions(optArgs.profiles, RealUI.db)
 
+-- =============================================================================
+-- Profile Unification Evaluation (Requirements 24.1, 24.2, 24.3, 24.4)
+-- =============================================================================
+--
+-- 1. Profile Scope Analysis
+--    -----------------------------------------------------------------------
+--    RealUI Profiles (AceDB via RealUI_ConfigDB):
+--      Per-spec switching via LibDualSpec. Controls module toggles, Infobar
+--      settings, FrameMover positions, and all other module db.profile fields.
+--
+--    Skins Profiles (AceDB via RealUI_SkinsDB):
+--      Separate AceDB instance. Controls appearance (frameColor, buttonColor,
+--      fonts, scale, addon toggles). No LibDualSpec integration — appearance
+--      is typically shared across specs.
+--
+--    Systems Profile System:
+--      Module-level system config. Only active when the Profile System module
+--      is enabled. Manages module enable states, performance settings, and
+--      layout preferences.
+--
+-- 2. Overlap Assessment
+--    -----------------------------------------------------------------------
+--    - RealUI Profiles and Skins Profiles do NOT overlap — they manage
+--      different saved variables (RealUI_ConfigDB vs RealUI_SkinsDB).
+--    - Systems Profile System manages module enable states which partially
+--      overlaps with RealUI Profiles (which also stores module states in
+--      RealUI_ConfigDB).
+--    - LibDualSpec only applies to RealUI Profiles, not Skins or Systems.
+--
+-- 3. Export/Import Evaluation
+--    -----------------------------------------------------------------------
+--    - AceDB provides built-in profile copy/delete but no export/import to
+--      file.
+--    - Adding export/import would require serialization (AceSerializer) and
+--      a text input dialog.
+--    - Low priority — profile copy between characters covers most use cases.
+--
+-- 4. Unification Recommendation
+--    -----------------------------------------------------------------------
+--    - Full unification is NOT recommended because Skins and Core serve
+--      different purposes and use separate saved variables.
+--    - The current three-scope model is appropriate.
+--    - The profileScopesDesc description panel (added in task 5.1) provides
+--      adequate user guidance explaining all three scopes.
+--
+-- =============================================================================
+
+-- Profile scope description: explains the three separate profile scopes in RealUI
+optArgs.profiles.args.profileScopesDesc = {
+    name = "|cffffcc00Profile Scopes|r\n\n"
+        .. "RealUI uses three separate profile scopes:\n\n"
+        .. "|cff88ccffRealUI Profiles|r (this section): Controls the main AceDB profile for RealUI core settings (Infobar, FrameMover, module toggles, etc.). LibDualSpec allows automatic profile switching per specialization.\n\n"
+        .. "|cff88ccffSkins Profiles|r (Skins \226\134\146 Profiles): Controls appearance settings (frame color, button color, fonts, scale, addon skin toggles). Separate from main profiles because appearance is often shared across specs.\n\n"
+        .. "|cff88ccffSystems Profile System|r (Systems \226\134\146 Profile System): Controls system-level configuration such as module states, performance settings, and layout preferences. Only visible when the Profile System module is active.",
+    type = "description",
+    fontSize = "medium",
+    order = 0,
+}
+
 
 
 local nameFormat = _G.ENABLE .. " %s"
@@ -145,7 +204,8 @@ do -- RealUI
                 },
                 statusBar = {
                     name = L["Infobar_ShowStatusBar"],
-                    desc = L["Infobar_ShowStatusBarDesc"],
+                    desc = L["Infobar_ShowStatusBarDesc"]
+                        .. "\n\n|cff888888Disabled when the Progress block is not enabled.|r",
                     type = "toggle",
                     disabled = function() return not Infobar.db.profile.blocks.realui.progress.enabled end,
                     get = function() return Infobar.db.profile.showBars end,
@@ -162,7 +222,8 @@ do -- RealUI
                 },
                 HideStatusBarMaxLevel = {
                     name = L["Infobar_HideStatusBarMaxLevel"],
-                    desc = L["Infobar_HideStatusBarMaxLevelDesc"],
+                    desc = L["Infobar_HideStatusBarMaxLevelDesc"]
+                        .. "\n\n|cff888888Disabled when the Progress block is not enabled.|r",
                     type = "toggle",
                     disabled = function() return not Infobar.db.profile.blocks.realui.progress.enabled end,
                     get = function() return Infobar.db.profile.HideStatusBarMaxLevel end,
@@ -311,6 +372,7 @@ do -- RealUI
                 }
                 infobar.args.blocks.args[name.."Label"] = {
                     name = L["Infobar_ShowLabel"],
+                    desc = "|cff888888Disabled when this block is not enabled.|r",
                     type = "toggle",
                     disabled = function() return not blockInfo.enabled end,
                     get = function() return blockInfo.showLabel end,
@@ -323,6 +385,7 @@ do -- RealUI
                 }
                 infobar.args.blocks.args[name.."Icon"] = {
                     name = L["Infobar_ShowIcon"],
+                    desc = "|cff888888Disabled when this block is not enabled.|r",
                     type = "toggle",
                     disabled = function() return not blockInfo.enabled end,
                     get = function() return blockInfo.showIcon end,
@@ -638,6 +701,7 @@ do -- RealUI
                 },
                 general = {
                     name = "General",
+                    desc = "|cff888888Disabled when the Screen Saver module is not enabled.|r",
                     type = "group",
                     inline = true,
                     disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
@@ -664,6 +728,17 @@ do -- RealUI
         type = "group",
         order = 0,
         args = {
+            overview = {
+                name = "|cffffcc00Core Modules|r\n\n"
+                    .. "|cff88ccffInfobar|r: The information and button bar at the top or bottom of the screen. Configure block visibility, labels, icons, background opacity, and per-block settings.\n\n"
+                    .. "|cff88ccffScreen Saver|r: Dims the screen when you go AFK, with an optional combat warning sound.\n\n"
+                    .. "|cffffcc00Configuration Layout|r\n\n"
+                    .. "|cff88ccffAdvanced Options|r (this window): Detailed configuration for all RealUI modules \226\128\148 Core, Skins, Tooltips, Inventory, CombatText, UI Tweaks, and Systems.\n\n"
+                    .. "|cff88ccffHuD Config|r (the slide-down bar at the top of the screen): HuD-related settings including UnitFrames, CastBars, and ClassResource.",
+                type = "description",
+                fontSize = "medium",
+                order = 0,
+            },
             infobar = infobar,
             screenSaver = screenSaver,
         },
@@ -859,6 +934,7 @@ do -- Inventory
 
         args.filters.args[tag.."Index"] = {
             name = filter.name,
+            desc = "|cff888888Disabled when this filter is not enabled.|r",
             type = "input",
             disabled = function()
                 return not filter:IsEnabled()
@@ -874,6 +950,7 @@ do -- Inventory
         args.filters.args[tag.."Up"] = {
             name = _G.TRACKER_SORT_MANUAL_UP,
             type = "execute",
+            desc = "|cff888888Disabled when this filter is not enabled.|r",
             disabled = function()
                 --print("Up:disabled", tag, filter:IsEnabled())
                 return not filter:IsEnabled()
@@ -889,6 +966,7 @@ do -- Inventory
         args.filters.args[tag.."Down"] = {
             name = _G.TRACKER_SORT_MANUAL_DOWN,
             type = "execute",
+            desc = "|cff888888Disabled when this filter is not enabled.|r",
             disabled = function()
                 return not filter:IsEnabled()
             end,
@@ -1042,6 +1120,11 @@ do -- Skins
 
     local Color = _G.Aurora.Color
     local Util = _G.Aurora.Util
+    -- [Duplication Resolution] Class Colors: The set callback writes to both
+    -- CUSTOM_CLASS_COLORS (SkinsDB runtime) and AuroraConfig.customClassColors
+    -- (Aurora standalone sync). This dual-write ensures class color changes made
+    -- in RealUI carry over if the user later runs Aurora standalone.
+    -- See design: Duplication Resolution Matrix — Class Colors.
     local classColors do
         classColors = {
             name = _G.CLASS_COLORS,
@@ -1061,11 +1144,61 @@ do -- Skins
                 set = function(info, r, g, b)
                     color:SetRGB(r, g, b)
                     _G.CUSTOM_CLASS_COLORS:NotifyChanges()
+                    -- Sync to AuroraConfig so Aurora standalone picks up custom class colors
+                    _G.AuroraConfig = _G.AuroraConfig or {}
+                    _G.AuroraConfig.customClassColors = _G.AuroraConfig.customClassColors or {}
+                    _G.AuroraConfig.customClassColors[classToken] = {r = r, g = g, b = b}
                 end,
             }
         end
     end
     local minScale, maxScale = 0.48, 1
+    -- =========================================================================
+    -- Addon Skin Coverage Evaluation (Requirements 23.1, 23.2, 23.3)
+    -- =========================================================================
+    --
+    -- Addons skinned by default in a standard RealUI installation:
+    --   - Grid2           (raid/party frames, included in RealUI suite)
+    --   - Bartender4      (action bars, included in RealUI workspace)
+    --   - Masque          (button skinning, optional companion)
+    --
+    -- The addon skin list below is dynamically generated from
+    -- Aurora.Base.GetAddonSkins(). Adding new skins requires writing skin
+    -- code in Aurora or RealUI_Skins — changes to this config file alone
+    -- will NOT add a new skin.
+    --
+    -- Candidate addons evaluated for future skin coverage:
+    --
+    --   Platynator (nameplate addon, included in RealUI workspace as reference)
+    --     - Aurora does NOT provide a skin via GetAddonSkins().
+    --     - A new skin would need to be written in RealUI_Skins.
+    --     - Platynator manages its own nameplate frames; skinning would
+    --       require hooking into its frame creation pipeline.
+    --
+    --   Details! Damage Meter (popular companion addon)
+    --     - Aurora does NOT provide a skin via GetAddonSkins().
+    --     - A new skin would need to be written in RealUI_Skins.
+    --     - Details has its own extensive theming/skin system which may
+    --       conflict with external skinning attempts.
+    --
+    --   WeakAuras (popular companion addon)
+    --     - Aurora does NOT provide a skin via GetAddonSkins().
+    --     - A new skin would need to be written in RealUI_Skins.
+    --     - WeakAuras frames are user-created and highly dynamic; skinning
+    --       the options UI is feasible but individual displays are not.
+    --
+    --   BigWigs / DBM (raid boss mods)
+    --     - Aurora does NOT provide skins for either via GetAddonSkins().
+    --     - New skins would need to be written in RealUI_Skins.
+    --     - Both addons have their own bar/alert styling systems.
+    --     - BigWigs has a plugin API that may be more appropriate than
+    --       external frame skinning.
+    --
+    -- Recommendation: Details and BigWigs/DBM have mature internal theming
+    -- systems, so external skins offer limited value. Platynator and
+    -- WeakAuras options UI are the strongest candidates if skin coverage
+    -- is expanded in the future.
+    -- =========================================================================
     local addons do
         local addonSkins = _G.Aurora.Base.GetAddonSkins()
         addons = {
@@ -1079,9 +1212,12 @@ do -- Skins
         for i = 1, #addonSkins do
             local name = addonSkins[i]
             if not name:find("RealUI") then
+                local isInstalled = _G.C_AddOns.GetAddOnInfo(name) ~= nil
                 addons.args[name] = {
                     name = name,
+                    desc = not isInstalled and (name .. " is not installed. Install the addon to enable this skin.") or nil,
                     type = "toggle",
+                    disabled = not isInstalled and function() return true end or nil,
                     get = function() return SkinsDB.profile.addons[name] end,
                     set = function(info, value)
                         SkinsDB.profile.addons[name] = value
@@ -1129,8 +1265,15 @@ do -- Skins
                 type = "header",
                 order = 0,
             },
+            -- [Duplication Resolution] Frame Alpha: This is SkinsDB.frameColor.a —
+            -- RealUI's frame backdrop alpha. Distinct from AuroraConfig.alpha (Skin
+            -- Style → Frame Opacity), which controls Aurora's skinned element opacity.
+            -- Both are intentionally exposed as separate controls.
+            -- See design: Duplication Resolution Matrix — Frame Alpha.
             frameColor = {
                 name = L.Appearance_FrameColor,
+                desc = "RealUI's frame backdrop color and alpha. The alpha channel here controls the backdrop opacity of RealUI frames."
+                    .. "\n\n|cffffcc00Note:|r This is separate from the Skin Style \226\134\146 Frame Opacity setting, which controls the opacity of skinned UI elements.",
                 type = "color",
                 hasAlpha = true,
                 get = function(info)
@@ -1176,9 +1319,16 @@ do -- Skins
                 type = "header",
                 order = 10,
             },
+            -- [Duplication Resolution] Font Replacement: These font selectors
+            -- (normal/chat/header) control which fonts to use via SkinsDB. They are
+            -- distinct from AuroraConfig.fonts (Skin Features → Replace Fonts), which
+            -- is a master toggle controlling whether font replacement happens at all.
+            -- Both are intentionally exposed as separate controls.
+            -- See design: Duplication Resolution Matrix — Font Replacement.
             normal = {
                 name = L.Fonts_Normal,
-                desc = L.Fonts_NormalDesc,
+                desc = (L.Fonts_NormalDesc or "")
+                    .. "\n\n|cffffcc00Note:|r This selects which font to use. The Skin Features \226\134\146 Replace Fonts toggle must be enabled for font replacement to take effect.",
                 type = "select",
                 dialogControl = "LSM30_Font",
                 values = _G.AceGUIWidgetLSMlists.font,
@@ -1188,7 +1338,8 @@ do -- Skins
             },
             chat = {
                 name = L.Fonts_Chat,
-                desc = L.Fonts_ChatDesc,
+                desc = (L.Fonts_ChatDesc or "")
+                    .. "\n\n|cffffcc00Note:|r This selects which font to use. The Skin Features \226\134\146 Replace Fonts toggle must be enabled for font replacement to take effect.",
                 type = "select",
                 dialogControl = "LSM30_Font",
                 values = _G.AceGUIWidgetLSMlists.font,
@@ -1198,7 +1349,8 @@ do -- Skins
             },
             header = {
                 name = L.Fonts_Header,
-                desc = L.Fonts_HeaderDesc,
+                desc = (L.Fonts_HeaderDesc or "")
+                    .. "\n\n|cffffcc00Note:|r This selects which font to use. The Skin Features \226\134\146 Replace Fonts toggle must be enabled for font replacement to take effect.",
                 type = "select",
                 dialogControl = "LSM30_Font",
                 values = _G.AceGUIWidgetLSMlists.font,
@@ -1211,9 +1363,86 @@ do -- Skins
                 type = "header",
                 order = 20,
             },
+            scaleDesc = {
+                name = "Scale settings are applied in the following order of precedence:\n"
+                    .. "1. |cff00ff00Resolution Optimizer|r — When active, automatically sets High Resolution and may override Custom Scale.\n"
+                    .. "2. |cff00ff00Pixel Perfect|r — When enabled, calculates the optimal scale automatically and disables Custom Scale.\n"
+                    .. "3. |cff00ff00Custom Scale|r — Manual scale value, used when Pixel Perfect is off.\n"
+                    .. "4. |cff00ff00UI Mod Scale|r — Scales only the Infobar and HuD Config bar, independent of the above settings.",
+                type = "description",
+                fontSize = "medium",
+                order = 20.5,
+            },
+            -- ============================================================
+            -- Install Wizard Affected Settings — Developer Reference
+            -- (Requirement 18.3)
+            --
+            -- The Install Wizard (InstallWizard.lua) may reset or set
+            -- the following settings during first-time setup or upgrade:
+            --
+            -- 1. isHighRes (Skins → High Resolution) — Advanced.lua
+            -- 2. layout (HuD Config → Other → Layout) — ConfigBar.lua
+            -- 3. useLarge / hudSize (HuD Config → Other → Use Large) — ConfigBar.lua
+            -- 4. Resolution Optimizer re-optimization — triggered by wizard, not a direct config control
+            -- 5. Chat settings (RealUI_Chat) — not in RealUI_Config
+            -- 6. CVars (nameplateShowFriendlyNPCs, etc.) — set directly by wizard, not config controls
+            -- 7. Naga bar visibility — set by wizard based on mouse type selection
+            -- 8. Repair mount — set by wizard based on mount selection
+            --
+            -- Settings 1–3 that have config controls are annotated with
+            -- a ⚠ warning in their desc field. Settings 4–8 are managed
+            -- outside RealUI_Config and have no corresponding controls.
+            -- ============================================================
+            -- ============================================================
+            -- Dead/Unused Options Audit — Developer Reference
+            -- (Requirement 19.1, 19.3 — Task 10.1)
+            --
+            -- Audit performed across all get/set callbacks in Advanced.lua.
+            -- Each db field was searched in the corresponding module code
+            -- to verify it is read at runtime.
+            --
+            -- DEAD OPTIONS FOUND:
+            --
+            -- 1. coordDelayHide (Minimap → Information → Fade out Coords)
+            --    DB field: MinimapAdv.db.profile.information.coordDelayHide
+            --    Issue: The set callback referenced MinimapAdv:CoordsUpdate()
+            --    which does not exist in the module. The db field is defined
+            --    in defaults but never read by any module code.
+            --    Resolution: Disabled with explanatory desc.
+            --
+            -- 2. multiTip (Tooltips → Multi-Tip)
+            --    DB field: Tooltips.db.global.multiTip
+            --    Issue: MultiTip.xml is commented out in the TOC file
+            --    (# MultiTip.xml). The feature is not loaded and the db
+            --    field is never read by any module code.
+            --    Resolution: Disabled with explanatory desc.
+            --
+            -- 3. Tooltip position controls (atCursor, x, y, point)
+            --    DB fields: Tooltips.db.global.position.*
+            --    Issue: Position fields are defined in defaults but the
+            --    RealUI_Tooltips module never reads them to position
+            --    tooltips. The controls write to db but nothing uses
+            --    the values.
+            --    Resolution: Disabled with explanatory desc and group note.
+            --
+            -- 4. dvelve (Objectives → Collapse zones → Delves)
+            --    DB field: ObjectivesAdv.db.profile.hidden.collapse.dvelve
+            --    Issue: The db key is "dvelve" but WoW's GetInstanceInfo()
+            --    returns "delve" for Delves. The collapse check uses
+            --    db.hidden.collapse[instanceType] so the misspelled key
+            --    never matches. Effectively dead.
+            --    Resolution: Added explanatory desc noting the mismatch.
+            --
+            -- ALL OTHER OPTIONS VERIFIED ACTIVE:
+            -- Every other get/set callback in Advanced.lua writes to db
+            -- fields that are confirmed read by their respective module
+            -- code at runtime.
+            -- ============================================================
             isHighRes = {
                 name = L.Appearance_HighRes,
-                desc = L.Appearance_HighResDesc,
+                desc = L.Appearance_HighResDesc
+                    .. "\n\n|cffffcc00Note:|r The Resolution Optimizer may manage this setting automatically based on your screen resolution."
+                    .. "\n\n|cffffcc00⚠|r This setting may be reset by the Install Wizard during first-time setup or upgrade.",
                 type = "toggle",
                 get = function() return SkinsDB.profile.isHighRes end,
                 set = function(info, value)
@@ -1224,7 +1453,8 @@ do -- Skins
             },
             isPixelScale = {
                 name = L.Appearance_Pixel,
-                desc = L.Appearance_PixelDesc,
+                desc = L.Appearance_PixelDesc
+                    .. "\n\n|cffffcc00Note:|r When enabled, the Custom Scale input is locked and its value is calculated automatically.",
                 type = "toggle",
                 get = function() return SkinsDB.profile.isPixelScale end,
                 set = function(info, value)
@@ -1235,7 +1465,9 @@ do -- Skins
             },
             customScale = {
                 name = L.Appearance_UIScale,
-                desc = L.Appearance_UIScaleDesc:format(minScale, maxScale),
+                desc = L.Appearance_UIScaleDesc:format(minScale, maxScale)
+                    .. "\n\n|cffffcc00Note:|r This value is overridden when Pixel Perfect is enabled (scale is calculated automatically). "
+                    .. "The Resolution Optimizer may also override this value based on your screen resolution.",
                 type = "input",
                 disabled = function() return SkinsDB.profile.isPixelScale end,
                 validate = function(info, value)
@@ -1272,6 +1504,242 @@ do -- Skins
             classColors = classColors,
             addons = addons,
             blizzardSkins = blizzardSkins,
+            skinFeatures = {
+                name = "Skin Features",
+                type = "group",
+                inline = true,
+                order = 30,
+                args = {
+                    desc = {
+                        name = "Toggle skinning for individual UI elements. Changes require a UI reload to take effect.",
+                        type = "description",
+                        order = 0,
+                    },
+                    bags = {
+                        name = "Skin Bags",
+                        desc = "Skin bag frames",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.bags
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.bags = value
+                        end,
+                        order = 1,
+                    },
+                    banks = {
+                        name = "Skin Banks",
+                        desc = "Skin bank frames",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.banks
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.banks = value
+                        end,
+                        order = 2,
+                    },
+                    chat = {
+                        name = "Skin Chat",
+                        desc = "Skin chat frames",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.chat
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.chat = value
+                        end,
+                        order = 3,
+                    },
+                    loot = {
+                        name = "Skin Loot",
+                        desc = "Skin loot frames",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.loot
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.loot = value
+                        end,
+                        order = 4,
+                    },
+                    mainmenubar = {
+                        name = "Skin Main Menu Bar",
+                        desc = "Skin main menu bar",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.mainmenubar
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.mainmenubar = value
+                        end,
+                        order = 5,
+                    },
+                    -- [Duplication Resolution] Font Replacement: This is AuroraConfig.fonts —
+                    -- a master toggle for whether font replacement happens at all. Distinct
+                    -- from the SkinsDB font selectors (normal/chat/header) above, which
+                    -- control which fonts are used when replacement is active.
+                    -- See design: Duplication Resolution Matrix — Font Replacement.
+                    fonts = {
+                        name = "Replace Fonts",
+                        desc = "Controls whether the skin engine replaces default UI fonts."
+                            .. "\n\n|cffffcc00Note:|r This is separate from the font selectors under Fonts above, which choose which fonts to use. This toggle must be enabled for those font selections to take effect.",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.fonts
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.fonts = value
+                        end,
+                        order = 6,
+                    },
+                    tooltips = {
+                        name = "Skin Tooltips",
+                        desc = "Skin tooltip frames",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.tooltips
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.tooltips = value
+                        end,
+                        order = 7,
+                    },
+                    chatBubbles = {
+                        name = "Skin Chat Bubbles",
+                        desc = "Skin chat bubbles",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.chatBubbles
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.chatBubbles = value
+                        end,
+                        order = 8,
+                    },
+                    chatBubbleNames = {
+                        name = "Show Chat Bubble Names",
+                        desc = "Show names on chat bubbles",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.chatBubbleNames
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.chatBubbleNames = value
+                        end,
+                        order = 9,
+                    },
+                },
+            },
+            skinStyle = {
+                name = "Skin Style",
+                type = "group",
+                inline = true,
+                order = 31,
+                args = {
+                    desc = {
+                        name = "Adjust the visual style of skinned UI elements.",
+                        type = "description",
+                        order = 0,
+                    },
+                    buttonsHaveGradient = {
+                        name = "Button Gradient",
+                        desc = "Use gradient on buttons",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.buttonsHaveGradient
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.buttonsHaveGradient = value
+                        end,
+                        order = 1,
+                    },
+                    customHighlightEnabled = {
+                        name = "Custom Highlight",
+                        desc = "Use custom highlight color",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
+                            return _G.AuroraConfig.customHighlight.enabled
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
+                            _G.AuroraConfig.customHighlight.enabled = value
+                        end,
+                        order = 2,
+                    },
+                    highlightColor = {
+                        name = "Highlight Color",
+                        desc = "Custom highlight color."
+                            .. "\n\n|cff888888Disabled when Custom Highlight is not enabled.|r",
+                        type = "color",
+                        hasAlpha = false,
+                        disabled = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
+                            return not _G.AuroraConfig.customHighlight.enabled
+                        end,
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
+                            local ch = _G.AuroraConfig.customHighlight
+                            return ch.r or 0, ch.g or 0, ch.b or 0
+                        end,
+                        set = function(info, r, g, b)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
+                            _G.AuroraConfig.customHighlight.r = r
+                            _G.AuroraConfig.customHighlight.g = g
+                            _G.AuroraConfig.customHighlight.b = b
+                        end,
+                        order = 3,
+                    },
+                    -- [Duplication Resolution] Frame Alpha: This is AuroraConfig.alpha —
+                    -- Aurora's skinned element opacity. Distinct from SkinsDB.frameColor.a
+                    -- (Appearance → Frame Color alpha), which controls RealUI's frame
+                    -- backdrop opacity. Both are intentionally exposed as separate controls.
+                    -- See design: Duplication Resolution Matrix — Frame Alpha.
+                    alpha = {
+                        name = "Frame Opacity",
+                        desc = "Opacity of skinned UI element frames."
+                            .. "\n\n|cffffcc00Note:|r This is separate from the Appearance \226\134\146 Frame Color alpha, which controls the backdrop opacity of RealUI frames.",
+                        type = "range",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.alpha or 1
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.alpha = value
+                        end,
+                        order = 4,
+                    },
+                },
+            },
             profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
     }
@@ -1326,12 +1794,86 @@ do -- Tooltips
             },
             multiTip = {
                 name = L.Tooltips_MultiTip,
-                desc = L.Tooltips_MultiTipDesc,
+                desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version."
+                    .. "\n\nThe MultiTip feature is disabled (not loaded in the current build).",
                 type = "toggle",
+                disabled = function() return true end,
                 get = appGet,
                 set = appSet,
                 order = 5,
-            }
+            },
+            position = {
+                name = "Position",
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                    deadNote = {
+                        name = "|cffff4444Note:|r These position settings currently have no effect. "
+                            .. "The RealUI_Tooltips module does not yet read these values to reposition tooltips. "
+                            .. "They may be wired up in a future version or removed.",
+                        type = "description",
+                        order = 0,
+                    },
+                    atCursor = {
+                        name = "Anchor to Cursor",
+                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        type = "toggle",
+                        disabled = function() return true end,
+                        get = function() return Tooltips.db.global.position.atCursor end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.atCursor = value
+                        end,
+                        order = 1,
+                    },
+                    point = {
+                        name = "Anchor Point",
+                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        type = "select",
+                        disabled = function() return true end,
+                        values = {
+                            TOPLEFT = "TOPLEFT",
+                            TOP = "TOP",
+                            TOPRIGHT = "TOPRIGHT",
+                            LEFT = "LEFT",
+                            CENTER = "CENTER",
+                            RIGHT = "RIGHT",
+                            BOTTOMLEFT = "BOTTOMLEFT",
+                            BOTTOM = "BOTTOM",
+                            BOTTOMRIGHT = "BOTTOMRIGHT",
+                        },
+                        get = function() return Tooltips.db.global.position.point end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.point = value
+                        end,
+                        order = 2,
+                    },
+                    x = {
+                        name = "X Offset",
+                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        type = "input",
+                        width = "half",
+                        disabled = function() return true end,
+                        get = function() return tostring(Tooltips.db.global.position.x) end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.x = ValidateOffset(value)
+                        end,
+                        order = 3,
+                    },
+                    y = {
+                        name = "Y Offset",
+                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        type = "input",
+                        width = "half",
+                        disabled = function() return true end,
+                        get = function() return tostring(Tooltips.db.global.position.y) end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.y = ValidateOffset(value)
+                        end,
+                        order = 4,
+                    },
+                },
+            },
         }
     end
 
@@ -1376,6 +1918,7 @@ do -- UI Tweaks
                 },
                 size = {
                     name = "Size",
+                    desc = "|cff888888Disabled when the Alt Power Bar module is not enabled.|r",
                     type = "group",
                     inline = true,
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
@@ -1414,6 +1957,7 @@ do -- UI Tweaks
                 },
                 position = {
                     name = "Position",
+                    desc = "|cff888888Disabled when the Alt Power Bar module is not enabled.|r",
                     type = "group",
                     inline = true,
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
@@ -1528,7 +2072,8 @@ do -- UI Tweaks
                 },
                 minDuration = {
                     name = "Min Duration",
-                    desc = "The minimum number of seconds a cooldown's duration must be to display text.",
+                    desc = "The minimum number of seconds a cooldown's duration must be to display text."
+                        .. "\n\n|cff888888Disabled when the CooldownCount module is not enabled.|r",
                     type = "range",
                     min = 0, max = 30, step = 0.1, bigStep = 1,
                     disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
@@ -1540,7 +2085,8 @@ do -- UI Tweaks
                 },
                 expiringDuration = {
                     name = "Expiring Duration",
-                    desc = "The minimum number of seconds a cooldown must be to display in the expiring format.",
+                    desc = "The minimum number of seconds a cooldown must be to display in the expiring format."
+                        .. "\n\n|cff888888Disabled when the CooldownCount module is not enabled.|r",
                     type = "range",
                     min = 0, max = 30, step = 1,
                     disabled = function(info) return not RealUI:GetModuleEnabled(MODNAME) end,
@@ -1657,6 +2203,7 @@ do -- UI Tweaks
                 name = "Addons",
                 type = "group",
                 childGroups = "tab",
+                desc = "|cff888888Disabled when the FrameMover module is not enabled.|r",
                 disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                 order = 50,
                 args = {},
@@ -1668,6 +2215,7 @@ do -- UI Tweaks
                     name = addon.name,
                     type = "group",
                     childGroups = "tab",
+                    desc = "|cff888888Disabled when " .. addon.name .. " is not loaded or FrameMover is not enabled.|r",
                     disabled = function() return not(_G.C_AddOns.IsAddOnLoaded(addon.name) and RealUI:GetModuleEnabled(MODNAME)) end,
                     order = addonOrderCnt,
                     args = {
@@ -1704,6 +2252,7 @@ do -- UI Tweaks
                 local normalFrameOpts = {
                     name = "Frames",
                     type = "group",
+                    desc = "|cff888888Disabled when frame moving is not enabled for this addon.|r",
                     disabled = function() return not GetEnabled(addonSlug, FrameMover.db.profile.addons[addonSlug]) end,
                     order = 10,
                     args = {},
@@ -1808,6 +2357,7 @@ do -- UI Tweaks
                     local normalHealingFrameOpts = {
                         name = "Healing Layout Frames",
                         type = "group",
+                        desc = "|cff888888Disabled when frame moving or healing layout is not enabled for this addon.|r",
                         disabled = function() return not ( GetEnabled(addonSlug, FrameMover.db.profile.addons[addonSlug]) and FrameMover.db.profile.addons[addonSlug].healing ) end,
                         order = 50,
                         args = {},
@@ -1903,6 +2453,7 @@ do -- UI Tweaks
             uiFramesOpts = {
                 name = "UI Frames",
                 type = "group",
+                desc = "|cff888888Disabled when the FrameMover module is not enabled.|r",
                 disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 60,
                 args = {},
@@ -1939,6 +2490,7 @@ do -- UI Tweaks
                         name = "Frames",
                         type = "group",
                         inline = true,
+                        desc = "|cff888888Disabled when frame moving is not enabled for this UI frame.|r",
                         disabled = function() if FrameMover.db.profile.uiframes[uiSlug].move then return false else return true end end,
                         order = 30,
                         args = {},
@@ -2024,6 +2576,7 @@ do -- UI Tweaks
             hideOpts = {
                 name = "Hide Frames",
                 type = "group",
+                desc = "|cff888888Disabled when the FrameMover module is not enabled.|r",
                 disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                 order = 70,
                 args = {
@@ -2091,6 +2644,16 @@ do -- UI Tweaks
                     fontSize = "medium",
                     order = 20,
                 },
+                docPanel = {
+                    type = "description",
+                    name = "|cffffcc00Frame Positioning Systems|r\n\n"
+                        .. "|cff88ccffFrameMover|r: Repositions addon frames and UI frames to predefined positions. Positions are stored in the FrameMover profile and applied on login or reload.\n\n"
+                        .. "|cff88ccffDragEmAll|r: Allows dragging Blizzard frames to custom positions. Positions persist across sessions via LibWindow.\n\n"
+                        .. "|cff88ccffEditMode|r: WoW's built-in frame layout editor. Manages certain Blizzard frames that FrameMover may also target.\n\n"
+                        .. "|cffff4444\226\154\160 Conflict:|r If FrameMover and EditMode both manage the same frame, EditMode may override FrameMover's position on reload. Disable FrameMover for any frames you manage in EditMode.",
+                    fontSize = "medium",
+                    order = 25,
+                },
                 addons = addonOpts,
                 uiframes = uiFramesOpts,
                 hide = hideOpts,
@@ -2148,20 +2711,19 @@ do -- UI Tweaks
                 information = {
                     name = "Information",
                     type = "group",
+                    desc = "|cff888888Disabled when the Minimap module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 40,
                     args = {
                         coordDelayHide = {
                             name = "Fade out Coords",
-                            desc = "Hide the Coordinate display when you haven't moved for 10 seconds.",
+                            desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version."
+                                .. "\n\nThe coordinate fade-out feature is not implemented in the current MinimapAdv module.",
                             type = "toggle",
+                            disabled = function() return true end,
                             get = function(info) return MinimapAdv.db.profile.information.coordDelayHide end,
                             set = function(info, value)
                                 MinimapAdv.db.profile.information.coordDelayHide = value
-                                MinimapAdv.StationaryTime = 0
-                                MinimapAdv.LastX = 0
-                                MinimapAdv.LastY = 0
-                                MinimapAdv:CoordsUpdate()
                             end,
                             order = 10,
                         },
@@ -2241,6 +2803,7 @@ do -- UI Tweaks
                 hidden = {
                     name = "Automatic Hide/Show",
                     type = "group",
+                    desc = "|cff888888Disabled when the Minimap module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 50,
                     args = {
@@ -2260,6 +2823,7 @@ do -- UI Tweaks
                             name = "Hide in..",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when Automatic Hide/Show is not enabled.|r",
                             disabled = function()
                                 return not(MinimapAdv.db.profile.hidden.enabled and RealUI:GetModuleEnabled(MODNAME))
                             end,
@@ -2300,6 +2864,7 @@ do -- UI Tweaks
                 sizeposition = {
                     name = "Position",
                     type = "group",
+                    desc = "|cff888888Disabled when the Minimap module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
@@ -2382,6 +2947,7 @@ do -- UI Tweaks
                 expand = {
                     name = "Farm Mode",
                     type = "group",
+                    desc = "|cff888888Disabled when the Minimap module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 70,
                     args = {
@@ -2484,7 +3050,8 @@ do -- UI Tweaks
                             args = {
                                 gatherertoggle = {
                                     name = "Gatherer toggle",
-                                    desc = "If you have Gatherer installed, then MinimapAdv will automatically disable Gatherer's minimap icons and HUD while not in Farm Mode, and enable them while in Farm Mode.",
+                                    desc = "If you have Gatherer installed, then MinimapAdv will automatically disable Gatherer's minimap icons and HUD while not in Farm Mode, and enable them while in Farm Mode."
+                                        .. "\n\n|cff888888Disabled when Gatherer is not installed.|r",
                                     type = "toggle",
                                     disabled = function() if not _G.Gatherer then return true else return false end end,
                                     get = function(info) return MinimapAdv.db.profile.expand.extras.gatherertoggle end,
@@ -2532,6 +3099,7 @@ do -- UI Tweaks
                 poi = {
                     name = "POI",
                     type = "group",
+                    desc = "|cff888888Disabled when the Minimap module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 80,
                     args = {
@@ -2555,6 +3123,7 @@ do -- UI Tweaks
                             name = "General Settings",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when POI display is not enabled.|r",
                             disabled = function()
                                 return not(MinimapAdv.db.profile.poi.enabled and RealUI:GetModuleEnabled(MODNAME))
                             end,
@@ -2593,6 +3162,7 @@ do -- UI Tweaks
                             name = "Icon Settings",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when POI display is not enabled.|r",
                             disabled = function()
                                 return not(MinimapAdv.db.profile.poi.enabled and RealUI:GetModuleEnabled(MODNAME))
                             end,
@@ -2668,6 +3238,7 @@ do -- UI Tweaks
                     name = "Size",
                     type = "group",
                     inline = true,
+                    desc = "|cff888888Disabled when the Mirror Bar module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 50,
                     args = {
@@ -2706,6 +3277,7 @@ do -- UI Tweaks
                     name = "Position",
                     type = "group",
                     inline = true,
+                    desc = "|cff888888Disabled when the Mirror Bar module is not enabled.|r",
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
@@ -2834,6 +3406,7 @@ do -- UI Tweaks
                 sizeposition = {
                     name = "Size/Position",
                     type = "group",
+                    desc = "|cff888888Disabled when the Objectives Adv. module is not enabled.|r",
                     disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                     order = 40,
                     args = {
@@ -2867,6 +3440,7 @@ do -- UI Tweaks
                             name = "Offsets",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when Size/Position adjustments are not enabled.|r",
                             disabled = function() return not(ObjectivesAdv.db.profile.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
                             order = 40,
                             args = {
@@ -2918,6 +3492,7 @@ do -- UI Tweaks
                             name = "Position",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when Size/Position adjustments are not enabled.|r",
                             disabled = function() return not(ObjectivesAdv.db.profile.position.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
                             order = 50,
                             args = {
@@ -2960,6 +3535,7 @@ do -- UI Tweaks
                 hidden = {
                     name = "Automatic Collapse/Hide",
                     type = "group",
+                    desc = "|cff888888Disabled when the Objectives Adv. module is not enabled.|r",
                     disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
                     order = 60,
                     args = {
@@ -2987,6 +3563,7 @@ do -- UI Tweaks
                             name = "Collapse the follwoing tracking frames..",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when Automatic Collapse/Hide is not enabled.|r",
                             disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and ObjectivesAdv.db.profile.hidden.enabled) end,
                             order = 25,
                             args = {
@@ -3038,6 +3615,7 @@ do -- UI Tweaks
                             name = "in..",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when Automatic Collapse/Hide is not enabled.|r",
                             disabled = function() return not(RealUI:GetModuleEnabled(MODNAME) and ObjectivesAdv.db.profile.hidden.enabled) end,
                             order = 30,
                             args = {
@@ -3077,7 +3655,10 @@ do -- UI Tweaks
                                     order = 50,
                                 },
                                 dvelve = {
-                                    name = "Dvelves",
+                                    name = "Delves",
+                                    desc = "|cffff4444Note:|r This setting currently has no effect due to a db key mismatch. "
+                                        .. "The internal key is \"dvelve\" but WoW returns \"delve\" as the instance type. "
+                                        .. "This will be fixed in a future update.",
                                     type = "toggle",
                                     get = collapseGet,
                                     set = collapseSet,
@@ -3094,6 +3675,7 @@ do -- UI Tweaks
                             name = "Hide the Objectives Tracker Frame completely in..",
                             type = "group",
                             inline = true,
+                            desc = "|cff888888Disabled when Automatic Collapse/Hide is not enabled.|r",
                             disabled = function() return not(ObjectivesAdv.db.profile.hidden.enabled) or not(RealUI:GetModuleEnabled(MODNAME)) end,
                             order = 40,
                             args = {

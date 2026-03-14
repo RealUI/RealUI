@@ -194,6 +194,11 @@ local function CreateSystemsConfig()
     end
 
     -- GC Tuning Configuration
+    -- [Duplication Resolution] GC Mode: This section reads/writes AuroraConfig.gcMode
+    -- directly and is the authoritative control for this setting under RealUI. The
+    -- same saved variable is read by Aurora standalone, so changes here carry over.
+    -- No other config section duplicates this control.
+    -- See design: Duplication Resolution Matrix — GC Mode.
     do
         local gcModeValues = {
             smooth  = "Smooth (recommended) — frequent small GC passes, reduces large stutter spikes",
@@ -216,6 +221,11 @@ local function CreateSystemsConfig()
                     type = "description",
                     fontSize = "medium",
                     order = 2,
+                },
+                sharedNote = {
+                    name = "|cffffcc00Shared setting:|r This GC mode is stored in the shared configuration (AuroraConfig.gcMode). If you later switch to running Aurora standalone, this setting carries over automatically.",
+                    type = "description",
+                    order = 3,
                 },
                 mode = {
                     name = "GC Mode",
@@ -270,6 +280,15 @@ local function CreateSystemsConfig()
                     name = "Profile System",
                     type = "header",
                     order = 1,
+                },
+                profileScopesDesc = {
+                    name = "RealUI has three separate profile scopes:\n\n"
+                        .. "|cff88ccffSystems Profile System|r (this section): Controls system-level configuration such as module states, performance settings, and layout preferences. Only visible when the Profile System module is active.\n\n"
+                        .. "|cff88ccffRealUI Profiles|r (Advanced Options \226\134\146 Profiles): Controls the main AceDB profile for RealUI core settings (Infobar, FrameMover, module toggles, etc.). LibDualSpec allows automatic profile switching per specialization.\n\n"
+                        .. "|cff88ccffSkins Profiles|r (Skins \226\134\146 Profiles): Controls appearance settings (frame color, button color, fonts, scale, addon skin toggles). Separate from main profiles because appearance is often shared across specs.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 2,
                 },
                 current = {
                     name = "Current Profile",

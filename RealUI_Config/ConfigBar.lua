@@ -81,6 +81,7 @@ do -- Other
                 args = {
                     layout = {
                         name = L["Layout_Layout"],
+                        desc = "|cffffcc00⚠|r This setting may be reset by the Install Wizard during first-time setup or upgrade.",
                         type = "select",
                         values = function()
                             return {
@@ -120,7 +121,8 @@ do -- Other
                     },
                     useLarge = {
                         name = L["HuD_UseLarge"],
-                        desc = L["HuD_UseLargeDesc"],
+                        desc = L["HuD_UseLargeDesc"]
+                            .. "\n\n|cffffcc00⚠|r This setting may be reset by the Install Wizard during first-time setup or upgrade.",
                         type = "toggle",
                         get = function() return RealUI.db.profile.settings.hudSize == 2 end,
                         set = function(info, value)
