@@ -714,6 +714,51 @@ function ns.commands:hudfixtestall()
     end
 end
 
+-- Run all CombatText property tests (combattext-wow12-update spec)
+function ns.commands:cttestall()
+    local ctTests = {
+        { name = "ctdispatch",      label = "Property 1: Message type dispatch routing" },
+        { name = "ctcolorassign",   label = "Property 2: Color assignment" },
+        { name = "ctcritsticky",    label = "Property 3: Crit sticky display" },
+        { name = "ctinitevent",     label = "Property 4: Init event registration" },
+        { name = "ctlibsink",       label = "Property 5: LibSink integration" },
+        { name = "ctlibsinkniltest",label = "Property 6: LibSink nil handling" },
+        { name = "ctmergequeue",    label = "Property 7: Merge queue" },
+        { name = "ctmisstext",      label = "Property 8: Miss type text" },
+        { name = "ctpowertype",     label = "Property 9: Power type mapping" },
+        { name = "cttestmode",      label = "Property 10: Test mode" },
+    }
+
+    _G.print("|cff00ccff[CombatText Test Suite]|r Running all 10 property tests...")
+    _G.print("---")
+
+    local passed, failed, skipped = 0, 0, 0
+    for _, test in _G.ipairs(ctTests) do
+        local cmd = ns.commands[test.name]
+        if cmd then
+            local ok = cmd(ns.commands)
+            if ok == false then
+                failed = failed + 1
+            elseif ok == nil then
+                skipped = skipped + 1
+            else
+                passed = passed + 1
+            end
+        else
+            _G.print(("|cffff9900[SKIP]|r %s — command not found"):format(test.label))
+            skipped = skipped + 1
+        end
+    end
+
+    _G.print("---")
+    local skipMsg = skipped > 0 and (", " .. skipped .. " skipped") or ""
+    if failed == 0 then
+        _G.print(("|cff00ff00[SUITE PASS]|r %d passed%s"):format(passed, skipMsg))
+    else
+        _G.print(("|cffff0000[SUITE FAIL]|r %d passed, %d failed%s"):format(passed, failed, skipMsg))
+    end
+end
+
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)

@@ -62,5 +62,15 @@ tests\BankLayoutExplorationTest.lua
 tests\BankLayoutPreservationTest.lua
 tests\BankSlotOverlayDiag.lua
 tests\StutterDiagnostic.lua
+tests\CombatText_DispatchRoutingTest.lua
+tests\CombatText_MissTypeTextTest.lua
+tests\CombatText_CritStickyTest.lua
+tests\CombatText_ColorAssignmentTest.lua
+tests\CombatText_PowerTypeMappingTest.lua
+tests\CombatText_InitEventTest.lua
+tests\CombatText_MergeQueueTest.lua
+tests\CombatText_TestModeTest.lua
+tests\CombatText_LibSinkTest.lua
+tests\CombatText_LibSinkNilTest.lua
 
 ../Aurora/dev/test.lua
