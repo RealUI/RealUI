@@ -1,3 +1,29 @@
+## [3.0.7] - 2026-03-14 ##
+### Summary ###
+Performance and GC hardening pass. PerformanceMonitor and ResourceManager now respect Aurora's combat GC mode — no more surprise collectgarbage("collect") calls mid-fight. ResourceManager check interval aligned with its data refresh rate (120s instead of 30s) to eliminate pointless timer callbacks. RealUI_CombatText restored and updated for WoW 12. BugGrabber updated to v12.0.10. Aurora updated to 12.0.1.16 with configurable GC tuning modes and object pooling.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+  * RealUI_CombatText
+  * RealUI_Dev
+  * Aurora (12.0.1.16)
+
+### Added ###
+  * add: configurable GC tuning settings UI in RealUI config panel
+  * add: CombatText test suite in RealUI_Dev
+
+### Changed ###
+  * chg: PerformanceMonitor now honors Aurora's combat GC mode — skips GC during combat
+  * chg: ResourceManager check interval aligned to data refresh rate (120s instead of 30s)
+  * chg: RealUI_CombatText updated to work within WoW 12 limits
+  * chg: BugGrabber v12.0.9 -> v12.0.10
+
+### Fixed ###
+  * fix: ResourceManager and PerformanceMonitor could fire collectgarbage("collect") during combat, undermining Aurora's combat GC pause mode
+  * fix: CombatText TestMode fixes for RealUI_Dev tests
+
+
 ## [3.0.6] - 2026-03-13 ##
 ### Summary ###
 Bug-fix and hardening pass. Fixes Grid2 setup crashes, Inventory bank errors, loot roll windows, and several combat taint sources. BugGrabber updated to v12.0.9. New stutter diagnostics and Inventory test coverage in RealUI_Dev.
@@ -248,6 +274,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.7]: https://github.com/RealUI/RealUI/compare/3.0.6...3.0.7
 [3.0.6]: https://github.com/RealUI/RealUI/compare/3.0.5...3.0.6
 [3.0.5]: https://github.com/RealUI/RealUI/compare/3.0.4...3.0.5
 [3.0.4]: https://github.com/RealUI/RealUI/compare/3.0.3...3.0.4
