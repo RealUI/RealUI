@@ -155,10 +155,10 @@ local stickyLines = _G.CreateUnsecuredObjectPool(ScrollLineFactory, ScrollLineRe
 stickyLines.mixin = StickyLineMixin
 
 function CombatText:UpdateLineOptions()
-    for _, line in normalLines:EnumerateActive() do
+    for line in normalLines:EnumerateActive() do
         line:SetOptions()
     end
-    for _, line in stickyLines:EnumerateActive() do
+    for line in stickyLines:EnumerateActive() do
         line:SetOptions()
     end
 end

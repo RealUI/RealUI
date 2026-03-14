@@ -775,6 +775,63 @@ do -- CombatText
                     },
                 }
             },
+            blizzardFCT = {
+                name = "Blizzard Floating Combat Text",
+                type = "group",
+                inline = true,
+                order = 30,
+                args = {
+                    desc = {
+                        name = "Control Blizzard's built-in floating combat text. Disable these to only see RealUI's combat text.",
+                        type = "description",
+                        order = 0,
+                    },
+                    enableFloatingCombatText = {
+                        name = "Incoming Combat Text",
+                        desc = "Show Blizzard's floating combat text above your character (damage taken, heals received).",
+                        type = "toggle",
+                        get = function() return CombatText.db.global.blizzardFCT.enableFloatingCombatText end,
+                        set = function(_, value)
+                            CombatText.db.global.blizzardFCT.enableFloatingCombatText = value
+                            _G.SetCVar("enableFloatingCombatText", value and "1" or "0")
+                        end,
+                        order = 1,
+                    },
+                    floatingCombatTextCombatDamage = {
+                        name = "Outgoing Damage Numbers",
+                        desc = "Show Blizzard's damage numbers above your character.",
+                        type = "toggle",
+                        get = function() return CombatText.db.global.blizzardFCT.floatingCombatTextCombatDamage end,
+                        set = function(_, value)
+                            CombatText.db.global.blizzardFCT.floatingCombatTextCombatDamage = value
+                            _G.SetCVar("floatingCombatTextCombatDamage", value and "1" or "0")
+                        end,
+                        order = 2,
+                    },
+                    floatingCombatTextCombatHealing = {
+                        name = "Outgoing Healing Numbers",
+                        desc = "Show Blizzard's healing numbers above your character.",
+                        type = "toggle",
+                        get = function() return CombatText.db.global.blizzardFCT.floatingCombatTextCombatHealing end,
+                        set = function(_, value)
+                            CombatText.db.global.blizzardFCT.floatingCombatTextCombatHealing = value
+                            _G.SetCVar("floatingCombatTextCombatHealing", value and "1" or "0")
+                        end,
+                        order = 3,
+                    },
+                    nameplateShowDamage = {
+                        name = "Nameplate Damage Numbers",
+                        desc = "Show damage numbers on enemy nameplates. This is the large number that appears over mobs.",
+                        type = "toggle",
+                        get = function() return CombatText.db.global.blizzardFCT.nameplateShowDamage end,
+                        set = function(_, value)
+                            CombatText.db.global.blizzardFCT.nameplateShowDamage = value
+                            _G.SetCVar("nameplateShowDamage", value and "1" or "0")
+                        end,
+                        order = 4,
+                    },
+                },
+            },
         }
     end
 

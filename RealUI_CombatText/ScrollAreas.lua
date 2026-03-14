@@ -53,13 +53,18 @@ _G.C_Timer.NewTicker(0.1, function( ... )
     local eventInfo = tremove(eventQueue, 1)
     if eventInfo.string then
         DisplayEvent(eventInfo, eventInfo.string)
+    elseif eventInfo.secretAmount then
+        -- WoW 12: amount is a secret value, use string.format to concatenate
+        -- (allowed per Secret Values spec) then pass to FontString:SetText
+        local text = string.format("%d", eventInfo.secretAmount)
+        if eventInfo.color then
+            text = eventInfo.color:WrapTextInColorCode(text)
+        end
+        DisplayEvent(eventInfo, text)
     else
         local text = ""
-        if eventInfo.amount > 0 then
+        if eventInfo.amount and eventInfo.amount > 0 then
             text = RealUI.ReadableNumber(eventInfo.amount)
-        end
-        if eventInfo.sourceUnit == "pet" and not eventInfo.text then
-            eventInfo.text = _G.PET
         end
 
         if eventInfo.text then
@@ -89,14 +94,8 @@ _G.C_Timer.NewTicker(0.6, function( ... )
         mergeEvent = mergeQueue[i]
         for j = 1, #wait do
             queueEvent = wait[j]
-            if mergeEvent.event == queueEvent.event then
-                if not mergeEvent.spellName then
-                    if mergeEvent.destName == queueEvent.destName then
-                        doMerge = true
-                    end
-                elseif mergeEvent.spellName == queueEvent.spellName then
-                    doMerge = true
-                end
+            if mergeEvent.messageType == queueEvent.messageType then
+                doMerge = true
             end
 
             if doMerge then

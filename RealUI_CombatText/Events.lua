@@ -1,392 +1,213 @@
 local _, private = ...
 
--- Lua Globals --
--- luacheck: globals select
-
 -- Libs --
 local Aurora = _G.Aurora
 local Color = Aurora.Color
 
--- RealUI --
-local RealUI = _G.RealUI
+-- Message type to color mapping
+-- Physical damage: red, Spell damage: purple, Healing: green, Miss types: white
+local MESSAGE_TYPE_COLORS = {
+    -- Physical damage
+    DAMAGE          = Color.Create(1, 0.1, 0.1),
+    DAMAGE_CRIT     = Color.Create(1, 0.1, 0.1),
+    DAMAGE_SHIELD   = Color.Create(1, 0.1, 0.1),
+    SPLIT_DAMAGE    = Color.Create(1, 0.1, 0.1),
 
-local function MissingEvent(eventInfo, ...)
-    _G.print("Missing combat event", eventInfo.eventBase, eventInfo.eventType, eventInfo.spellName, eventInfo.spellID, ...)
-end
+    -- Spell damage
+    SPELL_DAMAGE      = Color.Create(0.79, 0.3, 0.85),
+    SPELL_DAMAGE_CRIT = Color.Create(0.79, 0.3, 0.85),
 
-local eventSuffix = _G.setmetatable({}, {
-    __index = function(...)
-        return MissingEvent
-    end
-})
+    -- Healing
+    HEAL               = Color.green,
+    HEAL_CRIT          = Color.green,
+    PERIODIC_HEAL      = Color.green,
+    PERIODIC_HEAL_CRIT = Color.green,
+    HEAL_ABSORB           = Color.green,
+    PERIODIC_HEAL_ABSORB  = Color.green,
+    HEAL_CRIT_ABSORB      = Color.green,
+    ABSORB_ADDED          = Color.green,
 
-
-local Damageclass = _G.Enum.Damageclass
-local defaultSchool = Damageclass.MaskNone
-local SpellColors = {
-    [Damageclass.MaskNone] = Color.Create(1, 1, 1),
-    [Damageclass.MaskPhysical] = Color.Create(1, 1, 0),
-    [Damageclass.MaskHoly] = Color.Create(1, 0.9, 0.5),
-    [Damageclass.MaskFire] = Color.Create(1, 0.5, 0),
-    [Damageclass.MaskNature] = Color.Create(0.3, 1, 0.3),
-    [Damageclass.MaskFrost] = Color.Create(0.5, 1, 1),
-    [Damageclass.MaskShadow] = Color.Create(0.5, 0.5, 1),
-    [Damageclass.MaskArcane] = Color.Create(1, 0.5, 1),
+    -- Miss types
+    MISS    = Color.white,  DODGE   = Color.white,  PARRY    = Color.white,
+    EVADE   = Color.white,  IMMUNE  = Color.white,  DEFLECT  = Color.white,
+    BLOCK   = Color.white,  ABSORB  = Color.white,  RESIST   = Color.white,
+    SPELL_MISS    = Color.white,  SPELL_DODGE   = Color.white,
+    SPELL_PARRY   = Color.white,  SPELL_EVADE   = Color.white,
+    SPELL_IMMUNE  = Color.white,  SPELL_DEFLECT = Color.white,
+    SPELL_REFLECT = Color.white,  SPELL_BLOCK   = Color.white,
+    SPELL_ABSORB  = Color.white,  SPELL_RESIST  = Color.white,
 }
-local function GetSpellColor(school)
-    if school then
-        if SpellColors[school] then
-            return SpellColors[school]
-        --else
-            --_G.print("Missing spell color", school)
-        end
-    end
+private.MESSAGE_TYPE_COLORS = MESSAGE_TYPE_COLORS
 
+-- Scroll area routing: damage → "outgoing", healing → "incoming", other → "notification"
+local SCROLL_AREA_ROUTING = {
+    -- Damage → outgoing
+    DAMAGE          = "outgoing",
+    DAMAGE_CRIT     = "outgoing",
+    SPELL_DAMAGE      = "outgoing",
+    SPELL_DAMAGE_CRIT = "outgoing",
+    DAMAGE_SHIELD   = "outgoing",
+    SPLIT_DAMAGE    = "outgoing",
 
-    return SpellColors[defaultSchool]
-end
+    -- Healing → incoming
+    HEAL               = "incoming",
+    HEAL_CRIT          = "incoming",
+    PERIODIC_HEAL      = "incoming",
+    PERIODIC_HEAL_CRIT = "incoming",
+    HEAL_ABSORB           = "incoming",
+    PERIODIC_HEAL_ABSORB  = "incoming",
+    HEAL_CRIT_ABSORB      = "incoming",
+    ABSORB_ADDED          = "incoming",
 
---local defaultPower = _G.Enum.PowerType.Mana
-local alternatePower = _G.Enum.PowerType.Alternate
-local PowerColors = {
-    [_G.Enum.PowerType.Mana] = {Color.Create(0, 0, 1), _G.MANA},
-    [_G.Enum.PowerType.Rage] = {Color.Create(1, 0, 0), _G.RAGE},
-    [_G.Enum.PowerType.Focus] = {Color.Create(1, 0.5, 0.25), _G.FOCUS},
-    [_G.Enum.PowerType.Energy] = {Color.Create(1, 1, 0), _G.ENERGY},
-    [_G.Enum.PowerType.ComboPoints] = {Color.Create(1, 0.96, 0.41), _G.COMBO_POINTS},
-    [_G.Enum.PowerType.Runes] = {Color.Create(0.5, 0.5, 0.5), _G.RUNES},
-    [_G.Enum.PowerType.RunicPower] = {Color.Create(0, 0.82, 1), _G.RUNIC_POWER},
-    [_G.Enum.PowerType.SoulShards] = {Color.Create(0.5, 0.32, 0.55), _G.SOUL_SHARDS},
-    [_G.Enum.PowerType.LunarPower] = {Color.Create(0.3, 0.52, 0.9), _G.LUNAR_POWER},
-    [_G.Enum.PowerType.HolyPower] = {Color.Create(0.95, 0.9, 0.6), _G.HOLY_POWER},
-    [_G.Enum.PowerType.Maelstrom] = {Color.Create(0, 0.5, 1), _G.MAELSTROM_POWER},
-    [_G.Enum.PowerType.Chi] = {Color.Create(0.71, 1, 0.92), _G.CHI_POWER},
-    [_G.Enum.PowerType.Insanity] = {Color.Create(0.4, 0, 0.8), _G.INSANITY_POWER},
-    [_G.Enum.PowerType.ArcaneCharges] = {Color.Create(0.1, 0.1, 0.98), _G.ARCANE_CHARGES_POWER},
-    [_G.Enum.PowerType.Fury] = {Color.Create(0.788, 0.259, 0.992), _G.FURY},
-    [_G.Enum.PowerType.Pain] = {Color.Create(1, 0.612, 0), _G.PAIN},
+    -- Miss types → notification
+    MISS    = "notification",  DODGE   = "notification",  PARRY    = "notification",
+    EVADE   = "notification",  IMMUNE  = "notification",  DEFLECT  = "notification",
+    BLOCK   = "notification",  ABSORB  = "notification",  RESIST   = "notification",
+    SPELL_MISS    = "notification",  SPELL_DODGE   = "notification",
+    SPELL_PARRY   = "notification",  SPELL_EVADE   = "notification",
+    SPELL_IMMUNE  = "notification",  SPELL_DEFLECT = "notification",
+    SPELL_REFLECT = "notification",  SPELL_BLOCK   = "notification",
+    SPELL_ABSORB  = "notification",  SPELL_RESIST  = "notification",
+
+    -- Energize → notification
+    ENERGIZE          = "notification",
+    PERIODIC_ENERGIZE = "notification",
 }
-local function GetPower(powerType, alternatePowerType)
-    local power = PowerColors[powerType]
-    if powerType == alternatePower and alternatePowerType then
-        power = PowerColors[alternatePowerType]
-    end
+private.SCROLL_AREA_ROUTING = SCROLL_AREA_ROUTING
 
-    if power then
-        return power[1], power[2]
-    else
-        return Color.white, _G.GetUnitPowerBarStringsByID(alternatePowerType)
-    end
-end
-
-local eventPrefix = {}
-private.eventPrefix = eventPrefix
-
-function eventPrefix.SWING(eventInfo, ...)
-    eventInfo.icon = 132223 -- Ability_MeleeDamage
-    if eventSuffix[eventInfo.eventType](eventInfo, ...) then
-        private.AddEvent(eventInfo)
-    end
-end
-
-function eventPrefix.RANGE(eventInfo, ...)
-    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
-
-    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = info.iconID
-
-    if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
-        private.AddEvent(eventInfo)
-    end
-end
-
-function eventPrefix.SPELL(eventInfo, ...)
-    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
-
-    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = info.iconID
-
-    if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
-        private.AddEvent(eventInfo)
-    end
-end
-
-function eventPrefix.SPELL_EMPOWER(eventInfo, ...)
-    eventInfo.spellID, eventInfo.spellName = ...
-
-    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = info.iconID
-
-    if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
-        private.AddEvent(eventInfo)
-    end
-end
-
-function eventPrefix.SPELL_PERIODIC(eventInfo, ...)
-    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
-
-    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = info.iconID
-
-    if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
-        private.AddEvent(eventInfo)
-    end
-end
-
-function eventPrefix.SPELL_BUILDING(eventInfo, ...)
-    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool = ...
-
-    local info = _G.C_Spell.GetSpellInfo(eventInfo.spellID)
-    eventInfo.icon = info.iconID
-
-    if eventSuffix[eventInfo.eventType](eventInfo, select(4, ...)) then
-        private.AddEvent(eventInfo)
-    end
-end
-
-local partialEffects = {
-    resist = _G.RESIST_TRAILER:gsub("%%d", "%%s"),
-    block = _G.BLOCK_TRAILER:gsub("%%d", "%%s"),
-    absorb = _G.ABSORB_TRAILER:gsub("%%d", "%%s"),
-    glancing = _G.GLANCING_TRAILER,
-    crushing = _G.CRUSHING_TRAILER,
-    overheal = _G.TEXT_MODE_A_STRING_RESULT_OVERHEALING:lower(),
-    overkill = _G.TEXT_MODE_A_STRING_RESULT_OVERKILLING:lower(),
-    overenergize = _G.TEXT_MODE_A_STRING_RESULT_OVERENERGIZE:lower(),
+-- Crit types that use sticky display and are non-mergeable
+local CRIT_TYPES = {
+    DAMAGE_CRIT        = true,
+    SPELL_DAMAGE_CRIT  = true,
+    HEAL_CRIT          = true,
+    PERIODIC_HEAL_CRIT = true,
 }
-local function GetResultString(resisted, blocked, absorbed, glancing, crushing, overhealing, overkill, overenergize)
-    local resultStr
-    if resisted and resisted ~= 0 then
-        if resisted < 0 then    --Its really a vulnerability
-            -- I don't think this is a thing anymore
-            _G.print("Vulnerable!!!", resisted)
-        else
-            resultStr = partialEffects.resist:format(RealUI.ReadableNumber(resisted))
-        end
+private.CRIT_TYPES = CRIT_TYPES
+
+-- Power type string → {color, name} mapping
+-- Keyed by string instead of Enum.PowerType for WoW 12 compatibility
+local POWER_TYPE_MAP = {
+    MANA          = {Color.Create(0, 0, 1),          _G.MANA},
+    RAGE          = {Color.Create(1, 0, 0),          _G.RAGE},
+    FOCUS         = {Color.Create(1, 0.5, 0.25),     _G.FOCUS},
+    ENERGY        = {Color.Create(1, 1, 0),          _G.ENERGY},
+    COMBO_POINTS  = {Color.Create(1, 0.96, 0.41),    _G.COMBO_POINTS},
+    RUNES         = {Color.Create(0.5, 0.5, 0.5),    _G.RUNES},
+    RUNIC_POWER   = {Color.Create(0, 0.82, 1),       _G.RUNIC_POWER},
+    SOUL_SHARDS   = {Color.Create(0.5, 0.32, 0.55),  _G.SOUL_SHARDS},
+    LUNAR_POWER   = {Color.Create(0.3, 0.52, 0.9),   _G.LUNAR_POWER},
+    HOLY_POWER    = {Color.Create(0.95, 0.9, 0.6),   _G.HOLY_POWER},
+    MAELSTROM     = {Color.Create(0, 0.5, 1),        _G.MAELSTROM_POWER},
+    CHI           = {Color.Create(0.71, 1, 0.92),    _G.CHI_POWER},
+    INSANITY      = {Color.Create(0.4, 0, 0.8),      _G.INSANITY_POWER},
+    ARCANE_CHARGES = {Color.Create(0.1, 0.1, 0.98),  _G.ARCANE_CHARGES_POWER},
+    FURY          = {Color.Create(0.788, 0.259, 0.992), _G.FURY},
+    PAIN          = {Color.Create(1, 0.612, 0),      _G.PAIN},
+}
+private.POWER_TYPE_MAP = POWER_TYPE_MAP
+
+
+-- Sets for categorizing message types
+local DAMAGE_TYPES = {
+    DAMAGE = true, DAMAGE_CRIT = true,
+    SPELL_DAMAGE = true, SPELL_DAMAGE_CRIT = true,
+    DAMAGE_SHIELD = true, SPLIT_DAMAGE = true,
+}
+
+local HEAL_TYPES = {
+    HEAL = true, HEAL_CRIT = true,
+    PERIODIC_HEAL = true, PERIODIC_HEAL_CRIT = true,
+    HEAL_ABSORB = true, PERIODIC_HEAL_ABSORB = true,
+    HEAL_CRIT_ABSORB = true, ABSORB_ADDED = true,
+}
+
+local MISS_TYPES = {
+    MISS = true, DODGE = true, PARRY = true, EVADE = true,
+    IMMUNE = true, DEFLECT = true, BLOCK = true, ABSORB = true, RESIST = true,
+    SPELL_MISS = true, SPELL_DODGE = true, SPELL_PARRY = true,
+    SPELL_EVADE = true, SPELL_IMMUNE = true, SPELL_DEFLECT = true,
+    SPELL_REFLECT = true, SPELL_BLOCK = true, SPELL_ABSORB = true,
+    SPELL_RESIST = true,
+}
+
+local ENERGIZE_TYPES = {
+    ENERGIZE = true,
+    PERIODIC_ENERGIZE = true,
+}
+
+-- WoW 12 secret value helpers: GetCurrentCombatTextEventInfo() returns
+-- tainted/secret values. We can pass them to string.format and FontString:SetText
+-- but cannot do arithmetic, comparisons, or use them as table keys.
+-- We store them as-is and let the display layer handle them via SetFormattedText.
+
+-- Dispatch function for WoW 12 COMBAT_TEXT_UPDATE
+-- messageType: event payload arg from COMBAT_TEXT_UPDATE (untainted)
+-- desc1, desc2: from GetCurrentCombatTextEventInfo() (secret/tainted)
+--   Damage:   desc1=amount, desc2=nil
+--   Heals:    desc1=source_name, desc2=amount
+--   Miss:     desc1=nil, desc2=nil
+--   Energize: desc1=amount, desc2=power_type
+--   Block/Absorb: desc1=damage_taken, desc2=damage_blocked/absorbed
+function private.HandleMessageType(messageType, desc1, desc2)
+    if not messageType then
+        return
     end
 
-    if blocked and blocked > 0 then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.block:format(RealUI.ReadableNumber(blocked))
-        else
-            resultStr = partialEffects.block:format(RealUI.ReadableNumber(blocked))
-        end
+    local scrollType = SCROLL_AREA_ROUTING[messageType]
+    if not scrollType then
+        return
     end
 
-    if absorbed and absorbed > 0 then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.absorb:format(RealUI.ReadableNumber(absorbed))
-        else
-            resultStr = partialEffects.absorb:format(RealUI.ReadableNumber(absorbed))
-        end
+    local color = MESSAGE_TYPE_COLORS[messageType]
+    local isSticky = CRIT_TYPES[messageType] or false
+
+    if DAMAGE_TYPES[messageType] then
+        -- desc1 = secret amount
+        local eventInfo = {
+            messageType = messageType,
+            scrollType = scrollType,
+            secretAmount = desc1,
+            color = color,
+            isSticky = isSticky,
+            canMerge = false, -- can't merge secret values (no arithmetic)
+        }
+        private.AddEvent(eventInfo)
+
+    elseif HEAL_TYPES[messageType] then
+        -- desc2 = secret amount
+        local eventInfo = {
+            messageType = messageType,
+            scrollType = scrollType,
+            secretAmount = desc2,
+            color = color,
+            isSticky = isSticky,
+            canMerge = false,
+        }
+        private.AddEvent(eventInfo)
+
+    elseif MISS_TYPES[messageType] then
+        local resultStr = _G[messageType] or _G[messageType:gsub("SPELL_", "")]
+        local eventInfo = {
+            messageType = messageType,
+            scrollType = scrollType,
+            string = resultStr,
+            color = color,
+            isSticky = false,
+            canMerge = false,
+        }
+        private.AddEvent(eventInfo)
+
+    elseif ENERGIZE_TYPES[messageType] then
+        -- desc1 = secret amount, desc2 = secret power type string
+        -- Can't use desc2 as table key, just show the amount
+        local eventInfo = {
+            messageType = messageType,
+            scrollType = scrollType,
+            secretAmount = desc1,
+            color = color,
+            isSticky = false,
+            canMerge = false,
+        }
+        private.AddEvent(eventInfo)
     end
-
-    if glancing then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.glancing
-        else
-            resultStr = partialEffects.glancing
-        end
-    end
-
-    if crushing then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.crushing
-        else
-            resultStr = partialEffects.crushing
-        end
-    end
-
-    if overhealing and overhealing > 0 then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.overheal:format(RealUI.ReadableNumber(overhealing))
-        else
-            resultStr = partialEffects.overheal:format(RealUI.ReadableNumber(overhealing))
-        end
-    end
-
-    if overkill and overkill > 0 then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.overkill:format(RealUI.ReadableNumber(overkill))
-        else
-            resultStr = partialEffects.overkill:format(RealUI.ReadableNumber(overkill))
-        end
-    end
-
-    if overenergize and overenergize > 0 then
-        if resultStr then
-            resultStr = resultStr.." "..partialEffects.overenergize:format(RealUI.ReadableNumber(overenergize))
-        else
-            resultStr = partialEffects.overenergize:format(RealUI.ReadableNumber(overenergize))
-        end
-    end
-
-    return resultStr
-end
-
-function eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand)
-    local resultStr = GetResultString(resisted, blocked, absorbed, glancing, crushing, nil, overkill)
-    eventInfo.resultStr = resultStr or ""
-
-    if overkill > 0 then
-        amount = amount - overkill
-    end
-
-    eventInfo.amount = amount
-    eventInfo.isSticky = critical
-    eventInfo.color = GetSpellColor(school)
-    return true
-end
-function eventSuffix.MISSED(eventInfo, missType, isOffHand, amountMissed, critical)
-    eventInfo.amount = amountMissed or 0
-    eventInfo.resultStr = _G[missType]
-    eventInfo.isSticky = critical
-
-    return true
-end
-function eventSuffix.HEAL(eventInfo, amount, overhealing, absorbed, critical)
-    local resultStr = GetResultString(nil, nil, absorbed, nil, nil, overhealing)
-    eventInfo.resultStr = resultStr or ""
-
-    if overhealing > 0 then
-        amount = amount - overhealing
-    end
-
-    eventInfo.amount = amount
-    eventInfo.isSticky = critical
-    eventInfo.color = Color.green
-    return true
-end
-
-function eventSuffix.HEAL_ABSORBED(eventInfo, extraGUID, extraName, extraFlags, extraRaidFlags, extraSpellID, extraSpellName, extraSchool, amount)
-    return eventSuffix.HEAL(eventInfo, 0, 0, amount, false)
-end
-
-function eventSuffix.ENERGIZE(eventInfo, amount, overEnergize, powerType, alternatePowerType)
-    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
-
-    local resultStr = GetResultString(nil, nil, nil, nil, nil, nil, nil, overEnergize)
-    eventInfo.resultStr = resultStr or ""
-
-    eventInfo.amount = amount
-
-    return true
-end
-function eventSuffix.DRAIN(eventInfo, amount, powerType, extraAmount, alternatePowerType)
-    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
-    eventInfo.amount = amount
-
-    if extraAmount then
-        _G.print("DRAIN extraAmount", eventInfo.text, extraAmount)
-    end
-
-    return true
-end
-function eventSuffix.LEECH(eventInfo, amount, powerType, extraAmount, alternatePowerType)
-    eventInfo.color, eventInfo.text = GetPower(powerType, alternatePowerType)
-    eventInfo.amount = amount
-
-    if extraAmount then
-        _G.print("LEECH extraAmount", eventInfo.text, extraAmount)
-    end
-
-    return true
-end
-
-local eventFormat = "%s %s (%s)"
-function eventSuffix.INTERRUPT(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
-    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_INTERRUPT, extraSpellName, _G.C_Spell.GetSchoolString(extraSpellSchool))
-
-    eventInfo.canMerge = false
-    eventInfo.isSticky = true
-    return true
-end
-function eventSuffix.DISPEL(eventInfo, extraSpellId, extraSpellName, extraSpellSchool, auraType)
-    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_DISPEL, extraSpellName, auraType)
-
-    eventInfo.canMerge = false
-    return true
-end
-function eventSuffix.DISPEL_FAILED(eventInfo, extraSpellId, extraSpellName, extraSpellSchool)
-    eventInfo.string = _G.ACTION_SPELL_DISPEL_FAILED
-
-    eventInfo.canMerge = false
-    eventInfo.isSticky = true
-    return true
-end
-function eventSuffix.STOLEN(eventInfo, extraSpellId, extraSpellName, extraSpellSchool, auraType)
-    -- eventInfo.string = _G["ACTION_SPELL_STOLEN"..auraType] .. extraSpellName
-    eventInfo.string = eventFormat:format(_G.ACTION_SPELL_STOLEN, extraSpellName, auraType)
-
-    eventInfo.canMerge = false
-    return true
-end
-
-local eventSpecial = {}
-private.eventSpecial = eventSpecial
-local PARTY_KILL = "%s %s %s"
-function eventSpecial.PARTY_KILL(eventInfo, ...)
-    local _, unconsciousOnDeath = ...
-    eventInfo.scrollType = "notification"
-
-    local resultStr = _G.ACTION_PARTY_KILL
-    if unconsciousOnDeath then
-        resultStr = _G.ACTION_PARTY_KILL_UNCONSCIOUS
-    end
-    eventInfo.resultStr = resultStr
-
-    eventInfo.canMerge = false
-    eventInfo.isSticky = true
-    eventInfo.string = PARTY_KILL:format(eventInfo.sourceName, resultStr, eventInfo.destName)
-    private.AddEvent(eventInfo)
-end
-
-local SPELL_INSTAKILL = "%s %s %s"
-function eventSpecial.SPELL_INSTAKILL(eventInfo, ...)
-    local _, unconsciousOnDeath
-    eventInfo.spellID, eventInfo.spellName, eventInfo.spellSchool, _, unconsciousOnDeath = ...
-    eventInfo.scrollType = "notification"
-
-    local resultStr = _G.ACTION_SPELL_INSTAKILL
-    if unconsciousOnDeath then
-        resultStr = _G.ACTION_SPELL_INSTAKILL_UNCONSCIOUS
-    end
-    eventInfo.resultStr = resultStr
-
-    eventInfo.canMerge = false
-    eventInfo.isSticky = true
-    eventInfo.string = SPELL_INSTAKILL:format(eventInfo.spellName, resultStr, eventInfo.destName)
-    private.AddEvent(eventInfo)
-end
-
-local UNIT_DIED = "%s %s"
-function eventSpecial.UNIT_DIED(eventInfo, ...)
-    local _, unconsciousOnDeath = ...
-    eventInfo.scrollType = "notification"
-
-    local resultStr = _G.ACTION_UNIT_DIED
-    if unconsciousOnDeath then
-        resultStr = _G.ACTION_UNIT_BECCOMES_UNCONSCIOUS
-    end
-    eventInfo.resultStr = resultStr
-
-    eventInfo.canMerge = false
-    eventInfo.isSticky = true
-    eventInfo.string = UNIT_DIED:format(eventInfo.destName, resultStr)
-    private.AddEvent(eventInfo)
-end
-
-function eventSpecial.ENVIRONMENTAL_DAMAGE(eventInfo, ...)
-    local environmentalType, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing = ...
-    eventInfo.eventBase = "ENVIRONMENTAL_DAMAGE_"..environmentalType:upper()
-
-    eventSuffix.DAMAGE(eventInfo, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing)
-
-    eventInfo.color = GetSpellColor(school)
-    private.AddEvent(eventInfo)
-end
-
-function eventSpecial.DAMAGE_SPLIT(eventInfo, ...)
-    eventInfo.eventType = "DAMAGE"
-    return eventPrefix.SPELL(eventInfo, ...)
 end
