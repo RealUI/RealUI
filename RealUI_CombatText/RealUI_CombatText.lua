@@ -94,19 +94,19 @@ function CombatText:PLAYER_REGEN_DISABLED()
 end
 
 function CombatText:COMBAT_TEXT_UPDATE(event, messageType)
-    local desc1, desc2 = GetCurrentCombatTextEventInfo()
+    local desc1, desc2 = _G.GetCurrentCombatTextEventInfo()
     private.HandleMessageType(messageType, desc1, desc2)
 end
 
 function CombatText:UNIT_ENTERED_VEHICLE(event, unit, showVehicle, ...)
     if unit == "player" and showVehicle then
-        C_CombatText.SetActiveUnit("vehicle")
+        _G.C_CombatText.SetActiveUnit("vehicle")
     end
 end
 
 function CombatText:UNIT_EXITING_VEHICLE(event, unit)
     if unit == "player" then
-        C_CombatText.SetActiveUnit("player")
+        _G.C_CombatText.SetActiveUnit("player")
     end
 end
 
@@ -116,7 +116,7 @@ function CombatText:OnInitialize()
 
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
-    C_CombatText.SetActiveUnit("player")
+    _G.C_CombatText.SetActiveUnit("player")
     self:RegisterEvent("COMBAT_TEXT_UPDATE")
     self:RegisterEvent("UNIT_ENTERED_VEHICLE")
     self:RegisterEvent("UNIT_EXITING_VEHICLE")
@@ -124,10 +124,10 @@ function CombatText:OnInitialize()
 
     -- Apply Blizzard FCT CVar settings
     local fct = self.db.global.blizzardFCT
-    SetCVar("enableFloatingCombatText", fct.enableFloatingCombatText and "1" or "0")
-    SetCVar("floatingCombatTextCombatDamage", fct.floatingCombatTextCombatDamage and "1" or "0")
-    SetCVar("floatingCombatTextCombatHealing", fct.floatingCombatTextCombatHealing and "1" or "0")
-    SetCVar("nameplateShowDamage", fct.nameplateShowDamage and "1" or "0")
+    _G.SetCVar("enableFloatingCombatText", fct.enableFloatingCombatText and "1" or "0")
+    _G.SetCVar("floatingCombatTextCombatDamage", fct.floatingCombatTextCombatDamage and "1" or "0")
+    _G.SetCVar("floatingCombatTextCombatHealing", fct.floatingCombatTextCombatHealing and "1" or "0")
+    _G.SetCVar("nameplateShowDamage", fct.nameplateShowDamage and "1" or "0")
 
     local LibSink = _G.LibStub("LibSink-2.0", true)
     if LibSink then

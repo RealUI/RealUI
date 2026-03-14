@@ -17,5 +17,5 @@ max_cyclomatic_complexity = 73
 unused_args = false
 self = false
 globals = {
-    "_G"
+    "_G",
 }

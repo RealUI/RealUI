@@ -43,9 +43,9 @@ This document summarizes the final system integration and polish work completed 
 #### ResourceManager
 - **Memory Monitoring**: Real-time memory usage tracking across all RealUI addons
 - **CPU Monitoring**: Performance tracking and threshold detection
-- **Automatic Garbage Collection**: Scheduled GC during non-combat periods
-- **Resource Optimization**: Periodic optimization of module loading and frame updates
-- **Threshold Alerts**: Automatic warnings and recovery when resource limits are exceeded
+- **Scheduled Manual GC**: Fires explicit `collectgarbage("collect")` calls on a timer (every 10 min via OptimizeResources, plus every 5 min via SystemIntegration). Does NOT change Lua's automatic GC mode — never calls `restart`, `stop`, `setpause`, or `setstepmul`. Aurora's GC strategy in `Skin/init.lua` is the sole owner of GC mode control.
+- **Resource Optimization**: Periodic cleanup of unused data (every 10 minutes)
+- **Threshold Alerts**: Automatic warnings and recovery when resource limits are exceeded (checked every 30 seconds)
 - **Resource Statistics**: Detailed reporting of memory, CPU, and optimization metrics
 
 ### 11.2 Add Final User Experience Polish
