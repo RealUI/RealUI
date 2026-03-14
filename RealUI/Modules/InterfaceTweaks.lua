@@ -73,9 +73,9 @@ function InterfaceTweaks:OnEvent(event, ...)
 end
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --     Achievement Screenshots     --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 AddTweak("achShots", {
     name = "Tweaks_Achievements",
     event = "ACHIEVEMENT_EARNED",
@@ -89,9 +89,9 @@ AddTweak("achShots", {
 })
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --        Auto Holiday Boss        --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 do
     AddTweak("autoHoliday", {
         name = "Tweaks_AutoHoliday",
@@ -117,9 +117,9 @@ do
 end
 
 
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 --           Mouse Trail           --
-----====####$$$$%%%%%$$$$####====----
+----====#####################====----
 do
     local pollingRate, numLines = 0.05, 15
     local lines = {}
