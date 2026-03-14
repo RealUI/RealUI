@@ -56,6 +56,7 @@ local numEvents = #testEvents
 
 local testFrame = _G.CreateFrame("Frame")
 testFrame:Hide()
+private._testFrame = testFrame
 
 local update = 0
 testFrame:SetScript("OnUpdate", function(self, elapsed)
