@@ -121,8 +121,8 @@ function ResourceManager:OptimizeResources()
 
     local currentTime = _G.time()
 
-    -- Perform garbage collection if needed
-    if currentTime - resourceState.lastGC >= THRESHOLDS.GC_INTERVAL then
+    -- Perform garbage collection if needed (skip during combat to respect Aurora's GC mode)
+    if not RealUI.inCombat and currentTime - resourceState.lastGC >= THRESHOLDS.GC_INTERVAL then
         self:PerformGarbageCollection()
     end
 
@@ -225,8 +225,8 @@ function ResourceManager:HandleResourceWarning(warning)
             RealUI.FeedbackSystem:ShowWarning("Resource Warning", message)
         end
 
-        -- Attempt automatic recovery
-        if warning.type == "memory" then
+        -- Attempt automatic recovery (skip GC during combat to respect Aurora's GC mode)
+        if warning.type == "memory" and not RealUI.inCombat then
             self:PerformGarbageCollection()
 
             -- If still critical, enable safe mode
@@ -288,10 +288,12 @@ end
 function ResourceManager:StartMonitoring()
     debug("Starting resource monitoring...")
 
-    -- Monitor resources every 30 seconds
+    -- Monitor resources at the same interval as the data refresh (2 minutes)
+    -- The underlying GetMemoryUsage/GetCPUUsage calls are throttled to this
+    -- interval anyway, so checking more often just wastes timer callbacks.
     RealUI:ScheduleRepeatingTimer(function()
         self:CheckThresholds()
-    end, 30)
+    end, THRESHOLDS.MEMORY_CHECK_INTERVAL)
 
     -- Optimize resources periodically
     RealUI:ScheduleRepeatingTimer(function()
