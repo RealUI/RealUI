@@ -380,6 +380,10 @@ end
 -- Garbage Collection Management
 
 function PerformanceMonitor:CheckAutomaticGarbageCollection(memory)
+    -- Skip during combat to respect Aurora's GC mode (especially "combat" mode
+    -- which calls collectgarbage("stop") to prevent in-combat stutter)
+    if RealUI.inCombat then return end
+
     if memory >= PERFORMANCE_CONFIG.GC_AUTOMATIC_THRESHOLD then
         debug("Memory threshold reached, triggering garbage collection")
         self:PerformGarbageCollection()
@@ -419,6 +423,9 @@ function PerformanceMonitor:PerformIncrementalGarbageCollection()
 end
 
 function PerformanceMonitor:CheckForcedGarbageCollection()
+    -- Skip during combat to respect Aurora's GC mode
+    if RealUI.inCombat then return end
+
     local currentTime = GetTime()
     local timeSinceLastGC = currentTime - performanceData.system.lastGC
 
