@@ -72,5 +72,17 @@ tests\CombatText_MergeQueueTest.lua
 tests\CombatText_TestModeTest.lua
 tests\CombatText_LibSinkTest.lua
 tests\CombatText_LibSinkNilTest.lua
+tests\RealUI_Config_AuroraConfig_RoundTrip.lua
+tests\RealUI_Config_Skins_Coverage.lua
+tests\RealUI_Config_PixelPerfect_Scale.lua
+tests\RealUI_Config_AddonSkins_Match.lua
+tests\RealUI_Config_Systems_NoDuplicates.lua
+tests\RealUI_Config_InterfaceTweaks_Callable.lua
+tests\RealUI_Config_ModuleDisabled_Cascade.lua
+tests\RealUI_Config_InstallWizard_Annotations.lua
+tests\RealUI_Config_LockedOptions_Desc.lua
+tests\RealUI_Config_BlockToggles_Complete.lua
+tests\RealUI_Config_UnitChecks.lua
+tests\RealUI_Config_TestRunner.lua
 
 ../Aurora/dev/test.lua
