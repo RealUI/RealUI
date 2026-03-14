@@ -54,8 +54,8 @@ local function RunTest()
     -- 5. Test vehicle switching via mock of C_CombatText.SetActiveUnit
     do
         local calls = {}
-        local origSetActiveUnit = C_CombatText.SetActiveUnit
-        C_CombatText.SetActiveUnit = function(unit)
+        local origSetActiveUnit = _G.C_CombatText.SetActiveUnit
+        _G.C_CombatText.SetActiveUnit = function(unit)
             calls[#calls + 1] = unit
         end
 
@@ -72,19 +72,18 @@ local function RunTest()
             #calls == 1 and calls[1] == "player")
 
         -- Restore original
-        C_CombatText.SetActiveUnit = origSetActiveUnit
+        _G.C_CombatText.SetActiveUnit = origSetActiveUnit
     end
 
     -- 6. Test combat state notifications
     do
-        local capturedEventInfo = nil
+        local capturedEventInfo
         local origAddEvent = private.AddEvent
         private.AddEvent = function(eventInfo)
             capturedEventInfo = eventInfo
         end
 
         -- PLAYER_REGEN_DISABLED → ENTERING_COMBAT
-        capturedEventInfo = nil
         CombatText:PLAYER_REGEN_DISABLED()
         check("PLAYER_REGEN_DISABLED produces eventInfo",
             capturedEventInfo ~= nil)
@@ -94,7 +93,7 @@ local function RunTest()
             capturedEventInfo and capturedEventInfo.scrollType == "notification")
 
         -- PLAYER_REGEN_ENABLED → LEAVING_COMBAT
-        capturedEventInfo = nil
+        capturedEventInfo = nil -- luacheck: ignore 311
         CombatText:PLAYER_REGEN_ENABLED()
         check("PLAYER_REGEN_ENABLED produces eventInfo",
             capturedEventInfo ~= nil)
@@ -109,13 +108,12 @@ local function RunTest()
 
     -- 7. Test unknown message type produces no eventInfo
     do
-        local capturedEventInfo = nil
+        local capturedEventInfo
         local origAddEvent = private.AddEvent
         private.AddEvent = function(eventInfo)
             capturedEventInfo = eventInfo
         end
 
-        capturedEventInfo = nil
         private.HandleMessageType("FUTURE_NEW_TYPE")
         check("Unknown message type 'FUTURE_NEW_TYPE' produces no eventInfo",
             capturedEventInfo == nil)
@@ -126,13 +124,12 @@ local function RunTest()
 
     -- 8. Test zero-amount damage (WoW 12: stored as secretAmount)
     do
-        local capturedEventInfo = nil
+        local capturedEventInfo
         local origAddEvent = private.AddEvent
         private.AddEvent = function(eventInfo)
             capturedEventInfo = eventInfo
         end
 
-        capturedEventInfo = nil
         private.HandleMessageType("DAMAGE", 0)
         check("Zero-amount DAMAGE produces eventInfo",
             capturedEventInfo ~= nil)
@@ -145,13 +142,12 @@ local function RunTest()
 
     -- 9. Test energize with unknown power type (WoW 12: desc2 is secret, can't use as table key)
     do
-        local capturedEventInfo = nil
+        local capturedEventInfo
         local origAddEvent = private.AddEvent
         private.AddEvent = function(eventInfo)
             capturedEventInfo = eventInfo
         end
 
-        capturedEventInfo = nil
         -- desc2 = "NEW_POWER_TYPE" (secret in real WoW, but untainted in test)
         private.HandleMessageType("ENERGIZE", 50, "NEW_POWER_TYPE")
         check("Unknown power type 'NEW_POWER_TYPE' produces eventInfo",

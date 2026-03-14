@@ -49,14 +49,13 @@ local function RunTest()
     end
 
     -- Mock AddEvent to capture eventInfo
-    local capturedEventInfo = nil
+    local capturedEventInfo
     local originalAddEvent = private.AddEvent
     private.AddEvent = function(eventInfo)
         capturedEventInfo = eventInfo
     end
 
     -- Call sink with nil location: sink(addon, text, r, g, b, font, size, outline, sticky, location, icon)
-    capturedEventInfo = nil
     sinkHandler(nil, "Test", 1, 1, 1, nil, nil, nil, false, nil, nil)
 
     check("Sink with nil location produces eventInfo",

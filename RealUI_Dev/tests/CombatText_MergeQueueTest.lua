@@ -72,7 +72,7 @@ local function RunTest()
 
     -- Mock AddEvent to capture eventInfo
     local originalAddEvent = private.AddEvent
-    local capturedEventInfo = nil
+    local capturedEventInfo -- luacheck: ignore 311
     private.AddEvent = function(eventInfo)
         capturedEventInfo = eventInfo
     end
