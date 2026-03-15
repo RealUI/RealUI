@@ -270,29 +270,18 @@ function errorFrame:Update()
 end
 
 local lastSeen, threshold = {}, 2
-function errorFrame:BugGrabber_BugGrabbed(callback, errorObject)
-    --[[errorObject = {
-        message = sanitizedMessage,
-        stack = table.concat(tmp, "\n"),
-        locals = inCombat and "" or debuglocals(3),
-        session = addon:GetSessionId(),
-        time = date("%Y/%m/%d %H:%M:%S"),
-        counter = 1,
-    }]]
-    --print(errorObject.message)
-    local errorID, now = _G.BugGrabber:GetErrorID(errorObject), _G.time()
+function errorFrame:BugGrabber_BugGrabbed(tableID)
+    local now = _G.time()
 
-    if not lastSeen[errorID] or (now - lastSeen[errorID]) > threshold then
-        lastSeen[errorID] = now
-        _G.print(CHAT_ERROR_FORMAT:format(errorID, _G.LUA_ERROR, errorID))
+    if not lastSeen[tableID] or (now - lastSeen[tableID]) > threshold then
+        lastSeen[tableID] = now
+        local trimmedID = tableID:sub(8) -- Trim away "table: "
+        _G.print(CHAT_ERROR_FORMAT:format(trimmedID, _G.LUA_ERROR, trimmedID))
 
         if self:IsShown() then
             self:Update()
         end
     end
-end
-function errorFrame:BugGrabber_CapturePaused()
-    --print("Too many errors")
 end
 
 
@@ -321,9 +310,7 @@ function errorFrame.ADDON_LOADED(addon)
     end
 end
 
-_G.BugGrabber.setupCallbacks()
-_G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_BugGrabbed")
-_G.BugGrabber.RegisterCallback(errorFrame, "BugGrabber_CapturePaused")
+EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", errorFrame.BugGrabber_BugGrabbed, errorFrame)
 errorFrame:RegisterEvent("ADDON_LOADED")
 errorFrame:RegisterEvent("LUA_WARNING")
 errorFrame:SetScript("OnEvent", function(dialog, event, ...)

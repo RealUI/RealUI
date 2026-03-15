@@ -1002,7 +1002,10 @@ function Infobar:CreateBlocks()
                 errors = _G.BugGrabber:GetDB()
                 ShowBugIcon(block, "OnEnable", errors[#errors])
 
-                _G.BugGrabber.RegisterCallback(block, "BugGrabber_BugGrabbed", ShowBugIcon, block)
+                EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", function()
+                    errors = _G.BugGrabber:GetDB()
+                    ShowBugIcon(block, "BugGrabber.BugGrabbed", errors[#errors])
+                end, block)
             end,
             OnEnter = function(block, ...)
                 MenuFrame:Open(block, "TOPLEFT", menuList)
