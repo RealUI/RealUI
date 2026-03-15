@@ -1,16 +1,16 @@
 
 local _G = _G
 local type, table, next, tostring, tonumber, print = type, table, next, tostring, tonumber, print
-local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
-local DisableAddOn = C_AddOns.DisableAddOn
-local GetAddOnEnableState = C_AddOns.GetAddOnEnableState
-local GetNumAddOns = C_AddOns.GetNumAddOns
 local playerName = UnitNameUnmodified("player")
 
 -----------------------------------------------------------------------
 -- Check if we already exist in the global space
 -- If we do - bail out early, there's no version checks.
 if _G.BugGrabber then return end
+
+-- Disable outdated/conflicting addons
+C_AddOns.DisableAddOn("!Swatter")
+C_AddOns.DisableAddOn("!ImprovedErrorFrame")
 
 -----------------------------------------------------------------------
 -- If we're embedded we create a .BugGrabber object on the addons
@@ -19,11 +19,8 @@ if _G.BugGrabber then return end
 local bugGrabberParentAddon, parentAddonTable = ...
 local STANDALONE_NAME = "!BugGrabber"
 if bugGrabberParentAddon ~= STANDALONE_NAME then
-	local tbl = { STANDALONE_NAME, "!Swatter", "!ImprovedErrorFrame" }
-	for i = 1, 3 do
-		local enabled = GetAddOnEnableState(tbl[i], playerName)
-		if enabled == 2 then return end -- Bail out
-	end
+	local enabled = C_AddOns.GetAddOnEnableState(STANDALONE_NAME, playerName)
+	if enabled == 2 then return end -- Bail out
 end
 if not parentAddonTable.BugGrabber then parentAddonTable.BugGrabber = {} end
 local addon = parentAddonTable.BugGrabber
@@ -45,8 +42,6 @@ BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE = 10
 
 local L = {
 	ADDON_CALL_PROTECTED = "[%s] AddOn '%s' tried to call the protected function '%s'.",
-	ADDON_CALL_PROTECTED_MATCH = "^%[(.*)%] (AddOn '.*' tried to call the protected function '.*'.)$",
-	ADDON_DISABLED = "|cffffff00!BugGrabber and %s cannot coexist; %s has been forcefully disabled. If you want to, you may log out, disable !BugGrabber, and enable %s.|r",
 	BUGGRABBER_STOPPED = "|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r",
 	ERROR_DETECTED = "%s |cffffff00captured, click the link for more information.|r",
 	ERROR_UNABLE = "|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r",
@@ -57,16 +52,121 @@ local L = {
 	USAGE = "|cffffff00Usage: /buggrabber <1-%d>.|r",
 }
 
+do
+	local locale = GetLocale()
+	if locale == "koKR" then
+		L.ADDON_CALL_PROTECTED = "[%s] 애드온 '%s'|1이;가; 보호된 함수 '%s' 호출을 시도했습니다."
+		L.BUGGRABBER_STOPPED = "|cffffff00UI에 오류가 너무 많습니다. 결과적으로 게임 경험이 저하될 수 있습니다. 이 메시지를 다시 보지 않으려면 오류가 있는 애드온을 사용 중지하거나 업데이트하세요.|r"
+		L.ERROR_DETECTED = "%s |cffffff00수집됨, 자세한 정보는 링크를 클릭하세요.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber는 혼자서 다른 플레이어의 오류를 검색할 수 없습니다. 이 기능을 제공할 수 있는 BugSack이나 비슷한 디스플레이 애드온을 설치해주세요.|r"
+		L.NO_DISPLAY_1 = "|cffffff00당신은 !BugGrabber를 표시 애드온 없이 실행한 것 같습니다. !BugGrabber는 게임 오류 확인을 위한 슬래시 명령어를 제공하고 있지만, 표시 애드온은 당신이 더 편리한 방법으로 이러한 오류를 관리할 수 있게 도와줍니다.|r"
+		L.NO_DISPLAY_2 = "|cffffff00표준 디스플레이는 BugSack이라고 하며, 아마도 !BugGrabber를 구한 동일 사이트에서 찾을 수 있습니다.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00만약 이에 대해 다시 알림받고 싶지 않다면, /stopnag를 실행하세요.|r"
+		L.STOP_NAG = "|cffffff00다음 패치때까지 !BugGrabber는 표시 애드온이 없는 것에 대해 성가시게 하지 않습니다.|r"
+		L.USAGE = "|cffffff00사용법: /buggrabber <1-%d>.|r"
+	elseif locale == "deDE" then
+		L.ADDON_CALL_PROTECTED = "[%s] AddOn '%s' hat versucht die geschützte Funktion '%s' aufzurufen."
+		L.BUGGRABBER_STOPPED = "|cffffff00In deinem UI treten zu viele Fehler auf, als Folge davon könnte dein Spiel langsamer laufen. Deaktiviere oder aktualisiere die fehlerhaften Addons, wenn du diese Meldung nicht mehr sehen willst.|r"
+		L.ERROR_DETECTED = "%s |cffffff00gefangen, klicke auf den Link für mehr Informationen.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber kann selbst keine Fehler von anderen Spielern anzeigen. Bitte installiere BugSack oder ein vergleichbares Display-Addon, das dir diese Funktionalität bietet.|r"
+		L.NO_DISPLAY_1 = "|cffffff00Anscheinend benutzt du !BugGrabber ohne dazugehörigem Display-Addon. Zwar bietet !BugGrabber Slash-Befehle, um auf die Fehler zuzugreifen, mit einem Display-Addon wäre die Fehlerverwaltung aber bequemer.|r"
+		L.NO_DISPLAY_2 = "|cffffff00Die Standardanzeige heißt BugSack und kann vermutlich auf der Seite gefunden werden, wo du auch !BugGrabber gefunden hast.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00Wenn du diesen Hinweis nicht mehr sehen willst, gib /stopnag ein.|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber wird bis zum nächsten Patch nicht mehr auf ein fehlendes Display-Addon hinweisen.|r"
+		L.USAGE = "|cffffff00Benutzung: /buggrabber <1-%d>.|r"
+	elseif locale == "esES" then
+		L.ADDON_CALL_PROTECTED = "[%s] El addon '%s' ha intentado llamar a la función protegida '%s'."
+		L.BUGGRABBER_STOPPED = "|cffffff00¡Hay demasiados errores en la interfaz! Esto puede afectar negativamente el rendimiento del juego. Desactivar o actualizar los addons que están causando los errores si no deseas ver este mensaje nunca más.|r"
+		L.ERROR_DETECTED = "%s |cffffff00capturado. Haz clic en el vínculo para más información.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber no puede recibir errores de otro jugadores por sí mismo. Instalar BugSack o un addon similar que proporciona esta función.|r"
+		L.NO_DISPLAY_1 = "|cffff441Parece que estás usando !BugGrabber sin un addon de visualización para acompañarlo. Aunque !BugGrabber proporciona un comando para ver a los errores, un addon de visualización puede proporciona una interfaz más convenientemente.|r"
+		L.NO_DISPLAY_2 = "|cffff4411El addon estándar de visualización para !BugGrabber es |r|cff44ff44BugSack|r|cff4411. Puedes descargarlo desde el mismo lugar donde descargó BugSack.|r"
+		L.NO_DISPLAY_STOP = "|cff4411Si no quieres ver este mensaje nunca más, ejecute el comando |r|cff44ff44/stopnag|r|cffff4411.|r"
+		L.STOP_NAG = "|cffff4411BugGrabber no te recordará sobre el desaparecido |r|cff44ff44BugSack|r|cffff4411 nunca más, hasta el próximo parche.|r"
+		L.USAGE = "|cffffff00Uso: /buggrabber <1-%d>|r"
+	elseif locale == "zhTW" then
+		L.ADDON_CALL_PROTECTED = "[%s] 插件 '%s' 嘗試調用保護功能 '%s'。"
+		L.BUGGRABBER_STOPPED = "|cffffff00你的UI有太多的錯誤。這可能導致糟糕的遊戲體驗。禁用或是更新錯誤的插件如果你不想看到再次看到這個訊息。|r"
+		L.ERROR_DETECTED = "%s |cffffff00已捕捉，點擊連結以獲得更多訊息。|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber 本身無法檢索其他玩家的錯誤。請安裝 BugSack 或類似的錯誤顯示插件，可能會包含這些功能。|r"
+		L.NO_DISPLAY_1 = "|cffffff00你似乎沒有與 !BugGrabber 一起運行的錯誤顯示插件。雖然斜線命令訪問錯誤報告，但錯誤顯示插件可以以更快捷的方式幫助您管理這些錯誤。|r"
+		L.NO_DISPLAY_2 = "|cffffff00標準的錯誤顯示插件名叫 BugSack，可以在找到 !BugGrabber 的網站上找到它。|r"
+		L.NO_DISPLAY_STOP = "|cffffff00如果你不希望再次被提醒，請輸入 /stopnag。|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber將不再提示缺失錯誤顯示插件資訊直到下個版本發佈。|r"
+		L.USAGE = "|cffffff00用法：/buggrabber <1-%d>。|r"
+	elseif locale == "zhCN" then
+		L.ADDON_CALL_PROTECTED = "[%s] 插件 '%s' 尝试调用保护功能 '%s'。"
+		L.BUGGRABBER_STOPPED = "|cffffff00用户界面有太多的错误。所以，游戏体验会被降低。如不想再看到此信息请禁用或升级失效插件。|r"
+		L.ERROR_DETECTED = "%s |cffffff00已抓取，点击链接获取更多信息。|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber 本身无法检索其他玩家的错误。请安装 BugSack 或类似的错误显示插件，可能会包含这些功能。|r"
+		L.NO_DISPLAY_1 = "|cffffff00似乎没有与 !BugGrabber 一起运行的错误显示插件。虽然斜线命令访问错误报告，但错误显示插件可以以更快捷的方式帮助您管理这些错误。|r"
+		L.NO_DISPLAY_2 = "|cffffff00标准的错误显示插件名叫 BugSack，可以在找到 !BugGrabber 的网站上找到它。|r"
+		L.NO_DISPLAY_STOP = "|cffffff00如果你不希望再次被提醒，请输入 /stopnag。|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber 将不再提示缺失错误显示插件信息知道下个版本发布。|r"
+		L.USAGE = "|cffffff00用法：/buggrabber <1-%d>。|r"
+	elseif locale == "ruRU" then
+		L.ADDON_CALL_PROTECTED = "[%s] Модификация '%s' пыталась вызвать защищенную функцию '%s'."
+		L.BUGGRABBER_STOPPED = "|cffffff00Слишком много ошибок в вашем UI (пользовательском интерфейсе). В результате этого может снизиться играбельность. Отключите или обновите модификации, вызывающие сбои, если больше не хотите видеть это сообщение.|r"
+		L.ERROR_DETECTED = "%s |cffffff00перехвачен, нажмите на ссылку для получения дополнительной информации.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber не может самостоятельно получить ошибки от других игроков. Пожалуйста, установите BugSack или аналогичные модификации, которые могли бы дать вам эту функциональность.|r"
+		L.NO_DISPLAY_1 = "|cffffff00Кажется, !BugGrabber запущен без модификации для отображения информации. Хотя !BugGrabber предоставляет слеш-команды для доступа к внутриигровым ошибкам, модификация, выводящая информацию на экран, может показать их в более удобной форме.|r"
+		L.NO_DISPLAY_2 = "|cffffff00Стандартная модификация для вывода информации называется BugSack, и может быть найдена там же, где вы нашли !BugGrabber.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00Если вам не нравятся напоминания об этом, наберите /stopnag.|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber не будет напоминать об отсутствующей модификации, выводящей информацию, до следующего патча.|r"
+		L.USAGE = "|cffffff00Использование: /buggrabber <1-%d>.|r"
+	elseif locale == "frFR" then
+		L.ADDON_CALL_PROTECTED = "[%s] L’AddOn '%s' a tenté d’appeler la fonction protégée '%s'."
+		L.BUGGRABBER_STOPPED = "|cffffff00Il y a trop d’erreurs dans votre interface utilisateur. En conséquence, votre expérience de jeu pourrait être dégradée. Désactivez ou mettez à jour les AddOns défaillants si vous ne souhaitez plus voir ce message.|r"
+		L.ERROR_DETECTED = "%s |cffffff00capturé, cliquez sur le lien pour plus d’informations.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber ne peut pas récupérer les erreurs des autres joueurs par lui-même. Veuillez installer BugSack ou un autre AddOn d’affichage offrant cette fonctionnalité.|r"
+		L.NO_DISPLAY_1 = "|cffffff00Il semble que vous utilisiez !BugGrabber sans AddOn d’affichage associé. Bien qu’une commande slash soit disponible pour consulter les erreurs, un affichage dédié vous permet de les gérer plus facilement.|r"
+		L.NO_DISPLAY_2 = "|cffffff00L’affichage standard s’appelle BugSack et peut probablement être trouvé sur le même site que celui où vous avez téléchargé !BugGrabber.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00Si vous ne souhaitez plus recevoir ce rappel, utilisez la commande /stopnag.|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber ne vous rappellera plus l’absence d’un AddOn d’affichage jusqu’au prochain patch.|r"
+		L.USAGE = "|cffffff00Utilisation : /buggrabber <1-%d>.|r"
+	elseif locale == "esMX" then
+		L.ADDON_CALL_PROTECTED = "[%s] El addon '%s' ha intentado llamar a la función protegida '%s'."
+		L.BUGGRABBER_STOPPED = "|cffffff00¡Hay demasiados errores en la interfaz! Esto puede afectar negativamente el rendimiento del juego. Desactivar o actualizar los addons que están causando los errores si no deseas ver este mensaje nunca más.|r"
+		L.ERROR_DETECTED = "%s |cffffff00capturado. Haz clic en el vínculo para más información.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber no puede recibir errores de otro jugadores por sí mismo. Instalar BugSack o un addon similar que proporciona esta función.|r"
+		L.NO_DISPLAY_1 = "|cffffff00Parece que estás usando !BugGrabber sin un addon de visualización para acompañarlo. Aunque !BugGrabber proporciona un comando para ver a los errores, un addon de visualización puede proporciona una interfaz más convenientemente.|r"
+		L.NO_DISPLAY_2 = "|cffffff00El addon estándar de visualización para !BugGrabber es |r|cff44ff44BugSack|r|cff4411. Puedes descargarlo desde el mismo lugar donde descargó BugSack.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00Si no quieres ver este mensaje nunca más, ejecute el comando |r|cff44ff44/stopnag|r|cffff4411.|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber no te recordará sobre el desaparecido |r|cff44ff44BugSack|r|cffff4411 nunca más, hasta el próximo parche.|r"
+		L.USAGE = "|cffffff00Uso: /buggrabber <1-%d>|r"
+	elseif locale == "ptBR" then
+		L.ADDON_CALL_PROTECTED = "[%s] O Addon '%s' tentou chamar a função protegida '%s'."
+		L.BUGGRABBER_STOPPED = "|cffffff00Existem muitos erros na sua interface. Como resultado, a experiência com o jogo pode ser desagradável. Desative ou atualize os Addons com falhas, se você não quiser ver essa mensagem novamente.|r"
+		L.ERROR_DETECTED = "%s |cffffff00capturado, clique no link para mais informações.|r "
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber, por si só, é incapaz de receber erro de outros jogadores. Por favor. instale o BugSack ou outro programa que oferece esta funcionalidade.|r"
+		L.NO_DISPLAY_1 = "|cffffff00Parece que você está usando o !BugGrabber sem nenhum addon para visualização. Embora o haja um comando interno para acessar os relatórios de erros, um complemento possa ser necessário para gerenciar esses erros de forma mais conveniente.|r"
+		L.NO_DISPLAY_2 = "|cffffff00A ferramenta de exibição padrão é chamada BugSack, e provavelmente, você encontrará no mesmo site que você encontrou o !BugGrabber.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00Se você não quiser ser lembrado disto novamente, utilize o comando /stopnag.|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber não comentará sobre a ausência de uma ferramenta de exibição até a próxima versão.|r"
+		L.USAGE = "|cffffff00Uso: /buggrabber <1-%d>.|r"
+	elseif locale == "itIT" then
+		L.ADDON_CALL_PROTECTED = "[%s] AddOn '%s' ha cercato di chiamare la funzione protetta '%s'."
+		L.BUGGRABBER_STOPPED = "|cffffff00Ci sono troppi errori nella tua UI. Di conseguenza, la tua esperienza di gioco potrebbe essere non completamente appagante. Disabilita o aggiorna l'addon che genera così tanti avvisi se non vuoi più vedere questo messaggio.|r"
+		L.ERROR_DETECTED = "%s |cffffff00catturato, clicca sul link per maggiori informazioni.|r"
+		L.ERROR_UNABLE = "|cffffff00!BugGrabber non è capace di rivelare errori dovuti ad altri giocatori. Per favore, installa BugSack o un'addon equivalente per poter visualizzare anche questo tipo di errori.|r"
+		L.NO_DISPLAY_1 = "lcffff4411Sembra che tu stia eseguendo !BugGrabber senza alcun addon che ne visualizzi gli errori. Anche se !BugGrabber ha un comando per visualizzarli nella chat, un addon aggiuntivo per visualizzarli potrebbe esserti utile.|r"
+		L.NO_DISPLAY_2 = "|cffffff00L'addon standard per la visualizzazione degli errori catturati da !BugGrabber si chiama BugSack, e molto probabilmente lo puoi trovare sullo stesso sito dove hai trovato !BugGrabber.|r"
+		L.NO_DISPLAY_STOP = "|cffffff00Se non vuoi visualizzare più questo messaggio, esegui il comando /stopnag.|r"
+		L.STOP_NAG = "|cffffff00!BugGrabber non ti ricorderà più di installare BugSack fino al prossimo aggiornamento.|r"
+		L.USAGE = "|cffffff00Uso: /buggrabber <1-%d>.|r"
+	end
+end
+
 -----------------------------------------------------------------------
 -- Locals
 --
 
 -- Should implement :FormatError(errorTable).
 local displayObjectName = nil
-for i = 1, GetNumAddOns() do
-	local meta = GetAddOnMetadata(i, "X-BugGrabber-Display")
+for i = 1, C_AddOns.GetNumAddOns() do
+	local meta = C_AddOns.GetAddOnMetadata(i, "X-BugGrabber-Display")
 	if meta then
-		local enabled = GetAddOnEnableState(i, playerName)
+		local enabled = C_AddOns.GetAddOnEnableState(i, playerName)
 		if enabled == 2 then
 			displayObjectName = meta
 			break
@@ -83,30 +183,18 @@ local db = nil
 local loadErrors = {}
 
 local paused = nil
-local isBugGrabbedRegistered = nil
-local callbacks = nil
+local isDisplayRegistered = nil
 
 -----------------------------------------------------------------------
 -- Callbacks
 --
 
-local function setupCallbacks()
-	if not callbacks and LibStub and LibStub("CallbackHandler-1.0", true) then
-		callbacks = LibStub("CallbackHandler-1.0"):New(addon)
-		function callbacks:OnUsed(_, eventname)
-			if eventname == "BugGrabber_BugGrabbed" then isBugGrabbedRegistered = true end
-		end
-		function callbacks:OnUnused(_, eventname)
-			if eventname == "BugGrabber_BugGrabbed" then isBugGrabbedRegistered = nil end
-		end
-		setupCallbacks = nil
+do
+	local tbl = {}
+	local function callback()
+		isDisplayRegistered = true
 	end
-end
-addon.setupCallbacks = setupCallbacks; -- make it accessible from the outside for add-ons relying on BugGrabber events so they can make BugGrabber.RegisterCallback appear when they need it (CallbackHandler-1.0 is not embedded in BugGrabber)
-
-local function triggerEvent(...)
-	if not callbacks then setupCallbacks() end
-	if callbacks then callbacks:Fire(...) end
+	EventRegistry:RegisterCallback("BugGrabber.DisplayRegistered", callback, tbl)
 end
 
 -----------------------------------------------------------------------
@@ -114,7 +202,8 @@ end
 --
 
 local function fetchFromDatabase(database, target)
-	for i, err in next, database do
+	for i = #database, 1, -1 do
+		local err = database[i]
 		if err.message == target then
 			-- This error already exists
 			return err, i
@@ -139,6 +228,19 @@ local function printErrorObject(err)
 		if err.locals then
 			print(err.locals)
 		end
+	end
+end
+
+local function StoreError(errorObject)
+	if db then
+		local newCount = #db + 1
+		db[newCount] = errorObject
+		-- Save only the last MAX_BUGGRABBER_ERRORS errors (otherwise the SV gets too big)
+		if newCount > MAX_BUGGRABBER_ERRORS then
+			table.remove(db, 1)
+		end
+	else
+		loadErrors[#loadErrors + 1] = errorObject
 	end
 end
 
@@ -208,7 +310,6 @@ do
 					end
 				end
 				paused=true
-				triggerEvent("BugGrabber_CapturePaused")
 			end
 			return
 		end
@@ -242,7 +343,7 @@ do
 					time = time(),
 					counter = 1,
 				}
-				addon:StoreError(errorObject)
+				StoreError(errorObject)
 			else
 				errorObject = {
 					message = errorMessage,
@@ -250,7 +351,7 @@ do
 					time = time(),
 					counter = 1,
 				}
-				addon:StoreError(errorObject) -- Always store the error before checking stack/locals incase something goes wrong whilst calling them
+				StoreError(errorObject) -- Always store the error before checking stack/locals incase something goes wrong whilst calling them
 				local stack, level = GetErrorStack()
 				errorObject.stack = stack or "Debugstack was nil."
 				local locals = GetErrorLocals(level)
@@ -262,7 +363,7 @@ do
 			if errorObject.session ~= session then -- Error from a different session, update it
 				-- Do not re-arrange this error in the DB unless it's from an older session
 				table.remove(db or loadErrors, positionInDatabase)
-				addon:StoreError(errorObject)
+				StoreError(errorObject)
 				errorObject.time = time()
 
 				errorObject.session = session
@@ -279,7 +380,7 @@ do
 				-- Do not re-arrange this error in the DB unless 10 seconds have elapsed since the last time the error occured (timer will reset if the error is spamming)
 				if curTime - errorTime > 10 then
 					table.remove(db or loadErrors, positionInDatabase)
-					addon:StoreError(errorObject)
+					StoreError(errorObject)
 				end
 
 				if not isSimple and curTime - errorTime > 120 then -- More than 2 minutes, update the stack again
@@ -291,11 +392,12 @@ do
 			end
 		end
 
-		if not isBugGrabbedRegistered then
+		if not isDisplayRegistered then
 			print(L.ERROR_DETECTED:format(addon:GetChatLink(errorObject)))
 		end
 
-		triggerEvent("BugGrabber_BugGrabbed", errorObject)
+		local tableID = tostring(errorObject)
+		EventRegistry:TriggerEvent("BugGrabber.BugGrabbed", tableID)
 	end
 end
 
@@ -303,16 +405,8 @@ end
 -- API
 --
 
-function addon:StoreError(errorObject)
-	if db then
-		db[#db + 1] = errorObject
-		-- Save only the last MAX_BUGGRABBER_ERRORS errors (otherwise the SV gets too big)
-		if #db > MAX_BUGGRABBER_ERRORS then
-			table.remove(db, 1)
-		end
-	else
-		loadErrors[#loadErrors + 1] = errorObject
-	end
+function addon:StoreError(errorObject) -- XXX remove me eventually
+	StoreError(errorObject)
 end
 
 do
@@ -336,15 +430,15 @@ function addon:GetErrorByPlayerAndID(player, tableId)
 	print(L.ERROR_UNABLE)
 end
 
-function addon:GetErrorByID(tableId)
-	for _, errorObject in next, db do
-		if tostring(errorObject) == tableId then
-			return errorObject
+function addon:GetErrorByID(tableID)
+	for i = #db, 1, -1 do
+		local err = db[i]
+		if tostring(err) == tableID then
+			return err
 		end
 	end
 end
 
-function addon:GetErrorID(errorObject) return tostring(errorObject):sub(8) end
 function addon:Reset() if BugGrabberDB then db = {} BugGrabberDB.errors = db BugGrabberDB.session = 1 end end
 function addon:GetDB() return db or loadErrors end
 function addon:GetSessionId() return BugGrabberDB and BugGrabberDB.session or -1 end
@@ -361,7 +455,7 @@ end
 -- Initialization
 --
 
-local function initDatabase()
+do
 	-- Persist defaults and make sure we have sane SavedVariables
 	if type(BugGrabberDB) ~= "table" then BugGrabberDB = {} end
 	local sv = BugGrabberDB
@@ -385,9 +479,9 @@ local function initDatabase()
 		local exists, positionInDatabase = fetchFromDatabase(db, err.message)
 		if exists then
 			table.remove(db, positionInDatabase)
-			addon:StoreError(exists)
+			StoreError(exists)
 		else
-			addon:StoreError(err)
+			StoreError(err)
 		end
 	end
 	loadErrors = nil
@@ -397,15 +491,6 @@ local function initDatabase()
 			if type(v.message) == "table" then table.remove(db, i) end
 		end
 		sv.lastSanitation = 3
-	end
-
-	-- load locales
-	if type(addon.LoadTranslations) == "function" then
-		local locale = GetLocale()
-		if locale ~= "enUS" and locale ~= "enGB" then
-			addon:LoadTranslations(locale, L)
-		end
-		addon.LoadTranslations = nil
 	end
 
 	-- Only warn about missing display if we're running standalone.
@@ -423,16 +508,12 @@ local function initDatabase()
 			_G.SLASH_BugGrabberStopNag1 = "/stopnag"
 		end
 	end
-
-	initDatabase = nil
 end
 
 local events = {}
 do
 	local frame = CreateFrame("Frame")
 	frame:SetScript("OnEvent", function(_, event, ...) events[event](events, event, ...) end)
-	frame:RegisterEvent("ADDON_LOADED")
-	frame:RegisterEvent("PLAYER_LOGIN")
 	frame:RegisterEvent("ADDON_ACTION_BLOCKED")
 	frame:RegisterEvent("ADDON_ACTION_FORBIDDEN")
 	frame:RegisterEvent("LUA_WARNING")
@@ -443,64 +524,6 @@ do
 end
 
 do
-	local function createSwatter()
-		-- Need this so Stubby will feed us errors instead of just
-		-- dumping them to the chat frame.
-		_G.Swatter = {
-			IsEnabled = function() return true end,
-			OnError = function(msg, _, stack)
-				grabError(tostring(msg) .. tostring(stack))
-			end,
-			isFake = true,
-		}
-	end
-
-	local swatterDisabled = nil
-	function events:ADDON_LOADED(_, msg)
-		if not callbacks then setupCallbacks() end
-		if msg == "Stubby" then createSwatter() end
-		if initDatabase then
-			-- If we're running embedded, just init as soon as possible,
-			-- but if we are running separately we init when !BugGrabber
-			-- loads so that our SVs are available.
-			if bugGrabberParentAddon ~= STANDALONE_NAME or msg == bugGrabberParentAddon then
-				initDatabase()
-			end
-		end
-
-		if not swatterDisabled and _G.Swatter and not _G.Swatter.isFake then
-			swatterDisabled = true
-			if bugGrabberParentAddon == STANDALONE_NAME then
-				print(L.ADDON_DISABLED:format("Swatter", "Swatter", "Swatter"))
-			end
-			DisableAddOn("!Swatter")
-			SlashCmdList.SWATTER = nil
-			SLASH_SWATTER1, SLASH_SWATTER2 = nil, nil
-			for _, v in next, Swatter do
-				if type(v) == "table" then
-					if v.UnregisterAllEvents then
-						v:UnregisterAllEvents()
-					end
-					if v.Hide then
-						v:Hide()
-					end
-				end
-			end
-			Swatter = nil
-
-			local enabled = GetAddOnEnableState("Stubby", playerName)
-			if enabled == 2 then createSwatter() end
-
-			real_seterrorhandler(grabError)
-		end
-	end
-end
-
-function events:PLAYER_LOGIN()
-	if not callbacks then setupCallbacks() end
-	real_seterrorhandler(grabError)
-end
-do
 	local badAddons = {}
 	function events:ADDON_ACTION_FORBIDDEN(event, addonName, addonFunc)
 		local name = addonName or "<name>"
@@ -509,24 +532,22 @@ do
 			grabError(L.ADDON_CALL_PROTECTED:format(event, name or "<name>", addonFunc or "<func>"))
 		end
 	end
-end
-events.ADDON_ACTION_BLOCKED = events.ADDON_ACTION_FORBIDDEN
-function events:LUA_WARNING(_, warningText, pre11_1_5warningText) -- XXX changed in 11.1.5, need to wait until it's ported to all classic versions
-	local text = pre11_1_5warningText or warningText
-	if not text then text = "" end
-	text = "LUA_WARNING: " .. text
-	grabError(text, true)
+	events.ADDON_ACTION_BLOCKED = events.ADDON_ACTION_FORBIDDEN
+	UIParent:UnregisterEvent("ADDON_ACTION_FORBIDDEN")
+	UIParent:UnregisterEvent("ADDON_ACTION_BLOCKED")
 end
 
-UIParent:UnregisterEvent("LUA_WARNING") -- XXX pre-11.1.5
-if ScriptErrorsFrame then -- Post 11.1.5
-	ScriptErrorsFrame:UnregisterEvent("LUA_WARNING")
+function events:LUA_WARNING(_, warningText)
+	if not warningText then warningText = "" end
+	warningText = "LUA_WARNING: " .. warningText
+	grabError(warningText, true)
 end
+ScriptErrorsFrame:UnregisterEvent("LUA_WARNING")
+
 real_seterrorhandler(grabError)
-function seterrorhandler() --[[ noop ]] end
+function seterrorhandler() end
 
 -- Set up slash command
 SlashCmdList.BugGrabber = slashHandler
 SLASH_BugGrabber1 = "/buggrabber"
 BugGrabber = setmetatable({}, { __index = addon, __newindex = function() end, __metatable = false })
-

@@ -1,9 +1,43 @@
 ------------------------------------------------------------------------
-r370 | funkehdude | 2026-03-12 22:41:15 +0000 (Thu, 12 Mar 2026) | 1 line
+r377 | funkehdude | 2026-03-14 23:41:09 +0000 (Sat, 14 Mar 2026) | 1 line
 Changed paths:
-   M /trunk/.luacheckrc
    M /trunk/BugGrabber.lua
 
-Throttle how regularly the DB is re-arranged for repeating errors
+Send the table ID with the BugGrabber.BugGrabbed callback, cleanups
+------------------------------------------------------------------------
+r376 | funkehdude | 2026-03-14 22:45:25 +0000 (Sat, 14 Mar 2026) | 1 line
+Changed paths:
+   M /trunk/BugGrabber.lua
+
+Tweak
+------------------------------------------------------------------------
+r375 | funkehdude | 2026-03-14 20:22:34 +0000 (Sat, 14 Mar 2026) | 1 line
+Changed paths:
+   M /trunk/!BugGrabber.toc
+   M /trunk/.luacheckrc
+   M /trunk/BugGrabber.lua
+   D /trunk/locales.lua
+
+Clean up old code
+------------------------------------------------------------------------
+r374 | funkehdude | 2026-03-14 06:51:42 +0000 (Sat, 14 Mar 2026) | 1 line
+Changed paths:
+   M /trunk/BugGrabber.lua
+
+Swap to using EventRegistry for callbacks
+------------------------------------------------------------------------
+r373 | funkehdude | 2026-03-14 05:33:00 +0000 (Sat, 14 Mar 2026) | 1 line
+Changed paths:
+   M /trunk/!BugGrabber.toc
+   M /trunk/BugGrabber.lua
+   M /trunk/load.xml
+
+Merge localization into main file
+------------------------------------------------------------------------
+r372 | funkehdude | 2026-03-14 05:26:16 +0000 (Sat, 14 Mar 2026) | 1 line
+Changed paths:
+   M /trunk/BugGrabber.lua
+
+Unregister addon blocked popups since we deal with showing messages about them
 ------------------------------------------------------------------------
 

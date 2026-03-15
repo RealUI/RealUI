@@ -2,7 +2,5 @@
 ..\FrameXML\UI.xsd">
 
 <Script file="BugGrabber.lua"/>
-<Script file="locales.lua"/>
 
 </Ui>
-
