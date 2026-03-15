@@ -382,6 +382,14 @@ local function ResetFrames()
 end
 
 function DragEmAll:ADDON_LOADED(event, name)
+    if _G.InCombatLockdown() then
+        -- Defer all frame hooking until combat ends to avoid taint
+        RealUI.TryInCombat(function()
+            self:ADDON_LOADED(event, name)
+        end, false)
+        return
+    end
+
     if name == "Blizzard_PlayerSpells" then
         -- PlayerSpellsFrameMixin:OnLoad() calls ShowUIPanel() during frame creation,
         -- which triggers SetAttributeNoHandler() on the frame before ADDON_LOADED fires.
