@@ -34,25 +34,20 @@ local function restoreTable(dst, src)
     end
 end
 
--- Minimal PRNG (xorshift32) so we don't depend on math.random seed state
+-- Minimal PRNG (linear congruential) so we don't depend on math.random seed state
 local rngState = (_G.GetTime and math.floor(_G.GetTime() * 1000) or 12345) + 67890
-local function xorshift()
-    local x = rngState
-    x = bit.bxor(x, bit.lshift(x, 13))
-    x = bit.bxor(x, bit.rshift(x, 17))
-    x = bit.bxor(x, bit.lshift(x, 5))
-    -- keep positive 32-bit
-    if x < 0 then x = x + 0x100000000 end
-    rngState = x
-    return x
+local function nextRandom()
+    -- LCG parameters from Numerical Recipes
+    rngState = (rngState * 1103515245 + 12345) % 0x7FFFFFFF
+    return rngState
 end
 
 local function randomBool()
-    return xorshift() % 2 == 1
+    return nextRandom() % 2 == 1
 end
 
 local function randomFloat01()
-    return (xorshift() % 10001) / 10000  -- 0.0000 .. 1.0000
+    return (nextRandom() % 10001) / 10000  -- 0.0000 .. 1.0000
 end
 
 
