@@ -28,5 +28,4 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Fixes\BlizzBugsSuck.lua"/>
     <Script file="Fixes\InspectFix.lua"/>
     <Script file="Fixes\LibStrataFix.lua"/>
-    <Include file="Fixes\Taintless.xml"/>
 </Ui>
