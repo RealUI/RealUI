@@ -290,6 +290,7 @@ end
 function CastBars:CreateCastBars(unitFrame, unit, unitData)
     self:debug("CreateCastBars", unit)
     local info, unitDB = unitData.power or unitData.health, db[unit]
+    if not unitDB then return end
     unitFrame.Castbar = unitFrame:CreateAngle("CastBar", nil, unitFrame)
     local Castbar = unitFrame.Castbar
     Castbar:SetAngleVertex(info.leftVertex, info.rightVertex)
@@ -574,6 +575,7 @@ function CastBars:OnInitialize()
 end
 
 function CastBars:OnEnable()
+    db = self.db.profile
     self.configMode = false
 end
 

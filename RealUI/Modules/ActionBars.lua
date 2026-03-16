@@ -63,7 +63,7 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
-    if BT4ActionBars and BT4ActionBars.db and BT4ActionBars.db.profile
+    if BT4ActionBars and BT4ActionBars.actionbars and BT4ActionBars.db and BT4ActionBars.db.profile
         and BT4ActionBars.db.profile.actionbars and BT4ActionBars.ApplyConfig then
         BT4ActionBars:ApplyConfig()
     end

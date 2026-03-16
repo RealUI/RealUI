@@ -122,6 +122,7 @@ FrameMover.MoveFrameGroup = MoveFrameGroup
 -- Move all Addons
 function FrameMover:MoveAddons(addonName)
     FrameMover:debug("MoveAddons", addonName)
+    if not db.addons then return end
     for addonSlug, addon in next, FrameList.addons do
         local addonInfo = db.addons[addonSlug]
         FrameMover:debug("Move Addon", addonSlug, addon, addonName)
@@ -310,6 +311,7 @@ function FrameMover:OnInitialize()
 end
 
 function FrameMover:OnEnable()
+    db = self.db.profile
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 

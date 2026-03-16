@@ -117,6 +117,7 @@ end
 -- Set Info text/button positions
 function MinimapAdv:UpdateInfoPosition()
     self:debug("UpdateInfoPosition")
+    if not db.information then return end
     self.numText = 1
     if _G.Minimap:IsVisible() and not isInFarmMode then
         local mapPoints = GetPositionData()
@@ -443,7 +444,7 @@ do -- ButtonCollectFrame
     end
 
     function MinimapAdv:UpdateButtonCollection()
-        if not db.information.minimapbuttons then return end
+        if not db.information or not db.information.minimapbuttons then return end
         for i, child in next, {_G.Minimap:GetChildren()} do
             if child:GetName() then
                 if not(ignoreList[child:GetName()]) and not child.questID then
@@ -1369,7 +1370,7 @@ function MinimapAdv:ZoneChange(event, ...)
     Location.text:SetText(zName)
     Location.text:SetTextColor(r, g, b)
     Location:SetHeight(Location.text:GetStringHeight())
-    infoTexts.Location.shown = db.information.location
+    infoTexts.Location.shown = db.information and db.information.location
 end
 
 function MinimapAdv:ZONE_CHANGED_NEW_AREA(event, ...)
@@ -1872,6 +1873,8 @@ function MinimapAdv:OnInitialize()
 end
 
 function MinimapAdv:OnEnable()
+    db = self.db.profile
+
     if not HBD then
         _G.C_AddOns.LoadAddOn("HereBeDragons")
         HBD = _G.LibStub("HereBeDragons-2.0")
