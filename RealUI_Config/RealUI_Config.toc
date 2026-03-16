@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe, Hanshi
-## Version: 3.0.7
+## Version: 3.0.8
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: RealUI

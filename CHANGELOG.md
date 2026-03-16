@@ -1,3 +1,33 @@
+## [3.0.8] - 2026-03-16 ##
+### Summary ###
+Stability fixes for dual-spec characters (e.g. Priests). Modules now refresh their db reference on profile switch so stale data no longer causes cascading nil errors on login. Removed obsolete Blizzard bug-fix patches and TaintLess.xml (inert since 11.0). Cleaned up InspectFix dead hooks. BugGrabber updated to v12.0.11. RealUI_Config overhauled to expose all Aurora settings, consolidate duplicated options, and add missing controls. New config test suite in RealUI_Dev.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+  * RealUI_Config
+  * RealUI_Dev
+  * RealUI_Skins
+  * Aurora (12.0.1.17)
+
+### Added ###
+  * add: config test suite in RealUI_Dev
+
+### Changed ###
+  * chg: BugGrabber v12.0.10 -> v12.0.11
+  * chg: BugGrabber API updated — fixing compatibility
+  * chg: updated RealUI_Config Advanced panel — unified/removed/updated config options
+  * chg: Remove 4 obsolete Blizzard bug fixes (TradeSkill, Shipyard, AddonTooltip, EnableAddOn); fix PetJournal dragButton to preserve RightButtonUp
+  * chg: Clean up InspectFix: remove dead hooks (TalentFrame, InspectUnit, OnUpdate), fix revstr crash, drop Examiner reference
+  * chg: Remove TaintLess.xml — all patches inert on retail after Blizzard's Menu system migration in 11.0
+
+### Fixed ###
+  * fix: stale db references after DualSpec profile switch on login — fixes 6 cascading nil errors for dual-spec characters (Infobar, MinimapAdv, CastBars, FrameMover, ActionBars)
+  * fix: nil positions table error on priest login (Infobar)
+  * fix: don't try to move/allow dragging of frames if we are in combat — fixes taint
+  * fix: PRNG updated — no longer uses xorshift32 or linear congruential
+
+
 ## [3.0.7] - 2026-03-14 ##
 ### Summary ###
 Performance and GC hardening pass. PerformanceMonitor and ResourceManager now respect Aurora's combat GC mode — no more surprise collectgarbage("collect") calls mid-fight. ResourceManager check interval aligned with its data refresh rate (120s instead of 30s) to eliminate pointless timer callbacks. RealUI_CombatText restored and updated for WoW 12. BugGrabber updated to v12.0.10. Aurora updated to 12.0.1.16 with configurable GC tuning modes and object pooling.
@@ -274,6 +304,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.8]: https://github.com/RealUI/RealUI/compare/3.0.7...3.0.8
 [3.0.7]: https://github.com/RealUI/RealUI/compare/3.0.6...3.0.7
 [3.0.6]: https://github.com/RealUI/RealUI/compare/3.0.5...3.0.6
 [3.0.5]: https://github.com/RealUI/RealUI/compare/3.0.4...3.0.5
