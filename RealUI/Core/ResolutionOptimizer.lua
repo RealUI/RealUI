@@ -39,6 +39,8 @@ local OPTIMIZATION_PROFILES = {
         actionBarsYOffset = 10,
         scaleMultiplier = 0.9,
         compactMode = true,
+        isHighRes = false,
+        isPixelScale = true,
         description = "Low Resolution (< 1080p)"
     },
     [RESOLUTION_CATEGORY.STANDARD] = {
@@ -47,6 +49,8 @@ local OPTIMIZATION_PROFILES = {
         actionBarsYOffset = 0,
         scaleMultiplier = 1.0,
         compactMode = false,
+        isHighRes = false,
+        isPixelScale = true,
         description = "Standard Resolution (1080p)"
     },
     [RESOLUTION_CATEGORY.HIGH] = {
@@ -55,6 +59,8 @@ local OPTIMIZATION_PROFILES = {
         actionBarsYOffset = 0,
         scaleMultiplier = 1.0,
         compactMode = false,
+        isHighRes = true,
+        isPixelScale = true,
         description = "High Resolution (1440p+)"
     },
     [RESOLUTION_CATEGORY.ULTRA_HIGH] = {
@@ -63,6 +69,8 @@ local OPTIMIZATION_PROFILES = {
         actionBarsYOffset = 0,
         scaleMultiplier = 1.1,
         compactMode = false,
+        isHighRes = true,
+        isPixelScale = true,
         description = "Ultra High Resolution (4K+)"
     }
 }
@@ -164,6 +172,20 @@ function ResolutionOptimizer:ApplyOptimizations(force)
         debug("Set HuD size to", profile.hudSize)
     end
 
+    -- Apply scale settings via RealUI_Skins (only available after RealUI_Skins loads)
+    local skinsModule = RealUI:GetModule("Skins", true)
+    if skinsModule and skinsModule.db then
+        local skinsDB = skinsModule.db.profile
+        skinsDB.isHighRes = profile.isHighRes
+        skinsDB.isPixelScale = profile.isPixelScale
+        debug("Set isHighRes to", profile.isHighRes, "isPixelScale to", profile.isPixelScale)
+
+        -- Apply the scale now so saved values are correct for reload
+        if RealUI.UpdateUIScale then
+            RealUI.UpdateUIScale(skinsDB.customScale, true)
+        end
+    end
+
     -- Apply position optimizations
     if db.positions then
         for layoutId = 1, 2 do
@@ -218,14 +240,23 @@ end
 function ResolutionOptimizer:ReOptimize()
     debug("Forcing re-optimization")
     self.optimizationApplied = false
-    return self:ApplyOptimizations(true)
+    local applied = self:ApplyOptimizations(true)
+    if applied then
+        RealUI:ReloadUIDialog()
+    end
+    return applied
 end
 
 -- Event handler for display size changes
 function ResolutionOptimizer:OnDisplaySizeChanged()
-    debug("Display size changed, re-optimizing")
+    debug("Display size changed, detecting new resolution")
     self:ScheduleTimer(function()
-        self:ReOptimize()
+        local newCategory = self:GetResolutionCategory()
+        if newCategory ~= self.currentCategory then
+            debug("Resolution category changed from", self.currentCategory, "to", newCategory)
+            self.optimizationApplied = false
+            self:ApplyOptimizations(false)
+        end
     end, 1.0)
 end
 

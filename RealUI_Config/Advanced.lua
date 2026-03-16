@@ -1152,7 +1152,7 @@ do -- Skins
             }
         end
     end
-    local minScale, maxScale = 0.48, 1
+    local minScale, maxScale = 0.25, 1
     -- =========================================================================
     -- Addon Skin Coverage Evaluation (Requirements 23.1, 23.2, 23.3)
     -- =========================================================================
@@ -1447,7 +1447,7 @@ do -- Skins
                 get = function() return SkinsDB.profile.isHighRes end,
                 set = function(info, value)
                     SkinsDB.profile.isHighRes = value
-                    RealUI.UpdateUIScale(SkinsDB.profile.customScale)
+                    RealUI.UpdateUIScale(SkinsDB.profile.customScale, true)
                 end,
                 order = 21,
             },
@@ -1459,7 +1459,7 @@ do -- Skins
                 get = function() return SkinsDB.profile.isPixelScale end,
                 set = function(info, value)
                     SkinsDB.profile.isPixelScale = value
-                    RealUI.UpdateUIScale()
+                    RealUI.UpdateUIScale(nil, true)
                 end,
                 order = 22
             },
@@ -1484,7 +1484,7 @@ do -- Skins
                 end,
                 get = function() return _G.tostring(SkinsDB.profile.customScale) end,
                 set = function(info, value)
-                    RealUI.UpdateUIScale(_G.tonumber(value))
+                    RealUI.UpdateUIScale(_G.tonumber(value), true)
                 end,
                 order = 23,
             },

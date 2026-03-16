@@ -76,64 +76,88 @@ function RealUI.RegisterModdedFrame(frame, updateFunc)
     moddedFrames[frame] = updateFunc or false
 end
 
---[[ Setting the `uiScale` cvar will taint the ObjectiveTracker, and by extention the
-    WorldMap and map action button. As such, we only use that if we absolutly have to.
-    WoW CVar can't go below .64
-]]
+--[[ UI Scale Strategy
+    The engine scale (SetCVar / UIParent:SetScale) is applied ONCE at login
+    inside the deferred C_Timer.After(0) call from Aurora's ADDON_LOADED.
+    This is the safest window — no combat, no protected frames active yet.
 
+    Runtime changes from the config panel (toggling Pixel Perfect, changing
+    Custom Scale, re-optimizing) save the new values and prompt a /reload.
+    This avoids all taint issues while giving the optimizer full control.
+
+    WoW CVar "uiScale" has a minimum of 0.64. For scales below that
+    (e.g. pixel-perfect on 4K = 0.3556), we use UIParent:SetScale() as
+    a fallback since it has no floor. This only happens at login.
+]]
 
 local uiMod = (select(2, _G.GetPhysicalScreenSize()) / 768)
 local uiScaleChanging
-function RealUI.UpdateUIScale(newScale)
+local isStartupScaleApplied = false
+
+function RealUI.UpdateUIScale(newScale, fromConfig)
     if uiScaleChanging then return end
 
-    -- https://www.reddit.com/r/wow/comments/95o2qn/how_to_pixel_perfect_ui/
     local _, pysHeight = _G.GetPhysicalScreenSize()
     uiMod = (pysHeight / 768) * (private.uiScale or 1)
     pixelScale = 768 / pysHeight
     private.debug("pixel scale", pixelScale, uiMod)
 
     local oldScale = private.skinsDB.customScale
-    local cvarScale, parentScale = tonumber(RealUI.Scale.Round(_G.GetCVar("uiscale"),2)), RealUI.Scale.Round(_G.UIParent:GetScale(), 2)
+    local cvarScale = tonumber(RealUI.Scale.Round(_G.GetCVar("uiscale"), 2))
+    local parentScale = RealUI.Scale.Round(_G.UIParent:GetScale(), 2)
     private.debug("current scale", oldScale, cvarScale, parentScale)
-    if parentScale == 1 then -- bail if UIParent is scaled to 1... we don't want to mess with that
+
+    if parentScale == 1 then
         return
     end
-    -- Get Scale
+
+    -- Determine the desired customScale
     if private.skinsDB.isPixelScale then
-        newScale = RealUI.Scale.Round(pixelScale,2)
+        newScale = RealUI.Scale.Round(pixelScale, 2)
     end
     if not newScale then
         newScale = oldScale
     end
     private.debug("newScale", newScale)
-    local uiScale = newScale
+
+    -- Compute the engine-level scale (what UIParent should be)
+    local engineScale = newScale
     if private.skinsDB.isHighRes then
-        uiScale = RealUI.Scale.Round(uiScale * 2, 2)
+        engineScale = RealUI.Scale.Round(engineScale * 2, 2)
     end
 
     uiScaleChanging = true
-    private.debug("update uiScale", uiScale)
+    private.debug("update engineScale", engineScale)
 
-    --[[ UIParent:SetScale() from addon code taints C_ActionBar.GetActionBarPage() and related
-        action bar page APIs, causing ADDON_ACTION_BLOCKED errors on MultiBar:ShowBase() during
-        combat. Prefer SetCVar("uiScale") which lets the engine apply the scale securely.
-        SetCVar has a minimum of 0.64, so UIParent:SetScale() is only used as a fallback for
-        sub-0.64 scales (high-DPI without isHighRes). SetCVar may taint the ObjectiveTracker
-        but that is far less disruptive than broken action bars in combat. ]]
-    if parentScale ~= uiScale then
-        private.debug("Skipping engine UI scale change to avoid taint; desired uiScale:", uiScale)
-        -- Store the desired engine UI scale instead of changing it here. Changing
-        -- the `uiScale` CVar or calling `UIParent:SetScale` from addon code can
-        -- taint protected Blizzard frame behavior (ObjectiveTracker / WorldMap)
-        -- and lead to ADDON_ACTION_BLOCKED. Leave the global scale unchanged
-        -- and only apply per-frame scaling via `RealUI.RegisterModdedFrame`.
-        private.desiredUIScale = uiScale
+    -- Apply engine scale ONLY at login (first call)
+    if not isStartupScaleApplied then
+        isStartupScaleApplied = true
+
+        if parentScale ~= engineScale then
+            -- At login (deferred C_Timer.After(0) context), apply the scale
+            -- directly via UIParent:SetScale(). SetCVar("uiScale") from addon
+            -- code may not take effect reliably and has a 0.64 floor.
+            private.debug("Setting UIParent:SetScale to", engineScale)
+            _G.UIParent:SetScale(engineScale)
+        end
     end
 
     private.skinsDB.customScale = newScale
     UpdateModScale()
     uiScaleChanging = false
+
+    -- Report effective scale on first run (login)
+    if not private.scaleReported then
+        private.scaleReported = true
+        local phyWidth, phyHeight = _G.GetPhysicalScreenSize()
+        local mode = private.skinsDB.isHighRes and "HiDPI" or (private.skinsDB.isPixelScale and "Pixel" or "Custom")
+        _G.print(("Running on %sx%s - Effective Scale: %.2f (%s)"):format(phyWidth, phyHeight, newScale, mode))
+    end
+
+    -- Only prompt reload when explicitly triggered from config panel / optimizer
+    if fromConfig and parentScale ~= engineScale then
+        RealUI:ReloadUIDialog()
+    end
 end
 
 function RealUI.GetInterfaceSize()

@@ -86,6 +86,9 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     end
 
 
+    -- Guard: BT4ActionBars.actionbars may not be populated yet during early profile switches
+    if not (BT4ActionBars and BT4ActionBars.actionbars) then return end
+
     local BarSizes = {}
     local centerPadding = padding / 2
     local BarPadding = {top = {}, bottom = {}, sides = {}}
@@ -679,7 +682,9 @@ end
 
 function ActionBars:OnProfileUpdate(...)
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI:DoesAddonMove("Bartender4"))
-    self:RefreshMod()
+    if self:IsEnabled() then
+        self:RefreshMod()
+    end
 end
 
 function ActionBars:OnInitialize()
