@@ -842,8 +842,8 @@ function Infobar:CreateBar()
             if block.AdjustElements then block:AdjustElements(blockInfo) end
         end
 
-        ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
-        ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
+        if ndb.positions[1] then ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
+        if ndb.positions[2] then ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
     end)
 
     -- Stripes
@@ -1155,6 +1155,6 @@ function Infobar:OnEnable()
 
     -- Adjust ActionBar positions
     ndb = RealUI.db.profile
-    ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
-    ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT)
+    if ndb.positions[1] then ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
+    if ndb.positions[2] then ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
 end
