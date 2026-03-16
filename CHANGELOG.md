@@ -1,3 +1,20 @@
+## [3.0.9] - 2026-03-17 ##
+### Summary ###
+Reworked UI Scale strategy to be taint-safe. Engine scale (UIParent:SetScale) is now applied once at login instead of at runtime, hopefully eliminating the taint issues that plagued previous approaches. Config panel changes (Pixel Perfect toggle, HiDPI mode, custom scale slider) now save values and prompt a /reload instead of live-applying, which avoids ADDON_ACTION_BLOCKED errors entirely. ResolutionOptimizer profiles gained isHighRes/isPixelScale flags so resolution detection feeds directly into the new scale path. Aurora 12.0.1.18 updated to defer to the host addon's scaling when present, removing its own redundant scale logic. Also fixed an action bar error on login for dual-spec characters when the current spec differs from the one used during initial setup.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora (12.0.1.18)
+
+### Changed ###
+  * chg: UI Scale Strategy update
+
+### Fixed ###
+  * fix: action bar error on login for dual-spec characters when current spec differs from the one used during initial setup.
+
+
 ## [3.0.8] - 2026-03-16 ##
 ### Summary ###
 Stability fixes for dual-spec characters (e.g. Priests). Modules now refresh their db reference on profile switch so stale data no longer causes cascading nil errors on login. Removed obsolete Blizzard bug-fix patches and TaintLess.xml (inert since 11.0). Cleaned up InspectFix dead hooks. BugGrabber updated to v12.0.11. RealUI_Config overhauled to expose all Aurora settings, consolidate duplicated options, and add missing controls. New config test suite in RealUI_Dev.
@@ -304,6 +321,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.9]: https://github.com/RealUI/RealUI/compare/3.0.8...3.0.9
 [3.0.8]: https://github.com/RealUI/RealUI/compare/3.0.7...3.0.8
 [3.0.7]: https://github.com/RealUI/RealUI/compare/3.0.6...3.0.7
 [3.0.6]: https://github.com/RealUI/RealUI/compare/3.0.5...3.0.6
