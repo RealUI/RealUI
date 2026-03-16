@@ -1,6 +1,5 @@
 InspectFix = CreateFrame("Button", "InspectFixHiddenFrame", UIParent)
 local addonName = "InspectFix"
-local revision = tonumber(("$Revision: 57 $"):match("%d+"))
 
 local BlizzardNotifyInspect = _G.NotifyInspect
 local InspectPaperDollFrame_SetLevel = nil
@@ -53,18 +52,7 @@ local function inspectonevent(self, event, ...)
     InspectFix:Update()
   end
 end
-local function inspectonupdate(self)
-  if inspectfilter(self, nil) then
-    InspectFrame_OnUpdate(self)
-    InspectFix:Update()
-  end
-end
-local function talentonevent(self, event, ...)
-  if inspectfilter(self, event, ...) then
-    InspectTalentFrame_OnEvent(self, event, ...)
-    InspectFix:Update()
-  end
-end
+
 
 -- cache the inspect contents in case we lose our target (so GameTooltip:SetInventoryItem() no longer works)
 local scantt = CreateFrame("GameTooltip", "InspectFix_Tooltip", UIParent, "GameTooltipTemplate")
@@ -153,8 +141,6 @@ local blockmsg = {}
 local function UserInspecting()
   if InspectFrame and InspectFrame:IsVisible() then
      return "Blizzard_InspectUI"
-  elseif Examiner and Examiner:IsVisible() then
-     return "Examiner"
   else
      return nil
   end
@@ -223,18 +209,6 @@ local function guildframe_hook()
   end
 end
 
-local function inspectunit(unit)
-  if not inspectable(unit) then return end
-  -- NotifyInspect blocking in this addon and others is controlled by visibility of InspectFrame
-  -- When the user requests an inspect we need to immediately show that frame to start that blocking
-  -- and ensure the Notify issued by InspectFrame isn't squashed by a subsequent stealth inspect,
-  -- which would effectively cancel the user's manual inspect, causing the frame to never be shown
-  ShowUIPanel(InspectFrame)
-  -- issue a (duplicate) NotifyInspect with the frame open, to engage our retry and be extra-sure
-  InspectFrame_UnitChanged(InspectFrame)
-end
-
-
 local hookcnt = 0
 local hooked = {}
 function InspectFix:tryhook()
@@ -260,28 +234,6 @@ function InspectFix:tryhook()
       debug("Hooked inspectonevent")
     else
       debug("Re-Hooked inspectonevent")
-    end
-  end
-
-  if _G.InspectFrame_OnUpdate and InspectFrame:GetScript("OnUpdate") ~= inspectonupdate then
-    InspectFrame:SetScript("OnUpdate", inspectonupdate)
-    if not hooked[inspectonupdate] then
-      hookcnt = hookcnt + 1
-      hooked[inspectonupdate] = true
-      debug("Hooked inspectonupdate")
-    else
-      debug("Re-Hooked inspectonupdate")
-    end
-  end
-
-  if _G.InspectTalentFrame_OnEvent and InspectTalentFrame:GetScript("OnEvent") ~= talentonevent then
-    InspectTalentFrame:SetScript("OnEvent", talentonevent)
-    if not hooked[talentonevent] then
-      hookcnt = hookcnt + 1
-      hooked[inspectonevent] = true
-      debug("Hooked talentonevent")
-    else
-      debug("Re-Hooked talentonevent")
     end
   end
 
@@ -330,14 +282,7 @@ function InspectFix:tryhook()
     debug("Hooked pdfupdate")
   end
 
-  if not hooked[inspectunit] and InspectUnit then
-    hooksecurefunc("InspectUnit", inspectunit)
-    hookcnt = hookcnt + 1
-    hooked[inspectunit] = true
-    debug("Hooked inspectunit")
-  end
-
-  if hookcnt == 9 then
+  if hookcnt == 6 then
     hookcnt = hookcnt + 1
     print("InspectFix hook activated.")
   end
@@ -367,11 +312,6 @@ InspectFix:RegisterEvent("INSPECT_READY")
 function InspectFix:Load()
   InspectFix:tryhook()
   loaded = true
-
-  if not revstr or string.find(revstr, "@") then
-    revstr = "r"..tostring(revision)
-  end
-  --print("InspectFix "..revstr.." loaded.")
 end
 
 function InspectFix:Unload()
