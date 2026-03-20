@@ -463,9 +463,9 @@ function RealUI:OnInitialize()
     end
 
     -- Initialize Resource Manager
-    if self.ResourceManager then
-        self.ResourceManager:Initialize()
-    end
+    -- NOTE: ResourceManager requires the database to check
+    -- settings.performanceMonitorEnabled, so actual initialization is
+    -- deferred to after the database is created (see below).
 
     -- Initialize User Experience Polish
     if self.UXPolish then
@@ -538,6 +538,12 @@ function RealUI:OnInitialize()
     if self.LayoutManager then
         self.LayoutManager:LoadLayoutState()
         self.LayoutManager:ValidateCurrentLayout()
+    end
+
+    -- Initialize Resource Manager (deferred to here because it needs the
+    -- database to check settings.performanceMonitorEnabled)
+    if self.ResourceManager then
+        self.ResourceManager:Initialize()
     end
 
     -- Handle legacy character data migration
