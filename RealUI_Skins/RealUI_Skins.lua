@@ -21,6 +21,8 @@ private.isDev = RealUI.isDev
 local debug = RealUI.GetDebug("Skins")
 private.debug = debug
 
+local scaleMessagePrinted = false
+
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
@@ -97,6 +99,11 @@ local isStartupScaleApplied = false
 function RealUI.UpdateUIScale(newScale, fromConfig)
     if uiScaleChanging then return end
 
+    -- Ensure Aurora's standalone scale message is always suppressed when
+    -- RealUI_Skins is the host addon, even if we early-return below.
+    private.scaleReported = true
+    _G.AURORA_SCALE_REPORTED = true
+
     local _, pysHeight = _G.GetPhysicalScreenSize()
     uiMod = (pysHeight / 768) * (private.uiScale or 1)
     pixelScale = 768 / pysHeight
@@ -147,7 +154,9 @@ function RealUI.UpdateUIScale(newScale, fromConfig)
     uiScaleChanging = false
 
     -- Report effective scale on first run (login)
-    if not private.scaleReported then
+    if not scaleMessagePrinted then
+        scaleMessagePrinted = true
+        -- Also ensure Aurora's standalone message is suppressed
         private.scaleReported = true
         local phyWidth, phyHeight = _G.GetPhysicalScreenSize()
         local mode = private.skinsDB.isHighRes and "HiDPI" or (private.skinsDB.isPixelScale and "Pixel" or "Custom")
@@ -200,6 +209,14 @@ function RealUI:AddFrameStripes(Frame)
 end
 
 function private.OnLoad()
+    -- Bug 9 fix: Suppress Aurora's standalone "UI Scale" message immediately.
+    -- This must be the FIRST thing in OnLoad, before any code that could error,
+    -- so the deferred C_Timer.After(0) callback in init.lua always sees it.
+    private.scaleReported = true
+    -- Also set a global flag for dev mode where Aurora may load as a separate
+    -- addon with its own private table that can't see our private.scaleReported.
+    _G.AURORA_SCALE_REPORTED = true
+
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
     skinsDB:RegisterCallback("OnProfileChanged", function(db, newProfile)
         RealUI:ReloadUIDialog()
