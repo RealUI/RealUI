@@ -85,4 +85,7 @@ tests\RealUI_Config_BlockToggles_Complete.lua
 tests\RealUI_Config_UnitChecks.lua
 tests\RealUI_Config_TestRunner.lua
 
+tests\BugConditionTests.lua
+tests\PreservationTests.lua
+
 ../Aurora/dev/test.lua
