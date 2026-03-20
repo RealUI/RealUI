@@ -35,6 +35,13 @@ local function MiniPatchInstallation(newVer)
         if minipatches[0] then
             _G.tinsert(patches, minipatches[0])
         end
+        -- Cross-major-version: also run all patch-level minipatches (1..curVer[3])
+        -- since the user skipped all intermediate patches during the major version jump
+        for i = 1, curVer[3] do
+            if minipatches[i] then
+                _G.tinsert(patches, minipatches[i])
+            end
+        end
     else
         if oldVer[3] then
             for i = oldVer[3] + 1, curVer[3] do
@@ -107,6 +114,9 @@ function RealUI:InstallProcedure()
     end
 
     -- Primary Stages
+    -- Bug 5 fix (7.3): Profile forcing (via the wizard) only runs when
+    -- installStage != -1. After setup is complete (installStage == -1),
+    -- only minipatches run — no profile forcing occurs here.
     debug("Stage", dbc.init.installStage)
     if dbc.init.installStage > -1 then
         -- Delay showing the wizard to allow UI to fully load
@@ -114,6 +124,14 @@ function RealUI:InstallProcedure()
             self.InstallWizard:Start()
         end)
     else
+        -- Bug 7 fix (9.2): Set setupVersion for existing characters that were
+        -- configured before SetupSystem was introduced, preventing NeedsSetup
+        -- from re-triggering the wizard on every login.
+        local SetupSystem = RealUI.SetupSystem
+        if SetupSystem and not dbg[SetupSystem.SETUP_VERSION_KEY] then
+            dbg[SetupSystem.SETUP_VERSION_KEY] = SetupSystem.CURRENT_VERSION
+        end
+
         MiniPatchInstallation(newVer)
     end
 end
