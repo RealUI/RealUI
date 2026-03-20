@@ -93,6 +93,13 @@ function UnitFrames:RefreshUnits(event)
                 end
             end
 
+            -- Update aura counts on player frame
+            if unitKey == "player" then
+                if frame.Buffs and db.units.player then
+                    frame.Buffs.num = db.units.player.buffCount
+                end
+            end
+
             frame:UpdateAllElements(event)
         end
     end
@@ -332,6 +339,8 @@ function UnitFrames:OnInitialize()
                     reverseMissing = false,
                     reversePercent = false,
                     framePoint = {},
+                    buffCount = 16,
+                    showPlayerBuffs = true,
                 },
                 target = {
                     size = {x = 259, y = 28},

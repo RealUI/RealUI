@@ -3,6 +3,8 @@ local _, private = ...
 -- Libs --
 local oUF = private.oUF
 
+local Base = _G.Aurora.Base
+
 -- RealUI --
 local RealUI = private.RealUI
 local db
@@ -104,6 +106,28 @@ UnitFrames.player = {
 
         --[[ Class Resource ]]--
         RealUI:GetModule("ClassResource"):Setup(dialog, dialog.unit)
+
+        --[[ Player Buffs ]]--
+        local buffSize = 20
+        local buffSpacing = 2
+        local buffNum = (db.units.player and db.units.player.buffCount) or 16
+        local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))
+        local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
+
+        local Buffs = _G.CreateFrame("Frame", nil, dialog)
+        Buffs:SetPoint("BOTTOMLEFT", dialog, "TOPLEFT", 0, 20)
+        Buffs:SetSize(dialog:GetWidth(), buffRows * (buffSize + buffSpacing))
+        Buffs.num = buffNum
+        Buffs.size = buffSize
+        Buffs.spacing = buffSpacing
+        Buffs.initialAnchor = "BOTTOMLEFT"
+        Buffs.growthX = "RIGHT"
+        Buffs.growthY = "UP"
+        Buffs.PostCreateButton = function(_, button)
+            Base.CropIcon(button.Icon, button)
+            button.Count:SetFontObject("NumberFont_Outline_Med")
+        end
+        dialog.Buffs = Buffs
     end,
     health = {
         leftVertex = 1,
