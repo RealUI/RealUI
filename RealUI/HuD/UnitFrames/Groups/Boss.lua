@@ -17,13 +17,17 @@ local function FilterAura(_, _, data)
     if data.isPlayerAura and bossDB.showPlayerAuras then return true end
 
     -- Cast by NPC
+    -- Avoid UnitGUID + strsplit on data.sourceUnit — the sourceUnit value
+    -- can be tainted (secret string) which causes "attempt to perform string
+    -- conversion on a secret string value" when passed to API functions.
+    -- Instead, check whether the source is a known boss unit directly.
     if bossDB.showNPCAuras then
         local sourceUnit = data.sourceUnit
-        if sourceUnit and type(sourceUnit) == "string" then
-            local ok, guid = pcall(_G.UnitGUID, sourceUnit)
-            if ok and guid then
-                local unitType = _G.strsplit("-", guid)
-                if unitType == "Creature" then return true end
+        if sourceUnit then
+            -- Boss units are always "bossN"; if the source matches one of
+            -- those it's an NPC aura we want to show.
+            for i = 1, 5 do
+                if sourceUnit == "boss" .. i then return true end
             end
         end
     end
