@@ -134,9 +134,10 @@ function CastBars:UpdateSettings(unit)
     castbar:SetSize(size.x * unitDB.scale, size.y * unitDB.scale)
     castbar.Icon:SetSize(size.icon * unitDB.scale, size.icon * unitDB.scale)
 
+    local anchor = castbar.textOverlay or castbar
     if unit == "focus" then
-        castbar.Icon:SetPoint("BOTTOMLEFT", castbar, "BOTTOMRIGHT", 2, 1)
-        castbar.Text:SetPoint("BOTTOMRIGHT", castbar, "TOPRIGHT", 0, 2)
+        castbar.Icon:SetPoint("BOTTOMLEFT", anchor, "BOTTOMRIGHT", 2, 1)
+        castbar.Text:SetPoint("BOTTOMRIGHT", anchor, "TOPRIGHT", 0, 2)
         castbar.Time:SetPoint("BOTTOMLEFT", castbar.Icon, "BOTTOMRIGHT", 2, 0)
     else
         local iconX, iconY
@@ -299,11 +300,15 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     -- Castbar:SetSmooth(false)
     Castbar:SetReverseFill(unitDB.reverse)
 
-    Castbar.Icon = Castbar:CreateTexture(nil, "OVERLAY")
+    Castbar.textOverlay = _G.CreateFrame("Frame", nil, Castbar)
+    Castbar.textOverlay:SetFrameLevel(Castbar:GetFrameLevel() + 5)
+    Castbar.textOverlay:SetAllPoints(Castbar)
+
+    Castbar.Icon = Castbar.textOverlay:CreateTexture(nil, "OVERLAY")
     Aurora.Base.CropIcon(Castbar.Icon, Castbar)
 
-    Castbar.Text = Castbar:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1_Outline")
-    Castbar.Time = Castbar:CreateFontString(nil, "OVERLAY", "NumberFont_Outline_Large")
+    Castbar.Text = Castbar.textOverlay:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1_Outline")
+    Castbar.Time = Castbar.textOverlay:CreateFontString(nil, "OVERLAY", "NumberFont_Outline_Large")
 
     local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)
     SafeZone:SetColorTexture(uninterruptible:GetRGB())
