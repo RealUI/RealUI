@@ -58,8 +58,19 @@ local grouplootlist, grouplootframes = {}, {}
 local RealUIGroupLootFrame
 
 local function GroupLootOnEvent(self, event, rollId)
-    _G.tinsert(grouplootlist, {rollId = rollId})
-    Loot:UpdateGroupLoot()
+    if event == "START_LOOT_ROLL" then
+        _G.tinsert(grouplootlist, {rollId = rollId})
+        Loot:UpdateGroupLoot()
+    elseif event == "LOOT_ROLLS_COMPLETE" then
+        -- Safety net: remove any stale entries whose rollId no longer returns valid data
+        for i = #grouplootlist, 1, -1 do
+            local texture = _G.GetLootRollItemInfo(grouplootlist[i].rollId)
+            if not texture then
+                _G.tremove(grouplootlist, i)
+            end
+        end
+        Loot:UpdateGroupLoot()
+    end
 end
 
 local function GroupLootFrameOnEvent(self, event, ...)
@@ -110,7 +121,21 @@ local function GroupLootFrameOnLeave(self)
 end
 
 local function GroupLootButtonOnClick(self, button)
-    _G.RollOnLoot(self:GetParent().rollId, self.type)
+    local frame = self:GetParent()
+    local rollId = frame.rollId
+    _G.RollOnLoot(rollId, self.type)
+
+    -- Remove the roll entry from grouplootlist (mirrors CANCEL_LOOT_ROLL cleanup)
+    for index, value in next, grouplootlist do
+        if rollId == value.rollId then
+            _G.tremove(grouplootlist, index)
+            break
+        end
+    end
+
+    _G.StaticPopup_Hide("CONFIRM_LOOT_ROLL", rollId)
+    frame.rollId = nil
+    Loot:UpdateGroupLoot()
 end
 
 local function GroupLootSortFunc(a, b)
@@ -257,6 +282,7 @@ end
 function Loot:InitializeGroupLoot()
     RealUIGroupLootFrame = _G.CreateFrame("Frame", "RealUI_GroupLoot", _G.UIParent)
     RealUIGroupLootFrame:RegisterEvent("START_LOOT_ROLL")
+    RealUIGroupLootFrame:RegisterEvent("LOOT_ROLLS_COMPLETE")
     RealUIGroupLootFrame:SetScript("OnEvent", GroupLootOnEvent)
     RealUIGroupLootFrame:SetFrameStrata("HIGH")
     RealUIGroupLootFrame:SetWidth(db.grouplootwidth)
