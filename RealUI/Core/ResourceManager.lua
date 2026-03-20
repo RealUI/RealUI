@@ -309,6 +309,14 @@ end
 function ResourceManager:Initialize()
     debug("Initializing resource manager...")
 
+    -- ResourceManager is gated behind the performanceMonitorEnabled setting
+    -- (default: off).  Only start the repeating timers when the user has
+    -- explicitly opted in via the Systems config panel.
+    if not (RealUI.db and RealUI.db.profile.settings.performanceMonitorEnabled) then
+        debug("Resource monitoring disabled by settings.performanceMonitorEnabled")
+        return
+    end
+
     -- Start monitoring
     self:StartMonitoring()
 
