@@ -435,6 +435,7 @@ local function Shared(self, unit)
     -- Create a proxy frame for the CombatFader to avoid taint city.
     self.overlay = _G.CreateFrame("Frame", nil, self)
     self.overlay:SetFrameStrata("BACKGROUND")
+    self.overlay:EnableMouse(false)
     CombatFader:RegisterFrameForFade("UnitFrames", self.overlay)
 
     local unitData = UnitFrames[unit]
