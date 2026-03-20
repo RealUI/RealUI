@@ -408,7 +408,7 @@ function AddonControl:OnInitialize()
                 },
                 ["Bartender4"] = {
                     profiles = {
-                        base =          {use = true,    key = "RealUI"},
+                        base =          {use = true,    key = "RealUI", userOverride = false},
                         layout =        {use = true,    key = "Healing"},
                     },
                     control = {

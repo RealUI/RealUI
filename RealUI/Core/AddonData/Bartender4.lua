@@ -386,6 +386,21 @@ function private.Profiles.Bartender4()
         return
     end
 
+    -- Bug 5 fix: Respect user's Bartender4 profile selection.
+    -- Only force profiles during the initial setup wizard (installStage != -1).
+    -- On subsequent logins (installStage == -1), if the user has set userOverride,
+    -- skip the profile reset to preserve their custom BT4 profile choice.
+    local dbc = RealUI.db and RealUI.db.char
+    if dbc and dbc.init.installStage == -1 then
+        local acModule = RealUI:GetModule("AddonControl", true)
+        if acModule and acModule.db then
+            local bt4Control = acModule.db.profile.addonControl["Bartender4"]
+            if bt4Control and bt4Control.profiles.base.userOverride then
+                return
+            end
+        end
+    end
+
     db:SetDualSpecEnabled(true)
 
     for specIndex = 1, #RealUI.charInfo.specs do
