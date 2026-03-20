@@ -21,6 +21,19 @@ local CloseHuDWindow = private.CloseHuDWindow
 local options = private.options
 local debug = private.debug
 
+-- Safe layout accessor: returns the current layout index, falling back to
+-- the character DB value or 1 if RealUI.cLayout is nil/tainted.
+local function safeLayout()
+    return RealUI.cLayout or (RealUI.db and RealUI.db.char.layout.current) or 1
+end
+
+-- Safe position accessor: returns the positions table for the current layout,
+-- or nil if unavailable.
+local function safePositions()
+    local layout = safeLayout()
+    return RealUI.db and RealUI.db.profile.positions[layout]
+end
+
 
 options.HuD = {
     type = "group",
@@ -114,7 +127,7 @@ do -- Other
                             RealUI.ncLayout = RealUI.cLayout == 1 and 2 or 1
 
                             if value then
-                                RealUI.db.profile.positions[RealUI.ncLayout] = RealUI.DeepCopy(RealUI.db.profile.positions[RealUI.cLayout])
+                                RealUI.db.profile.positions[RealUI.ncLayout] = RealUI.DeepCopy(RealUI.db.profile.positions[safeLayout()])
                             end
                         end,
                         order = 20,
@@ -141,10 +154,16 @@ do -- Other
                         step = 1,
                         bigStep = 4,
                         order = 40,
-                        get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["HuDY"] end,
+                        get = function(info)
+                            local pos = safePositions()
+                            return pos and pos["HuDY"] or 0
+                        end,
                         set = function(info, value)
-                            RealUI.db.profile.positions[RealUI.cLayout]["HuDY"] = value
-                            RealUI:UpdatePositioners()
+                            local pos = safePositions()
+                            if pos then
+                                pos["HuDY"] = value
+                                RealUI:UpdatePositioners()
+                            end
                         end,
                     }
                 }
@@ -175,10 +194,16 @@ do -- Other
                         step = 1,
                         bigStep = 4,
                         order = 30,
-                        get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["SpellAlertWidth"] end,
+                        get = function(info)
+                            local pos = safePositions()
+                            return pos and pos["SpellAlertWidth"] or 150
+                        end,
                         set = function(info, value)
-                            RealUI.db.profile.positions[RealUI.cLayout]["SpellAlertWidth"] = value
-                            RealUI:UpdatePositioners()
+                            local pos = safePositions()
+                            if pos then
+                                pos["SpellAlertWidth"] = value
+                                RealUI:UpdatePositioners()
+                            end
                         end,
                     }
                 }
@@ -253,9 +278,9 @@ do -- Other
                                         name = L["ActionBars_Move"]:format(L["ActionBars_Stance"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Stance"]),
                                         type = "toggle",
-                                        get = function() return ActionBars.db.profile[RealUI.cLayout].moveBars.stance end,
+                                        get = function() return ActionBars.db.profile[safeLayout()].moveBars.stance end,
                                         set = function(info, value)
-                                            ActionBars.db.profile[RealUI.cLayout].moveBars.stance = value
+                                            ActionBars.db.profile[safeLayout()].moveBars.stance = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 10,
@@ -264,9 +289,9 @@ do -- Other
                                         name = L["ActionBars_Move"]:format(L["ActionBars_Pet"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_Pet"]),
                                         type = "toggle",
-                                        get = function() return ActionBars.db.profile[RealUI.cLayout].moveBars.pet end,
+                                        get = function() return ActionBars.db.profile[safeLayout()].moveBars.pet end,
                                         set = function(info, value)
-                                            ActionBars.db.profile[RealUI.cLayout].moveBars.pet = value
+                                            ActionBars.db.profile[safeLayout()].moveBars.pet = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 20,
@@ -275,9 +300,9 @@ do -- Other
                                         name = L["ActionBars_Move"]:format(L["ActionBars_EAB"]),
                                         desc = L["ActionBars_MoveDesc"]:format(L["ActionBars_EAB"]),
                                         type = "toggle",
-                                        get = function() return ActionBars.db.profile[RealUI.cLayout].moveBars.eab end,
+                                        get = function() return ActionBars.db.profile[safeLayout()].moveBars.eab end,
                                         set = function(info, value)
-                                            ActionBars.db.profile[RealUI.cLayout].moveBars.eab = value
+                                            ActionBars.db.profile[safeLayout()].moveBars.eab = value
                                             ActionBars:ApplyABSettings()
                                         end,
                                         order = 30,
@@ -297,10 +322,10 @@ do -- Other
                                     }
                                 end,
                                 get = function(info)
-                                    return ActionBars.db.profile[RealUI.cLayout].centerPositions
+                                    return ActionBars.db.profile[safeLayout()].centerPositions
                                 end,
                                 set = function(info, value)
-                                    ActionBars.db.profile[RealUI.cLayout].centerPositions = value
+                                    ActionBars.db.profile[safeLayout()].centerPositions = value
                                     ActionBars:ApplyABSettings()
                                     RealUI:UpdatePositioners()
                                 end,
@@ -318,10 +343,10 @@ do -- Other
                                     }
                                 end,
                                 get = function(info)
-                                    return ActionBars.db.profile[RealUI.cLayout].sidePositions
+                                    return ActionBars.db.profile[safeLayout()].sidePositions
                                 end,
                                 set = function(info, value)
-                                    ActionBars.db.profile[RealUI.cLayout].sidePositions = value
+                                    ActionBars.db.profile[safeLayout()].sidePositions = value
                                     ActionBars:ApplyABSettings()
                                     RealUI:UpdatePositioners()
                                 end,
@@ -335,11 +360,17 @@ do -- Other
                                 min = -round(uiHeight * 0.3), max = round(uiHeight * 0.3),
                                 step = 1, bigStep = 4,
                                 order = -1,
-                                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["ActionBarsY"] end,
+                                get = function(info)
+                                    local pos = safePositions()
+                                    return pos and pos["ActionBarsY"] or -161.5
+                                end,
                                 set = function(info, value)
-                                    RealUI.db.profile.positions[RealUI.cLayout]["ActionBarsY"] = value - .5
-                                    ActionBars:ApplyABSettings()
-                                    RealUI:UpdatePositioners()
+                                    local pos = safePositions()
+                                    if pos then
+                                        pos["ActionBarsY"] = value - .5
+                                        ActionBars:ApplyABSettings()
+                                        RealUI:UpdatePositioners()
+                                    end
                                 end,
                             }
                         }
@@ -751,10 +782,16 @@ do -- UnitFrames
                 step = 1,
                 bigStep = 4,
                 order = 30,
-                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["UFHorizontal"] end,
+                get = function(info)
+                    local pos = safePositions()
+                    return pos and pos["UFHorizontal"] or 200
+                end,
                 set = function(info, value)
-                    RealUI.db.profile.positions[RealUI.cLayout]["UFHorizontal"] = value
-                    RealUI:UpdatePositioners()
+                    local pos = safePositions()
+                    if pos then
+                        pos["UFHorizontal"] = value
+                        RealUI:UpdatePositioners()
+                    end
                 end,
             }
         end
@@ -838,10 +875,16 @@ do -- UnitFrames
                 max = -30,
                 step = 1,
                 bigStep = 4,
-                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["BossX"] end,
+                get = function(info)
+                    local pos = safePositions()
+                    return pos and pos["BossX"] or -32
+                end,
                 set = function(info, value)
-                    RealUI.db.profile.positions[RealUI.cLayout]["BossX"] = value
-                    RealUI:UpdatePositioners()
+                    local pos = safePositions()
+                    if pos then
+                        pos["BossX"] = value
+                        RealUI:UpdatePositioners()
+                    end
                 end,
                 order = 2,
             }
@@ -853,10 +896,16 @@ do -- UnitFrames
                 max = round(uiHeight * 0.4),
                 step = 1,
                 bigStep = 2,
-                get = function(info) return RealUI.db.profile.positions[RealUI.cLayout]["BossY"] end,
+                get = function(info)
+                    local pos = safePositions()
+                    return pos and pos["BossY"] or 314
+                end,
                 set = function(info, value)
-                    RealUI.db.profile.positions[RealUI.cLayout]["BossY"] = value
-                    RealUI:UpdatePositioners()
+                    local pos = safePositions()
+                    if pos then
+                        pos["BossY"] = value
+                        RealUI:UpdatePositioners()
+                    end
                 end,
                 order = 4,
             }
