@@ -188,8 +188,11 @@ function InstallWizard:Complete()
         debug("Disabled old tutorial system")
     end
 
+    -- Capture first-time state before it gets cleared by the CVar block below
+    local isFirstTimeAccount = dbg and dbg.tags and dbg.tags.firsttime
+
     -- Apply first-time CVars if this is first time
-    if dbg and dbg.tags and dbg.tags.firsttime then
+    if isFirstTimeAccount then
         debug("Applying first-time account CVars")
         self:ApplyAccountCVars()
         debug("Applying first-time character CVars")
@@ -227,26 +230,41 @@ function InstallWizard:Complete()
         debug("Updated verinfo")
     end
 
-    -- Apply RealUI addon profiles (from old setup system)
-    if RealUI.AddRealUIProfiles then
-        debug("Adding RealUI profiles to addons")
-        RealUI:AddRealUIProfiles()
-    end
+    -- Account-wide addon profile setup: only run for truly first-time accounts
+    -- When firsttime is already false, global config is done — skip profile creation
+    if isFirstTimeAccount then
+        if RealUI.AddRealUIProfiles then
+            debug("Adding RealUI profiles to addons")
+            RealUI:AddRealUIProfiles()
+        end
 
-    if RealUI.SetProfilesToRealUI then
-        debug("Setting addon profiles to RealUI")
-        RealUI:SetProfilesToRealUI()
-    end
+        if RealUI.SetProfilesToRealUI then
+            debug("Setting addon profiles to RealUI")
+            RealUI:SetProfilesToRealUI()
+        end
 
-    -- Set profile keys for all addons
-    if RealUI.SetProfileKeys then
-        debug("Setting profile keys")
-        RealUI:SetProfileKeys()
+        -- Set profile keys for all addons
+        if RealUI.SetProfileKeys then
+            debug("Setting profile keys")
+            RealUI:SetProfileKeys()
+        end
+    else
+        debug("Skipping account-wide profile setup (firsttime already false)")
     end
 
     -- Perform character initialization
+    -- For truly new characters, run full setup; for already-initialized characters,
+    -- only run character-specific steps (layout, spec mapping, chat positioning)
     if RealUI.CharacterInit then
-        RealUI.CharacterInit:Setup()
+        if not RealUI.CharacterInit:IsInitialized() then
+            RealUI.CharacterInit:Setup()
+        else
+            -- Character already initialized — only apply role defaults and chat positioning
+            debug("Character already initialized, running character-specific steps only")
+            RealUI.CharacterInit:ApplyRoleDefaults()
+            RealUI.CharacterInit:SetupChatFrames()
+            RealUI.CharacterInit:RegisterCharacter()
+        end
     end
 
     -- Complete setup in SetupSystem

@@ -87,6 +87,15 @@ function SetupSystem:NeedsSetup()
         return true
     end
 
+    -- Already-configured characters should never re-trigger the wizard
+    if RealUI.db.char and RealUI.db.char.init then
+        local charInit = RealUI.db.char.init
+        if charInit.installStage == -1 and charInit.initialized == true then
+            debug("Character already configured, skipping setup")
+            return false
+        end
+    end
+
     local dbg = RealUI.db.global
 
     -- Check if setup has been run for current version
