@@ -267,11 +267,13 @@ function RealUI:GetVerString()
     return RealUI.verinfo.string
 end
 function RealUI:GetVersionChange(oldVer, curVer)
-    if oldVer[1] == 2 then
-        return ((curVer[1] > oldVer[1]) and "major") or ((curVer[2] > oldVer[2]) and "minor")
-    else
+    if curVer[1] > oldVer[1] then
         return "major"
+    elseif curVer[2] > oldVer[2] then
+        return "minor"
     end
+    -- Same major.minor — no version change (patch-level handled by minipatches)
+    return nil
 end
 
 -- To help position UI elements
@@ -357,7 +359,47 @@ function RealUI:OnProfileUpdate(event, database, profile)
     -- completed (installStage == -1).  During initial setup the wizard
     -- calls AddRealUIProfiles + SetProfilesToRealUI explicitly at the end.
     if dbc.init.installStage == -1 then
-        RealUI:SetProfilesToRealUI()
+        -- Bug 5 fix: Snapshot module enabled states before profile forcing
+        -- so we can restore any modules that get incorrectly disabled by the
+        -- profile cascade.
+        local moduleSnapshot = {}
+        if db.modules then
+            for modName, enabled in next, db.modules do
+                moduleSnapshot[modName] = enabled
+            end
+        end
+
+        -- Bug 5 fix (7.3): Respect userOverride per addon. After the wizard
+        -- (installStage == -1), skip profile forcing for addons where the
+        -- user has set userOverride = true in AddonControl.
+        local acModule = self:GetModule("AddonControl", true)
+        local acDB = acModule and acModule.db and acModule.db.profile
+        for addonName in next, private.Profiles do
+            local skip = false
+            if acDB and acDB.addonControl and acDB.addonControl[addonName] then
+                local addonCtrl = acDB.addonControl[addonName]
+                if addonCtrl.profiles and addonCtrl.profiles.base
+                        and addonCtrl.profiles.base.userOverride then
+                    skip = true
+                end
+            end
+            if not skip then
+                self:SetAddOnProfileToRealUI(addonName)
+            end
+        end
+
+        -- Restore any modules that were incorrectly disabled by the cascade
+        if db.modules then
+            for modName, wasEnabled in next, moduleSnapshot do
+                if wasEnabled and not db.modules[modName] then
+                    db.modules[modName] = true
+                end
+            end
+            -- Ensure CastBars is always enabled across profile switches
+            if db.modules["CastBars"] == false then
+                db.modules["CastBars"] = true
+            end
+        end
     end
 
     for _, module in self:IterateModules() do
@@ -1195,6 +1237,9 @@ local onLoadMessages = {
 function RealUI:OnEnable()
     debug("OnEnable starting", dbc.init.installStage)
 
+    -- Reset per-session flags
+    dbg.tags.uiScaleWarningDismissed = false
+
     -- Enable modules from database (after all modules have registered)
     if self.ModuleFramework then
         self.ModuleFramework:EnableModulesFromDatabase()
@@ -1257,6 +1302,22 @@ function RealUI:OnEnable()
                 )
             end
         end
+    end
+
+    -- UI Scale CVar conflict detection (Bug 4)
+    -- Warn once per session if WoW's "Use UI Scale" CVar conflicts with RealUI's scale management
+    if dbc.init.installStage == -1
+       and not dbg.tags.uiScaleWarningDismissed
+       and _G.GetCVar("useUiScale") == "1" then
+        dbg.tags.uiScaleWarningDismissed = true
+        self:Notification(
+            "UI Scale Conflict",
+            true,
+            "WoW's 'Use UI Scale' setting is enabled and may conflict with RealUI's scale management. "
+                .. "Disable it in System > Graphics > UI Scale for best results.",
+            nil,
+            [[Interface\AddOns\RealUI\Media\Notification_Alert]]
+        )
     end
 
     -- Performance debugging notifications
