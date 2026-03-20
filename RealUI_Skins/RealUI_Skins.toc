@@ -27,4 +27,3 @@ AddOns\Ace3.lua
 AddOns\Clique.lua
 AddOns\DBM-GUI.lua
 AddOns\Masque.lua
-AddOns\WeakAuras.lua
