@@ -1,3 +1,41 @@
+## [3.0.10] - 2026-03-21 ##
+### Summary ###
+Nine-bug fix package targeting stability, usability, and profile reliability. Group loot roll windows now properly close after rolling instead of stacking up and blocking subsequent rolls. Castbar spell name and timer text no longer gets hidden behind the fill texture. Bartender4 mouseover casting now works correctly over RealUI unit frames. WoW's built-in "Use UI Scale" CVar is now actively suppressed to prevent it from overriding RealUI's scale management, with a 15-second notification explaining the conflict. Healer profile switching no longer incorrectly disables unrelated modules, and Bartender4 profile customizations are preserved across profile changes via a new userOverride flag in AddonControl. Player buffs are now displayed above the player unit frame, matching the existing target buff layout. The install wizard no longer re-triggers on every login for already-configured characters. The MiniPatch system now correctly handles major version transitions (2.5.x→3.0.0) and includes reserved slots for all 3.0.x incremental patches. Aurora's duplicate "UI Scale" message on login is fully suppressed when RealUI_Skins is the host addon. Also added NotificationWithDuration API for timed notification display, and moved dev test files from RealUI to RealUI_Dev to keep them out of release packages.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Dev
+  * RealUI_Skins
+  * Aurora (12.0.1.19)
+
+### Added ###
+  * add: player buffs element on player unit frame, anchored above the frame matching target buff pattern
+  * add: NotificationWithDuration API for displaying notifications with custom durations
+  * add: userOverride flag in AddonControl to preserve user-customized addon profiles across profile switches
+  * add: MiniPatch [0] for 2.5.x→3.0.0 major version transition (nibRealUI→RealUI migration, deprecated 2.x data cleanup)
+  * add: reserved MiniPatch slots [2]–[9] for 3.0.x incremental data migrations
+  * add: LOOT_ROLLS_COMPLETE safety-net handler for group loot cleanup
+
+### Changed ###
+  * chg: UI Scale CVar guard — WoW's "Use UI Scale" is now force-disabled at startup and mid-session with a 15-second notification
+  * chg: MiniPatchInstallation now runs minipatches[0] and all patch-level minipatches on cross-major-version upgrades
+  * chg: dev test files (BugConditionTests, PreservationTests) moved from RealUI to RealUI_Dev
+
+### Fixed ###
+  * fix: group loot roll window not closing after clicking Need/Greed/Disenchant/Pass — roll entry now removed from grouplootlist immediately after RollOnLoot
+  * fix: castbar spell name and timer text obscured by AngleStatusBar fill texture — text now parented to a higher-level overlay frame
+  * fix: Bartender4 mouseover cast not detecting unit on RealUI frames — overlay frame mouse disabled so GetMouseFocus returns the unit frame
+  * fix: WoW "Use UI Scale" CVar silently overriding RealUI scaling with no user feedback
+  * fix: healer profile switch incorrectly disabling unrelated modules — module enabled states now snapshot/restored across profile cascade
+  * fix: Bartender4 profile reset to "RealUI" on every profile event — userOverride flag now respected in SetProfileKeys
+  * fix: CastBars module disabled after profile switch — explicitly re-enabled if incorrectly toggled off
+  * fix: profile forcing running outside install wizard when user had custom addon profiles
+  * fix: player buffs not displayed above player unit frame
+  * fix: install wizard re-triggering on every login for already-configured characters — SetupSystem now checks installStage and initialized before NeedsSetup
+  * fix: setupVersion not set for existing characters, causing NeedsSetup to always return true
+  * fix: duplicate "UI Scale" + "Effective Scale" messages on login — private.scaleReported and AURORA_SCALE_REPORTED set early in RealUI_Skins OnLoad
+
+
 ## [3.0.9] - 2026-03-17 ##
 ### Summary ###
 Reworked UI Scale strategy to be taint-safe. Engine scale (UIParent:SetScale) is now applied once at login instead of at runtime, hopefully eliminating the taint issues that plagued previous approaches. Config panel changes (Pixel Perfect toggle, HiDPI mode, custom scale slider) now save values and prompt a /reload instead of live-applying, which avoids ADDON_ACTION_BLOCKED errors entirely. ResolutionOptimizer profiles gained isHighRes/isPixelScale flags so resolution detection feeds directly into the new scale path. Aurora 12.0.1.18 updated to defer to the host addon's scaling when present, removing its own redundant scale logic. Also fixed an action bar error on login for dual-spec characters when the current spec differs from the one used during initial setup.
@@ -321,6 +359,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.0.10]: https://github.com/RealUI/RealUI/compare/3.0.9...3.0.10
 [3.0.9]: https://github.com/RealUI/RealUI/compare/3.0.8...3.0.9
 [3.0.8]: https://github.com/RealUI/RealUI/compare/3.0.7...3.0.8
 [3.0.7]: https://github.com/RealUI/RealUI/compare/3.0.6...3.0.7
