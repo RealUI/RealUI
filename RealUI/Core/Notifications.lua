@@ -33,6 +33,7 @@ end
 
 local bannerShown = false
 local timeShown = 6
+local timeShownOverride
 
 local function hideBanner()
     local scale
@@ -51,13 +52,15 @@ end
 
 local function fadeTimer()
     local last = 0
+    local duration = timeShownOverride or timeShown
+    timeShownOverride = nil
     f:SetScript("OnUpdate", function(dialog, elapsed)
         local width = f:GetWidth()
         if width > bannerWidth then
             dialog:SetWidth(width - (interval*100))
         end
         last = last + elapsed
-        if last >= timeShown then
+        if last >= duration then
             dialog:SetWidth(bannerWidth)
             dialog:SetScript("OnUpdate", nil)
             hideBanner()
@@ -172,6 +175,12 @@ function RealUI:Notification(name, showWhileAFK, message, clickFunc, texture, ..
     else
         display(name, message, clickFunc, texture, ...)
     end
+end
+
+-- Show a notification with a custom display duration (seconds)
+function RealUI:NotificationWithDuration(duration, name, showWhileAFK, message, clickFunc, texture, ...)
+    timeShownOverride = duration
+    self:Notification(name, showWhileAFK, message, clickFunc, texture, ...)
 end
 
 -- Mouse events
