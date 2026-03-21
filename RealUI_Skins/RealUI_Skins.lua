@@ -104,6 +104,49 @@ function RealUI.UpdateUIScale(newScale, fromConfig)
     private.scaleReported = true
     _G.AURORA_SCALE_REPORTED = true
 
+    -- Force-disable WoW's built-in "Use UI Scale" CVar so the Blizzard
+    -- slider never overrides RealUI's scale management.
+    if _G.GetCVar("useUiScale") == "1" then
+        _G.SetCVar("useUiScale", 0)
+        -- Defer notification until RealUI is fully loaded (PLAYER_LOGIN)
+        _G.C_Timer.After(2, function()
+            if RealUI.NotificationWithDuration then
+                RealUI:NotificationWithDuration(15,
+                    "UI Scale Conflict",
+                    true,
+                    "WoW's 'Use UI Scale' was enabled and has been disabled. "
+                        .. "RealUI manages UI scaling — adjust scale in /realui > Skins instead.",
+                    nil,
+                    [[Interface\AddOns\RealUI\Media\Notification_Alert]]
+                )
+            end
+        end)
+    end
+
+    -- Guard against the user re-enabling it via the Settings panel.
+    -- Hook SetCVar to revert any attempt to turn useUiScale back on.
+    if not private._uiScaleGuardInstalled then
+        private._uiScaleGuardInstalled = true
+        _G.hooksecurefunc("SetCVar", function(cvar, value)
+            if cvar:lower() == "useuiscale" and tostring(value) == "1" then
+                _G.C_Timer.After(0, function()
+                    _G.SetCVar("useUiScale", 0)
+                    RealUI.UpdateUIScale()
+                    if RealUI.NotificationWithDuration then
+                        RealUI:NotificationWithDuration(15,
+                            "UI Scale Conflict",
+                            true,
+                            "WoW's 'Use UI Scale' was re-disabled. "
+                                .. "RealUI manages UI scaling — adjust scale in /realui > Skins instead.",
+                            nil,
+                            [[Interface\AddOns\RealUI\Media\Notification_Alert]]
+                        )
+                    end
+                end)
+            end
+        end)
+    end
+
     local _, pysHeight = _G.GetPhysicalScreenSize()
     uiMod = (pysHeight / 768) * (private.uiScale or 1)
     pixelScale = 768 / pysHeight

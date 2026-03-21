@@ -1304,21 +1304,10 @@ function RealUI:OnEnable()
         end
     end
 
-    -- UI Scale CVar conflict detection (Bug 4)
-    -- Warn once per session if WoW's "Use UI Scale" CVar conflicts with RealUI's scale management
-    if dbc.init.installStage == -1
-       and not dbg.tags.uiScaleWarningDismissed
-       and _G.GetCVar("useUiScale") == "1" then
-        dbg.tags.uiScaleWarningDismissed = true
-        self:Notification(
-            "UI Scale Conflict",
-            true,
-            "WoW's 'Use UI Scale' setting is enabled and may conflict with RealUI's scale management. "
-                .. "Disable it in System > Graphics > UI Scale for best results.",
-            nil,
-            [[Interface\AddOns\RealUI\Media\Notification_Alert]]
-        )
-    end
+    -- UI Scale CVar conflict detection
+    -- RealUI_Skins.UpdateUIScale force-disables useUiScale at startup and
+    -- hooks SetCVar to revert it if toggled mid-session. The notification
+    -- is shown from the hook in RealUI_Skins when the revert happens.
 
     -- Performance debugging notifications
     if _G.GetCVar("taintLog") ~= "0" then
