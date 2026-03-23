@@ -2,6 +2,7 @@ package-as: RealUI
 
 ignore:
     - utils
+    - docs
     - CONTRIBUTING.md
     - *.sublime*
     - package.bat
