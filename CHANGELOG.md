@@ -22,10 +22,13 @@
   * chg: profile management removed from individual scope tabs — all switching now routes through CoordinatedSwitch
   * chg: Bartender4 AddonData now reads custom per-spec mappings from DualSpecSystem instead of hardcoding role-based defaults
   * chg: new profiles created via CoordinatedSwitch inherit settings from the current profile via CopyProfile
+  * chg: only show reload dialog if install wizard won't run
+  * chg: simplify the boss frames to remove taint
 
 ### Fixed ###
   * fix: Bartender4 LibDualSpec mappings not syncing with RealUI's per-spec assignments — BT4's own LDS integration now kept in lockstep
   * fix: RealUI_Skins SetAlpha crash on profile switch — stale private.skinsDB reference now updated in OnProfileChanged/OnProfileCopied/OnProfileReset callbacks
+  * fix: remove moduleFrameworkConfig persistence that caused CastBars to disable on healer spec login
 
 
 ## [3.0.10] - 2026-03-21 ##
