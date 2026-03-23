@@ -116,6 +116,25 @@ function Inventory:OnInitialize()
     private.Update()
 
     self.Update = private.Update
+
+    self:RegisterChatCommand("resetinventory", function()
+        local inv = Inventory.main
+        if inv then
+            inv:ClearAllPoints()
+            inv:SetPoint("TOPLEFT", 100, -100)
+            inv:SetUserPlaced(false)
+        end
+
+        local bank = Inventory.bank
+        if bank then
+            bank:ClearAllPoints()
+            bank:SetPoint("CENTER", _G.UIParent, "CENTER", 200, 0)
+            bank:SetUserPlaced(false)
+        end
+
+        _G.print("|cff0099ffRealUI|r: Inventory and Bank positions have been reset.")
+    end)
+
     _G.C_Timer.After(1, function()
         -- Disable tutorials
         _G.SetCVarBitfield("closedInfoFramesAccountWide", _G.LE_FRAME_TUTORIAL_EQUIP_REAGENT_BAG, true)
