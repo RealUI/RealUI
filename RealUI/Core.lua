@@ -485,7 +485,11 @@ function RealUI:OnProfileUpdate(event, database, profile)
         debug("OnProfileReset", RealUI.db.char.init, RealUI.db.char.init.installStage)
         RealUI.db.char.init = charInit
         debug("Char", RealUI.db.char.init, RealUI.db.char.init.installStage)
-        RealUI:ReloadUIDialog()
+        -- Only show reload dialog if install wizard won't run;
+        -- the wizard has its own reload prompt (REALUI_SETUP_RELOAD).
+        if charInit.installStage == -1 then
+            RealUI:ReloadUIDialog()
+        end
     end
 end
 
