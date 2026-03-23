@@ -550,43 +550,6 @@ do -- UnitFrames
                         type = "group",
                         order = 10,
                         args = {
-                            showPlayerAuras = {
-                                name = L["UnitFrames_PlayerAuras"],
-                                desc = L["UnitFrames_PlayerAurasDesc"],
-                                type = "toggle",
-                                get = function() return UnitFrames.db.profile.boss.showPlayerAuras end,
-                                set = function(info, value)
-                                    UnitFrames.db.profile.boss.showPlayerAuras = value
-                                end,
-                                order = 10,
-                            },
-                            showNPCAuras = {
-                                name = L["UnitFrames_NPCAuras"],
-                                desc = L["UnitFrames_NPCAurasDesc"],
-                                type = "toggle",
-                                get = function() return UnitFrames.db.profile.boss.showNPCAuras end,
-                                set = function(info, value)
-                                    UnitFrames.db.profile.boss.showNPCAuras = value
-                                end,
-                                order = 20,
-                            },
-                            buffCount = {
-                                name = L["UnitFrames_BuffCount"],
-                                type = "range",
-                                min = 1, max = 8, step = 1,
-                                get = function(info) return UnitFrames.db.profile.boss.buffCount end,
-                                set = function(info, value) UnitFrames.db.profile.boss.buffCount = value end,
-                                order = 30,
-                            },
-                            debuffCount = {
-                                name = L["UnitFrames_DebuffCount"],
-                                type = "range",
-                                min = 1, max = 8, step = 1,
-                                get = function(info) return UnitFrames.db.profile.boss.debuffCount end,
-                                set = function(info, value) UnitFrames.db.profile.boss.debuffCount = value end,
-                                order = 40,
-                            },
-
                         }
                     },
                     arena = {

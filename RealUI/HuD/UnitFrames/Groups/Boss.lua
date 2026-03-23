@@ -2,92 +2,14 @@ local _, private = ...
 
 -- Libs --
 local oUF = private.oUF
-local Base = _G.Aurora.Base
 
 -- RealUI --
 local RealUI = private.RealUI
 local UnitFrames = RealUI:GetModule("UnitFrames")
 local FramePoint = RealUI:GetModule("FramePoint")
 
---[[ Aura Filter ]]--
-local function FilterAura(_, _, data)
-    local bossDB = UnitFrames.db.profile.boss
-
-    -- Cast by Player
-    if data.isPlayerAura and bossDB.showPlayerAuras then return true end
-
-    -- Cast by NPC
-    -- Avoid UnitGUID + strsplit on data.sourceUnit — the sourceUnit value
-    -- can be tainted (secret string) which causes "attempt to perform string
-    -- conversion on a secret string value" when passed to API functions.
-    -- Instead, check whether the source is a known boss unit directly.
-    if bossDB.showNPCAuras then
-        local sourceUnit = data.sourceUnit
-        if sourceUnit then
-            -- Boss units are always "bossN"; if the source matches one of
-            -- those it's an NPC aura we want to show.
-            for i = 1, 5 do
-                if sourceUnit == "boss" .. i then return true end
-            end
-        end
-    end
-
-    return false
-end
-
---[[ Aura Display ]]--
-local function CreateAuras(parent)
-    local bossDB = UnitFrames.db.profile.boss
-    local iconSize = parent:GetHeight()
-
-    -- Debuffs
-    local debuffNum = bossDB.debuffCount
-    local debuffSpacing = 2
-    local debuffCols = _G.math.floor((parent:GetWidth() + debuffSpacing) / (iconSize + debuffSpacing))
-    local debuffRows = _G.math.ceil(debuffNum / _G.math.max(debuffCols, 1))
-
-    local Debuffs = _G.CreateFrame("Frame", nil, parent)
-    Debuffs:SetPoint("BOTTOMLEFT", parent, "TOPLEFT", 0, 4)
-    Debuffs:SetSize(parent:GetWidth(), debuffRows * (iconSize + debuffSpacing))
-    Debuffs.num = debuffNum
-    Debuffs.size = iconSize
-    Debuffs.spacing = debuffSpacing
-    Debuffs.initialAnchor = "BOTTOMLEFT"
-    Debuffs.growthX = "RIGHT"
-    Debuffs.growthY = "UP"
-    Debuffs.FilterAura = FilterAura
-    Debuffs.PostCreateButton = function(_, button)
-        Base.CropIcon(button.Icon, button)
-        button.Count:SetFontObject("NumberFont_Outline_Med")
-    end
-    parent.Debuffs = Debuffs
-
-    -- Buffs
-    local buffNum = bossDB.buffCount
-    local buffSpacing = 2
-    local buffCols = _G.math.floor((parent:GetWidth() + buffSpacing) / (iconSize + buffSpacing))
-    local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
-
-    local Buffs = _G.CreateFrame("Frame", nil, parent)
-    Buffs:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, 4)
-    Buffs:SetSize(parent:GetWidth(), buffRows * (iconSize + buffSpacing))
-    Buffs.num = buffNum
-    Buffs.size = iconSize
-    Buffs.spacing = buffSpacing
-    Buffs.initialAnchor = "BOTTOMRIGHT"
-    Buffs.growthX = "LEFT"
-    Buffs.growthY = "UP"
-    Buffs.FilterAura = FilterAura
-    Buffs.PostCreateButton = function(_, button)
-        Base.CropIcon(button.Icon, button)
-        button.Count:SetFontObject("NumberFont_Outline_Med")
-    end
-    parent.Buffs = Buffs
-end
-
 UnitFrames.boss = {
     create = function(dialog)
-        CreateAuras(dialog)
 
         dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
         dialog.Power.displayAltPower = true

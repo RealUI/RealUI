@@ -395,10 +395,6 @@ function UnitFrames:OnInitialize()
             },
             boss = {
                 gap = 3,
-                buffCount = 3,
-                debuffCount = 5,
-                showPlayerAuras = true,
-                showNPCAuras = true,
             },
             -- TODO: Convert to FramePoint
             positions = {

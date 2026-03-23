@@ -329,7 +329,7 @@ function RealUI:ChatCommand_Config(input)
                 local inv = invMod.main
                 if inv then
                     inv:ClearAllPoints()
-                    inv:SetPoint("TOPLEFT", 100, -100)
+                    inv:SetPoint("CENTER", _G.UIParent, "CENTER", -200, 0)
                     inv:SetUserPlaced(false)
                 end
 
