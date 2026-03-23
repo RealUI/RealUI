@@ -3,6 +3,8 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <!-- Core Framework -->
     <Script file="Core\VersionManager.lua"/>
     <Script file="Core\ProfileSystem.lua"/>
+    <Script file="Core\ProfileCoordinator.lua"/>
+    <Script file="Core\ProfileExporter.lua"/>
     <Script file="Core\DualSpecSystem.lua"/>
     <Script file="Core\ConfigPersistence.lua"/>
     <Script file="Core\ModuleFramework.lua"/>

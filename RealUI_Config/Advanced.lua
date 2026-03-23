@@ -44,71 +44,18 @@ options.RealUI = {
     name = "|cffffffffRealUI|r "..RealUI:GetVerString(true),
     type = "group",
     args = {
-        profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
+        profiles = private.unifiedProfilePage or _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(RealUI.db),
     }
 }
 
 local optArgs = options.RealUI.args
-_G.LibStub("LibDualSpec-1.0"):EnhanceOptions(optArgs.profiles, RealUI.db)
+-- Only enhance with LibDualSpec if we fell back to the old table
+if not private.unifiedProfilePage then
+    _G.LibStub("LibDualSpec-1.0"):EnhanceOptions(optArgs.profiles, RealUI.db)
+end
 
--- =============================================================================
--- Profile Unification Evaluation (Requirements 24.1, 24.2, 24.3, 24.4)
--- =============================================================================
---
--- 1. Profile Scope Analysis
---    -----------------------------------------------------------------------
---    RealUI Profiles (AceDB via RealUI_ConfigDB):
---      Per-spec switching via LibDualSpec. Controls module toggles, Infobar
---      settings, FrameMover positions, and all other module db.profile fields.
---
---    Skins Profiles (AceDB via RealUI_SkinsDB):
---      Separate AceDB instance. Controls appearance (frameColor, buttonColor,
---      fonts, scale, addon toggles). No LibDualSpec integration — appearance
---      is typically shared across specs.
---
---    Systems Profile System:
---      Module-level system config. Only active when the Profile System module
---      is enabled. Manages module enable states, performance settings, and
---      layout preferences.
---
--- 2. Overlap Assessment
---    -----------------------------------------------------------------------
---    - RealUI Profiles and Skins Profiles do NOT overlap — they manage
---      different saved variables (RealUI_ConfigDB vs RealUI_SkinsDB).
---    - Systems Profile System manages module enable states which partially
---      overlaps with RealUI Profiles (which also stores module states in
---      RealUI_ConfigDB).
---    - LibDualSpec only applies to RealUI Profiles, not Skins or Systems.
---
--- 3. Export/Import Evaluation
---    -----------------------------------------------------------------------
---    - AceDB provides built-in profile copy/delete but no export/import to
---      file.
---    - Adding export/import would require serialization (AceSerializer) and
---      a text input dialog.
---    - Low priority — profile copy between characters covers most use cases.
---
--- 4. Unification Recommendation
---    -----------------------------------------------------------------------
---    - Full unification is NOT recommended because Skins and Core serve
---      different purposes and use separate saved variables.
---    - The current three-scope model is appropriate.
---    - The profileScopesDesc description panel (added in task 5.1) provides
---      adequate user guidance explaining all three scopes.
---
--- =============================================================================
-
--- Profile scope description: explains the three separate profile scopes in RealUI
-optArgs.profiles.args.profileScopesDesc = {
-    name = "|cffffcc00Profile Scopes|r\n\n"
-        .. "RealUI uses three separate profile scopes:\n\n"
-        .. "|cff88ccffRealUI Profiles|r (this section): Controls the main AceDB profile for RealUI core settings (Infobar, FrameMover, module toggles, etc.). LibDualSpec allows automatic profile switching per specialization.\n\n"
-        .. "|cff88ccffSkins Profiles|r (Skins \226\134\146 Profiles): Controls appearance settings (frame color, button color, fonts, scale, addon skin toggles). Separate from main profiles because appearance is often shared across specs.\n\n"
-        .. "|cff88ccffSystems Profile System|r (Systems \226\134\146 Profile System): Controls system-level configuration such as module states, performance settings, and layout preferences. Only visible when the Profile System module is active.",
-    type = "description",
-    fontSize = "medium",
-    order = 0,
-}
+-- Profile Unification Evaluation comment block removed — superseded by Unified Profile Page (UPP).
+-- The UPP (private.unifiedProfilePage) now provides all profile scope descriptions and controls.
 
 
 
@@ -1740,7 +1687,6 @@ do -- Skins
                     },
                 },
             },
-            profiles = _G.LibStub("AceDBOptions-3.0"):GetOptionsTable(SkinsDB),
         }
     }
 end

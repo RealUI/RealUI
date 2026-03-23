@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: Graphical configuration for RealUI
 ## Author: Gethe, Hanshi
-## Version: 3.0.10
+## Version: 3.1.0
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## OptionalDeps: AceGUI-3.0-SharedMediaWidgets
 ## RequiredDeps: RealUI
@@ -13,5 +13,6 @@ Libs\Libs.xml
 
 Config.lua
 ConfigBar.lua
+UnifiedProfilePage.lua
 Advanced.lua
 SystemsConfig.lua

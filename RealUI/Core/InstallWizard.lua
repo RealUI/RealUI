@@ -173,6 +173,155 @@ function InstallWizard:Start(forceShow)
     return true
 end
 
+-- Propagate unified profiles across linked scopes after initial profile setup.
+-- Creates Core profiles ("RealUI" / "RealUI-Healing") based on character specs,
+-- assigns them via DualSpecSystem, and ensures matching profiles exist in BT4
+-- and Skins scopes when their scope links are enabled.
+-- Does NOT overwrite existing custom profile assignments in db.char.specProfiles.
+local function PropagateUnifiedProfiles()
+    debug("PropagateUnifiedProfiles: starting")
+
+    local specs = RealUI.charInfo and RealUI.charInfo.specs
+    if not specs or #specs == 0 then
+        debug("PropagateUnifiedProfiles: no spec info available, skipping")
+        return
+    end
+
+    local DualSpec = RealUI.DualSpecSystem
+    local PC = RealUI.ProfileCoordinator
+
+    -- Determine if character has at least one healer spec
+    local hasHealer = false
+    local hasNonHealer = false
+    for i = 1, #specs do
+        if specs[i].role == "HEALER" then
+            hasHealer = true
+        else
+            hasNonHealer = true
+        end
+    end
+
+    local builtInProfiles  -- list of profile names to ensure
+    if hasHealer and hasNonHealer then
+        builtInProfiles = { "RealUI", "RealUI-Healing" }
+    else
+        builtInProfiles = { "RealUI" }
+    end
+
+    local scopeResults = {}  -- { scope = true/false }
+    local scopeErrors = {}   -- { scope = errorMsg }
+
+    ----------------------------------------------------------------
+    -- 1. Core scope: create profiles and assign specs
+    ----------------------------------------------------------------
+    local coreOk, coreErr = pcall(function()
+        if not RealUI.db then return end
+
+        -- Ensure both built-in profiles exist in Core scope
+        local currentProfile = RealUI.db:GetCurrentProfile()
+        for _, profileName in ipairs(builtInProfiles) do
+            -- SetProfile creates the profile if it doesn't exist
+            RealUI.db:SetProfile(profileName)
+        end
+        -- Switch back to original profile
+        RealUI.db:SetProfile(currentProfile)
+
+        -- Assign specs via DualSpecSystem, respecting existing custom assignments
+        if DualSpec then
+            local dbc = RealUI.db.char
+            for i = 1, #specs do
+                -- Skip if user already has a custom assignment
+                if dbc and dbc.specProfiles and dbc.specProfiles[i] then
+                    debug("PropagateUnifiedProfiles: spec", i, "already has custom assignment:", dbc.specProfiles[i])
+                else
+                    local profileName
+                    if hasHealer and hasNonHealer then
+                        profileName = (specs[i].role == "HEALER") and "RealUI-Healing" or "RealUI"
+                    else
+                        profileName = "RealUI"
+                    end
+                    DualSpec:SetSpecProfile(i, profileName)
+                    debug("PropagateUnifiedProfiles: assigned spec", i, "->", profileName)
+                end
+            end
+        end
+    end)
+    scopeResults["core"] = coreOk
+    if not coreOk then
+        scopeErrors["core"] = coreErr
+        debug("PropagateUnifiedProfiles: Core scope error:", coreErr)
+    end
+
+    ----------------------------------------------------------------
+    -- 2. BT4 scope: ensure BT4 profiles for built-in names
+    ----------------------------------------------------------------
+    if PC and PC:IsScopeLinked(PC.SCOPE_BT4) then
+        local bt4Ok, bt4Err = pcall(function()
+            if DualSpec and DualSpec.EnsureBartenderActionBarsProfiles then
+                DualSpec:EnsureBartenderActionBarsProfiles()
+                debug("PropagateUnifiedProfiles: BT4 profiles ensured")
+            end
+        end)
+        scopeResults["bt4"] = bt4Ok
+        if not bt4Ok then
+            scopeErrors["bt4"] = bt4Err
+            debug("PropagateUnifiedProfiles: BT4 scope error:", bt4Err)
+        end
+    else
+        debug("PropagateUnifiedProfiles: BT4 scope not linked, skipping")
+    end
+
+    ----------------------------------------------------------------
+    -- 3. Skins scope: create matching profiles
+    ----------------------------------------------------------------
+    if PC and PC:IsScopeLinked(PC.SCOPE_SKINS) then
+        local skinsOk, skinsErr = pcall(function()
+            local skinsModule = RealUI:GetModule("Skins", true)
+            if not skinsModule or not skinsModule.db then
+                debug("PropagateUnifiedProfiles: Skins module/db not available, skipping")
+                return
+            end
+            local skinsDB = skinsModule.db
+            local currentSkins = skinsDB:GetCurrentProfile()
+            for _, profileName in ipairs(builtInProfiles) do
+                -- SetProfile creates the profile if it doesn't exist
+                skinsDB:SetProfile(profileName)
+            end
+            -- Switch back to original profile
+            skinsDB:SetProfile(currentSkins)
+            debug("PropagateUnifiedProfiles: Skins profiles ensured")
+        end)
+        scopeResults["skins"] = skinsOk
+        if not skinsOk then
+            scopeErrors["skins"] = skinsErr
+            debug("PropagateUnifiedProfiles: Skins scope error:", skinsErr)
+        end
+    else
+        debug("PropagateUnifiedProfiles: Skins scope not linked, skipping")
+    end
+
+    ----------------------------------------------------------------
+    -- Summary
+    ----------------------------------------------------------------
+    local succeeded, failed = {}, {}
+    for scope, ok in pairs(scopeResults) do
+        if ok then
+            succeeded[#succeeded + 1] = scope
+        else
+            failed[#failed + 1] = scope
+        end
+    end
+
+    if #failed > 0 then
+        debug("PropagateUnifiedProfiles: completed with errors. Succeeded:", table.concat(succeeded, ", "), "Failed:", table.concat(failed, ", "))
+        for scope, err in pairs(scopeErrors) do
+            debug("  ", scope, ":", tostring(err))
+        end
+    else
+        debug("PropagateUnifiedProfiles: completed successfully. Scopes:", table.concat(succeeded, ", "))
+    end
+end
+
 -- Complete installation
 function InstallWizard:Complete()
     self:SetStage(InstallWizard.STAGE_COMPLETE)
@@ -251,6 +400,11 @@ function InstallWizard:Complete()
     else
         debug("Skipping account-wide profile setup (firsttime already false)")
     end
+
+    -- Propagate unified profiles across linked scopes (Core, BT4, Skins)
+    -- Runs for all characters: creates built-in profiles, assigns specs,
+    -- and ensures matching profiles in linked scopes.
+    PropagateUnifiedProfiles()
 
     -- Perform character initialization
     -- For truly new characters, run full setup; for already-initialized characters,

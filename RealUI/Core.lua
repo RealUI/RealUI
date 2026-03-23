@@ -141,13 +141,20 @@ do
             currency = {},
             qol = {
                 repairMountID = 0
-            }
+            },
+            unifiedProfilesMigrated = false -- Migration marker for unified profile system
         },
         char = {
             init = charInit,
             layout = {
                 current = 1, -- 1 = DPS/Tank, 2 = Healing
                 spec = spec -- Save layout for each spec
+            },
+            specProfiles = {}, -- Custom spec-to-profile mapping
+            -- Scope link toggles for coordinated profile switching (per-character, not per-profile)
+            scopeLinks = {
+                skins = false,  -- Appearance shared across specs by default
+                bt4 = true      -- Action bars change with spec by default
             }
         },
         profile = {
@@ -350,10 +357,34 @@ function RealUI.LoadConfig(app, section, ...)
     RealUI.ToggleConfig(app, section, ...)
 end
 
+-- One-shot event frame for deferring layout updates out of combat lockdown.
+-- Uses a dedicated frame to avoid overwriting the PLAYER_REGEN_ENABLED handler
+-- registered by SystemIntegration on the RealUI AceEvent object.
+local profileUpdateDeferFrame = _G.CreateFrame("Frame")
+profileUpdateDeferFrame:Hide()
+
 function RealUI:OnProfileUpdate(event, database, profile)
     db = database.profile
     dbc = database.char
     dbg = database.global
+
+    -- When a brand-new profile is created, AceDB gives us a mostly-empty
+    -- table.  Merge any missing keys from ProfileSystem defaults so that
+    -- modules never read nil where they expect a value.
+    if event == "OnNewProfile" and self.ProfileSystem then
+        local profileDefaults = self.ProfileSystem:GetDatabaseDefaults().profile
+        if profileDefaults then
+            for key, value in next, profileDefaults do
+                if db[key] == nil then
+                    if type(value) == "table" then
+                        db[key] = self.ProfileSystem:DeepCopyTable(value)
+                    else
+                        db[key] = value
+                    end
+                end
+            end
+        end
+    end
 
     -- Only push profiles to third-party addons if the install wizard has
     -- completed (installStage == -1).  During initial setup the wizard
@@ -402,14 +433,30 @@ function RealUI:OnProfileUpdate(event, database, profile)
         end
     end
 
+    -- Module callbacks run immediately regardless of combat state — they
+    -- only update non-protected data references (db.profile pointers, etc.)
     for _, module in self:IterateModules() do
         module:OnProfileUpdate(event, profile)
     end
 
-    -- Update layout to match the new profile, but skip if LayoutManager is
-    -- already mid-switch (PerformLayoutSwitch handles everything in that case)
-    if not (self.LayoutManager and self.LayoutManager:IsSwitchInProgress()) then
-        RealUI:UpdateLayout(private.profileToLayout[profile])
+    -- Position/scale updates touch protected frames and must be deferred
+    -- when the player is in combat lockdown.
+    local function applyLayoutUpdates()
+        if not (self.LayoutManager and self.LayoutManager:IsSwitchInProgress()) then
+            RealUI:UpdateLayout(private.profileToLayout[profile])
+        end
+    end
+
+    if _G.InCombatLockdown() then
+        debug("OnProfileUpdate: deferring layout updates until combat ends")
+        profileUpdateDeferFrame:SetScript("OnEvent", function(frame)
+            frame:UnregisterEvent("PLAYER_REGEN_ENABLED")
+            frame:SetScript("OnEvent", nil)
+            applyLayoutUpdates()
+        end)
+        profileUpdateDeferFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    else
+        applyLayoutUpdates()
     end
 
     if event == "OnProfileReset" then
@@ -514,10 +561,9 @@ function RealUI:OnInitialize()
         self.UXPolish:Initialize()
     end
 
-    -- Initialize Final Migrations
-    if self.FinalMigrations then
-        self.FinalMigrations:Initialize()
-    end
+    -- NOTE: FinalMigrations:Initialize() is called after the AceDB database
+    -- is created and dbg.verinfo is updated (see below), because it needs
+    -- RealUI.db to exist for migration checks.
 
     -- Initialize Setup System
     if self.SetupSystem then
@@ -642,12 +688,23 @@ function RealUI:OnInitialize()
         debug("Missing libraries detected:", table.concat(missingLibs, ", "))
     end
 
+    -- Initialize Final Migrations (must run after database + verinfo are ready)
+    if self.FinalMigrations then
+        self.FinalMigrations:Initialize()
+    end
+
     -- Register profile change callbacks
     debug("Registering profile callbacks")
     self.db.RegisterCallback(self, "OnNewProfile", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
+
+    -- Register ProfileCoordinator's OnProfileChanged hook so that ANY Core
+    -- profile switch (LibDualSpec, manual, etc.) coordinates linked scopes.
+    if self.ProfileCoordinator and self.ProfileCoordinator.RegisterProfileCallback then
+        self.ProfileCoordinator:RegisterProfileCallback()
+    end
 
     -- Register game events for specialization tracking (handled by DualSpecSystem)
     -- Events are now registered in DualSpecSystem:Initialize()

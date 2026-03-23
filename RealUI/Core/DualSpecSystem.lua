@@ -77,14 +77,10 @@ local function EnsureBartenderActionBarsProfiles()
         end
 
         for barID, enabled in pairs(defaultEnabled) do
-            if type(profile.actionbars[barID]) ~= "table" then
+            if profile.actionbars[barID] == nil then
                 profile.actionbars[barID] = { enabled = enabled }
             end
         end
-    end
-
-    for profileName in pairs(profiles) do
-        EnsureProfile(profileName)
     end
 
     for _, profileName in ipairs(layoutToProfile) do
@@ -164,7 +160,16 @@ function DualSpecSystem:SetSpecProfile(specIndex, profileName)
     debug("Setting spec profile:", specIndex, "->", profileName)
     specProfiles[specIndex] = profileName
 
-    -- Update character database
+    -- Persist custom assignment in db.char.specProfiles
+    if RealUI.db and RealUI.db.char then
+        if not RealUI.db.char.specProfiles then
+            RealUI.db.char.specProfiles = {}
+        end
+        RealUI.db.char.specProfiles[specIndex] = profileName
+        debug("Persisted spec profile in db.char.specProfiles:", specIndex, "->", profileName)
+    end
+
+    -- Update character database layout mapping (legacy compat)
     local dbc = RealUI.db and RealUI.db.char
     if dbc and dbc.layout and dbc.layout.spec then
         local layoutIndex = profileToLayout[profileName] or 1
@@ -176,6 +181,16 @@ function DualSpecSystem:SetSpecProfile(specIndex, profileName)
     if isLibDualSpecSetup and RealUI.db then
         debug("Updating LibDualSpec profile mapping for spec:", specIndex)
         RealUI.db:SetDualSpecProfile(profileName, specIndex)
+
+        -- Keep BT4's own LibDualSpec mapping in sync so it doesn't fight
+        -- with our coordinator on spec changes (BT4 has its own LDS integration)
+        if RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_BT4) then
+            local bt4Addon = _G.Bartender4
+            if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
+                debug("Syncing BT4 LibDualSpec mapping for spec:", specIndex, "->", profileName)
+                bt4Addon.db:SetDualSpecProfile(profileName, specIndex)
+            end
+        end
     end
 
     debug("Spec profile set successfully:", specIndex, "->", profileName)
@@ -194,6 +209,26 @@ function DualSpecSystem:GetSpecProfile(specIndex)
 end
 
 function DualSpecSystem:GetDefaultProfileForSpec(specIndex)
+    -- Check for a custom profile assignment first (persisted in db.char.specProfiles)
+    if RealUI.db and RealUI.db.char and RealUI.db.char.specProfiles then
+        local customProfile = RealUI.db.char.specProfiles[specIndex]
+        if customProfile then
+            -- Verify the custom profile still exists in the database
+            local profiles = RealUI.db:GetProfiles()
+            if profiles then
+                for _, name in ipairs(profiles) do
+                    if name == customProfile then
+                        debug("Custom profile for spec", specIndex, ":", customProfile)
+                        return customProfile
+                    end
+                end
+            end
+            -- Custom profile was deleted — fall through to role-based default
+            debug("Custom profile", customProfile, "no longer exists for spec", specIndex, "— falling back to default")
+        end
+    end
+
+    -- Fall back to role-based default
     local defaultProfile
     if self:IsHealingSpec(specIndex) then
         defaultProfile = layoutToProfile[2] -- Healing profile
@@ -259,17 +294,29 @@ function DualSpecSystem:SwitchToSpecProfile(specIndex)
         self:SaveCurrentSpecConfiguration()
     end
 
-    local success = RealUI.ProfileSystem:SwitchProfile(targetProfile)
+    -- Delegate to ProfileCoordinator for coordinated switching across all linked scopes
+    local success, warnings = RealUI.ProfileCoordinator:CoordinatedSwitch(targetProfile)
     if success then
-        debug("Profile switched successfully")
+        debug("Coordinated profile switch completed successfully")
 
         -- Load spec-specific configuration
         self:LoadSpecConfiguration(specIndex)
 
         -- Update current spec tracking
         currentSpec = specIndex
+
+        if warnings and #warnings > 0 then
+            for _, w in ipairs(warnings) do
+                debug("Switch warning:", w)
+            end
+        end
     else
-        debug("Failed to switch profile")
+        debug("Coordinated profile switch failed or deferred")
+        if warnings then
+            for _, w in ipairs(warnings) do
+                debug("Switch issue:", w)
+            end
+        end
     end
 
     return success
@@ -401,21 +448,24 @@ function DualSpecSystem:SetupLibDualSpec()
     end
 
     -- Set up dual-spec profiles for all specs
+    -- NOTE: We set isLibDualSpecSetup = true BEFORE calling SetSpecProfile
+    -- so that SetSpecProfile's BT4 LDS sync branch is active.
+    isLibDualSpecSetup = true
+
     for specIndex = 1, #RealUI.charInfo.specs do
         local spec = RealUI.charInfo.specs[specIndex]
         local profileName = self:GetDefaultProfileForSpec(specIndex)
 
         debug("Setting up spec profile:", specIndex, spec.name, spec.role, "->", profileName)
 
-        -- Set the dual-spec profile in LibDualSpec
+        -- Set the dual-spec profile in LibDualSpec (Core)
         RealUI.db:SetDualSpecProfile(profileName, specIndex)
 
-        -- Update our internal mapping
+        -- Update our internal mapping (this also syncs BT4's LDS via SetSpecProfile)
         self:SetSpecProfile(specIndex, profileName)
     end
 
-    isLibDualSpecSetup = true
-    debug("LibDualSpec setup cocessfully")
+    debug("LibDualSpec setup complete")
     return true
 end
 
@@ -431,12 +481,21 @@ function DualSpecSystem:RefreshLibDualSpecProfiles()
 
     debug("Refreshing LibDualSpec profiles")
 
-    -- Re-setup all spec profiles
+    -- Re-setup all spec profiles (Core + BT4 if linked)
     for specIndex = 1, #RealUI.charInfo.specs do
         local profileName = self:GetSpecProfile(specIndex)
         if profileName then
             RealUI.db:SetDualSpecProfile(profileName, specIndex)
-            debug("Refreshed spec profile:", specIndex, "->", profileName)
+            debug("Refreshed Core LDS spec profile:", specIndex, "->", profileName)
+
+            -- Keep BT4's LDS in sync
+            if RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_BT4) then
+                local bt4Addon = _G.Bartender4
+                if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
+                    bt4Addon.db:SetDualSpecProfile(profileName, specIndex)
+                    debug("Refreshed BT4 LDS spec profile:", specIndex, "->", profileName)
+                end
+            end
         end
     end
 
@@ -745,6 +804,51 @@ function DualSpecSystem:PostInitialize()
         return false
     end
 
+    -- Register OnProfileDeleted callback to handle custom profile deletion fallback (Req 9.7)
+    RealUI.db.RegisterCallback(self, "OnProfileDeleted", function(_, _, profileKey)
+        debug("Profile deleted:", profileKey)
+        local dbc = RealUI.db and RealUI.db.char
+        if not dbc or not dbc.specProfiles then return end
+
+        for specIndex, assignedProfile in pairs(dbc.specProfiles) do
+            if assignedProfile == profileKey then
+                -- Revert to built-in default for this spec's role
+                local defaultProfile
+                if DualSpecSystem:IsHealingSpec(specIndex) then
+                    defaultProfile = layoutToProfile[2] -- "RealUI-Healing"
+                else
+                    defaultProfile = layoutToProfile[1] -- "RealUI"
+                end
+
+                debug("Reverting spec", specIndex, "from deleted profile", profileKey, "to default", defaultProfile)
+                dbc.specProfiles[specIndex] = defaultProfile
+                specProfiles[specIndex] = defaultProfile
+
+                -- Update LibDualSpec mapping
+                if isLibDualSpecSetup then
+                    RealUI.db:SetDualSpecProfile(defaultProfile, specIndex)
+
+                    -- Keep BT4's LDS in sync
+                    if RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_BT4) then
+                        local bt4Addon = _G.Bartender4
+                        if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
+                            bt4Addon.db:SetDualSpecProfile(defaultProfile, specIndex)
+                        end
+                    end
+                end
+
+                -- Notify user
+                RealUI:Notification(
+                    "Profile Deleted",
+                    false,
+                    "Spec " .. specIndex .. " reverted to '" .. defaultProfile .. "' (deleted: '" .. profileKey .. "')",
+                    nil,
+                    [[Interface\AddOns\RealUI\Media\Notification_Alert]]
+                )
+            end
+        end
+    end)
+
     -- Load existing spec configurations
     self:GetAllSpecConfigurations()
 
@@ -828,6 +932,11 @@ function DualSpecSystem:GetDebugInfo()
 
     debug("Debug info generated")
     return info
+end
+
+-- Expose EnsureBartenderActionBarsProfiles for external callers (e.g. setup wizard)
+function DualSpecSystem:EnsureBartenderActionBarsProfiles()
+    EnsureBartenderActionBarsProfiles()
 end
 
 -- Register with RealUI namespace

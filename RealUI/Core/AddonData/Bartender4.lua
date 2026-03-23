@@ -403,10 +403,21 @@ function private.Profiles.Bartender4()
 
     db:SetDualSpecEnabled(true)
 
+    -- Use DualSpecSystem's custom per-spec mappings when available,
+    -- otherwise fall back to simple role-based defaults.
+    local dss = RealUI.DualSpecSystem
     for specIndex = 1, #RealUI.charInfo.specs do
-        local profile = private.layoutToProfile[1]
-        if RealUI.charInfo.specs[specIndex].role == "HEALER" then
-            profile = private.layoutToProfile[2]
+        local profile
+        if dss and dss:IsInitialized() then
+            profile = dss:GetSpecProfile(specIndex)
+        end
+        if not profile then
+            -- Fallback: role-based default
+            if RealUI.charInfo.specs[specIndex].role == "HEALER" then
+                profile = private.layoutToProfile[2]
+            else
+                profile = private.layoutToProfile[1]
+            end
         end
 
         db:SetDualSpecProfile(profile, specIndex)
@@ -414,9 +425,16 @@ function private.Profiles.Bartender4()
 
     -- Switch to the correct profile for the current spec.
     local currentSpec = RealUI.charInfo.specs.current
-    local targetProfile = private.layoutToProfile[1]  -- Default: "RealUI" (DPS/Tank)
-    if currentSpec and currentSpec.role == "HEALER" then
-        targetProfile = private.layoutToProfile[2]    -- "RealUI-Healing"
+    local targetProfile
+    if dss and dss:IsInitialized() and currentSpec then
+        targetProfile = dss:GetSpecProfile(currentSpec.index)
+    end
+    if not targetProfile then
+        -- Fallback: role-based default
+        targetProfile = private.layoutToProfile[1]  -- Default: "RealUI" (DPS/Tank)
+        if currentSpec and currentSpec.role == "HEALER" then
+            targetProfile = private.layoutToProfile[2]    -- "RealUI-Healing"
+        end
     end
     if db:GetCurrentProfile() ~= targetProfile then
         db:SetProfile(targetProfile)

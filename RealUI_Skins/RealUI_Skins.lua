@@ -261,13 +261,16 @@ function private.OnLoad()
     _G.AURORA_SCALE_REPORTED = true
 
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
-    skinsDB:RegisterCallback("OnProfileChanged", function(db, newProfile)
+    skinsDB:RegisterCallback("OnProfileChanged", function(db)
+        private.skinsDB = db.profile
         RealUI:ReloadUIDialog()
     end)
-    skinsDB:RegisterCallback("OnProfileCopied", function(db, sourceProfile)
+    skinsDB:RegisterCallback("OnProfileCopied", function(db)
+        private.skinsDB = db.profile
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileReset", function(db)
+        private.skinsDB = db.profile
         RealUI:ReloadUIDialog()
     end)
     private.skinsDB = skinsDB.profile

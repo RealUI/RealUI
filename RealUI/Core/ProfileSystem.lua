@@ -48,14 +48,16 @@ function ProfileSystem:GetDatabaseDefaults()
             verinfo = {},
             patchedTOC = 0,
             currency = {},
-            profileVersion = PROFILE_VERSION
+            profileVersion = PROFILE_VERSION,
+            unifiedProfilesMigrated = false -- Migration marker for unified profile system
         },
         char = {
             init = GetDefaultCharInit(),
             layout = {
                 current = 1, -- 1 = DPS/Tank, 2 = Healing
                 spec = GetDefaultSpec()
-            }
+            },
+            specProfiles = {} -- Custom spec-to-profile mapping
         },
         profile = {
             modules = {
@@ -72,7 +74,12 @@ function ProfileSystem:GetDatabaseDefaults()
                 hudSize = 2,
                 reverseUnitFrameBars = false
             },
-            profileVersion = PROFILE_VERSION
+            profileVersion = PROFILE_VERSION,
+            -- Scope link toggles for coordinated profile switching
+            scopeLinks = {
+                skins = false,  -- Appearance shared across specs by default
+                bt4 = true      -- Action bars change with spec by default
+            }
         }
     }
 end

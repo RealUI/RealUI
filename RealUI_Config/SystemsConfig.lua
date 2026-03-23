@@ -269,73 +269,23 @@ local function CreateSystemsConfig()
         }
     end
 
-    -- Profile System Configuration
-    if RealUI.ProfileSystem then
-        systemsConfig.args.profiles = {
-            name = "Profile System",
-            type = "group",
-            order = 30,
-            args = {
-                header = {
-                    name = "Profile System",
-                    type = "header",
-                    order = 1,
-                },
-                profileScopesDesc = {
-                    name = "RealUI has three separate profile scopes:\n\n"
-                        .. "|cff88ccffSystems Profile System|r (this section): Controls system-level configuration such as module states, performance settings, and layout preferences. Only visible when the Profile System module is active.\n\n"
-                        .. "|cff88ccffRealUI Profiles|r (Advanced Options \226\134\146 Profiles): Controls the main AceDB profile for RealUI core settings (Infobar, FrameMover, module toggles, etc.). LibDualSpec allows automatic profile switching per specialization.\n\n"
-                        .. "|cff88ccffSkins Profiles|r (Skins \226\134\146 Profiles): Controls appearance settings (frame color, button color, fonts, scale, addon skin toggles). Separate from main profiles because appearance is often shared across specs.",
-                    type = "description",
-                    fontSize = "medium",
-                    order = 2,
-                },
-                current = {
-                    name = "Current Profile",
-                    type = "group",
-                    inline = true,
-                    order = 10,
-                    args = {
-                        profile = {
-                            name = function()
-                                return "Active: " .. (RealUI.ProfileSystem:GetCurrentProfile() or "Unknown")
-                            end,
-                            type = "description",
-                            fontSize = "medium",
-                            order = 1,
-                        },
-                    },
-                },
-                switch = {
-                    name = "Switch Profile",
-                    type = "group",
-                    inline = true,
-                    order = 20,
-                    args = {
-                        select = {
-                            name = "Select Profile",
-                            type = "select",
-                            values = function()
-                                local profiles = RealUI.ProfileSystem:GetProfileList()
-                                local profileTable = {}
-                                for _, name in ipairs(profiles) do
-                                    profileTable[name] = name
-                                end
-                                return profileTable
-                            end,
-                            get = function()
-                                return RealUI.ProfileSystem:GetCurrentProfile()
-                            end,
-                            set = function(info, value)
-                                RealUI.ProfileSystem:SwitchProfile(value)
-                            end,
-                            order = 1,
-                        },
-                    },
-                },
+    -- Profile System Configuration — redirected to Unified Profile Page
+    systemsConfig.args.profiles = {
+        name = "Profile System",
+        type = "group",
+        order = 30,
+        args = {
+            redirect = {
+                name = "|cffffcc00Profile management has moved|r\n\n"
+                    .. "All profile management is now handled by the Unified Profile Page.\n\n"
+                    .. "Navigate to |cff88ccffAdvanced \226\134\146 Profiles|r to manage Core, Skins, and Bartender4 profiles, "
+                    .. "DualSpec mappings, scope link toggles, and export/import.",
+                type = "description",
+                fontSize = "medium",
+                order = 1,
             },
-        }
-    end
+        },
+    }
 
     -- Layout Manager Configuration
     if RealUI.LayoutManager then

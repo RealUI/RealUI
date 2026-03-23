@@ -127,6 +127,146 @@ function FinalMigrations:RegisterStandardMigrations()
             end
         end
     end, "Update character initialization data")
+
+    -- Migration: Unified Profile System (Req 8.1–8.8)
+    -- Initializes scope link defaults, populates spec-to-profile mapping from
+    -- legacy layout.spec data, and removes deprecated Systems Profile System keys.
+    self:RegisterMigration("3.0.0", "3.1.0", function()
+        local db = RealUI.db
+        if not db then
+            debug("Unified profiles migration: database not available")
+            return
+        end
+
+        -- Idempotence check (Req 8.7, 8.8)
+        if db.global.unifiedProfilesMigrated then
+            debug("Unified profiles migration: already migrated, skipping")
+            return
+        end
+
+        -- Layout index → profile name mapping
+        local layoutToProfile = {
+            [1] = "RealUI",
+            [2] = "RealUI-Healing",
+        }
+
+        -- Deprecated keys from the old Systems Profile System (Req 8.5)
+        local deprecatedProfileKeys = {
+            "profileSystem",
+            "systemProfiles",
+            "profileSwitcher",
+            "legacyProfileSystem",
+        }
+
+        local allSuccess = true
+
+        -- Scope 1: Initialize scopeLinks on db.char (per-character, not per-profile)
+        local ok1, err1 = pcall(function()
+            local dbc = db.char
+            if type(dbc) ~= "table" then return end
+
+            if not dbc.scopeLinks then
+                dbc.scopeLinks = {
+                    skins = false,
+                    bt4 = true,
+                }
+                debug("Initialized scopeLinks on db.char")
+            end
+
+            -- Clean up legacy per-profile scopeLinks if present
+            local profiles = db.profiles
+            if type(profiles) == "table" then
+                for profileName, profileData in pairs(profiles) do
+                    if type(profileData) == "table" and profileData.scopeLinks then
+                        -- Migrate: if user had customized scopeLinks on the active profile,
+                        -- carry those values to db.char
+                        if profileName == db:GetCurrentProfile() then
+                            dbc.scopeLinks.skins = profileData.scopeLinks.skins or false
+                            dbc.scopeLinks.bt4 = (profileData.scopeLinks.bt4 ~= false) -- default true
+                            debug("Migrated scopeLinks from active profile to db.char")
+                        end
+                        profileData.scopeLinks = nil
+                        debug("Removed legacy scopeLinks from profile:", profileName)
+                    end
+                end
+            end
+        end)
+        if not ok1 then
+            debug("Unified profiles migration: scopeLinks migration failed -", err1)
+            allSuccess = false
+            -- Safe default: ensure db.char has scopeLinks
+            if db.char and not db.char.scopeLinks then
+                db.char.scopeLinks = { skins = false, bt4 = true }
+            end
+        end
+
+        -- Scope 2: Populate db.char.specProfiles from db.char.layout.spec (Req 8.4)
+        local ok2, err2 = pcall(function()
+            local dbc = db.char
+            if type(dbc) ~= "table" then return end
+
+            if not dbc.specProfiles then
+                dbc.specProfiles = {}
+            end
+
+            if dbc.layout and type(dbc.layout.spec) == "table" then
+                for specIndex, layoutIndex in pairs(dbc.layout.spec) do
+                    -- Only populate if not already set (preserve existing assignments)
+                    if not dbc.specProfiles[specIndex] then
+                        local profileName = layoutToProfile[layoutIndex]
+                        if profileName then
+                            dbc.specProfiles[specIndex] = profileName
+                            debug("Mapped spec", specIndex, "-> layout", layoutIndex, "-> profile", profileName)
+                        else
+                            -- Unknown layout index, default to "RealUI"
+                            dbc.specProfiles[specIndex] = layoutToProfile[1]
+                            debug("Mapped spec", specIndex, "-> unknown layout", layoutIndex, "-> default RealUI")
+                        end
+                    end
+                end
+            end
+        end)
+        if not ok2 then
+            debug("Unified profiles migration: char specProfiles scope failed -", err2)
+            allSuccess = false
+            -- Safe default: ensure specProfiles exists
+            if db.char and not db.char.specProfiles then
+                db.char.specProfiles = {}
+            end
+        end
+
+        -- Scope 3: Remove deprecated Systems Profile System keys from all profiles (Req 8.5)
+        local ok3, err3 = pcall(function()
+            local profiles = db.profiles
+            if type(profiles) ~= "table" then return end
+
+            for profileName, profileData in pairs(profiles) do
+                if type(profileData) == "table" then
+                    for _, key in ipairs(deprecatedProfileKeys) do
+                        if profileData[key] ~= nil then
+                            profileData[key] = nil
+                            debug("Removed deprecated key", key, "from profile:", profileName)
+                        end
+                    end
+                end
+            end
+        end)
+        if not ok3 then
+            debug("Unified profiles migration: deprecated keys cleanup failed -", err3)
+            allSuccess = false
+        end
+
+        -- Mark migration complete (Req 8.8)
+        if allSuccess then
+            db.global.unifiedProfilesMigrated = true
+            debug("Unified profiles migration completed successfully")
+        else
+            -- Still mark as migrated to avoid re-running on every login;
+            -- partial failures were handled with safe defaults above.
+            db.global.unifiedProfilesMigrated = true
+            debug("Unified profiles migration completed with errors (safe defaults applied)")
+        end
+    end, "Migrate to unified profile system")
 end
 
 -- Clean up deprecated settings
@@ -252,6 +392,17 @@ function FinalMigrations:Initialize()
                     RealUI.FeedbackSystem:ShowWarning("Migration Warning", "Some data migrations failed. Check /exportdiag for details.")
                 end
             end
+        end
+    end
+
+    -- Fallback: run unified-profiles migration even if version strings match
+    -- (e.g. dev environment where saved version already equals running version).
+    -- The migration's own idempotence guard (unifiedProfilesMigrated) prevents re-runs.
+    if RealUI.db and RealUI.db.global and not RealUI.db.global.unifiedProfilesMigrated then
+        debug("Running unified-profiles migration (fallback: version match but not yet migrated)")
+        local _, fallbackFailed = self:RunPendingMigrations("3.0.0", "3.1.0")
+        if fallbackFailed and #fallbackFailed > 0 then
+            debug("Fallback migration had failures")
         end
     end
 
