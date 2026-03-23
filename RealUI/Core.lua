@@ -323,6 +323,28 @@ function RealUI:ChatCommand_Config(input)
             _G.PLATYNATOR_CURRENT_PROFILE = {}
             _G.ReloadUI()
             return
+        elseif command == "resetinventory" then
+            local invMod = self:GetModule("Inventory", true)
+            if invMod then
+                local inv = invMod.main
+                if inv then
+                    inv:ClearAllPoints()
+                    inv:SetPoint("TOPLEFT", 100, -100)
+                    inv:SetUserPlaced(false)
+                end
+
+                local bank = invMod.bank
+                if bank then
+                    bank:ClearAllPoints()
+                    bank:SetPoint("CENTER", _G.UIParent, "CENTER", 200, 0)
+                    bank:SetUserPlaced(false)
+                end
+
+                print("|cff0099ffRealUI|r: Inventory and Bank positions have been reset.")
+            else
+                print("|cff0099ffRealUI|r: Inventory module not loaded.")
+            end
+            return
         end
     end
 
