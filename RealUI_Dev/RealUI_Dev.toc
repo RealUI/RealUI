@@ -2,7 +2,7 @@
 ## Title: RealUI Dev
 ## Category: RealUI_Core
 ## Notes: Development assistant for RealUI
-## Version: 3.0.10
+## Version: 3.1.0
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: RealUI_Bugs
 ## RequiredDeps: RealUI_Bugs
@@ -84,6 +84,30 @@ tests\RealUI_Config_LockedOptions_Desc.lua
 tests\RealUI_Config_BlockToggles_Complete.lua
 tests\RealUI_Config_UnitChecks.lua
 tests\RealUI_Config_TestRunner.lua
+
+tests\UnifiedProfiles_BT4PreserveTest.lua
+tests\UnifiedProfiles_ProfileUpdateRefsTest.lua
+tests\UnifiedProfiles_ProfileUpdateModulesTest.lua
+tests\UnifiedProfiles_NewProfileDefaultsTest.lua
+tests\UnifiedProfiles_CoordinatedSwitchTest.lua
+tests\UnifiedProfiles_DisabledScopeTest.lua
+tests\UnifiedProfiles_ScopeLinkPersistTest.lua
+tests\UnifiedProfiles_ReentrancyGuardTest.lua
+tests\UnifiedProfiles_CompletionMessageTest.lua
+tests\UnifiedProfiles_SpecProfileRoundTripTest.lua
+tests\UnifiedProfiles_ProfileDeletionFallbackTest.lua
+tests\UnifiedProfiles_ExportImportRoundTripTest.lua
+tests\UnifiedProfiles_InvalidImportTest.lua
+tests\UnifiedProfiles_ExportHeaderTest.lua
+tests\UnifiedProfiles_DualSpecDropdownTest.lua
+tests\UnifiedProfiles_SetupWizardRoleTest.lua
+tests\UnifiedProfiles_SetupWizardSingleRoleTest.lua
+tests\UnifiedProfiles_SetupWizardPreserveCustomTest.lua
+tests\UnifiedProfiles_MigrationScopeLinkDefaultsTest.lua
+tests\UnifiedProfiles_MigrationPreserveDataTest.lua
+tests\UnifiedProfiles_MigrationSpecMappingTest.lua
+tests\UnifiedProfiles_MigrationDeprecatedKeysTest.lua
+tests\UnifiedProfiles_MigrationIdempotenceTest.lua
 
 tests\BugConditionTests.lua
 tests\PreservationTests.lua

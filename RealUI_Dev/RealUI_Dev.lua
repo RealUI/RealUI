@@ -759,6 +759,64 @@ function ns.commands:cttestall()
     end
 end
 
+-- Run all Unified Profile property tests (realui-profiles-2 spec)
+function ns.commands:profiletestall()
+    local profileTests = {
+        { name = "bt4preserve",              label = "Property 14: EnsureBartenderActionBarsProfiles preserves existing data" },
+        { name = "profileupdaterefs",        label = "Property 17: OnProfileUpdate refreshes all references" },
+        { name = "profileupdatemodules",     label = "Property 18: OnProfileUpdate propagates to all modules" },
+        { name = "newprofiledefaults",       label = "Property 19: New profile contains all defaults" },
+        { name = "coordswitch",             label = "Property 1: Coordinated switch sets all linked scopes" },
+        { name = "disabledscope",           label = "Property 2: Disabled scope exclusion" },
+        { name = "scopelinkpersist",        label = "Property 3: Scope link toggle persistence round-trip" },
+        { name = "reentrancyguard",         label = "Property 7: Reentrancy guard" },
+        { name = "completionmsg",           label = "Property 8: Completion message contains correct data" },
+        { name = "specprofileroundtrip",    label = "Property 4: Spec-to-profile mapping round-trip" },
+        { name = "profiledeletionfallback", label = "Property 16: Custom profile deletion triggers fallback" },
+        { name = "exportimportroundtrip",   label = "Property 20: Export/import round-trip" },
+        { name = "invalidimport",           label = "Property 21: Invalid import rejection" },
+        { name = "exportheader",            label = "Property 22: Export header contains required metadata" },
+        { name = "dualspecdropdown",        label = "Property 23: DualSpec mapping dropdown includes all profiles" },
+        { name = "setupwizardrole",         label = "Property 5: Setup wizard assigns profiles by role" },
+        { name = "setupwizardsinglerole",   label = "Property 6: Setup wizard single-role characters" },
+        { name = "setupwizardpreservecustom", label = "Property 15: Setup wizard preserves custom profile assignments" },
+        { name = "migrationscopelinkdefaults", label = "Property 9: Migration initializes scope link defaults" },
+        { name = "migrationpreservedata",   label = "Property 10: Migration preserves existing profile data" },
+        { name = "migrationspecmapping",    label = "Property 11: Migration populates spec-to-profile mapping" },
+        { name = "migrationdeprecatedkeys", label = "Property 12: Migration removes deprecated keys" },
+        { name = "migrationidempotence",    label = "Property 13: Migration idempotence" },
+    }
+
+    _G.print("|cff00ccff[Profile Test Suite]|r Running all 23 property tests...")
+    _G.print("---")
+
+    local passed, failed, skipped = 0, 0, 0
+    for _, test in _G.ipairs(profileTests) do
+        local cmd = ns.commands[test.name]
+        if cmd then
+            local ok = cmd(ns.commands)
+            if ok == false then
+                failed = failed + 1
+            elseif ok == nil then
+                skipped = skipped + 1
+            else
+                passed = passed + 1
+            end
+        else
+            _G.print(("|cffff9900[SKIP]|r %s — command not found"):format(test.label))
+            skipped = skipped + 1
+        end
+    end
+
+    _G.print("---")
+    local skipMsg = skipped > 0 and (", " .. skipped .. " skipped") or ""
+    if failed == 0 then
+        _G.print(("|cff00ff00[SUITE PASS]|r %d passed%s"):format(passed, skipMsg))
+    else
+        _G.print(("|cffff0000[SUITE FAIL]|r %d passed, %d failed%s"):format(passed, failed, skipMsg))
+    end
+end
+
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)
