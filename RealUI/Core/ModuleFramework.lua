@@ -1019,62 +1019,6 @@ function ModuleFramework:ClearModuleStateHistory(moduleName)
     return true
 end
 
--- Persistent Module Configuration
-function ModuleFramework:SaveModuleConfiguration()
-    if not RealUI.db or not RealUI.db.profile then
-        debug("Database not available for configuration save")
-        return false
-    end
-
-    local config = {
-        moduleStates = {},
-        dependencies = moduleDependencies,
-        loadOrder = moduleLoadOrder,
-        timestamp = time()
-    }
-
-    -- Save current module states
-    for name in pairs(registeredModules) do
-        config.moduleStates[name] = {
-            state = self:GetModuleState(name),
-            enabled = self:IsModuleEnabled(name)
-        }
-    end
-
-    RealUI.db.profile.moduleFrameworkConfig = config
-    debug("Module configuration saved")
-    return true
-end
-
-function ModuleFramework:LoadModuleConfiguration()
-    if not RealUI.db or not RealUI.db.profile or not RealUI.db.profile.moduleFrameworkConfig then
-        debug("No saved module configuration found")
-        return false
-    end
-
-    local config = RealUI.db.profile.moduleFrameworkConfig
-    debug("Loading module configuration from:", config.timestamp)
-
-    -- Restore module states
-    for name, stateInfo in pairs(config.moduleStates) do
-        if registeredModules[name] then
-            if stateInfo.enabled and not self:IsModuleEnabled(name) then
-                self:EnableModule(name)
-            elseif not stateInfo.enabled and self:IsModuleEnabled(name) then
-                self:DisableModule(name)
-            end
-        end
-    end
-
-    -- Restore load order if available
-    if config.loadOrder then
-        moduleLoadOrder = config.loadOrder
-    end
-
-    debug("Module configuration loaded successfully")
-    return true
-end
-
 -- Initialization and Lifecycle Management
 function ModuleFramework:Initialize()
     debug("Initializing ModuleFramework")
@@ -1103,8 +1047,14 @@ function ModuleFramework:Initialize()
         debug("Dependency validation failed, issues:", #issues)
     end
 
-    -- Load saved module configuration if available
-    self:LoadModuleConfiguration()
+    -- Clean up stale moduleFrameworkConfig from saved variables.
+    -- This data created a parallel source of truth that could override
+    -- db.profile.modules, causing modules (notably CastBars) to be
+    -- incorrectly disabled on dualspec profile switches.
+    if RealUI.db and RealUI.db.profile and RealUI.db.profile.moduleFrameworkConfig then
+        debug("Removing stale moduleFrameworkConfig from profile")
+        RealUI.db.profile.moduleFrameworkConfig = nil
+    end
 
     -- Note: Module enabling moved to EnableModulesFromDatabase()
     -- which is called after database is initialized
@@ -1171,9 +1121,6 @@ end
 function ModuleFramework:Shutdown()
     debug("Shutting down ModuleFramework")
 
-    -- Save current module configuration before shutdown
-    self:SaveModuleConfiguration()
-
     -- Unload all modules in reverse load order
     local loadOrder = self:GetLoadOrder()
     for i = #loadOrder, 1, -1 do
@@ -1205,6 +1152,13 @@ end
 function ModuleFramework:OnProfileUpdate(event, profile)
     debug("OnProfileUpdate", event, profile)
 
+    -- Clean up stale moduleFrameworkConfig from the newly-active profile
+    -- (covers profiles other than the one cleaned during Initialize)
+    if RealUI.db and RealUI.db.profile and RealUI.db.profile.moduleFrameworkConfig then
+        debug("Removing stale moduleFrameworkConfig from switched profile")
+        RealUI.db.profile.moduleFrameworkConfig = nil
+    end
+
     -- Save current state before profile change
     for moduleName in pairs(registeredModules) do
         self:SaveModuleState(moduleName)
@@ -1217,9 +1171,6 @@ function ModuleFramework:OnProfileUpdate(event, profile)
             moduleObj:OnProfileUpdate(event, profile)
         end
     end
-
-    -- Save configuration after profile update
-    self:SaveModuleConfiguration()
 end
 
 -- Enhanced Utility Functions

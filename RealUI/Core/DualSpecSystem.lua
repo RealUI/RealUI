@@ -638,13 +638,14 @@ function DualSpecSystem:SaveCurrentSpecConfiguration()
 end
 
 function DualSpecSystem:GetCurrentConfiguration()
-    -- This would collect current UI state - for now return a placeholder
-    -- In a full implementation, this would gather positions, settings, etc.
+    -- Collect current UI state for per-spec persistence.
+    -- NOTE: modules are intentionally excluded — module enabled states
+    -- are managed solely by db.profile.modules and must not be
+    -- overwritten by stale spec-config snapshots.
     return {
         timestamp = _G.time(),
         hudSize = RealUI.db and RealUI.db.profile.settings.hudSize,
         positions = RealUI.db and RealUI.db.profile.positions,
-        modules = RealUI.db and RealUI.db.profile.modules
     }
 end
 
@@ -666,10 +667,11 @@ function DualSpecSystem:ApplyConfiguration(configData)
         RealUI.db.profile.positions = configData.positions
     end
 
-    -- Apply module states if available
-    if configData.modules and RealUI.db and RealUI.db.profile then
-        RealUI.db.profile.modules = configData.modules
-    end
+    -- NOTE: Do NOT apply configData.modules here. Module enabled states
+    -- are authoritative in db.profile.modules and managed by AceDB's
+    -- profile system + the CastBars guard in Core:OnProfileUpdate.
+    -- Wholesale-replacing db.profile.modules with a stale snapshot was
+    -- a persistence vector for the CastBars-disabled-on-healer-login bug.
 
     debug("Configuration applied successfully")
     return true
