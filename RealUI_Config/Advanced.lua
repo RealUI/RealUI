@@ -1594,6 +1594,36 @@ do -- Skins
                         end,
                         order = 9,
                     },
+                    characterSheet = {
+                        name = "Skin Character Sheet",
+                        desc = "Skin the character sheet frame."
+                            .. "\n\n|cff888888Disable when using addons like ChonkyCharacterSheet that replace the character sheet.|r",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.characterSheet
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.characterSheet = value
+                        end,
+                        order = 10,
+                    },
+                    objectiveTracker = {
+                        name = "Skin Objective Tracker",
+                        desc = "Skin the objective/quest tracker frame."
+                            .. "\n\n|cff888888Disabling restores Blizzard's default tracker appearance.|r",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.objectiveTracker
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.objectiveTracker = value
+                        end,
+                        order = 11,
+                    },
                 },
             },
             skinStyle = {
@@ -1621,6 +1651,21 @@ do -- Skins
                         end,
                         order = 1,
                     },
+                    talentArtBackground = {
+                        name = "Talent Artistic Background",
+                        desc = "Show Blizzard's class-specific artwork behind the talent tree."
+                            .. "\n\n|cff888888Disabling hides the artwork and shows Aurora's flat dark background.|r",
+                        type = "toggle",
+                        get = function()
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            return _G.AuroraConfig.talentArtBackground
+                        end,
+                        set = function(info, value)
+                            _G.AuroraConfig = _G.AuroraConfig or {}
+                            _G.AuroraConfig.talentArtBackground = value
+                        end,
+                        order = 2,
+                    },
                     customHighlightEnabled = {
                         name = "Custom Highlight",
                         desc = "Use custom highlight color",
@@ -1635,7 +1680,7 @@ do -- Skins
                             _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
                             _G.AuroraConfig.customHighlight.enabled = value
                         end,
-                        order = 2,
+                        order = 3,
                     },
                     highlightColor = {
                         name = "Highlight Color",
@@ -1661,7 +1706,7 @@ do -- Skins
                             _G.AuroraConfig.customHighlight.g = g
                             _G.AuroraConfig.customHighlight.b = b
                         end,
-                        order = 3,
+                        order = 4,
                     },
                     -- [Duplication Resolution] Frame Alpha: This is AuroraConfig.alpha —
                     -- Aurora's skinned element opacity. Distinct from SkinsDB.frameColor.a
