@@ -1,3 +1,33 @@
+## [3.1.0] - 2026-03-23 ##
+### Summary ###
+**BREAKING CHANGE** — Profile management has been completely reworked. RealUI now has a Unified Profile System that manages Core, Skins, and Bartender4 profiles together from a single page. You can assign a different profile to each of your specializations (e.g. a druid can have separate profiles for Balance, Feral, Guardian, and Restoration), and when you change specs LibDualSpec will automatically switch all linked scopes in one coordinated action. Scope link toggles let you control which addons participate — Skins can be shared across all specs while Bartender4 follows your spec. New profiles inherit settings from your current profile instead of starting empty. Export and import lets you share profiles as text strings. An automated migration runs on first login to move your existing settings into the new system — no manual action required, but a /reload will be prompted.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+
+### Added ###
+  * add: Unified Profile Page under Advanced → Profiles with tabbed interface (General, Core Scope, Skins Scope, BT4 Scope, Export/Import)
+  * add: ProfileCoordinator — coordinated profile switching across Core, Skins, and Bartender4 with combat deferral and reentrancy guard
+  * add: per-specialization profile mapping — assign any profile to each spec via DualSpec Mapping section
+  * add: scope link toggles — control whether Skins and Bartender4 follow Core profile switches
+  * add: ProfileExporter — AceSerializer + base64 export/import for single or combined scope profiles
+  * add: create new profile and delete profile controls on the General tab (built-in RealUI/RealUI-Healing profiles protected from deletion)
+  * add: OnCoreProfileChanged callback — external profile switches (LibDualSpec, manual) now coordinate all linked scopes automatically
+  * add: scopeLinks migration from db.profile to db.char (per-character, not per-profile)
+  * add: use /resetinventory in-game to reset both the inventory and bank frames to their default positions.
+
+### Changed ###
+  * chg: profile management removed from individual scope tabs — all switching now routes through CoordinatedSwitch
+  * chg: Bartender4 AddonData now reads custom per-spec mappings from DualSpecSystem instead of hardcoding role-based defaults
+  * chg: new profiles created via CoordinatedSwitch inherit settings from the current profile via CopyProfile
+
+### Fixed ###
+  * fix: Bartender4 LibDualSpec mappings not syncing with RealUI's per-spec assignments — BT4's own LDS integration now kept in lockstep
+  * fix: RealUI_Skins SetAlpha crash on profile switch — stale private.skinsDB reference now updated in OnProfileChanged/OnProfileCopied/OnProfileReset callbacks
+
+
 ## [3.0.10] - 2026-03-21 ##
 ### Summary ###
 Nine-bug fix package targeting stability, usability, and profile reliability. Group loot roll windows now properly close after rolling instead of stacking up and blocking subsequent rolls. Castbar spell name and timer text no longer gets hidden behind the fill texture. Bartender4 mouseover casting now works correctly over RealUI unit frames. WoW's built-in "Use UI Scale" CVar is now actively suppressed to prevent it from overriding RealUI's scale management, with a 15-second notification explaining the conflict. Healer profile switching no longer incorrectly disables unrelated modules, and Bartender4 profile customizations are preserved across profile changes via a new userOverride flag in AddonControl. Player buffs are now displayed above the player unit frame, matching the existing target buff layout. The install wizard no longer re-triggers on every login for already-configured characters. The MiniPatch system now correctly handles major version transitions (2.5.x→3.0.0) and includes reserved slots for all 3.0.x incremental patches. Aurora's duplicate "UI Scale" message on login is fully suppressed when RealUI_Skins is the host addon. Also added NotificationWithDuration API for timed notification display, and moved dev test files from RealUI to RealUI_Dev to keep them out of release packages.
@@ -359,6 +389,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.0]: https://github.com/RealUI/RealUI/compare/3.0.10...3.1.0
 [3.0.10]: https://github.com/RealUI/RealUI/compare/3.0.9...3.0.10
 [3.0.9]: https://github.com/RealUI/RealUI/compare/3.0.8...3.0.9
 [3.0.8]: https://github.com/RealUI/RealUI/compare/3.0.7...3.0.8
