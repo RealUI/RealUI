@@ -817,6 +817,49 @@ function ns.commands:profiletestall()
     end
 end
 
+-- Run all UF enhancement property tests (hud-unitframe-enhancements spec)
+function ns.commands:uftestall()
+    local ufTests = {
+        { name = "i",      label = "Property 2: Breakpoint suffix ranges" },
+        { name = "ufabbrevformat",    label = "Property 1: Abbreviated number formatting" },
+        { name = "ufnonvaluemode",    label = "Property 3: Non-value modes exclude abbreviation" },
+        { name = "ufhealthbarcolor",  label = "Property 4: Health bar foreground/background color" },
+        { name = "uftextcolorhex",    label = "Property 6: Custom text color hex" },
+        { name = "ufpowertagcomp",    label = "Property 7: Power tag string composition" },
+        { name = "ufauratoggle",      label = "Property 5: Aura toggle and count sync" },
+        { name = "ufprediction",      label = "Property 8: Prediction sub-widget delegation" },
+    }
+
+    _G.print("|cff00ccff[UF Enhancement Test Suite]|r Running all 8 property tests...")
+    _G.print("---")
+
+    local passed, failed, skipped = 0, 0, 0
+    for _, test in _G.ipairs(ufTests) do
+        local cmd = ns.commands[test.name]
+        if cmd then
+            local ok = cmd(ns.commands)
+            if ok == false then
+                failed = failed + 1
+            elseif ok == nil then
+                skipped = skipped + 1
+            else
+                passed = passed + 1
+            end
+        else
+            _G.print(("|cffff9900[SKIP]|r %s — command not found"):format(test.label))
+            skipped = skipped + 1
+        end
+    end
+
+    _G.print("---")
+    local skipMsg = skipped > 0 and (", " .. skipped .. " skipped") or ""
+    if failed == 0 then
+        _G.print(("|cff00ff00[SUITE PASS]|r %d passed%s"):format(passed, skipMsg))
+    else
+        _G.print(("|cffff0000[SUITE FAIL]|r %d passed, %d failed%s"):format(passed, failed, skipMsg))
+    end
+end
+
 -- Slash Commands
 _G.SLASH_DEV1 = "/realdev"
 function _G.SlashCmdList.DEV(msg, editBox)

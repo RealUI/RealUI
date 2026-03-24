@@ -45,6 +45,14 @@ tests\TagsLineLimitTest.lua
 tests\TagsNumericFormatTest.lua
 tests\TagsSecretSafeTest.lua
 tests\UnitFramesClassColorTest.lua
+tests\UF_BreakpointSuffixTest.lua
+tests\UF_AbbrevFormatTest.lua
+tests\UF_NonValueModeTest.lua
+tests\UF_HealthBarColorTest.lua
+tests\UF_TextColorHexTest.lua
+tests\UF_PowerTagCompositionTest.lua
+tests\UF_AuraToggleTest.lua
+tests\UF_PredictionDelegationTest.lua
 tests\CastBarInterruptibleColorTest.lua
 tests\CastBarChannelingTickTest.lua
 tests\CombatFaderOpacityTest.lua
