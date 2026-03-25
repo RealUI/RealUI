@@ -176,8 +176,9 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
                 ActionBars:debug(id, "barPlace", barPlace)
 
                 -- y Offset
-                local topYOfs = ndb.positions[RealUI.cLayout]["HuDY"] + ndb.positions[RealUI.cLayout]["ActionBarsY"] + RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"]
-                local bottomYOfs = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + buttonSizes.bars + fixedSettings.bt4Padding
+                local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
+                local topYOfs = layoutPositions["HuDY"] + layoutPositions["ActionBarsY"] + RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"]
+                local bottomYOfs = layoutPositions["ActionBarsBotY"] + buttonSizes.bars + fixedSettings.bt4Padding
                 ActionBars:debug(id, "Y Offset", topYOfs, bottomYOfs)
                 if barPlace == 1 then
                     if isTopBar then
@@ -341,7 +342,7 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
 
         -- Calculate X, Y
         eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 + 5.5
-        eabY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + 6
+        eabY = (ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])["ActionBarsBotY"] + 6
 
         _G.ExtraActionButton1:ClearAllPoints()
         _G.ExtraActionButton1:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOM", eabX - 1, eabY)
@@ -371,7 +372,7 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
             if BT4Stance and not(BT4Stance:IsEnabled()) then BT4Stance:Enable() end
 
             local sbX = -(_G.max(BarSizes[2], BarSizes[3]) / 2 - 4)
-            local sbY = ndb.positions[RealUI.cLayout]["ActionBarsBotY"] + buttonSizes.stanceBar + fixedSettings.bt4Padding
+            local sbY = (ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])["ActionBarsBotY"] + buttonSizes.stanceBar + fixedSettings.bt4Padding
 
             -- Set Position
             local profileStanceBar = BT4DB["namespaces"]["StanceBar"]["profiles"][prof]
