@@ -25,6 +25,9 @@ local units = {
 }
 
 function UnitFrames:RefreshUnits(event)
+    -- Swap oUF.colors.health based on alternative bar style (only affects angled bars via UpdateColor override)
+    oUF.colors.health = oUF:CreateColor(0.66, 0.22, 0.22)
+
     for i = 1, #units do
         local frame = _G["RealUI" .. units[i] .. "Frame"]
         if not frame then
@@ -35,15 +38,52 @@ function UnitFrames:RefreshUnits(event)
 
             -- Update class color settings
             if frame.Health then
-                frame.Health.colorClass = db.overlay.classColor
-                frame.Health.colorHealth = not db.overlay.classColor
+                local unitDB = db.units[unitKey]
+                local hb = unitDB and unitDB.healthBar
+                local colorByClass = db.overlay.classColor or (hb and hb.colorForegroundByClass)
+                frame.Health.colorClass = colorByClass
+                frame.Health.colorReaction = colorByClass
+                frame.Health.colorHealth = not colorByClass
+
+                -- Update alternative bar style
+                if frame.Health and frame.Health.bg then
+                    if db.misc.alternativeBarStyle then
+                        if not frame.HealthBG then
+                            -- Create HealthBG on demand
+                            local unitData2 = UnitFrames[unitKey]
+                            if unitData2 and unitData2.health and unitData2.health.leftVertex then
+                                local hb2 = unitDB and unitDB.healthBar
+                                local bgColor = (hb2 and hb2.background) or {0.78, 0.15, 0.15}
+                                local bgOpacity = (hb2 and hb2.backgroundOpacity) or 1.0
+                                local HealthBG = frame:CreateAngle("StatusBar", nil, frame.overlay)
+                                HealthBG:SetAngleVertex(unitData2.health.leftVertex, unitData2.health.rightVertex)
+                                HealthBG:SetSize(frame.Health:GetWidth(), frame.Health:GetHeight())
+                                HealthBG:SetPoint("TOP"..(unitData2.health.point or "RIGHT"), frame)
+                                HealthBG:SetFrameLevel(frame.Health:GetFrameLevel())
+                                HealthBG.bg:SetAlpha(0)
+                                HealthBG.top:Hide()
+                                HealthBG.bottom:Hide()
+                                HealthBG.left:Hide()
+                                HealthBG.right:Hide()
+                                HealthBG.fill:SetDrawLayer("BORDER")
+                                HealthBG:SetMinMaxValues(0, 1)
+                                HealthBG:SetValue(1)
+                                HealthBG:SetStatusBarColor(bgColor[1], bgColor[2], bgColor[3], bgOpacity)
+                                frame.HealthBG = HealthBG
+                            end
+                        else
+                            frame.HealthBG:Show()
+                        end
+                    elseif frame.HealthBG then
+                        frame.HealthBG:Hide()
+                    end
+                end
 
                 -- Update fill direction: natural direction based on side, reverseFill toggles it
                 local natural = false
                 if unitData and unitData.health and unitData.health.point then
                     natural = unitData.health.point == "RIGHT"
                 end
-                local unitDB = db.units[unitKey]
                 local reverseFill = natural
                 if unitDB and unitDB.reverseFill then
                     reverseFill = not natural
@@ -83,20 +123,38 @@ function UnitFrames:RefreshUnits(event)
                 end
             end
 
-            -- Update aura counts on target frame
+            -- Update aura toggles/counts on target frame
             if unitKey == "target" then
-                if frame.Debuffs and db.units.target then
-                    frame.Debuffs.num = db.units.target.debuffCount
+                if frame.Debuffs then
+                    if db.units.target.showTargetDebuffs then
+                        frame.Debuffs.num = db.units.target.debuffCount
+                        frame.Debuffs:Show()
+                    else
+                        frame.Debuffs.num = 0
+                        frame.Debuffs:Hide()
+                    end
                 end
-                if frame.Buffs and db.units.target then
-                    frame.Buffs.num = db.units.target.buffCount
+                if frame.Buffs then
+                    if db.units.target.showTargetBuffs then
+                        frame.Buffs.num = db.units.target.buffCount
+                        frame.Buffs:Show()
+                    else
+                        frame.Buffs.num = 0
+                        frame.Buffs:Hide()
+                    end
                 end
             end
 
-            -- Update aura counts on player frame
+            -- Update aura toggles/counts on player frame
             if unitKey == "player" then
-                if frame.Buffs and db.units.player then
-                    frame.Buffs.num = db.units.player.buffCount
+                if frame.Buffs then
+                    if db.units.player.showPlayerBuffs then
+                        frame.Buffs.num = db.units.player.buffCount
+                        frame.Buffs:Show()
+                    else
+                        frame.Buffs.num = 0
+                        frame.Buffs:Hide()
+                    end
                 end
             end
 
@@ -109,8 +167,20 @@ function UnitFrames:RefreshUnits(event)
         local frame = _G["RealUIBossFrame" .. i]
         if frame then
             if frame.Health then
-                frame.Health.colorClass = db.overlay.classColor
-                frame.Health.colorHealth = not db.overlay.classColor
+                local hb = db.units.boss and db.units.boss.healthBar
+                local colorByClass = db.overlay.classColor or (hb and hb.colorForegroundByClass)
+                frame.Health.colorClass = colorByClass
+                frame.Health.colorReaction = colorByClass
+                frame.Health.colorHealth = not colorByClass
+
+                -- Update alternative bar style on boss frames
+                if frame.HealthBG then
+                    if db.misc.alternativeBarStyle then
+                        frame.HealthBG:Show()
+                    else
+                        frame.HealthBG:Hide()
+                    end
+                end
 
                 if frame.Health.text then
                     frame:Untag(frame.Health.text)
@@ -119,10 +189,22 @@ function UnitFrames:RefreshUnits(event)
             end
 
             if frame.Debuffs then
-                frame.Debuffs.num = db.boss.debuffCount
+                if db.boss.showBossDebuffs then
+                    frame.Debuffs.num = db.boss.debuffCount
+                    frame.Debuffs:Show()
+                else
+                    frame.Debuffs.num = 0
+                    frame.Debuffs:Hide()
+                end
             end
             if frame.Buffs then
-                frame.Buffs.num = db.boss.buffCount
+                if db.boss.showBossBuffs then
+                    frame.Buffs.num = db.boss.buffCount
+                    frame.Buffs:Show()
+                else
+                    frame.Buffs.num = 0
+                    frame.Buffs:Hide()
+                end
             end
 
             frame:UpdateAllElements(event)
@@ -135,6 +217,7 @@ function UnitFrames:RefreshUnits(event)
         if frame then
             if frame.Health then
                 frame.Health.colorClass = db.overlay.classColor
+                frame.Health.colorReaction = db.overlay.classColor
                 frame.Health.colorHealth = not db.overlay.classColor
 
                 if frame.Health.text then
@@ -318,6 +401,13 @@ function UnitFrames:OnInitialize()
                 focuskey = "shift",
                 statusText = "smart",
                 alwaysDisplayFullHealth = true,
+                showPrediction = true,
+                alternativeBarStyle = false,
+                textColors = {
+                    health = nil,
+                    power = nil,
+                    name = nil,
+                },
                 combatfade = {
                     enabled = true,
                     opacity = {
@@ -341,6 +431,14 @@ function UnitFrames:OnInitialize()
                     framePoint = {},
                     buffCount = 16,
                     showPlayerBuffs = true,
+                    healthBar = {
+                        foreground = {0.08, 0.08, 0.08},
+                        foregroundOpacity = 0.8,
+                        background = {0.78, 0.15, 0.15},
+                        backgroundOpacity = 1.0,
+                        colorForegroundByClass = false,
+                        colorBackgroundByClass = false,
+                    },
                 },
                 target = {
                     size = {x = 259, y = 28},
@@ -350,6 +448,16 @@ function UnitFrames:OnInitialize()
                     framePoint = {},
                     debuffCount = 16,
                     buffCount = 16,
+                    showTargetDebuffs = true,
+                    showTargetBuffs = true,
+                    healthBar = {
+                        foreground = {0.08, 0.08, 0.08},
+                        foregroundOpacity = 0.8,
+                        background = {0.78, 0.15, 0.15},
+                        backgroundOpacity = 1.0,
+                        colorForegroundByClass = false,
+                        colorBackgroundByClass = false,
+                    },
                 },
                 targettarget = {
                     size = {x = 138, y = 10},
@@ -380,6 +488,14 @@ function UnitFrames:OnInitialize()
                     size = {x = 135, y = 22},
                     position = {x = 0, y = 0},
                     framePoint = {},
+                    healthBar = {
+                        foreground = {0.08, 0.08, 0.08},
+                        foregroundOpacity = 0.8,
+                        background = {0.78, 0.15, 0.15},
+                        backgroundOpacity = 1.0,
+                        colorForegroundByClass = false,
+                        colorBackgroundByClass = false,
+                    },
                 },
                 party = {
                     size = {x = 100, y = 50},
@@ -395,6 +511,10 @@ function UnitFrames:OnInitialize()
             },
             boss = {
                 gap = 3,
+                debuffCount = 16,
+                buffCount = 16,
+                showBossDebuffs = true,
+                showBossBuffs = true,
             },
             -- TODO: Convert to FramePoint
             positions = {

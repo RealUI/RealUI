@@ -85,8 +85,53 @@ local function CreateHealthBar(parent, info, isAngled)
         Health:SetPoint("TOP"..info.point, parent)
         Health:SetReverseFill(GetReverseFill(parent.unit, info))
 
+        -- Set initial bg color: red when alternative style is active
+        -- Use a separate HealthBG StatusBar at the same frame level, with fill at BORDER layer
+        -- (above Health's bg at BACKGROUND, below Health's fill at ARTWORK)
+        if db.misc.alternativeBarStyle then
+            local HealthBG = parent:CreateAngle("StatusBar", nil, parent.overlay)
+            HealthBG:SetAngleVertex(info.leftVertex, info.rightVertex)
+            HealthBG:SetSize(width, height)
+            HealthBG:SetPoint("TOP"..info.point, parent)
+            HealthBG:SetReverseFill(GetReverseFill(parent.unit, info))
+            HealthBG:SetFrameLevel(Health:GetFrameLevel())
+            -- Hide HealthBG's own bg and borders
+            HealthBG.bg:SetAlpha(0)
+            HealthBG.top:Hide()
+            HealthBG.bottom:Hide()
+            HealthBG.left:Hide()
+            HealthBG.right:Hide()
+            -- Put fill at BORDER layer (between BACKGROUND and ARTWORK)
+            HealthBG.fill:SetDrawLayer("BORDER")
+            HealthBG:SetMinMaxValues(0, 1)
+            HealthBG:SetValue(1)
+            local hbDB = db.units[parent.unit] and db.units[parent.unit].healthBar
+            local bgColor = (hbDB and hbDB.background) or {0.78, 0.15, 0.15}
+            local bgOpacity = (hbDB and hbDB.backgroundOpacity) or 1.0
+            HealthBG:SetStatusBarColor(bgColor[1], bgColor[2], bgColor[3], bgOpacity)
+            parent.HealthBG = HealthBG
+        end
+
         Health.PreUpdate = function(self)
             self:SetReverseFill(GetReverseFill(parent.unit, info))
+        end
+
+        -- Hook overlay alpha to hide HealthBG when faded (prevents red bleed-through)
+        -- Delay activation until after CombatFader's initial setup completes
+        if db.misc.alternativeBarStyle then
+            _G.C_Timer.After(1, function()
+                _G.hooksecurefunc(parent.overlay, "SetAlpha", function(overlay, alpha)
+                    if not db.misc.alternativeBarStyle then return end
+                    if not parent.HealthBG then return end
+                    -- Hide only when deeply faded (below "hurt" threshold)
+                    -- Target Selected = 0.75, so use 0.5 as threshold
+                    if alpha < 0.5 then
+                        parent.HealthBG:Hide()
+                    else
+                        parent.HealthBG:Show()
+                    end
+                end)
+            end)
         end
     else
         Health = _G.CreateFrame("StatusBar", nil, parent.overlay)
@@ -117,31 +162,49 @@ local function CreateHealthBar(parent, info, isAngled)
     end
 
     Health.barType = "health"
-    Health.colorClass = db.overlay.classColor
+    local unitDB = db.units[parent.unit] or {}
+    local hb = unitDB.healthBar or {}
+    Health.colorClass = db.overlay.classColor or hb.colorForegroundByClass
     Health.colorTapping = true
     Health.colorDisconnected = true
-    Health.colorHealth = not db.overlay.classColor
-    Health.colorReaction = true
+    Health.colorHealth = not Health.colorClass
+    Health.colorReaction = Health.colorClass
 
     parent.Health = Health
 
-    -- Create Health sub-widgets for prediction (angled units only)
+    -- For angled bars with alternative style: override oUF's UpdateColor to apply dark foreground
     if isAngled then
-        local HealingAll = parent:CreateAngle("StatusBar", nil, Health)
-        HealingAll:SetAngleVertex(info.leftVertex, info.rightVertex)
-        HealingAll:SetReverseFill(Health:GetReverseFill())
-        HealingAll:SetStatusBarColor(0.33, 0.33, 1, db.overlay.bar.opacity.absorb)
-        local healMeta = AngleStatusBar:GetBarMeta(HealingAll)
-        if healMeta then healMeta.isPredictionWidget = true end
-        Health.HealingAll = HealingAll
+        Health.UpdateColor = function(self, event, unit)
+            if not unit or self.unit ~= unit then return end
+            local element = self.Health
+            if not element then return end
 
-        local DamageAbsorb = parent:CreateAngle("StatusBar", nil, Health)
-        DamageAbsorb:SetAngleVertex(info.leftVertex, info.rightVertex)
-        DamageAbsorb:SetReverseFill(Health:GetReverseFill())
-        DamageAbsorb:SetStatusBarColor(1, 1, 1, db.overlay.bar.opacity.absorb)
-        local absorbMeta = AngleStatusBar:GetBarMeta(DamageAbsorb)
-        if absorbMeta then absorbMeta.isPredictionWidget = true end
-        Health.DamageAbsorb = DamageAbsorb
+            if db.misc.alternativeBarStyle then
+                -- Alternative style: dark foreground, red bg shows through missing health
+                local unitDB = db.units[unit] or {}
+                local hb = unitDB.healthBar or {}
+                local c = hb.foreground or {0.08, 0.08, 0.08}
+                element:SetStatusBarColor(c[1], c[2], c[3], 1.0)
+            else
+                -- Default oUF color logic
+                local color
+                if element.colorDisconnected and not _G.UnitIsConnected(unit) then
+                    color = self.colors.disconnected
+                elseif element.colorTapping and not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) then
+                    color = self.colors.tapped
+                elseif element.colorClass and (_G.UnitIsPlayer(unit) or _G.UnitInPartyIsAI(unit)) then
+                    local _, class = _G.UnitClass(unit)
+                    color = self.colors.class[class]
+                elseif element.colorReaction and _G.UnitReaction(unit, "player") then
+                    color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+                elseif element.colorHealth then
+                    color = self.colors.health
+                end
+                if color then
+                    element:SetStatusBarColor(color:GetRGB())
+                end
+            end
+        end
     end
 end
 
@@ -503,6 +566,15 @@ local function Shared(self, unit)
             unitData.PostUpdate(frame, event)
         end
     end
+
+    -- Deferred color kick: the native StatusBar engine for secret values (player
+    -- health/power) needs one frame to initialize before colors stick. Force an
+    -- oUF update after the first render so bars aren't grey on reload.
+    -- Also ensures PostUpdateColor fires for alternative bar style on all units.
+    _G.C_Timer.After(0, function()
+        if self.Health then self.Health:ForceUpdate() end
+        if self.Power then self.Power:ForceUpdate() end
+    end)
 end
 
 function UnitFrames:InitializeLayout()

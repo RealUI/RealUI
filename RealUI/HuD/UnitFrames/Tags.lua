@@ -18,6 +18,22 @@ local RealUI = private.RealUI
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
+-- Abbreviation config: use CreateAbbreviateConfig for cached performance
+-- AbbreviateNumbers accepts secret values natively (no string conversion needed)
+local abbrevBreakpoints = {
+    { breakpoint = 1e12, abbreviation = "B", significandDivisor = 1e10, fractionDivisor = 100, abbreviationIsGlobal = false },
+    { breakpoint = 1e11, abbreviation = "B", significandDivisor = 1e9,  fractionDivisor = 1,   abbreviationIsGlobal = false },
+    { breakpoint = 1e10, abbreviation = "B", significandDivisor = 1e8,  fractionDivisor = 10,  abbreviationIsGlobal = false },
+    { breakpoint = 1e9,  abbreviation = "B", significandDivisor = 1e7,  fractionDivisor = 100, abbreviationIsGlobal = false },
+    { breakpoint = 1e8,  abbreviation = "M", significandDivisor = 1e6,  fractionDivisor = 1,   abbreviationIsGlobal = false },
+    { breakpoint = 1e7,  abbreviation = "M", significandDivisor = 1e5,  fractionDivisor = 10,  abbreviationIsGlobal = false },
+    { breakpoint = 1e6,  abbreviation = "M", significandDivisor = 1e4,  fractionDivisor = 100, abbreviationIsGlobal = false },
+    { breakpoint = 1e5,  abbreviation = "K", significandDivisor = 1000, fractionDivisor = 1,   abbreviationIsGlobal = false },
+    { breakpoint = 1e4,  abbreviation = "K", significandDivisor = 100,  fractionDivisor = 10,  abbreviationIsGlobal = false },
+}
+local abbrevConfig = _G.CreateAbbreviateConfig and _G.CreateAbbreviateConfig(abbrevBreakpoints)
+local abbrevData = { breakpointData = abbrevBreakpoints, config = abbrevConfig }
+
 ----------------------------------
 ------ Tag String Composers ------
 ----------------------------------
@@ -34,18 +50,20 @@ function UnitFrames.GetHealthTagString(statusText)
 end
 
 function UnitFrames.GetPowerTagString(statusText, powerType)
+    local tc = UnitFrames.db and UnitFrames.db.profile.misc.textColors
+    local colorTag = (tc and tc.power) and "[realui:customPowerColor]" or "[powercolor]"
     if powerType ~= "MANA" then
-        return "[powercolor][realui:powerValue]"
+        return colorTag .. "[realui:powerValue]"
     end
     if statusText == "perc" or statusText == "smart" then
-        return "[powercolor][realui:powerPercent<$%]"
+        return colorTag .. "[realui:powerPercent<$%]"
     elseif statusText == "value" or statusText == "abs" then
-        return "[powercolor][realui:powerValue]"
+        return colorTag .. "[realui:powerValue]"
     elseif statusText == "both" then
-        return "[powercolor][realui:powerPercent<$%] - [powercolor][realui:powerValue]"
+        return colorTag .. "[realui:powerPercent<$%] - " .. colorTag .. "[realui:powerValue]"
     end
     -- Fallback to percentage if unknown statusText
-    return "[powercolor][realui:powerPercent<$%]"
+    return colorTag .. "[realui:powerPercent<$%]"
 end
 
 ------------------
@@ -56,6 +74,10 @@ end
 tags.Methods["realui:healthcolor"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         return "|cff3f3f3f"
+    end
+    local c = UnitFrames.db.profile.misc.textColors and UnitFrames.db.profile.misc.textColors.health
+    if c then
+        return ("|cff%02x%02x%02x"):format(c[1] * 255, c[2] * 255, c[3] * 255)
     end
     return ("|c%s"):format(RealUI.GetColorString(oUF.colors.health))
 end
@@ -75,11 +97,7 @@ tags.Methods["realui:healthValue"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         return "0"
     end
-    local health = _G.UnitHealth(unit)
-    if not _G.issecretvalue(health) then
-        return RealUI.ReadableNumber(health)
-    end
-    return _G.string.format('%d', health)
+    return _G.AbbreviateNumbers(_G.UnitHealth(unit), abbrevData)
 end
 tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
@@ -98,13 +116,19 @@ tags.Methods["realui:powerValue"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         return "0"
     end
-    local power = _G.UnitPower(unit)
-    if not _G.issecretvalue(power) then
-        return RealUI.ReadableNumber(power)
-    end
-    return _G.string.format('%d', power)
+    return _G.AbbreviateNumbers(_G.UnitPower(unit), abbrevData)
 end
 tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
+
+-- Custom Power Color (uses custom textColors.power if set, otherwise delegates to powercolor)
+tags.Methods["realui:customPowerColor"] = function(unit)
+    local c = UnitFrames.db.profile.misc.textColors and UnitFrames.db.profile.misc.textColors.power
+    if c then
+        return ("|cff%02x%02x%02x"):format(c[1] * 255, c[2] * 255, c[3] * 255)
+    end
+    return tags.Methods["powercolor"](unit)
+end
+tags.Events["realui:customPowerColor"] = "UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER"
 
 -- Name
 tags.Methods["realui:name"] = function(unit)
@@ -119,8 +143,13 @@ tags.Methods["realui:name"] = function(unit)
     local nameColor = "|cffffffff"
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         nameColor = "|cff3f3f3f"
-    elseif UnitFrames.db.profile.overlay.classColorNames then
-        nameColor = tags.Methods.raidcolor(unit) or nameColor
+    else
+        local nameColorSetting = UnitFrames.db.profile.misc.textColors and UnitFrames.db.profile.misc.textColors.name
+        if nameColorSetting then
+            nameColor = ("|cff%02x%02x%02x"):format(nameColorSetting[1] * 255, nameColorSetting[2] * 255, nameColorSetting[3] * 255)
+        elseif UnitFrames.db.profile.overlay.classColorNames then
+            nameColor = tags.Methods.raidcolor(unit) or nameColor
+        end
     end
     return ("%s%s|r"):format(nameColor, name)
 end
