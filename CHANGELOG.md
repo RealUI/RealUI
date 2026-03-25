@@ -22,9 +22,7 @@ HuD unit frame enhancements: health/power values now display abbreviated numbers
 ### Fixed ###
   * fix: player health/power bars grey on reload — deferred ForceUpdate after native StatusBar engine initializes for secret values
   * fix: ActionBars crash at line 179 when ndb.positions[RealUI.cLayout] is nil — fallback to defaultPositions
-
-
-
+  * fix: remove hardcoded references to 3.0.0 and use RealUI.verinfo.string instead
 
 
 ## [3.1.0] - 2026-03-23 ##
