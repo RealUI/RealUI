@@ -45,8 +45,8 @@ end
 function SavedVariablesMigration:MarkMigrationComplete()
     if _G.RealUIDB and _G.RealUIDB.global then
         _G.RealUIDB.global[MIGRATION_STATUS_KEY] = true
-        -- Also mark setup as complete for 3.0.0 since we migrated the config
-        _G.RealUIDB.global["setupVersion"] = "3.0.0"
+        -- Also mark setup as complete since we migrated the config
+        _G.RealUIDB.global["setupVersion"] = RealUI.verinfo.string
 
         -- Ensure character is marked as initialized if we migrated data
         if _G.RealUIDB.char then
@@ -60,7 +60,7 @@ function SavedVariablesMigration:MarkMigrationComplete()
             end
         end
 
-        debug("Migration marked as complete, setup version set to 3.0.0, character initialized")
+        debug("Migration marked as complete, setup version set to " .. RealUI.verinfo.string .. ", character initialized")
     end
 end
 

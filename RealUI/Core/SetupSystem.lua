@@ -14,7 +14,7 @@ local SetupSystem = {}
 RealUI.SetupSystem = SetupSystem
 
 -- Version constants
-SetupSystem.CURRENT_VERSION = "3.0.0"
+SetupSystem.CURRENT_VERSION = RealUI.verinfo.string
 SetupSystem.SETUP_VERSION_KEY = "setupVersion"
 
 -- Setup state

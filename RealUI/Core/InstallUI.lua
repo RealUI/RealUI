@@ -139,19 +139,19 @@ RealUI is a comprehensive UI replacement that provides:
 
 Click "Next" to begin the setup process, or "Skip" to use default settings.
 ]],
-        upgradeText = [[
-Welcome to RealUI 3.0.0!
+        upgradeText = ([[
+Welcome to RealUI %s!
 
 You're upgrading from a previous version. This wizard will help you configure the new version.
 
-What's new in 3.0.0:
+What's new in %s:
 • Enhanced setup system with better upgrade detection
 • Improved configuration migration
 • New modular architecture
 • Better performance and stability
 
 Your previous settings have been migrated where possible. Click "Next" to review and complete the setup.
-]],
+]]):format(RealUI.verinfo.string, RealUI.verinfo.string),
         showPrev = false,
         showNext = true,
         showSkip = true
@@ -408,7 +408,7 @@ function InstallUI:UpdateStage(stage)
     -- Update title
     local stageTitle = stageInfo.title
     if isUpgrade and stage == 0 then
-        stageTitle = "Welcome to RealUI 3.0.0!"
+        stageTitle = "Welcome to RealUI " .. RealUI.verinfo.string .. "!"
     end
     self.title:SetText(stageTitle)
 

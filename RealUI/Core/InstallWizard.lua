@@ -495,7 +495,7 @@ function InstallWizard:Complete()
     end
 
     -- Show completion message
-    print("|cff00ff00RealUI 3.0.0 setup completed successfully!|r")
+    print("|cff00ff00RealUI " .. RealUI.verinfo.string .. " setup completed successfully!|r")
 
     -- Show reload UI dialog
     _G.StaticPopup_Show("REALUI_SETUP_RELOAD")
