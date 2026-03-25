@@ -1,3 +1,32 @@
+## [3.1.1] - 2026-03-25 ##
+### Summary ###
+HuD unit frame enhancements: health/power values now display abbreviated numbers (101K, 1.97M) using the WoW AbbreviateNumbers API. An optional "Alternative Bar Style" replaces the default dark-red health fill with a dark foreground that shrinks to reveal a configurable red background for missing health. Custom text colors for health, power, and name tags are available via color pickers with reset-to-default. Aura display on player, target, and boss frames is now individually toggleable with configurable counts. Player health/power bars no longer appear grey on reload (secret value timing fix). ActionBars no longer crash when the positions table is missing for the current layout.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+
+### Added ###
+  * add: abbreviated health/power numbers via AbbreviateNumbers API with breakpoint table (K at 10K, M at 1M, B at 1B)
+  * add: Alternative Bar Style toggle — dark foreground with red background for missing health, opt-in via ConfigBar
+  * add: custom text color pickers for health, power, and name tags with reset-to-default buttons
+  * add: per-frame aura toggles and count sliders for player buffs, target debuffs/buffs, and boss debuffs/buffs
+  * add: deferred ForceUpdate on all unit frames to fix secret-value color timing on reload
+
+### Changed ###
+  * chg: health bar foreground/background color options only visible when Alternative Bar Style is enabled
+  * chg: oUF.colors.health swapped to dark foreground color when Alternative Bar Style is active
+  * chg: HealthBG uses BORDER draw layer at same frame level as Health for correct layering
+  * chg: CombatFader alpha hook hides HealthBG below 50% alpha to prevent red bleed-through when faded
+
+### Fixed ###
+  * fix: player health/power bars grey on reload — deferred ForceUpdate after native StatusBar engine initializes for secret values
+  * fix: ActionBars crash at line 179 when ndb.positions[RealUI.cLayout] is nil — fallback to defaultPositions
+
+
+
+
+
 ## [3.1.0] - 2026-03-23 ##
 ### Summary ###
 **BREAKING CHANGE** — Profile management has been completely reworked. RealUI now has a Unified Profile System that manages Core, Skins, and Bartender4 profiles together from a single page. You can assign a different profile to each of your specializations (e.g. a druid can have separate profiles for Balance, Feral, Guardian, and Restoration), and when you change specs LibDualSpec will automatically switch all linked scopes in one coordinated action. Scope link toggles let you control which addons participate — Skins can be shared across all specs while Bartender4 follows your spec. New profiles inherit settings from your current profile instead of starting empty. Export and import lets you share profiles as text strings. An automated migration runs on first login to move your existing settings into the new system — no manual action required, but a /reload will be prompted.
@@ -392,6 +421,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.1]: https://github.com/RealUI/RealUI/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/RealUI/RealUI/compare/3.0.10...3.1.0
 [3.0.10]: https://github.com/RealUI/RealUI/compare/3.0.9...3.0.10
 [3.0.9]: https://github.com/RealUI/RealUI/compare/3.0.8...3.0.9
