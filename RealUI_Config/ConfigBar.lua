@@ -491,6 +491,228 @@ do -- UnitFrames
                         end,
                         order = 41,
                     },
+                    -- Health Bar Colors
+                    healthBarHeader = {
+                        name = "Health Bar Colors",
+                        type = "header",
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 50,
+                    },
+                    foregroundColor = {
+                        name = "Foreground Color",
+                        type = "color",
+                        hasAlpha = false,
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 51,
+                        get = function()
+                            local db = UnitFrames.db.profile
+                            local c = db.units.player.healthBar.foreground
+                            return c[1], c[2], c[3]
+                        end,
+                        set = function(_, r, g, b)
+                            local db = UnitFrames.db.profile
+                            local color = {r, g, b}
+                            for _, unitKey in next, {"player", "target", "boss"} do
+                                if db.units[unitKey] and db.units[unitKey].healthBar then
+                                    db.units[unitKey].healthBar.foreground = {r, g, b}
+                                end
+                            end
+                            UnitFrames:RefreshUnits("HealthBarColors")
+                        end,
+                    },
+                    foregroundOpacity = {
+                        name = "Foreground Opacity",
+                        type = "range",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 52,
+                        get = function()
+                            return UnitFrames.db.profile.units.player.healthBar.foregroundOpacity
+                        end,
+                        set = function(_, val)
+                            local db = UnitFrames.db.profile
+                            for _, unitKey in next, {"player", "target", "boss"} do
+                                if db.units[unitKey] and db.units[unitKey].healthBar then
+                                    db.units[unitKey].healthBar.foregroundOpacity = val
+                                end
+                            end
+                            UnitFrames:RefreshUnits("HealthBarColors")
+                        end,
+                    },
+                    backgroundColor = {
+                        name = "Background Color",
+                        type = "color",
+                        hasAlpha = false,
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 53,
+                        get = function()
+                            local c = UnitFrames.db.profile.units.player.healthBar.background
+                            return c[1], c[2], c[3]
+                        end,
+                        set = function(_, r, g, b)
+                            local db = UnitFrames.db.profile
+                            for _, unitKey in next, {"player", "target", "boss"} do
+                                if db.units[unitKey] and db.units[unitKey].healthBar then
+                                    db.units[unitKey].healthBar.background = {r, g, b}
+                                end
+                            end
+                            UnitFrames:RefreshUnits("HealthBarColors")
+                        end,
+                    },
+                    backgroundOpacity = {
+                        name = "Background Opacity",
+                        type = "range",
+                        min = 0, max = 1, step = 0.05,
+                        isPercent = true,
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 54,
+                        get = function()
+                            return UnitFrames.db.profile.units.player.healthBar.backgroundOpacity
+                        end,
+                        set = function(_, val)
+                            local db = UnitFrames.db.profile
+                            for _, unitKey in next, {"player", "target", "boss"} do
+                                if db.units[unitKey] and db.units[unitKey].healthBar then
+                                    db.units[unitKey].healthBar.backgroundOpacity = val
+                                end
+                            end
+                            UnitFrames:RefreshUnits("HealthBarColors")
+                        end,
+                    },
+                    colorForegroundByClass = {
+                        name = "Class Color Foreground",
+                        type = "toggle",
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 55,
+                        get = function()
+                            return UnitFrames.db.profile.units.player.healthBar.colorForegroundByClass
+                        end,
+                        set = function(_, val)
+                            local db = UnitFrames.db.profile
+                            for _, unitKey in next, {"player", "target", "boss"} do
+                                if db.units[unitKey] and db.units[unitKey].healthBar then
+                                    db.units[unitKey].healthBar.colorForegroundByClass = val
+                                end
+                            end
+                            UnitFrames:RefreshUnits("HealthBarColors")
+                        end,
+                    },
+                    colorBackgroundByClass = {
+                        name = "Class Color Background",
+                        type = "toggle",
+                        hidden = function() return not UnitFrames.db.profile.misc.alternativeBarStyle end,
+                        order = 56,
+                        get = function()
+                            return UnitFrames.db.profile.units.player.healthBar.colorBackgroundByClass
+                        end,
+                        set = function(_, val)
+                            local db = UnitFrames.db.profile
+                            for _, unitKey in next, {"player", "target", "boss"} do
+                                if db.units[unitKey] and db.units[unitKey].healthBar then
+                                    db.units[unitKey].healthBar.colorBackgroundByClass = val
+                                end
+                            end
+                            UnitFrames:RefreshUnits("HealthBarColors")
+                        end,
+                    },
+                    -- Text Colors
+                    textColorHeader = {
+                        name = "Text Colors",
+                        type = "header",
+                        order = 60,
+                    },
+                    healthTextColor = {
+                        name = "Health Text Color",
+                        type = "color",
+                        hasAlpha = false,
+                        order = 61,
+                        get = function()
+                            local c = UnitFrames.db.profile.misc.textColors and UnitFrames.db.profile.misc.textColors.health
+                            if c then return c[1], c[2], c[3] end
+                            return 0.66, 0.22, 0.22
+                        end,
+                        set = function(_, r, g, b)
+                            UnitFrames.db.profile.misc.textColors.health = {r, g, b}
+                            UnitFrames:RefreshUnits("TextColors")
+                        end,
+                    },
+                    healthTextColorReset = {
+                        name = "Reset Health Text Color",
+                        type = "execute",
+                        order = 62,
+                        func = function()
+                            UnitFrames.db.profile.misc.textColors.health = nil
+                            UnitFrames:RefreshUnits("TextColors")
+                        end,
+                    },
+                    powerTextColor = {
+                        name = "Power Text Color",
+                        type = "color",
+                        hasAlpha = false,
+                        order = 63,
+                        get = function()
+                            local c = UnitFrames.db.profile.misc.textColors and UnitFrames.db.profile.misc.textColors.power
+                            if c then return c[1], c[2], c[3] end
+                            return 1, 1, 1
+                        end,
+                        set = function(_, r, g, b)
+                            UnitFrames.db.profile.misc.textColors.power = {r, g, b}
+                            UnitFrames:RefreshUnits("TextColors")
+                        end,
+                    },
+                    powerTextColorReset = {
+                        name = "Reset Power Text Color",
+                        type = "execute",
+                        order = 64,
+                        func = function()
+                            UnitFrames.db.profile.misc.textColors.power = nil
+                            UnitFrames:RefreshUnits("TextColors")
+                        end,
+                    },
+                    nameTextColor = {
+                        name = "Name Text Color",
+                        type = "color",
+                        hasAlpha = false,
+                        order = 65,
+                        get = function()
+                            local c = UnitFrames.db.profile.misc.textColors and UnitFrames.db.profile.misc.textColors.name
+                            if c then return c[1], c[2], c[3] end
+                            return 1, 1, 1
+                        end,
+                        set = function(_, r, g, b)
+                            UnitFrames.db.profile.misc.textColors.name = {r, g, b}
+                            UnitFrames:RefreshUnits("TextColors")
+                        end,
+                    },
+                    nameTextColorReset = {
+                        name = "Reset Name Text Color",
+                        type = "execute",
+                        order = 66,
+                        func = function()
+                            UnitFrames.db.profile.misc.textColors.name = nil
+                            UnitFrames:RefreshUnits("TextColors")
+                        end,
+                    },
+                    -- Alternative Bar Style
+                    altBarStyleHeader = {
+                        name = "Bar Style",
+                        type = "header",
+                        order = 75,
+                    },
+                    alternativeBarStyle = {
+                        name = "Alternative Bar Style",
+                        desc = "Use a dark foreground that shrinks to reveal a colored background bar. When disabled, bars use the standard solid color fill.",
+                        type = "toggle",
+                        order = 76,
+                        get = function()
+                            return UnitFrames.db.profile.misc.alternativeBarStyle
+                        end,
+                        set = function(_, val)
+                            UnitFrames.db.profile.misc.alternativeBarStyle = val
+                            UnitFrames:RefreshUnits("AlternativeBarStyle")
+                        end,
+                    },
                 }
             },
             units = {
@@ -710,16 +932,39 @@ do -- UnitFrames
                 end,
             }
         end
-        if unitSlug == "target" then
+        if unitSlug == "player" then
+            unit.args.showPlayerBuffs = {
+                name = "Show Player Buffs",
+                type = "toggle",
+                order = 35,
+                get = function() return UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.showPlayerBuffs = val
+                    UnitFrames:RefreshUnits("PlayerAuras")
+                end,
+            }
             unit.args.buffCount = {
                 name = L["UnitFrames_BuffCount"],
                 type = "range",
                 min = 0, max = 40, step = 1,
+                order = 36,
+                disabled = function() return not UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                get = function() return UnitFrames.db.profile.units.player.buffCount end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.buffCount = val
+                    UnitFrames:RefreshUnits("PlayerAuras")
+                end,
+            }
+        end
+        if unitSlug == "target" then
+            unit.args.showTargetDebuffs = {
+                name = "Show Target Debuffs",
+                type = "toggle",
                 order = 35,
-                get = function() return UnitFrames.db.profile.units.target.buffCount end,
-                set = function(info, value)
-                    UnitFrames.db.profile.units.target.buffCount = value
-                    UnitFrames:RefreshUnits("BuffCount")
+                get = function() return UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.showTargetDebuffs = val
+                    UnitFrames:RefreshUnits("TargetAuras")
                 end,
             }
             unit.args.debuffCount = {
@@ -727,10 +972,33 @@ do -- UnitFrames
                 type = "range",
                 min = 0, max = 40, step = 1,
                 order = 36,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetDebuffs end,
                 get = function() return UnitFrames.db.profile.units.target.debuffCount end,
-                set = function(info, value)
-                    UnitFrames.db.profile.units.target.debuffCount = value
-                    UnitFrames:RefreshUnits("DebuffCount")
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.debuffCount = val
+                    UnitFrames:RefreshUnits("TargetAuras")
+                end,
+            }
+            unit.args.showTargetBuffs = {
+                name = "Show Target Buffs",
+                type = "toggle",
+                order = 37,
+                get = function() return UnitFrames.db.profile.units.target.showTargetBuffs end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.showTargetBuffs = val
+                    UnitFrames:RefreshUnits("TargetAuras")
+                end,
+            }
+            unit.args.buffCount = {
+                name = L["UnitFrames_BuffCount"],
+                type = "range",
+                min = 0, max = 40, step = 1,
+                order = 38,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
+                get = function() return UnitFrames.db.profile.units.target.buffCount end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.buffCount = val
+                    UnitFrames:RefreshUnits("TargetAuras")
                 end,
             }
         end
@@ -881,6 +1149,52 @@ do -- UnitFrames
                 set = function(info, value) UnitFrames.db.profile.boss.gap = value end,
                 order = 6,
             }
+            if groupSlug == "boss" then
+                args.showBossDebuffs = {
+                    name = "Show Boss Debuffs",
+                    type = "toggle",
+                    order = 10,
+                    get = function() return UnitFrames.db.profile.boss.showBossDebuffs end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.showBossDebuffs = val
+                        UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
+                args.debuffCount = {
+                    name = L["UnitFrames_DebuffCount"],
+                    type = "range",
+                    min = 0, max = 40, step = 1,
+                    order = 11,
+                    disabled = function() return not UnitFrames.db.profile.boss.showBossDebuffs end,
+                    get = function() return UnitFrames.db.profile.boss.debuffCount end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.debuffCount = val
+                        UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
+                args.showBossBuffs = {
+                    name = "Show Boss Buffs",
+                    type = "toggle",
+                    order = 12,
+                    get = function() return UnitFrames.db.profile.boss.showBossBuffs end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.showBossBuffs = val
+                        UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
+                args.buffCount = {
+                    name = L["UnitFrames_BuffCount"],
+                    type = "range",
+                    min = 0, max = 40, step = 1,
+                    order = 13,
+                    disabled = function() return not UnitFrames.db.profile.boss.showBossBuffs end,
+                    get = function() return UnitFrames.db.profile.boss.buffCount end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.buffCount = val
+                        UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
+            end
         end
     end
 end
