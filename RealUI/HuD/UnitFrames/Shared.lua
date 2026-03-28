@@ -329,10 +329,10 @@ local CreatePowerStatus do
         local inCombat = _G.UnitAffectingCombat(unit)
         local isResting = _G.IsResting()
 
-        -- UnitIsAFK returns a restricted (secret) boolean during combat lockdown
-        -- in instanced content; skip it in either case
+        -- UnitIsAFK returns a restricted (secret) boolean during combat lockdown;
+        -- guard on the player's lockdown state, not the unit's combat state
         local isAFK = false
-        if not inCombat and not _G.IsInInstance() then
+        if not _G.InCombatLockdown() then
             isAFK = _G.UnitIsAFK(unit)
         end
 
