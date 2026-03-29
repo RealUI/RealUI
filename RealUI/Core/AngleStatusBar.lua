@@ -158,16 +158,33 @@ local UpdateAngle do
         tex:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
     end
 
+    -- Prediction fills continue the parent bar's parallelogram slope.
+    -- All top vertices share one offset, all bottom vertices are at zero.
+    local function SetPredictionVertexOffset(tex, meta)
+        local topOffset
+        if meta.leftVertex % 2 == 1 then
+            topOffset = meta.minWidth
+        else
+            topOffset = -meta.minWidth
+        end
+        tex:SetVertexOffset(1, topOffset, 0)
+        tex:SetVertexOffset(2, 0, 0)
+        tex:SetVertexOffset(3, topOffset, 0)
+        tex:SetVertexOffset(4, 0, 0)
+    end
+
     function UpdateAngle(self)
-        if bars[self].minWidth <= 0 then
+        local mw = bars[self].minWidth
+        if _G.issecretvalue(mw) or mw <= 0 then
             return
         end
 
         local meta = bars[self]
         local minWidth = meta.minWidth
         if meta.regions then
+            local setOffset = meta.isPredictionWidget and SetPredictionVertexOffset or SetVertexOffset
             for index = 1, #meta.regions do
-                SetVertexOffset(meta.regions[index], meta)
+                setOffset(meta.regions[index], meta)
             end
         else
             SetVertexOffset(self, meta)
@@ -218,6 +235,10 @@ local UpdateAngle do
 end
 
 local function OnSizeChanged(self, width, height)
+    -- Layout engine can propagate secret taint through anchor chains
+    -- (e.g. prediction bars anchored to a health fill sized by secret values).
+    -- Ignore these callbacks; our explicit SetSize calls will fire non-secret ones.
+    if _G.issecretvalue(width) or _G.issecretvalue(height) then return end
     local meta = bars[self]
     meta.maxWidth = width
     meta.minWidth = height
@@ -454,9 +475,17 @@ function AngleStatusBarMixin:SetValue(value)
         return
     end
 
-    -- Non-secret value: ensure we're not in secret range mode
+    -- Non-secret value with secret range: the native engine has already
+    -- sized the fill correctly (e.g. prediction amount with secret max health).
+    -- Read back the computed width instead of using our Lua formula.
     if meta.hasSecretRange then
-        meta.hasSecretRange = false
+        local width = self.fill:GetWidth()
+        if not _G.issecretvalue(width) and width > 0.001 then
+            self.fill:SetShown(true)
+        else
+            self.fill:SetShown(false)
+        end
+        return
     end
 
     if type(meta.maxVal) == "number" and value > meta.maxVal then
@@ -585,6 +614,25 @@ local function CreateAngleStatusBar(name, parent)
     return bar
 end
 
+-- Lightweight StatusBar for prediction overlays (no background or borders)
+local function CreateAnglePredictionBar(name, parent)
+    local bar = _G.CreateFrame("StatusBar", name, parent)
+    bar:SetScript("OnSizeChanged", OnSizeChanged)
+
+    local fill = bar:CreateTexture(nil, "ARTWORK")
+    fill:SetPoint("TOP")
+    fill:SetPoint("BOTTOM")
+    fill:SetPoint("LEFT")
+    bar.fill = fill
+
+    local nativeSetTexture = _G.getmetatable(bar).__index.SetStatusBarTexture
+    if nativeSetTexture then
+        nativeSetTexture(bar, fill)
+    end
+
+    return bar
+end
+
 --[[ CreateAngle factory ]]--
 function AngleStatusBar:CreateAngle(frameType, name, parent)
     if frameType == "Texture" then
@@ -688,6 +736,39 @@ function AngleStatusBar:CreateAngle(frameType, name, parent)
             hasBG = true,
         }
         _G.tinsert(bars[bar].regions, bar.bg)
+        _G.tinsert(bars[bar].regions, bar.fill)
+
+        local parentMeta = bars[parent]
+        if parentMeta then
+            _G.tinsert(parentMeta.children, bar)
+            bar:SetAngleVertex(parentMeta.leftVertex, parentMeta.rightVertex)
+        end
+
+        return bar
+
+    elseif frameType == "Prediction" then
+        local bar = CreateAnglePredictionBar(name, parent)
+        _G.Mixin(bar, AngleStatusBarMixin)
+
+        bars[bar] = {
+            regions = {},
+            children = {},
+            fillColor = {},
+            bgColor = {},
+            borderColor = {},
+            minWidth = 0,
+            maxWidth = 0,
+            minVal = 0,
+            maxVal = 0,
+            leftVertex = 1,
+            rightVertex = 4,
+            smooth = false,
+            value = 0,
+            isReverseFill = false,
+            hasSecretRange = false,
+            hasBG = false,
+            isPredictionWidget = true,
+        }
         _G.tinsert(bars[bar].regions, bar.fill)
 
         local parentMeta = bars[parent]
