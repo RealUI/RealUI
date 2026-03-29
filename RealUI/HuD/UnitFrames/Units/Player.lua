@@ -104,6 +104,18 @@ UnitFrames.player = {
         dialog.RaidTargetIndicator:SetSize(20, 20)
         dialog.RaidTargetIndicator:SetPoint("BOTTOMLEFT", dialog, "TOPRIGHT", 10, 4)
 
+        --[[ Private Auras ]]--
+        local PrivateAuras = _G.CreateFrame("Frame", nil, dialog)
+        PrivateAuras:SetPoint("TOPLEFT", dialog, "BOTTOMLEFT", 10, -30)
+        PrivateAuras:SetSize(dialog:GetWidth(), 24)
+        PrivateAuras.size = 22
+        PrivateAuras.spacing = 2
+        PrivateAuras.initialAnchor = "BOTTOMLEFT"
+        PrivateAuras.growthX = "RIGHT"
+        PrivateAuras.growthY = "DOWN"
+        PrivateAuras.num = 6
+        dialog.PrivateAuras = PrivateAuras
+
         --[[ Class Resource ]]--
         RealUI:GetModule("ClassResource"):Setup(dialog, dialog.unit)
 
