@@ -2,6 +2,8 @@
 -- http://www.wowinterface.com/downloads/info17602-tullaCooldownCount.html
 local _, private = ...
 
+-- luacheck: globals _G
+
 -- Lua Globals --
 local next = _G.next
 
@@ -154,7 +156,8 @@ local function ShouldHaveTimer(cd)
     end
 
     local parent = cd:GetParent()
-    if parent.AutoCastShine then
+    local primaryCooldown = parent and (parent.cooldown or parent.Cooldown)
+    if parent and parent.AutoCastShine and primaryCooldown == cd then
         return true
     else
         ignore[cd] = true
