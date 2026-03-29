@@ -158,6 +158,36 @@ function UnitFrames:RefreshUnits(event)
                 end
             end
 
+            -- Toggle Private Auras
+            if frame._privateAurasFrame then
+                if db.misc.showPrivateAuras then
+                    if not frame.PrivateAuras then
+                        frame.PrivateAuras = frame._privateAurasFrame
+                        frame:EnableElement("PrivateAuras", frame.unit)
+                    end
+                else
+                    if frame.PrivateAuras then
+                        frame:DisableElement("PrivateAuras")
+                        frame.PrivateAuras = nil
+                    end
+                end
+            end
+
+            -- Toggle Health Prediction sub-widgets
+            if frame.Health then
+                local predictionWidgets = {"HealingAll", "DamageAbsorb", "HealAbsorb"}
+                for _, wn in ipairs(predictionWidgets) do
+                    local widget = frame.Health[wn]
+                    if widget then
+                        if db.misc.showPrediction then
+                            widget:Show()
+                        else
+                            widget:Hide()
+                        end
+                    end
+                end
+            end
+
             frame:UpdateAllElements(event)
         end
     end
@@ -402,6 +432,7 @@ function UnitFrames:OnInitialize()
                 statusText = "smart",
                 alwaysDisplayFullHealth = true,
                 showPrediction = true,
+                showPrivateAuras = true,
                 alternativeBarStyle = false,
                 textColors = {
                     health = nil,

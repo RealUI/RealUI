@@ -42,7 +42,10 @@ UnitFrames.target = {
         PrivateAuras.growthX = "LEFT"
         PrivateAuras.growthY = "DOWN"
         PrivateAuras.num = 6
-        dialog.PrivateAuras = PrivateAuras
+        dialog._privateAurasFrame = PrivateAuras
+        if db.misc.showPrivateAuras then
+            dialog.PrivateAuras = PrivateAuras
+        end
 
         -- Target Debuffs
         local debuffSize = 24

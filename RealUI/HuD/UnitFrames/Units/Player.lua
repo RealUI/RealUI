@@ -114,7 +114,10 @@ UnitFrames.player = {
         PrivateAuras.growthX = "RIGHT"
         PrivateAuras.growthY = "DOWN"
         PrivateAuras.num = 6
-        dialog.PrivateAuras = PrivateAuras
+        dialog._privateAurasFrame = PrivateAuras
+        if db.misc.showPrivateAuras then
+            dialog.PrivateAuras = PrivateAuras
+        end
 
         --[[ Class Resource ]]--
         RealUI:GetModule("ClassResource"):Setup(dialog, dialog.unit)
