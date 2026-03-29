@@ -32,6 +32,18 @@ UnitFrames.target = {
         dialog.Range.frequentUpdates = true
         dialog:Tag(dialog.Range, "[realui:range]")
 
+        --[[ Private Auras ]]--
+        local PrivateAuras = _G.CreateFrame("Frame", nil, dialog)
+        PrivateAuras:SetPoint("TOPRIGHT", dialog, "BOTTOMRIGHT", -10, -30)
+        PrivateAuras:SetSize(dialog:GetWidth(), 24)
+        PrivateAuras.size = 22
+        PrivateAuras.spacing = 2
+        PrivateAuras.initialAnchor = "BOTTOMRIGHT"
+        PrivateAuras.growthX = "LEFT"
+        PrivateAuras.growthY = "DOWN"
+        PrivateAuras.num = 6
+        dialog.PrivateAuras = PrivateAuras
+
         -- Target Debuffs
         local debuffSize = 24
         local debuffSpacing = 2
