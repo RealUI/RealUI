@@ -133,6 +133,48 @@ local function CreateHealthBar(parent, info, isAngled)
                 end)
             end)
         end
+
+        -- Health prediction sub-widgets
+        local isReverse = GetReverseFill(parent.unit, info)
+
+        local HealingAll = parent:CreateAngle("Prediction", nil, Health)
+        HealingAll:SetPoint("TOP", Health)
+        HealingAll:SetPoint("BOTTOM", Health)
+        if isReverse then
+            HealingAll:SetPoint("RIGHT", Health:GetStatusBarTexture(), "LEFT")
+            HealingAll:SetReverseFill(true)
+        else
+            HealingAll:SetPoint("LEFT", Health:GetStatusBarTexture(), "RIGHT")
+        end
+        HealingAll:SetWidth(Health:GetWidth())
+        HealingAll:SetStatusBarColor(0.0, 0.659, 0.608, 0.4)
+        Health.HealingAll = HealingAll
+
+        local DamageAbsorb = parent:CreateAngle("Prediction", nil, Health)
+        DamageAbsorb:SetPoint("TOP", Health)
+        DamageAbsorb:SetPoint("BOTTOM", Health)
+        if isReverse then
+            DamageAbsorb:SetPoint("RIGHT", HealingAll:GetStatusBarTexture(), "LEFT")
+            DamageAbsorb:SetReverseFill(true)
+        else
+            DamageAbsorb:SetPoint("LEFT", HealingAll:GetStatusBarTexture(), "RIGHT")
+        end
+        DamageAbsorb:SetWidth(Health:GetWidth())
+        DamageAbsorb:SetStatusBarColor(0.75, 0.75, 1.0, 0.35)
+        Health.DamageAbsorb = DamageAbsorb
+
+        local HealAbsorb = parent:CreateAngle("Prediction", nil, Health)
+        HealAbsorb:SetPoint("TOP", Health)
+        HealAbsorb:SetPoint("BOTTOM", Health)
+        if isReverse then
+            HealAbsorb:SetPoint("LEFT", Health:GetStatusBarTexture(), "LEFT")
+        else
+            HealAbsorb:SetPoint("RIGHT", Health:GetStatusBarTexture(), "RIGHT")
+            HealAbsorb:SetReverseFill(true)
+        end
+        HealAbsorb:SetWidth(Health:GetWidth())
+        HealAbsorb:SetStatusBarColor(0.6, 0.15, 0.15, 0.5)
+        Health.HealAbsorb = HealAbsorb
     else
         Health = _G.CreateFrame("StatusBar", nil, parent.overlay)
         Health:SetPoint("TOPLEFT", parent)
