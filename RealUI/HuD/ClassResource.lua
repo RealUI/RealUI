@@ -356,6 +356,7 @@ local classPowers = {
         token = "RUNES",
         max = 6
     },
+    HUNTER = {token = "TIP_OF_THE_SPEAR", max = 3},
     MAGE = {type = _G.Enum.PowerType.ArcaneCharges, token = "ARCANE_CHARGES"},
     MONK = {type = _G.Enum.PowerType.Chi, token = "CHI"},
     PALADIN = {
