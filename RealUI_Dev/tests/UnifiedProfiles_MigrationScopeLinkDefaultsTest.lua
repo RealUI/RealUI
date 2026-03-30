@@ -72,7 +72,6 @@ local function RunMigrationScopeLinkDefaultsTest()
         -- 1. Build a random set of Core profiles (1–6 profiles)
         local numProfiles = nextRandom(6)
         local profiles = {}
-        local profileNames = {}
 
         for _ = 1, numProfiles do
             local name = generateRandomProfileName()
@@ -98,7 +97,6 @@ local function RunMigrationScopeLinkDefaultsTest()
                 -- else: no scopeLinks — migration should add defaults
 
                 profiles[name] = profileData
-                profileNames[#profileNames + 1] = name
             end
         end
 
