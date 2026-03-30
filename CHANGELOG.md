@@ -1,3 +1,30 @@
+## [3.1.2] - 2026-03-30 ##
+### Summary ###
+HuD unit frames now support optional Private Auras beneath the player and target frames plus angled health prediction overlays for incoming heals, damage absorbs, and heal absorbs. Both features are configurable from the HuD options. Shaman Maelstrom handling has been restored for class resources and additional power, the Housing editor storage panel can now be repositioned, CooldownCount ignores auxiliary action button cooldown overlays, and Open Checked Mail no longer runs blacklist checks on currency attachments. Aurora is updated from 12.0.1.20 to 12.0.1.21, bringing new Blizzard housing, covenant calling, delve, and PvP match skins along with additional taint-safe widget and pooled-frame fixes.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora (12.0.1.21)
+
+### Added ###
+  * add: Private Auras on player and target unit frames, anchored beneath the frames with mirrored left/right growth
+  * add: angled health prediction overlays for incoming heals, damage absorbs, and heal absorbs using secret-taint-safe geometry
+  * add: HuD config toggles for showing Private Auras and health prediction overlays
+
+### Changed ###
+  * chg: DragEmAll can now move Blizzard_HouseEditor's StoragePanel
+  * chg: Aurora updated to 12.0.1.21 with new skins for Blizzard_CovenantCallings, Blizzard_DelvesDifficultyPicker, Blizzard_HousingControls, Blizzard_HousingTemplates, and PvP match results
+  * chg: Aurora expands pooled-frame skinning coverage and consolidates pooled acquisition helpers for safer shared skinning paths
+
+### Fixed ###
+  * fix: restore Shaman MAELSTROM support for class resource display and additional power color updates
+  * fix: guard AFK indicator updates against UnitIsAFK secret boolean taint during combat
+  * fix: CooldownCount now ignores auxiliary action button cooldown frames instead of attaching duplicate timers to them
+  * fix: Open Checked Mail no longer blacklists currency attachments as if they were item IDs
+
+
 ## [3.1.1] - 2026-03-25 ##
 ### Summary ###
 HuD unit frame enhancements: health/power values now display abbreviated numbers (101K, 1.97M) using the WoW AbbreviateNumbers API. An optional "Alternative Bar Style" replaces the default dark-red health fill with a dark foreground that shrinks to reveal a configurable red background for missing health. Custom text colors for health, power, and name tags are available via color pickers with reset-to-default. Aura display on player, target, and boss frames is now individually toggleable with configurable counts. Player health/power bars no longer appear grey on reload (secret value timing fix). ActionBars no longer crash when the positions table is missing for the current layout.
@@ -419,6 +446,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.2]: https://github.com/RealUI/RealUI/compare/3.1.1...3.1.2
 [3.1.1]: https://github.com/RealUI/RealUI/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/RealUI/RealUI/compare/3.0.10...3.1.0
 [3.0.10]: https://github.com/RealUI/RealUI/compare/3.0.9...3.0.10
