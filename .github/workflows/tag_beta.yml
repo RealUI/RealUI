@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dev
       - ptr
+      - ptr/**
       - beta
+      - beta/**
 
 jobs:
   check:
@@ -29,6 +30,8 @@ jobs:
         result-encoding: string
 
   tag:
+    needs: check
+    if: github.ref == 'refs/heads/ptr' || startsWith(github.ref, 'refs/heads/ptr/') || github.ref == 'refs/heads/beta' || startsWith(github.ref, 'refs/heads/beta/')
     runs-on: ubuntu-latest
 
     steps:
@@ -41,10 +44,52 @@ jobs:
         annotate: warning
 
     - name: Set beta
-      uses: onemedical/action-general-autotag@ff8cadef90081cba864a441fa70be1903cf3f101
+      uses: actions/github-script@v7
       with:
-        GITHUB_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
-        source_file: "nibRealUI/nibRealUI.toc"
-        extraction_regex: "\\s*##\\s*Version\\s*:\\s*(\\d+\\.\\d+\\.\\d+)"
-        tag_format: "{version}.${{ github.run_number }}-beta"
-        tag_message: "beta"
+        github-token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
+        script: |
+          const fs = require("fs")
+          const path = require("path")
+
+          const sourceFile = path.join(process.env.GITHUB_WORKSPACE, "nibRealUI", "nibRealUI.toc")
+          const source = fs.readFileSync(sourceFile, "utf8")
+          const match = source.match(/##\s*Version\s*:\s*(\d+\.\d+\.\d+)/)
+
+          if (!match) {
+            core.setFailed(`Unable to find addon version in ${sourceFile}`)
+            return
+          }
+
+          const version = match[1]
+          const tagName = `${version}.${context.runNumber}-beta`
+          const ref = `tags/${tagName}`
+          const { owner, repo } = context.repo
+
+          try {
+            await github.rest.git.getRef({ owner, repo, ref })
+            core.info(`Tag ${tagName} already exists; skipping creation.`)
+            return tagName
+          } catch (error) {
+            if (error.status !== 404) {
+              throw error
+            }
+          }
+
+          const tag = await github.rest.git.createTag({
+            owner,
+            repo,
+            tag: tagName,
+            message: "beta",
+            object: context.sha,
+            type: "commit",
+          })
+
+          await github.rest.git.createRef({
+            owner,
+            repo,
+            ref: `refs/tags/${tagName}`,
+            sha: tag.data.sha,
+          })
+
+          core.info(`Created beta tag ${tagName}`)
+          return tagName
