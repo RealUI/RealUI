@@ -151,10 +151,13 @@ function ClassResource:CreateClassPower(unitFrame, unit)
         self:debug("data", showUnused, hasPartial, hasChargedPoint)
 
         local color = element.__owner.colors.power[powerType]
-        local r, g, b = color[1], color[2], color[3]
+        local r, g, b
+        if color and color.GetRGB then
+            r, g, b = color:GetRGB()
+        end
         local mu = element[1].bg.multiplier
 
-        if lastChargedIndex and lastChargedIndex ~= chargedIndex then
+        if lastChargedIndex and lastChargedIndex ~= chargedIndex and r then
             element[lastChargedIndex].bg:SetVertexColor(r * mu, g * mu, b * mu)
             element[lastChargedIndex]:SetStatusBarColor(r, g, b)
         end
@@ -360,6 +363,7 @@ local classPowers = {
         token = "HOLY_POWER",
         max = 5
     },
+    SHAMAN = {token = "MAELSTROM", max = 10},
     WARLOCK = {type = _G.Enum.PowerType.SoulShards, token = "SOUL_SHARDS"},
     EVOKER = {type = _G.Enum.PowerType.Essence, token = "POWER_TYPE_ESSENCE"},
 }

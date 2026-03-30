@@ -99,6 +99,24 @@ local function FixCommunitiesFrame(point, anchor, relPoint, x, y)
 end
 FramePoint.FixCommunitiesFrame = FixCommunitiesFrame
 
+local function FixHouseEditorStoragePanel(point, anchor, relPoint, x, y)
+    local HouseEditorFrame = _G.HouseEditorFrame
+    local mover = _G.HouseEditorStoragePanelMover
+
+    if HouseEditorFrame.StoragePanel then
+        HouseEditorFrame.StoragePanel:ClearAllPoints()
+        HouseEditorFrame.StoragePanel:SetPoint(point, _G.UIParent, relPoint, x, y)
+    end
+
+    if HouseEditorFrame.StorageButton then
+        HouseEditorFrame.StorageButton:ClearAllPoints()
+        HouseEditorFrame.StorageButton:SetPoint(point, _G.UIParent, relPoint, x, y)
+    end
+
+    mover:Show()
+end
+FramePoint.FixHouseEditorStoragePanel = FixHouseEditorStoragePanel
+
 function FramePoint.OnDragStart(frame)
     LibWin.OnDragStart(frame)
     if frame.dragBG then
@@ -117,6 +135,9 @@ function FramePoint.OnDragStop(frame)
         end
         if frame:GetName() == "CommunitiesFrameMover" then
             FixCommunitiesFrame(point, anchor, relPoint, x, y)
+        end
+        if frame:GetName() == "HouseEditorStoragePanelMover" then
+            FixHouseEditorStoragePanel(point, anchor, relPoint, x, y)
         end
 
         RealUI.SetPixelPoint(frame)

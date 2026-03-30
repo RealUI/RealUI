@@ -66,8 +66,8 @@ function OpenCheckedMailMixin:AdvanceToNextItem()
     if checkboxes[self.mailIndex] then
         while ( not foundAttachment ) do
             local _, _, _, _, _, CODAmount = _G.GetInboxHeaderInfo(self.mailIndex)
-            local itemID = select(2, _G.GetInboxItem(self.mailIndex, self.attachmentIndex))
-            local hasBlacklistedItem = self:IsItemBlacklisted(itemID)
+            local _, itemID, _, _, _, _, isCurrency = _G.GetInboxItem(self.mailIndex, self.attachmentIndex)
+            local hasBlacklistedItem = (not isCurrency) and self:IsItemBlacklisted(itemID)
             local hasCOD = CODAmount and CODAmount > 0
             local hasMoneyOrItem = _G.C_Mail.HasInboxMoney(self.mailIndex) or _G.HasInboxItem(self.mailIndex, self.attachmentIndex)
             if ( not hasBlacklistedItem and not hasCOD and hasMoneyOrItem ) then

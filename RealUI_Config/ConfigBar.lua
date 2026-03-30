@@ -491,6 +491,28 @@ do -- UnitFrames
                         end,
                         order = 41,
                     },
+                    showPrediction = {
+                        name = "Health Prediction",
+                        desc = "Show incoming heals, damage absorbs and heal absorbs on health bars.",
+                        type = "toggle",
+                        get = function() return UnitFrames.db.profile.misc.showPrediction end,
+                        set = function(_, value)
+                            UnitFrames.db.profile.misc.showPrediction = value
+                            UnitFrames:RefreshUnits("HealthPrediction")
+                        end,
+                        order = 42,
+                    },
+                    showPrivateAuras = {
+                        name = "Private Auras",
+                        desc = "Show Blizzard private aura anchors below player and target frames (visible during certain boss encounters).",
+                        type = "toggle",
+                        get = function() return UnitFrames.db.profile.misc.showPrivateAuras end,
+                        set = function(_, value)
+                            UnitFrames.db.profile.misc.showPrivateAuras = value
+                            UnitFrames:RefreshUnits("PrivateAuras")
+                        end,
+                        order = 43,
+                    },
                     -- Health Bar Colors
                     healthBarHeader = {
                         name = "Health Bar Colors",

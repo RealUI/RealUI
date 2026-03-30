@@ -138,6 +138,10 @@ local addonFrames = {
         GuildBankFrame = {"GuildBankEmblemFrame"}
     },
     --Blizzard_GuildControlUI = {},
+    Blizzard_HouseEditor = {
+        HouseEditorStoragePanelMover = {"StoragePanel", "StorageButton"}
+    },
+
     Blizzard_HousingDashboard = {
         HousingDashboardFrame = {}
     },
@@ -273,6 +277,9 @@ function DragEmAll:HookFrame(frameName, children, force)
 
     for i, childName in next, children do
         local child = _G[childName] or frame[childName]
+        if not child and frameName == "HouseEditorStoragePanelMover" and _G.HouseEditorFrame then
+            child = _G.HouseEditorFrame[childName]
+        end
         if child then
             child:HookScript("OnMouseDown", function(this)
                 FramePoint.OnDragStart(frame)
@@ -322,6 +329,40 @@ function DragEmAll:HookFrame(frameName, children, force)
         _G.CommunitiesFrame:HookScript("OnHide", function()
             frame:Hide()
         end)
+    end
+    if frameName == "HouseEditorStoragePanelMover" then
+        local function UpdateHouseEditorStorageMover()
+            local houseEditorFrame = _G.HouseEditorFrame
+            local anchorFrame
+            if not houseEditorFrame then
+                frame:Hide()
+                return
+            end
+
+            if houseEditorFrame.StoragePanel and houseEditorFrame.StoragePanel:IsShown() then
+                anchorFrame = houseEditorFrame.StoragePanel
+            elseif houseEditorFrame.StorageButton and houseEditorFrame.StorageButton:IsShown() then
+                anchorFrame = houseEditorFrame.StorageButton
+            end
+
+            if anchorFrame then
+                frame:SetSize(anchorFrame:GetSize())
+                frame:Show()
+                FramePoint.FixHouseEditorStoragePanel(frame:GetPoint())
+            else
+                frame:Hide()
+            end
+        end
+
+        _G.HouseEditorFrame.StoragePanel:HookScript("OnShow", UpdateHouseEditorStorageMover)
+        _G.HouseEditorFrame.StoragePanel:HookScript("OnHide", UpdateHouseEditorStorageMover)
+        _G.HouseEditorFrame.StorageButton:HookScript("OnShow", UpdateHouseEditorStorageMover)
+        _G.HouseEditorFrame.StorageButton:HookScript("OnHide", UpdateHouseEditorStorageMover)
+        _G.HouseEditorFrame:HookScript("OnHide", function()
+            frame:Hide()
+        end)
+
+        UpdateHouseEditorStorageMover()
     end
 
     frames[frameName] = children
@@ -485,6 +526,17 @@ function DragEmAll:OnEnable()
     communitiesbg:SetAllPoints(CommunitiesFrameMover)
     communitiesbg:Hide()
     CommunitiesFrameMover.dragBG = bg
+
+    local HouseEditorStoragePanelMover = _G.CreateFrame("Frame", "HouseEditorStoragePanelMover", _G.UIParent)
+    HouseEditorStoragePanelMover:SetSize(100, 100)
+    HouseEditorStoragePanelMover:SetPoint("TOPLEFT")
+    HouseEditorStoragePanelMover:Hide()
+
+    local houseEditorBG = HouseEditorStoragePanelMover:CreateTexture(nil, "BACKGROUND")
+    houseEditorBG:SetColorTexture(1, 1, 1, 0.2)
+    houseEditorBG:SetAllPoints(HouseEditorStoragePanelMover)
+    houseEditorBG:Hide()
+    HouseEditorStoragePanelMover.dragBG = houseEditorBG
 
 
     -- Making the ColorPickerFrame itself draggable makes interacting with the
