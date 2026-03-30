@@ -31,6 +31,11 @@ local function CreateTotems(parent)
 
         Totems[index] = totem
     end
+
+    function Totems.PostUpdate(element, slot, haveTotem)
+        element[slot]:SetShown(haveTotem)
+    end
+
     parent.Totems = Totems
 end
 
