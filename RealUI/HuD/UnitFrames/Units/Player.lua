@@ -13,35 +13,19 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 local FramePoint = RealUI:GetModule("FramePoint")
 
 local function CreateTotems(parent)
-    -- DestroyTotem is protected, so we hack the default
-    local TotemFrame = _G.TotemFrame
-    TotemFrame:SetParent(parent.overlay)
-    _G.hooksecurefunc(TotemFrame, "Update", function()
-        TotemFrame:ClearAllPoints()
-        TotemFrame:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
-    end)
-    for totem in TotemFrame.totemPool:EnumerateActive() do
+    local Totems = {}
+    for index = 1, 4 do
+        local totem = _G.CreateFrame("Button", nil, parent)
         totem:SetSize(22, 22)
-        totem:ClearAllPoints()
-        totem:SetPoint("TOPLEFT", TotemFrame, totem.layoutIndex * (totem:GetWidth() + 3), 0)
+        totem:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10 + (index - 1) * 25, -4)
 
-        local bg = totem.Background
-        bg:SetPoint("TOPLEFT", -1, 1)
-        bg:SetPoint("BOTTOMRIGHT", 1, -1)
-        bg:SetColorTexture(0, 0, 0)
-
-        local dur = totem.duration
-        dur:Hide()
-        dur.Show = function() end
-
-        local icon = totem.Icon.Texture
-        icon:SetTexCoord(.08, .92, .08, .92)
-        icon:ClearAllPoints()
+        local icon = totem:CreateTexture(nil, "OVERLAY")
         icon:SetAllPoints()
+        totem.Icon = icon
 
-        local _, border = totem:GetChildren()
-        border:DisableDrawLayer("OVERLAY")
+        Totems[index] = totem
     end
+    parent.Totems = Totems
 end
 
 UnitFrames.player = {
