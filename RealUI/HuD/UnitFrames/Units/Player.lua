@@ -10,14 +10,20 @@ local RealUI = private.RealUI
 local db
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
+local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 
 local function CreateTotems(parent)
+    local container = _G.CreateFrame("Frame", nil, parent)
+    container:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
+    container:SetSize(4 * 22 + 3 * 3, 22) -- 4 icons * size + 3 gaps
+    CombatFader:RegisterFrameForFade("UnitFrames", container)
+
     local Totems = {}
     for index = 1, 4 do
-        local totem = _G.CreateFrame("Button", nil, parent)
+        local totem = _G.CreateFrame("Button", nil, container)
         totem:SetSize(22, 22)
-        totem:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10 + (index - 1) * 25, -4)
+        totem:SetPoint("TOPLEFT", container, "TOPLEFT", (index - 1) * 25, 0)
 
         local bg = totem:CreateTexture(nil, "BACKGROUND")
         bg:SetPoint("TOPLEFT", -1, 1)
@@ -28,6 +34,12 @@ local function CreateTotems(parent)
         icon:SetTexCoord(.08, .92, .08, .92)
         icon:SetAllPoints()
         totem.Icon = icon
+
+        local cooldown = _G.CreateFrame("Cooldown", nil, totem, "CooldownFrameTemplate")
+        cooldown:SetAllPoints()
+        cooldown:SetDrawEdge(false)
+        cooldown:SetDrawSwipe(true)
+        totem.Cooldown = cooldown
 
         Totems[index] = totem
     end
