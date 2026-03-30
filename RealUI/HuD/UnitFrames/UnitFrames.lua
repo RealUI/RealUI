@@ -603,5 +603,8 @@ function UnitFrames:OnEnable()
     oUF.colors.health = oUF:CreateColor(0.66, 0.22, 0.22)
     oUF.colors.power.MANA = RealUI.ColorDesaturate(0.1, oUF.colors.power.MANA)
     oUF.colors.power.MANA = RealUI.ColorShift(-0.07, oUF.colors.power.MANA)
+    -- Mute the new oUF 13.4.0 class-power colors to match RealUI's subdued palette
+    oUF.colors.power.ICICLES = RealUI.ColorDesaturate(0.15, oUF.colors.power.ICICLES)
+    oUF.colors.power.TIP_OF_THE_SPEAR = RealUI.ColorDesaturate(0.15, oUF.colors.power.TIP_OF_THE_SPEAR)
     self:InitializeLayout()
 end
