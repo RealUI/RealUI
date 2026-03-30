@@ -304,7 +304,7 @@ local function RunCoordinatedSwitchTest()
         end
 
         -- Execute coordinated switch
-        local success, switchedScopes, warnings = CoordinatedSwitchReplica(
+        local _, switchedScopes, warnings = CoordinatedSwitchReplica(
             coreDB, skinsDB, bt4Addon, bt4db, scopeLinks, targetProfile, charKey
         )
 
@@ -435,7 +435,6 @@ local function RunCoordinatedSwitchTest()
             end
             if not foundWarning then
                 failures = failures + 1
-                iterFailed = true
                 _G.print(("|cffff0000[FAIL]|r iter %d: No warning for missing BT4 profile '%s'"):format(
                     i, targetProfile))
             end

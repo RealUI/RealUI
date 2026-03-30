@@ -13,7 +13,6 @@ local RealUI = private.RealUI
 local db, ndb -- luacheck: ignore
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
-local AngleStatusBar = RealUI:GetModule("AngleStatusBar")
 local CombatFader = RealUI:GetModule("CombatFader")
 local round = RealUI.Round
 
@@ -223,9 +222,9 @@ local function CreateHealthBar(parent, info, isAngled)
 
             if db.misc.alternativeBarStyle then
                 -- Alternative style: dark foreground, red bg shows through missing health
-                local unitDB = db.units[unit] or {}
-                local hb = unitDB.healthBar or {}
-                local c = hb.foreground or {0.08, 0.08, 0.08}
+                local unitSettings = db.units[unit] or {}
+                local healthBarDB = unitSettings.healthBar or {}
+                local c = healthBarDB.foreground or {0.08, 0.08, 0.08}
                 element:SetStatusBarColor(c[1], c[2], c[3], 1.0)
             else
                 -- Default oUF color logic

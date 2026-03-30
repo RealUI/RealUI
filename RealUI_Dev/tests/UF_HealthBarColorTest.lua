@@ -51,10 +51,12 @@ local function RunHealthBarColorTest()
         local fgByClass = (nextRandom(2) == 1)
         local bgByClass = (nextRandom(2) == 1)
         local globalClassColor = (nextRandom(2) == 1)
-        local fgR, fgG, fgB = randomFloat(), randomFloat(), randomFloat()
+        randomFloat()
+        randomFloat()
+        randomFloat()
         local bgR, bgG, bgB = randomFloat(), randomFloat(), randomFloat()
-        local fgOpacity = randomFloat()
-        local bgOpacity = randomFloat()
+        randomFloat()
+        randomFloat()
 
         -- Verify colorClass flag logic
         local expectedColorClass = globalClassColor or fgByClass

@@ -284,7 +284,7 @@ local function RunCompletionMessageTest()
         end
 
         -- Execute coordinated switch
-        local success, message = CoordinatedSwitchWithMessage(
+        local _, message = CoordinatedSwitchWithMessage(
             coreDB, skinsDB, bt4Addon, bt4db, scopeLinks, targetProfile, charKey
         )
 

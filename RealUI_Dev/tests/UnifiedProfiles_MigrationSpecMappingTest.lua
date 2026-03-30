@@ -150,7 +150,6 @@ local function RunMigrationSpecMappingTest()
             for specIdx in _G.pairs(dbc.specProfiles) do
                 if not layoutSpec[specIdx] and not originalSpecProfiles[specIdx] then
                     failures = failures + 1
-                    iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: unexpected spec index %s appeared in specProfiles"):format(
                         i, _G.tostring(specIdx)))
                     break

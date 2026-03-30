@@ -149,20 +149,17 @@ local function RunMigrationScopeLinkDefaultsTest()
                 local data = profiles[name]
                 if type(data.scopeLinks) ~= "table" then
                     failures = failures + 1
-                    iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' lost its scopeLinks after migration"):format(i, name))
                     break
                 end
                 if data.scopeLinks.skins ~= origLinks.skins then
                     failures = failures + 1
-                    iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' scopeLinks.skins changed from %s to %s"):format(
                         i, name, _G.tostring(origLinks.skins), _G.tostring(data.scopeLinks.skins)))
                     break
                 end
                 if data.scopeLinks.bt4 ~= origLinks.bt4 then
                     failures = failures + 1
-                    iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' scopeLinks.bt4 changed from %s to %s"):format(
                         i, name, _G.tostring(origLinks.bt4), _G.tostring(data.scopeLinks.bt4)))
                     break

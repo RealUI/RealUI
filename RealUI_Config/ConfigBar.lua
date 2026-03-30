@@ -533,7 +533,6 @@ do -- UnitFrames
                         end,
                         set = function(_, r, g, b)
                             local db = UnitFrames.db.profile
-                            local color = {r, g, b}
                             for _, unitKey in next, {"player", "target", "boss"} do
                                 if db.units[unitKey] and db.units[unitKey].healthBar then
                                     db.units[unitKey].healthBar.foreground = {r, g, b}

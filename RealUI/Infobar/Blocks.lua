@@ -1002,7 +1002,7 @@ function Infobar:CreateBlocks()
                 errors = _G.BugGrabber:GetDB()
                 ShowBugIcon(block, "OnEnable", errors[#errors])
 
-                EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", function()
+                _G.EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", function()
                     errors = _G.BugGrabber:GetDB()
                     ShowBugIcon(block, "BugGrabber.BugGrabbed", errors[#errors])
                 end, block)

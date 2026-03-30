@@ -181,7 +181,6 @@ local function RunNewProfileDefaultsTest()
             for _, key in _G.ipairs(defaultKeys) do
                 if profileData[key] == nil then
                     failures = failures + 1
-                    iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: key '%s' became nil after merge"):format(
                         i, _G.tostring(key)))
                     break

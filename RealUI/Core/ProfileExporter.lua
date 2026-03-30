@@ -175,7 +175,7 @@ local function ParseHeader(header)
         return nil, "Header is not a string."
     end
 
-    local parts = {strsplit(HEADER_SEPARATOR, header)}
+    local parts = {_G.strsplit(HEADER_SEPARATOR, header)}
     if #parts < 4 then
         return nil, "Header has too few fields."
     end
@@ -200,7 +200,7 @@ local function ParseHeader(header)
         return nil, "Missing scopes in header."
     end
 
-    local scopes = {strsplit(HEADER_SCOPE_SEPARATOR, scopeStr)}
+    local scopes = {_G.strsplit(HEADER_SCOPE_SEPARATOR, scopeStr)}
     if #scopes == 0 then
         return nil, "No scopes found in header."
     end
@@ -375,8 +375,8 @@ function ProfileExporter:Import(encodedString, profileName)
     local currentVersion = GetVersion()
     if headerInfo.version ~= currentVersion then
         -- Parse both versions for comparison
-        local impParts = {strsplit(".", headerInfo.version)}
-        local curParts = {strsplit(".", currentVersion)}
+        local impParts = {_G.strsplit(".", headerInfo.version)}
+        local curParts = {_G.strsplit(".", currentVersion)}
         local isNewer = false
         for i = 1, 3 do
             local imp = tonumber(impParts[i]) or 0

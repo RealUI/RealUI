@@ -219,7 +219,6 @@ local function RunMigrationPreserveDataTest()
             local data = profiles[name]
             if not data then
                 failures = failures + 1
-                iterFailed = true
                 _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' disappeared after migration"):format(i, name))
                 break
             end

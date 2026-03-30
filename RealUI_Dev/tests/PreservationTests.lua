@@ -337,7 +337,7 @@ function PreserveTests.Test6_TargetBuffsAndPlayerElements()
             or "RealUITargetFrame.Buffs missing")
 
         if hasBuffs then
-            local point, relativeTo, relativePoint, xOfs, yOfs = targetFrame.Buffs:GetPoint(1)
+            local point, _, relativePoint, xOfs, yOfs = targetFrame.Buffs:GetPoint(1)
             local isAbove = point and (point:find("BOTTOM") ~= nil)
                 and relativePoint and (relativePoint:find("TOP") ~= nil)
             RecordResult(6, "Target Buffs anchored above", isAbove,

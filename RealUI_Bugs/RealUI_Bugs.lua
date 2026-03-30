@@ -310,7 +310,7 @@ function errorFrame.ADDON_LOADED(addon)
     end
 end
 
-EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", errorFrame.BugGrabber_BugGrabbed, errorFrame)
+_G.EventRegistry:RegisterCallback("BugGrabber.BugGrabbed", errorFrame.BugGrabber_BugGrabbed, errorFrame)
 errorFrame:RegisterEvent("ADDON_LOADED")
 errorFrame:RegisterEvent("LUA_WARNING")
 errorFrame:SetScript("OnEvent", function(dialog, event, ...)
