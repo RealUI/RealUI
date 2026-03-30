@@ -19,7 +19,13 @@ local function CreateTotems(parent)
         totem:SetSize(22, 22)
         totem:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10 + (index - 1) * 25, -4)
 
-        local icon = totem:CreateTexture(nil, "OVERLAY")
+        local bg = totem:CreateTexture(nil, "BACKGROUND")
+        bg:SetPoint("TOPLEFT", -1, 1)
+        bg:SetPoint("BOTTOMRIGHT", 1, -1)
+        bg:SetColorTexture(0, 0, 0)
+
+        local icon = totem:CreateTexture(nil, "BORDER")
+        icon:SetTexCoord(.08, .92, .08, .92)
         icon:SetAllPoints()
         totem.Icon = icon
 
