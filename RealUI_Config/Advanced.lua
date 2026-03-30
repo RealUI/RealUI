@@ -1045,18 +1045,6 @@ do -- Skins
     order = order + 1
 
     local SkinsDB = RealUI.GetOptions("Skins")
-    local function deepCopy(value)
-        if type(value) ~= "table" then
-            return value
-        end
-
-        local copy = {}
-        for key, nestedValue in next, value do
-            copy[key] = deepCopy(nestedValue)
-        end
-        return copy
-    end
-
     local function appGet(info)
         return SkinsDB.profile[info[#info]]
     end
