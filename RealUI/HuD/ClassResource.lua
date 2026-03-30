@@ -357,7 +357,7 @@ local classPowers = {
         max = 6
     },
     HUNTER = {token = "TIP_OF_THE_SPEAR", max = 3},
-    MAGE = {type = _G.Enum.PowerType.ArcaneCharges, token = "ARCANE_CHARGES"},
+    MAGE = {type = _G.Enum.PowerType.ArcaneCharges, token = "ARCANE_CHARGES", max = 5}, -- 4 for Arcane, 5 for Frost Icicles
     MONK = {type = _G.Enum.PowerType.Chi, token = "CHI"},
     PALADIN = {
         type = _G.Enum.PowerType.HolyPower,
