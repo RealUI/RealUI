@@ -1045,12 +1045,41 @@ do -- Skins
     order = order + 1
 
     local SkinsDB = RealUI.GetOptions("Skins")
+    local function deepCopy(value)
+        if type(value) ~= "table" then
+            return value
+        end
+
+        local copy = {}
+        for key, nestedValue in next, value do
+            copy[key] = deepCopy(nestedValue)
+        end
+        return copy
+    end
+
     local function appGet(info)
         return SkinsDB.profile[info[#info]]
     end
     local function appSet(info, value)
         SkinsDB.profile[info[#info]] = value
         RealUI:UpdateFrameStyle()
+    end
+
+    local function auroraGetValue(key, fallbackValue)
+        return RealUI.GetAuroraConfigValue(key, fallbackValue)
+    end
+
+    local function auroraSetValue(key, value)
+        RealUI.SetAuroraConfigValue(key, value)
+    end
+
+    local function auroraGetTable(key)
+        local profileTable, runtimeTable = RealUI.GetAuroraConfigTable(key)
+        return profileTable or runtimeTable
+    end
+
+    local function auroraSetTable(key, value)
+        RealUI.SetAuroraConfigTable(key, value)
     end
 
     local function fontGet(info)
@@ -1091,10 +1120,9 @@ do -- Skins
                 set = function(info, r, g, b)
                     color:SetRGB(r, g, b)
                     _G.CUSTOM_CLASS_COLORS:NotifyChanges()
-                    -- Sync to AuroraConfig so Aurora standalone picks up custom class colors
-                    _G.AuroraConfig = _G.AuroraConfig or {}
-                    _G.AuroraConfig.customClassColors = _G.AuroraConfig.customClassColors or {}
-                    _G.AuroraConfig.customClassColors[classToken] = {r = r, g = g, b = b}
+                    local customClassColors = auroraGetTable("customClassColors")
+                    customClassColors[classToken] = {r = r, g = g, b = b}
+                    auroraSetTable("customClassColors", customClassColors)
                 end,
             }
         end
@@ -1466,70 +1494,40 @@ do -- Skins
                         name = "Skin Bags",
                         desc = "Skin bag frames",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.bags
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.bags = value
-                        end,
+                        get = function() return auroraGetValue("bags", true) end,
+                        set = function(info, value) auroraSetValue("bags", value) end,
                         order = 1,
                     },
                     banks = {
                         name = "Skin Banks",
                         desc = "Skin bank frames",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.banks
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.banks = value
-                        end,
+                        get = function() return auroraGetValue("banks", true) end,
+                        set = function(info, value) auroraSetValue("banks", value) end,
                         order = 2,
                     },
                     chat = {
                         name = "Skin Chat",
                         desc = "Skin chat frames",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.chat
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.chat = value
-                        end,
+                        get = function() return auroraGetValue("chat", true) end,
+                        set = function(info, value) auroraSetValue("chat", value) end,
                         order = 3,
                     },
                     loot = {
                         name = "Skin Loot",
                         desc = "Skin loot frames",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.loot
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.loot = value
-                        end,
+                        get = function() return auroraGetValue("loot", true) end,
+                        set = function(info, value) auroraSetValue("loot", value) end,
                         order = 4,
                     },
                     mainmenubar = {
                         name = "Skin Main Menu Bar",
                         desc = "Skin main menu bar",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.mainmenubar
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.mainmenubar = value
-                        end,
+                        get = function() return auroraGetValue("mainmenubar", false) end,
+                        set = function(info, value) auroraSetValue("mainmenubar", value) end,
                         order = 5,
                     },
                     -- [Duplication Resolution] Font Replacement: This is AuroraConfig.fonts —
@@ -1542,56 +1540,32 @@ do -- Skins
                         desc = "Controls whether the skin engine replaces default UI fonts."
                             .. "\n\n|cffffcc00Note:|r This is separate from the font selectors under Fonts above, which choose which fonts to use. This toggle must be enabled for those font selections to take effect.",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.fonts
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.fonts = value
-                        end,
+                        get = function() return auroraGetValue("fonts", true) end,
+                        set = function(info, value) auroraSetValue("fonts", value) end,
                         order = 6,
                     },
                     tooltips = {
                         name = "Skin Tooltips",
                         desc = "Skin tooltip frames",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.tooltips
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.tooltips = value
-                        end,
+                        get = function() return auroraGetValue("tooltips", true) end,
+                        set = function(info, value) auroraSetValue("tooltips", value) end,
                         order = 7,
                     },
                     chatBubbles = {
                         name = "Skin Chat Bubbles",
                         desc = "Skin chat bubbles",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.chatBubbles
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.chatBubbles = value
-                        end,
+                        get = function() return auroraGetValue("chatBubbles", true) end,
+                        set = function(info, value) auroraSetValue("chatBubbles", value) end,
                         order = 8,
                     },
                     chatBubbleNames = {
                         name = "Show Chat Bubble Names",
                         desc = "Show names on chat bubbles",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.chatBubbleNames
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.chatBubbleNames = value
-                        end,
+                        get = function() return auroraGetValue("chatBubbleNames", true) end,
+                        set = function(info, value) auroraSetValue("chatBubbleNames", value) end,
                         order = 9,
                     },
                     characterSheet = {
@@ -1599,14 +1573,8 @@ do -- Skins
                         desc = "Skin the character sheet frame."
                             .. "\n\n|cff888888Disable when using addons like ChonkyCharacterSheet that replace the character sheet.|r",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.characterSheet
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.characterSheet = value
-                        end,
+                        get = function() return auroraGetValue("characterSheet", true) end,
+                        set = function(info, value) auroraSetValue("characterSheet", value) end,
                         order = 10,
                     },
                     objectiveTracker = {
@@ -1614,14 +1582,8 @@ do -- Skins
                         desc = "Skin the objective/quest tracker frame."
                             .. "\n\n|cff888888Disabling restores Blizzard's default tracker appearance.|r",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.objectiveTracker
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.objectiveTracker = value
-                        end,
+                        get = function() return auroraGetValue("objectiveTracker", true) end,
+                        set = function(info, value) auroraSetValue("objectiveTracker", value) end,
                         order = 11,
                     },
                 },
@@ -1641,14 +1603,8 @@ do -- Skins
                         name = "Button Gradient",
                         desc = "Use gradient on buttons",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.buttonsHaveGradient
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.buttonsHaveGradient = value
-                        end,
+                        get = function() return auroraGetValue("buttonsHaveGradient", true) end,
+                        set = function(info, value) auroraSetValue("buttonsHaveGradient", value) end,
                         order = 1,
                     },
                     talentArtBackground = {
@@ -1656,14 +1612,8 @@ do -- Skins
                         desc = "Show Blizzard's class-specific artwork behind the talent tree."
                             .. "\n\n|cff888888Disabling hides the artwork and shows Aurora's flat dark background.|r",
                         type = "toggle",
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.talentArtBackground
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.talentArtBackground = value
-                        end,
+                        get = function() return auroraGetValue("talentArtBackground", true) end,
+                        set = function(info, value) auroraSetValue("talentArtBackground", value) end,
                         order = 2,
                     },
                     customHighlightEnabled = {
@@ -1671,14 +1621,12 @@ do -- Skins
                         desc = "Use custom highlight color",
                         type = "toggle",
                         get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-                            return _G.AuroraConfig.customHighlight.enabled
+                            return auroraGetTable("customHighlight").enabled
                         end,
                         set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-                            _G.AuroraConfig.customHighlight.enabled = value
+                            local customHighlight = auroraGetTable("customHighlight")
+                            customHighlight.enabled = value
+                            auroraSetTable("customHighlight", customHighlight)
                         end,
                         order = 3,
                     },
@@ -1689,22 +1637,18 @@ do -- Skins
                         type = "color",
                         hasAlpha = false,
                         disabled = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-                            return not _G.AuroraConfig.customHighlight.enabled
+                            return not auroraGetTable("customHighlight").enabled
                         end,
                         get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-                            local ch = _G.AuroraConfig.customHighlight
+                            local ch = auroraGetTable("customHighlight")
                             return ch.r or 0, ch.g or 0, ch.b or 0
                         end,
                         set = function(info, r, g, b)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-                            _G.AuroraConfig.customHighlight.r = r
-                            _G.AuroraConfig.customHighlight.g = g
-                            _G.AuroraConfig.customHighlight.b = b
+                            local customHighlight = auroraGetTable("customHighlight")
+                            customHighlight.r = r
+                            customHighlight.g = g
+                            customHighlight.b = b
+                            auroraSetTable("customHighlight", customHighlight)
                         end,
                         order = 4,
                     },
@@ -1720,14 +1664,8 @@ do -- Skins
                         type = "range",
                         min = 0, max = 1, step = 0.05,
                         isPercent = true,
-                        get = function()
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            return _G.AuroraConfig.alpha or 1
-                        end,
-                        set = function(info, value)
-                            _G.AuroraConfig = _G.AuroraConfig or {}
-                            _G.AuroraConfig.alpha = value
-                        end,
+                        get = function() return auroraGetValue("alpha", 1) end,
+                        set = function(info, value) auroraSetValue("alpha", value) end,
                         order = 4,
                     },
                 },

@@ -14,6 +14,14 @@ local debug = private.debug
 local function CreateSystemsConfig()
     debug("Creating Systems Configuration")
 
+    local function auroraGetValue(key, fallbackValue)
+        return RealUI.GetAuroraConfigValue(key, fallbackValue)
+    end
+
+    local function auroraSetValue(key, value)
+        RealUI.SetAuroraConfigValue(key, value)
+    end
+
     local systemsConfig = {
         name = "Systems",
         type = "group",
@@ -234,16 +242,9 @@ local function CreateSystemsConfig()
                     width = "full",
                     values = gcModeValues,
                     sorting = { "smooth", "default", "combat" },
-                    get = function()
-                        if _G.AuroraConfig then
-                            return _G.AuroraConfig.gcMode or "smooth"
-                        end
-                        return "smooth"
-                    end,
+                    get = function() return auroraGetValue("gcMode", "smooth") end,
                     set = function(_, value)
-                        if _G.AuroraConfig then
-                            _G.AuroraConfig.gcMode = value
-                        end
+                        auroraSetValue("gcMode", value)
                         -- Apply immediately via Aurora's public API
                         if _G.Aurora and _G.Aurora.ApplyGCMode then
                             _G.Aurora.ApplyGCMode(value)

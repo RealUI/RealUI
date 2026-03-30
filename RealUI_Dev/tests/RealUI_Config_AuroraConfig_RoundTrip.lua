@@ -1,4 +1,5 @@
 local ADDON_NAME, ns = ... -- luacheck: ignore
+local RealUI = _G.RealUI
 
 -- Feature: realui-config-overhaul, Property 1: AuroraConfig round-trip consistency
 -- Validates: Requirements 1.2, 21.2, 22.1, 22.2, 22.3
@@ -57,72 +58,118 @@ end
 local FEATURE_KEYS = {
     "bags", "banks", "chat", "loot", "mainmenubar",
     "fonts", "tooltips", "chatBubbles", "chatBubbleNames",
+    "characterSheet", "objectiveTracker",
 }
 
 ---------------------------------------------------------------------------
 -- Build simulated get/set callbacks matching Advanced.lua patterns
 ---------------------------------------------------------------------------
 
+local function getRuntimeAuroraConfig()
+    _G.AuroraConfig = _G.AuroraConfig or {}
+    return _G.AuroraConfig
+end
+
+local function getAuroraValue(key, fallbackValue)
+    if RealUI and RealUI.GetAuroraConfigValue then
+        return RealUI.GetAuroraConfigValue(key, fallbackValue)
+    end
+
+    local auroraConfig = getRuntimeAuroraConfig()
+    if auroraConfig[key] == nil then
+        auroraConfig[key] = fallbackValue
+    end
+    return auroraConfig[key]
+end
+
+local function setAuroraValue(key, value)
+    if RealUI and RealUI.SetAuroraConfigValue then
+        RealUI.SetAuroraConfigValue(key, value)
+        return
+    end
+
+    getRuntimeAuroraConfig()[key] = value
+end
+
+local function getAuroraTable(key)
+    if RealUI and RealUI.GetAuroraConfigTable then
+        local profileTable, runtimeTable = RealUI.GetAuroraConfigTable(key)
+        return profileTable or runtimeTable
+    end
+
+    local auroraConfig = getRuntimeAuroraConfig()
+    auroraConfig[key] = auroraConfig[key] or {}
+    return auroraConfig[key]
+end
+
+local function setAuroraTable(key, value)
+    if RealUI and RealUI.SetAuroraConfigTable then
+        RealUI.SetAuroraConfigTable(key, value)
+        return
+    end
+
+    getRuntimeAuroraConfig()[key] = deepCopy(value)
+end
+
 -- Skin Features get/set (mirrors Advanced.lua skinFeatures group)
 local function featureGet(key)
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    return _G.AuroraConfig[key]
+    return getAuroraValue(key, true)
 end
 
 local function featureSet(key, value)
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig[key] = value
+    setAuroraValue(key, value)
 end
 
 -- Skin Style: buttonsHaveGradient
 local function gradientGet()
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    return _G.AuroraConfig.buttonsHaveGradient
+    return getAuroraValue("buttonsHaveGradient", true)
 end
 
 local function gradientSet(value)
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig.buttonsHaveGradient = value
+    setAuroraValue("buttonsHaveGradient", value)
+end
+
+-- Skin Style: talentArtBackground
+local function talentArtBackgroundGet()
+    return getAuroraValue("talentArtBackground", true)
+end
+
+local function talentArtBackgroundSet(value)
+    setAuroraValue("talentArtBackground", value)
 end
 
 -- Skin Style: customHighlight.enabled
 local function highlightEnabledGet()
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-    return _G.AuroraConfig.customHighlight.enabled
+    return getAuroraTable("customHighlight").enabled
 end
 
 local function highlightEnabledSet(value)
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-    _G.AuroraConfig.customHighlight.enabled = value
+    local customHighlight = getAuroraTable("customHighlight")
+    customHighlight.enabled = value
+    setAuroraTable("customHighlight", customHighlight)
 end
 
 -- Skin Style: customHighlight color (r, g, b)
 local function highlightColorGet()
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-    local ch = _G.AuroraConfig.customHighlight
+    local ch = getAuroraTable("customHighlight")
     return ch.r or 0, ch.g or 0, ch.b or 0
 end
 
 local function highlightColorSet(r, g, b)
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig.customHighlight = _G.AuroraConfig.customHighlight or {}
-    _G.AuroraConfig.customHighlight.r = r
-    _G.AuroraConfig.customHighlight.g = g
-    _G.AuroraConfig.customHighlight.b = b
+    local customHighlight = getAuroraTable("customHighlight")
+    customHighlight.r = r
+    customHighlight.g = g
+    customHighlight.b = b
+    setAuroraTable("customHighlight", customHighlight)
 end
 
 -- Skin Style: alpha (range 0-1)
 local function alphaGet()
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    return _G.AuroraConfig.alpha or 1
+    return getAuroraValue("alpha", 1)
 end
 
 local function alphaSet(value)
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    _G.AuroraConfig.alpha = value
+    setAuroraValue("alpha", value)
 end
 
 
@@ -134,8 +181,7 @@ local function RunRoundTripTest()
     local firstFailure = nil
 
     -- Snapshot original state
-    _G.AuroraConfig = _G.AuroraConfig or {}
-    local originalConfig = deepCopy(_G.AuroraConfig)
+    local originalConfig = deepCopy(getRuntimeAuroraConfig())
 
     for i = 1, ITERATIONS do
         -- Seed varies per iteration
@@ -164,6 +210,26 @@ local function RunRoundTripTest()
                 if not firstFailure then
                     firstFailure = ("Iter %d: Feature '%s' AuroraConfig[%s] = %s, expected %s"):format(
                         i, key, key, tostring(rawVal), tostring(testVal))
+                end
+            else
+                passed = passed + 1
+            end
+        end
+
+        ---------------------------------------------------------------
+        -- 1b) Skin Style: talentArtBackground (boolean)
+        ---------------------------------------------------------------
+        do
+            local testVal = randomBool()
+            talentArtBackgroundSet(testVal)
+            local readBack = talentArtBackgroundGet()
+            local rawVal = _G.AuroraConfig.talentArtBackground
+
+            if readBack ~= testVal or rawVal ~= testVal then
+                failed = failed + 1
+                if not firstFailure then
+                    firstFailure = ("Iter %d: talentArtBackground get=%s raw=%s expected=%s"):format(
+                        i, tostring(readBack), tostring(rawVal), tostring(testVal))
                 end
             else
                 passed = passed + 1
@@ -263,7 +329,7 @@ local function RunRoundTripTest()
     end
 
     -- Restore original AuroraConfig state
-    restoreTable(_G.AuroraConfig, originalConfig)
+    restoreTable(getRuntimeAuroraConfig(), originalConfig)
 
     return passed, failed, firstFailure
 end

@@ -23,6 +23,106 @@ private.debug = debug
 
 local scaleMessagePrinted = false
 
+local auroraConfigDefaults = {
+    acknowledgedSplashScreen = false,
+    bags = true,
+    banks = true,
+    chat = true,
+    loot = true,
+    mainmenubar = false,
+    fonts = true,
+    tooltips = true,
+    chatBubbles = true,
+    chatBubbleNames = true,
+    characterSheet = true,
+    objectiveTracker = true,
+    talentArtBackground = true,
+    buttonsHaveGradient = true,
+    customHighlight = {
+        enabled = false,
+        r = 0.243,
+        g = 0.570,
+        b = 1,
+    },
+    alpha = 0.5,
+    hasAnalytics = true,
+    customClassColors = {},
+    gcMode = "smooth",
+}
+
+local function DeepCopy(value)
+    if type(value) ~= "table" then
+        return value
+    end
+
+    local copy = {}
+    for key, nestedValue in next, value do
+        copy[key] = DeepCopy(nestedValue)
+    end
+    return copy
+end
+
+local function ApplyTableDefaults(target, defaultsTable)
+    for key, defaultValue in next, defaultsTable do
+        if target[key] == nil then
+            target[key] = DeepCopy(defaultValue)
+        elseif type(defaultValue) == "table" and type(target[key]) == "table" then
+            ApplyTableDefaults(target[key], defaultValue)
+        end
+    end
+end
+
+local function ReplaceTableContents(target, source)
+    for key in next, target do
+        target[key] = nil
+    end
+    for key, value in next, source do
+        target[key] = DeepCopy(value)
+    end
+end
+
+local function EnsureProfileAuroraConfig(profile)
+    local profileConfig = rawget(profile, "auroraConfig")
+    if type(profileConfig) ~= "table" then
+        if type(_G.AuroraConfig) == "table" then
+            profileConfig = DeepCopy(_G.AuroraConfig)
+            ApplyTableDefaults(profileConfig, auroraConfigDefaults)
+        else
+            profileConfig = DeepCopy(auroraConfigDefaults)
+        end
+        profile.auroraConfig = profileConfig
+    else
+        ApplyTableDefaults(profileConfig, auroraConfigDefaults)
+    end
+    return profileConfig
+end
+
+local function SyncRuntimeAuroraConfig(profile)
+    local profileConfig = EnsureProfileAuroraConfig(profile)
+
+    if type(_G.AuroraConfig) ~= "table" then
+        _G.AuroraConfig = {}
+    end
+
+    ReplaceTableContents(_G.AuroraConfig, profileConfig)
+    return profileConfig, _G.AuroraConfig
+end
+
+local function GetAuroraConfigStores()
+    if not private.skinsDB then
+        if type(_G.AuroraConfig) ~= "table" then
+            _G.AuroraConfig = {}
+        end
+        return nil, _G.AuroraConfig
+    end
+
+    local profileConfig = EnsureProfileAuroraConfig(private.skinsDB)
+    if type(_G.AuroraConfig) ~= "table" then
+        _G.AuroraConfig = {}
+    end
+    return profileConfig, _G.AuroraConfig
+end
+
 local defaults = {
     profile = {
         stripeAlpha = 0.5,
@@ -38,11 +138,71 @@ local defaults = {
         isHighRes = false,
         isPixelScale = true,
         fonts = fonts,
+        auroraConfig = auroraConfigDefaults,
         addons = {
             ["**"] = true
         }
     }
 }
+
+function RealUI.GetAuroraConfigValue(key, fallbackValue)
+    local profileConfig, runtimeConfig = GetAuroraConfigStores()
+    if profileConfig then
+        if profileConfig[key] == nil then
+            if auroraConfigDefaults[key] ~= nil then
+                profileConfig[key] = DeepCopy(auroraConfigDefaults[key])
+            else
+                profileConfig[key] = fallbackValue
+            end
+        end
+        runtimeConfig[key] = DeepCopy(profileConfig[key])
+        return profileConfig[key]
+    end
+
+    if runtimeConfig[key] == nil then
+        if auroraConfigDefaults[key] ~= nil then
+            runtimeConfig[key] = DeepCopy(auroraConfigDefaults[key])
+        else
+            runtimeConfig[key] = fallbackValue
+        end
+    end
+    return runtimeConfig[key]
+end
+
+function RealUI.SetAuroraConfigValue(key, value)
+    local profileConfig, runtimeConfig = GetAuroraConfigStores()
+    if profileConfig then
+        profileConfig[key] = DeepCopy(value)
+    end
+    runtimeConfig[key] = DeepCopy(value)
+end
+
+function RealUI.GetAuroraConfigTable(key)
+    local profileConfig, runtimeConfig = GetAuroraConfigStores()
+    local defaultValue = auroraConfigDefaults[key] or {}
+
+    if profileConfig then
+        if type(profileConfig[key]) ~= "table" then
+            profileConfig[key] = DeepCopy(defaultValue)
+        end
+        runtimeConfig[key] = DeepCopy(profileConfig[key])
+        return profileConfig[key], runtimeConfig[key]
+    end
+
+    if type(runtimeConfig[key]) ~= "table" then
+        runtimeConfig[key] = DeepCopy(defaultValue)
+    end
+    return nil, runtimeConfig[key]
+end
+
+function RealUI.SetAuroraConfigTable(key, value)
+    local copiedValue = DeepCopy(value)
+    local profileConfig, runtimeConfig = GetAuroraConfigStores()
+    if profileConfig then
+        profileConfig[key] = DeepCopy(copiedValue)
+    end
+    runtimeConfig[key] = copiedValue
+end
 
 RealUI.textures = private.textures
 
@@ -263,17 +423,21 @@ function private.OnLoad()
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
     skinsDB:RegisterCallback("OnProfileChanged", function(db)
         private.skinsDB = db.profile
+        SyncRuntimeAuroraConfig(private.skinsDB)
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileCopied", function(db)
         private.skinsDB = db.profile
+        SyncRuntimeAuroraConfig(private.skinsDB)
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileReset", function(db)
         private.skinsDB = db.profile
+        SyncRuntimeAuroraConfig(private.skinsDB)
         RealUI:ReloadUIDialog()
     end)
     private.skinsDB = skinsDB.profile
+    SyncRuntimeAuroraConfig(private.skinsDB)
 
     -- Set flags
     private.disabled.bags = true
