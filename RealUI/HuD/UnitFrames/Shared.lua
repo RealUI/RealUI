@@ -370,12 +370,10 @@ local CreatePowerStatus do
         local inCombat = _G.UnitAffectingCombat(unit)
         local isResting = _G.IsResting()
 
-        -- UnitIsAFK returns a restricted (secret) boolean during combat lockdown;
-        -- guard on the player's lockdown state, not the unit's combat state
-        local isAFK = false
-        if not _G.InCombatLockdown() then
-            isAFK = _G.UnitIsAFK(unit)
-        end
+        -- UnitIsAFK can return a secret boolean in tainted execution contexts;
+        -- check with issecretvalue before testing it
+        local isAFK = _G.UnitIsAFK(unit)
+        if _G.issecretvalue(isAFK) then isAFK = false end
 
         if isAFK then
             self.LeaderIndicator.status = "afk"
