@@ -13,6 +13,9 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 
+local TOTEM_PRIORITIES = _G.UnitClassBase and _G.UnitClassBase('player') == 'SHAMAN'
+    and _G.SHAMAN_TOTEM_PRIORITIES or _G.STANDARD_TOTEM_PRIORITIES
+
 local function CreateTotems(parent)
     local container = _G.CreateFrame("Frame", nil, parent)
     container:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, -4)
@@ -45,7 +48,7 @@ local function CreateTotems(parent)
     end
 
     function Totems.PostUpdate(element, slot, haveTotem)
-        element[slot]:SetShown(haveTotem)
+        element[TOTEM_PRIORITIES[slot]]:SetShown(haveTotem)
     end
 
     parent.Totems = Totems
