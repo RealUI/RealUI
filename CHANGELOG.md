@@ -1,3 +1,14 @@
+## [3.1.3] - 2026-03-30 ##
+### Summary ###
+Hotfix release for a single HuD unit frame bug: AFK status checks now safely handle Blizzard secret booleans in tainted execution contexts, preventing status indicator failures and related protected-value issues.
+
+### Modified AddOns ###
+  * RealUI
+
+### Fixed ###
+  * fix: guard HuD AFK indicator status checks with `issecretvalue` so `UnitIsAFK()` cannot leak a restricted boolean into tainted code paths
+
+
 ## [3.1.2] - 2026-03-30 ##
 ### Summary ###
 HuD unit frames now support optional Private Auras beneath the player and target frames plus angled health prediction overlays for incoming heals, damage absorbs, and heal absorbs. Both features are configurable from the HuD options. Shaman Maelstrom handling has been restored for class resources and additional power, the Housing editor storage panel can now be repositioned, CooldownCount ignores auxiliary action button cooldown overlays, and Open Checked Mail no longer runs blacklist checks on currency attachments. Aurora is updated from 12.0.1.20 to 12.0.1.21, bringing new Blizzard housing, covenant calling, delve, and PvP match skins along with additional taint-safe widget and pooled-frame fixes.
@@ -446,6 +457,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.3]: https://github.com/RealUI/RealUI/compare/3.1.2...3.1.3
 [3.1.2]: https://github.com/RealUI/RealUI/compare/3.1.1...3.1.2
 [3.1.1]: https://github.com/RealUI/RealUI/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/RealUI/RealUI/compare/3.0.10...3.1.0
