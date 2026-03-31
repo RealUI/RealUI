@@ -48,7 +48,11 @@ local function CreateTotems(parent)
     end
 
     function Totems.PostUpdate(element, slot, haveTotem)
-        element[TOTEM_PRIORITIES[slot]]:SetShown(haveTotem)
+        if haveTotem then
+            element[TOTEM_PRIORITIES[slot]]:Show()
+        else
+            element[TOTEM_PRIORITIES[slot]]:Hide()
+        end
     end
 
     parent.Totems = Totems
