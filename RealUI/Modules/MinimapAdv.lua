@@ -1023,10 +1023,20 @@ function MinimapAdv:FadeButtons()
             end
 
             MMFrames.buttonframe:Show()
+
+            local landingButton = _G.ExpansionLandingPageMinimapButton
+            if landingButton and landingButton:IsShown() then
+                fadeIn(landingButton)
+            end
         else
             MMFrames.buttonframe:Hide()
             MMFrames.tracking:Hide()
             MMFrames.farm:Hide()
+
+            local landingButton = _G.ExpansionLandingPageMinimapButton
+            if landingButton and not landingButton.shouldShow and not landingButton.mouseover then
+                fadeOut(landingButton)
+            end
         end
     end
 end
@@ -1256,14 +1266,10 @@ local function Garrison_OnEvent(self, event, ...)
     MinimapAdv:debug("Garrison_OnEvent", event, ...)
     MinimapAdv:debug("button has pulse", self.MinimapLoopPulseAnim:IsPlaying())
     if event == "GARRISON_SHOW_LANDING_PAGE" then
-        local alpha = self:GetAlpha()
-        -- This fires quite often, so only react when the frame is actually shown.
-        if _G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown() and alpha <= 1 then
+        -- This fires quite often, so only react when the landing page is actually open.
+        if _G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown() then
             MinimapAdv:debug("inLandingPage fadein")
             fadeIn(self)
-        elseif not self.shouldShow and alpha > 0 then
-            MinimapAdv:debug("outLandingPage fadeout")
-            fadeOut(self)
         else
             MinimapAdv:debug("notLandingPage")
             self.shouldShow = self.MinimapLoopPulseAnim:IsPlaying()
@@ -1277,14 +1283,16 @@ local function Garrison_OnEvent(self, event, ...)
 end
 local function Garrison_OnLeave(self)
     MinimapAdv:debug("Garrison_OnLeave")
-    if not (self.MinimapLoopPulseAnim:IsPlaying() and (_G.GarrisonLandingPage and _G.GarrisonLandingPage:IsShown())) then
-        self.shouldShow = false
+    self.mouseover = false
+    -- Only fade out if the minimap itself is also no longer hovered and no pulse is active.
+    if not _G.Minimap.mouseover and not self.shouldShow then
         fadeOut(self)
     end
 end
 local function Garrison_OnEnter(self)
     MinimapAdv:debug("Garrison_OnEnter")
     if not self.title then return end
+    self.mouseover = true
     local isLeft = (db.position and db.position.anchorto or "TOPLEFT"):find("LEFT")
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
@@ -1303,7 +1311,6 @@ local function Garrison_OnEnter(self)
         end
     end
     _G.GameTooltip:Show()
-    self.shouldShow = true
     fadeIn(self)
 end
 
@@ -1783,6 +1790,7 @@ local function SetUpMinimapFrame()
         landingButton:HookScript("OnLeave", Garrison_OnLeave)
         landingButton:SetScript("OnEnter", Garrison_OnEnter)
         landingButton.shouldShow = false
+        landingButton.mouseover = false
     end
 
     local queueStatusButton = _G.QueueStatusButton
