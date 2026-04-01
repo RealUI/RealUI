@@ -1,3 +1,33 @@
+## [3.1.4] - 2026-04-01 ##
+### Summary ###
+This release refreshes RealUI's HuD and skinning stack, updating Aurora from 12.0.1.21 to 12.0.1.23 and oUF to 13.4.1. Player totems now use oUF's native Totems element with RealUI styling, cooldown swipes, fade integration, safer visibility handling in tainted paths, and fixes for disappearing or empty-duration slots. HuD class resources and power colors now understand the newer declassified aura-backed power types used by the updated oUF, including Frost Icicles and Hunter Tip of the Spear. Aurora configuration handling inside RealUI has also been hardened so embedded Aurora settings persist and stay synchronized more reliably across reloads and profile usage, while Aurora 12.0.1.23 adds another round of tooltip, pool, and Adventure Map taint fixes.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora (12.0.1.23)
+  * oUF (13.4.1)
+
+### Added ###
+  * add: native oUF Totems support on the player frame with RealUI styling, cooldown swipes, and CombatFader integration
+  * add: HuD class resource support for Hunter Tip of the Spear and the expanded oUF 13.4.x declassified aura power set
+
+### Changed ###
+  * chg: update oUF to 13.4.1, bringing newer declassified aura power handling plus the follow-up totem fixes that landed after 13.4.0
+  * chg: expand Mage class resource handling to support up to 5 charges so Frost Icicles and Arcane Charges both fit the same HuD path
+  * chg: mute the new oUF 13.4.x Icicles and Tip of the Spear colors to match RealUI's subdued class-power palette
+  * chg: Aurora configuration access in RealUI config and skins now uses synchronized helpers so shared Aurora settings survive reloads and embedded usage more reliably
+
+### Fixed ###
+  * fix: player totems no longer pass secret `haveTotem` values into `SetShown()` in tainted execution paths
+  * fix: player totem widgets no longer disappear too quickly and now handle empty-duration slots correctly with the updated oUF totem behavior
+  * fix: restore garrison landing button hover visibility by removing an erroneous fade-out path in the minimap module
+  * fix: embedded Aurora no longer risks nil `AuroraConfig` access during startup/profile sync paths
+  * fix: Aurora 12.0.1.22 resolves a race condition in `VisitHouse`
+  * fix: Aurora 12.0.1.23 prevents delve tooltip hide taint from `GameTooltip_AddWidgetSet`, removes `titleFramePool` taint, and fixes an `AdventureMapFrame` pool-wrap nil error
+
+
 ## [3.1.3] - 2026-03-30 ##
 ### Summary ###
 Hotfix release for a single HuD unit frame bug: AFK status checks now safely handle Blizzard secret booleans in tainted execution contexts, preventing status indicator failures and related protected-value issues.
@@ -143,7 +173,6 @@ Reworked UI Scale strategy to be taint-safe. Engine scale (UIParent:SetScale) is
   * RealUI_Config
   * RealUI_Skins
   * Aurora (12.0.1.18)
-
 ### Changed ###
   * chg: UI Scale Strategy update
 
@@ -457,6 +486,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.4]: https://github.com/RealUI/RealUI/compare/3.1.3...3.1.4
 [3.1.3]: https://github.com/RealUI/RealUI/compare/3.1.2...3.1.3
 [3.1.2]: https://github.com/RealUI/RealUI/compare/3.1.1...3.1.2
 [3.1.1]: https://github.com/RealUI/RealUI/compare/3.1.0...3.1.1
