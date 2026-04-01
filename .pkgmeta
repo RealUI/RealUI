@@ -42,7 +42,7 @@ externals:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
     RealUI/Libs/oUF:
-        url: https://github.com/arnvid/oUF.git
+        url: https://github.com/oUF-wow/oUF.git
     RealUI_Config/Libs/AceConfig-3.0:
         url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
     RealUI_Config/Libs/AceDBOptions-3.0:
