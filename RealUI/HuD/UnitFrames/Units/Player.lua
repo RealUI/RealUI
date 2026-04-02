@@ -130,7 +130,7 @@ UnitFrames.player = {
         RealUI:GetModule("ClassResource"):Setup(dialog, dialog.unit)
 
         --[[ Player Buffs ]]--
-        local buffSize = 20
+        local buffSize = (db.units.player and db.units.player.buffSize) or 20
         local buffSpacing = 2
         local buffNum = (db.units.player and db.units.player.buffCount) or 16
         local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))

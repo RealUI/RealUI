@@ -128,6 +128,10 @@ function UnitFrames:RefreshUnits(event)
                 if frame.Debuffs then
                     if db.units.target.showTargetDebuffs then
                         frame.Debuffs.num = db.units.target.debuffCount
+                        if frame.Debuffs.size ~= db.units.target.debuffSize then
+                            frame.Debuffs.size = db.units.target.debuffSize
+                            frame.Debuffs:ForceUpdate()
+                        end
                         frame.Debuffs:Show()
                     else
                         frame.Debuffs.num = 0
@@ -137,6 +141,10 @@ function UnitFrames:RefreshUnits(event)
                 if frame.Buffs then
                     if db.units.target.showTargetBuffs then
                         frame.Buffs.num = db.units.target.buffCount
+                        if frame.Buffs.size ~= db.units.target.buffSize then
+                            frame.Buffs.size = db.units.target.buffSize
+                            frame.Buffs:ForceUpdate()
+                        end
                         frame.Buffs:Show()
                     else
                         frame.Buffs.num = 0
@@ -150,6 +158,10 @@ function UnitFrames:RefreshUnits(event)
                 if frame.Buffs then
                     if db.units.player.showPlayerBuffs then
                         frame.Buffs.num = db.units.player.buffCount
+                        if frame.Buffs.size ~= db.units.player.buffSize then
+                            frame.Buffs.size = db.units.player.buffSize
+                            frame.Buffs:ForceUpdate()
+                        end
                         frame.Buffs:Show()
                     else
                         frame.Buffs.num = 0
@@ -221,6 +233,10 @@ function UnitFrames:RefreshUnits(event)
             if frame.Debuffs then
                 if db.boss.showBossDebuffs then
                     frame.Debuffs.num = db.boss.debuffCount
+                    if frame.Debuffs.size ~= db.boss.debuffSize then
+                        frame.Debuffs.size = db.boss.debuffSize
+                        frame.Debuffs:ForceUpdate()
+                    end
                     frame.Debuffs:Show()
                 else
                     frame.Debuffs.num = 0
@@ -230,6 +246,10 @@ function UnitFrames:RefreshUnits(event)
             if frame.Buffs then
                 if db.boss.showBossBuffs then
                     frame.Buffs.num = db.boss.buffCount
+                    if frame.Buffs.size ~= db.boss.buffSize then
+                        frame.Buffs.size = db.boss.buffSize
+                        frame.Buffs:ForceUpdate()
+                    end
                     frame.Buffs:Show()
                 else
                     frame.Buffs.num = 0
@@ -461,6 +481,7 @@ function UnitFrames:OnInitialize()
                     reversePercent = false,
                     framePoint = {},
                     buffCount = 16,
+                    buffSize = 20,
                     showPlayerBuffs = true,
                     healthBar = {
                         foreground = {0.08, 0.08, 0.08},
@@ -478,7 +499,9 @@ function UnitFrames:OnInitialize()
                     reverseFill = false,
                     framePoint = {},
                     debuffCount = 16,
+                    debuffSize = 24,
                     buffCount = 16,
+                    buffSize = 20,
                     showTargetDebuffs = true,
                     showTargetBuffs = true,
                     healthBar = {
@@ -543,7 +566,9 @@ function UnitFrames:OnInitialize()
             boss = {
                 gap = 3,
                 debuffCount = 16,
+                debuffSize = 20,
                 buffCount = 16,
+                buffSize = 18,
                 showBossDebuffs = true,
                 showBossBuffs = true,
             },

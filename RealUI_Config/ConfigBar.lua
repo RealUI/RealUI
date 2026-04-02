@@ -976,6 +976,18 @@ do -- UnitFrames
                     UnitFrames:RefreshUnits("PlayerAuras")
                 end,
             }
+            unit.args.buffSize = {
+                name = L["UnitFrames_BuffSize"],
+                type = "range",
+                min = 10, max = 60, step = 1,
+                order = 37,
+                disabled = function() return not UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                get = function() return UnitFrames.db.profile.units.player.buffSize end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.buffSize = val
+                    UnitFrames:RefreshUnits("PlayerAuras")
+                end,
+            }
         end
         if unitSlug == "target" then
             unit.args.showTargetDebuffs = {
@@ -1000,10 +1012,22 @@ do -- UnitFrames
                     UnitFrames:RefreshUnits("TargetAuras")
                 end,
             }
+            unit.args.debuffSize = {
+                name = L["UnitFrames_DebuffSize"],
+                type = "range",
+                min = 10, max = 60, step = 1,
+                order = 37,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                get = function() return UnitFrames.db.profile.units.target.debuffSize end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.debuffSize = val
+                    UnitFrames:RefreshUnits("TargetAuras")
+                end,
+            }
             unit.args.showTargetBuffs = {
                 name = "Show Target Buffs",
                 type = "toggle",
-                order = 37,
+                order = 38,
                 get = function() return UnitFrames.db.profile.units.target.showTargetBuffs end,
                 set = function(_, val)
                     UnitFrames.db.profile.units.target.showTargetBuffs = val
@@ -1014,11 +1038,23 @@ do -- UnitFrames
                 name = L["UnitFrames_BuffCount"],
                 type = "range",
                 min = 0, max = 40, step = 1,
-                order = 38,
+                order = 39,
                 disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
                 get = function() return UnitFrames.db.profile.units.target.buffCount end,
                 set = function(_, val)
                     UnitFrames.db.profile.units.target.buffCount = val
+                    UnitFrames:RefreshUnits("TargetAuras")
+                end,
+            }
+            unit.args.buffSize = {
+                name = L["UnitFrames_BuffSize"],
+                type = "range",
+                min = 10, max = 60, step = 1,
+                order = 40,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
+                get = function() return UnitFrames.db.profile.units.target.buffSize end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.buffSize = val
                     UnitFrames:RefreshUnits("TargetAuras")
                 end,
             }
@@ -1193,10 +1229,22 @@ do -- UnitFrames
                         UnitFrames:RefreshUnits("BossAuras")
                     end,
                 }
+                args.debuffSize = {
+                    name = L["UnitFrames_DebuffSize"],
+                    type = "range",
+                    min = 10, max = 60, step = 1,
+                    order = 12,
+                    disabled = function() return not UnitFrames.db.profile.boss.showBossDebuffs end,
+                    get = function() return UnitFrames.db.profile.boss.debuffSize end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.debuffSize = val
+                        UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
                 args.showBossBuffs = {
                     name = "Show Boss Buffs",
                     type = "toggle",
-                    order = 12,
+                    order = 13,
                     get = function() return UnitFrames.db.profile.boss.showBossBuffs end,
                     set = function(_, val)
                         UnitFrames.db.profile.boss.showBossBuffs = val
@@ -1207,11 +1255,23 @@ do -- UnitFrames
                     name = L["UnitFrames_BuffCount"],
                     type = "range",
                     min = 0, max = 40, step = 1,
-                    order = 13,
+                    order = 14,
                     disabled = function() return not UnitFrames.db.profile.boss.showBossBuffs end,
                     get = function() return UnitFrames.db.profile.boss.buffCount end,
                     set = function(_, val)
                         UnitFrames.db.profile.boss.buffCount = val
+                        UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
+                args.buffSize = {
+                    name = L["UnitFrames_BuffSize"],
+                    type = "range",
+                    min = 10, max = 60, step = 1,
+                    order = 15,
+                    disabled = function() return not UnitFrames.db.profile.boss.showBossBuffs end,
+                    get = function() return UnitFrames.db.profile.boss.buffSize end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.buffSize = val
                         UnitFrames:RefreshUnits("BossAuras")
                     end,
                 }

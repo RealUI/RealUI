@@ -48,7 +48,7 @@ UnitFrames.target = {
         end
 
         -- Target Debuffs
-        local debuffSize = 24
+        local debuffSize = (db.units.target and db.units.target.debuffSize) or 24
         local debuffSpacing = 2
         local debuffNum = (db.units.target and db.units.target.debuffCount) or 16
         local debuffCols = _G.math.floor((dialog:GetWidth() + debuffSpacing) / (debuffSize + debuffSpacing))
@@ -70,7 +70,7 @@ UnitFrames.target = {
         dialog.Debuffs = Debuffs
 
         -- Target Buffs
-        local buffSize = 20
+        local buffSize = (db.units.target and db.units.target.buffSize) or 20
         local buffSpacing = 2
         local buffNum = (db.units.target and db.units.target.buffCount) or 16
         local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))
