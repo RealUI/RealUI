@@ -14,8 +14,6 @@ local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 
 local PLAYER_CLASS = _G.UnitClassBase and _G.UnitClassBase('player')
-local TOTEM_PRIORITIES = PLAYER_CLASS == 'SHAMAN'
-    and _G.SHAMAN_TOTEM_PRIORITIES or _G.STANDARD_TOTEM_PRIORITIES
 
 local function CreateTotems(parent)
     local container = _G.CreateFrame("Frame", nil, parent)
