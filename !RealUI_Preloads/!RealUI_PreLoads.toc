@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: The preload Blizzard Depencies essential core of RealUI and others
 ## Author: Hanshi
-## Version: 3.1.4
+## Version: 3.1.5
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
 ## LoadWith: Blizzard_CompactRaidFrames

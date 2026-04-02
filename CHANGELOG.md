@@ -1,3 +1,18 @@
+## [3.1.5] - 2026-04-02 ##
+### Summary ###
+Minor follow-up release for the recent HuD totem work. Player totems now only initialize for Shamans, avoiding unnecessary element setup on other classes. Aurora is updated from 12.0.1.23 to 12.0.1.24, bringing DelvesDifficultyPicker and QuestMapFrame taint-related skinning fixes.
+
+### Modified AddOns ###
+  * RealUI
+  * Aurora (12.0.1.24)
+
+### Changed ###
+  * chg: only create and load player totems for Shamans now that the oUF Totems element is enabled on the player frame
+
+### Fixed ###
+  * fix: Aurora 12.0.1.24 updates DelvesDifficultyPicker to use `DropdownButton` and stops skinning pooled QuestMapFrame title rows to avoid quest log tooltip taint
+
+
 ## [3.1.4] - 2026-04-01 ##
 ### Summary ###
 This release refreshes RealUI's HuD and skinning stack, updating Aurora from 12.0.1.21 to 12.0.1.23 and oUF to 13.4.1. Player totems now use oUF's native Totems element with RealUI styling, cooldown swipes, fade integration, safer visibility handling in tainted paths, and fixes for disappearing or empty-duration slots. HuD class resources and power colors now understand the newer declassified aura-backed power types used by the updated oUF, including Frost Icicles and Hunter Tip of the Spear. Aurora configuration handling inside RealUI has also been hardened so embedded Aurora settings persist and stay synchronized more reliably across reloads and profile usage, while Aurora 12.0.1.23 adds another round of tooltip, pool, and Adventure Map taint fixes.
@@ -486,6 +501,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.5]: https://github.com/RealUI/RealUI/compare/3.1.4...3.1.5
 [3.1.4]: https://github.com/RealUI/RealUI/compare/3.1.3...3.1.4
 [3.1.3]: https://github.com/RealUI/RealUI/compare/3.1.2...3.1.3
 [3.1.2]: https://github.com/RealUI/RealUI/compare/3.1.1...3.1.2
