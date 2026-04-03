@@ -102,7 +102,12 @@ local function GetBaseFontSize(timer)
 end
 
 function Timer:UpdateText()
-    local remain = self.enabled and (self.duration - (_G.GetTime() - self.start)) or 0
+    local ok, remain = _G.pcall(function()
+        return self.enabled and (self.duration - (_G.GetTime() - self.start)) or 0
+    end)
+    if not ok then
+        return self:Stop()
+    end
     if round(remain) > 0 then
         local text = self.text
         local formatStr, time, nextUpdate = getTimeText(remain)
@@ -126,7 +131,13 @@ function Timer:UpdateText()
 end
 
 function Timer:Start(start, duration, modRate)
-    if start > 0 and duration > db.minDuration then
+    -- In battlegrounds, Blizzard can pass tainted ("secret") number values
+    -- that cannot be used in arithmetic or comparisons by addon code.
+    -- Guard against this by wrapping the check in pcall.
+    local ok, shouldStart = _G.pcall(function()
+        return start and duration and start > 0 and duration > db.minDuration
+    end)
+    if ok and shouldStart then
         self.start = start
         self.duration = duration
         self.enabled = true
