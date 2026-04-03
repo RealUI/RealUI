@@ -84,17 +84,34 @@ local sizeAdjust = {
     {time = 10, adj = 4},
     {time = MINUTE, adj = 2},
 }
+
+local function GetBaseFontSize(timer)
+    local parent = timer:GetParent()
+    if not parent then
+        return CD_FONT.size, CD_FONT.size + sizeAdjust[1].adj
+    end
+
+    local shortestSide = _G.math.min(parent:GetWidth() or 0, parent:GetHeight() or 0)
+    if shortestSide <= 0 then
+        return CD_FONT.size, CD_FONT.size + sizeAdjust[1].adj
+    end
+
+    local baseSize = _G.math.min(CD_FONT.size, _G.math.max(6, _G.math.floor(shortestSide * 0.36 + 0.5)))
+    local maxSize = _G.math.max(baseSize, _G.math.floor(shortestSide * 0.44 + 0.5))
+    return baseSize, maxSize
+end
+
 function Timer:UpdateText()
     local remain = self.enabled and (self.duration - (_G.GetTime() - self.start)) or 0
     if round(remain) > 0 then
         local text = self.text
         local formatStr, time, nextUpdate = getTimeText(remain)
 
-        local size = CD_FONT.size
+        local size, maxSize = GetBaseFontSize(self)
         for i = 1, #sizeAdjust do
             local info = sizeAdjust[i]
             if remain < info.time then
-                size = size + info.adj
+                size = _G.math.min(size + info.adj, maxSize)
                 break
             end
         end
@@ -113,7 +130,8 @@ function Timer:Start(start, duration, modRate)
         self.start = start
         self.duration = duration
         self.enabled = true
-        self.text:SetFont(CD_FONT.font, CD_FONT.size, CD_FONT.flags)
+        local size = GetBaseFontSize(self)
+        self.text:SetFont(CD_FONT.font, size, CD_FONT.flags)
         self:UpdateText()
         self:Show()
     else
@@ -157,7 +175,7 @@ local function ShouldHaveTimer(cd)
 
     local parent = cd:GetParent()
     local primaryCooldown = parent and (parent.cooldown or parent.Cooldown)
-    if parent and parent.AutoCastShine and primaryCooldown == cd then
+    if parent and primaryCooldown == cd and (parent.AutoCastShine or parent.auraInstanceID) then
         return true
     else
         ignore[cd] = true
@@ -211,6 +229,9 @@ function CooldownCount:OnEnable()
 
     _G.hooksecurefunc(_G.getmetatable(_G["ActionButton1Cooldown"]).__index, "SetCooldown", function(cd, start, duration, modRate)
         if ShouldHaveTimer(cd) then
+            if cd.SetHideCountdownNumbers then
+                cd:SetHideCountdownNumbers(true)
+            end
             if not cd._timer then
                 cd._timer = CreateTimer(cd)
             end
