@@ -301,6 +301,20 @@ function Loot:InitializeGroupLoot()
     _G.GroupLootContainer:UnregisterAllEvents()
     _G.GroupLootContainer:Hide()
     _G.GroupLootContainer_AddRoll = function() end
+
+    -- After a /reload, re-populate from any still-active rolls that the
+    -- server remembers.  Blizzard's UIParent does this via
+    -- PLAYER_ENTERING_WORLD → GetActiveLootRollIDs → GroupLootContainer_AddRoll,
+    -- but we replaced that function above.
+    local pendingIDs = _G.GetActiveLootRollIDs and _G.GetActiveLootRollIDs()
+    if pendingIDs then
+        for i = 1, #pendingIDs do
+            _G.tinsert(grouplootlist, {rollId = pendingIDs[i]})
+        end
+        if #pendingIDs > 0 then
+            self:UpdateGroupLoot()
+        end
+    end
 end
 
 --------------
