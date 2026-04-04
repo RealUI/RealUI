@@ -1604,6 +1604,16 @@ do -- Skins
                         set = function(info, value) auroraSetValue("talentArtBackground", value) end,
                         order = 2,
                     },
+                    heroTalentsCustomAnchor = {
+                        name = "Hero Talents Custom Position",
+                        desc = "Use Aurora's alternate Hero Talents container position in the Talents frame."
+                            .. "\n\n|cff888888Disabled keeps Blizzard's default position.|r"
+                            .. "\n|cffffcc00Requires UI reload to take effect.|r",
+                        type = "toggle",
+                        get = function() return auroraGetValue("heroTalentsCustomAnchor", false) end,
+                        set = function(info, value) auroraSetValue("heroTalentsCustomAnchor", value) end,
+                        order = 3,
+                    },
                     customHighlightEnabled = {
                         name = "Custom Highlight",
                         desc = "Use custom highlight color",
@@ -1616,7 +1626,7 @@ do -- Skins
                             customHighlight.enabled = value
                             auroraSetTable("customHighlight", customHighlight)
                         end,
-                        order = 3,
+                        order = 4,
                     },
                     highlightColor = {
                         name = "Highlight Color",
@@ -1638,7 +1648,7 @@ do -- Skins
                             customHighlight.b = b
                             auroraSetTable("customHighlight", customHighlight)
                         end,
-                        order = 4,
+                        order = 5,
                     },
                     -- [Duplication Resolution] Frame Alpha: This is AuroraConfig.alpha —
                     -- Aurora's skinned element opacity. Distinct from SkinsDB.frameColor.a
@@ -1654,7 +1664,7 @@ do -- Skins
                         isPercent = true,
                         get = function() return auroraGetValue("alpha", 1) end,
                         set = function(info, value) auroraSetValue("alpha", value) end,
-                        order = 4,
+                        order = 6,
                     },
                 },
             },

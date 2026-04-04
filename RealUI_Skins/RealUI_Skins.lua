@@ -50,6 +50,14 @@ local auroraConfigDefaults = {
     gcMode = "smooth",
 }
 
+local auroraCharacterConfigDefaults = {
+    heroTalentsCustomAnchor = false,
+}
+
+local auroraCharacterScopedKeys = {
+    heroTalentsCustomAnchor = true,
+}
+
 local function DeepCopy(value)
     if type(value) ~= "table" then
         return value
@@ -97,14 +105,46 @@ local function EnsureProfileAuroraConfig(profile)
     return profileConfig
 end
 
+local function IsCharacterScopedAuroraKey(key)
+    return auroraCharacterScopedKeys[key] == true
+end
+
+local function EnsureCharacterAuroraConfig(charConfig, profileConfig)
+    local characterConfig = rawget(charConfig, "auroraConfig")
+    if type(characterConfig) ~= "table" then
+        characterConfig = {}
+        charConfig.auroraConfig = characterConfig
+    end
+
+    for key, defaultValue in next, auroraCharacterConfigDefaults do
+        if characterConfig[key] == nil then
+            if profileConfig and profileConfig[key] ~= nil then
+                characterConfig[key] = DeepCopy(profileConfig[key])
+            else
+                characterConfig[key] = DeepCopy(defaultValue)
+            end
+        end
+    end
+
+    return characterConfig
+end
+
 local function SyncRuntimeAuroraConfig(profile)
     local profileConfig = EnsureProfileAuroraConfig(profile)
+    local characterConfig = private.skinsCharDB and EnsureCharacterAuroraConfig(private.skinsCharDB, profileConfig) or nil
 
     if type(_G.AuroraConfig) ~= "table" then
         _G.AuroraConfig = {}
     end
 
     ReplaceTableContents(_G.AuroraConfig, profileConfig)
+    if characterConfig then
+        for key in next, auroraCharacterScopedKeys do
+            if characterConfig[key] ~= nil then
+                _G.AuroraConfig[key] = DeepCopy(characterConfig[key])
+            end
+        end
+    end
     return profileConfig, _G.AuroraConfig
 end
 
@@ -113,14 +153,15 @@ local function GetAuroraConfigStores()
         if type(_G.AuroraConfig) ~= "table" then
             _G.AuroraConfig = {}
         end
-        return nil, _G.AuroraConfig
+        return nil, _G.AuroraConfig, nil
     end
 
     local profileConfig = EnsureProfileAuroraConfig(private.skinsDB)
+    local characterConfig = private.skinsCharDB and EnsureCharacterAuroraConfig(private.skinsCharDB, profileConfig) or nil
     if type(_G.AuroraConfig) ~= "table" then
         _G.AuroraConfig = {}
     end
-    return profileConfig, _G.AuroraConfig
+    return profileConfig, _G.AuroraConfig, characterConfig
 end
 
 local defaults = {
@@ -142,11 +183,26 @@ local defaults = {
         addons = {
             ["**"] = true
         }
-    }
+    },
+    char = {
+        auroraConfig = auroraCharacterConfigDefaults,
+    },
 }
 
 function RealUI.GetAuroraConfigValue(key, fallbackValue)
-    local profileConfig, runtimeConfig = GetAuroraConfigStores()
+    local profileConfig, runtimeConfig, characterConfig = GetAuroraConfigStores()
+    if IsCharacterScopedAuroraKey(key) and characterConfig then
+        if characterConfig[key] == nil then
+            if auroraCharacterConfigDefaults[key] ~= nil then
+                characterConfig[key] = DeepCopy(auroraCharacterConfigDefaults[key])
+            else
+                characterConfig[key] = fallbackValue
+            end
+        end
+        runtimeConfig[key] = DeepCopy(characterConfig[key])
+        return characterConfig[key]
+    end
+
     if profileConfig then
         if profileConfig[key] == nil then
             if auroraConfigDefaults[key] ~= nil then
@@ -170,7 +226,13 @@ function RealUI.GetAuroraConfigValue(key, fallbackValue)
 end
 
 function RealUI.SetAuroraConfigValue(key, value)
-    local profileConfig, runtimeConfig = GetAuroraConfigStores()
+    local profileConfig, runtimeConfig, characterConfig = GetAuroraConfigStores()
+    if IsCharacterScopedAuroraKey(key) and characterConfig then
+        characterConfig[key] = DeepCopy(value)
+        runtimeConfig[key] = DeepCopy(value)
+        return
+    end
+
     if profileConfig then
         profileConfig[key] = DeepCopy(value)
     end
@@ -423,20 +485,24 @@ function private.OnLoad()
     local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
     skinsDB:RegisterCallback("OnProfileChanged", function(db)
         private.skinsDB = db.profile
+        private.skinsCharDB = db.char
         SyncRuntimeAuroraConfig(private.skinsDB)
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileCopied", function(db)
         private.skinsDB = db.profile
+        private.skinsCharDB = db.char
         SyncRuntimeAuroraConfig(private.skinsDB)
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileReset", function(db)
         private.skinsDB = db.profile
+        private.skinsCharDB = db.char
         SyncRuntimeAuroraConfig(private.skinsDB)
         RealUI:ReloadUIDialog()
     end)
     private.skinsDB = skinsDB.profile
+    private.skinsCharDB = skinsDB.char
     SyncRuntimeAuroraConfig(private.skinsDB)
 
     -- Set flags
