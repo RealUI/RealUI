@@ -1614,6 +1614,22 @@ do -- Skins
                         set = function(info, value) auroraSetValue("heroTalentsCustomAnchor", value) end,
                         order = 3,
                     },
+                    heroTalentsAnchorPreset = {
+                        name = "Hero Talents Anchor Preset",
+                        desc = "Choose a preset anchor position for the Hero Talents container."
+                            .. "\n\n|cffffcc00Requires UI reload to take effect.|r",
+                        type = "select",
+                        values = {
+                            default = "Balanced (50, -4)",
+                            left = "Shift Left (30, -4)",
+                            lower = "Lowered (50, -28)",
+                            compact = "Compact (38, -18)",
+                        },
+                        get = function() return auroraGetValue("heroTalentsAnchorPreset", "default") end,
+                        set = function(info, value) auroraSetValue("heroTalentsAnchorPreset", value) end,
+                        disabled = function() return not auroraGetValue("heroTalentsCustomAnchor", false) end,
+                        order = 4,
+                    },
                     customHighlightEnabled = {
                         name = "Custom Highlight",
                         desc = "Use custom highlight color",
@@ -1626,7 +1642,7 @@ do -- Skins
                             customHighlight.enabled = value
                             auroraSetTable("customHighlight", customHighlight)
                         end,
-                        order = 4,
+                        order = 5,
                     },
                     highlightColor = {
                         name = "Highlight Color",
@@ -1648,7 +1664,7 @@ do -- Skins
                             customHighlight.b = b
                             auroraSetTable("customHighlight", customHighlight)
                         end,
-                        order = 5,
+                        order = 6,
                     },
                     -- [Duplication Resolution] Frame Alpha: This is AuroraConfig.alpha —
                     -- Aurora's skinned element opacity. Distinct from SkinsDB.frameColor.a
@@ -1664,7 +1680,7 @@ do -- Skins
                         isPercent = true,
                         get = function() return auroraGetValue("alpha", 1) end,
                         set = function(info, value) auroraSetValue("alpha", value) end,
-                        order = 6,
+                        order = 7,
                     },
                 },
             },

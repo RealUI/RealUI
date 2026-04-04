@@ -52,10 +52,12 @@ local auroraConfigDefaults = {
 
 local auroraCharacterConfigDefaults = {
     heroTalentsCustomAnchor = false,
+    heroTalentsAnchorPreset = "default",
 }
 
 local auroraCharacterScopedKeys = {
     heroTalentsCustomAnchor = true,
+    heroTalentsAnchorPreset = true,
 }
 
 local function DeepCopy(value)
