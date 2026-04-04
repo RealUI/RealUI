@@ -91,8 +91,14 @@ local function GetBaseFontSize(timer)
         return CD_FONT.size, CD_FONT.size + sizeAdjust[1].adj
     end
 
-    local shortestSide = _G.math.min(parent:GetWidth() or 0, parent:GetHeight() or 0)
-    if shortestSide <= 0 then
+    -- GetWidth/GetHeight can return secret numbers on nameplate cooldown
+    -- frames (Blizzard secure context in BGs). Force arithmetic inside
+    -- pcall so secret values error there instead of leaking out.
+    local ok, shortestSide = _G.pcall(function()
+        local pw, ph = parent:GetWidth() or 0, parent:GetHeight() or 0
+        return _G.math.min(pw + 0, ph + 0)
+    end)
+    if not ok or not shortestSide or shortestSide <= 0 then
         return CD_FONT.size, CD_FONT.size + sizeAdjust[1].adj
     end
 
