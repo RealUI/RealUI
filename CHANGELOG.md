@@ -1,3 +1,20 @@
+## [3.1.6] - 2026-04-04 ##
+### Summary ###
+Bug-fix release addressing cooldown counter spam, loot roll issues, and oversized aura timers. Cooldown text no longer spams in dungeons and battlegrounds and is properly sized on unit frame buffs. Loot roll frames now re-populate after a reload and show correct transmog atlas textures instead of greed coin icons. Aurora is updated from 12.0.1.24 to 12.0.1.25, with tooltip taint fixes, NineSlice layout resolution, PVPMatchResults skinning work, and sanitized securecallfunction paths.
+
+### Modified AddOns ###
+  * RealUI
+  * Aurora (12.0.1.25)
+
+### Fixed ###
+  * fix: cooldown counter spam in dungeons and battlegrounds
+  * fix: protect against Timer update text with secret values
+  * fix: re-populate custom roll frames from GetActiveLootRollIDs after reload
+  * fix: use proper transmog atlas textures instead of greed coin icons on roll popup
+  * fix: oversized aura cooldown text on unit frame buffs
+  * fix: Aurora 12.0.1.25 resolves tooltip taint from NineSlice layout and GameTooltip_AddWidgetSet securecallfunction paths, sanitizes orderIndex after Setup calls, and wraps QuestMapLogTitleButton_OnEnter to prevent GetStringWidth secret number taint
+
+
 ## [3.1.5] - 2026-04-02 ##
 ### Summary ###
 Minor follow-up release for the recent HuD totem work. Player totems now only initialize for Shamans, avoiding unnecessary element setup on other classes. Aurora is updated from 12.0.1.23 to 12.0.1.24, bringing DelvesDifficultyPicker and QuestMapFrame taint-related skinning fixes.
@@ -501,6 +518,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.6]: https://github.com/RealUI/RealUI/compare/3.1.5...3.1.6
 [3.1.5]: https://github.com/RealUI/RealUI/compare/3.1.4...3.1.5
 [3.1.4]: https://github.com/RealUI/RealUI/compare/3.1.3...3.1.4
 [3.1.3]: https://github.com/RealUI/RealUI/compare/3.1.2...3.1.3
