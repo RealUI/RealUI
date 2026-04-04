@@ -1621,6 +1621,8 @@ do -- Skins
                         type = "select",
                         values = {
                             default = "Balanced (50, -4)",
+                            topcenter = "Top Centered (0, -4)",
+                            centercenter = "Center Centered (0, 0)",
                             left = "Shift Left (30, -4)",
                             lower = "Lowered (50, -28)",
                             compact = "Compact (38, -18)",
