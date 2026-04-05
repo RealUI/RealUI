@@ -1,3 +1,31 @@
+## [3.1.7] - 2026-04-05 ##
+### Summary ###
+Stability and feature release focused on login reliability, Hero Talent positioning, and aura layout customization. Startup profile/layout initialization has been overhauled to prevent first-login thrash, healer-profile race conditions, and early-frame nil errors. Hero Talents can now be repositioned via a config preset dropdown, and aura icons on the player and target unit frames are now configurable in position. Resource/performance monitoring is disabled by default for all existing profiles as a safety measure. Aurora is updated from 12.0.1.25 to 12.0.1.26, bringing backdrop alpha fixes, bag button skin restructuring, Hero Talent anchor presets, and Blizzard file-structure alignment.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora (12.0.1.26)
+
+### Added ###
+  * add: configurable aura layout positioning for player and target unit frames
+  * add: Hero Talents anchor preset dropdown to config with preset-based positioning
+  * add: optional HeroTalentsContainer custom re-anchor with default-off per-character behavior
+
+### Changed ###
+  * chg: additional tuning for heroTalentsAnchorPreset
+  * chg: force resource/performance monitoring off by default for all existing profiles (users can re-enable manually)
+
+### Fixed ###
+  * fix: debounce initial-spec sync to prevent login profile/layout thrash and healer profile race resetting Bartender and oUF on first load
+  * fix: throttle startup profile retries until ActionBars are initialized
+  * fix: defer RefreshMod until frames exist on early login
+  * fix: guard UnitFrames Shared against nil misc/units during UNIT_FACTION updates
+  * fix: harden ResourceManager timeout handling
+  * fix: Aurora 12.0.1.26 restores backdrop alpha transparency in SetBackdropColor, moves MainMenuBarBagButtons skin to its own addon, aligns TabSystemTemplates to the Blizzard restructure, and cleans up deprecated UIMenu code
+
+
 ## [3.1.6] - 2026-04-04 ##
 ### Summary ###
 Bug-fix release addressing cooldown counter spam, loot roll issues, and oversized aura timers. Cooldown text no longer spams in dungeons and battlegrounds and is properly sized on unit frame buffs. Loot roll frames now re-populate after a reload and show correct transmog atlas textures instead of greed coin icons. Aurora is updated from 12.0.1.24 to 12.0.1.25, with tooltip taint fixes, NineSlice layout resolution, PVPMatchResults skinning work, and sanitized securecallfunction paths.
