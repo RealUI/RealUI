@@ -51,18 +51,25 @@ UnitFrames.target = {
         local debuffSize = 24
         local debuffSpacing = 2
         local debuffNum = (db.units.target and db.units.target.debuffCount) or 16
-        local debuffCols = _G.math.floor((dialog:GetWidth() + debuffSpacing) / (debuffSize + debuffSpacing))
+        local debuffLayout = (db.units.target and db.units.target.auraLayout and db.units.target.auraLayout.debuffs) or {}
+        local debuffAnchor = debuffLayout.anchor or "TOPLEFT"
+        local debuffGrowthX = debuffLayout.growthX or "RIGHT"
+        local debuffGrowthY = debuffLayout.growthY or "UP"
+        local debuffMaxWidth = debuffLayout.maxWidth or 0
+        local debuffFrameWidth = (debuffMaxWidth > 0 and debuffMaxWidth) or dialog:GetWidth()
+        local debuffCols = _G.math.floor((debuffFrameWidth + debuffSpacing) / (debuffSize + debuffSpacing))
         local debuffRows = _G.math.ceil(debuffNum / _G.math.max(debuffCols, 1))
 
         local Debuffs = _G.CreateFrame("Frame", nil, dialog)
-        Debuffs:SetPoint("BOTTOMLEFT", dialog, "TOPLEFT", 0, 20)
-        Debuffs:SetSize(dialog:GetWidth(), debuffRows * (debuffSize + debuffSpacing))
+
+        Debuffs:SetSize(debuffFrameWidth, debuffRows * (debuffSize + debuffSpacing))
         Debuffs.num = debuffNum
         Debuffs.size = debuffSize
         Debuffs.spacing = debuffSpacing
-        Debuffs.initialAnchor = "BOTTOMLEFT"
-        Debuffs.growthX = "RIGHT"
-        Debuffs.growthY = "UP"
+        Debuffs.initialAnchor = UnitFrames.GetInitialAnchor(debuffGrowthX, debuffGrowthY)
+        UnitFrames.SetAuraPosition(Debuffs, dialog, debuffAnchor, Debuffs.initialAnchor)
+        Debuffs.growthX = debuffGrowthX
+        Debuffs.growthY = debuffGrowthY
         Debuffs.PostCreateButton = function(_, button)
             Base.CropIcon(button.Icon, button)
             button.Count:SetFontObject("NumberFont_Outline_Med")
@@ -73,18 +80,25 @@ UnitFrames.target = {
         local buffSize = 20
         local buffSpacing = 2
         local buffNum = (db.units.target and db.units.target.buffCount) or 16
-        local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))
+        local buffLayout = (db.units.target and db.units.target.auraLayout and db.units.target.auraLayout.buffs) or {}
+        local buffAnchor = buffLayout.anchor or "TOPRIGHT"
+        local buffGrowthX = buffLayout.growthX or "LEFT"
+        local buffGrowthY = buffLayout.growthY or "UP"
+        local buffMaxWidth = buffLayout.maxWidth or 0
+        local buffFrameWidth = (buffMaxWidth > 0 and buffMaxWidth) or dialog:GetWidth()
+        local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
         local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
 
         local Buffs = _G.CreateFrame("Frame", nil, dialog)
-        Buffs:SetPoint("BOTTOMRIGHT", dialog, "TOPRIGHT", 0, 20)
-        Buffs:SetSize(dialog:GetWidth(), buffRows * (buffSize + buffSpacing))
+
+        Buffs:SetSize(buffFrameWidth, buffRows * (buffSize + buffSpacing))
         Buffs.num = buffNum
         Buffs.size = buffSize
         Buffs.spacing = buffSpacing
-        Buffs.initialAnchor = "BOTTOMRIGHT"
-        Buffs.growthX = "LEFT"
-        Buffs.growthY = "UP"
+        Buffs.initialAnchor = UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY)
+        UnitFrames.SetAuraPosition(Buffs, dialog, buffAnchor, Buffs.initialAnchor)
+        Buffs.growthX = buffGrowthX
+        Buffs.growthY = buffGrowthY
         Buffs.PostCreateButton = function(_, button)
             Base.CropIcon(button.Icon, button)
             button.Count:SetFontObject("NumberFont_Outline_Med")

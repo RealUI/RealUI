@@ -16,6 +16,30 @@ local refreshRetryPending = false
 
 UnitFrames.units = {}
 
+-- Maps position anchor to {dialog-side anchor, offsetX, offsetY}
+local auraPositionMap = {
+    TOPLEFT = {"TOPLEFT", 0, 20},
+    TOPRIGHT = {"TOPRIGHT", 0, 20},
+    BOTTOMLEFT = {"BOTTOMLEFT", 0, -20},
+    BOTTOMRIGHT = {"BOTTOMRIGHT", 0, -20},
+    LEFT = {"LEFT", -10, 0},
+    RIGHT = {"RIGHT", 10, 0},
+    LEFTTOP = {"TOPLEFT", -10, 0},
+    LEFTBOTTOM = {"BOTTOMLEFT", -10, 0},
+    RIGHTTOP = {"TOPRIGHT", 10, 0},
+    RIGHTBOTTOM = {"BOTTOMRIGHT", 10, 0},
+}
+
+function UnitFrames.GetInitialAnchor(growthX, growthY)
+    return ((growthY == "DOWN") and "TOP" or "BOTTOM") .. ((growthX == "LEFT") and "RIGHT" or "LEFT")
+end
+
+function UnitFrames.SetAuraPosition(auraFrame, parent, posAnchor, initialAnchor)
+    local pos = auraPositionMap[posAnchor] or auraPositionMap.TOPLEFT
+    auraFrame:ClearAllPoints()
+    auraFrame:SetPoint(initialAnchor, parent, pos[1], pos[2], pos[3])
+end
+
 local units = {
     "Player",
     "Target",
@@ -134,6 +158,26 @@ function UnitFrames:RefreshUnits(event)
                         frame.Debuffs.num = 0
                         frame.Debuffs:Hide()
                     end
+
+                    -- Update debuff layout from config
+                    local debuffLayout = db.units.target.auraLayout and db.units.target.auraLayout.debuffs
+                    if debuffLayout then
+                        if debuffLayout.growthX then frame.Debuffs.growthX = debuffLayout.growthX end
+                        if debuffLayout.growthY then frame.Debuffs.growthY = debuffLayout.growthY end
+                        frame.Debuffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Debuffs.growthX or "RIGHT", frame.Debuffs.growthY or "UP")
+                        UnitFrames.SetAuraPosition(frame.Debuffs, frame, debuffLayout.anchor or "TOPLEFT", frame.Debuffs.initialAnchor)
+                        -- Update frame size based on maxWidth
+                        if debuffLayout.maxWidth then
+                            local debuffSize = frame.Debuffs.size or 24
+                            local debuffSpacing = frame.Debuffs.spacing or 2
+                            local debuffFrameWidth = (debuffLayout.maxWidth > 0 and debuffLayout.maxWidth) or frame:GetWidth()
+                            local debuffCols = _G.math.floor((debuffFrameWidth + debuffSpacing) / (debuffSize + debuffSpacing))
+                            local debuffRows = _G.math.ceil(frame.Debuffs.num / _G.math.max(debuffCols, 1))
+                            frame.Debuffs:SetWidth(debuffFrameWidth)
+                            frame.Debuffs:SetHeight(debuffRows * (debuffSize + debuffSpacing))
+                        end
+                        frame.Debuffs:ForceUpdate()
+                    end
                 end
                 if frame.Buffs then
                     if db.units.target.showTargetBuffs then
@@ -142,6 +186,25 @@ function UnitFrames:RefreshUnits(event)
                     else
                         frame.Buffs.num = 0
                         frame.Buffs:Hide()
+                    end
+
+                    -- Update buff layout from config
+                    local buffLayout = db.units.target.auraLayout and db.units.target.auraLayout.buffs
+                    if buffLayout then
+                        if buffLayout.growthX then frame.Buffs.growthX = buffLayout.growthX end
+                        if buffLayout.growthY then frame.Buffs.growthY = buffLayout.growthY end
+                        frame.Buffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Buffs.growthX or "LEFT", frame.Buffs.growthY or "UP")
+                        UnitFrames.SetAuraPosition(frame.Buffs, frame, buffLayout.anchor or "TOPRIGHT", frame.Buffs.initialAnchor)
+                        if buffLayout.maxWidth then
+                            local buffSize = frame.Buffs.size or 20
+                            local buffSpacing = frame.Buffs.spacing or 2
+                            local buffFrameWidth = (buffLayout.maxWidth > 0 and buffLayout.maxWidth) or frame:GetWidth()
+                            local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
+                            local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
+                            frame.Buffs:SetWidth(buffFrameWidth)
+                            frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
+                        end
+                        frame.Buffs:ForceUpdate()
                     end
                 end
             end
@@ -155,6 +218,24 @@ function UnitFrames:RefreshUnits(event)
                     else
                         frame.Buffs.num = 0
                         frame.Buffs:Hide()
+                    end
+
+                    local buffLayout = db.units.player.auraLayout and db.units.player.auraLayout.buffs
+                    if buffLayout then
+                        if buffLayout.growthX then frame.Buffs.growthX = buffLayout.growthX end
+                        if buffLayout.growthY then frame.Buffs.growthY = buffLayout.growthY end
+                        frame.Buffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Buffs.growthX or "RIGHT", frame.Buffs.growthY or "UP")
+                        UnitFrames.SetAuraPosition(frame.Buffs, frame, buffLayout.anchor or "TOPLEFT", frame.Buffs.initialAnchor)
+                        if buffLayout.maxWidth then
+                            local buffSize = frame.Buffs.size or 20
+                            local buffSpacing = frame.Buffs.spacing or 2
+                            local buffFrameWidth = (buffLayout.maxWidth > 0 and buffLayout.maxWidth) or frame:GetWidth()
+                            local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
+                            local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
+                            frame.Buffs:SetWidth(buffFrameWidth)
+                            frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
+                        end
+                        frame.Buffs:ForceUpdate()
                     end
                 end
             end
@@ -277,7 +358,7 @@ UnitFrames.steppoints = {
 
 local unitGroups = {
     Arena = 5,
-    Boss = 5
+    Boss = 5,
 }
 function RealUI:DemoUnitGroup(unitType, toggle)
     local baseName = "RealUI" .. unitType .. "Frame"
@@ -478,6 +559,14 @@ function UnitFrames:OnInitialize()
                     framePoint = {},
                     buffCount = 16,
                     showPlayerBuffs = true,
+                    auraLayout = {
+                        buffs = {
+                            anchor = "TOPLEFT",
+                            growthX = "RIGHT",
+                            growthY = "UP",
+                            maxWidth = 0,
+                        },
+                    },
                     healthBar = {
                         foreground = {0.08, 0.08, 0.08},
                         foregroundOpacity = 0.8,
@@ -497,6 +586,20 @@ function UnitFrames:OnInitialize()
                     buffCount = 16,
                     showTargetDebuffs = true,
                     showTargetBuffs = true,
+                    auraLayout = {
+                        debuffs = {
+                            anchor = "TOPLEFT",
+                            growthX = "RIGHT",
+                            growthY = "UP",
+                            maxWidth = 0,
+                        },
+                        buffs = {
+                            anchor = "TOPRIGHT",
+                            growthX = "LEFT",
+                            growthY = "UP",
+                            maxWidth = 0,
+                        },
+                    },
                     healthBar = {
                         foreground = {0.08, 0.08, 0.08},
                         foregroundOpacity = 0.8,

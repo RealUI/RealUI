@@ -133,18 +133,25 @@ UnitFrames.player = {
         local buffSize = 20
         local buffSpacing = 2
         local buffNum = (db.units.player and db.units.player.buffCount) or 16
-        local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))
+        local buffLayout = (db.units.player and db.units.player.auraLayout and db.units.player.auraLayout.buffs) or {}
+        local buffAnchor = buffLayout.anchor or "TOPLEFT"
+        local buffGrowthX = buffLayout.growthX or "RIGHT"
+        local buffGrowthY = buffLayout.growthY or "UP"
+        local buffMaxWidth = buffLayout.maxWidth or 0
+        local buffFrameWidth = (buffMaxWidth > 0 and buffMaxWidth) or dialog:GetWidth()
+        local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
         local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
 
         local Buffs = _G.CreateFrame("Frame", nil, dialog)
-        Buffs:SetPoint("BOTTOMLEFT", dialog, "TOPLEFT", 0, 20)
-        Buffs:SetSize(dialog:GetWidth(), buffRows * (buffSize + buffSpacing))
+
+        Buffs:SetSize(buffFrameWidth, buffRows * (buffSize + buffSpacing))
         Buffs.num = buffNum
         Buffs.size = buffSize
         Buffs.spacing = buffSpacing
-        Buffs.initialAnchor = "BOTTOMLEFT"
-        Buffs.growthX = "RIGHT"
-        Buffs.growthY = "UP"
+        Buffs.initialAnchor = UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY)
+        UnitFrames.SetAuraPosition(Buffs, dialog, buffAnchor, Buffs.initialAnchor)
+        Buffs.growthX = buffGrowthX
+        Buffs.growthY = buffGrowthY
         Buffs.PostCreateButton = function(_, button)
             Base.CropIcon(button.Icon, button)
             button.Count:SetFontObject("NumberFont_Outline_Med")
