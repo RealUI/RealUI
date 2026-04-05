@@ -726,4 +726,11 @@ function UnitFrames:OnEnable()
     oUF.colors.power.ICICLES = RealUI.ColorDesaturate(0.15, oUF.colors.power.ICICLES)
     oUF.colors.power.TIP_OF_THE_SPEAR = RealUI.ColorDesaturate(0.15, oUF.colors.power.TIP_OF_THE_SPEAR)
     self:InitializeLayout()
+
+    -- Apply saved aura toggle state after frames are spawned.
+    -- Without this, frames created visible by default ignore Show/Hide settings until
+    -- a config change triggers RefreshUnits.
+    _G.C_Timer.After(0, function()
+        self:RefreshUnits("InitAuraState")
+    end)
 end
