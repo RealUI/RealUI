@@ -21,6 +21,7 @@ local specProfiles = {}
 local specConfigurations = {}
 local isInitialized = false
 local isLibDualSpecSetup = false
+local initialSpecSyncPending = false
 
 -- Profile to Layout Mapping (from Core.lua)
 local profileToLayout = {
@@ -692,17 +693,23 @@ local function UpdateSpec()
         LDS.currentSpec = RealUI.charInfo.specs.current.index
 
         -- Schedule a deferred profile/layout sync once initial spec resolves
-        RealUI:ScheduleTimer(function()
-            if not _G.IsPlayerInitialSpec() then
-                local specIndex = _G.C_SpecializationInfo.GetSpecialization()
-                if specIndex and RealUI.DualSpecSystem:IsInitialized() then
-                    -- Always call OnSpecializationChanged to ensure currentSpec
-                    -- is set and profile/layout are correct, even if the profile
-                    -- already happens to match.
-                    RealUI.DualSpecSystem:OnSpecializationChanged(specIndex)
+        if not initialSpecSyncPending then
+            initialSpecSyncPending = true
+            RealUI:ScheduleTimer(function()
+                initialSpecSyncPending = false
+                if not _G.IsPlayerInitialSpec() then
+                    local specIndex = _G.C_SpecializationInfo.GetSpecialization()
+                    if specIndex and RealUI.DualSpecSystem:IsInitialized() then
+                        -- Always call OnSpecializationChanged to ensure currentSpec
+                        -- is set and profile/layout are correct, even if the profile
+                        -- already happens to match.
+                        RealUI.DualSpecSystem:OnSpecializationChanged(specIndex)
+                    end
                 end
-            end
-        end, 2)
+            end, 2)
+        else
+            debug("Initial-spec deferred sync already queued")
+        end
         return
     end
 
