@@ -23,6 +23,32 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Trim changelog to current release
+      run: |
+        version="${GITHUB_REF#refs/tags/}"
+        # Extract the version's section and its Detailed Changes compare link
+        python3 -c "
+        import sys, re
+        ver = '$version'
+        text = open('CHANGELOG.md').read()
+        # Match from ## [ver] to the next ## [ or ## Detailed
+        pattern = r'(## \[' + re.escape(ver) + r'\].*?)(?=\n## [\[D])'
+        m = re.search(pattern, text, re.DOTALL)
+        if not m:
+            sys.exit(1)
+        body = m.group(1).rstrip()
+        # Find the compare link for this version
+        link = re.search(r'^\[' + re.escape(ver) + r'\]:.*$', text, re.MULTILINE)
+        if link:
+            body += '\n\n## Detailed Changes ##\n' + link.group(0) + '\n'
+        print(body)
+        " > CHANGELOG_RELEASE.md
+        if [ -s CHANGELOG_RELEASE.md ]; then
+          mv CHANGELOG_RELEASE.md CHANGELOG.md
+        else
+          echo "Warning: Could not extract changelog for version $version"
+        fi
+
     - name: Create Release Package
       env:
         CF_API_KEY: ${{ secrets.CF_API_KEY }}
