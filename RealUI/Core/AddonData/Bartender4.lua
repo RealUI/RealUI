@@ -5,6 +5,7 @@ local _, private = ...
 
 -- RealUI --
 local RealUI = private.RealUI
+local bartenderProfileRetryPending = false
 
 function private.AddOns.Bartender4()
     local namespaces = _G.Bartender4DB.namespaces
@@ -378,13 +379,19 @@ function private.Profiles.Bartender4()
     -- If bars aren't ready yet, defer the entire function.
     local actionBarsModule = _G.Bartender4:GetModule("ActionBars", true)
     if not actionBarsModule or not actionBarsModule.actionbars then
-        RealUI:ScheduleTimer(function()
-            if _G.Bartender4 and _G.Bartender4.db then
-                private.Profiles.Bartender4()
-            end
-        end, 1)
+        if not bartenderProfileRetryPending then
+            bartenderProfileRetryPending = true
+            RealUI:ScheduleTimer(function()
+                bartenderProfileRetryPending = false
+                if _G.Bartender4 and _G.Bartender4.db then
+                    private.Profiles.Bartender4()
+                end
+            end, 1)
+        end
         return
     end
+
+    bartenderProfileRetryPending = false
 
     -- Bug 5 fix: Respect user's Bartender4 profile selection.
     -- Only force profiles during the initial setup wizard (installStage != -1).
