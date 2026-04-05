@@ -16,6 +16,14 @@ local UnitFrames = RealUI:GetModule("UnitFrames")
 local CombatFader = RealUI:GetModule("CombatFader")
 local round = RealUI.Round
 
+local function GetMiscDB()
+    return (db and db.misc) or {}
+end
+
+local function GetUnitsDB()
+    return (db and db.units) or {}
+end
+
 local function SafeShow(frame, show)
     if not frame then return end
     if _G.InCombatLockdown() and frame.IsProtected and frame:IsProtected() then
@@ -87,7 +95,7 @@ local function CreateHealthBar(parent, info, isAngled)
         -- Set initial bg color: red when alternative style is active
         -- Use a separate HealthBG StatusBar at the same frame level, with fill at BORDER layer
         -- (above Health's bg at BACKGROUND, below Health's fill at ARTWORK)
-        if db.misc.alternativeBarStyle then
+        if GetMiscDB().alternativeBarStyle then
             local HealthBG = parent:CreateAngle("StatusBar", nil, parent.overlay)
             HealthBG:SetAngleVertex(info.leftVertex, info.rightVertex)
             HealthBG:SetSize(width, height)
@@ -104,7 +112,8 @@ local function CreateHealthBar(parent, info, isAngled)
             HealthBG.fill:SetDrawLayer("BORDER")
             HealthBG:SetMinMaxValues(0, 1)
             HealthBG:SetValue(1)
-            local hbDB = db.units[parent.unit] and db.units[parent.unit].healthBar
+            local unitsDB = GetUnitsDB()
+            local hbDB = unitsDB[parent.unit] and unitsDB[parent.unit].healthBar
             local bgColor = (hbDB and hbDB.background) or {0.78, 0.15, 0.15}
             local bgOpacity = (hbDB and hbDB.backgroundOpacity) or 1.0
             HealthBG:SetStatusBarColor(bgColor[1], bgColor[2], bgColor[3], bgOpacity)
@@ -117,10 +126,10 @@ local function CreateHealthBar(parent, info, isAngled)
 
         -- Hook overlay alpha to hide HealthBG when faded (prevents red bleed-through)
         -- Delay activation until after CombatFader's initial setup completes
-        if db.misc.alternativeBarStyle then
+        if GetMiscDB().alternativeBarStyle then
             _G.C_Timer.After(1, function()
                 _G.hooksecurefunc(parent.overlay, "SetAlpha", function(overlay, alpha)
-                    if not db.misc.alternativeBarStyle then return end
+                    if not GetMiscDB().alternativeBarStyle then return end
                     if not parent.HealthBG then return end
                     -- Hide only when deeply faded (below "hurt" threshold)
                     -- Target Selected = 0.75, so use 0.5 as threshold
@@ -198,12 +207,12 @@ local function CreateHealthBar(parent, info, isAngled)
             Health.text:SetPoint("CENTER")
         end
         Health.text:SetFontObject("SystemFont_Shadow_Med1")
-        local statusText = db.misc.statusText
+        local statusText = GetMiscDB().statusText
         parent:Tag(Health.text, UnitFrames.GetHealthTagString(statusText))
     end
 
     Health.barType = "health"
-    local unitDB = db.units[parent.unit] or {}
+    local unitDB = GetUnitsDB()[parent.unit] or {}
     local hb = unitDB.healthBar or {}
     Health.colorClass = db.overlay.classColor or hb.colorForegroundByClass
     Health.colorTapping = true
@@ -220,9 +229,9 @@ local function CreateHealthBar(parent, info, isAngled)
             local element = self.Health
             if not element then return end
 
-            if db.misc.alternativeBarStyle then
+            if GetMiscDB().alternativeBarStyle then
                 -- Alternative style: dark foreground, red bg shows through missing health
-                local unitSettings = db.units[unit] or {}
+                local unitSettings = GetUnitsDB()[unit] or {}
                 local healthBarDB = unitSettings.healthBar or {}
                 local c = healthBarDB.foreground or {0.08, 0.08, 0.08}
                 element:SetStatusBarColor(c[1], c[2], c[3], 1.0)
@@ -342,7 +351,7 @@ local function CreatePowerBar(parent, info, isAngled)
             Power.text:SetPoint("CENTER")
         end
         Power.text:SetFontObject("SystemFont_Shadow_Med1")
-        local statusText = db.misc.statusText
+        local statusText = GetMiscDB().statusText
         local _, powerType = _G.UnitPowerType(parent.unit)
         parent:Tag(Power.text, UnitFrames.GetPowerTagString(statusText, powerType))
     end
@@ -522,8 +531,9 @@ local function Shared(self, unit)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
     self:RegisterForClicks("AnyUp")
 
-    if db.misc.focusclick then
-        local ModKey = db.misc.focuskey
+    local misc = GetMiscDB()
+    if misc.focusclick then
+        local ModKey = misc.focuskey or "SHIFT"
         local MouseButton = 1
         local key = ModKey .. "-type" .. (MouseButton or "")
         if(self.unit == "focus") then
