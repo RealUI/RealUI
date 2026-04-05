@@ -1,3 +1,59 @@
+## [3.1.8] - 2026-04-05 ##
+### Summary ###
+Hotfix for unit frame aura toggle state not applying on login. Saved Show/Hide aura settings on player and target frames now take effect immediately when frames are first created, instead of requiring a manual config change to trigger.
+
+### Modified AddOns ###
+  * RealUI
+
+### Fixed ###
+  * fix: apply saved aura toggle state on init, not just on config change
+
+
+## [3.1.7] - 2026-04-05 ##
+### Summary ###
+Stability and feature release focused on login reliability, Hero Talent positioning, and aura layout customization. Startup profile/layout initialization has been overhauled to prevent first-login thrash, healer-profile race conditions, and early-frame nil errors. Hero Talents can now be repositioned via a config preset dropdown, and aura icons on the player and target unit frames are now configurable in position. Resource/performance monitoring is disabled by default for all existing profiles as a safety measure. Aurora is updated from 12.0.1.25 to 12.0.1.26, bringing backdrop alpha fixes, bag button skin restructuring, Hero Talent anchor presets, and Blizzard file-structure alignment.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora (12.0.1.26)
+
+### Added ###
+  * add: configurable aura layout positioning for player and target unit frames
+  * add: Hero Talents anchor preset dropdown to config with preset-based positioning
+  * add: optional HeroTalentsContainer custom re-anchor with default-off per-character behavior
+
+### Changed ###
+  * chg: additional tuning for heroTalentsAnchorPreset
+  * chg: force resource/performance monitoring off by default for all existing profiles (users can re-enable manually)
+
+### Fixed ###
+  * fix: debounce initial-spec sync to prevent login profile/layout thrash and healer profile race resetting Bartender and oUF on first load
+  * fix: throttle startup profile retries until ActionBars are initialized
+  * fix: defer RefreshMod until frames exist on early login
+  * fix: guard UnitFrames Shared against nil misc/units during UNIT_FACTION updates
+  * fix: harden ResourceManager timeout handling
+  * fix: Aurora 12.0.1.26 restores backdrop alpha transparency in SetBackdropColor, moves MainMenuBarBagButtons skin to its own addon, aligns TabSystemTemplates to the Blizzard restructure, and cleans up deprecated UIMenu code
+
+
+## [3.1.6] - 2026-04-04 ##
+### Summary ###
+Bug-fix release addressing cooldown counter spam, loot roll issues, and oversized aura timers. Cooldown text no longer spams in dungeons and battlegrounds and is properly sized on unit frame buffs. Loot roll frames now re-populate after a reload and show correct transmog atlas textures instead of greed coin icons. Aurora is updated from 12.0.1.24 to 12.0.1.25, with tooltip taint fixes, NineSlice layout resolution, PVPMatchResults skinning work, and sanitized securecallfunction paths.
+
+### Modified AddOns ###
+  * RealUI
+  * Aurora (12.0.1.25)
+
+### Fixed ###
+  * fix: cooldown counter spam in dungeons and battlegrounds
+  * fix: protect against Timer update text with secret values
+  * fix: re-populate custom roll frames from GetActiveLootRollIDs after reload
+  * fix: use proper transmog atlas textures instead of greed coin icons on roll popup
+  * fix: oversized aura cooldown text on unit frame buffs
+  * fix: Aurora 12.0.1.25 resolves tooltip taint from NineSlice layout and GameTooltip_AddWidgetSet securecallfunction paths, sanitizes orderIndex after Setup calls, and wraps QuestMapLogTitleButton_OnEnter to prevent GetStringWidth secret number taint
+
+
 ## [3.1.5] - 2026-04-02 ##
 ### Summary ###
 Minor follow-up release for the recent HuD totem work. Player totems now only initialize for Shamans, avoiding unnecessary element setup on other classes. Aurora is updated from 12.0.1.23 to 12.0.1.24, bringing DelvesDifficultyPicker and QuestMapFrame taint-related skinning fixes.
@@ -501,6 +557,9 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.8]: https://github.com/RealUI/RealUI/compare/3.1.7...3.1.8
+[3.1.7]: https://github.com/RealUI/RealUI/compare/3.1.6...3.1.7
+[3.1.6]: https://github.com/RealUI/RealUI/compare/3.1.5...3.1.6
 [3.1.5]: https://github.com/RealUI/RealUI/compare/3.1.4...3.1.5
 [3.1.4]: https://github.com/RealUI/RealUI/compare/3.1.3...3.1.4
 [3.1.3]: https://github.com/RealUI/RealUI/compare/3.1.2...3.1.3

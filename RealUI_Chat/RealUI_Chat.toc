@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: Useful chat mods
 ## Author: Gethe, Hanshi
-## Version: 3.1.5
+## Version: 3.1.8
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## SavedVariables: RealUI_ChatDB

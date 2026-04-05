@@ -988,6 +988,80 @@ do -- UnitFrames
                     UnitFrames:RefreshUnits("PlayerAuras")
                 end,
             }
+            unit.args.buffLayoutHeader = {
+                name = "Buff Layout",
+                type = "header",
+                order = 38,
+            }
+            unit.args.buffAnchor = {
+                name = L["UnitFrames_AuraLayoutBuffAnchor"],
+                desc = L["UnitFrames_AuraLayoutBuffAnchorDesc"],
+                type = "select",
+                values = function() return {
+                    BOTTOMLEFT = "Bottom Left",
+                    BOTTOMRIGHT = "Bottom Right",
+                    TOPLEFT = "Top Left",
+                    TOPRIGHT = "Top Right",
+                    LEFTTOP = "Left Top",
+                    LEFTBOTTOM = "Left Bottom",
+                    RIGHTTOP = "Right Top",
+                    RIGHTBOTTOM = "Right Bottom",
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                } end,
+                order = 39,
+                disabled = function() return not UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                get = function() return UnitFrames.db.profile.units.player.auraLayout.buffs.anchor end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.auraLayout.buffs.anchor = val
+                    UnitFrames:RefreshUnits("PlayerAurasLayout")
+                end,
+            }
+            unit.args.buffGrowthX = {
+                name = L["UnitFrames_AuraLayoutBuffGrowthX"],
+                desc = L["UnitFrames_AuraLayoutBuffGrowthXDesc"],
+                type = "select",
+                values = function() return {
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                } end,
+                order = 40,
+                disabled = function() return not UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                get = function() return UnitFrames.db.profile.units.player.auraLayout.buffs.growthX end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.auraLayout.buffs.growthX = val
+                    UnitFrames:RefreshUnits("PlayerAurasLayout")
+                end,
+            }
+            unit.args.buffGrowthY = {
+                name = L["UnitFrames_AuraLayoutBuffGrowthY"],
+                desc = L["UnitFrames_AuraLayoutBuffGrowthYDesc"],
+                type = "select",
+                values = function() return {
+                    DOWN = "Down",
+                    UP = "Up",
+                } end,
+                order = 41,
+                disabled = function() return not UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                get = function() return UnitFrames.db.profile.units.player.auraLayout.buffs.growthY end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.auraLayout.buffs.growthY = val
+                    UnitFrames:RefreshUnits("PlayerAurasLayout")
+                end,
+            }
+            unit.args.buffMaxWidth = {
+                name = L["UnitFrames_AuraLayoutBuffMaxWidth"],
+                desc = L["UnitFrames_AuraLayoutBuffMaxWidthDesc"],
+                type = "range",
+                min = 0, max = 400, step = 5,
+                order = 42,
+                disabled = function() return not UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                get = function() return UnitFrames.db.profile.units.player.auraLayout.buffs.maxWidth end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.player.auraLayout.buffs.maxWidth = val
+                    UnitFrames:RefreshUnits("PlayerAurasLayout")
+                end,
+            }
         end
         if unitSlug == "target" then
             unit.args.showTargetDebuffs = {
@@ -1056,6 +1130,156 @@ do -- UnitFrames
                 set = function(_, val)
                     UnitFrames.db.profile.units.target.buffSize = val
                     UnitFrames:RefreshUnits("TargetAuras")
+                end,
+            }
+            -- Debuff Layout Options
+            unit.args.debuffLayoutHeader = {
+                name = "Debuff Layout",
+                type = "header",
+                order = 41,
+            }
+            unit.args.debuffAnchor = {
+                name = L["UnitFrames_AuraLayoutDebuffAnchor"],
+                desc = L["UnitFrames_AuraLayoutDebuffAnchorDesc"],
+                type = "select",
+                values = function() return {
+                    BOTTOMLEFT = "Bottom Left",
+                    BOTTOMRIGHT = "Bottom Right",
+                    TOPLEFT = "Top Left",
+                    TOPRIGHT = "Top Right",
+                    LEFTTOP = "Left Top",
+                    LEFTBOTTOM = "Left Bottom",
+                    RIGHTTOP = "Right Top",
+                    RIGHTBOTTOM = "Right Bottom",
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                } end,
+                order = 42,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.debuffs.anchor end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.debuffs.anchor = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            unit.args.debuffGrowthX = {
+                name = L["UnitFrames_AuraLayoutDebuffGrowthX"],
+                desc = L["UnitFrames_AuraLayoutDebuffGrowthXDesc"],
+                type = "select",
+                values = function() return {
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                } end,
+                order = 43,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.debuffs.growthX end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.debuffs.growthX = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            unit.args.debuffGrowthY = {
+                name = L["UnitFrames_AuraLayoutDebuffGrowthY"],
+                desc = L["UnitFrames_AuraLayoutDebuffGrowthYDesc"],
+                type = "select",
+                values = function() return {
+                    DOWN = "Down",
+                    UP = "Up",
+                } end,
+                order = 44,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.debuffs.growthY end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.debuffs.growthY = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            unit.args.debuffMaxWidth = {
+                name = L["UnitFrames_AuraLayoutDebuffMaxWidth"],
+                desc = L["UnitFrames_AuraLayoutDebuffMaxWidthDesc"],
+                type = "range",
+                min = 0, max = 400, step = 5,
+                order = 45,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.debuffs.maxWidth end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.debuffs.maxWidth = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            -- Buff Layout Options
+            unit.args.buffLayoutHeader = {
+                name = "Buff Layout",
+                type = "header",
+                order = 46,
+            }
+            unit.args.buffAnchor = {
+                name = L["UnitFrames_AuraLayoutBuffAnchor"],
+                desc = L["UnitFrames_AuraLayoutBuffAnchorDesc"],
+                type = "select",
+                values = function() return {
+                    BOTTOMLEFT = "Bottom Left",
+                    BOTTOMRIGHT = "Bottom Right",
+                    TOPLEFT = "Top Left",
+                    TOPRIGHT = "Top Right",
+                    LEFTTOP = "Left Top",
+                    LEFTBOTTOM = "Left Bottom",
+                    RIGHTTOP = "Right Top",
+                    RIGHTBOTTOM = "Right Bottom",
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                } end,
+                order = 47,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.buffs.anchor end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.buffs.anchor = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            unit.args.buffGrowthX = {
+                name = L["UnitFrames_AuraLayoutBuffGrowthX"],
+                desc = L["UnitFrames_AuraLayoutBuffGrowthXDesc"],
+                type = "select",
+                values = function() return {
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                } end,
+                order = 48,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.buffs.growthX end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.buffs.growthX = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            unit.args.buffGrowthY = {
+                name = L["UnitFrames_AuraLayoutBuffGrowthY"],
+                desc = L["UnitFrames_AuraLayoutBuffGrowthYDesc"],
+                type = "select",
+                values = function() return {
+                    DOWN = "Down",
+                    UP = "Up",
+                } end,
+                order = 49,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.buffs.growthY end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.buffs.growthY = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
+                end,
+            }
+            unit.args.buffMaxWidth = {
+                name = L["UnitFrames_AuraLayoutBuffMaxWidth"],
+                desc = L["UnitFrames_AuraLayoutBuffMaxWidthDesc"],
+                type = "range",
+                min = 0, max = 400, step = 5,
+                order = 50,
+                disabled = function() return not UnitFrames.db.profile.units.target.showTargetBuffs end,
+                get = function() return UnitFrames.db.profile.units.target.auraLayout.buffs.maxWidth end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units.target.auraLayout.buffs.maxWidth = val
+                    UnitFrames:RefreshUnits("TargetAurasLayout")
                 end,
             }
         end

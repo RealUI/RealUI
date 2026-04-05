@@ -18,7 +18,9 @@ local resourceState = {
     cpuUsage = 0,
     frameCount = 0,
     lastGC = 0,
-    lastOptimization = 0
+    lastOptimization = 0,
+    memoryBackoffUntil = 0,
+    cpuBackoffUntil = 0
 }
 
 -- Resource thresholds
@@ -30,7 +32,8 @@ local THRESHOLDS = {
     MEMORY_CHECK_INTERVAL = 120, -- 2 minutes
     CPU_CHECK_INTERVAL = 120, -- 2 minutes
     GC_INTERVAL = 300, -- 5 minutes
-    OPTIMIZATION_INTERVAL = 600 -- 10 minutes
+    OPTIMIZATION_INTERVAL = 600, -- 10 minutes
+    FAILURE_BACKOFF_INTERVAL = 600 -- 10 minutes after expensive API failures
 }
 
 local RELATED_ADDONS = {
@@ -46,16 +49,36 @@ local RELATED_ADDONS = {
 -- Get current memory usage
 function ResourceManager:GetMemoryUsage()
     local now = _G.GetTime()
+
+    if now < (resourceState.memoryBackoffUntil or 0) then
+        return resourceState.memoryUsage
+    end
+
     if now - (resourceState.lastMemoryCheck or 0) < THRESHOLDS.MEMORY_CHECK_INTERVAL then
         return resourceState.memoryUsage
     end
 
-    _G.UpdateAddOnMemoryUsage()
-    local memory = _G.GetAddOnMemoryUsage(ADDON_NAME)
+    local okUpdate = pcall(_G.UpdateAddOnMemoryUsage)
+    if not okUpdate then
+        debug("UpdateAddOnMemoryUsage failed; enabling temporary backoff")
+        resourceState.memoryUsage = resourceState.memoryUsage > 0 and resourceState.memoryUsage or collectgarbage("count")
+        resourceState.lastMemoryCheck = now
+        resourceState.memoryBackoffUntil = now + THRESHOLDS.FAILURE_BACKOFF_INTERVAL
+        return resourceState.memoryUsage
+    end
 
-    for _, addon in ipairs(RELATED_ADDONS) do
-        if _G.C_AddOns.IsAddOnLoaded(addon) then
-            memory = memory + _G.GetAddOnMemoryUsage(addon)
+    local okMain, memory = pcall(_G.GetAddOnMemoryUsage, ADDON_NAME)
+    if not okMain then
+        memory = collectgarbage("count")
+    else
+        for _, addon in ipairs(RELATED_ADDONS) do
+            local okLoaded, loaded = pcall(_G.C_AddOns.IsAddOnLoaded, addon)
+            if okLoaded and loaded then
+                local okAddon, addonUsage = pcall(_G.GetAddOnMemoryUsage, addon)
+                if okAddon and type(addonUsage) == "number" then
+                    memory = memory + addonUsage
+                end
+            end
         end
     end
 
@@ -77,16 +100,36 @@ function ResourceManager:GetCPUUsage()
     end
 
     local now = _G.GetTime()
+
+    if now < (resourceState.cpuBackoffUntil or 0) then
+        return resourceState.cpuUsage
+    end
+
     if now - (resourceState.lastCPUCheck or 0) < THRESHOLDS.CPU_CHECK_INTERVAL then
         return resourceState.cpuUsage
     end
 
-    _G.UpdateAddOnCPUUsage()
-    local cpu = _G.GetAddOnCPUUsage(ADDON_NAME)
+    local okUpdate = pcall(_G.UpdateAddOnCPUUsage)
+    if not okUpdate then
+        debug("UpdateAddOnCPUUsage failed; enabling temporary backoff")
+        resourceState.cpuUsage = 0
+        resourceState.lastCPUCheck = now
+        resourceState.cpuBackoffUntil = now + THRESHOLDS.FAILURE_BACKOFF_INTERVAL
+        return 0
+    end
 
-    for _, addon in ipairs(RELATED_ADDONS) do
-        if _G.C_AddOns.IsAddOnLoaded(addon) then
-            cpu = cpu + _G.GetAddOnCPUUsage(addon)
+    local okMain, cpu = pcall(_G.GetAddOnCPUUsage, ADDON_NAME)
+    if not okMain then
+        cpu = 0
+    else
+        for _, addon in ipairs(RELATED_ADDONS) do
+            local okLoaded, loaded = pcall(_G.C_AddOns.IsAddOnLoaded, addon)
+            if okLoaded and loaded then
+                local okAddon, addonUsage = pcall(_G.GetAddOnCPUUsage, addon)
+                if okAddon and type(addonUsage) == "number" then
+                    cpu = cpu + addonUsage
+                end
+            end
         end
     end
 
@@ -312,7 +355,8 @@ function ResourceManager:Initialize()
     -- ResourceManager is gated behind the performanceMonitorEnabled setting
     -- (default: off).  Only start the repeating timers when the user has
     -- explicitly opted in via the Systems config panel.
-    if not (RealUI.db and RealUI.db.profile.settings.performanceMonitorEnabled) then
+    local settings = RealUI.db and RealUI.db.profile and RealUI.db.profile.settings
+    if not (settings and settings.performanceMonitorEnabled == true) then
         debug("Resource monitoring disabled by settings.performanceMonitorEnabled")
         return
     end

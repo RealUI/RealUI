@@ -68,15 +68,43 @@ RealUI.minipatches = {
         end
     end,
 
-    -- Minipatches [2] through [9]: reserved for 3.0.0 → 3.0.9 incremental data migrations.
-    -- Each entry corresponds to a patch version (3.0.2 through 3.0.9).
-    -- Populate with migration logic as needed when a patch version introduces data changes.
+    -- Minipatches [2] through [6]: reserved for incremental data migrations.
     [2] = function() end,
     [3] = function() end,
     [4] = function() end,
     [5] = function() end,
     [6] = function() end,
-    [7] = function() end,
+
+    -- 3.1.7 safety patch: force resource/performance monitoring off by default
+    -- for all existing profiles. Users can still manually re-enable it.
+    [7] = function()
+        if not RealUI.db then
+            return
+        end
+
+        local db = RealUI.db
+        local dbg = db.global
+
+        if type(db.profiles) == "table" then
+            for _, profileData in next, db.profiles do
+                if type(profileData) == "table" then
+                    profileData.settings = profileData.settings or {}
+                    profileData.settings.performanceMonitorEnabled = false
+                end
+            end
+        end
+
+        if db.profile then
+            db.profile.settings = db.profile.settings or {}
+            db.profile.settings.performanceMonitorEnabled = false
+        end
+
+        if dbg then
+            dbg.resourceMonitor317DefaultApplied = true
+        end
+    end,
+
+    -- Minipatches [8] and [9]: reserved for future patch-level migrations.
     [8] = function() end,
     [9] = function() end,
 }
