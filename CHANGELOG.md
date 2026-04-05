@@ -1,3 +1,14 @@
+## [3.1.8] - 2026-04-05 ##
+### Summary ###
+Hotfix for unit frame aura toggle state not applying on login. Saved Show/Hide aura settings on player and target frames now take effect immediately when frames are first created, instead of requiring a manual config change to trigger.
+
+### Modified AddOns ###
+  * RealUI
+
+### Fixed ###
+  * fix: apply saved aura toggle state on init, not just on config change
+
+
 ## [3.1.7] - 2026-04-05 ##
 ### Summary ###
 Stability and feature release focused on login reliability, Hero Talent positioning, and aura layout customization. Startup profile/layout initialization has been overhauled to prevent first-login thrash, healer-profile race conditions, and early-frame nil errors. Hero Talents can now be repositioned via a config preset dropdown, and aura icons on the player and target unit frames are now configurable in position. Resource/performance monitoring is disabled by default for all existing profiles as a safety measure. Aurora is updated from 12.0.1.25 to 12.0.1.26, bringing backdrop alpha fixes, bag button skin restructuring, Hero Talent anchor presets, and Blizzard file-structure alignment.
@@ -546,6 +557,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.8]: https://github.com/RealUI/RealUI/compare/3.1.7...3.1.8
 [3.1.7]: https://github.com/RealUI/RealUI/compare/3.1.6...3.1.7
 [3.1.6]: https://github.com/RealUI/RealUI/compare/3.1.5...3.1.6
 [3.1.5]: https://github.com/RealUI/RealUI/compare/3.1.4...3.1.5
