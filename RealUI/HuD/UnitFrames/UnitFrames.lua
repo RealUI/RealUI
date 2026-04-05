@@ -49,7 +49,7 @@ local units = {
     "TargetTarget",
 }
 
-function UnitFrames:RefreshUnits(event)
+function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
     -- Swap oUF.colors.health based on alternative bar style (only affects angled bars via UpdateColor override)
     oUF.colors.health = oUF:CreateColor(0.66, 0.22, 0.22)
 
