@@ -12,6 +12,7 @@ local FramePoint = RealUI:GetModule("FramePoint")
 
 local MODNAME = "UnitFrames"
 local UnitFrames = RealUI:NewModule(MODNAME, "AceEvent-3.0")
+local refreshRetryPending = false
 
 UnitFrames.units = {}
 
@@ -307,6 +308,21 @@ function UnitFrames:RefreshMod()
     db = self.db.profile
     ndb = RealUI.db.profile
     self.layoutSize = RealUI.cLayout or RealUI.db.char.layout.current or 1
+
+    -- During early login, profile updates can fire before oUF frames are spawned.
+    -- Delay one tick so frame reposition/refresh does not run against nil frames.
+    if not _G.RealUIPlayerFrame then
+        if not refreshRetryPending then
+            refreshRetryPending = true
+            self:ScheduleTimer(function()
+                refreshRetryPending = false
+                if self:IsEnabled() then
+                    self:RefreshMod()
+                end
+            end, 0.5)
+        end
+        return
+    end
 
     -- Reposition unit frames for the new layout
     self:RepositionFrames()
