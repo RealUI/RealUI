@@ -7,7 +7,6 @@ RealUI is a minimalistic UI designed to be functional, yet also efficient and el
 
 Information
 -----------
-
   * This release is for Midnight Expansion - World of Warcraft 12.0.1
   * This release is a major update to the Blizzard UI - with many changes to the core and modules
   * Most features previously disabled have been aded back and modernized - including the HUD unit frames, nameplates, and more
