@@ -253,6 +253,40 @@ function ClassResource:CreateRunes(unitFrame, unit)
     unitFrame.Runes = Runes
     return Runes
 end
+function ClassResource:CreateSoulFragments(unitFrame, unit)
+    self:debug("CreateSoulFragments", unit)
+    local ClassPower = {}
+    local bar = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
+    bar:SetSize(barDB.size.width, barDB.size.height)
+    bar:SetAngleVertex(1, 3)
+    bar:SetMinMaxValues(0, 1)
+
+    CombatFader:RegisterFrameForFade(MODNAME, bar)
+    FramePoint:PositionFrame(self, bar, {"class", "bar", "position"})
+
+    ClassPower[1] = bar
+    ClassPower.frame = bar
+
+    function ClassPower.PostUpdate(element, cur, maxVal, hasMaxChanged, powerType)
+        self:debug("SoulFragments:PostUpdate", cur, maxVal, powerType)
+        if self.configMode then
+            cur = 0.6
+            element[1]:SetValue(cur)
+        end
+        element[1]:SetShown(cur and cur > 0)
+    end
+
+    function ClassPower.PostUpdateColor(element, color)
+        self:debug("SoulFragments:PostUpdateColor")
+        if color and color.GetRGB then
+            local r, g, b = color:GetRGB()
+            element[1]:SetStatusBarColor(RealUI.ColorDarken(0.5, r, g, b))
+        end
+    end
+
+    unitFrame.ClassPower = ClassPower
+    return ClassPower
+end
 function ClassResource:CreateStagger(unitFrame, unit)
     self:debug("CreateStagger", unit)
     local Stagger = unitFrame:CreateAngle("StatusBar", nil, unitFrame)
@@ -302,6 +336,12 @@ function ClassResource:Setup(unitFrame, unit)
     if playerClass == "MONK" then
         self.bar = isEnabled and self:CreateStagger(unitFrame, unit) or {}
         self.bar.info = _G.C_Spell.GetSpellInfo(124255)
+    elseif playerClass == "DEMONHUNTER" then
+        -- DH Devourer uses normalized 0-1 Soul Fragments via ClassPower;
+        -- override points with a Stagger-style bar instead of discrete icons
+        if isEnabled then
+            self.points = self:CreateSoulFragments(unitFrame, unit)
+        end
     end
 end
 
@@ -334,6 +374,12 @@ function ClassResource:ToggleConfigMode(isConfigMode)
             bar:SetMinMaxValues(0, maxHealth)
             bar:PostUpdate(maxHealth * 0.4, maxHealth)
         end
+        -- DH Soul Fragments bar in config mode
+        if playerClass == "DEMONHUNTER" and pts and pts[1] and pts[1].SetMinMaxValues then
+            pts[1]:SetMinMaxValues(0, 1)
+            pts[1]:SetValue(0.6)
+            pts[1]:Show()
+        end
     else
         -- Explicitly undo the SetShown(true) calls from config mode
         -- before ForceUpdate restores the correct display state
@@ -364,6 +410,7 @@ local classPowers = {
         token = "HOLY_POWER",
         max = 5
     },
+    DEMONHUNTER = {token = "SOUL_FRAGMENTS", max = 1},
     SHAMAN = {token = "MAELSTROM", max = 10},
     WARLOCK = {type = _G.Enum.PowerType.SoulShards, token = "SOUL_SHARDS"},
     EVOKER = {type = _G.Enum.PowerType.Essence, token = "POWER_TYPE_ESSENCE"},
