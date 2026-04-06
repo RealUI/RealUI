@@ -323,6 +323,21 @@ function RealUI:ChatCommand_Config(input)
             _G.PLATYNATOR_CURRENT_PROFILE = {}
             _G.ReloadUI()
             return
+        elseif command == "resetchar" then
+            -- Reset only this character's init data so the setup wizard
+            -- will re-run on next load without wiping account-wide settings.
+            if self.db and self.db.char then
+                self.db.char.init = {
+                    installStage = 0,
+                    initialized = false,
+                    needchatmoved = true
+                }
+                print("|cff0099ffRealUI|r: Character setup data reset. Reloading UI...")
+                _G.ReloadUI()
+            else
+                print("|cff0099ffRealUI|r: Database not available.")
+            end
+            return
         elseif command == "resetinventory" then
             local invMod = self:GetModule("Inventory", true)
             if invMod then
@@ -1074,7 +1089,7 @@ function RealUI:OnInitialize()
                     local info = self.CharacterInit:GetCharacterInfo()
                     print("Character:", info.fullName, "Role:", info.role, "Level:", info.level)
                 else
-                    print("Usage: /charinit <setup|reset|info>")
+                    print("Usage: /charinit <setup / reset / info>")
                 end
             else
                 print("CharacterInit not available")
