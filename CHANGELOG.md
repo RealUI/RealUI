@@ -1,3 +1,22 @@
+## [3.1.9] - 2026-04-06 ##
+### Summary ###
+Character setup reliability and new DH class feature. First-character setup now correctly applies all character-specific CVars and addon profiles (including Platynator) for every new character, not just the first account login. Demon Hunter Devourer Soul Fragments are now tracked with a Stagger-style resource bar. Aurora updated from 12.0.1.26 to 12.0.1.27 with new utility helpers and a combat nil-safety fix.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Skins
+  * Aurora (12.0.1.27)
+
+### Added ###
+  * add: Stagger-style bar for DH Devourer Soul Fragments
+
+### Fixed ###
+  * fix: always apply character CVars and addon profiles during setup, not just first account
+  * fix: add Platynator profile activation and always set profile keys for new characters
+  * fix: add AceTimer-3.0 mixin for ScheduleTimer in RefreshMod
+  * fix: Aurora 12.0.1.27 replaces GetBackdrop call with _auroraSkinned check to prevent nil method error in combat, adds SkinOnce/CropCircularIcon/SetHighlightColor utility helpers
+
+
 ## [3.1.8] - 2026-04-05 ##
 ### Summary ###
 Hotfix for unit frame aura toggle state not applying on login. Saved Show/Hide aura settings on player and target frames now take effect immediately when frames are first created, instead of requiring a manual config change to trigger.
@@ -557,6 +576,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.9]: https://github.com/RealUI/RealUI/compare/3.1.8...3.1.9
 [3.1.8]: https://github.com/RealUI/RealUI/compare/3.1.7...3.1.8
 [3.1.7]: https://github.com/RealUI/RealUI/compare/3.1.6...3.1.7
 [3.1.6]: https://github.com/RealUI/RealUI/compare/3.1.5...3.1.6
