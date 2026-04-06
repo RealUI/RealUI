@@ -340,16 +340,18 @@ function InstallWizard:Complete()
     -- Capture first-time state before it gets cleared by the CVar block below
     local isFirstTimeAccount = dbg and dbg.tags and dbg.tags.firsttime
 
-    -- Apply first-time CVars if this is first time
+    -- Apply CVars
     if isFirstTimeAccount then
         debug("Applying first-time account CVars")
         self:ApplyAccountCVars()
-        debug("Applying first-time character CVars")
-        self:ApplyCharacterCVars()
         dbg.tags.firsttime = false
         dbg.tutorial = dbg.tutorial or {}
         dbg.tutorial.stage = -1
     end
+
+    -- Character CVars apply for every new character, not just the first account
+    debug("Applying character CVars")
+    self:ApplyCharacterCVars()
 
     -- Chat frame setup
     for i = 1, 10 do
@@ -379,26 +381,29 @@ function InstallWizard:Complete()
         debug("Updated verinfo")
     end
 
-    -- Account-wide addon profile setup: only run for truly first-time accounts
-    -- When firsttime is already false, global config is done — skip profile creation
+    -- Account-wide addon profile creation: only run for truly first-time accounts.
+    -- Profile data already exists after the first character completes setup.
     if isFirstTimeAccount then
         if RealUI.AddRealUIProfiles then
             debug("Adding RealUI profiles to addons")
             RealUI:AddRealUIProfiles()
         end
-
-        if RealUI.SetProfilesToRealUI then
-            debug("Setting addon profiles to RealUI")
-            RealUI:SetProfilesToRealUI()
-        end
-
-        -- Set profile keys for all addons
-        if RealUI.SetProfileKeys then
-            debug("Setting profile keys")
-            RealUI:SetProfileKeys()
-        end
     else
-        debug("Skipping account-wide profile setup (firsttime already false)")
+        debug("Skipping account-wide profile creation (firsttime already false)")
+    end
+
+    -- Character-specific profile assignment: always run so each new character
+    -- (or resetchar'd character) gets linked to the correct addon profiles.
+    if RealUI.SetProfilesToRealUI then
+        debug("Setting addon profiles to RealUI for this character")
+        RealUI:SetProfilesToRealUI()
+    end
+
+    -- Profile keys map this character to the correct profile in each addon's
+    -- saved variables.  This is per-character data, so run for every setup.
+    if RealUI.SetProfileKeys then
+        debug("Setting profile keys for this character")
+        RealUI:SetProfileKeys()
     end
 
     -- Propagate unified profiles across linked scopes (Core, BT4, Skins)

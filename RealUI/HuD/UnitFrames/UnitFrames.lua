@@ -11,7 +11,7 @@ local CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 
 local MODNAME = "UnitFrames"
-local UnitFrames = RealUI:NewModule(MODNAME, "AceEvent-3.0")
+local UnitFrames = RealUI:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
 local refreshRetryPending = false
 
 UnitFrames.units = {}

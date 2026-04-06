@@ -9,3 +9,12 @@ end
 function private.AddOns.Platynator()
     _G.Platynator.API.ImportString(GetRealUIProfile(), "RealUI")
 end
+
+function private.Profiles.Platynator()
+    -- Switch the character's active Platynator profile to "RealUI".
+    -- PLATYNATOR_CURRENT_PROFILE is a per-character saved variable.
+    if _G.PLATYNATOR_CONFIG and _G.PLATYNATOR_CONFIG.Profiles
+            and _G.PLATYNATOR_CONFIG.Profiles["RealUI"] then
+        _G.PLATYNATOR_CURRENT_PROFILE = "RealUI"
+    end
+end
