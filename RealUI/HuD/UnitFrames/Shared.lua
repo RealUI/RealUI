@@ -422,7 +422,7 @@ local CreatePowerStatus do
         end
     end
 
-    function CreatePowerStatus(parent, data)
+    function CreatePowerStatus(parent, data, unit)
         local point, anchor, relPoint, x, info
         if data.power then
             info, anchor = data.power, parent.Power
@@ -443,7 +443,9 @@ local CreatePowerStatus do
         CombatRest:SetAngleVertex(leftVertex, rightVertex)
         CombatRest.Override = UpdateStatus
         parent.CombatIndicator = CombatRest
-        parent.RestingIndicator = CombatRest
+        if unit == "player" then
+            parent.RestingIndicator = CombatRest
+        end
 
         local LeaderAFK = parent:CreateAngle("Frame", nil, anchor)
         LeaderAFK:SetSize(width, height)
@@ -575,7 +577,7 @@ local function Shared(self, unit)
     end
 
     if isAngled then
-        CreatePowerStatus(self, unitData)
+        CreatePowerStatus(self, unitData, unit)
         CreateEndBox(self, unitData)
     end
 
