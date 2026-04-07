@@ -623,8 +623,8 @@ local function Shared(self, unit)
     -- oUF update after the first render so bars aren't grey on reload.
     -- Also ensures PostUpdateColor fires for alternative bar style on all units.
     _G.C_Timer.After(0, function()
-        if self.Health then self.Health:ForceUpdate() end
-        if self.Power then self.Power:ForceUpdate() end
+        if self.Health and self.Health.ForceUpdate then self.Health:ForceUpdate() end
+        if self.Power and self.Power.ForceUpdate then self.Power:ForceUpdate() end
     end)
 end
 
