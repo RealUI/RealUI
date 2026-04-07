@@ -260,6 +260,7 @@ function ClassResource:CreateSoulFragments(unitFrame, unit)
     bar:SetSize(barDB.size.width, barDB.size.height)
     bar:SetAngleVertex(1, 3)
     bar:SetMinMaxValues(0, 1)
+    bar:DisableNativeFill()
 
     CombatFader:RegisterFrameForFade(MODNAME, bar)
     FramePoint:PositionFrame(self, bar, {"class", "bar", "position"})
@@ -293,16 +294,26 @@ function ClassResource:CreateStagger(unitFrame, unit)
 
     Stagger:SetSize(barDB.size.width, barDB.size.height)
     Stagger:SetAngleVertex(1, 3)
+    Stagger:DisableNativeFill()
 
     FramePoint:PositionFrame(self, Stagger, {"class", "bar", "position"})
 
-    function Stagger.PostUpdateColor(element, r, g, b)
-        self:debug("Stagger:PostUpdateColor", r, g, b)
+    function Stagger.PostUpdateColor(element, color)
+        self:debug("Stagger:PostUpdateColor", color)
         if self.configMode then
-            local color = unitFrame.colors.power[_G.BREWMASTER_POWER_BAR_NAME][2]
-            r, g, b = color[1], color[2], color[3]
+            color = unitFrame.colors.power.STAGGER and unitFrame.colors.power.STAGGER[2]
         end
-        element:SetStatusBarColor(RealUI.ColorDarken(0.5, r, g, b))
+        if color then
+            local r, g, b
+            if color.GetRGB then
+                r, g, b = color:GetRGB()
+            else
+                r, g, b = color[1] or color.r, color[2] or color.g, color[3] or color.b
+            end
+            if r then
+                element:SetStatusBarColor(RealUI.ColorDarken(0.5, r, g, b))
+            end
+        end
     end
     function Stagger.PostUpdate(element, cur, max)
         local r, g, b = element:GetStatusBarColor()
