@@ -79,6 +79,7 @@ local defaults = {
 }
 
 function CombatText:PLAYER_REGEN_ENABLED()
+    private.FlushQueues()
     local eventInfo = {
         string = _G.LEAVING_COMBAT,
         scrollType = "notification",
