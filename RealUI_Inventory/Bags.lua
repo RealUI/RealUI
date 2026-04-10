@@ -1593,7 +1593,7 @@ local function CreateBag(bagType)
     if bagType == "bank" then
         local withdrawButton = CreateFeatureButton(main, nil, "arrow-up",
         function()
-            _G.StaticPopup_Show("BANK_MONEY_WITHDRAW")
+            _G.StaticPopup_Show("BANK_MONEY_WITHDRAW", nil, nil, { bankType = main.activeBankType })
         end,
         function(dialog)
             _G.GameTooltip:SetOwner(dialog, "ANCHOR_LEFT")
@@ -1606,7 +1606,7 @@ local function CreateBag(bagType)
 
         local depositButton = CreateFeatureButton(main, nil, "arrow-down",
         function()
-            _G.StaticPopup_Show("BANK_MONEY_DEPOSIT")
+            _G.StaticPopup_Show("BANK_MONEY_DEPOSIT", nil, nil, { bankType = main.activeBankType })
         end,
         function(dialog)
             _G.GameTooltip:SetOwner(dialog, "ANCHOR_LEFT")
