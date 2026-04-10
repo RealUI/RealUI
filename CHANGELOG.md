@@ -1,3 +1,26 @@
+## [3.1.10] - 2026-04-10 ##
+### Summary ###
+Combat text event queue handling, stagger bar fixes, taint safety improvements, and a major Aurora skin expansion. RealUI_CombatText now summarizes rapid event queues to prevent flooding. Stagger and Soul Fragment bars now fill correctly after decoupling Lua fill from the C++ StatusBar engine. Protected frame repositioning is deferred during combat to prevent ADDON_ACTION_BLOCKED. Aurora updated from 12.0.1.27 to 12.0.1.28 with 14 new Blizzard addon skins covering combat/HUD, matchmaking/PvP, and utility addons.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_CombatText
+  * RealUI_Inventory
+  * Aurora (12.0.1.28)
+
+### Added ###
+  * add: CombatText_Summary system for RealUI_CombatText to handle rapid event queue growth — summarize, report, drop queue, and continue
+  * add: Aurora 12.0.1.28 adds 14 new addon skins — Blizzard_DamageMeter, Blizzard_EncounterTimeline, Blizzard_EncounterWarnings, Blizzard_CooldownViewer, Blizzard_BuffFrame, Blizzard_MatchmakingQueueDisplay, Blizzard_EndOfMatchUI, Blizzard_PersonalResourceDisplay, Blizzard_SpellDiminishUI, Blizzard_WorldLootObjectList, Blizzard_CombatLog, Blizzard_ScriptErrorsFrame, Blizzard_HelpPlate, Blizzard_DelvesCompanionConfiguration
+
+### Fixed ###
+  * fix: stagger bar not growing — add DisableNativeFill() to decouple Lua fill from C++ StatusBar engine for non-secret bars (Stagger, SoulFragments); fix PostUpdateColor to accept ColorMixin and replace removed BREWMASTER_POWER_BAR_NAME global
+  * fix: defer protected frame repositioning during combat to prevent ADDON_ACTION_BLOCKED
+  * fix: only set RestingIndicator on player frame to avoid secret boolean taint
+  * fix: guard ForceUpdate calls against nil when element init is incomplete
+  * fix: add Grizzly Hills Packmaster to InstallWizard repair mount list
+  * fix: Aurora 12.0.1.28 resolves CooldownViewer taint by using external weak table instead of writing _auroraSkinned on item frames, fixes EnumeratePools crash on categoryPool, and fixes CharacterSpecificLayoutCheckButton targeting inner .Button child
+
+
 ## [3.1.9] - 2026-04-06 ##
 ### Summary ###
 Character setup reliability and new DH class feature. First-character setup now correctly applies all character-specific CVars and addon profiles (including Platynator) for every new character, not just the first account login. Demon Hunter Devourer Soul Fragments are now tracked with a Stagger-style resource bar. Aurora updated from 12.0.1.26 to 12.0.1.27 with new utility helpers and a combat nil-safety fix.
