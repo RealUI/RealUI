@@ -263,6 +263,7 @@ Configure optional quality of life features:
                     {id = 280, name = "Traveler's Tundra Mammoth"},
                     {id = 460, name = "Grand Expedition Yak"},
                     {id = 1039, name = "Mighty Caravan Brutosaur"},
+                    {id = 2237, name = "Grizzly Hills Packmaster"},
                 }
 
                 local dropdown = _G.CreateFrame("Frame", "RealUIWizardRepairMount", self.content, "UIDropDownMenuTemplate")

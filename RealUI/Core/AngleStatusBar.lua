@@ -24,7 +24,7 @@ local function SetBarValue(self, value)
     -- Secret values from WoW APIs cannot be compared or used in arithmetic
     if _G.issecretvalue(value) then
         meta.value = 0
-        -- The native engine may have already sized fill. Read back width.
+        -- The native engine has already sized fill. Read back width.
         local width = self.fill:GetWidth()
         if not _G.issecretvalue(width) and width > 0.001 then
             self.fill:SetShown(true)
@@ -435,6 +435,8 @@ function AngleStatusBarMixin:SetValue(value)
     -- Forward to native StatusBar so oUF/WoW can read values back.
     -- Since fill IS the native StatusBar texture, the C++ engine will
     -- automatically size fill based on the value (even secret values).
+    -- Bars that called DisableNativeFill() are exempt: the native engine
+    -- sizes a hidden proxy instead, leaving fill under our Lua control.
     local nativeSetValue = _G.getmetatable(self).__index.SetValue
     if nativeSetValue then
         nativeSetValue(self, value)
@@ -504,6 +506,24 @@ end
 
 function AngleStatusBarMixin:SetSmooth(isSmooth)
     bars[self].smooth = isSmooth
+end
+
+--- Swap the native StatusBar texture from fill to a hidden proxy.
+--- After this call the C++ engine sizes an invisible proxy instead of fill,
+--- so our Lua Lerp-based width in SetBarValue is never overridden.
+--- Use this on bars whose values are always non-secret (e.g. Stagger, Power).
+--- Bars that may receive secret values (Health, CastBar) must NOT call this.
+function AngleStatusBarMixin:DisableNativeFill()
+    local proxy = self:CreateTexture(nil, "ARTWORK")
+    proxy:SetPoint("TOP")
+    proxy:SetPoint("BOTTOM")
+    proxy:SetPoint("LEFT")
+    proxy:SetAlpha(0)
+
+    local nativeSetTexture = _G.getmetatable(self).__index.SetStatusBarTexture
+    if nativeSetTexture then
+        nativeSetTexture(self, proxy)
+    end
 end
 
 function AngleStatusBarMixin:SetReverseFill(isReverseFill)
