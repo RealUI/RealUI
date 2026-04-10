@@ -134,7 +134,7 @@ function FrameMover:RegisterEvents()
     if RealUI.RegisterEvent then
         RealUI:RegisterEvent("UI_SCALE_CHANGED", function()
             debug("UI scale changed, validating positions")
-            if InCombatLockdown() then
+            if _G.InCombatLockdown() then
                 debug("In combat, deferring validation")
                 frameMovementState.pendingValidation = true
                 return
@@ -144,7 +144,7 @@ function FrameMover:RegisterEvents()
 
         RealUI:RegisterEvent("DISPLAY_SIZE_CHANGED", function()
             debug("Display size changed, validating positions")
-            if InCombatLockdown() then
+            if _G.InCombatLockdown() then
                 debug("In combat, deferring validation")
                 frameMovementState.pendingValidation = true
                 return
@@ -287,7 +287,7 @@ function FrameMover:SetFramePosition(frameId, point, parent, relativePoint, x, y
     debug("Setting frame position:", frameId, point, parent, relativePoint, x, y)
 
     -- Protected frames (Edit Mode systems like PlayerFrame) cannot be repositioned in combat
-    if InCombatLockdown() and frame.IsInDefaultPosition then
+    if _G.InCombatLockdown() and frame.IsInDefaultPosition then
         debug("Skipping protected frame in combat:", frameId)
         frameMovementState.pendingValidation = true
         return false
