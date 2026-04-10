@@ -422,7 +422,7 @@ local CreatePowerStatus do
         end
     end
 
-    function CreatePowerStatus(parent, data)
+    function CreatePowerStatus(parent, data, unit)
         local point, anchor, relPoint, x, info
         if data.power then
             info, anchor = data.power, parent.Power
@@ -443,7 +443,9 @@ local CreatePowerStatus do
         CombatRest:SetAngleVertex(leftVertex, rightVertex)
         CombatRest.Override = UpdateStatus
         parent.CombatIndicator = CombatRest
-        parent.RestingIndicator = CombatRest
+        if unit == "player" then
+            parent.RestingIndicator = CombatRest
+        end
 
         local LeaderAFK = parent:CreateAngle("Frame", nil, anchor)
         LeaderAFK:SetSize(width, height)
@@ -575,7 +577,7 @@ local function Shared(self, unit)
     end
 
     if isAngled then
-        CreatePowerStatus(self, unitData)
+        CreatePowerStatus(self, unitData, unit)
         CreateEndBox(self, unitData)
     end
 
@@ -621,8 +623,8 @@ local function Shared(self, unit)
     -- oUF update after the first render so bars aren't grey on reload.
     -- Also ensures PostUpdateColor fires for alternative bar style on all units.
     _G.C_Timer.After(0, function()
-        if self.Health then self.Health:ForceUpdate() end
-        if self.Power then self.Power:ForceUpdate() end
+        if self.Health and self.Health.ForceUpdate then self.Health:ForceUpdate() end
+        if self.Power and self.Power.ForceUpdate then self.Power:ForceUpdate() end
     end)
 end
 
