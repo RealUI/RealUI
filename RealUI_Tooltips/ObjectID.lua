@@ -94,61 +94,7 @@ local function SetupQuestTooltips()
     _G.EventRegistry:RegisterCallback("OnQuestBlockHeader.OnEnter", QuestTooltipHook, Inventory)
 end
 
---[[
-local function SetupAchievementTooltips()
-    local frame = _G.CreateFrame("frame")
-    frame:RegisterEvent("ADDON_LOADED")
-    frame:SetScript("OnEvent", function(_, _, addonName)
-        if addonName == "Blizzard_AchievementUI" then
-            for i, button in ipairs(_G.AchievementFrameAchievementsContainer.buttons) do
-                button:HookScript("OnEnter", function()
-                    if not _G.GameTooltip:IsOwned(button) then
-                        _G.GameTooltip:SetOwner(button, "ANCHOR_NONE")
-                        _G.GameTooltip:SetPoint("TOPLEFT", button, "TOPRIGHT", 0, 0)
-                    end
-
-                    if button.id then
-                        AddToTooltip(_G.GameTooltip, TooltipTypes.achievement, button.id)
-                    end
-                end)
-                button:HookScript("OnLeave", function()
-                    _G.GameTooltip:Hide()
-                end)
-            end
-            frame:UnregisterEvent("ADDON_LOADED")
-        end
-    end)
-end
-
-local function SetupCurrencyTooltips()
-    local function setCurrencyTooltipFunction(dialog, link)
-        local currencyID = link:match("currency:(%d+)")
-        if currencyID then
-            AddToTooltip(dialog, TooltipTypes.currency, currencyID)
-        end
-    end
-
-    private.AddHook("SetHyperlink", setCurrencyTooltipFunction)
-    private.AddHook("SetCurrencyToken", function(dialog, index)
-        setCurrencyTooltipFunction(dialog, _G.C_CurrencyInfo.GetCurrencyListLink(index))
-    end)
-end
-
-local function SetupAzeriteTooltips()
-    private.AddHook("SetAzeriteEssence", function(dialog, azeriteID, rank)
-        if azeriteID then
-            AddToTooltip(dialog, TooltipTypes.azerite, azeriteID)
-        end
-    end)
-end
-]]
-
 function private.SetupIDTips()
-    --SetupSpellTooltips()
     SetupItemTooltips()
-    --SetupUnitTooltips()
     SetupQuestTooltips()
-    --SetupAchievementTooltips()
-    --SetupCurrencyTooltips()
-    --SetupAzeriteTooltips()
 end
