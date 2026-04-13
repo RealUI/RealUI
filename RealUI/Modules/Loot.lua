@@ -622,41 +622,4 @@ end
 
 function Loot:OnEnable()
     self:RegisterEvent("PLAYER_LOGIN")
-
-    --[[
-    local function MasterLooterFrame_Show()
-        local itemFrame = _G.MasterLooterFrame.Item;
-        itemFrame.ItemName:SetText(_G.LootFrame.selectedItemName);
-        itemFrame.Icon:SetTexture(_G.LootFrame.selectedTexture);
-        local colorInfo = _G.ITEM_QUALITY_COLORS[_G.LootFrame.selectedQuality];
-        itemFrame.IconBorder:SetVertexColor(colorInfo.r, colorInfo.g, colorInfo.b);
-        itemFrame.ItemName:SetVertexColor(colorInfo.r, colorInfo.g, colorInfo.b);
-
-        _G.MasterLooterFrame:Show();
-        _G.MasterLooterFrame_UpdatePlayers();
-        _G.MasterLooterFrame:SetPoint("TOPLEFT", _G.Lib_DropDownList1, 0, 0);
-
-        _G.Lib_CloseDropDownMenus();
-    end
-
-    local dropdown = _G.CreateFrame("Frame", "RealUILootDropDown", _G.UIParent, "Lib_UIDropDownMenuTemplate")
-    _G.Lib_UIDropDownMenu_Initialize(dropdown, function()
-        local info = _G.Lib_UIDropDownMenu_CreateInfo();
-        info.isTitle = 1;
-        info.text = _G.MASTER_LOOTER;
-        info.fontObject = _G.GameFontNormalLeft;
-        info.notCheckable = 1;
-        _G.Lib_UIDropDownMenu_AddButton(info);
-
-        info = _G.Lib_UIDropDownMenu_CreateInfo();
-        info.notCheckable = 1;
-        info.text = _G.ASSIGN_LOOT;
-        info.func = MasterLooterFrame_Show;
-        _G.Lib_UIDropDownMenu_AddButton(info);
-        info.text = _G.REQUEST_ROLL;
-        info.func = function() _G.DoMasterLootRoll(_G.LootFrame.selectedSlot); end;
-        _G.Lib_UIDropDownMenu_AddButton(info);
-    end, "MENU")
-    self.dropdown = dropdown
-    ]]
 end
