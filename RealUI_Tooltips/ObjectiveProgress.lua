@@ -14,7 +14,12 @@ local progressFormat = "%s |cFFFFFFFF(+%s%%)|r"
 local challengeData = {}
 
 local function AddObjectiveProgressImpl(tooltip, lineData)
-    local npcID = select(6, ("-"):split(_G.UnitGUID(tooltip._unitToken) or ""))
+    local unitToken = tooltip._unitToken
+    if _G.C_Secrets and _G.C_Secrets.ShouldUnitIdentityBeSecret and _G.C_Secrets.ShouldUnitIdentityBeSecret(unitToken) then
+        return
+    end
+
+    local npcID = select(6, ("-"):split(_G.UnitGUID(unitToken) or ""))
     npcID = tonumber(npcID)
 
     local weight
@@ -35,7 +40,7 @@ local function AddObjectiveProgressImpl(tooltip, lineData)
                 end
             end
 
-            local faction = _G.UnitFactionGroup(tooltip._unitToken)
+            local faction = _G.UnitFactionGroup(unitToken)
             local _, _, _, _, _, _, _, instanceMapID = _G.GetInstanceInfo()
             local isAlternate = challengeMapID == 234 -- Upper Karazhan
             if instanceMapID == 1822 then -- Siege of Boralus
