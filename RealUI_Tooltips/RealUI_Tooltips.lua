@@ -66,8 +66,12 @@ local function IsNonSecretString(value)
     return type(value) == "string" and not RealUI.isSecret(value)
 end
 
+local function IsUnitIdentitySecret(unit)
+    return _G.C_Secrets and _G.C_Secrets.ShouldUnitIdentityBeSecret and _G.C_Secrets.ShouldUnitIdentityBeSecret(unit)
+end
+
 local function GetUnitColor(unit)
-    if not IsSafeUnitToken(unit) then
+    if not IsSafeUnitToken(unit) or IsUnitIdentitySecret(unit) then
         return Color.white
     end
     local color
@@ -88,7 +92,7 @@ local function GetUnitColor(unit)
     return color
 end
 local function GetUnitName(unit)
-    if not IsSafeUnitToken(unit) then
+    if not IsSafeUnitToken(unit) or IsUnitIdentitySecret(unit) then
         return "Unknown"
     end
     local unitName, server = _G.UnitName(unit)
@@ -133,7 +137,7 @@ local function GetUnitName(unit)
     return unitName
 end
 local function GetUnitClassification(unit)
-    if not IsSafeUnitToken(unit) then
+    if not IsSafeUnitToken(unit) or IsUnitIdentitySecret(unit) then
         return
     end
     local level
@@ -339,7 +343,8 @@ if _G.issecure and _G.issecure() then
         local unitTarget = unitToken.."target"
         if IsNonSecretTrue(_G.UnitExists(unitTarget)) then
             local text
-            if IsNonSecretTrue(_G.UnitIsUnit(unitTarget, "player")) then
+            local canCompare = not _G.C_Secrets or not _G.C_Secrets.CanCompareUnitTokens or _G.C_Secrets.CanCompareUnitTokens(unitTarget, "player")
+            if canCompare and IsNonSecretTrue(_G.UnitIsUnit(unitTarget, "player")) then
                 text = ("|cffff0000%s|r"):format("> ".._G.YOU.." <")
             else
                 text = GetUnitName(unitTarget)
