@@ -1,8 +1,13 @@
 # Lib: RangeCheck-3.0
 
-## [1.0.17-9-gd53d7b0](https://github.com/WeakAuras/LibRangeCheck-3.0/tree/d53d7b0704995f1504f5771ea4f3dac7b6e60bac) (2026-02-25)
-[Full Changelog](https://github.com/WeakAuras/LibRangeCheck-3.0/compare/1.0.17...d53d7b0704995f1504f5771ea4f3dac7b6e60bac) [Previous Releases](https://github.com/WeakAuras/LibRangeCheck-3.0/releases)
+## [1.0.17-10-ga6b43e6](https://github.com/WeakAuras/LibRangeCheck-3.0/tree/a6b43e614b018f0121fadcb51c5bd7933b40bf52) (2026-04-09)
+[Full Changelog](https://github.com/WeakAuras/LibRangeCheck-3.0/compare/1.0.17...a6b43e614b018f0121fadcb51c5bd7933b40bf52) [Previous Releases](https://github.com/WeakAuras/LibRangeCheck-3.0/releases)
 
+- Fix: Titan event registration and use C\_EventUtils.IsEventValid  
+    Titan no longer has the LEARNED\_SPELL\_IN\_TAB event  
+    Switched to C\_EventUtils.IsEventValid across all expansions to prevent lua errors on titan and future lua errors  
+    Fixed CVAR\_UPDATE registration  
+    TOC Bumps  
 - - Adding Pyroblast as fallback for Mages  
 - Remove "Ring of righteous Flame" as reportely it's affected by talents  
     Fixes: #45  
