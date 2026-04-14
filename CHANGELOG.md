@@ -1,3 +1,29 @@
+## [3.1.11] - 2026-04-14 ##
+### Summary ###
+Taint safety hardening, library updates, dead code cleanup, and a massive Aurora skin expansion. ObjectiveProgress and Tooltips now use C_Secrets methods to prevent secret-number taint. BugGrabber updated to v12.0.12 and LibRangeCheck-3.0 to 1.0.17-10. Aurora updated from 12.0.1.28 to 12.0.1.29 with 25 new Blizzard addon skins covering nameplates, professions, talents, allied races, PvP, and legacy expansion content.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+  * RealUI_Tooltips
+  * Aurora (12.0.1.29)
+
+### Changed ###
+  * chg: update ObjectiveProgress to be protected by C_Secrets methods
+  * chg: update Tooltips to be protected by new C_Secrets methods
+  * chg: BugGrabber updated to v12.0.12
+  * chg: LibRangeCheck-3.0 upgraded from 1.0.17-9 to 1.0.17-10
+  * chore: clean up dead code in Loot module
+  * chore: remove dead code from RealUI_Tooltips
+
+### Added ###
+  * add: Aurora 12.0.1.29 adds 25 new addon skins — Blizzard_AlliedRacesUI, Blizzard_AutoCompletePopupList, Blizzard_ClassTrial, Blizzard_ClickBindingUI, Blizzard_ContentTracking, Blizzard_CovenantToasts, Blizzard_CustomizationUI, Blizzard_DelvesToast, Blizzard_ExpansionTrial, Blizzard_GenericTraitUI, Blizzard_GuildRename, Blizzard_ItemBeltFrame, Blizzard_MajorFactions, Blizzard_NamePlates, Blizzard_ObliterumUI, Blizzard_PerksProgram, Blizzard_PlunderstormPrematchUI, Blizzard_ProfessionsCustomerOrders, Blizzard_QuestTimer, Blizzard_QuickKeybind, Blizzard_RemixArtifactUI, Blizzard_ReportFrame, Blizzard_RuneforgeUI, Blizzard_SharedTalentUI, Blizzard_StableUI
+
+### Fixed ###
+  * fix: Aurora 12.0.1.29 resolves taint-safe PVP queue/join button skinning to prevent JoinBattlefield ADDON_ACTION_FORBIDDEN, and guards NameFrame nil in LargeItemButtonTemplate for PVP loot buttons
+  * fix: anchor EAB and ZoneAbility to left of topmost bar
+
+
 ## [3.1.10] - 2026-04-10 ##
 ### Summary ###
 Combat text event queue handling, stagger bar fixes, taint safety improvements, and a major Aurora skin expansion. RealUI_CombatText now summarizes rapid event queues to prevent flooding. Stagger and Soul Fragment bars now fill correctly after decoupling Lua fill from the C++ StatusBar engine. Protected frame repositioning is deferred during combat to prevent ADDON_ACTION_BLOCKED. Aurora updated from 12.0.1.27 to 12.0.1.28 with 14 new Blizzard addon skins covering combat/HUD, matchmaking/PvP, and utility addons.
@@ -599,6 +625,8 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.11]: https://github.com/RealUI/RealUI/compare/3.1.10...3.1.11
+[3.1.10]: https://github.com/RealUI/RealUI/compare/3.1.9...3.1.10
 [3.1.9]: https://github.com/RealUI/RealUI/compare/3.1.8...3.1.9
 [3.1.8]: https://github.com/RealUI/RealUI/compare/3.1.7...3.1.8
 [3.1.7]: https://github.com/RealUI/RealUI/compare/3.1.6...3.1.7
