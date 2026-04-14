@@ -407,7 +407,20 @@ local function TestConfigOptionsPreservation()
         checkedCount = checkedCount + 2
     end
 
-    -- 5e: Target aura counts
+    -- 5e: Boss/arena aura sizes exist and are numbers
+    if db.boss then
+        if _G.type(db.boss.buffSize) ~= "number" then
+            failures = failures + 1
+            _G.print("|cffff0000[FAIL]|r boss.buffSize is not a number")
+        end
+        if _G.type(db.boss.debuffSize) ~= "number" then
+            failures = failures + 1
+            _G.print("|cffff0000[FAIL]|r boss.debuffSize is not a number")
+        end
+        checkedCount = checkedCount + 2
+    end
+
+    -- 5f: Target aura counts
     if db.units and db.units.target then
         if _G.type(db.units.target.debuffCount) ~= "number" then
             failures = failures + 1
@@ -420,7 +433,20 @@ local function TestConfigOptionsPreservation()
         checkedCount = checkedCount + 2
     end
 
-    -- 5f: Cast bar config exists
+    -- 5g: Target aura sizes
+    if db.units and db.units.target then
+        if _G.type(db.units.target.debuffSize) ~= "number" then
+            failures = failures + 1
+            _G.print("|cffff0000[FAIL]|r units.target.debuffSize is not a number")
+        end
+        if _G.type(db.units.target.buffSize) ~= "number" then
+            failures = failures + 1
+            _G.print("|cffff0000[FAIL]|r units.target.buffSize is not a number")
+        end
+        checkedCount = checkedCount + 2
+    end
+
+    -- 5h: Cast bar config exists
     local CastBars = RealUI:GetModule("CastBars")
     if CastBars and CastBars.db then
         local cdb = CastBars.db.profile
@@ -443,7 +469,7 @@ local function TestConfigOptionsPreservation()
         end
     end
 
-    -- 5g: RefreshUnits propagates classColor to spawned frames
+    -- 5i: RefreshUnits propagates classColor to spawned frames
     for _, classColor in _G.ipairs({true, false}) do
         db.overlay.classColor = classColor
         UnitFrames:RefreshUnits("PreservationTest")

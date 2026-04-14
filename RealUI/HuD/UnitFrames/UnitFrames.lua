@@ -159,6 +159,8 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         frame.Debuffs:Hide()
                     end
 
+                    frame.Debuffs.size = db.units.target.debuffSize or 20
+
                     -- Update debuff layout from config
                     local debuffLayout = db.units.target.auraLayout and db.units.target.auraLayout.debuffs
                     if debuffLayout then
@@ -166,18 +168,17 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         if debuffLayout.growthY then frame.Debuffs.growthY = debuffLayout.growthY end
                         frame.Debuffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Debuffs.growthX or "RIGHT", frame.Debuffs.growthY or "UP")
                         UnitFrames.SetAuraPosition(frame.Debuffs, frame, debuffLayout.anchor or "TOPLEFT", frame.Debuffs.initialAnchor)
-                        -- Update frame size based on maxWidth
-                        if debuffLayout.maxWidth then
-                            local debuffSize = frame.Debuffs.size or 24
-                            local debuffSpacing = frame.Debuffs.spacing or 2
-                            local debuffFrameWidth = (debuffLayout.maxWidth > 0 and debuffLayout.maxWidth) or frame:GetWidth()
-                            local debuffCols = _G.math.floor((debuffFrameWidth + debuffSpacing) / (debuffSize + debuffSpacing))
-                            local debuffRows = _G.math.ceil(frame.Debuffs.num / _G.math.max(debuffCols, 1))
-                            frame.Debuffs:SetWidth(debuffFrameWidth)
-                            frame.Debuffs:SetHeight(debuffRows * (debuffSize + debuffSpacing))
-                        end
-                        frame.Debuffs:ForceUpdate()
                     end
+                    -- Recalculate container size
+                    local debuffSize = frame.Debuffs.size
+                    local debuffSpacing = frame.Debuffs.spacing or 2
+                    local debuffMaxWidth = debuffLayout and debuffLayout.maxWidth
+                    local debuffFrameWidth = (debuffMaxWidth and debuffMaxWidth > 0 and debuffMaxWidth) or frame:GetWidth()
+                    local debuffCols = _G.math.floor((debuffFrameWidth + debuffSpacing) / (debuffSize + debuffSpacing))
+                    local debuffRows = _G.math.ceil(frame.Debuffs.num / _G.math.max(debuffCols, 1))
+                    frame.Debuffs:SetWidth(debuffFrameWidth)
+                    frame.Debuffs:SetHeight(debuffRows * (debuffSize + debuffSpacing))
+                    frame.Debuffs:ForceUpdate()
                 end
                 if frame.Buffs then
                     if db.units.target.showTargetBuffs then
@@ -188,6 +189,8 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         frame.Buffs:Hide()
                     end
 
+                    frame.Buffs.size = db.units.target.buffSize or 20
+
                     -- Update buff layout from config
                     local buffLayout = db.units.target.auraLayout and db.units.target.auraLayout.buffs
                     if buffLayout then
@@ -195,17 +198,17 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         if buffLayout.growthY then frame.Buffs.growthY = buffLayout.growthY end
                         frame.Buffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Buffs.growthX or "LEFT", frame.Buffs.growthY or "UP")
                         UnitFrames.SetAuraPosition(frame.Buffs, frame, buffLayout.anchor or "TOPRIGHT", frame.Buffs.initialAnchor)
-                        if buffLayout.maxWidth then
-                            local buffSize = frame.Buffs.size or 20
-                            local buffSpacing = frame.Buffs.spacing or 2
-                            local buffFrameWidth = (buffLayout.maxWidth > 0 and buffLayout.maxWidth) or frame:GetWidth()
-                            local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
-                            local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
-                            frame.Buffs:SetWidth(buffFrameWidth)
-                            frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
-                        end
-                        frame.Buffs:ForceUpdate()
                     end
+                    -- Recalculate container size
+                    local buffSize = frame.Buffs.size
+                    local buffSpacing = frame.Buffs.spacing or 2
+                    local buffMaxWidth = buffLayout and buffLayout.maxWidth
+                    local buffFrameWidth = (buffMaxWidth and buffMaxWidth > 0 and buffMaxWidth) or frame:GetWidth()
+                    local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
+                    local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
+                    frame.Buffs:SetWidth(buffFrameWidth)
+                    frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
+                    frame.Buffs:ForceUpdate()
                 end
             end
 
@@ -220,23 +223,25 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         frame.Buffs:Hide()
                     end
 
+                    frame.Buffs.size = db.units.player.buffSize or 20
+
                     local buffLayout = db.units.player.auraLayout and db.units.player.auraLayout.buffs
                     if buffLayout then
                         if buffLayout.growthX then frame.Buffs.growthX = buffLayout.growthX end
                         if buffLayout.growthY then frame.Buffs.growthY = buffLayout.growthY end
                         frame.Buffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Buffs.growthX or "RIGHT", frame.Buffs.growthY or "UP")
                         UnitFrames.SetAuraPosition(frame.Buffs, frame, buffLayout.anchor or "TOPLEFT", frame.Buffs.initialAnchor)
-                        if buffLayout.maxWidth then
-                            local buffSize = frame.Buffs.size or 20
-                            local buffSpacing = frame.Buffs.spacing or 2
-                            local buffFrameWidth = (buffLayout.maxWidth > 0 and buffLayout.maxWidth) or frame:GetWidth()
-                            local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
-                            local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
-                            frame.Buffs:SetWidth(buffFrameWidth)
-                            frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
-                        end
-                        frame.Buffs:ForceUpdate()
                     end
+                    -- Recalculate container size
+                    local buffSize = frame.Buffs.size
+                    local buffSpacing = frame.Buffs.spacing or 2
+                    local buffMaxWidth = buffLayout and buffLayout.maxWidth
+                    local buffFrameWidth = (buffMaxWidth and buffMaxWidth > 0 and buffMaxWidth) or frame:GetWidth()
+                    local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
+                    local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
+                    frame.Buffs:SetWidth(buffFrameWidth)
+                    frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
+                    frame.Buffs:ForceUpdate()
                 end
             end
 
@@ -308,6 +313,12 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                     frame.Debuffs.num = 0
                     frame.Debuffs:Hide()
                 end
+                frame.Debuffs.size = db.boss.debuffSize or 20
+                local debuffSpacing = frame.Debuffs.spacing or 2
+                local debuffCols = _G.math.floor((frame:GetWidth() + debuffSpacing) / (frame.Debuffs.size + debuffSpacing))
+                local debuffRows = _G.math.ceil(frame.Debuffs.num / _G.math.max(debuffCols, 1))
+                frame.Debuffs:SetHeight(debuffRows * (frame.Debuffs.size + debuffSpacing))
+                frame.Debuffs:ForceUpdate()
             end
             if frame.Buffs then
                 if db.boss.showBossBuffs then
@@ -317,6 +328,12 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                     frame.Buffs.num = 0
                     frame.Buffs:Hide()
                 end
+                frame.Buffs.size = db.boss.buffSize or 20
+                local buffSpacing = frame.Buffs.spacing or 2
+                local buffCols = _G.math.floor((frame:GetWidth() + buffSpacing) / (frame.Buffs.size + buffSpacing))
+                local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
+                frame.Buffs:SetHeight(buffRows * (frame.Buffs.size + buffSpacing))
+                frame.Buffs:ForceUpdate()
             end
 
             frame:UpdateAllElements(event)
@@ -558,6 +575,7 @@ function UnitFrames:OnInitialize()
                     reversePercent = false,
                     framePoint = {},
                     buffCount = 16,
+                    buffSize = 20,
                     showPlayerBuffs = true,
                     auraLayout = {
                         buffs = {
@@ -583,7 +601,9 @@ function UnitFrames:OnInitialize()
                     reverseFill = false,
                     framePoint = {},
                     debuffCount = 16,
+                    debuffSize = 20,
                     buffCount = 16,
+                    buffSize = 20,
                     showTargetDebuffs = true,
                     showTargetBuffs = true,
                     auraLayout = {
@@ -662,7 +682,9 @@ function UnitFrames:OnInitialize()
             boss = {
                 gap = 3,
                 debuffCount = 16,
+                debuffSize = 20,
                 buffCount = 16,
+                buffSize = 20,
                 showBossDebuffs = true,
                 showBossBuffs = true,
             },

@@ -27,7 +27,7 @@ UnitFrames.boss = {
         -- Boss Debuffs
         local db = UnitFrames.db.profile
         local Base = _G.Aurora.Base
-        local debuffSize = 20
+        local debuffSize = (db.boss and db.boss.debuffSize) or 20
         local debuffSpacing = 2
         local debuffNum = (db.boss and db.boss.debuffCount) or 16
         local debuffCols = _G.math.floor((dialog:GetWidth() + debuffSpacing) / (debuffSize + debuffSpacing))
@@ -49,7 +49,7 @@ UnitFrames.boss = {
         dialog.Debuffs = Debuffs
 
         -- Boss Buffs
-        local buffSize = 18
+        local buffSize = (db.boss and db.boss.buffSize) or 20
         local buffSpacing = 2
         local buffNum = (db.boss and db.boss.buffCount) or 16
         local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))

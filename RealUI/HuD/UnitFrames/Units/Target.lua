@@ -48,7 +48,7 @@ UnitFrames.target = {
         end
 
         -- Target Debuffs
-        local debuffSize = 24
+        local debuffSize = (db.units.target and db.units.target.debuffSize) or 20
         local debuffSpacing = 2
         local debuffNum = (db.units.target and db.units.target.debuffCount) or 16
         local debuffLayout = (db.units.target and db.units.target.auraLayout and db.units.target.auraLayout.debuffs) or {}
@@ -77,7 +77,7 @@ UnitFrames.target = {
         dialog.Debuffs = Debuffs
 
         -- Target Buffs
-        local buffSize = 20
+        local buffSize = (db.units.target and db.units.target.buffSize) or 20
         local buffSpacing = 2
         local buffNum = (db.units.target and db.units.target.buffCount) or 16
         local buffLayout = (db.units.target and db.units.target.auraLayout and db.units.target.auraLayout.buffs) or {}
