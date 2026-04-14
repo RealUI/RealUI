@@ -338,18 +338,20 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     -- Extra Action Bar
     ----
     if barSettings.moveBars.eab then
-        local eabX, eabY
+        -- Anchor EAB and ZoneAbility to the left of the topmost center bar
+        -- Both stacked vertically, clear of right-side Naga bars
+        local topBar = _G.BT4Bar1
+        if topBar then
+            local pad = 4
 
-        -- Calculate X, Y
-        eabX = _G.max(BarSizes[2], BarSizes[3]) / 2 + 5.5
-        eabY = (ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])["ActionBarsBotY"] + 6
+            _G.ExtraActionButton1:ClearAllPoints()
+            _G.ExtraActionButton1:SetPoint("BOTTOMRIGHT", topBar, "BOTTOMLEFT", -pad, 0)
 
-        _G.ExtraActionButton1:ClearAllPoints()
-        _G.ExtraActionButton1:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOM", eabX - 1, eabY)
+            _G.ZoneAbilityFrame.SpellButtonContainer:ClearAllPoints()
+            _G.ZoneAbilityFrame.SpellButtonContainer:SetPoint("TOPRIGHT", _G.ExtraActionButton1, "TOPLEFT", -pad, 0)
+        end
 
-        _G.ZoneAbilityFrame.SpellButtonContainer:ClearAllPoints()
-        _G.ZoneAbilityFrame.SpellButtonContainer:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOM", -eabX, eabY)
-
+        -- Push BT4's ExtraActionBar container offscreen so it doesn't interfere
         local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
         if profileEAB then
             profileEAB["position"] = {
