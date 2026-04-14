@@ -373,27 +373,35 @@ do
 					local locals = GetErrorLocals(level)
 					errorObject.locals = locals or "Debuglocals was nil."
 				end
+
+				if not isDisplayRegistered then
+					print(L.ERROR_DETECTED:format(addon:GetChatLink(errorObject)))
+				end
 			else
 				local curTime = time()
-				local errorTime = errorObject.time
+				local elapsed = curTime - errorObject.time
 				errorObject.time = curTime
-				-- Do not re-arrange this error in the DB unless 10 seconds have elapsed since the last time the error occured (timer will reset if the error is spamming)
-				if curTime - errorTime > 10 then
+				if elapsed > 10 then
+					-- Do not re-arrange this error in the DB unless 10 seconds have elapsed since the last time the error occured (timer will reset if the error is spamming)
 					table.remove(db or loadErrors, positionInDatabase)
 					StoreError(errorObject)
-				end
 
-				if not isSimple and curTime - errorTime > 120 then -- More than 2 minutes, update the stack again
-					local stack, level = GetErrorStack()
-					errorObject.stack = stack or "Debugstack was nil."
-					local locals = GetErrorLocals(level)
-					errorObject.locals = locals or "Debuglocals was nil."
+					if elapsed > 30 then
+						-- Throttle the print
+						if not isDisplayRegistered then
+							print(L.ERROR_DETECTED:format(addon:GetChatLink(errorObject)))
+						end
+
+						if not isSimple and elapsed > 120 then
+							-- More than 2 minutes, update the stack again
+							local stack, level = GetErrorStack()
+							errorObject.stack = stack or "Debugstack was nil."
+							local locals = GetErrorLocals(level)
+							errorObject.locals = locals or "Debuglocals was nil."
+						end
+					end
 				end
 			end
-		end
-
-		if not isDisplayRegistered then
-			print(L.ERROR_DETECTED:format(addon:GetChatLink(errorObject)))
 		end
 
 		local tableID = tostring(errorObject)
