@@ -11,27 +11,27 @@ ignore:
 
 externals:
     RealUI/Libs/AceAddon-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceAddon-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceAddon-3.0
     RealUI/Libs/AceBucket-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceBucket-3.0
     RealUI/Libs/AceConsole-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceConsole-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceConsole-3.0
     RealUI/Libs/AceEvent-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
     RealUI/Libs/AceHook-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceHook-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceHook-3.0
     RealUI/Libs/AceTimer-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceTimer-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceTimer-3.0
     RealUI/Libs/AceSerializer-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceSerializer-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceSerializer-3.0
     RealUI/Libs/HereBeDragons:
-        url: https://repos.wowace.com/wow/herebedragons
+        url: https://github.com/Nevcairiel/HereBeDragons.git
         tag: latest
     RealUI/Libs/LibChatAnims:
         url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
         tag: latest
     RealUI/Libs/LibDualSpec-1.0:
-        url: https://repos.wowace.com/wow/libdualspec-1-0
+        url: https://github.com/AdiAddons/LibDualSpec-1.0.git
         tag: latest
     RealUI/Libs/LibIconFonts:
         url: https://github.com/Gethe/LibIconFonts.git
@@ -44,24 +44,24 @@ externals:
     RealUI/Libs/oUF:
         url: https://github.com/oUF-wow/oUF.git
     RealUI_Config/Libs/AceConfig-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceConfig-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceConfig-3.0
     RealUI_Config/Libs/AceDBOptions-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceDBOptions-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceDBOptions-3.0
     RealUI_Config/Libs/AceGUI-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceGUI-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceGUI-3.0
     RealUI_Config/Libs/AceGUI-3.0-SharedMediaWidgets:
         url: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
         tag: latest
 
     RealUI_Bugs/Libs/CallbackHandler-1.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/CallbackHandler-1.0
+        url: https://github.com/WoWUIDev/Ace3.git/CallbackHandler-1.0
     RealUI_Bugs/Libs/LibStub:
-        url: https://repos.wowace.com/wow/ace3/trunk/LibStub
+        url: https://github.com/WoWUIDev/Ace3.git/LibStub
     RealUI_Bugs/Libs/LibTextDump-1.0:
         url: https://repos.wowace.com/wow/libtextdump-1-0
 
     RealUI_Skins/Libs/AceDB-3.0:
-        url: https://repos.wowace.com/wow/ace3/trunk/AceDB-3.0
+        url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
     RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
         url: https://github.com/alarofrunetotem/LibItemUpgradeInfo.git
         tag: latest

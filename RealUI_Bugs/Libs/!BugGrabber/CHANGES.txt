@@ -1,14 +1,2 @@
 ------------------------------------------------------------------------
-r380 | funkehdude | 2026-03-27 18:28:57 +0000 (Fri, 27 Mar 2026) | 1 line
-Changed paths:
-   M /trunk/BugGrabber.lua
-
-Throttle prints when no display addon is being used
-------------------------------------------------------------------------
-r379 | funkehdude | 2026-03-27 17:39:41 +0000 (Fri, 27 Mar 2026) | 1 line
-Changed paths:
-   M /trunk/!BugGrabber.toc
-
-Bump toc
-------------------------------------------------------------------------
 
