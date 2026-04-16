@@ -214,7 +214,7 @@ function SystemIntegration:ManageResources()
     end, 300) -- Every 5 minutes
 
     -- Monitor memory usage (only if enabled in settings)
-    if RealUI.PerformanceMonitor and RealUI.db and RealUI.db.profile.settings.performanceMonitorEnabled then
+    if RealUI.PerformanceMonitor and RealUI.db and RealUI.db.profile.settings.performanceMonitorEnabled == true then
         RealUI.PerformanceMonitor:StartMonitoring()
     end
 

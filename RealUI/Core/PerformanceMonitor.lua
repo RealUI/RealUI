@@ -84,6 +84,11 @@ local alertHistory = {}
 local monitoringTimers = {}
 local isMonitoring = false
 
+local function IsPerformanceMonitoringEnabled()
+    local settings = RealUI.db and RealUI.db.profile and RealUI.db.profile.settings
+    return settings and settings.performanceMonitorEnabled == true
+end
+
 -- Performance Monitoring Core Functions
 
 function PerformanceMonitor:Initialize()
@@ -177,6 +182,13 @@ function PerformanceMonitor:GetMemoryUsage()
 end
 
 function PerformanceMonitor:TrackMemoryUsage()
+    if not IsPerformanceMonitoringEnabled() then
+        if isMonitoring then
+            self:StopMonitoring()
+        end
+        return performanceData.memory.current
+    end
+
     local currentTime = GetTime()
 
     -- Check if enough time has passed since last check
@@ -258,6 +270,13 @@ function PerformanceMonitor:GetCPUUsage()
 end
 
 function PerformanceMonitor:TrackCPUUsage()
+    if not IsPerformanceMonitoringEnabled() then
+        if isMonitoring then
+            self:StopMonitoring()
+        end
+        return performanceData.cpu.current
+    end
+
     local currentTime = GetTime()
 
     -- Check if enough time has passed since last check
@@ -322,6 +341,13 @@ end
 -- Framerate Monitoring
 
 function PerformanceMonitor:TrackFramerate()
+    if not IsPerformanceMonitoringEnabled() then
+        if isMonitoring then
+            self:StopMonitoring()
+        end
+        return performanceData.framerate.current
+    end
+
     local currentTime = GetTime()
     local fps = GetFramerate()
 
@@ -586,6 +612,11 @@ function PerformanceMonitor:StartMonitoring()
         return false
     end
 
+    if not IsPerformanceMonitoringEnabled() then
+        debug("Performance monitoring disabled by settings.performanceMonitorEnabled")
+        return false
+    end
+
     debug("Starting performance monitoring")
     isMonitoring = true
     performanceData.system.monitoring = true
@@ -672,8 +703,22 @@ function PerformanceMonitor:CleanupHistory()
 end
 
 function PerformanceMonitor:TrimHistory(history)
-    while #history > PERFORMANCE_CONFIG.MAX_HISTORY_ENTRIES do
-        table.remove(history, 1)
+    local maxEntries = PERFORMANCE_CONFIG.MAX_HISTORY_ENTRIES
+    local entryCount = #history
+
+    if entryCount <= maxEntries then
+        return
+    end
+
+    local removeCount = entryCount - maxEntries
+
+    -- Keep the newest entries with a single linear pass; this avoids
+    -- repeated table.remove(history, 1) shifts that can stall the client.
+    for i = 1, maxEntries do
+        history[i] = history[i + removeCount]
+    end
+    for i = maxEntries + 1, entryCount do
+        history[i] = nil
     end
 end
 
