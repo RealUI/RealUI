@@ -1,3 +1,20 @@
+## [3.1.12] - 2026-04-16 ##
+### Summary ###
+Configurable aura button sizing, BugGrabber update, packaging fix, and new Aurora skins. Aura buttons now support user-configurable sizes with automatic container resizing. BugGrabber updated to v12.0.14. Aurora updated from 12.0.1.29 to 12.0.1.30 with skins for Housing, GenericShoppingCart, and Subtitles.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+  * Aurora (12.0.1.30)
+
+### Changed ###
+  * chg: BugGrabber updated to v12.0.14
+
+### Added ###
+  * add: configurable aura button size with automatic container resize
+  * add: Aurora 12.0.1.30 adds skins for Blizzard_Housing, Blizzard_GenericShoppingCart, and Blizzard_Subtitles
+
+
 ## [3.1.11] - 2026-04-14 ##
 ### Summary ###
 Taint safety hardening, library updates, dead code cleanup, and a massive Aurora skin expansion. ObjectiveProgress and Tooltips now use C_Secrets methods to prevent secret-number taint. BugGrabber updated to v12.0.12 and LibRangeCheck-3.0 to 1.0.17-10. Aurora updated from 12.0.1.28 to 12.0.1.29 with 25 new Blizzard addon skins covering nameplates, professions, talents, allied races, PvP, and legacy expansion content.
