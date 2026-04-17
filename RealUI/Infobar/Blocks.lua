@@ -1425,6 +1425,7 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
 
+                tooltip:AddLine(" ")
                 lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
                 tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
 
@@ -1687,6 +1688,7 @@ function Infobar:CreateBlocks()
                 lineNum, colNum = tooltip:AddLine()
                 tooltip:SetCell(lineNum, colNum, friendsData, TextTableCellProvider)
 
+                tooltip:AddLine(" ")
                 lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
                 tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
 
