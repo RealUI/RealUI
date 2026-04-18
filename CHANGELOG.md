@@ -1,3 +1,25 @@
+## [3.1.13] - 2026-04-18 ##
+### Summary ###
+Unit frame status text now supports a configurable outline mode, Infobar hint text spacing is improved for readability, and performance monitor timeout handling is hardened so timers shut down correctly when monitoring is disabled. Aurora is updated from 12.0.1.30 to 12.0.1.31 with status text outline styling updates and fixes for ExternalDefensivesFrame and LootHistory item name visibility.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * Aurora (12.0.1.31)
+
+### Added ###
+  * add: configurable status text outline mode for health and power labels on unit frames
+
+### Changed ###
+  * chg: Infobar adds spacing above the Guild/Friends whisper-invite hint line for clearer separation
+  * chg: Aurora updated to 12.0.1.31 (from 12.0.1.30)
+
+### Fixed ###
+  * fix: harden performance monitor timeout handling and enforce timer shutdown when the feature is disabled
+  * fix: Aurora 12.0.1.31 removes the ExternalDefensivesFrame container backdrop to prevent an always-visible empty bar
+  * fix: Aurora 12.0.1.31 hides LootHistory BackgroundArtFrame textures so item names remain visible
+
+
 ## [3.1.12] - 2026-04-16 ##
 ### Summary ###
 Configurable aura button sizing, BugGrabber update, packaging fix, and new Aurora skins. Aura buttons now support user-configurable sizes with automatic container resizing. BugGrabber updated to v12.0.14. Aurora updated from 12.0.1.29 to 12.0.1.30 with skins for Housing, GenericShoppingCart, and Subtitles.
@@ -642,6 +664,8 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.13]: https://github.com/RealUI/RealUI/compare/3.1.12...3.1.13
+[3.1.12]: https://github.com/RealUI/RealUI/compare/3.1.11...3.1.12
 [3.1.11]: https://github.com/RealUI/RealUI/compare/3.1.10...3.1.11
 [3.1.10]: https://github.com/RealUI/RealUI/compare/3.1.9...3.1.10
 [3.1.9]: https://github.com/RealUI/RealUI/compare/3.1.8...3.1.9
