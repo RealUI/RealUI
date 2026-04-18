@@ -462,6 +462,26 @@ do -- UnitFrames
                         end,
                         order = 30,
                     },
+                    statusTextOutline = {
+                        name = "Status Text Outline",
+                        desc = "Choose how health and power status text is outlined.",
+                        type = "select",
+                        values = function()
+                            return {
+                                shadow = "Shadow",
+                                outline = "Outline",
+                                thick = "Thick Outline",
+                            }
+                        end,
+                        get = function()
+                            return UnitFrames.db.profile.misc.statusTextOutline or "outline"
+                        end,
+                        set = function(_, value)
+                            UnitFrames.db.profile.misc.statusTextOutline = value
+                            UnitFrames:RefreshUnits("StatusTextOutline")
+                        end,
+                        order = 31,
+                    },
                     focusClick = {
                         name = L["UnitFrames_SetFocus"],
                         desc = L["UnitFrames_SetFocusDesc"],

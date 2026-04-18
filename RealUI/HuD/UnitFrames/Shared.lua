@@ -206,7 +206,7 @@ local function CreateHealthBar(parent, info, isAngled)
         else
             Health.text:SetPoint("CENTER")
         end
-        Health.text:SetFontObject("SystemFont_Shadow_Med1")
+        UnitFrames:ApplyStatusTextFont(Health.text)
         local statusText = GetMiscDB().statusText
         parent:Tag(Health.text, UnitFrames.GetHealthTagString(statusText))
     end
@@ -350,7 +350,7 @@ local function CreatePowerBar(parent, info, isAngled)
         else
             Power.text:SetPoint("CENTER")
         end
-        Power.text:SetFontObject("SystemFont_Shadow_Med1")
+        UnitFrames:ApplyStatusTextFont(Power.text)
         local statusText = GetMiscDB().statusText
         local _, powerType = _G.UnitPowerType(parent.unit)
         parent:Tag(Power.text, UnitFrames.GetPowerTagString(statusText, powerType))

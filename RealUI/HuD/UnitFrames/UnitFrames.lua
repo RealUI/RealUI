@@ -49,6 +49,32 @@ local units = {
     "TargetTarget",
 }
 
+function UnitFrames:ApplyStatusTextFont(fontString)
+    if not fontString then return end
+
+    local misc = db and db.misc or {}
+    local mode = misc.statusTextOutline or "outline"
+
+    if mode == "shadow" then
+        fontString:SetFontObject("SystemFont_Shadow_Med1")
+        return
+    end
+
+    -- Start from the shadowed base font, then swap in outline flags.
+    fontString:SetFontObject("SystemFont_Shadow_Med1")
+    local font, size = fontString:GetFont()
+    if not font or not size then
+        fontString:SetFontObject("SystemFont_Shadow_Med1_Outline")
+        return
+    end
+
+    if mode == "thick" then
+        fontString:SetFont(font, size, "THICKOUTLINE")
+    else
+        fontString:SetFont(font, size, "OUTLINE")
+    end
+end
+
 function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
     -- Swap oUF.colors.health based on alternative bar style (only affects angled bars via UpdateColor override)
     oUF.colors.health = oUF:CreateColor(0.66, 0.22, 0.22)
@@ -120,6 +146,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
 
                 -- Retag health text
                 if frame.Health.text then
+                    self:ApplyStatusTextFont(frame.Health.text)
                     frame:Untag(frame.Health.text)
                     frame:Tag(frame.Health.text, UnitFrames.GetHealthTagString(db.misc.statusText))
                 end
@@ -142,6 +169,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                 end
 
                 if frame.Power.text then
+                    self:ApplyStatusTextFont(frame.Power.text)
                     frame:Untag(frame.Power.text)
                     local _, powerType = _G.UnitPowerType(unitKey)
                     frame:Tag(frame.Power.text, UnitFrames.GetPowerTagString(db.misc.statusText, powerType))
@@ -544,6 +572,7 @@ function UnitFrames:OnInitialize()
                 focusclick = true,
                 focuskey = "shift",
                 statusText = "smart",
+                statusTextOutline = "outline",
                 alwaysDisplayFullHealth = true,
                 showPrediction = true,
                 showPrivateAuras = true,
