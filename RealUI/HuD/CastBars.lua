@@ -101,7 +101,11 @@ function CastBars:SetBarTicks(tickInfo)
     local size = castbarSizes.player
 
     local numTicks = tickInfo.ticks
-    local haste = _G.UnitSpellHaste("player") / 100 + 1
+    local hasteRating = _G.UnitSpellHaste("player")
+    local haste = 1
+    if not _G.issecretvalue(hasteRating) and type(hasteRating) == "number" then
+        haste = hasteRating / 100 + 1
+    end
     numTicks = _G.floor(numTicks * haste + 0.5)
     for i = 1, numTicks do
         local xOfs
