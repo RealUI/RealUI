@@ -1,3 +1,25 @@
+## [3.1.15] - 2026-04-24 ##
+### Summary ###
+Follow-up WoW 12.0.5 stability release. Unit frame abbreviation formatting now uses a hardened multi-path fallback for Blizzard's new API preconditions, cast bar tick placement ignores tainted haste values, AltPowerBar guards early update races, and RealUI_Bugs filters stale Private Aura updates from Blizzard. Aurora is updated from 12.0.5.0 to 12.0.5.2 with QueueStatusFrame taint and SetVertexColor compatibility fixes.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+  * RealUI_Dev
+  * Aurora (12.0.5.2)
+
+### Changed ###
+  * chg: Aurora updated to 12.0.5.2 (from 12.0.5.0)
+  * chg: remove unused `Test.lua` entry from the RealUI_Dev TOC
+
+### Fixed ###
+  * fix: harden unit-frame abbreviated number formatting for WoW 12.0.5 with formatter, legacy config, default Blizzard, and pure-Lua fallback paths
+  * fix: ignore secret or nonnumeric `UnitSpellHaste("player")` values when computing cast bar ticks to prevent tainted arithmetic on channel bars
+  * fix: guard PlayerPowerBarAlt against early update callbacks before the bar frame exists so stale events stop raising errors
+  * fix: filter stale `updatedAuraInstanceIDs` in Blizzard PrivateAuras updates before forwarding to Blizzard handlers to avoid race-driven nil aura data
+  * fix: Aurora 12.0.5.2 avoids QueueStatusFrame tooltip-backdrop taint and protects `SetVertexColor` calls with Blizzard color objects on 12.0.5
+
+
 ## [3.1.14] - 2026-04-23 ##
 ### Summary ###
 WoW 12.0.5 compatibility update. Hardened abbreviation config for new API preconditions, bumped all TOC Interface versions to 120005. Aurora updated to 12.0.5.0 with initial 12.0.5 compatibility fixes. Some upstream addons (oUF) are not yet updated for 12.0.5.
@@ -695,6 +717,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.15]: https://github.com/RealUI/RealUI/compare/3.1.14...3.1.15
 [3.1.14]: https://github.com/RealUI/RealUI/compare/3.1.13...3.1.14
 [3.1.13]: https://github.com/RealUI/RealUI/compare/3.1.12...3.1.13
 [3.1.12]: https://github.com/RealUI/RealUI/compare/3.1.11...3.1.12
