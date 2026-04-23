@@ -8,6 +8,10 @@ local ADDON_NAME, ns = ... -- luacheck: ignore
 -- breakpoints are in descending order, each range maps to the expected suffix,
 -- and AbbreviateNumbers produces consistent output for any given input.
 --
+-- Updated for 12.0.5: CreateAbbreviateConfig now has
+-- RequiresRestrictedAbbreviationBreakpoints precondition (FailureMode = Error).
+-- Tests validate that the pcall-guarded fallback path works correctly.
+--
 -- NOTE: AbbreviateNumbers may only append suffixes for secret values (from
 -- UnitHealth etc.). With plain Lua numbers the API may return unsuffixed
 -- strings. Therefore this test validates structural correctness and
@@ -77,11 +81,59 @@ local function RunBreakpointSuffixTest()
         end
     end
 
-    -- Part 2: Validate AbbreviateNumbers consistency
-    -- Calling AbbreviateNumbers twice with the same input must return the same result
+    -- Part 2: Validate CreateAbbreviateConfig pcall safety (12.0.5 hardening)
+    -- CreateAbbreviateConfig may now throw due to RequiresRestrictedAbbreviationBreakpoints.
+    -- The production code wraps this in pcall; verify that pattern works.
+    if _G.CreateAbbreviateConfig then
+        local ok, configOrErr = pcall(_G.CreateAbbreviateConfig, abbrevBreakpoints)
+        if ok then
+            _G.print("|cff00ff00[INFO]|r CreateAbbreviateConfig accepted custom breakpoints (pre-12.0.5 or breakpoints valid)")
+        else
+            _G.print("|cffffff00[INFO]|r CreateAbbreviateConfig rejected custom breakpoints (12.0.5 precondition): " .. _G.tostring(configOrErr))
+            _G.print("|cffffff00[INFO]|r This is expected — production code falls back to AbbreviatedNumberFormatter or defaults")
+        end
+    else
+        _G.print("|cff888888[INFO]|r CreateAbbreviateConfig not available")
+    end
+
+    -- Part 2b: Validate AbbreviatedNumberFormatter path (12.0.5+)
+    if _G.C_StringUtil and _G.C_StringUtil.CreateAbbreviatedNumberFormatter then
+        local ok, formatter = pcall(_G.C_StringUtil.CreateAbbreviatedNumberFormatter)
+        if ok and formatter then
+            local setOk, setErr = pcall(formatter.SetBreakpoints, formatter, abbrevBreakpoints)
+            if setOk then
+                _G.print("|cff00ff00[INFO]|r AbbreviatedNumberFormatter accepted custom breakpoints")
+            else
+                _G.print("|cffffff00[INFO]|r AbbreviatedNumberFormatter rejected custom breakpoints: " .. _G.tostring(setErr))
+                -- Verify ResetBreakpoints fallback works
+                local resetOk = pcall(formatter.ResetBreakpoints, formatter)
+                if resetOk then
+                    _G.print("|cff00ff00[INFO]|r ResetBreakpoints fallback succeeded (locale defaults active)")
+                else
+                    failures = failures + 1
+                    _G.print("|cffff0000[FAIL]|r ResetBreakpoints also failed — no viable formatter path")
+                end
+            end
+        else
+            failures = failures + 1
+            _G.print("|cffff0000[FAIL]|r CreateAbbreviatedNumberFormatter failed: " .. _G.tostring(formatter))
+        end
+    else
+        _G.print("|cff888888[INFO]|r AbbreviatedNumberFormatter API not available (pre-12.0.5)")
+    end
+
+    -- Part 3: Validate AbbreviateNumbers consistency
+    -- Calling AbbreviateNumbers twice with the same input must return the same result.
+    -- Use whichever abbrevData path is available.
     if _G.AbbreviateNumbers then
-        local abbrevConfig = _G.CreateAbbreviateConfig and _G.CreateAbbreviateConfig(abbrevBreakpoints)
-        local abbrevData = { breakpointData = abbrevBreakpoints, config = abbrevConfig }
+        local abbrevConfig
+        if _G.CreateAbbreviateConfig then
+            local ok, config = pcall(_G.CreateAbbreviateConfig, abbrevBreakpoints)
+            if ok then abbrevConfig = config end
+        end
+        -- abbrevData may be nil if CreateAbbreviateConfig was rejected — that's fine,
+        -- AbbreviateNumbers with nil uses Blizzard defaults
+        local abbrevData = abbrevConfig and { breakpointData = abbrevBreakpoints, config = abbrevConfig } or nil
 
         for i = 1, NUM_ITERATIONS do
             local value = nextRandom(0x7FFFFFFF)
@@ -115,7 +167,7 @@ local function RunBreakpointSuffixTest()
         _G.print("|cff888888[INFO]|r AbbreviateNumbers not available, skipping consistency checks")
     end
 
-    -- Part 3: Coverage check — every range [10K, 1M), [1M, 1B), [1B, +inf) has at least one breakpoint
+    -- Part 4: Coverage check — every range [10K, 1M), [1M, 1B), [1B, +inf) has at least one breakpoint
     local hasK, hasM, hasB = false, false, false
     for _, bp in _G.ipairs(abbrevBreakpoints) do
         if bp.abbreviation == "K" then hasK = true end

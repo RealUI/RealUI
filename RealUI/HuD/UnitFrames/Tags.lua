@@ -18,8 +18,15 @@ local RealUI = private.RealUI
 
 local UnitFrames = RealUI:GetModule("UnitFrames")
 
--- Abbreviation config: use CreateAbbreviateConfig for cached performance
+-- Abbreviation config: hardened for 12.0.5 precondition changes
 -- AbbreviateNumbers accepts secret values natively (no string conversion needed)
+--
+-- Strategy (in priority order):
+--   1. AbbreviatedNumberFormatter (new 12.0.5+ ScriptObject API)
+--   2. CreateAbbreviateConfig (legacy path, pcall-guarded)
+--   3. AbbreviateNumbers with nil abbrevData (Blizzard default formatting)
+--   4. Pure-Lua fallback (if AbbreviateNumbers itself is unavailable)
+
 local abbrevBreakpoints = {
     { breakpoint = 1e12, abbreviation = "B", significandDivisor = 1e10, fractionDivisor = 100, abbreviationIsGlobal = false },
     { breakpoint = 1e11, abbreviation = "B", significandDivisor = 1e9,  fractionDivisor = 1,   abbreviationIsGlobal = false },
@@ -31,8 +38,84 @@ local abbrevBreakpoints = {
     { breakpoint = 1e5,  abbreviation = "K", significandDivisor = 1000, fractionDivisor = 1,   abbreviationIsGlobal = false },
     { breakpoint = 1e4,  abbreviation = "K", significandDivisor = 100,  fractionDivisor = 10,  abbreviationIsGlobal = false },
 }
-local abbrevConfig = _G.CreateAbbreviateConfig and _G.CreateAbbreviateConfig(abbrevBreakpoints)
-local abbrevData = { breakpointData = abbrevBreakpoints, config = abbrevConfig }
+
+-- Path 1: Try AbbreviatedNumberFormatter (12.0.5+)
+local abbrevFormatter
+if _G.C_StringUtil and _G.C_StringUtil.CreateAbbreviatedNumberFormatter then
+    local ok, formatter = pcall(_G.C_StringUtil.CreateAbbreviatedNumberFormatter)
+    if ok and formatter then
+        local setOk = pcall(formatter.SetBreakpoints, formatter, abbrevBreakpoints)
+        if setOk then
+            abbrevFormatter = formatter
+        else
+            -- Custom breakpoints rejected; reset to locale defaults
+            pcall(formatter.ResetBreakpoints, formatter)
+            abbrevFormatter = formatter
+            _G.print("|cffffff00[RealUI Tags] Custom breakpoints rejected by 12.0.5 validation, using locale defaults|r")
+        end
+    end
+end
+
+-- Path 2: Try CreateAbbreviateConfig (legacy, pcall-guarded)
+local abbrevData
+if not abbrevFormatter then
+    if _G.CreateAbbreviateConfig then
+        local ok, config = pcall(_G.CreateAbbreviateConfig, abbrevBreakpoints)
+        if ok and config then
+            abbrevData = { breakpointData = abbrevBreakpoints, config = config }
+        else
+            _G.print("|cffffff00[RealUI Tags] CreateAbbreviateConfig failed, falling back to default formatting|r")
+        end
+    end
+end
+
+-- Path 4: Pure-Lua fallback for when AbbreviateNumbers is unavailable
+local function luaAbbreviate(value)
+    if value >= 1e10 then
+        return _G.string.format("%.1fB", value / 1e9)
+    elseif value >= 1e9 then
+        return _G.string.format("%.2fB", value / 1e9)
+    elseif value >= 1e7 then
+        return _G.string.format("%.1fM", value / 1e6)
+    elseif value >= 1e6 then
+        return _G.string.format("%.2fM", value / 1e6)
+    elseif value >= 1e5 then
+        return _G.string.format("%dK", value / 1e3)
+    elseif value >= 1e4 then
+        return _G.string.format("%.1fK", value / 1e3)
+    else
+        return _G.tostring(value)
+    end
+end
+
+-- Unified abbreviation function used by health/power tags
+local function AbbreviateValue(value)
+    -- Secret values must go through Blizzard APIs (they handle display restrictions)
+    if _G.issecretvalue and _G.issecretvalue(value) then
+        if _G.AbbreviateNumbers then
+            -- Prefer formatter path for secrets too
+            if abbrevFormatter then
+                local ok, result = pcall(_G.AbbreviateNumbers, value, abbrevFormatter)
+                if ok then return result end
+            end
+            return _G.AbbreviateNumbers(value, abbrevData)
+        end
+        -- Cannot format secret values without AbbreviateNumbers
+        return "?"
+    end
+    -- Non-secret: prefer formatter, then legacy, then Lua fallback
+    if abbrevFormatter then
+        local ok, result = pcall(_G.AbbreviateNumbers, value, abbrevFormatter)
+        if ok then return result end
+    end
+    if abbrevData and _G.AbbreviateNumbers then
+        return _G.AbbreviateNumbers(value, abbrevData)
+    end
+    if _G.AbbreviateNumbers then
+        return _G.AbbreviateNumbers(value)
+    end
+    return luaAbbreviate(value)
+end
 
 ----------------------------------
 ------ Tag String Composers ------
@@ -97,7 +180,7 @@ tags.Methods["realui:healthValue"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         return "0"
     end
-    return _G.AbbreviateNumbers(_G.UnitHealth(unit), abbrevData)
+    return AbbreviateValue(_G.UnitHealth(unit))
 end
 tags.Events["realui:healthValue"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_TARGETABLE_CHANGED"
 
@@ -116,7 +199,7 @@ tags.Methods["realui:powerValue"] = function(unit)
     if _G.UnitIsDead(unit) or _G.UnitIsGhost(unit) or not _G.UnitIsConnected(unit) then
         return "0"
     end
-    return _G.AbbreviateNumbers(_G.UnitPower(unit), abbrevData)
+    return AbbreviateValue(_G.UnitPower(unit))
 end
 tags.Events["realui:powerValue"] = "UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_DISPLAYPOWER UNIT_TARGETABLE_CHANGED"
 
