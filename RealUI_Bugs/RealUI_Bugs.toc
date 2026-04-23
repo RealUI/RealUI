@@ -1,9 +1,9 @@
-## Interface: 120001
+## Interface: 120005
 ## Title: RealUI Bugs
 ## Category: RealUI_Core
 ## Notes: Bug catcher
 ## Author: Gethe, Hanshi
-## Version: 3.1.13
+## Version: 3.1.14
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: Blizzard_ChatFrame
 ## OptionalDeps: Ace3, LibTextDump-1.0
