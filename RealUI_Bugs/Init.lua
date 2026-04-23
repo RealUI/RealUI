@@ -54,3 +54,79 @@ do
         end
     end)
 end
+
+-- Blizzard PrivateAuras race workaround:
+-- HandleUpdateInfo() can receive updatedAuraInstanceIDs where the aura data is
+-- already gone. Blizzard then dereferences newAura.isPrivate and errors.
+do
+    local function PatchPrivateAurasWatcher()
+        local privateAuras = _G["PrivateAuras"]
+        local privateAurasAPI = _G["C_UnitAurasPrivate"]
+        local watcher = privateAuras and privateAuras.PrivateAuraUnitWatcher
+        if type(watcher) ~= "table" or watcher._realuiPrivateAuraPatched then
+            return
+        end
+        if type(privateAurasAPI) ~= "table" then
+            return
+        end
+
+        local originalHandleUpdateInfo = watcher.HandleUpdateInfo
+        if type(originalHandleUpdateInfo) ~= "function" then
+            return
+        end
+
+        watcher.HandleUpdateInfo = function(self, privateAuraSource, updateInfo)
+            if type(updateInfo) == "table" and not updateInfo.isFullUpdate and type(updateInfo.updatedAuraInstanceIDs) == "table" and type(self) == "table" and self.auras and self.unit then
+                local filteredIDs
+                local removedAny = false
+
+                for i = 1, #updateInfo.updatedAuraInstanceIDs do
+                    local auraInstanceID = updateInfo.updatedAuraInstanceIDs[i]
+                    local keepID = true
+
+                    if self.auras[auraInstanceID] ~= nil then
+                        local newAura = privateAurasAPI.GetAuraDataByAuraInstanceIDPrivate(self.unit, auraInstanceID)
+                        if newAura == nil then
+                            keepID = false
+                            removedAny = true
+                        end
+                    end
+
+                    if keepID then
+                        if not filteredIDs then
+                            filteredIDs = {}
+                        end
+                        filteredIDs[#filteredIDs + 1] = auraInstanceID
+                    end
+                end
+
+                if removedAny then
+                    local safeUpdateInfo = {}
+                    for k, v in _G.pairs(updateInfo) do
+                        safeUpdateInfo[k] = v
+                    end
+                    safeUpdateInfo.updatedAuraInstanceIDs = filteredIDs or {}
+                    updateInfo = safeUpdateInfo
+                end
+            end
+
+            return originalHandleUpdateInfo(self, privateAuraSource, updateInfo)
+        end
+
+        watcher._realuiPrivateAuraPatched = true
+    end
+
+    local f = _G.CreateFrame("Frame")
+    f:RegisterEvent("ADDON_LOADED")
+    f:SetScript("OnEvent", function(self, _, addon)
+        if addon == "Blizzard_PrivateAurasUI" then
+            PatchPrivateAurasWatcher()
+            self:UnregisterEvent("ADDON_LOADED")
+        end
+    end)
+
+    if _G.C_AddOns.IsAddOnLoaded("Blizzard_PrivateAurasUI") then
+        PatchPrivateAurasWatcher()
+        f:UnregisterEvent("ADDON_LOADED")
+    end
+end
