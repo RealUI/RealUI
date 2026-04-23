@@ -1,3 +1,34 @@
+## [3.1.14] - 2026-04-23 ##
+### Summary ###
+WoW 12.0.5 compatibility update. Hardened abbreviation config for new API preconditions, bumped all TOC Interface versions to 120005. Aurora updated to 12.0.5.0 with initial 12.0.5 compatibility fixes. Some upstream addons (oUF) are not yet updated for 12.0.5.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * RealUI_Bugs
+  * RealUI_Dev
+  * RealUI_Tooltips
+  * RealUI_Inventory
+  * RealUI_CombatText
+  * RealUI_Chat
+  * !RealUI_Preloads
+  * nibRealUI
+  * Aurora (12.0.5.0)
+
+### Changed ###
+  * chg: bump ## Interface to 120005 for all RealUI TOC files
+  * chg: Aurora updated to 12.0.5.0 with initial 12.0.5 compatibility
+
+### Fixed ###
+  * fix: harden abbreviation config in UnitFrames Tags.lua with pcall fallback for 12.0.5 CreateAbbreviateConfig precondition changes (RequiresRestrictedAbbreviationBreakpoints)
+  * fix: add multi-path fallback strategy — AbbreviatedNumberFormatter (12.0.5+), CreateAbbreviateConfig (legacy), AbbreviateNumbers defaults, pure-Lua K/M/B
+  * fix: update UF_BreakpointSuffixTest and UF_AbbrevFormatTest for new precondition behavior and fallback paths
+
+### Known Issues ###
+  * oUF privateauras element needs upstream update for new isContainer field in C_UnitAuras.AddPrivateAuraAnchor args
+
+
 ## [3.1.13] - 2026-04-18 ##
 ### Summary ###
 Unit frame status text now supports a configurable outline mode, Infobar hint text spacing is improved for readability, and performance monitor timeout handling is hardened so timers shut down correctly when monitoring is disabled. Aurora is updated from 12.0.1.30 to 12.0.1.31 with status text outline styling updates and fixes for ExternalDefensivesFrame and LootHistory item name visibility.
@@ -664,6 +695,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.14]: https://github.com/RealUI/RealUI/compare/3.1.13...3.1.14
 [3.1.13]: https://github.com/RealUI/RealUI/compare/3.1.12...3.1.13
 [3.1.12]: https://github.com/RealUI/RealUI/compare/3.1.11...3.1.12
 [3.1.11]: https://github.com/RealUI/RealUI/compare/3.1.10...3.1.11

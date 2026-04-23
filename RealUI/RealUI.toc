@@ -1,9 +1,9 @@
-## Interface: 120001
+## Interface: 120005
 ## Title: RealUI
 ## Category: RealUI_Core
 ## Notes: The essential core of RealUI - A comprehensive interface suite with modular design
 ## Author: Nibelheim, Gethe, Hanshi
-## Version: 3.1.13
+## Version: 3.1.14
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: RealUI_Bugs, Bartender4
 ## RequiredDeps: RealUI_Bugs, RealUI_Skins, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
