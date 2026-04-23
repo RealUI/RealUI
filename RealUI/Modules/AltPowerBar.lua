@@ -32,17 +32,30 @@ local UpdateInterval = 0
 
 ]]
 -- Events
-function AltPowerBar:PowerUpdate()
+function AltPowerBar:PowerUpdate(_, unitToken)
+    if unitToken and unitToken ~= "player" then
+        return
+    end
+
+    local bar = self.bar
+    if not bar then
+        return
+    end
+
     if _G.GetUnitPowerBarInfo("player") then
-        self.bar:Show()
+        bar:Show()
     else
-        self.bar:Hide()
+        bar:Hide()
     end
 end
 
 -- Position
 function AltPowerBar:UpdatePosition()
     local bar = self.bar
+    if not bar then
+        return
+    end
+
     bar:SetPoint(db.position.anchorfrom, _G.UIParent, db.position.anchorto, db.position.x, db.position.y)
 
     bar:SetFrameStrata("MEDIUM")
@@ -97,6 +110,10 @@ function AltPowerBar:RefreshMod()
     if not RealUI:GetModuleEnabled(MODNAME) then return end
     db = self.db.profile
 
+    if not self.bar then
+        self:CreateFrames()
+    end
+
     self:UpdatePosition()
     self:PowerUpdate()
 end
@@ -128,7 +145,10 @@ function AltPowerBar:OnEnable()
     self:RegisterEvent("UNIT_POWER_BAR_HIDE", "PowerUpdate")
 
     -- Hide Default
-    _G.PlayerPowerBarAlt:SetAlpha(0)
+    local playerPowerBarAlt = _G["PlayerPowerBarAlt"]
+    if playerPowerBarAlt then
+        playerPowerBarAlt:SetAlpha(0)
+    end
 
     if LoggedIn then
         self:RefreshMod()
@@ -141,6 +161,11 @@ function AltPowerBar:OnDisable()
     self:UnregisterEvent("UNIT_POWER_BAR_SHOW")
     self:UnregisterEvent("UNIT_POWER_BAR_HIDE")
 
-    self.bar:Hide()
-    _G.PlayerPowerBarAlt:SetAlpha(1)
+    if self.bar then
+        self.bar:Hide()
+    end
+    local playerPowerBarAlt = _G["PlayerPowerBarAlt"]
+    if playerPowerBarAlt then
+        playerPowerBarAlt:SetAlpha(1)
+    end
 end
