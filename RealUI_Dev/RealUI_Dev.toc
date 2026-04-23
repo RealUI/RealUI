@@ -8,7 +8,6 @@
 ## RequiredDeps: RealUI_Bugs
 
 RealUI_Dev.lua
-tests\Test.lua
 tests\BankLifecycleTest.lua
 tests\BankBagsVisibilityTest.lua
 tests\BankBagUpdateTest.lua
