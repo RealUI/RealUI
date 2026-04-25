@@ -3,14 +3,29 @@ local _, private = ...
 function private.AddOns.Masque()
     local MSQ = _G.LibStub("Masque")
     local Hidden = MSQ.__Hidden
+    local GetAddOnMetadata = (_G.C_AddOns and _G.C_AddOns.GetAddOnMetadata) or _G.GetAddOnMetadata
+    local RealUI = private.RealUI or _G.RealUI
+    local skinVersion
+
+    if RealUI and RealUI.verinfo and RealUI.verinfo.string then
+        skinVersion = RealUI.verinfo.string
+    end
+
+    if (not skinVersion or skinVersion == "") and GetAddOnMetadata then
+        skinVersion = GetAddOnMetadata("RealUI_Skins", "Version")
+    end
+
+    if not skinVersion or skinVersion == "" then
+        skinVersion = "0.0.0"
+    end
 
     MSQ:AddSkin("RealUI", {
         Template = "Blizzard Modern",
         Shape = "Square",
-        API_VERSION = 110107,
+        API_VERSION = 110210,
 
         Author = "Gethe/Arnvid",
-        Version = "11.0.5",
+        Version = skinVersion,
 
         Backdrop = {
             Texture = [[Interface\AddOns\Masque\Textures\Backdrop\Action]],
@@ -183,10 +198,29 @@ function private.AddOns.Masque()
             OffsetX = 1,
             OffsetY = -1,
         },
+        AutoCast_Corners = {
+            Atlas = "UI-HUD-ActionBar-PetAutoCast-Corners",
+            UseAtlasSize = false,
+            DrawLayer = "OVERLAY",
+            DrawLevel = 1,
+            Width = 26,
+            Height = 26,
+            OffsetX = 1,
+            OffsetY = -1,
+        },
         Cooldown = {
             Width = 26,
             Height = 26,
         },
-        ChargeCooldown = "Cooldown",
+        CooldownLoC = "Cooldown",
+        ChargeCooldown = {
+            Width = 26,
+            Height = 26,
+            Anchor = "Icon",
+        },
+        AssistedCombatHighlight = {
+            Width = 38,
+            Height = 38,
+        },
     }, true)
 end
