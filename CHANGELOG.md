@@ -1,3 +1,28 @@
+## [3.1.16] - 2026-04-25 ##
+### Summary ###
+Feature and compatibility follow-up release after 3.1.15. MinimapAdv now supports task-based minimap POIs, Masque skin integration is updated for current API fields, and RealUI build support now includes 120005. Aurora is updated from 12.0.5.2 to 12.0.5.3 with PlayerSpells icon corrections and additional taint-safety hardening.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Skins
+  * Aurora (12.0.5.3)
+
+### Added ###
+  * add: task-based minimap POI handling in MinimapAdv
+
+### Changed ###
+  * chg: add build 120005 to supported RealUI game versions
+  * chg: update Masque skin integration for newer API fields (`api_version`, `AutoCast_Corners`, `ChargeCooldown`, `AssistedCombatHighlight`)
+  * chg: Aurora updated to 12.0.5.3 (from 12.0.5.2)
+
+### Fixed ###
+  * fix: Aurora 12.0.5.3 prefers base spell textures for PlayerSpells spec icons
+  * fix: Aurora 12.0.5.3 prevents UIWidget container taint in restricted layout paths
+  * fix: Aurora 12.0.5.3 wraps GameTooltip_AddWidgetSet in securecallfunction to avoid LayoutFrame secret-number taint
+  * fix: Aurora 12.0.5.3 prevents PaperDoll stat taint from CharacterFrame skinning
+  * fix: Aurora 12.0.5.3 uses SharedButtonSmallTemplate for dialog buttons on WoW 12.0.5
+
+
 ## [3.1.15] - 2026-04-24 ##
 ### Summary ###
 Follow-up WoW 12.0.5 stability release. Unit frame abbreviation formatting now uses a hardened multi-path fallback for Blizzard's new API preconditions, cast bar tick placement ignores tainted haste values, AltPowerBar guards early update races, and RealUI_Bugs filters stale Private Aura updates from Blizzard. Aurora is updated from 12.0.5.0 to 12.0.5.2 with QueueStatusFrame taint and SetVertexColor compatibility fixes.
@@ -717,6 +742,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.16]: https://github.com/RealUI/RealUI/compare/3.1.15...3.1.16
 [3.1.15]: https://github.com/RealUI/RealUI/compare/3.1.14...3.1.15
 [3.1.14]: https://github.com/RealUI/RealUI/compare/3.1.13...3.1.14
 [3.1.13]: https://github.com/RealUI/RealUI/compare/3.1.12...3.1.13
