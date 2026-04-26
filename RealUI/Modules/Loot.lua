@@ -176,10 +176,13 @@ local function GroupLootSortFunc(a, b)
     return a.rollId < b.rollId
 end
 
-local function UpdateSecondaryRollButtons(frame, canGreed, canTransmog)
+local function UpdateSecondaryRollButtons(frame, rollId, canGreed, canTransmog)
+    local greedEnabled = canGreed or canTransmog
     frame.greed.type = 2
 
-    if canGreed then
+    -- WoW 12 can expose a transmog roll alongside greed-style behavior.
+    -- Keep greed clickable when transmog is available so both options are usable.
+    if greedEnabled then
         frame.greed:Enable()
     else
         frame.greed:Disable()
@@ -199,9 +202,10 @@ local function UpdateSecondaryRollButtons(frame, canGreed, canTransmog)
     frame.greed:GetNormalTexture():SetDesaturated(not frame.greed:IsEnabled())
     GroupLootDebug(
         "SecondaryButtons",
-        "rollId=".._G.tostring(frame.rollId),
+        "rollId=".._G.tostring(rollId),
         "canGreed=".._G.tostring(canGreed),
         "canTransmog=".._G.tostring(canTransmog),
+        "greedEnabledByRules=".._G.tostring(greedEnabled),
         "greedShown=".._G.tostring(frame.greed:IsShown()),
         "greedEnabled=".._G.tostring(frame.greed:IsEnabled()),
         "transmogShown=".._G.tostring(frame.transmog:IsShown())
@@ -303,18 +307,18 @@ function Loot:UpdateGroupLoot()
             break
         end
 
+        frame.rollId = value.rollId
+        frame.rollLink = rollLink
+
         if Needable then frame.need:Enable() else frame.need:Disable() end
 
-        UpdateSecondaryRollButtons(frame, Greedable, canTransmog)
+        UpdateSecondaryRollButtons(frame, value.rollId, Greedable, canTransmog)
 
         frame.need:GetNormalTexture():SetDesaturated(not Needable);
 
         frame.text:SetText(_G.ITEM_QUALITY_COLORS[quality].hex..name)
 
         frame.icon:SetTexture(texture)
-
-        frame.rollId = value.rollId
-        frame.rollLink = rollLink
 
         frame:Show()
     end
