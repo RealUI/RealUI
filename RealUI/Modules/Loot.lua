@@ -50,6 +50,26 @@ local db
 local MODNAME = "Loot"
 local Loot = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
+-- Runtime toggle: /run RealUI_LootRollDebug = true (or false)
+local DEBUG_GROUP_LOOT = false
+
+local function IsGroupLootDebugEnabled()
+    return DEBUG_GROUP_LOOT or _G.RealUI_LootRollDebug == true
+end
+
+local function GroupLootDebug(...)
+    if not IsGroupLootDebugEnabled() then
+        return
+    end
+
+    local parts = {}
+    for i = 1, _G.select("#", ...) do
+        parts[i] = _G.tostring(_G.select(i, ...))
+    end
+
+    _G.print("|cff33ff99RealUI Loot Debug:|r ".._G.table.concat(parts, " "))
+end
+
 --------------------
 ---- GROUP LOOT ----
 --------------------
@@ -59,9 +79,22 @@ local RealUIGroupLootFrame
 
 local function GroupLootOnEvent(self, event, rollId)
     if event == "START_LOOT_ROLL" then
+        local _, name, _, _, _, canNeed, canGreed, canDisenchant, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(rollId)
+        local rollLink = _G.GetLootRollItemLink(rollId)
+        GroupLootDebug(
+            "START_LOOT_ROLL",
+            "rollId="..rollId,
+            "name="..(name or "nil"),
+            "need=".._G.tostring(canNeed),
+            "greed=".._G.tostring(canGreed),
+            "de=".._G.tostring(canDisenchant),
+            "transmog=".._G.tostring(canTransmog),
+            "linkType=".._G.tostring(type(rollLink) == "string" and rollLink:match("|H([^:|]+):") or nil)
+        )
         _G.tinsert(grouplootlist, {rollId = rollId})
         Loot:UpdateGroupLoot()
     elseif event == "LOOT_ROLLS_COMPLETE" then
+        GroupLootDebug("LOOT_ROLLS_COMPLETE", "active=".._G.tostring(#grouplootlist))
         -- Safety net: remove any stale entries whose rollId no longer returns valid data
         for i = #grouplootlist, 1, -1 do
             local texture = _G.GetLootRollItemInfo(grouplootlist[i].rollId)
@@ -123,6 +156,7 @@ end
 local function GroupLootButtonOnClick(self, button)
     local frame = self:GetParent()
     local rollId = frame.rollId
+    GroupLootDebug("RollOnLoot", "rollId=".._G.tostring(rollId), "type=".._G.tostring(self.type), "roll=".._G.tostring(self.roll))
     _G.RollOnLoot(rollId, self.type)
 
     -- Remove the roll entry from grouplootlist (mirrors CANCEL_LOOT_ROLL cleanup)
@@ -140,6 +174,42 @@ end
 
 local function GroupLootSortFunc(a, b)
     return a.rollId < b.rollId
+end
+
+local function UpdateSecondaryRollButtons(frame, rollId, canGreed, canTransmog)
+    local greedEnabled = canGreed or canTransmog
+    frame.greed.type = 2
+
+    -- WoW 12 can expose a transmog roll alongside greed-style behavior.
+    -- Keep greed clickable when transmog is available so both options are usable.
+    if greedEnabled then
+        frame.greed:Enable()
+    else
+        frame.greed:Disable()
+    end
+
+    if canTransmog then
+        frame.transmog:Show()
+        frame.transmog:Enable()
+        frame.greed:ClearAllPoints()
+        frame.greed:SetPoint("RIGHT", frame.transmog, "LEFT", -1, -4)
+    else
+        frame.transmog:Hide()
+        frame.greed:ClearAllPoints()
+        frame.greed:SetPoint("RIGHT", frame.pass, "LEFT", -1, -4)
+    end
+
+    frame.greed:GetNormalTexture():SetDesaturated(not frame.greed:IsEnabled())
+    GroupLootDebug(
+        "SecondaryButtons",
+        "rollId=".._G.tostring(rollId),
+        "canGreed=".._G.tostring(canGreed),
+        "canTransmog=".._G.tostring(canTransmog),
+        "greedEnabledByRules=".._G.tostring(greedEnabled),
+        "greedShown=".._G.tostring(frame.greed:IsShown()),
+        "greedEnabled=".._G.tostring(frame.greed:IsEnabled()),
+        "transmogShown=".._G.tostring(frame.transmog:IsShown())
+    )
 end
 
 function Loot:UpdateGroupLoot()
@@ -194,20 +264,9 @@ function Loot:UpdateGroupLoot()
             frame.transmog:SetNormalAtlas("lootroll-toast-icon-transmog-up")
             frame.transmog:SetPushedAtlas("lootroll-toast-icon-transmog-down")
             frame.transmog:SetHighlightAtlas("lootroll-toast-icon-transmog-highlight")
-            frame.transmog:SetPoint("CENTER", frame.greed, "CENTER", 0, 0)
+            frame.transmog:SetPoint("RIGHT", frame.pass, "LEFT", -1, -4)
             frame.transmog:SetScript("OnClick", GroupLootButtonOnClick)
             frame.transmog:Hide()
-
-            frame.disenchant = _G.CreateFrame("Button", nil, frame)
-            frame.disenchant.type = 3
-            frame.disenchant.roll = "disenchant"
-            frame.disenchant:SetWidth(28)
-            frame.disenchant:SetHeight(28)
-            frame.disenchant:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-DE-Up")
-            frame.disenchant:SetPushedTexture("Interface\\Buttons\\UI-GroupLoot-DE-Down")
-            frame.disenchant:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-DE-Highlight")
-            frame.disenchant:SetPoint("RIGHT", frame.greed, "LEFT", -1, 2)
-            frame.disenchant:SetScript("OnClick", GroupLootButtonOnClick)
 
             frame.need = _G.CreateFrame("Button", nil, frame)
             frame.need.type = 1
@@ -217,7 +276,7 @@ function Loot:UpdateGroupLoot()
             frame.need:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Dice-Up")
             frame.need:SetPushedTexture("Interface\\Buttons\\UI-GroupLoot-Dice-Down")
             frame.need:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Dice-Highlight")
-            frame.need:SetPoint("RIGHT", frame.disenchant, "LEFT", -1, 0)
+            frame.need:SetPoint("RIGHT", frame.greed, "LEFT", -1, 0)
             frame.need:SetScript("OnClick", GroupLootButtonOnClick)
 
             frame.text = frame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
@@ -240,35 +299,26 @@ function Loot:UpdateGroupLoot()
             _G.tinsert(grouplootframes, frame)
         end
 
-        local texture, name, _, quality, _, Needable, Greedable, Disenchantable, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(value.rollId)
+        local texture, name, _, quality, _, Needable, Greedable, _, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(value.rollId)
+        local rollLink = _G.GetLootRollItemLink(value.rollId)
 
         if not name then
             _G.tremove(grouplootlist, index)
             break
         end
 
-        if Disenchantable then frame.disenchant:Enable() else frame.disenchant:Disable() end
+        frame.rollId = value.rollId
+        frame.rollLink = rollLink
+
         if Needable then frame.need:Enable() else frame.need:Disable() end
 
-        if canTransmog then
-            frame.transmog:Show()
-            frame.greed:Hide()
-        else
-            frame.transmog:Hide()
-            frame.greed:Show()
-            if Greedable then frame.greed:Enable() else frame.greed:Disable() end
-            frame.greed:GetNormalTexture():SetDesaturated(not Greedable);
-        end
+        UpdateSecondaryRollButtons(frame, value.rollId, Greedable, canTransmog)
 
-        frame.disenchant:GetNormalTexture():SetDesaturated(not Disenchantable);
         frame.need:GetNormalTexture():SetDesaturated(not Needable);
 
         frame.text:SetText(_G.ITEM_QUALITY_COLORS[quality].hex..name)
 
         frame.icon:SetTexture(texture)
-
-        frame.rollId = value.rollId
-        frame.rollLink = _G.GetLootRollItemLink(value.rollId)
 
         frame:Show()
     end

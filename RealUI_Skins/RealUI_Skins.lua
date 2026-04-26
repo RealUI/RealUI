@@ -381,10 +381,6 @@ function RealUI.UpdateUIScale(newScale, fromConfig)
     local parentScale = RealUI.Scale.Round(_G.UIParent:GetScale(), 2)
     private.debug("current scale", oldScale, cvarScale, parentScale)
 
-    if parentScale == 1 then
-        return
-    end
-
     -- Determine the desired customScale
     if private.skinsDB.isPixelScale then
         newScale = RealUI.Scale.Round(pixelScale, 2)

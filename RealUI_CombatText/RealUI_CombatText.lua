@@ -70,7 +70,7 @@ local defaults = {
         },
         scrollDuration = 2,
         blizzardFCT = {
-            enableFloatingCombatText = true,
+            enableFloatingCombatText = false,
             floatingCombatTextCombatDamage = true,
             floatingCombatTextCombatHealing = true,
             nameplateShowDamage = true,

@@ -7,6 +7,15 @@ local _, private = ...
 local RealUI = private.RealUI
 --local debug = RealUI.GetDebug("MiniPatch")
 
+-- Version map for patch-level minipatches.
+-- Each entry is {major, minor, patch} and is applied when:
+--   oldVersion < patchVersion <= currentVersion
+RealUI.minipatchVersions = {
+    [1] = {3, 0, 1},
+    [2] = {3, 1, 7},
+    [3] = {3, 1, 17},
+}
+
 RealUI.minipatches = {
     -- Major version transition: 2.5.x → 3.0.0
     -- Handles nibRealUI → RealUI rename migration and deprecated 2.x data cleanup
@@ -68,16 +77,9 @@ RealUI.minipatches = {
         end
     end,
 
-    -- Minipatches [2] through [6]: reserved for incremental data migrations.
-    [2] = function() end,
-    [3] = function() end,
-    [4] = function() end,
-    [5] = function() end,
-    [6] = function() end,
-
     -- 3.1.7 safety patch: force resource/performance monitoring off by default
     -- for all existing profiles. Users can still manually re-enable it.
-    [7] = function()
+    [2] = function()
         if not RealUI.db then
             return
         end
@@ -104,7 +106,19 @@ RealUI.minipatches = {
         end
     end,
 
-    -- Minipatches [8] and [9]: reserved for future patch-level migrations.
-    [8] = function() end,
-    [9] = function() end,
+    -- 3.1.17 migration: disable Blizzard floating combat text by default
+    -- for existing users so RealUI combat text does not duplicate Blizzard output.
+    [3] = function()
+        local combatTextDB = _G.RealUI_CombatTextDB
+        if type(combatTextDB) ~= "table" then
+            return
+        end
+
+        combatTextDB.global = combatTextDB.global or {}
+        combatTextDB.global.blizzardFCT = combatTextDB.global.blizzardFCT or {}
+        combatTextDB.global.blizzardFCT.enableFloatingCombatText = false
+
+        -- Keep CVar aligned immediately; UI reload follows minipatch acceptance.
+        _G.SetCVar("enableFloatingCombatText", "0")
+    end,
 }

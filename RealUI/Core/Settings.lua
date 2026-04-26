@@ -2,12 +2,24 @@ local _, private = ...
 
 -- Lua Globals --
 local next = _G.next
+local type = _G.type
 
 -- RealUI --
 local RealUI = private.RealUI
 local L = RealUI.L
 local db, dbc, dbg
 local debug = RealUI.GetDebug("Settings")
+
+local function IsVersionTable(ver)
+    return type(ver) == "table" and type(ver[1]) == "number" and type(ver[2]) == "number" and type(ver[3]) == "number"
+end
+
+local function IsPatchVersionInRange(patchVersion, oldVer, curVer)
+    if not (IsVersionTable(patchVersion) and IsVersionTable(oldVer) and IsVersionTable(curVer)) then
+        return false
+    end
+    return RealUI:CompareVersions(patchVersion, oldVer) == 1 and RealUI:CompareVersions(patchVersion, curVer) <= 0
+end
 
 -- Mini Patch
 local function ApplyMiniPatches(patches)
@@ -26,32 +38,63 @@ local function MiniPatchInstallation(newVer)
     local curVer = RealUI.verinfo
     local oldVer = dbg.verinfo
     local minipatches = RealUI.minipatches
+    local patchVersions = RealUI.minipatchVersions or {}
 
     -- Find out which Mini Patches are needed
     local patches = {}
+    local queuedPatchIds = {}
+
+    local function QueuePatch(index)
+        if queuedPatchIds[index] or type(minipatches[index]) ~= "function" then
+            return
+        end
+        queuedPatchIds[index] = true
+        _G.tinsert(patches, minipatches[index])
+    end
+
+    local patchIds = {}
+    for patchId, patchFunc in next, minipatches do
+        if type(patchId) == "number" and patchId > 0 and type(patchFunc) == "function" then
+            local patchVersion = patchVersions[patchId]
+            if IsPatchVersionInRange(patchVersion, oldVer, curVer) then
+                _G.tinsert(patchIds, patchId)
+            elseif not IsVersionTable(patchVersion) then
+                -- Legacy fallback for unmapped minipatches: only apply within same major.minor stream.
+                if oldVer[1] == curVer[1] and oldVer[2] == curVer[2] and oldVer[3] then
+                    if patchId > oldVer[3] and patchId <= curVer[3] then
+                        _G.tinsert(patchIds, patchId)
+                    end
+                end
+            end
+        end
+    end
+
+    _G.table.sort(patchIds, function(a, b)
+        local aVer = patchVersions[a]
+        local bVer = patchVersions[b]
+        if IsVersionTable(aVer) and IsVersionTable(bVer) then
+            local cmp = RealUI:CompareVersions(aVer, bVer)
+            if cmp ~= 0 then
+                return cmp < 0
+            end
+        elseif IsVersionTable(aVer) then
+            return true
+        elseif IsVersionTable(bVer) then
+            return false
+        end
+        return a < b
+    end)
 
     debug("minipatch", newVer, oldVer[3], curVer[3])
     if newVer then
         if minipatches[0] then
-            _G.tinsert(patches, minipatches[0])
+            QueuePatch(0)
         end
-        -- Cross-major-version: also run all patch-level minipatches (1..curVer[3])
-        -- since the user skipped all intermediate patches during the major version jump
-        for i = 1, curVer[3] do
-            if minipatches[i] then
-                _G.tinsert(patches, minipatches[i])
-            end
-        end
-    else
-        if oldVer[3] then
-            for i = oldVer[3] + 1, curVer[3] do
-                debug("checking", i)
-                if minipatches[i] then
-                    -- This needs to be an array to ensure patches are applied sequentially.
-                    _G.tinsert(patches, minipatches[i])
-                end
-            end
-        end
+    end
+
+    for i = 1, #patchIds do
+        debug("queueing", patchIds[i])
+        QueuePatch(patchIds[i])
     end
 
 
@@ -59,7 +102,7 @@ local function MiniPatchInstallation(newVer)
     if dbg.patchedTOC ~= RealUI.TOC then
         if dbg.patchedTOC > 0 and minipatches[RealUI.TOC] then
             -- Add minipatch for TOC change
-            _G.tinsert(patches, minipatches[RealUI.TOC])
+            QueuePatch(RealUI.TOC)
         end
         dbg.patchedTOC = RealUI.TOC
     end
