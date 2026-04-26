@@ -142,6 +142,68 @@ local function GroupLootSortFunc(a, b)
     return a.rollId < b.rollId
 end
 
+local function GetLootRollLinkType(rollLink)
+    if type(rollLink) ~= "string" then
+        return nil
+    end
+
+    return rollLink:match("|H([^:|]+):")
+end
+
+local function GetLootRollItemClassID(rollLink)
+    if not _G.C_Item or not _G.C_Item.GetItemInfoInstant then
+        return nil
+    end
+
+    local linkType = GetLootRollLinkType(rollLink)
+    if linkType ~= "item" then
+        return nil
+    end
+
+    local _, _, _, _, _, classID = _G.C_Item.GetItemInfoInstant(rollLink)
+    return classID
+end
+
+local function ShouldUseGreedButtonForCollectRoll(rollLink, canTransmog)
+    if not canTransmog then
+        return false
+    end
+
+    local linkType = GetLootRollLinkType(rollLink)
+    if linkType == "housingdecor" then
+        return true
+    end
+
+    local housingClassID = _G.Enum and _G.Enum.ItemClass and _G.Enum.ItemClass.Housing
+    return housingClassID ~= nil and GetLootRollItemClassID(rollLink) == housingClassID
+end
+
+local function UpdateSecondaryRollButton(frame, rollLink, canGreed, canTransmog)
+    frame.greed.type = 2
+
+    if canTransmog and not ShouldUseGreedButtonForCollectRoll(rollLink, canTransmog) then
+        frame.transmog:Show()
+        frame.greed:Hide()
+        return
+    end
+
+    frame.transmog:Hide()
+    frame.greed:Show()
+
+    if canGreed then
+        frame.greed.type = 2
+        frame.greed:Enable()
+    elseif canTransmog then
+        frame.greed.type = 4
+        frame.greed:Enable()
+    else
+        frame.greed.type = 2
+        frame.greed:Disable()
+    end
+
+    frame.greed:GetNormalTexture():SetDesaturated(not frame.greed:IsEnabled())
+end
+
 function Loot:UpdateGroupLoot()
     _G.sort(grouplootlist, GroupLootSortFunc)
     for index, value in next, grouplootframes do value:Hide() end
@@ -241,6 +303,7 @@ function Loot:UpdateGroupLoot()
         end
 
         local texture, name, _, quality, _, Needable, Greedable, Disenchantable, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(value.rollId)
+        local rollLink = _G.GetLootRollItemLink(value.rollId)
 
         if not name then
             _G.tremove(grouplootlist, index)
@@ -250,15 +313,7 @@ function Loot:UpdateGroupLoot()
         if Disenchantable then frame.disenchant:Enable() else frame.disenchant:Disable() end
         if Needable then frame.need:Enable() else frame.need:Disable() end
 
-        if canTransmog then
-            frame.transmog:Show()
-            frame.greed:Hide()
-        else
-            frame.transmog:Hide()
-            frame.greed:Show()
-            if Greedable then frame.greed:Enable() else frame.greed:Disable() end
-            frame.greed:GetNormalTexture():SetDesaturated(not Greedable);
-        end
+        UpdateSecondaryRollButton(frame, rollLink, Greedable, canTransmog)
 
         frame.disenchant:GetNormalTexture():SetDesaturated(not Disenchantable);
         frame.need:GetNormalTexture():SetDesaturated(not Needable);
@@ -268,7 +323,7 @@ function Loot:UpdateGroupLoot()
         frame.icon:SetTexture(texture)
 
         frame.rollId = value.rollId
-        frame.rollLink = _G.GetLootRollItemLink(value.rollId)
+        frame.rollLink = rollLink
 
         frame:Show()
     end
