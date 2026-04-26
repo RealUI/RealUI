@@ -1,3 +1,28 @@
+## [3.1.17] - 2026-04-27 ##
+### Summary ###
+Quality-of-life and compatibility update focused on cleaner combat text defaults, improved loot-roll handling, Delves companion usability, and Aurora 12.0.5.4 visual and stability improvements.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Skins
+  * RealUI_CombatText
+  * RealUI_Config
+  * Aurora (12.0.5.4)
+
+### Changed ###
+  * chg: Aurora updated to 12.0.5.4 (from 12.0.5.3)
+  * chg: Blizzard floating combat text is now off by default in RealUI_CombatText to prevent duplicate combat numbers (option still available in Advanced settings)
+  * chg: Loot module now supports WoW 12 greed and transmog roll variants
+  * chg: more tweaks to roll module
+  * chg: DelvesCompanionConfigurationFrame can now be moved with DragEmAll
+  * add: Aurora 12.0.5.4 adds skin support for Blizzard_FrameXML TalkingHeadUI
+
+### Fixed ###
+  * fix: support Housing decor loot rolls in Mythic+ flow handling
+  * fix: startup UI scale now applies reliably at login in RealUI_Skins and Aurora
+  * fix: Aurora 12.0.5.4 makes DelvesCompanionConfigurationFrame skin non-transparent
+
+
 ## [3.1.16] - 2026-04-25 ##
 ### Summary ###
 Feature and compatibility follow-up release after 3.1.15. MinimapAdv now supports task-based minimap POIs, Masque skin integration is updated for current API fields, and RealUI build support now includes 120005. Aurora is updated from 12.0.5.2 to 12.0.5.3 with PlayerSpells icon corrections and additional taint-safety hardening.
