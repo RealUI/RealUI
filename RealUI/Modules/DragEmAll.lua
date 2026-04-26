@@ -27,6 +27,7 @@ local baseFames = {
     ChatConfigFrame = {},
     ColorPickerFrame = {},
     DressUpFrame = {},
+    DelvesCompanionConfigurationFrame = {},
     FriendsFrame = {},
     GameMenuFrame = {},
     GossipFrame = {},
