@@ -2,6 +2,9 @@
 call luacheck . -q || pause && EXIT
 
 :: Run packager
+:: Set to "no" to build a dependency-based package without bundling third-party addons.
+set BUNDLE_EXTERNAL_ADDONS=yes
+
 :: Usage: release.sh [-cdelLosuz] [-t topdir] [-r releasedir] [-p curse-id] [-w wowi-id] [-g game-version]
 ::   -c               Skip copying files into the package directory.
 ::   -d               Skip uploading.
