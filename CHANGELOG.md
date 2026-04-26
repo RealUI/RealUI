@@ -767,6 +767,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.1.17]: https://github.com/RealUI/RealUI/compare/3.1.16...3.1.17
 [3.1.16]: https://github.com/RealUI/RealUI/compare/3.1.15...3.1.16
 [3.1.15]: https://github.com/RealUI/RealUI/compare/3.1.14...3.1.15
 [3.1.14]: https://github.com/RealUI/RealUI/compare/3.1.13...3.1.14
