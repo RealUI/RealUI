@@ -809,8 +809,8 @@ do -- CombatText
                         order = 0,
                     },
                     enableFloatingCombatText = {
-                        name = "Incoming Combat Text",
-                        desc = "Show Blizzard's floating combat text above your character (damage taken, heals received).",
+                        name = "Enable Blizzard Floating Combat Text",
+                        desc = "Turn Blizzard floating combat text on or off (incoming damage/healing above your character).",
                         type = "toggle",
                         get = function() return CombatText.db.global.blizzardFCT.enableFloatingCombatText end,
                         set = function(_, value)
