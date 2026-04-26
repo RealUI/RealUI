@@ -34,7 +34,7 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Run Luacheck
-      uses: nebularg/actions-luacheck@dd48c197053814ed6e9e73f34ac37051b48a4bbf # v1.1.2
+      uses: nebularg/actions-luacheck@d4137dd840545b28521ed21931e06913d93c0bc1 # v1.1.2
       with:
         args: --no-color -q
         annotate: warning
