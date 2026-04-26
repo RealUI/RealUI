@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: RealUI Discord
+    url: https://discord.gg/realui
+    about: For quick questions, join the community Discord.
+  - name: WoWInterface Page
+    url: https://www.wowinterface.com/downloads/info16068-RealUI.html
+    about: Download the latest RealUI release and check comments.
+  - name: GitHub Repository
+    url: https://github.com/RealUI/RealUI
+    about: Source code, issues, and release tags.

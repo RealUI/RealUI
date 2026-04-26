@@ -1,0 +1,52 @@
+name: Question
+description: Ask a question about RealUI
+title: "[Question] "
+labels: question
+assignees: arnvid
+
+body:
+- type: checkboxes
+  attributes:
+    label: Did you check existing resources first?
+    description: Please check before submitting — your question may already be answered.
+    options:
+    - label: I have searched existing issues and discussions
+      required: true
+    - label: I have read the README and CONTRIBUTING guide
+      required: true
+
+- type: dropdown
+  attributes:
+    label: Game Client
+    description: Which WoW client are you running RealUI on?
+    options:
+      - Retail (Mainline)
+      - Beta
+      - PTR
+  validations:
+    required: true
+
+- type: input
+  attributes:
+    label: RealUI Version
+    description: The version you're currently running.
+    placeholder: "e.g. 3.1.0"
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Your Question
+    description: Ask your question as clearly as possible.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: What Have You Already Tried?
+    description: Describe any steps you've already taken to find an answer or solve the problem.
+
+- type: textarea
+  attributes:
+    label: Additional Context
+    description: Add any other context, screenshots, or error output that might be helpful.

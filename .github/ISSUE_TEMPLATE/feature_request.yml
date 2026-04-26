@@ -1,0 +1,73 @@
+name: Feature request
+description: Suggest an idea or improvement for RealUI
+title: "[Feature] "
+labels: enhancement
+assignees: arnvid
+
+body:
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue or discussion for this?
+    description: Please search issues before submitting.
+    options:
+    - label: I have searched existing issues and discussions
+      required: true
+
+- type: dropdown
+  attributes:
+    label: Game Client
+    description: Which WoW client(s) would benefit from this feature?
+    multiple: true
+    options:
+      - Retail (Mainline)
+      - Beta
+      - PTR
+  validations:
+    required: true
+
+- type: input
+  attributes:
+    label: RealUI Version
+    description: The version you're currently running (so we know what baseline to work from).
+    placeholder: "e.g. 3.1.0"
+
+- type: dropdown
+  attributes:
+    label: Which part of RealUI does this relate to?
+    description: Select the most relevant sub-addon or area.
+    multiple: true
+    options:
+      - Core (RealUI)
+      - RealUI_Skins / Aurora skinning
+      - RealUI_Config
+      - RealUI_Tooltips
+      - RealUI_Chat
+      - RealUI_CombatText
+      - RealUI_Inventory
+      - RealUI_Bugs
+      - General / Multiple areas
+
+- type: textarea
+  attributes:
+    label: Problem or Motivation
+    description: Is this feature request related to a problem? Describe what's frustrating or missing.
+    placeholder: "I'm always frustrated when..."
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Proposed Solution
+    description: Describe what you'd like to see happen. Be as specific as possible.
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Alternatives Considered
+    description: Have you tried any workarounds or considered other approaches?
+
+- type: textarea
+  attributes:
+    label: Additional Context
+    description: Add any other context, mockups, or screenshots to support the request.

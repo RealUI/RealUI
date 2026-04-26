@@ -1,16 +1,40 @@
-(Thanks for sending a pull request! Please make sure you click the link above to view the contribution guidelines, then fill out the blanks below.)
+<!-- Please read CONTRIBUTING.md before submitting. -->
 
-### What does this implement/fix? Explain your changes ###
+## Summary
 
+<!-- A clear and concise description of what this PR does. -->
 
-### Does this close any currently open issues? ###
+## Related Issues
 
-Link to the issues here
-    #1 #5
+<!-- Link any issues this PR closes or relates to. Use "Closes #123" to auto-close on merge. -->
 
-### Any relevant logs, error output, etc? ###
+Closes #
 
-(If it’s long, please paste to https://ghostbin.com/ and insert the link here.)
+## Type of Change
 
-### Any other comments? ###
+- [ ] Bug fix
+- [ ] New feature / enhancement
+- [ ] Refactor / code cleanup
+- [ ] Skinning / Aurora compatibility
+- [ ] Documentation update
+- [ ] Other (describe below)
+
+## Testing Done
+
+<!-- Describe how you tested your changes. Which client(s), which frames/addons exercised? -->
+
+- WoW client:
+- RealUI version:
+- Aurora version (if applicable):
+
+## Checklist
+
+- [ ] My changes follow the coding conventions in `CONTRIBUTING.md`
+- [ ] I have tested in-game without Lua errors
+- [ ] I have run `luacheck` locally and there are no new warnings
+- [ ] Protected frame operations are guarded with `InCombatLockdown()` where needed
+
+## Additional Notes
+
+<!-- Any extra context, screenshots, or Lua error output. For long logs, paste to https://gist.github.com -->
 
