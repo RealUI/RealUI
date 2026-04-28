@@ -77,8 +77,9 @@ local GroupLootIconSize = 32
 local grouplootlist, grouplootframes = {}, {}
 local RealUIGroupLootFrame
 
-local function GroupLootOnEvent(self, event, rollId)
+local function GroupLootOnEvent(self, event, ...)
     if event == "START_LOOT_ROLL" then
+        local rollId = ...
         local _, name, _, _, _, canNeed, canGreed, canDisenchant, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(rollId)
         local rollLink = _G.GetLootRollItemLink(rollId)
         GroupLootDebug(
@@ -93,6 +94,22 @@ local function GroupLootOnEvent(self, event, rollId)
         )
         _G.tinsert(grouplootlist, {rollId = rollId})
         Loot:UpdateGroupLoot()
+    elseif event == "CONFIRM_LOOT_ROLL" then
+        -- Server requires confirmation before the roll registers (e.g. housing decors,
+        -- BoP-need items). The user already expressed intent by clicking a button, so
+        -- auto-confirm here. Without this the roll silently fails: our frame is already
+        -- hidden before the server's async CONFIRM_LOOT_ROLL event arrives, Blizzard's
+        -- popup appears orphaned, the user dismisses it, and the server stays
+        -- "Waiting on" this player.
+        local confirmRollId, confirmRollType = ...
+        GroupLootDebug("CONFIRM_LOOT_ROLL", "rollId=".._G.tostring(confirmRollId), "type=".._G.tostring(confirmRollType))
+        _G.StaticPopup_Hide("CONFIRM_LOOT_ROLL", confirmRollId)
+        _G.ConfirmLootRoll(confirmRollId, confirmRollType)
+    elseif event == "CONFIRM_DISENCHANT_ROLL" then
+        local confirmRollId, confirmRollType = ...
+        GroupLootDebug("CONFIRM_DISENCHANT_ROLL", "rollId=".._G.tostring(confirmRollId), "type=".._G.tostring(confirmRollType))
+        _G.StaticPopup_Hide("CONFIRM_LOOT_ROLL", confirmRollId)
+        _G.ConfirmLootRoll(confirmRollId, confirmRollType)
     elseif event == "LOOT_ROLLS_COMPLETE" then
         GroupLootDebug("LOOT_ROLLS_COMPLETE", "active=".._G.tostring(#grouplootlist))
         -- Safety net: remove any stale entries whose rollId no longer returns valid data
@@ -333,6 +350,8 @@ function Loot:InitializeGroupLoot()
     RealUIGroupLootFrame = _G.CreateFrame("Frame", "RealUI_GroupLoot", _G.UIParent)
     RealUIGroupLootFrame:RegisterEvent("START_LOOT_ROLL")
     RealUIGroupLootFrame:RegisterEvent("LOOT_ROLLS_COMPLETE")
+    RealUIGroupLootFrame:RegisterEvent("CONFIRM_LOOT_ROLL")
+    RealUIGroupLootFrame:RegisterEvent("CONFIRM_DISENCHANT_ROLL")
     RealUIGroupLootFrame:SetScript("OnEvent", GroupLootOnEvent)
     RealUIGroupLootFrame:SetFrameStrata("HIGH")
     RealUIGroupLootFrame:SetWidth(db.grouplootwidth)
