@@ -1,3 +1,18 @@
+## [3.1.18] - 2026-04-29 ##
+### Summary ###
+Small hotfix for loot rolls. Auto-confirms server roll confirmations (CONFIRM_LOOT_ROLL, CONFIRM_DISENCHANT_ROLL) so rolls no longer silently fail when the custom loot frame has already closed before the server's async confirmation event arrives.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Bugs
+
+### Fixed ###
+  * fix: auto-confirm server roll confirmations to prevent stuck pending rolls — handles CONFIRM_LOOT_ROLL and CONFIRM_DISENCHANT_ROLL events by dismissing the orphaned Blizzard popup and calling ConfirmLootRoll automatically
+
+### Changed ###
+  * chg: BugGrabber updated to v12.0.15
+
+
 ## [3.1.17] - 2026-04-27 ##
 ### Summary ###
 Quality-of-life and compatibility update focused on cleaner combat text defaults, improved loot-roll handling, Delves companion usability, and Aurora 12.0.5.4 visual and stability improvements.
