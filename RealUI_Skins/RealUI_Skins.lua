@@ -191,6 +191,106 @@ local defaults = {
     },
 }
 
+local function ProfileExists(aceDB, profileName)
+    if not aceDB or not profileName then
+        return false
+    end
+
+    local profiles = aceDB:GetProfiles()
+    if not profiles then
+        return false
+    end
+
+    for _, existingName in ipairs(profiles) do
+        if existingName == profileName then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function HasValidScaleSettings(profileData)
+    if type(profileData) ~= "table" then
+        return false
+    end
+
+    local uiModScale = tonumber(profileData.uiModScale)
+    local customScale = tonumber(profileData.customScale)
+
+    return uiModScale ~= nil and uiModScale > 0
+        and customScale ~= nil and customScale > 0
+        and type(profileData.isHighRes) == "boolean"
+        and type(profileData.isPixelScale) == "boolean"
+end
+
+local function CopyScaleSettings(sourceProfile, targetProfile)
+    if type(sourceProfile) ~= "table" or type(targetProfile) ~= "table" then
+        return
+    end
+
+    targetProfile.uiModScale = sourceProfile.uiModScale
+    targetProfile.customScale = sourceProfile.customScale
+    targetProfile.isHighRes = sourceProfile.isHighRes
+    targetProfile.isPixelScale = sourceProfile.isPixelScale
+end
+
+local function GetStoredProfiles(aceDB)
+    if not aceDB then
+        return nil
+    end
+
+    if type(aceDB.profiles) == "table" then
+        return aceDB.profiles
+    end
+
+    if type(aceDB.sv) == "table" and type(aceDB.sv.profiles) == "table" then
+        return aceDB.sv.profiles
+    end
+
+    return nil
+end
+
+local function EnsureCanonicalSkinsProfiles(skinsDB)
+    if not skinsDB then
+        return
+    end
+
+    local currentSkinsProfile = skinsDB:GetCurrentProfile()
+    if currentSkinsProfile == "Default" then
+        local hadRealUIProfile = ProfileExists(skinsDB, "RealUI")
+
+        skinsDB:SetProfile("RealUI")
+
+        if not hadRealUIProfile then
+            skinsDB:CopyProfile("Default", true)
+        end
+    end
+
+    local currentProfile = skinsDB:GetCurrentProfile()
+    local hadHealingProfile = ProfileExists(skinsDB, "RealUI-Healing")
+
+    if not hadHealingProfile then
+        skinsDB:SetProfile("RealUI-Healing")
+        if ProfileExists(skinsDB, "RealUI") then
+            skinsDB:CopyProfile("RealUI", true)
+        end
+    end
+
+    local profiles = GetStoredProfiles(skinsDB) or {}
+    local realUIProfile = profiles["RealUI"]
+    local healingProfile = profiles["RealUI-Healing"]
+    local links = RealUI.db and RealUI.db.char and RealUI.db.char.scopeLinks or nil
+    local skinsScopeLinked = links and links.skins == true
+
+    if HasValidScaleSettings(realUIProfile) and (not HasValidScaleSettings(healingProfile) or not skinsScopeLinked) then
+        skinsDB:SetProfile("RealUI-Healing")
+        CopyScaleSettings(realUIProfile, skinsDB.profile)
+    end
+
+    skinsDB:SetProfile(currentProfile == "Default" and "RealUI" or currentProfile)
+end
+
 function RealUI.GetAuroraConfigValue(key, fallbackValue)
     local profileConfig, runtimeConfig, characterConfig = GetAuroraConfigStores()
     if IsCharacterScopedAuroraKey(key) and characterConfig then
@@ -480,7 +580,10 @@ function private.OnLoad()
     -- addon with its own private table that can't see our private.scaleReported.
     _G.AURORA_SCALE_REPORTED = true
 
-    local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, true)
+    local skinsDB = _G.LibStub("AceDB-3.0"):New("RealUI_SkinsDB", defaults, "RealUI")
+
+    EnsureCanonicalSkinsProfiles(skinsDB)
+
     skinsDB:RegisterCallback("OnProfileChanged", function(db)
         private.skinsDB = db.profile
         private.skinsCharDB = db.char

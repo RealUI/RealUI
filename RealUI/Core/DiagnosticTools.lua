@@ -299,12 +299,133 @@ function DiagnosticTools:PrintSystemStatus()
     end
 end
 
+function DiagnosticTools:PrintProfileScaleStatus()
+    local function GetStoredProfiles(aceDB)
+        if not aceDB then
+            return {}
+        end
+
+        if type(aceDB.sv) == "table" and type(aceDB.sv.profiles) == "table" then
+            return aceDB.sv.profiles
+        end
+
+        return aceDB.profiles or {}
+    end
+
+    local function BoolText(value)
+        return value and "true" or "false"
+    end
+
+    local function PrintSkinsProfile(name, profileData)
+        if not profileData then
+            print(("Skins profile '%s': missing"):format(name))
+            return
+        end
+
+        local uiModScale = tonumber(profileData.uiModScale)
+        if uiModScale == nil then
+            uiModScale = 1
+        end
+
+        local customScale = tonumber(profileData.customScale)
+        if customScale == nil then
+            customScale = 1
+        end
+
+        local isHighRes = profileData.isHighRes
+        if type(isHighRes) ~= "boolean" then
+            isHighRes = false
+        end
+
+        local isPixelScale = profileData.isPixelScale
+        if type(isPixelScale) ~= "boolean" then
+            isPixelScale = true
+        end
+
+        print((
+            "Skins profile '%s': uiModScale=%.2f customScale=%.2f isHighRes=%s isPixelScale=%s"
+        ):format(
+            name,
+            uiModScale,
+            customScale,
+            BoolText(isHighRes),
+            BoolText(isPixelScale)
+        ))
+    end
+
+    local currentSpecIndex = _G.C_SpecializationInfo.GetSpecialization()
+    local currentSpecInfo = currentSpecIndex and RealUI.charInfo and RealUI.charInfo.specs and RealUI.charInfo.specs[currentSpecIndex] or nil
+    local currentRole = currentSpecInfo and currentSpecInfo.role or "UNKNOWN"
+    local currentSpecName = currentSpecInfo and currentSpecInfo.name or "Unknown"
+    local currentProfile = RealUI.db and RealUI.db.GetCurrentProfile and RealUI.db:GetCurrentProfile() or "unknown"
+    local scopeLinks = RealUI.db and RealUI.db.char and RealUI.db.char.scopeLinks or {}
+
+    local skinsModule = RealUI:GetModule("Skins", true)
+    local skinsDB = skinsModule and skinsModule.db or nil
+    local currentSkinsProfile = skinsDB and skinsDB:GetCurrentProfile() or "unavailable"
+
+    print("=== RealUI Profile Scale Status ===")
+    print(("Character: %s - %s"):format(RealUI.charInfo.name or "Unknown", RealUI.charInfo.realm or "Unknown"))
+    print(("Class: %s"):format((RealUI.charInfo.class and RealUI.charInfo.class.token) or "UNKNOWN"))
+    print(("Current spec: %s [%s]"):format(currentSpecName, currentRole))
+    print(("Core profile: %s"):format(currentProfile))
+    print(("Skins scope linked: %s"):format(BoolText(scopeLinks and scopeLinks.skins == true)))
+    print(("BT4 scope linked: %s"):format(BoolText(scopeLinks and scopeLinks.bt4 ~= false)))
+
+    if RealUI.DualSpecSystem and RealUI.DualSpecSystem.GetDefaultProfileForSpec then
+        if currentSpecIndex then
+            print(("Default Core profile for current spec: %s"):format(
+                RealUI.DualSpecSystem:GetDefaultProfileForSpec(currentSpecIndex) or "unknown"
+            ))
+        end
+
+        if RealUI.db and RealUI.db.char and RealUI.db.char.specProfiles then
+            for specIndex = 1, #RealUI.charInfo.specs do
+                local specInfo = RealUI.charInfo.specs[specIndex]
+                print(("Spec %d %s [%s] -> %s"):format(
+                    specIndex,
+                    specInfo.name or "Unknown",
+                    specInfo.role or "UNKNOWN",
+                    RealUI.db.char.specProfiles[specIndex]
+                        or RealUI.DualSpecSystem:GetDefaultProfileForSpec(specIndex)
+                        or "unknown"
+                ))
+            end
+        end
+    end
+
+    if not skinsDB then
+        print("Skins database: unavailable")
+        return
+    end
+
+    print(("Current Skins profile: %s"):format(currentSkinsProfile))
+
+    local skinsProfiles = GetStoredProfiles(skinsDB)
+    if currentSkinsProfile ~= "unavailable" then
+        PrintSkinsProfile(currentSkinsProfile, skinsProfiles[currentSkinsProfile])
+    end
+
+    if currentSkinsProfile ~= "RealUI" then
+        PrintSkinsProfile("RealUI", skinsProfiles["RealUI"])
+    end
+    if currentSkinsProfile ~= "RealUI-Healing" then
+        PrintSkinsProfile("RealUI-Healing", skinsProfiles["RealUI-Healing"])
+    end
+
+    if _G.UIParent and _G.UIParent.GetScale then
+        print(("UIParent scale: %.2f"):format(_G.UIParent:GetScale() or 0))
+    end
+end
+
 -- Diagnostic Commands
 function DiagnosticTools:RunDiagnostic(diagnosticType)
     if diagnosticType == "health" then
         self:PrintHealthCheck()
     elseif diagnosticType == "status" then
         self:PrintSystemStatus()
+    elseif diagnosticType == "profile" or diagnosticType == "profiles" then
+        self:PrintProfileScaleStatus()
     elseif diagnosticType == "performance" then
         if RealUI.PerformanceMonitor then
             RealUI.PerformanceMonitor:PrintStatus()
@@ -325,8 +446,10 @@ function DiagnosticTools:RunDiagnostic(diagnosticType)
         self:PrintSystemStatus()
         print("")
         self:PrintHealthCheck()
+        print("")
+        self:PrintProfileScaleStatus()
     else
-        print("Unknown diagnostic type. Available: health, status, performance, modules, all")
+        print("Unknown diagnostic type. Available: health, status, profile, profiles, performance, modules, all")
     end
 end
 
