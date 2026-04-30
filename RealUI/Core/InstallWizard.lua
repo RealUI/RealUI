@@ -43,6 +43,25 @@ local installState = {
     stageData = {}
 }
 
+local function ProfileExists(aceDB, profileName)
+    if not aceDB or not profileName then
+        return false
+    end
+
+    local profiles = aceDB:GetProfiles()
+    if not profiles then
+        return false
+    end
+
+    for _, existingName in ipairs(profiles) do
+        if existingName == profileName then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function ApplyStartupDisplayOptimization()
     if RealUI.IsUsingHighResDisplay and RealUI:IsUsingHighResDisplay() then
         local skinsOptions = RealUI.GetOptions and RealUI.GetOptions("Skins")
@@ -284,8 +303,18 @@ local function PropagateUnifiedProfiles()
             local skinsDB = skinsModule.db
             local currentSkins = skinsDB:GetCurrentProfile()
             for _, profileName in ipairs(builtInProfiles) do
-                -- SetProfile creates the profile if it doesn't exist
+                local profileExists = ProfileExists(skinsDB, profileName)
+
+                -- SetProfile creates the profile if it doesn't exist.
+                -- When we create a built-in Skins profile during setup, seed it
+                -- from the current profile so display scale choices detected for
+                -- this character carry over instead of reverting to raw defaults.
                 skinsDB:SetProfile(profileName)
+
+                if not profileExists and currentSkins and currentSkins ~= profileName then
+                    skinsDB:CopyProfile(currentSkins, true)
+                    debug("PropagateUnifiedProfiles: seeded new Skins profile", profileName, "from", currentSkins)
+                end
             end
             -- Switch back to original profile
             skinsDB:SetProfile(currentSkins)
