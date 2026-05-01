@@ -58,10 +58,12 @@ Primary command aliases:
 
   * `/realui`
   * `/real`
+  * `/realadv`
 
 Default behavior:
 
   * `/realui` opens the RealUI configuration.
+  * `/realadv` opens the advanced RealUI configuration.
 
 Supported `/realui` subcommands:
 
