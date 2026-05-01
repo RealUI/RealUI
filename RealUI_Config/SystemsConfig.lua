@@ -374,62 +374,66 @@ local function CreateSystemsConfig()
         }
     end
 
-    -- Resolution Optimizer Configuration
-    if RealUI.ResolutionOptimizer then
-        systemsConfig.args.resolution = {
-            name = "Resolution Optimizer",
-            type = "group",
-            order = 50,
-            args = {
-                header = {
-                    name = "Resolution Optimizer",
-                    type = "header",
-                    order = 1,
-                },
-                current = {
-                    name = "Current Resolution",
-                    type = "group",
-                    inline = true,
-                    order = 10,
-                    args = {
-                        info = {
-                            name = function()
-                                local width, height = RealUI.ResolutionOptimizer:GetScreenDimensions()
-                                local profile, category = RealUI.ResolutionOptimizer:GetOptimizationProfile()
-                                if profile then
-                                    return ("Screen: %dx%d\nCategory: %s\n%s"):format(
-                                        width, height, category, profile.description
-                                    )
-                                else
-                                    return ("Screen: %dx%d\nNo optimization profile"):format(width, height)
-                                end
-                            end,
-                            type = "description",
-                            fontSize = "medium",
-                            order = 1,
-                        },
-                    },
-                },
-                actions = {
-                    name = "Actions",
-                    type = "group",
-                    inline = true,
-                    order = 20,
-                    args = {
-                        reoptimize = {
-                            name = "Re-optimize",
-                            desc = "Force re-optimization for current resolution",
-                            type = "execute",
-                            func = function()
-                                RealUI.ResolutionOptimizer:ReOptimize()
-                            end,
-                            order = 1,
-                        },
+    -- Display Wizard Configuration (replaces Resolution Optimizer)
+    systemsConfig.args.displayWizard = {
+        name = "Display Setup",
+        type = "group",
+        order = 50,
+        args = {
+            header = {
+                name = "Display Setup",
+                type = "header",
+                order = 1,
+            },
+            current = {
+                name = "Current Display",
+                type = "group",
+                inline = true,
+                order = 10,
+                args = {
+                    info = {
+                        name = function()
+                            local width, height = _G.GetPhysicalScreenSize()
+                            local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+                            if display and display.presetId then
+                                local preset = RealUI.DisplayPresets and RealUI.DisplayPresets.GetById(display.presetId)
+                                local presetName = preset and preset.name or display.presetId
+                                local hdrStatus = display.hdrEnabled and "On" or "Off"
+                                return ("Screen: %dx%d\nPreset: %s\nHDR: %s\nScale: %.2g  |  Font: %.2g"):format(
+                                    width, height, presetName, hdrStatus,
+                                    display.customScale or 1.0, display.fontScale or 1.0
+                                )
+                            else
+                                return ("Screen: %dx%d\nNo display preset configured"):format(width, height)
+                            end
+                        end,
+                        type = "description",
+                        fontSize = "medium",
+                        order = 1,
                     },
                 },
             },
-        }
-    end
+            actions = {
+                name = "Actions",
+                type = "group",
+                inline = true,
+                order = 20,
+                args = {
+                    openWizard = {
+                        name = "Open Display Setup",
+                        desc = "Open the display preset selector to change resolution, scale, and HDR settings",
+                        type = "execute",
+                        func = function()
+                            if RealUI.DisplayStage then
+                                RealUI.DisplayStage.Open()
+                            end
+                        end,
+                        order = 1,
+                    },
+                },
+            },
+        },
+    }
 
     -- Compatibility Manager Configuration
     if RealUI.CompatibilityManager then

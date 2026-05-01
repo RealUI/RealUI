@@ -1689,6 +1689,42 @@ do -- Skins
         }
     }
 end
+do -- Display
+    debug("Adv Display")
+    order = order + 1
+
+    optArgs.display = {
+        name = "Display",
+        type = "group",
+        order = order,
+        args = {
+            fontScale = {
+                name = "Font Scale",
+                desc = "Multiplier applied to chat frame, tooltip, and Objective Tracker font sizes."
+                    .. "\n\nThis is independent of UI Scale and can be adjusted after choosing a display preset.",
+                type = "range",
+                width = "full",
+                min = 0.8, max = 1.5, step = 0.05,
+                isPercent = true,
+                get = function()
+                    local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+                    return display and display.fontScale or 1.0
+                end,
+                set = function(info, value)
+                    local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+                    if display then
+                        display.fontScale = value
+                    end
+                    local DisplayPresets = RealUI.DisplayPresets
+                    if DisplayPresets and DisplayPresets.RefreshFontScale then
+                        DisplayPresets.RefreshFontScale(value)
+                    end
+                end,
+                order = 1,
+            },
+        },
+    }
+end
 do -- Tooltips
     debug("Adv Tooltips")
     order = order + 1

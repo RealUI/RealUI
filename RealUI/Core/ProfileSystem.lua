@@ -49,7 +49,15 @@ function ProfileSystem:GetDatabaseDefaults()
             patchedTOC = 0,
             currency = {},
             profileVersion = PROFILE_VERSION,
-            unifiedProfilesMigrated = false -- Migration marker for unified profile system
+            unifiedProfilesMigrated = false, -- Migration marker for unified profile system
+            display = {
+                presetId     = false,   -- false = not yet configured
+                customScale  = 1.0,
+                isHighRes    = false,
+                isPixelScale = true,
+                fontScale    = 1.0,
+                hdrEnabled   = false,   -- independent HDR toggle; colorMode derived at apply time
+            },
         },
         char = {
             init = GetDefaultCharInit(),

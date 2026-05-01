@@ -21,13 +21,15 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\Tutorial.lua"/>
     <Script file="Core\TutorialSystem.lua"/>
     <Script file="Core\InstallWizard.lua"/>
+    <Script file="Core\DisplayPresets.lua"/>
+    <Script file="Core\DisplayStage.lua"/>
     <Script file="Core\InstallUI.lua"/>
     <Script file="Core\CharacterInit.lua"/>
     <Script file="Core\SetupSystem.lua"/>
     <Script file="Core\Notifications.lua"/>
     <Script file="Core\FeedbackSystem.lua"/>
     <Script file="Core\DiagnosticTools.lua"/>
-    <Script file="Core\ResolutionOptimizer.lua"/>
+
     <Script file="Core\CompatibilityManager.lua"/>
     <Script file="Core\ProfileManager.lua"/>
     <Script file="Core\SystemIntegration.lua"/>

@@ -142,7 +142,15 @@ do
             qol = {
                 repairMountID = 0
             },
-            unifiedProfilesMigrated = false -- Migration marker for unified profile system
+            unifiedProfilesMigrated = false, -- Migration marker for unified profile system
+            display = {
+                presetId     = false,   -- false = not yet configured
+                customScale  = 1.0,
+                isHighRes    = false,
+                isPixelScale = true,
+                fontScale    = 1.0,
+                hdrEnabled   = false,   -- independent HDR toggle; colorMode derived at apply time
+            },
         },
         char = {
             init = charInit,
@@ -336,6 +344,13 @@ function RealUI:ChatCommand_Config(input)
                 _G.ReloadUI()
             else
                 print("|cff0099ffRealUI|r: Database not available.")
+            end
+            return
+        elseif command == "display" then
+            if self.DisplayStage then
+                self.DisplayStage.Open()
+            else
+                print("|cff0099ffRealUI|r: Display stage not available.")
             end
             return
         elseif command == "grid2update" then
