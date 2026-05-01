@@ -119,4 +119,6 @@ tests\UnifiedProfiles_MigrationIdempotenceTest.lua
 tests\BugConditionTests.lua
 tests\PreservationTests.lua
 
+tests\RealUI_Grid2_Modernization.lua
+
 ../Aurora/dev/test.lua
