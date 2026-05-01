@@ -16,7 +16,7 @@ RealUI.PerformanceMonitor = PerformanceMonitor
 -- Performance Monitoring Configuration
 local PERFORMANCE_CONFIG = {
     -- Monitoring intervals (in seconds)
-    MEMORY_CHECK_INTERVAL = 30,
+    MEMORY_CHECK_INTERVAL = 120,
     CPU_CHECK_INTERVAL = 5,
     PERFORMANCE_ALERT_INTERVAL = 60,
 
@@ -145,7 +145,7 @@ local realUIAddonIndices = nil
 -- Throttle timestamps to avoid calling expensive Update* APIs too frequently
 local lastMemoryUpdateTime = 0
 local lastCPUUpdateTime = 0
-local UPDATE_MIN_INTERVAL = 10 -- seconds
+local UPDATE_MIN_INTERVAL = 120 -- seconds; aligned with MEMORY_CHECK_INTERVAL
 
 local function BuildAddonIndexCache()
     realUIAddonIndices = {}
@@ -417,30 +417,13 @@ function PerformanceMonitor:CheckAutomaticGarbageCollection(memory)
 end
 
 function PerformanceMonitor:PerformGarbageCollection()
-    -- Use the cached memory value as the baseline to avoid an extra
-    -- UpdateAddOnMemoryUsage() call immediately before GC.
-    local beforeMemory = performanceData.memory.current
-    local beforeTime = GetTime()
-
-    -- Perform garbage collection
-    collectgarbage("collect")
-
-    local afterTime = GetTime()
-    -- Force a fresh memory read after GC by resetting the throttle timestamp.
-    lastMemoryUpdateTime = 0
-    local afterMemory = self:GetMemoryUsage()
-    local gcTime = (afterTime - beforeTime) * 1000 -- Convert to milliseconds
-    local memoryFreed = beforeMemory - afterMemory
-
-    performanceData.system.lastGC = afterTime
+    -- GC is owned by Aurora (smooth/combat modes). Forcing collectgarbage("collect")
+    -- here caused "script ran too long" errors. We record the event for stats only.
+    local currentTime = GetTime()
+    performanceData.system.lastGC = currentTime
     performanceData.system.gcCount = performanceData.system.gcCount + 1
-
-    debug(("Garbage collection completed: freed %.2f KB in %.2f ms"):format(
-        memoryFreed / 1024,
-        gcTime
-    ))
-
-    return memoryFreed, gcTime
+    debug("GC checkpoint recorded (collection managed by Aurora)")
+    return 0, 0
 end
 
 function PerformanceMonitor:PerformIncrementalGarbageCollection()
@@ -635,11 +618,6 @@ function PerformanceMonitor:StartMonitoring()
     monitoringTimers.framerate = RealUI:ScheduleRepeatingTimer(
         function() self:TrackFramerate() end,
         PERFORMANCE_CONFIG.CPU_CHECK_INTERVAL
-    )
-
-    monitoringTimers.gc = RealUI:ScheduleRepeatingTimer(
-        function() self:CheckForcedGarbageCollection() end,
-        60 -- Check every minute
     )
 
     monitoringTimers.cleanup = RealUI:ScheduleRepeatingTimer(
