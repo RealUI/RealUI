@@ -129,7 +129,7 @@ end
 -- "4k_theater" is never auto-suggested (Req 3.3).
 -- @return string  Preset id
 function DisplayPresets.Suggest()
-    local screenW, screenH = GetPhysicalScreenSize()
+    local screenW, screenH = _G.GetPhysicalScreenSize()
     local ratio = screenW / screenH
     local effectiveScale = screenH / 768
 

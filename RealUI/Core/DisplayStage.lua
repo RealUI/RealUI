@@ -39,8 +39,6 @@ local isWizardMode = false
 
 -- Preview frame references (Task 8)
 local previewFrame        -- the 320×180 preview container
-local mockUnitFrames = {} -- two StatusBar-based mock unit frames
-local mockActionBtns = {} -- six button-sized mock action bar frames
 local chatStrings = {}    -- two FontString lines for chat strip
 
 ---------------------------------------------------------------------------
@@ -349,7 +347,6 @@ local function BuildPreviewFrame(parent)
         unitFrame.healthBar = healthBar
         unitFrame.powerBar = powerBar
         unitFrame.border = unitBorder
-        mockUnitFrames[i] = unitFrame
 
         -- 8.3: Register with Aurora Color system (guarded)
         if Color and Color.RegisterHighlightElement then
@@ -391,7 +388,6 @@ local function BuildPreviewFrame(parent)
 
         btn.bg = btnBg
         btn.border = btnBorder
-        mockActionBtns[i] = btn
 
         -- 8.3: Register with Aurora Color system (guarded)
         if Color and Color.RegisterHighlightElement then
