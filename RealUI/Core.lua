@@ -338,6 +338,22 @@ function RealUI:ChatCommand_Config(input)
                 print("|cff0099ffRealUI|r: Database not available.")
             end
             return
+        elseif command == "grid2update" then
+            if not _G.Grid2DB then
+                print("|cff0099ffRealUI|r: Grid2 is not loaded.")
+                return
+            end
+            local changed = private.Grid2ProfileMigration()
+            if changed then
+                local dbg2 = self.db and self.db.global
+                if dbg2 then
+                    dbg2.grid2MigrationState = "applied"
+                end
+                print("|cff0099ffRealUI|r: Grid2 profiles updated with new 3.x additions.")
+            else
+                print("|cff0099ffRealUI|r: Grid2 profiles are already up to date.")
+            end
+            return
         elseif command == "resetinventory" then
             local invMod = self:GetModule("Inventory", true)
             if invMod then
@@ -1422,6 +1438,14 @@ function RealUI:OnEnable()
 
     -- Update frame styling
     self:UpdateFrameStyle()
+
+    -- Grid2 profile migration check for existing users
+    -- Deferred to avoid conflicting with minipatch or install popups
+    if dbc.init.installStage == -1 and _G.Grid2DB then
+        _G.C_Timer.After(3, function()
+            private.CheckGrid2Migration()
+        end)
+    end
 
     -- Mark framework as enabled
     RealUI.isEnabled = true

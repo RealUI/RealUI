@@ -80,7 +80,7 @@ function private.AddOns.Grid2()
     local Grid2RaidDebuffs = namespaces.Grid2RaidDebuffs.profiles
     Grid2RaidDebuffs["RealUI-Healing"] = {
         ["enabledModules"] = {
-            ["The War Within"] = true,
+            ["Midnight"] = true,
             ["Mythic+ Dungeons"] = true,
         },
     }
@@ -188,6 +188,7 @@ function private.AddOns.Grid2()
             },
             ["tooltip"] = {
                 ["type"] = "tooltip",
+                ["displayUnitOOC"] = true,
                 ["showDefault"] = true,
                 ["showTooltip"] = 4,
             },
@@ -274,7 +275,6 @@ function private.AddOns.Grid2()
             },
             ["heals"] = {
                 ["type"] = "bar",
-                ["anchorTo"] = "health",
                 ["location"] = {
                     ["y"] = 0,
                     ["relPoint"] = "CENTER",
@@ -310,34 +310,17 @@ function private.AddOns.Grid2()
                     ["b"] = 0,
                 },
             },
+            ["background"] = {
+                ["type"] = "background",
+            },
+            ["private-auras-dispel"] = {
+                ["type"] = "privateaurasdispel",
+                ["level"] = 7,
+            },
         },
         ["statuses"] = {
             ["health-deficit"] = {
                 ["threshold"] = 0,
-            },
-            ["buff-Grace-mine"] = {
-                ["color2"] = {
-                    ["a"] = 1,
-                    ["r"] = 0.8,
-                    ["g"] = 0.8,
-                    ["b"] = 0.8,
-                },
-                ["type"] = "buff",
-                ["color3"] = {
-                    ["a"] = 1,
-                    ["r"] = 1,
-                    ["g"] = 1,
-                    ["b"] = 1,
-                },
-                ["spellName"] = 77613,
-                ["colorCount"] = 3,
-                ["mine"] = true,
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["r"] = 0.6,
-                    ["g"] = 0.6,
-                    ["b"] = 0.6,
-                },
             },
             ["buff-Renew-mine"] = {
                 ["spellName"] = 139,
@@ -383,360 +366,6 @@ function private.AddOns.Grid2()
             },
             ["raid-debuffs"] = {
                 ["debuffs"] = {
-                    [968] = {
-                        274195, -- [1]
-                        277072, -- [2]
-                        265914, -- [3]
-                        255835, -- [4]
-                        255836, -- [5]
-                        263927, -- [6]
-                        250372, -- [7]
-                        255620, -- [8]
-                        250096, -- [9]
-                        259145, -- [10]
-                        249919, -- [11]
-                        255434, -- [12]
-                        255371, -- [13]
-                        257407, -- [14]
-                        255421, -- [15]
-                        253562, -- [16]
-                        254959, -- [17]
-                        260668, -- [18]
-                        255567, -- [19]
-                        279118, -- [20]
-                        252692, -- [21]
-                        252687, -- [22]
-                        255041, -- [23]
-                        255814, -- [24]
-                    },
-                    [1036] = {
-                        268896, -- [1]
-                        269104, -- [2]
-                        269131, -- [3]
-                        267899, -- [4]
-                        267818, -- [5]
-                        264560, -- [6]
-                        264477, -- [7]
-                        268233, -- [8]
-                        274633, -- [9]
-                        268309, -- [10]
-                        268315, -- [11]
-                        268317, -- [12]
-                        268322, -- [13]
-                        268391, -- [14]
-                        274720, -- [15]
-                        276268, -- [16]
-                        268059, -- [17]
-                        268027, -- [18]
-                        268214, -- [19]
-                        267034, -- [20]
-                    },
-                    [1002] = {
-                        257791, -- [1]
-                        257777, -- [2]
-                        257793, -- [3]
-                        260067, -- [4]
-                        256198, -- [5]
-                        256038, -- [6]
-                        256044, -- [7]
-                        256200, -- [8]
-                        256105, -- [9]
-                        256201, -- [10]
-                        257028, -- [11]
-                        259711, -- [12]
-                        257092, -- [13]
-                        260016, -- [14]
-                        258864, -- [15]
-                        258313, -- [16]
-                        258079, -- [17]
-                        258075, -- [18]
-                        258058, -- [19]
-                        265889, -- [20]
-                        258128, -- [21]
-                        225080, -- [22]
-                    },
-                    [1021] = {
-                        263905, -- [1]
-                        265352, -- [2]
-                        266036, -- [3]
-                        264105, -- [4]
-                        264390, -- [5]
-                        265346, -- [6]
-                        264050, -- [7]
-                        265761, -- [8]
-                        264153, -- [9]
-                        265407, -- [10]
-                        271178, -- [11]
-                        263943, -- [12]
-                        264520, -- [13]
-                        265881, -- [14]
-                        264378, -- [15]
-                        264407, -- [16]
-                        265880, -- [17]
-                        265882, -- [18]
-                        266035, -- [19]
-                        263891, -- [20]
-                        264556, -- [21]
-                        278456, -- [22]
-                        268203, -- [23]
-                        261439, -- [24]
-                        261438, -- [25]
-                        261440, -- [26]
-                        260551, -- [27]
-                        268231, -- [28]
-                        260741, -- [29]
-                        260926, -- [30]
-                        260703, -- [31]
-                    },
-                    [1023] = {
-                        256076, -- [1]
-                        257459, -- [2]
-                        257288, -- [3]
-                        274991, -- [4]
-                        257882, -- [5]
-                        257862, -- [6]
-                    },
-                    [1041] = {
-                        268932, -- [1]
-                        268586, -- [2]
-                        267626, -- [3]
-                        267702, -- [4]
-                        267764, -- [5]
-                        267639, -- [6]
-                        267273, -- [7]
-                        266238, -- [8]
-                        266231, -- [9]
-                        267257, -- [10]
-                        265773, -- [11]
-                        265914, -- [12]
-                    },
-                    [1030] = {
-                        267027, -- [1]
-                        263958, -- [2]
-                        261732, -- [3]
-                        263927, -- [4]
-                        269686, -- [5]
-                        269670, -- [6]
-                        268024, -- [7]
-                        266512, -- [8]
-                        266923, -- [9]
-                        263371, -- [10]
-                        263234, -- [11]
-                        268993, -- [12]
-                        263778, -- [13]
-                        225080, -- [14]
-                        273563, -- [15]
-                        272657, -- [16]
-                        272655, -- [17]
-                        272696, -- [18]
-                        272699, -- [19]
-                        268013, -- [20]
-                        268007, -- [21]
-                        268008, -- [22]
-                    },
-                    [1001] = {
-                        256553, -- [1]
-                        256363, -- [2]
-                        281591, -- [3]
-                        257460, -- [4]
-                        257314, -- [5]
-                        278993, -- [6]
-                        257908, -- [7]
-                        257478, -- [8]
-                        274384, -- [9]
-                        258874, -- [10]
-                        267523, -- [11]
-                        1604, -- [12]
-                    },
-                    [1177] = {
-                        284733, -- [1]
-                        282384, -- [2]
-                        283524, -- [3]
-                        282517, -- [4]
-                        282562, -- [5]
-                        282738, -- [6]
-                    },
-                    [1031] = {
-                        272336, -- [1]
-                        272536, -- [2]
-                        274693, -- [3]
-                        272407, -- [4]
-                        272146, -- [5]
-                        274019, -- [6]
-                        274113, -- [7]
-                        274761, -- [8]
-                        279013, -- [9]
-                        271222, -- [10]
-                        270290, -- [11]
-                        275270, -- [12]
-                        275189, -- [13]
-                        275205, -- [14]
-                        265360, -- [15]
-                        265662, -- [16]
-                        265237, -- [17]
-                        265264, -- [18]
-                        265646, -- [19]
-                        264210, -- [20]
-                        270589, -- [21]
-                        270620, -- [22]
-                        263334, -- [23]
-                        263372, -- [24]
-                        263436, -- [25]
-                        272506, -- [26]
-                        267409, -- [27]
-                        267430, -- [28]
-                        263235, -- [29]
-                        270287, -- [30]
-                        263321, -- [31]
-                        267659, -- [32]
-                        267700, -- [33]
-                        267813, -- [34]
-                        269691, -- [35]
-                        277007, -- [36]
-                        279575, -- [37]
-                        273365, -- [38]
-                        274358, -- [39]
-                        273434, -- [40]
-                        274195, -- [41]
-                        274271, -- [42]
-                        272018, -- [43]
-                        276020, -- [44]
-                        276299, -- [45]
-                        262313, -- [46]
-                        262314, -- [47]
-                        262292, -- [48]
-                        267821, -- [49]
-                        267787, -- [50]
-                        268095, -- [51]
-                        268198, -- [52]
-                        268253, -- [53]
-                        268277, -- [54]
-                        265129, -- [55]
-                        265178, -- [56]
-                        265212, -- [57]
-                        265127, -- [58]
-                        265206, -- [59]
-                    },
-                    [1022] = {
-                        269301, -- [1]
-                        260685, -- [2]
-                        260333, -- [3]
-                        260455, -- [4]
-                        259714, -- [5]
-                        259718, -- [6]
-                        273226, -- [7]
-                        265533, -- [8]
-                        265019, -- [9]
-                        265377, -- [10]
-                        265568, -- [11]
-                        266107, -- [12]
-                        266265, -- [13]
-                        272180, -- [14]
-                        265468, -- [15]
-                        272609, -- [16]
-                        265511, -- [17]
-                        278961, -- [18]
-                        273599, -- [19]
-                    },
-                    [1012] = {
-                        260811, -- [1]
-                        260829, -- [2]
-                        260838, -- [3]
-                        270277, -- [4]
-                        280604, -- [5]
-                        280605, -- [6]
-                        263637, -- [7]
-                        269298, -- [8]
-                        263202, -- [9]
-                        268704, -- [10]
-                        268846, -- [11]
-                        263074, -- [12]
-                        262270, -- [13]
-                        262794, -- [14]
-                        262811, -- [15]
-                        268797, -- [16]
-                        269429, -- [17]
-                        262377, -- [18]
-                        262348, -- [19]
-                        269092, -- [20]
-                        262515, -- [21]
-                        262513, -- [22]
-                        257582, -- [23]
-                        258627, -- [24]
-                        257544, -- [25]
-                        275907, -- [26]
-                        256137, -- [27]
-                        257333, -- [28]
-                        262347, -- [29]
-                        270882, -- [30]
-                        258971, -- [31]
-                        259940, -- [32]
-                        259853, -- [33]
-                    },
-                    [0] = {
-                        260989, -- [1]
-                        261509, -- [2]
-                        275175, -- [3]
-                        274932, -- [4]
-                        274904, -- [5]
-                        271244, -- [6]
-                        274895, -- [7]
-                        274891, -- [8]
-                        274839, -- [9]
-                        261605, -- [10]
-                        261552, -- [11]
-                    },
-                    [1176] = {
-                        282444, -- [1]
-                        286811, -- [2]
-                        282209, -- [3]
-                        282135, -- [4]
-                        285878, -- [5]
-                        287626, -- [6]
-                        287365, -- [7]
-                        288218, -- [8]
-                        289220, -- [9]
-                        288038, -- [10]
-                        285212, -- [11]
-                        287565, -- [12]
-                        286988, -- [13]
-                        288151, -- [14]
-                        282037, -- [15]
-                        285632, -- [16]
-                        286480, -- [17]
-                        282182, -- [18]
-                        287757, -- [19]
-                        283411, -- [20]
-                        284168, -- [21]
-                        284214, -- [22]
-                        287891, -- [23]
-                        287167, -- [24]
-                        289023, -- [25]
-                        285213, -- [26]
-                        288449, -- [27]
-                        284662, -- [28]
-                        285349, -- [29]
-                        284781, -- [30]
-                        284405, -- [31]
-                        285000, -- [32]
-                        285350, -- [33]
-                        285075, -- [34]
-                        285382, -- [35]
-                        285875, -- [36]
-                        282215, -- [37]
-                        282471, -- [38]
-                        285659, -- [39]
-                        286434, -- [40]
-                        283069, -- [41]
-                        285671, -- [42]
-                        282010, -- [43]
-                        283572, -- [44]
-                        283651, -- [45]
-                        283579, -- [46]
-                        283507, -- [47]
-                        287072, -- [48]
-                        284470, -- [49]
-                    },
                 },
             },
             ["buff-SpiritOfRedemption"] = {
@@ -751,6 +380,7 @@ function private.AddOns.Grid2()
                 },
             },
             ["threat"] = {
+                ["blinkThreshold"] = true,
                 ["color2"] = {
                     ["b"] = 0,
                     ["g"] = 0,
@@ -762,16 +392,6 @@ function private.AddOns.Grid2()
                 },
                 ["color1"] = {
                     ["g"] = 0.415686274509804,
-                },
-            },
-            ["debuff-WeakenedSoul"] = {
-                ["type"] = "debuff",
-                ["spellName"] = 6788,
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["r"] = 0,
-                    ["g"] = 0.2,
-                    ["b"] = 0.9,
                 },
             },
             ["buff-RenewingMist-mine"] = {
@@ -796,32 +416,11 @@ function private.AddOns.Grid2()
                     ["b"] = 0,
                 },
             },
-            ["buff-InnerFire"] = {
-                ["missing"] = true,
-                ["type"] = "buff",
-                ["spellName"] = 588,
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["r"] = 1,
-                    ["g"] = 1,
-                    ["b"] = 1,
-                },
-            },
             ["afk"] = {
                 ["color1"] = {
                     ["r"] = 0.501960784313726,
                     ["g"] = 0.501960784313726,
                     ["b"] = 0.501960784313726,
-                },
-            },
-            ["buff-DivineAegis"] = {
-                ["type"] = "buff",
-                ["spellName"] = 47509,
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["r"] = 1,
-                    ["g"] = 1,
-                    ["b"] = 1,
                 },
             },
             ["health-current"] = {
@@ -839,31 +438,8 @@ function private.AddOns.Grid2()
                     ["g"] = 0,
                 },
             },
-            ["buff-EternalFlame-mine"] = {
-                ["spellName"] = 114163,
-                ["type"] = "buff",
-                ["mine"] = 1,
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["r"] = 0,
-                    ["g"] = 1,
-                    ["b"] = 0,
-                },
-            },
             ["friendcolor"] = {
                 ["colorHostile"] = true,
-            },
-            ["buff-SpiritShell-mine"] = {
-                ["type"] = "buff",
-                ["spellName"] = 114908,
-                ["useSpellId"] = true,
-                ["mine"] = 1,
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["r"] = 0,
-                    ["g"] = 1,
-                    ["b"] = 0,
-                },
             },
             ["buff-PrayerOfMending-mine"] = {
                 ["type"] = "buff",
@@ -920,7 +496,7 @@ function private.AddOns.Grid2()
             },
         },
         ["versions"] = {
-            ["Grid2"] = 6,
+            ["Grid2"] = 106,
             ["Grid2RaidDebuffs"] = 4,
         },
         ["statusMap"] = {
@@ -933,8 +509,6 @@ function private.AddOns.Grid2()
             ["health-deficit"] = {
             },
             ["icon-left"] = {
-                ["buff-SpiritShell-mine"] = 53,
-                ["buff-EternalFlame-mine"] = 51,
                 ["buff-Rejuvenation-mine"] = 55,
                 ["buff-Lifebloom-mine"] = 56,
                 ["buff-RenewingMist-mine"] = 50,
@@ -1019,6 +593,10 @@ function private.AddOns.Grid2()
                 [0] = {
                 },
             },
+        },
+        ["hideBlizzard"] = {
+            ["raid"] = true,
+            ["party"] = true,
         },
     }
     profiles["RealUI"] = {
@@ -1171,7 +749,6 @@ function private.AddOns.Grid2()
             },
             ["heals"] = {
                 ["type"] = "bar",
-                ["anchorTo"] = "health",
                 ["location"] = {
                     ["y"] = 0,
                     ["relPoint"] = "CENTER",
@@ -1275,6 +852,13 @@ function private.AddOns.Grid2()
                 ["type"] = "square",
                 ["width"] = 5,
             },
+            ["background"] = {
+                ["type"] = "background",
+            },
+            ["private-auras-dispel"] = {
+                ["type"] = "privateaurasdispel",
+                ["level"] = 7,
+            },
         },
         ["statusMap"] = {
             ["corner-top-left"] = {
@@ -1317,7 +901,6 @@ function private.AddOns.Grid2()
             },
             ["corner-top-right"] = {
                 ["raid-assistant"] = 50,
-                ["debuff-WeakenedSoul"] = 89,
                 ["leader"] = 51,
                 ["buff-PowerWordShield"] = 99,
             },
@@ -1349,7 +932,7 @@ function private.AddOns.Grid2()
             },
         },
         ["versions"] = {
-            ["Grid2"] = 6,
+            ["Grid2"] = 106,
             ["Grid2RaidDebuffs"] = 4,
         },
         ["statuses"] = {
@@ -1365,6 +948,7 @@ function private.AddOns.Grid2()
                 ["spellName"] = 27827,
             },
             ["threat"] = {
+                ["blinkThreshold"] = true,
                 ["color2"] = {
                     ["b"] = 0,
                     ["g"] = 0,
@@ -1378,42 +962,8 @@ function private.AddOns.Grid2()
                     ["g"] = 0.388235294117647,
                 },
             },
-            ["debuff-WeakenedSoul"] = {
-                ["type"] = "debuff",
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["b"] = 0.9,
-                    ["g"] = 0.2,
-                    ["r"] = 0,
-                },
-                ["spellName"] = 6788,
-            },
             ["health-deficit"] = {
                 ["threshold"] = 0,
-            },
-            ["buff-Grace-mine"] = {
-                ["color2"] = {
-                    ["a"] = 1,
-                    ["b"] = 0.8,
-                    ["g"] = 0.8,
-                    ["r"] = 0.8,
-                },
-                ["type"] = "buff",
-                ["color3"] = {
-                    ["a"] = 1,
-                    ["b"] = 1,
-                    ["g"] = 1,
-                    ["r"] = 1,
-                },
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["b"] = 0.6,
-                    ["g"] = 0.6,
-                    ["r"] = 0.6,
-                },
-                ["colorCount"] = 3,
-                ["mine"] = true,
-                ["spellName"] = 77613,
             },
             ["afk"] = {
                 ["color1"] = {
@@ -1421,16 +971,6 @@ function private.AddOns.Grid2()
                     ["g"] = 0.501960784313726,
                     ["b"] = 0.501960784313726,
                 },
-            },
-            ["buff-DivineAegis"] = {
-                ["type"] = "buff",
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["b"] = 1,
-                    ["g"] = 1,
-                    ["r"] = 1,
-                },
-                ["spellName"] = 47509,
             },
             ["friendcolor"] = {
                 ["colorHostile"] = true,
@@ -1455,17 +995,6 @@ function private.AddOns.Grid2()
                     ["r"] = 0,
                 },
                 ["spellName"] = 17,
-            },
-            ["buff-InnerFire"] = {
-                ["missing"] = true,
-                ["type"] = "buff",
-                ["color1"] = {
-                    ["a"] = 1,
-                    ["b"] = 1,
-                    ["g"] = 1,
-                    ["r"] = 1,
-                },
-                ["spellName"] = 588,
             },
             ["dungeon-role"] = {
                 ["color2"] = {
@@ -1547,7 +1076,183 @@ function private.AddOns.Grid2()
                 },
             },
         },
+        ["hideBlizzard"] = {
+            ["raid"] = true,
+            ["party"] = true,
+        },
     }
+end
+
+-- Optional migration for existing users: additively applies Grid2 3.x
+-- profile additions and removes obsolete spell references that no longer
+-- exist in the game. Returns true if any changes were made, false otherwise.
+function private.Grid2ProfileMigration()
+    local Grid2DB = _G.Grid2DB
+    if not Grid2DB or not Grid2DB.profiles then return false end
+
+    -- Spells removed from the game — safe to clean up unconditionally
+    local OBSOLETE_STATUSES = {
+        "buff-Grace-mine",
+        "buff-DivineAegis",
+        "buff-InnerFire",
+        "buff-SpiritShell-mine",
+        "buff-EternalFlame-mine",
+        "debuff-WeakenedSoul",
+    }
+
+    local changed = false
+    for _, profileName in _G.ipairs({"RealUI", "RealUI-Healing"}) do
+        local profile = Grid2DB.profiles[profileName]
+        if profile then
+            -- hideBlizzard (migration v14)
+            if not profile.hideBlizzard then
+                profile.hideBlizzard = { raid = true, party = true }
+                changed = true
+            end
+
+            -- Ensure indicators table exists
+            profile.indicators = profile.indicators or {}
+
+            -- background indicator (migration v7)
+            if not profile.indicators["background"] then
+                profile.indicators["background"] = { type = "background" }
+                changed = true
+            end
+
+            -- private-auras-dispel indicator (migration v105)
+            if not profile.indicators["private-auras-dispel"] then
+                profile.indicators["private-auras-dispel"] = { type = "privateaurasdispel", level = 7 }
+                changed = true
+            end
+
+            -- tooltip displayUnitOOC (migration v6)
+            if profile.indicators["tooltip"] and profile.indicators["tooltip"].displayUnitOOC == nil then
+                profile.indicators["tooltip"].displayUnitOOC = true
+                changed = true
+            end
+
+            -- threat blinkThreshold (migration v11)
+            if profile.statuses and profile.statuses["threat"]
+               and not profile.statuses["threat"].blinkThreshold then
+                profile.statuses["threat"].blinkThreshold = true
+                changed = true
+            end
+
+            -- Remove obsolete statuses (spells no longer in the game)
+            if profile.statuses then
+                for _, obsolete in _G.ipairs(OBSOLETE_STATUSES) do
+                    if profile.statuses[obsolete] then
+                        profile.statuses[obsolete] = nil
+                        changed = true
+                    end
+                end
+            end
+
+            -- Remove obsolete statusMap references
+            if profile.statusMap then
+                for _, mappings in _G.pairs(profile.statusMap) do
+                    for _, obsolete in _G.ipairs(OBSOLETE_STATUSES) do
+                        if mappings[obsolete] then
+                            mappings[obsolete] = nil
+                            changed = true
+                        end
+                    end
+                end
+            end
+
+            -- Clear stale BfA-era raid debuffs (RealUI-Healing only)
+            if profileName == "RealUI-Healing" and profile.statuses
+               and profile.statuses["raid-debuffs"]
+               and profile.statuses["raid-debuffs"].debuffs then
+                local debuffs = profile.statuses["raid-debuffs"].debuffs
+                if _G.next(debuffs) then
+                    -- Wipe all entries — Grid2RaidDebuffs repopulates at runtime
+                    _G.table.wipe(debuffs)
+                    changed = true
+                end
+            end
+
+            -- versions.RealUIGrid2 for future migration tracking
+            profile.versions = profile.versions or {}
+            if not profile.versions.RealUIGrid2 then
+                profile.versions.RealUIGrid2 = 1
+                changed = true
+            end
+        end
+    end
+
+    -- Grid2RaidDebuffs enabledModules
+    local namespaces = Grid2DB.namespaces
+    local rdProfiles = namespaces and namespaces.Grid2RaidDebuffs
+        and namespaces.Grid2RaidDebuffs.profiles
+    if rdProfiles and rdProfiles["RealUI-Healing"] then
+        local em = rdProfiles["RealUI-Healing"].enabledModules
+        if em then
+            if not em["Midnight"] then
+                em["Midnight"] = true
+                changed = true
+            end
+            if em["The War Within"] then
+                em["The War Within"] = nil
+                changed = true
+            end
+        end
+    end
+
+    return changed
+end
+
+-- Check if Grid2 migration is needed and show opt-in popup for existing users.
+-- Called from Core.lua OnEnable with a short delay.
+function private.CheckGrid2Migration()
+    local dbg = RealUI.db and RealUI.db.global
+    if not dbg then return end
+
+    -- Skip if already applied or declined
+    if dbg.grid2MigrationState then return end
+
+    -- Skip if Grid2DB doesn't exist or profiles are missing
+    local Grid2DB = _G.Grid2DB
+    if not Grid2DB or not Grid2DB.profiles then return end
+
+    -- Detect if migration is needed: check sentinel (hideBlizzard absent)
+    local needsMigration = false
+    for _, profileName in _G.ipairs({"RealUI", "RealUI-Healing"}) do
+        local profile = Grid2DB.profiles[profileName]
+        if profile and not profile.hideBlizzard then
+            needsMigration = true
+            break
+        end
+    end
+
+    if not needsMigration then
+        dbg.grid2MigrationState = "applied"
+        return
+    end
+
+    -- Show two-button popup: Apply / Skip
+    _G.StaticPopupDialogs["REALUI_GRID2_MIGRATION"] = {
+        text = "|cff85e0ffRealUI Grid2 Update|r\n\nNew Grid2 3.x settings are available "
+            .. "(Blizzard frame hiding, private aura dispel indicator, background indicator, "
+            .. "Midnight raid debuffs).\n\nApply these additions to your Grid2 profiles? "
+            .. "Your existing customizations will not be changed.",
+        button1 = _G.APPLY or "Apply",
+        button2 = _G.CANCEL or "Skip",
+        OnAccept = function()
+            private.Grid2ProfileMigration()
+            dbg.grid2MigrationState = "applied"
+            _G.print("|cff0099ffRealUI|r: Grid2 profiles updated with new 3.x additions.")
+        end,
+        OnCancel = function()
+            dbg.grid2MigrationState = "declined"
+            _G.print("|cff0099ffRealUI|r: Grid2 update skipped. Use |cFFFF8000/realui grid2update|r to apply later.")
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = false,
+        notClosableByLogout = false,
+    }
+    _G.StaticPopup_Show("REALUI_GRID2_MIGRATION")
 end
 
 function private.Profiles.Grid2()
@@ -1563,18 +1268,27 @@ function private.Profiles.Grid2()
     end
 
     local pro = db[RealUI.charInfo.specs.current.index] or db
-    if type(pro) == "string" and pro ~= _G.Grid2.db:GetCurrentProfile() then
-        -- pcall protects against Grid2 errors during early init (e.g.
-        -- GridLayout:UpdateFrame calling SetClampedToScreen with a bad
-        -- value before Grid2 is fully bootstrapped on a fresh install).
-        local ok, _err = pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
-        if not ok then
-            -- Defer the profile switch until Grid2 is ready
-            RealUI:ScheduleTimer(function()
-                if _G.Grid2 and _G.Grid2.db then
-                    pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
-                end
-            end, 2)
+    if type(pro) == "string" then
+        if _G.Grid2ProfileAPI then
+            -- Use public API (Grid2 3.x) - no pcall needed since the API
+            -- is only available after Grid2 has fully initialized.
+            if pro ~= _G.Grid2ProfileAPI:GetCurrentProfileKey() then
+                _G.Grid2ProfileAPI:SetProfile(pro)
+            end
+        elseif pro ~= _G.Grid2.db:GetCurrentProfile() then
+            -- Fallback to AceDB (pre-3.x). pcall protects against Grid2
+            -- errors during early init (e.g. GridLayout:UpdateFrame calling
+            -- SetClampedToScreen with a bad value before Grid2 is fully
+            -- bootstrapped on a fresh install).
+            local ok, _err = pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
+            if not ok then
+                -- Defer the profile switch until Grid2 is ready
+                RealUI:ScheduleTimer(function()
+                    if _G.Grid2 and _G.Grid2.db then
+                        pcall(_G.Grid2.db.SetProfile, _G.Grid2.db, pro)
+                    end
+                end, 2)
+            end
         end
     end
 end
