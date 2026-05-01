@@ -1,3 +1,29 @@
+## [3.2.0] - unreleased ##
+### Summary ###
+Feature-heavy pre-release update that folds in two active spec tracks: a new Display Setup wizard stage in RealUI and Aurora's color mode system (including HDR and accessibility palettes). Also includes Grid2 profile modernization and startup/skinning hardening fixes.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * RealUI_Dev
+  * Aurora (12.0.5.6)
+
+### Added ###
+  * add: Display Setup wizard stage with preset-driven setup, live preview, and HDR toggle support, replacing the old Resolution Optimizer flow
+  * add: Aurora 12.0.5.5 adds a Color Mode system with live switching for Normal, HDR, and accessibility palettes (Deuteranopia, Protanopia, Tritanopia)
+
+### Changed ###
+  * chg: Aurora updated to 12.0.5.6 (from 12.0.5.4)
+  * chg: modernize bundled Grid2 profiles from DB_VERSION 6 to 106 with updated indicators, cleanup of obsolete spell mappings, and optional migration for existing users
+
+### Fixed ###
+  * fix: guard nil dropdown skin calls during startup in RealUI_Skins Ace3 skinning paths
+  * fix: migrate default skins profile seeding to RealUI core and normalize UI scale diagnostics during setup
+  * fix: Aurora 12.0.5.5 makes SetTooltipMoney workaround load-order safe
+  * fix: Aurora 12.0.5.6 guards `private.Integration` access in `Color.SetMode` to prevent early initialization errors
+
+
 ## [3.1.18] - 2026-04-29 ##
 ### Summary ###
 Small hotfix for loot rolls. Auto-confirms server roll confirmations (CONFIRM_LOOT_ROLL, CONFIRM_DISENCHANT_ROLL) so rolls no longer silently fail when the custom loot frame has already closed before the server's async confirmation event arrives.
@@ -782,6 +808,8 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.2.0]: https://github.com/RealUI/RealUI/compare/3.1.18...3.2.0
+[3.1.18]: https://github.com/RealUI/RealUI/compare/3.1.17...3.1.18
 [3.1.17]: https://github.com/RealUI/RealUI/compare/3.1.16...3.1.17
 [3.1.16]: https://github.com/RealUI/RealUI/compare/3.1.15...3.1.16
 [3.1.15]: https://github.com/RealUI/RealUI/compare/3.1.14...3.1.15
