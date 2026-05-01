@@ -1,6 +1,6 @@
-## [3.2.0] - unreleased ##
+## [3.2.0] - 2026-05-01 ##
 ### Summary ###
-Feature-heavy pre-release update that folds in two active spec tracks: a new Display Setup wizard stage in RealUI and Aurora's color mode system (including HDR and accessibility palettes). Also includes Grid2 profile modernization and startup/skinning hardening fixes.
+Feature-heavy update that folds in two active spec tracks: a new Display Setup wizard stage in RealUI and Aurora's color mode system (including HDR and accessibility palettes). Also includes Grid2 profile modernization and startup/skinning hardening fixes.
 
 ### Modified AddOns ###
   * RealUI
