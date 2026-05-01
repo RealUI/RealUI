@@ -87,6 +87,16 @@ do -- Other
                 end,
                 order = 2,
             },
+            displaySetup = {
+                name = "Display Setup",
+                type = "execute",
+                func = function()
+                    if RealUI.DisplayStage then
+                        RealUI.DisplayStage.Open()
+                    end
+                end,
+                order = 3,
+            },
             general = {
                 name = _G.GENERAL,
                 type = "group",

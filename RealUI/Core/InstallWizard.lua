@@ -31,9 +31,23 @@ _G.StaticPopupDialogs["REALUI_SETUP_RELOAD"] = {
 InstallWizard.STAGE_COMPLETE = -1
 InstallWizard.STAGE_WELCOME = 0
 InstallWizard.STAGE_LAYOUT = 1
-InstallWizard.STAGE_CHAT = 2
-InstallWizard.STAGE_QOL = 3
-InstallWizard.STAGE_FINISH = 4
+InstallWizard.STAGE_DISPLAY = 2
+InstallWizard.STAGE_CHAT = 3
+InstallWizard.STAGE_QOL = 4
+InstallWizard.STAGE_FINISH = 5
+
+-- Ordered STAGES table is the single authority for flow order.
+-- Navigation (Advance/Retreat) must iterate this table, not compare
+-- numeric values directly, so future insertions only require adding
+-- an entry here.
+InstallWizard.STAGES = {
+    InstallWizard.STAGE_WELCOME,
+    InstallWizard.STAGE_LAYOUT,
+    InstallWizard.STAGE_DISPLAY,
+    InstallWizard.STAGE_CHAT,
+    InstallWizard.STAGE_QOL,
+    InstallWizard.STAGE_FINISH,
+}
 
 -- Installation state
 local installState = {
@@ -72,10 +86,6 @@ local function ApplyStartupDisplayOptimization()
             RealUI.UpdateUIScale(skinsDB.customScale)
             debug("Applied startup high-res scaling for install wizard")
         end
-    end
-
-    if RealUI.ResolutionOptimizer and RealUI.ResolutionOptimizer.ReOptimize then
-        RealUI.ResolutionOptimizer:ReOptimize()
     end
 end
 
@@ -129,10 +139,25 @@ function InstallWizard:SetStage(stage)
     debug("Stage set to:", stage)
 end
 
+-- Find the index of a stage in the STAGES table
+local function StageIndex(stage)
+    for i, s in ipairs(InstallWizard.STAGES) do
+        if s == stage then
+            return i
+        end
+    end
+    return nil
+end
+
 -- Check if installation needs to be resumed
 function InstallWizard:NeedsResume()
     local stage = self:GetCurrentStage()
-    return stage > InstallWizard.STAGE_WELCOME and stage ~= InstallWizard.STAGE_COMPLETE
+    if stage == InstallWizard.STAGE_COMPLETE then
+        return false
+    end
+    local idx = StageIndex(stage)
+    -- Resume if the stage is past the first entry in the flow
+    return idx ~= nil and idx > 1
 end
 
 -- Initialize installation system
@@ -627,11 +652,15 @@ function InstallWizard:NextStage()
         return
     end
 
-    local nextStage = currentStage + 1
+    local idx = StageIndex(currentStage)
+    if not idx then
+        return
+    end
 
-    if nextStage > InstallWizard.STAGE_FINISH then
+    if idx >= #InstallWizard.STAGES then
         self:Complete()
     else
+        local nextStage = InstallWizard.STAGES[idx + 1]
         self:SetStage(nextStage)
 
         -- Update UI if available
@@ -645,11 +674,12 @@ end
 function InstallWizard:PreviousStage()
     local currentStage = self:GetCurrentStage()
 
-    if currentStage <= InstallWizard.STAGE_WELCOME then
+    local idx = StageIndex(currentStage)
+    if not idx or idx <= 1 then
         return
     end
 
-    local prevStage = currentStage - 1
+    local prevStage = InstallWizard.STAGES[idx - 1]
     self:SetStage(prevStage)
 
     -- Update UI if available

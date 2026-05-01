@@ -222,7 +222,28 @@ The system can automatically switch layouts based on your specialization.
             end
         end
     },
-    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_CHAT or 2] = {
+    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_DISPLAY or 2] = {
+        title = "Display Setup",
+        text = "",
+        showPrev = true,
+        showNext = true,
+        showSkip = true,
+        onShow = function(self)
+            -- Hide the default stage text — DisplayStage renders its own card grid
+            self.stageText:SetText("")
+            RealUI.DisplayStage.Show(self.content)
+        end,
+        onHide = function(self)
+            RealUI.DisplayStage.Hide()
+        end,
+        canAdvance = function()
+            return RealUI.DisplayStage.selectedPresetId ~= nil
+        end,
+        onAdvance = function()
+            RealUI.DisplayPresets.Apply(RealUI.DisplayStage.selectedPresetId, RealUI.DisplayStage.hdrEnabled)
+        end,
+    },
+    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_CHAT or 3] = {
         title = "Chat Configuration",
         text = [[
 RealUI includes enhanced chat features:
@@ -239,7 +260,7 @@ You can customize chat settings later through the RealUI configuration.
         showNext = true,
         showSkip = true
     },
-    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_QOL or 3] = {
+    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_QOL or 4] = {
         title = "Quality of Life",
         text = [[
 Configure optional quality of life features:
@@ -362,7 +383,7 @@ Configure optional quality of life features:
             if self.noMountText then self.noMountText:Hide() end
         end
     },
-    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_FINISH or 4] = {
+    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_FINISH or 5] = {
         title = "Installation Complete!",
         text = [[
 RealUI has been successfully configured!
@@ -428,9 +449,18 @@ function InstallUI:UpdateStage(stage)
         stageInfo.onShow(self)
     end
 
-    -- Update progress
-    local totalStages = RealUI.InstallWizard and RealUI.InstallWizard.STAGE_FINISH or 3
-    self.progressText:SetFormattedText("Step %d of %d", stage + 1, totalStages + 1)
+    -- Update progress using STAGES table
+    local totalStages = RealUI.InstallWizard and #RealUI.InstallWizard.STAGES or 6
+    local stageIndex = 1
+    if RealUI.InstallWizard and RealUI.InstallWizard.STAGES then
+        for i, s in _G.ipairs(RealUI.InstallWizard.STAGES) do
+            if s == stage then
+                stageIndex = i
+                break
+            end
+        end
+    end
+    self.progressText:SetFormattedText("Step %d of %d", stageIndex, totalStages)
 
     -- Update button visibility
     self.prevButton:SetShown(stageInfo.showPrev)
@@ -438,7 +468,7 @@ function InstallUI:UpdateStage(stage)
     self.skipButton:SetShown(stageInfo.showSkip)
 
     -- Update next button text for final stage
-    local finishStage = RealUI.InstallWizard and RealUI.InstallWizard.STAGE_FINISH or 3
+    local finishStage = RealUI.InstallWizard and RealUI.InstallWizard.STAGE_FINISH or 5
     if stage == finishStage then
         self.nextButton:SetText("Finish")
         self.nextButton:SetShown(true)
@@ -451,9 +481,24 @@ function InstallUI:UpdateStage(stage)
         self.nextButton:SetText("Next")
         self.nextButton:SetScript("OnClick", function()
             if RealUI.InstallWizard then
+                -- Call onAdvance before advancing to the next stage
+                local currentStage = RealUI.InstallWizard:GetCurrentStage()
+                local currentInfo = stageContent[currentStage]
+                if currentInfo and currentInfo.onAdvance then
+                    currentInfo.onAdvance()
+                end
                 RealUI.InstallWizard:NextStage()
             end
         end)
+    end
+
+    -- canAdvance support: if the stage content has a canAdvance callback,
+    -- call it and enable/disable the Next button accordingly.
+    -- Stages without canAdvance default to enabled.
+    if stageInfo.canAdvance then
+        self.nextButton:SetEnabled(stageInfo.canAdvance())
+    else
+        self.nextButton:SetEnabled(true)
     end
 end
 
