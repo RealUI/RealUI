@@ -7,14 +7,23 @@ RealUI is a minimalistic UI designed to be functional, yet also efficient and el
 
 Information
 -----------
-  * This release is for Midnight Expansion - World of Warcraft 12.0.1
-  * This release is a major update to the Blizzard UI - with many changes to the core and modules
-  * Most features previously disabled have been aded back and modernized - including the HUD unit frames, nameplates, and more
-  * All new features are accessible via the new "Systems" tab in the config, and there are new dev test commands for testing each system
-  * All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensuring a seamless upgrade experience
-  * There are still some bugs and tweaks needed over the coming weeks, but this version is stable enough for general use.
-  * Report issues at GitHub or connect with us on Discord
-  * This version is stable enoough for general use, but there are still some issues to be resolved
+  * Current branch target is Midnight-era WoW (12.0.x).
+  * RealUI now includes the modernized setup pipeline, unified profile handling, and display setup stage.
+  * User settings are automatically migrated from nibRealUIDB to RealUIDB when needed.
+  * Report issues on GitHub or connect with us on Discord.
+
+
+Quick Start
+-----------
+
+After first login, these are the most useful commands:
+
+  * `/realui` - open configuration.
+  * `/realui setup` - rerun setup flow.
+  * `/realui display` - open display preset setup.
+  * `/resetframes` - reset DragEmAll-managed frame positions.
+  * `/framemover reset` - reset moved frame positions.
+  * `/realui resetinventory` - reset inventory and bank positions.
 
 
 Installation
@@ -39,5 +48,57 @@ Update
 Troubleshooting/comments/questions?
 -----------------------------------
 
-Find a bug or want to post a comment? Please visit the ![RealUI Discord](https://img.shields.io/badge/discord-RealUI-7289DA.svg)(https://discord.gg/sasExJYxgf).
+Find a bug or want to post a comment? Please visit the [RealUI Discord](https://discord.gg/sasExJYxgf).
+
+
+Slash Commands
+--------------
+
+Primary command aliases:
+
+  * `/realui`
+  * `/real`
+
+Default behavior:
+
+  * `/realui` opens the RealUI configuration.
+
+Supported `/realui` subcommands:
+
+  * `/realui setup` - run setup flow.
+  * `/realui display` - open Display Setup stage.
+  * `/realui grid2update` - apply the RealUI Grid2 modernization update.
+  * `/realui resetinventory` - reset inventory and bank frame positions.
+  * `/realui resetchar` - reset current character initialization and rerun setup on reload.
+  * `/realui reset` - full reset of RealUI/nibRealUI/Bartender4 plus Platynator profile data.
+
+Other useful slash commands:
+
+  * `/resetframes` - reset DragEmAll-managed Blizzard/custom frame anchors.
+  * `/framemover status` - show frame mover status.
+  * `/framemover config` - toggle frame mover config mode.
+  * `/framemover reset` - reset all frame mover positions (reset frames).
+  * `/configmode` - toggle RealUI config mode overlays.
+  * `/installwizard start` - run the install wizard.
+
+
+Packaged AddOns
+---------------
+
+These folders are included in release packages:
+
+  * `!RealUI_Preloads`
+  * `RealUI`
+  * `nibRealUI`
+  * `RealUI_Config`
+  * `RealUI_Bugs`
+  * `RealUI_CombatText`
+  * `RealUI_Inventory`
+  * `RealUI_Skins` (includes embedded Aurora)
+  * `RealUI_Tooltips`
+
+Not packaged:
+
+  * `RealUI_Dev`
+  * `RealUI_Chat`
 
