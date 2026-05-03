@@ -66,7 +66,7 @@ local unifiedProfilePage = {
     name = "Profiles",
     type = "group",
     childGroups = "tab",
-    order = nextOrder(),
+    order = 90,
     args = {},
 }
 

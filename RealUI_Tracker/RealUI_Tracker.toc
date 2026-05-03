@@ -5,8 +5,8 @@
 ## Author: Hanshi
 ## Version: 3.2.0
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
-## RequiredDeps: Blizzard_ObjectiveTracker
-## OptionalDeps: Aurora, RealUI_Skins, RealUI
+## RequiredDeps: RealUI, Blizzard_ObjectiveTracker
+## OptionalDeps: RealUI_Skins
 ## SavedVariables: RealUI_TrackerDB
 
 Libs\Libs.xml

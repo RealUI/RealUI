@@ -453,7 +453,7 @@ local function BuildTrackerOptions()
         name = "Tracker",
         type = "group",
         childGroups = "tab",
-        order = 95,
+        order = 7,
         args = {
             header = {
                 name = "RealUI Tracker",

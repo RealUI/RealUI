@@ -1862,7 +1862,7 @@ do -- Tooltips
 end
 do -- UI Tweaks
     debug("Adv UITweaks")
-    order = order + 1
+    order = 80
     local altPowerBar do
         local MODNAME = "AltPowerBar"
         local AltPowerBar = RealUI:GetModule(MODNAME)
