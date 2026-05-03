@@ -160,7 +160,7 @@ local keyList = {
 }
 function CombatFader:AddFadeConfig(mod, configDB, startOrder, inline)
     if not RealUI:GetModuleEnabled(mod) then return end
-    _G.assert(modules[mod], mod.." has not yet been registered.")
+    if not modules[mod] then return end
 
     local args = {}
     for order, key in next, keyOrder do
