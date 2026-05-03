@@ -5,8 +5,7 @@ local ADDON_NAME, ns = ... -- luacheck: ignore
 --
 -- When a module's enabled state is false, all sub-option controls in that
 -- section that have a `disabled` callback should return true.
--- Tests AltPowerBar, CooldownCount, EventNotifier, MirrorBar, MinimapAdv,
--- and ObjectivesAdv.
+-- Tests AltPowerBar, CooldownCount, EventNotifier, MirrorBar, and MinimapAdv.
 
 ---------------------------------------------------------------------------
 -- Module-to-section-key mapping in optArgs.uiTweaks.args
@@ -17,7 +16,6 @@ local MODULE_SECTIONS = {
     { modName = "EventNotifier",    sectionKey = "eventNotify" },
     { modName = "MirrorBar",        sectionKey = "mirrorBar" },
     { modName = "MinimapAdv",       sectionKey = "minimap" },
-    { modName = "Objectives Adv.",  sectionKey = "objectives" },
 }
 
 ---------------------------------------------------------------------------
