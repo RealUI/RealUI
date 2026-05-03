@@ -73,6 +73,17 @@ externals:
         url: https://github.com/MMOSimca/LibObjectiveProgress-1.0.git
         tag: latest
 
+    RealUI_Tracker/Libs/LibStub:
+        url: https://github.com/WoWUIDev/Ace3.git/LibStub
+    RealUI_Tracker/Libs/CallbackHandler-1.0:
+        url: https://github.com/WoWUIDev/Ace3.git/CallbackHandler-1.0
+    RealUI_Tracker/Libs/AceAddon-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceAddon-3.0
+    RealUI_Tracker/Libs/AceDB-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
+    RealUI_Tracker/Libs/AceEvent-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
+
 manual-changelog:
     filename: CHANGELOG.md
     markup-type: markdown
@@ -86,5 +97,6 @@ move-folders:
     RealUI/RealUI_Inventory: RealUI_Inventory
     RealUI/RealUI_Skins: RealUI_Skins
     RealUI/RealUI_Tooltips: RealUI_Tooltips
+    RealUI/RealUI_Tracker: RealUI_Tracker
     Aurora: RealUI_Skins/Aurora
     RealUI/!RealUI_Preloads: "!RealUI_Preloads"
