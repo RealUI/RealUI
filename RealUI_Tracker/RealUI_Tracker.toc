@@ -1,0 +1,19 @@
+## Interface: 120005
+## Title: RealUI Tracker
+## Category: RealUI_Core
+## Notes: Enhanced objective tracker for RealUI
+## Author: Hanshi
+## Version: 3.2.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## RequiredDeps: Blizzard_ObjectiveTracker
+## OptionalDeps: Aurora, RealUI_Skins, RealUI
+## SavedVariables: RealUI_TrackerDB
+
+Libs\Libs.xml
+
+RealUI_Tracker.lua
+Templates.xml
+Container.lua
+Context.lua
+Display.lua
+Config.lua
