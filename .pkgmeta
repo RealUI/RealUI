@@ -8,7 +8,6 @@ ignore:
     - package.bat
     - RealUI_Dev
     - RealUI_Chat
-    - RealUI_Auras
 
 externals:
     RealUI/Libs/AceAddon-3.0:
@@ -74,16 +73,16 @@ externals:
         url: https://github.com/MMOSimca/LibObjectiveProgress-1.0.git
         tag: latest
 
-    # RealUI_Auras/Libs/LibStub:
-    #     url: https://github.com/WoWUIDev/Ace3.git/LibStub
-    # RealUI_Auras/Libs/CallbackHandler-1.0:
-    #     url: https://github.com/WoWUIDev/Ace3.git/CallbackHandler-1.0
-    # RealUI_Auras/Libs/AceAddon-3.0:
-    #     url: https://github.com/WoWUIDev/Ace3.git/AceAddon-3.0
-    # RealUI_Auras/Libs/AceDB-3.0:
-    #     url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
-    # RealUI_Auras/Libs/AceEvent-3.0:
-    #     url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
+    RealUI_Auras/Libs/LibStub:
+        url: https://github.com/WoWUIDev/Ace3.git/LibStub
+    RealUI_Auras/Libs/CallbackHandler-1.0:
+        url: https://github.com/WoWUIDev/Ace3.git/CallbackHandler-1.0
+    RealUI_Auras/Libs/AceAddon-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceAddon-3.0
+    RealUI_Auras/Libs/AceDB-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
+    RealUI_Auras/Libs/AceEvent-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
 
     RealUI_Tracker/Libs/LibStub:
         url: https://github.com/WoWUIDev/Ace3.git/LibStub
@@ -104,7 +103,7 @@ move-folders:
     RealUI/RealUI: RealUI
     RealUI/nibRealUI: nibRealUI
     RealUI/RealUI_Config: RealUI_Config
-    # RealUI/RealUI_Auras: RealUI_Auras
+    RealUI/RealUI_Auras: RealUI_Auras
     RealUI/RealUI_Bugs: RealUI_Bugs
     RealUI/RealUI_CombatText: RealUI_CombatText
     RealUI/RealUI_Inventory: RealUI_Inventory
