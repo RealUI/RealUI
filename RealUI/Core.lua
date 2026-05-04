@@ -422,6 +422,12 @@ function RealUI.LoadConfig(app, section, ...)
         end
     end
     debug("ToggleConfig", RealUI.ToggleConfig)
+    if type(RealUI.ToggleConfig) ~= "function" then
+        -- Config.lua errored during load before defining ToggleConfig.
+        -- Reset so the next invocation retries LoadAddOn.
+        configLoaded = false
+        return
+    end
     RealUI.ToggleConfig(app, section, ...)
 end
 
