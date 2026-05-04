@@ -372,6 +372,7 @@ RealUI.textures = private.textures
 
 local moddedFrames, pixelScale = {}, 768 / (select(2, _G.GetPhysicalScreenSize()))
 local function ResetScale(frame)
+    if not private.skinsDB then return end
     if _G.InCombatLockdown() then
         -- Never touch frame scale during combat; any SetScale call from addon
         -- code can propagate taint to the action bar secure execution path.
@@ -388,6 +389,7 @@ local function ResetScale(frame)
     end
 end
 local function UpdateModScale()
+    if not private.skinsDB then return end
     private.uiScale = private.skinsDB.uiModScale
     for frame, func in next, moddedFrames do
         ResetScale(frame)
