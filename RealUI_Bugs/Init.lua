@@ -58,6 +58,12 @@ end
 -- Blizzard PrivateAuras race workaround:
 -- HandleUpdateInfo() can receive updatedAuraInstanceIDs where the aura data is
 -- already gone. Blizzard then dereferences newAura.isPrivate and errors.
+--
+-- Extension: PrivateAuraAnchorContainerMixin:CheckExistingDispelHasCorrectType()
+-- can fire assertsafe() with a nil error handler when an aura update arrives
+-- with aura.dispelName=nil but the instance is already stored under a dispel
+-- type (e.g. "Disease"). assertsafe() then attempts to call a nil value from
+-- ErrorUtil.lua:18. Patch the check to bail early on partial aura data.
 do
     local function PatchPrivateAurasWatcher()
         local privateAuras = _G["PrivateAuras"]
@@ -116,17 +122,45 @@ do
         watcher._realuiPrivateAuraPatched = true
     end
 
+    local function PatchPrivateAurasContainerMixin()
+        local mixin = _G["PrivateAuraAnchorContainerMixin"]
+        if type(mixin) ~= "table" or mixin._realuiContainerMixinPatched then
+            return
+        end
+
+        local originalCheck = mixin.CheckExistingDispelHasCorrectType
+        if type(originalCheck) ~= "function" then
+            return
+        end
+
+        -- When an aura update arrives with nil dispelName the mixin's
+        -- assertsafe fires and tries to call a nil error handler, producing
+        -- "attempt to call a nil value" from ErrorUtil.lua:18. Bail early
+        -- for partial aura data; the aura will be re-classified on the next
+        -- full update.
+        mixin.CheckExistingDispelHasCorrectType = function(self, aura, auraInstanceID)
+            if aura and aura.dispelName == nil then
+                return
+            end
+            return originalCheck(self, aura, auraInstanceID)
+        end
+
+        mixin._realuiContainerMixinPatched = true
+    end
+
     local f = _G.CreateFrame("Frame")
     f:RegisterEvent("ADDON_LOADED")
     f:SetScript("OnEvent", function(self, _, addon)
         if addon == "Blizzard_PrivateAurasUI" then
             PatchPrivateAurasWatcher()
+            PatchPrivateAurasContainerMixin()
             self:UnregisterEvent("ADDON_LOADED")
         end
     end)
 
     if _G.C_AddOns.IsAddOnLoaded("Blizzard_PrivateAurasUI") then
         PatchPrivateAurasWatcher()
+        PatchPrivateAurasContainerMixin()
         f:UnregisterEvent("ADDON_LOADED")
     end
 end
