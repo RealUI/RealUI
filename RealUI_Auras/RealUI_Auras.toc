@@ -1,0 +1,22 @@
+## Interface: 120005
+## Title: RealUI Auras
+## Category: RealUI_Core
+## Notes: Buff and debuff tracking for RealUI
+## Author: Hanshi
+## Version: 3.2.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## RequiredDeps: RealUI
+## OptionalDeps: Masque
+## SavedVariables: RealUI_AurasDB
+
+Libs\Libs.xml
+
+Core.lua
+Defaults.lua
+CooldownViewer.lua
+Presets.lua
+Groups.lua
+Query.lua
+Filter.lua
+Icons.lua
+Config.lua
