@@ -116,6 +116,9 @@ tests\UnifiedProfiles_MigrationSpecMappingTest.lua
 tests\UnifiedProfiles_MigrationDeprecatedKeysTest.lua
 tests\UnifiedProfiles_MigrationIdempotenceTest.lua
 
+tests\CooldownViewer_SetLayoutTest.lua
+tests\CooldownViewer_MergeTest.lua
+
 tests\BugConditionTests.lua
 tests\PreservationTests.lua
 

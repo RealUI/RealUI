@@ -65,6 +65,7 @@ Default behavior:
   * `/realui` opens the RealUI configuration.
   * `/realadv` opens the advanced RealUI configuration.
 
+
 Supported `/realui` subcommands:
 
   * `/realui setup` - run setup flow.
