@@ -587,19 +587,25 @@ function private.OnLoad()
     skinsDB:RegisterCallback("OnProfileChanged", function(db)
         private.skinsDB = db.profile
         private.skinsCharDB = db.char
-        SyncRuntimeAuroraConfig(private.skinsDB)
+        if private.skinsDB then
+            SyncRuntimeAuroraConfig(private.skinsDB)
+        end
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileCopied", function(db)
         private.skinsDB = db.profile
         private.skinsCharDB = db.char
-        SyncRuntimeAuroraConfig(private.skinsDB)
+        if private.skinsDB then
+            SyncRuntimeAuroraConfig(private.skinsDB)
+        end
         RealUI:ReloadUIDialog()
     end)
     skinsDB:RegisterCallback("OnProfileReset", function(db)
         private.skinsDB = db.profile
         private.skinsCharDB = db.char
-        SyncRuntimeAuroraConfig(private.skinsDB)
+        if private.skinsDB then
+            SyncRuntimeAuroraConfig(private.skinsDB)
+        end
         RealUI:ReloadUIDialog()
     end)
     private.skinsDB = skinsDB.profile
