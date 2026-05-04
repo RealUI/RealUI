@@ -139,23 +139,12 @@ function ResourceManager:GetCPUUsage()
 end
 
 -- Perform garbage collection
+-- collectgarbage("collect") caused "script ran too long" errors in timer callbacks;
+-- GC is owned by Aurora (smooth/combat modes). Record the event for stats only.
 function ResourceManager:PerformGarbageCollection()
-    local beforeMemory = collectgarbage("count")
-    local startTime = _G.debugprofilestop()
-
-    collectgarbage("collect")
-
-    local afterMemory = collectgarbage("count")
-    local endTime = _G.debugprofilestop()
-
-    local freed = beforeMemory - afterMemory
-    local time = endTime - startTime
-
     resourceState.lastGC = _G.time()
-
-    debug(("Garbage collection: freed %.2f KB in %.2f ms"):format(freed, time))
-
-    return freed, time
+    debug("GC checkpoint recorded (collection managed by Aurora)")
+    return 0, 0
 end
 
 -- Optimize resource usage
