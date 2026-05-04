@@ -534,7 +534,7 @@ end
 
 function RealUI.GetInterfaceSize()
     local width, height = _G.GetPhysicalScreenSize()
-    if private.skinsDB.isHighRes then
+    if private.skinsDB and private.skinsDB.isHighRes then
         return width, height, width / 2, height / 2
     end
     return width, height
