@@ -409,19 +409,21 @@ function RealUI:DemoUnitGroup(unitType, toggle)
     local baseName = "RealUI" .. unitType .. "Frame"
     for i = 1, unitGroups[unitType] do
         local frame = _G[baseName .. i]
-        if toggle then
-            if not frame.__realunit then
-                frame.__realunit = frame:GetAttribute("unit") or frame.unit
-                frame:SetAttribute("unit", "player")
-                frame.unit = "player"
-                frame:Show()
-            end
-        else
-            if frame.__realunit then
-                frame:SetAttribute("unit", frame.__realunit)
-                frame.unit = frame.__realunit
-                frame.__realunit = nil
-                frame:Hide()
+        if frame then
+            if toggle then
+                if not frame.__realunit then
+                    frame.__realunit = frame:GetAttribute("unit") or frame.unit
+                    frame:SetAttribute("unit", "player")
+                    frame.unit = "player"
+                    frame:Show()
+                end
+            else
+                if frame.__realunit then
+                    frame:SetAttribute("unit", frame.__realunit)
+                    frame.unit = frame.__realunit
+                    frame.__realunit = nil
+                    frame:Hide()
+                end
             end
         end
     end
