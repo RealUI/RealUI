@@ -151,6 +151,9 @@ do
                 fontScale    = 1.0,
                 hdrEnabled   = false,   -- independent HDR toggle; colorMode derived at apply time
             },
+            editmode = {
+                migrationVersion = false, -- false = not yet migrated
+            },
         },
         char = {
             init = charInit,
@@ -163,6 +166,9 @@ do
             scopeLinks = {
                 skins = false,  -- Appearance shared across specs by default
                 bt4 = true      -- Action bars change with spec by default
+            },
+            editmode = {
+                perCharacter = false, -- Use account-wide EditMode layouts by default
             }
         },
         profile = {

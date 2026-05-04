@@ -548,6 +548,14 @@ function InstallWizard:Complete()
         end
     end
 
+    -- Apply EditMode layout for the current role and display preset
+    if RealUI.EditModeManager and RealUI.EditModeManager:IsInitialized() then
+        local role = (RealUI.cLayout == 2) and "healing" or "dpstank"
+        local display = RealUI.db.global.display
+        local presetId = display and display.presetId or "standard"
+        RealUI.EditModeManager:ApplyLayout(role, presetId)
+    end
+
     -- Hide installation wizard UI
     if RealUI.InstallUI then
         RealUI.InstallUI:Hide()

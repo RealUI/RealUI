@@ -89,6 +89,15 @@ function LayoutManager:Initialize()
     self:LoadCurrentLayout()
 
     layoutState.initialized = true
+
+    -- Register EditMode layout activation on layout switch
+    self:RegisterLayoutChangeCallback(function(newLayout, oldLayout)
+        if RealUI.EditModeManager and RealUI.EditModeManager:IsInitialized() then
+            local role = (newLayout == LAYOUT_HEALING) and "healing" or "dpstank"
+            RealUI.EditModeManager:ActivateLayout(role)
+        end
+    end)
+
     debug("LayoutManager initialized successfully")
     return true
 end

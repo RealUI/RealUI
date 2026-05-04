@@ -2169,265 +2169,6 @@ do -- UI Tweaks
 
         local FrameList = FrameMover.FrameList
         local MoveFrameGroup = FrameMover.MoveFrameGroup
-        local isAddonControl = FrameMover.isAddonControl
-
-        local function GetEnabled(addonSlug, addonInfo)
-            if isAddonControl[addonSlug] then
-                return RealUI:DoesAddonMove(isAddonControl[addonSlug])
-            else
-                return addonInfo.move
-            end
-        end
-        -- Create Addons options table
-        local addonOpts do
-            addonOpts = {
-                name = "Addons",
-                type = "group",
-                childGroups = "tab",
-                desc = "|cff888888Disabled when the FrameMover module is not enabled.|r",
-                disabled = function() return not RealUI:GetModuleEnabled(MODNAME) end,
-                order = 50,
-                args = {},
-            }
-            local addonOrderCnt = 10
-            for addonSlug, addon in next, FrameList.addons do
-                -- Create base options for Addons
-                addonOpts.args[addonSlug] = {
-                    name = addon.name,
-                    type = "group",
-                    childGroups = "tab",
-                    desc = "|cff888888Disabled when " .. addon.name .. " is not loaded or FrameMover is not enabled.|r",
-                    disabled = function() return not(_G.C_AddOns.IsAddOnLoaded(addon.name) and RealUI:GetModuleEnabled(MODNAME)) end,
-                    order = addonOrderCnt,
-                    args = {
-                        header = {
-                            name = ("Frame Mover - Addons - %s"):format(addon.name),
-                            type = "header",
-                            order = 10,
-                        },
-                        enabled = {
-                            name = ("Move %s"):format(addon.name),
-                            type = "toggle",
-                            get = function(info)
-                                return GetEnabled(addonSlug, FrameMover.db.profile.addons[addonSlug])
-                            end,
-                            set = function(info, value)
-                                if isAddonControl[addonSlug] then
-                                    RealUI:ToggleAddonPositionControl(isAddonControl[addonSlug], value)
-                                    if RealUI:DoesAddonMove(isAddonControl[addonSlug]) then
-                                        FrameMover:MoveAddons()
-                                    end
-                                else
-                                    FrameMover.db.profile.addons[addonSlug].move = value
-                                    if FrameMover.db.profile.addons[addonSlug].move then
-                                        FrameMover:MoveAddons()
-                                    end
-                                end
-                            end,
-                            order = 20,
-                        },
-                    },
-                }
-
-                -- Create options table for Frames
-                local normalFrameOpts = {
-                    name = "Frames",
-                    type = "group",
-                    desc = "|cff888888Disabled when frame moving is not enabled for this addon.|r",
-                    disabled = function() return not GetEnabled(addonSlug, FrameMover.db.profile.addons[addonSlug]) end,
-                    order = 10,
-                    args = {},
-                }
-                local normalFrameOrderCnt = 10
-                for i = 1, #addon.frames do
-                    normalFrameOpts.args[tostring(i)] = {
-                        name = addon.frames[i].name,
-                        type = "group",
-                        inline = true,
-                        order = normalFrameOrderCnt,
-                        args = {
-                            x = {
-                                type = "input",
-                                name = "X Offset",
-                                width = "half",
-                                get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frames[i].x) end,
-                                set = function(info, value)
-                                    value = ValidateOffset(value)
-                                    FrameMover.db.profile.addons[addonSlug].frames[i].x = value
-                                    FrameMover:MoveAddons()
-                                end,
-                                order = 10,
-                            },
-                            yoffset = {
-                                name = "Y Offset",
-                                type = "input",
-                                width = "half",
-                                get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frames[i].y) end,
-                                set = function(info, value)
-                                    value = ValidateOffset(value)
-                                    FrameMover.db.profile.addons[addonSlug].frames[i].y = value
-                                    FrameMover:MoveAddons()
-                                end,
-                                order = 20,
-                            },
-                            anchorto = {
-                                name = "Anchor To",
-                                type = "select",
-                                values = RealUI.globals.anchorPoints,
-                                get = function(info)
-                                    for idx, point in next, RealUI.globals.anchorPoints do
-                                        if point == FrameMover.db.profile.addons[addonSlug].frames[i].rpoint then return idx end
-                                    end
-                                end,
-                                set = function(info, value)
-                                    FrameMover.db.profile.addons[addonSlug].frames[i].rpoint = RealUI.globals.anchorPoints[value]
-                                    FrameMover:MoveAddons()
-                                end,
-                                order = 30,
-                            },
-                            anchorfrom = {
-                                name = "Anchor From",
-                                type = "select",
-                                values = RealUI.globals.anchorPoints,
-                                get = function(info)
-                                    for idx, point in next, RealUI.globals.anchorPoints do
-                                        if point == FrameMover.db.profile.addons[addonSlug].frames[i].point then return idx end
-                                    end
-                                end,
-                                set = function(info, value)
-                                    FrameMover.db.profile.addons[addonSlug].frames[i].point = RealUI.globals.anchorPoints[value]
-                                    FrameMover:MoveAddons()
-                                end,
-                                order = 40,
-                            },
-                            parent = {
-                                name = "Parent",
-                                desc = L["General_NoteParent"],
-                                type = "input",
-                                width = "double",
-                                get = function(info) return FrameMover.db.profile.addons[addonSlug].frames[i].parent end,
-                                set = function(info, value)
-                                    if not _G[value] then value = "UIParent" end
-                                    FrameMover.db.profile.addons[addonSlug].frames[i].parent = value
-                                    FrameMover:MoveAddons()
-                                end,
-                                order = 50,
-                            },
-                        },
-                    }
-                    normalFrameOrderCnt = normalFrameOrderCnt + 10
-                end
-                addonOpts.args[addonSlug].args.frames = normalFrameOpts
-
-                if addon.hashealing then
-                    -- Healing Enable option
-                    addonOpts.args[addonSlug].args.healingenabled = {
-                        name = "Enable Healing Layout",
-                        type = "toggle",
-                        get = function(info) return FrameMover.db.profile.addons[addonSlug].healing end,
-                        set = function(info, value)
-                            FrameMover.db.profile.addons[addonSlug].healing = value
-                            if FrameMover.db.profile.addons[addonSlug].move then
-                                FrameMover:MoveAddons()
-                            end
-                        end,
-                        order = 30,
-                    }
-
-                    -- Create options table for Healing Frames
-                    local normalHealingFrameOpts = {
-                        name = "Healing Layout Frames",
-                        type = "group",
-                        desc = "|cff888888Disabled when frame moving or healing layout is not enabled for this addon.|r",
-                        disabled = function() return not ( GetEnabled(addonSlug, FrameMover.db.profile.addons[addonSlug]) and FrameMover.db.profile.addons[addonSlug].healing ) end,
-                        order = 50,
-                        args = {},
-                    }
-                    local normalHealingFrameOrderCnt = 10
-                    for i = 1, #addon.frameshealing do
-                        normalHealingFrameOpts.args[tostring(i)] = {
-                            name = addon.frameshealing[i].name,
-                            type = "group",
-                            inline = true,
-                            order = normalHealingFrameOrderCnt,
-                            args = {
-                                x = {
-                                    name = "X Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frameshealing[i].x) end,
-                                    set = function(info, value)
-                                        value = ValidateOffset(value)
-                                        FrameMover.db.profile.addons[addonSlug].frameshealing[i].x = value
-                                        FrameMover:MoveAddons()
-                                    end,
-                                    order = 10,
-                                },
-                                yoffset = {
-                                    name = "Y Offset",
-                                    type = "input",
-                                    width = "half",
-                                    get = function(info) return tostring(FrameMover.db.profile.addons[addonSlug].frameshealing[i].y) end,
-                                    set = function(info, value)
-                                        value = ValidateOffset(value)
-                                        FrameMover.db.profile.addons[addonSlug].frameshealing[i].y = value
-                                        FrameMover:MoveAddons()
-                                    end,
-                                    order = 20,
-                                },
-                                anchorto = {
-                                    name = "Anchor To",
-                                    type = "select",
-                                    values = RealUI.globals.anchorPoints,
-                                    get = function(info)
-                                        for idx, point in next, RealUI.globals.anchorPoints do
-                                            if point == FrameMover.db.profile.addons[addonSlug].frameshealing[i].rpoint then return idx end
-                                        end
-                                    end,
-                                    set = function(info, value)
-                                        FrameMover.db.profile.addons[addonSlug].frameshealing[i].rpoint = RealUI.globals.anchorPoints[value]
-                                        FrameMover:MoveAddons()
-                                    end,
-                                    order = 30,
-                                },
-                                anchorfrom = {
-                                    name = "Anchor From",
-                                    type = "select",
-                                    values = RealUI.globals.anchorPoints,
-                                    get = function(info)
-                                        for idx, point in next, RealUI.globals.anchorPoints do
-                                            if point == FrameMover.db.profile.addons[addonSlug].frameshealing[i].point then return idx end
-                                        end
-                                    end,
-                                    set = function(info, value)
-                                        FrameMover.db.profile.addons[addonSlug].frameshealing[i].point = RealUI.globals.anchorPoints[value]
-                                        FrameMover:MoveAddons()
-                                    end,
-                                    order = 40,
-                                },
-                                parent = {
-                                    name = "Parent",
-                                    desc = L["General_NoteParent"],
-                                    type = "input",
-                                    width = "double",
-                                    get = function(info) return FrameMover.db.profile.addons[addonSlug].frameshealing[i].parent end,
-                                    set = function(info, value)
-                                        if not _G[value] then value = "UIParent" end
-                                        FrameMover.db.profile.addons[addonSlug].frameshealing[i].parent = value
-                                        FrameMover:MoveAddons()
-                                    end,
-                                    order = 50,
-                                },
-                            },
-                        }
-                        normalHealingFrameOrderCnt = normalHealingFrameOrderCnt + 10
-                    end
-                    addonOpts.args[addonSlug].args.healingframes = normalHealingFrameOpts
-                end
-
-                addonOrderCnt = addonOrderCnt + 10
-            end
-        end
 
         -- Create UIFrames options table
         local uiFramesOpts do
@@ -2552,92 +2293,124 @@ do -- UI Tweaks
             end
         end
 
-        -- Create Hide options table
-        local hideOpts do
-            hideOpts = {
-                name = "Hide Frames",
-                type = "group",
-                desc = "|cff888888Disabled when the FrameMover module is not enabled.|r",
-                disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
-                order = 70,
-                args = {
-                    header = {
-                        type = "header",
-                        name = "Frame Mover - Hide Frames",
-                        order = 10,
-                    },
-                    sep = {
-                        type = "description",
-                        name = " ",
-                        order = 20,
-                    },
-                    note = {
-                        type = "description",
-                        name = "Note: To make a frame visible again after it has been hidden, you will need to reload the UI (type: /rl).",
-                        order = 30,
-                    },
-                    hideframes = {
-                        type = "group",
-                        name = "Hide",
-                        inline = true,
-                        order = 40,
-                        args = {},
-                    },
-                },
-            }
-            -- Add all frames to Hide Frames options
-            local hideOrderCnt = 10
-            for hideSlug, hide in next, FrameList.hide do
-                -- Create base options for Hide
-                hideOpts.args.hideframes.args[hideSlug] = {
-                    type = "toggle",
-                    name = hide.name,
-                    get = function(info) return FrameMover.db.profile.hide [hideSlug].hide end,
-                    set = function(info, value)
-                        FrameMover.db.profile.hide [hideSlug].hide = value
-                        if FrameMover.db.profile.hide [hideSlug].hide then
-                            FrameMover:HideFrames()
-                        else
-                            RealUI:ReloadUIDialog()
-                        end
-                    end,
-                    order = hideOrderCnt,
-                }
-
-                hideOrderCnt = hideOrderCnt + 10
-            end
-        end
-
         -- Add extra options to Options table
         frameMover = {
             name = "Frame Mover",
-            desc = "Automatically Move/Hide certain AddOns/Frames.",
+            desc = "Reposition miscellaneous UI frames not managed by EditMode.",
             type = "group",
             args = {
                 header = {
                     type = "header",
-                    name = "Frame Mover/Hider",
+                    name = "Frame Mover",
                     order = 10,
                 },
                 desc = {
                     type = "description",
-                    name = "Automatically Move/Hide certain AddOns/Frames.",
+                    name = "Reposition miscellaneous UI frames not managed by EditMode.",
                     fontSize = "medium",
                     order = 20,
                 },
                 docPanel = {
                     type = "description",
                     name = "|cffffcc00Frame Positioning Systems|r\n\n"
-                        .. "|cff88ccffFrameMover|r: Repositions addon frames and UI frames to predefined positions. Positions are stored in the FrameMover profile and applied on login or reload.\n\n"
-                        .. "|cff88ccffDragEmAll|r: Allows dragging Blizzard frames to custom positions. Positions persist across sessions via LibWindow.\n\n"
-                        .. "|cff88ccffEditMode|r: WoW's built-in frame layout editor. Manages certain Blizzard frames that FrameMover may also target.\n\n"
-                        .. "|cffff4444\226\154\160 Conflict:|r If FrameMover and EditMode both manage the same frame, EditMode may override FrameMover's position on reload. Disable FrameMover for any frames you manage in EditMode.",
+                        .. "|cff88ccffEditMode|r: WoW's built-in layout editor now manages all Blizzard frame positions (Minimap, Buffs, Chat, Objective Tracker, Durability, Vehicle Seat, etc.). Use EditMode to reposition these frames.\n\n"
+                        .. "|cff88ccffFrameMover|r: Handles only miscellaneous UI frames that are not part of EditMode: zone text, raid alerts, ticket status, world state, error messages, and the alternate power bar.",
                     fontSize = "medium",
                     order = 25,
                 },
-                addons = addonOpts,
                 uiframes = uiFramesOpts,
-                hide = hideOpts,
+            },
+        }
+    end
+    local editMode do
+        local EditModeManager = RealUI.EditModeManager
+        local LAYOUT_TYPE_NAMES = {
+            [1] = "Account",
+            [2] = "Character",
+        }
+        local ROLE_LAYOUT_NAMES = {
+            dpstank = "RealUI",
+            healing = "RealUI-Healing",
+        }
+
+        editMode = {
+            name = "EditMode",
+            desc = "Manage RealUI's EditMode layout integration.",
+            type = "group",
+            args = {
+                header = {
+                    type = "header",
+                    name = "EditMode",
+                    order = 10,
+                },
+                desc = {
+                    type = "description",
+                    name = "RealUI manages Blizzard EditMode layouts to position system frames (Minimap, Buffs, Chat, Objective Tracker, etc.) according to your display preset and role.",
+                    fontSize = "medium",
+                    order = 20,
+                },
+                status = {
+                    type = "description",
+                    name = function()
+                        if not EditModeManager or not EditModeManager:IsInitialized() then
+                            return "|cffff4444EditMode Manager not initialized.|r"
+                        end
+                        local role = (RealUI.cLayout == 2) and "healing" or "dpstank"
+                        local layoutName = ROLE_LAYOUT_NAMES[role] or "Unknown"
+                        local layoutType = EditModeManager:GetCurrentLayoutType()
+                        local typeName = LAYOUT_TYPE_NAMES[layoutType] or "Unknown"
+                        return ("|cff88ccffActive Layout:|r %s\n|cff88ccffLayout Type:|r %s"):format(layoutName, typeName)
+                    end,
+                    fontSize = "medium",
+                    order = 30,
+                },
+                gap1 = {
+                    name = " ",
+                    type = "description",
+                    order = 35,
+                },
+                reapply = {
+                    type = "execute",
+                    name = "Re-apply RealUI Layout",
+                    desc = "Rebuild and activate the RealUI EditMode layout for the current role and display preset.",
+                    disabled = function()
+                        return not EditModeManager or not EditModeManager:IsInitialized()
+                    end,
+                    func = function()
+                        if not EditModeManager or not EditModeManager:IsInitialized() then return end
+                        local role = (RealUI.cLayout == 2) and "healing" or "dpstank"
+                        local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+                        local presetId = (display and display.presetId) or "standard"
+                        EditModeManager:ApplyLayout(role, presetId)
+                    end,
+                    order = 40,
+                },
+                gap2 = {
+                    name = " ",
+                    type = "description",
+                    order = 45,
+                },
+                perCharacter = {
+                    type = "toggle",
+                    name = "Use per-character EditMode layout",
+                    desc = "When enabled, RealUI creates character-specific EditMode layouts instead of account-wide ones.",
+                    disabled = function()
+                        return not EditModeManager or not EditModeManager:IsInitialized()
+                    end,
+                    get = function()
+                        local dbc = RealUI.db and RealUI.db.char
+                        if dbc and dbc.editmode then
+                            return dbc.editmode.perCharacter
+                        end
+                        return false
+                    end,
+                    set = function(info, value)
+                        if EditModeManager and EditModeManager:IsInitialized() then
+                            EditModeManager:SetPerCharacter(value)
+                        end
+                    end,
+                    order = 50,
+                },
             },
         }
     end
@@ -3344,6 +3117,7 @@ do -- UI Tweaks
             },
             altPowerBar = altPowerBar,
             cooldown = cooldown,
+            editMode = editMode,
             eventNotify = eventNotify,
             frameMover = frameMover,
             minimap = minimap,

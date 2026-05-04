@@ -364,6 +364,12 @@ function DisplayPresets.Apply(id, hdrEnabled)
         Aurora.Color.SetMode(colorMode)
     end
 
+    -- Rebuild EditMode layouts with the new display preset positions
+    if RealUI.EditModeManager and RealUI.EditModeManager:IsInitialized() then
+        local role = (RealUI.cLayout == 2) and "healing" or "dpstank"
+        RealUI.EditModeManager:ApplyLayout(role, id)
+    end
+
     -- Engine scale changes require a reload to take effect.
     -- Suppress during the install wizard — the wizard will handle reload
     -- at the end of the full setup flow.
