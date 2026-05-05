@@ -12,14 +12,11 @@ local Groups -- resolved lazily from AurasAddon.Groups
 ---------------------------------------------------------------------------
 local GROUP_ORDER = {
     "Buffs",
-    "PlayerBuffs",
-    "PlayerDebuffs",
     "TargetBuffs",
     "TargetDebuffs",
     "FocusBuffs",
     "FocusDebuffs",
     "ToTDebuffs",
-    "WeaponEnchants",
 }
 
 ---------------------------------------------------------------------------
