@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next type pairs ipairs table pcall CreateFrame InCombatLockdown C_EditMode C_AddOns
+-- luacheck: globals next type pairs ipairs table pcall CreateFrame InCombatLockdown C_EditMode C_AddOns C_Timer
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -465,3 +465,17 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
         end
     end
 end)
+
+-- Check if Blizzard_PlayerChoice is already loaded (it may load before us)
+if C_AddOns.IsAddOnLoaded("Blizzard_PlayerChoice") then
+    state.initialized = true
+    eventFrame:UnregisterEvent("ADDON_LOADED")
+    debug("Initialized — Blizzard_PlayerChoice was already loaded")
+
+    -- Defer migration check to next frame to ensure RealUI.db is ready
+    C_Timer.After(0, function()
+        if EditModeManager:NeedsMigration() then
+            EditModeManager:MigrateFromPreEditMode()
+        end
+    end)
+end

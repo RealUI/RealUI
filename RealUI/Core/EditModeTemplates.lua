@@ -106,13 +106,13 @@ Templates.base = {
     Entry(SYSTEM_ACTION_BAR, 8,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
         {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
-    Entry(SYSTEM_ACTION_BAR, 9,  -- Stance bar
+    Entry(SYSTEM_ACTION_BAR, 11, -- Stance bar (WoW systemIndex = 11)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
         {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
-    Entry(SYSTEM_ACTION_BAR, 10, -- Pet bar
+    Entry(SYSTEM_ACTION_BAR, 12, -- Pet bar (WoW systemIndex = 12)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
         {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
-    Entry(SYSTEM_ACTION_BAR, 11, -- Possess bar
+    Entry(SYSTEM_ACTION_BAR, 13, -- Possess bar (WoW systemIndex = 13)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
         {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
 
@@ -175,7 +175,7 @@ Templates.base = {
         {}),
 
     -- =====================================================================
-    -- System 6: Aura Frames (Buff = index 1, Debuff = index 2)
+    -- System 6: Aura Frames (Buff = index 1, Debuff = index 2, External Defensives = index 3)
     -- Top-right, below minimap
     -- =====================================================================
     Entry(SYSTEM_AURA_FRAME, 1, -- Buff Frame
@@ -183,6 +183,9 @@ Templates.base = {
         {}),
     Entry(SYSTEM_AURA_FRAME, 2, -- Debuff Frame
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -180, -100),
+        {}),
+    Entry(SYSTEM_AURA_FRAME, 3, -- External Defensives
+        Anchor("LEFT", "UIParent", "LEFT", 371, -178),
         {}),
 
     -- =====================================================================
@@ -243,9 +246,13 @@ Templates.base = {
 
     -- =====================================================================
     -- System 15: Status Tracking Bars (XP/Rep/Honor) — bottom-center
+    -- Index 1 = primary bar, Index 2 = secondary bar
     -- =====================================================================
-    Entry(SYSTEM_STATUS_TRACKING, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 0),
+    Entry(SYSTEM_STATUS_TRACKING, 1,
+        Anchor("BOTTOM", "StatusTrackingBarManager", "BOTTOM", 0, 0),
+        {}),
+    Entry(SYSTEM_STATUS_TRACKING, 2,
+        Anchor("BOTTOM", "StatusTrackingBarManager", "BOTTOM", 0, 17),
         {}),
 
     -- =====================================================================
@@ -277,10 +284,21 @@ Templates.base = {
         {}),
 
     -- =====================================================================
-    -- System 20: Cooldown Viewer (11.1.5) — bottom-center above action area
+    -- System 20: Cooldown Viewer (11.1.5) — center above action area
+    -- Index 1 = Essential Cooldowns, Index 2 = Buff Bar Cooldowns
+    -- Index 3 = Cooldown Viewer 3, Index 4 = Cooldown Viewer 4
     -- =====================================================================
-    Entry(SYSTEM_COOLDOWN_VIEWER, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 130),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 1,
+        Anchor("CENTER", "UIParent", "CENTER", 0, -183),
+        {}),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 2,
+        Anchor("CENTER", "UIParent", "CENTER", 0, -138),
+        {}),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 3,
+        Anchor("CENTER", "UIParent", "CENTER", 0, -100),
+        {}),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 4,
+        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 243),
         {}),
 
     -- =====================================================================
@@ -291,10 +309,23 @@ Templates.base = {
         {}),
 
     -- =====================================================================
-    -- System 22: Encounter Events (12.0.0) — top-center
+    -- System 22: Encounter Events (12.0.0) — multiple indices
+    -- Index 1 = Critical Encounter Warnings (Boss Warnings)
+    -- Index 2 = Medium Encounter Warnings
+    -- Index 3 = Minor Encounter Warnings
+    -- Index 4 = Encounter Events 4
     -- =====================================================================
-    Entry(SYSTEM_ENCOUNTER_EVENTS, nil,
-        Anchor("TOP", "UIParent", "TOP", 0, -150),
+    Entry(SYSTEM_ENCOUNTER_EVENTS, 1,
+        Anchor("TOP", "UIParent", "TOP", 0, -40),
+        {}),
+    Entry(SYSTEM_ENCOUNTER_EVENTS, 2,
+        Anchor("TOP", "UIParent", "TOP", 0, -90),
+        {}),
+    Entry(SYSTEM_ENCOUNTER_EVENTS, 3,
+        Anchor("TOP", "UIParent", "TOP", 0, -130),
+        {}),
+    Entry(SYSTEM_ENCOUNTER_EVENTS, 4,
+        Anchor("TOP", "UIParent", "TOP", 0, -170),
         {}),
 
     -- =====================================================================
@@ -342,9 +373,18 @@ Templates.overrides.healing = {
     ["5_nil"] = Entry(SYSTEM_EXTRA_ABILITIES, nil,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 380),
         {}),
-    -- Cooldown viewer: shifted up
-    ["20_nil"] = Entry(SYSTEM_COOLDOWN_VIEWER, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 190),
+    -- Cooldown viewer: shifted up (all 4 indices)
+    ["20_1"] = Entry(SYSTEM_COOLDOWN_VIEWER, 1,
+        Anchor("CENTER", "UIParent", "CENTER", 0, -123),
+        {}),
+    ["20_2"] = Entry(SYSTEM_COOLDOWN_VIEWER, 2,
+        Anchor("CENTER", "UIParent", "CENTER", 0, -78),
+        {}),
+    ["20_3"] = Entry(SYSTEM_COOLDOWN_VIEWER, 3,
+        Anchor("CENTER", "UIParent", "CENTER", 0, -40),
+        {}),
+    ["20_4"] = Entry(SYSTEM_COOLDOWN_VIEWER, 4,
+        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 303),
         {}),
 }
 

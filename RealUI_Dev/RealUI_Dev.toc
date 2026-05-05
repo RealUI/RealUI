@@ -119,6 +119,8 @@ tests\UnifiedProfiles_MigrationIdempotenceTest.lua
 tests\CooldownViewer_SetLayoutTest.lua
 tests\CooldownViewer_MergeTest.lua
 
+EditModeDump.lua
+
 tests\BugConditionTests.lua
 tests\PreservationTests.lua
 
