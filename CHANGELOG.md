@@ -1,3 +1,42 @@
+## [3.3.0] - Unreleased ##
+### Summary ###
+Feature release focused on RealUI's new EditMode integration plus tracker and aura modernization. RealUI now creates and manages dedicated EditMode layouts for DPS/Tank and Healing (with account-wide and per-character support), while RealUI_Tracker and RealUI_Auras replace older objective/aura workflows with native WoW 12-friendly behavior. The release also includes broad startup/runtime nil-safety fixes. Aurora is updated from 12.0.5.6 to 12.0.5.7 with CooldownViewer skinning refinements and HDR visibility tweaks.
+
+### Modified AddOns ###
+  * RealUI
+  * RealUI_Skins
+  * RealUI_Bugs
+  * RealUI_Config
+  * RealUI_Tracker
+  * RealUI_Auras
+  * RealUI_Dev
+  * Aurora (12.0.5.7)
+
+### Added ###
+  * add: RealUI EditMode integration replaces legacy Blizzard frame mover workflows with role-aware RealUI layouts (`RealUI` and `RealUI-Healing`), plus account-wide and per-character layout support
+  * add: RealUI_Tracker replaces ObjectivesAdv with a wrapped Blizzard objective tracker that supports custom positioning, instance-based hide/collapse behavior, CombatFader integration, quest counts, and quest difficulty coloring
+  * add: RealUI_Auras adds specialization-aware CooldownViewer preset setup plus focused aura groups for player buffs, target/focus buffs and debuffs, and target-of-target debuffs
+
+### Changed ###
+  * chg: Aurora updated to 12.0.5.7 (from 12.0.5.6)
+  * chg: retire ObjectivesAdv packaging and related config/dev references as RealUI moves objective tracking into RealUI_Tracker and cooldown/aura presentation into RealUI_Auras
+  * chg: move Blizzard frame positioning to EditMode templates and manager flows, reducing legacy FrameMover responsibilities to non-EditMode utility frames
+  * chg: RealUI_Auras config updates remove redundant buff options now covered by CooldownViewer and the reduced Auras v2 group model
+  * chg: update RealAdvanced menu list ordering for module layout consistency
+  * chg: stop duplicate garbage-collection management in RealUI ResourceManager/PerformanceMonitor when Aurora is already handling GC
+  * chg: Aurora 12.0.5.7 overhauls Blizzard_CooldownViewer skinning for the new RealUI_Auras workflow and applies full ButtonFrameTemplate skinning to CooldownViewerSettings
+
+### Fixed ###
+  * fix: ensure EditMode initialization waits for `Blizzard_PlayerChoice` so layout APIs are available before setup
+  * fix: avoid taint by no longer forcing `RefreshLayout` from RealUI_Auras at runtime (layout refresh now requires reload when needed)
+  * fix: resolve load-order race in CombatFader `AddFadeConfig`
+  * fix: suppress PrivateAuras assertsafe nil-handler crash on partial aura updates
+  * fix: harden RealUI_Skins startup/runtime paths with nil guards for `SyncRuntimeAuroraConfig`, `GetInterfaceSize`, `ResetScale`, and `UpdateModScale`
+  * fix: reset config load state on `ToggleConfig` nil so config can retry after partial-load failures
+  * fix: guard HudTestMode DemoUnitGroup against nil frames during demo updates
+  * fix: Aurora 12.0.5.7 improves HDR mode button brightness for better contrast on darker backgrounds
+
+
 ## [3.2.0] - 2026-05-01 ##
 ### Summary ###
 Feature-heavy update that folds in two active spec tracks: a new Display Setup wizard stage in RealUI and Aurora's color mode system (including HDR and accessibility palettes). Also includes Grid2 profile modernization and startup/skinning hardening fixes.
