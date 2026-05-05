@@ -21,7 +21,12 @@ function AurasAddon:OnInitialize()
             OnApply     = function()
                 local specTag = select(3, UnitClass("player")) * 10 + GetSpecialization()
                 local preset = RealUI_Auras.Presets and RealUI_Auras.Presets[specTag]
-                if preset then RealUI_Auras.CooldownViewer.MergePreset(preset) end
+                if preset then
+                    local added = RealUI_Auras.CooldownViewer.MergePreset(preset)
+                    if added and added > 0 then
+                        StaticPopup_Show("REALUI_AURAS_RELOAD")
+                    end
+                end
                 self.db.char.cooldownPresetOffered = true
             end,
         })
@@ -187,7 +192,6 @@ end
 --   • CooldownViewer is available
 --   • A preset exists for the new spec
 -- MergePreset is idempotent — it skips if "RealUI - <name>" already exists.
--- MergePreset fires CooldownViewerSettings.OnDataChanged internally.
 ---------------------------------------------------------------------------
 function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
     -- Don't auto-apply before the user has been asked via popup or wizard
@@ -209,6 +213,20 @@ function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
 end
 
 ---------------------------------------------------------------------------
+-- Reload prompt — shown after a preset is applied so CooldownViewer picks
+-- up the new layout data without requiring a manual /reload.
+---------------------------------------------------------------------------
+StaticPopupDialogs["REALUI_AURAS_RELOAD"] = {
+    text = "Cooldown layouts applied. Reload UI now to activate them?",
+    button1 = "Reload",
+    button2 = "Later",
+    OnAccept = function() ReloadUI() end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+}
+
+---------------------------------------------------------------------------
 -- 4.2 / 4.3  ShowPresetPopup — StaticPopup for preset application
 -- Accept = look up the preset for the current class/spec, merge it, set flag.
 -- Cancel = set flag only (suppress future popups).
@@ -226,8 +244,8 @@ StaticPopupDialogs["REALUI_AURAS_PRESET"] = {
             local added, _, err = RealUI_Auras.CooldownViewer.MergePreset(presetStr)
             if err then
                 print("[RealUI_Auras] Preset apply failed:", err)
-            else
-                print(("[RealUI_Auras] Applied %d preset layout(s)."):format(added))
+            elseif added > 0 then
+                StaticPopup_Show("REALUI_AURAS_RELOAD")
             end
         end
         AurasAddon.db.char.cooldownPresetOffered = true

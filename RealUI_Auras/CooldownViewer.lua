@@ -65,7 +65,6 @@ function CooldownViewer.MergePreset(presetStr)
         local ok, err = pcall(C_CooldownViewer.SetLayoutData, presetStr)
         if not ok then return 0, 0, err end
         SetCVar("cooldownViewerEnabled", 1)
-        EventRegistry:TriggerEvent("CooldownViewerSettings.OnDataChanged")
         return 1, 0
     end
 
@@ -126,7 +125,6 @@ function CooldownViewer.MergePreset(presetStr)
     if added > 0 then
         SetCVar("cooldownViewerEnabled", 1)
     end
-    EventRegistry:TriggerEvent("CooldownViewerSettings.OnDataChanged")
     return added, skipped
 end
 
