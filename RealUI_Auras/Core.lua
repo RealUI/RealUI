@@ -209,7 +209,10 @@ function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
     if not presetStr then return end
 
     -- MergePreset is idempotent: skips layouts that already exist
-    CooldownViewer.MergePreset(presetStr)
+    local added = CooldownViewer.MergePreset(presetStr)
+    if added and added > 0 then
+        StaticPopup_Show("REALUI_AURAS_RELOAD")
+    end
 end
 
 ---------------------------------------------------------------------------
