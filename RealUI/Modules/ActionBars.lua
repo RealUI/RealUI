@@ -178,27 +178,27 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
                 -- y Offset
                 local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
                 local topYOfs = layoutPositions["HuDY"] + layoutPositions["ActionBarsY"] + RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"]
-                local bottomYOfs = layoutPositions["ActionBarsBotY"] + buttonSizes.bars + fixedSettings.bt4Padding
-                ActionBars:debug(id, "Y Offset", topYOfs, bottomYOfs)
+                local bottomBase = layoutPositions["ActionBarsBotY"] + 14
+                local barGap = math.ceil(centerPadding + centerPadding)
+                ActionBars:debug(id, "Y Offset", topYOfs, bottomBase)
                 if barPlace == 1 then
                     if isTopBar then
                         y = topYOfs
                     else
-                        y = bottomYOfs
+                        y = bottomBase
                     end
                 elseif barPlace == 2 then
-                        local pad = math.ceil(centerPadding + centerPadding)
                     if isTopBar then
-                        y = -(buttonSizes.bars + pad) + topYOfs
+                        y = -(buttonSizes.bars + barGap) + topYOfs
                     else
-                        y = buttonSizes.bars + pad + bottomYOfs
+                        y = bottomBase + buttonSizes.bars + barGap
                     end
                 else
-                    local pad = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
+                    local pad2 = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
                     if isTopBar then
-                        y = -((buttonSizes.bars * 2) + pad) + topYOfs
+                        y = -((buttonSizes.bars * 2) + pad2) + topYOfs
                     else
-                        y = (buttonSizes.bars * 2) + pad + bottomYOfs
+                        y = bottomBase + (buttonSizes.bars * 2) + pad2
                     end
                 end
 
@@ -374,7 +374,7 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
             if BT4Stance and not(BT4Stance:IsEnabled()) then BT4Stance:Enable() end
 
             local sbX = -(_G.max(BarSizes[2], BarSizes[3]) / 2 - 4)
-            local sbY = (ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])["ActionBarsBotY"] + buttonSizes.stanceBar + fixedSettings.bt4Padding
+            local sbY = (ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])["ActionBarsBotY"]
 
             -- Set Position
             local profileStanceBar = BT4DB["namespaces"]["StanceBar"]["profiles"][prof]
