@@ -641,11 +641,15 @@ function ActionBars:ToggleNagaBar(enable)
             bar6Config.version = 3
             bar6Config.WoW10Layout = true  -- Prevent WoW 10.0 migration from changing our values
 
-            -- Set position
+            -- Set position: anchor to BOTTOM, bottom row aligned with lowest action bar
+            local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
+            local bottomBase = layoutPositions["ActionBarsBotY"] + 14
+            -- 4 rows of buttons, grow down from top — offset up by 3 rows worth
+            local nagaY = bottomBase + (buttonSizes.bars * 3) + (3 * fixedSettings.buttonPadding)
             bar6Config.position = {
-                ["y"] = -360,
+                ["y"] = nagaY,
                 ["x"] = 210,
-                ["point"] = "CENTER",
+                ["point"] = "BOTTOM",
                 ["scale"] = 1,
                 ["growHorizontal"] = "RIGHT",
                 ["growVertical"] = "DOWN",
@@ -655,9 +659,10 @@ function ActionBars:ToggleNagaBar(enable)
             -- config via AceDB (which includes proper defaults for skin, elements, etc.)
             BT4ActionBars:EnableBar(6)
 
-            -- Force button layout update after a short delay
+            -- Force position and button layout update
             local bt4bar = BT4ActionBars.actionbars[6]
             if bt4bar then
+                bt4bar:ApplyConfig()
                 _G.C_Timer.After(0.1, function()
                     if bt4bar.UpdateButtonLayout then
                         bt4bar:UpdateButtonLayout()
@@ -680,6 +685,12 @@ end
 
 function ActionBars:UpdateNagaBarState()
     if not db then return end
+    self:ToggleNagaBar(db.enableNagaBar)
+end
+
+function ActionBars:ToggleNagaCommand()
+    if not db then return end
+    db.enableNagaBar = not db.enableNagaBar
     self:ToggleNagaBar(db.enableNagaBar)
 end
 
@@ -762,6 +773,7 @@ function ActionBars:OnEnable()
         self:RegisterChatCommand("bt4", "BarChatCommand")
         self:RegisterChatCommand("bartender", "BarChatCommand")
         self:RegisterChatCommand("bartender4", "BarChatCommand")
+        self:RegisterChatCommand("naga", "ToggleNagaCommand")
     end
 end
 
