@@ -455,7 +455,61 @@ function UnitFrames:RefreshMod()
     -- Reposition unit frames for the new layout
     self:RepositionFrames()
 
+    -- Resize unit frames if layoutSize changed since they were spawned
+    self:ResizeFrames()
+
     self:RefreshUnits("RefreshMod")
+end
+
+function UnitFrames:ResizeFrames()
+    local sizeMod = self.layoutSize == 1 and 0.85 or 1
+    local round = RealUI.Round
+
+    for i = 1, #units do
+        local frame = _G["RealUI" .. units[i] .. "Frame"]
+        if frame then
+            local unitKey = frame.unit
+            local unitDB = db.units[unitKey]
+            local unitData = UnitFrames[unitKey]
+            if unitDB and unitDB.size then
+                local width = round(unitDB.size.x * sizeMod)
+                local height = round(unitDB.size.y * sizeMod)
+                local isAngled = unitData and unitData.health and unitData.health.leftVertex and unitData.health.rightVertex
+
+                if isAngled then
+                    frame:SetSize(width, height)
+                else
+                    frame:SetSize(width - 2, height - 2)
+                end
+            end
+        end
+    end
+
+    -- Resize boss frames
+    for i = 1, 5 do
+        local frame = _G["RealUIBossFrame" .. i]
+        if frame then
+            local unitDB = db.units.boss
+            if unitDB and unitDB.size then
+                local width = round(unitDB.size.x * sizeMod)
+                local height = round(unitDB.size.y * sizeMod)
+                frame:SetSize(width, height)
+            end
+        end
+    end
+
+    -- Resize arena frames
+    for i = 1, 5 do
+        local frame = _G["RealUIArenaFrame" .. i]
+        if frame then
+            local unitDB = db.units.arena
+            if unitDB and unitDB.size then
+                local width = round(unitDB.size.x * sizeMod)
+                local height = round(unitDB.size.y * sizeMod)
+                frame:SetSize(width, height)
+            end
+        end
+    end
 end
 
 function UnitFrames:OnProfileUpdate(event, profile)
