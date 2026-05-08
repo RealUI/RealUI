@@ -375,6 +375,14 @@ function RealUI:ChatCommand_Config(input)
                 print("|cff0099ffRealUI|r: Grid2 profiles are already up to date.")
             end
             return
+        elseif command == "grid2setpos" then
+            local GridLayoutMod = self:GetModule("GridLayout", true)
+            if GridLayoutMod and GridLayoutMod:IsEnabled() then
+                GridLayoutMod:ApplyPosition()
+            else
+                print("|cff0099ffRealUI|r: GridLayout module not available or Grid2 not loaded.")
+            end
+            return
         elseif command == "resetinventory" then
             local invMod = self:GetModule("Inventory", true)
             if invMod then

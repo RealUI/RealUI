@@ -28,10 +28,10 @@ function private.AddOns.Grid2()
         },
         ["FrameLock"] = true,
         ["clamp"] = true,
-        ["PosX"] = -1.525878872143950e-05,
-        ["anchor"] = "BOTTOM",
+        ["PosX"] = 80,
+        ["anchor"] = "BOTTOMLEFT",
         ["groupAnchor"] = "BOTTOMLEFT",
-        ["PosY"] = 38.4000015830993,
+        ["PosY"] = 200,
         ["BorderTexture"] = "None",
     }
 
