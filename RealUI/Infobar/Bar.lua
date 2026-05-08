@@ -212,8 +212,11 @@ function BlockMixin:OnUpdate(elapsed)
 end
 
 function BlockMixin:GetNearestDock()
-    local xOfs =  self:GetCenter()
+    local xOfs = self:GetCenter()
+    if not xOfs then return Infobar.frame[self.side or "left"] end
+
     local uiCenter = Infobar.frame:GetWidth() / 2
+    if uiCenter == 0 then return Infobar.frame[self.side or "left"] end
 
     local oldSide, newSide = self.side, "left"
     if xOfs > uiCenter then
@@ -994,15 +997,17 @@ function Infobar:GetBlockInfo(dataobjectname)
         assert(dataObj and dataObj.type, "string must be the name of an LDB data object.")
     end
 
+    if not db or not db.blocks then return nil end
+
     if dataObj.type == "RealUI" then
         self:debug("RealUI object", name)
-        return db.blocks.realui[name]
+        return db.blocks.realui and db.blocks.realui[name]
     elseif dataObj.type == "data source" then
         self:debug("Other object", name)
         for k, v in LDB:pairs(dataObj) do
             self:debug(k, v)
         end
-        return db.blocks.others[name]
+        return db.blocks.others and db.blocks.others[name]
     end
 end
 --------------------
