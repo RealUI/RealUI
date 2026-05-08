@@ -37,60 +37,126 @@ function AurasAddon:OnEnable()
     Groups = self.Groups
     Icons = self.Icons
 
+    -- Determine if any aura group is enabled (i.e. the replacement system is active)
+    local anyGroupEnabled = false
+    for _, group in ipairs(Groups.All()) do
+        if not group.disabled then
+            anyGroupEnabled = true
+            break
+        end
+    end
+
     -- 10.1: Detect Masque and create a skinning group before any icons are created.
     -- Must happen before Groups.InitAll() since that triggers container creation
     -- which may trigger icon creation.
-    local MSQ = LibStub and LibStub("Masque", true)
-    if MSQ then
-        Icons.MasqueGroup = MSQ:Group("RealUI", "Auras")
+    if anyGroupEnabled then
+        local MSQ = LibStub and LibStub("Masque", true)
+        if MSQ then
+            Icons.MasqueGroup = MSQ:Group("RealUI", "Auras")
 
-        -- 10.4: Register Masque reskin callback for skin changes.
-        -- Note: SetCallback is deprecated in modern Masque; use RegisterCallback.
-        Icons.MasqueGroup:RegisterCallback(function()
-            Icons.MasqueGroup:ReSkin()
-        end)
+            -- 10.4: Register Masque reskin callback for skin changes.
+            -- Note: SetCallback is deprecated in modern Masque; use RegisterCallback.
+            Icons.MasqueGroup:RegisterCallback(function()
+                Icons.MasqueGroup:ReSkin()
+            end)
+        end
     end
 
-    BuffFrame:Hide()
-    DebuffFrame:Hide()
+    -- Only hide Blizzard buff frames and register aura events when the
+    -- replacement aura system is active. When all groups are disabled
+    -- (the new default), Blizzard's native frames remain untouched and
+    -- no aura queries are made — eliminating the taint surface.
+    if anyGroupEnabled then
+        BuffFrame:Hide()
+        DebuffFrame:Hide()
 
-    -- 11.1: Permanently re-hide BuffFrame whenever Blizzard code shows it
-    -- (e.g. Character panel open/close, combat transitions). HookScript is
-    -- permanent and cannot be removed, so guard against double-hooking if
-    -- OnEnable is called more than once.
-    if not self._buffFrameHooked then
-        BuffFrame:HookScript("OnShow", function(f) f:Hide() end)
-        self._buffFrameHooked = true
+        -- 11.1: Permanently re-hide BuffFrame whenever Blizzard code shows it
+        if not self._buffFrameHooked then
+            BuffFrame:HookScript("OnShow", function(f) f:Hide() end)
+            self._buffFrameHooked = true
+        end
+
+        -- 11.2: Same for DebuffFrame
+        if not self._debuffFrameHooked then
+            DebuffFrame:HookScript("OnShow", function(f) f:Hide() end)
+            self._debuffFrameHooked = true
+        end
+
+        -- 6.2: UNIT_AURA (debounced redraw)
+        self:RegisterEvent("UNIT_AURA")
+
+        -- 6.3: PLAYER_TARGET_CHANGED → TargetBuffs, TargetDebuffs
+        self:RegisterEvent("PLAYER_TARGET_CHANGED")
+
+        -- 6.4: PLAYER_FOCUS_CHANGED → FocusBuffs, FocusDebuffs
+        self:RegisterEvent("PLAYER_FOCUS_CHANGED")
+
+        -- 6.5: UNIT_TARGET → ToTDebuffs (when target changes their target)
+        self:RegisterEvent("UNIT_TARGET")
+
+        -- 6.6: PLAYER_ENTERING_WORLD → full refresh after load screens
+        self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnPlayerEnteringWorld")
+
+        Groups.InitAll()
+    else
+        -- When all aura groups are disabled, ensure the oUF unit frame aura
+        -- elements are enabled so users still see auras on their frames.
+        -- This covers the case where a user previously had RealUI_Auras groups
+        -- active (which disabled the oUF elements) and now has them off.
+        self:EnableOufAuraElements()
     end
-
-    -- 11.2: Same for DebuffFrame
-    if not self._debuffFrameHooked then
-        DebuffFrame:HookScript("OnShow", function(f) f:Hide() end)
-        self._debuffFrameHooked = true
-    end
-
-    -- 6.2: UNIT_AURA (debounced redraw)
-    self:RegisterEvent("UNIT_AURA")
-
-    -- 6.3: PLAYER_TARGET_CHANGED → TargetBuffs, TargetDebuffs
-    self:RegisterEvent("PLAYER_TARGET_CHANGED")
-
-    -- 6.4: PLAYER_FOCUS_CHANGED → FocusBuffs, FocusDebuffs
-    self:RegisterEvent("PLAYER_FOCUS_CHANGED")
-
-    -- 6.5: UNIT_TARGET → ToTDebuffs (when target changes their target)
-    self:RegisterEvent("UNIT_TARGET")
-
-    -- 6.6: PLAYER_ENTERING_WORLD → full refresh after load screens
-    self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnPlayerEnteringWorld")
 
     -- 4.1: PLAYER_LOGIN → first-login CooldownViewer preset check
+    -- (always active regardless of aura group state)
     self:RegisterEvent("PLAYER_LOGIN")
 
     -- 8.1: PLAYER_SPECIALIZATION_CHANGED → auto-apply preset for new spec
+    -- (always active regardless of aura group state)
     self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+end
 
-    Groups.InitAll()
+---------------------------------------------------------------------------
+-- EnableOufAuraElements
+-- When RealUI_Auras groups are all disabled, re-enable the oUF aura
+-- elements on unit frames so target/focus/boss auras still display.
+-- Deferred to after UnitFrames has spawned its frames.
+---------------------------------------------------------------------------
+function AurasAddon:EnableOufAuraElements()
+    C_Timer.After(0, function()
+        local UnitFrames = RealUI and RealUI:GetModule("UnitFrames", true)
+        if not UnitFrames or not UnitFrames.db then return end
+
+        local db = UnitFrames.db.profile
+        local changed = false
+
+        -- Target debuffs/buffs
+        if db.units and db.units.target then
+            if db.units.target.showTargetDebuffs == false then
+                db.units.target.showTargetDebuffs = true
+                changed = true
+            end
+            if db.units.target.showTargetBuffs == false then
+                db.units.target.showTargetBuffs = true
+                changed = true
+            end
+        end
+
+        -- Boss debuffs/buffs
+        if db.boss then
+            if db.boss.showBossDebuffs == false then
+                db.boss.showBossDebuffs = true
+                changed = true
+            end
+            if db.boss.showBossBuffs == false then
+                db.boss.showBossBuffs = true
+                changed = true
+            end
+        end
+
+        if changed then
+            UnitFrames:RefreshUnits("AurasGroupsDisabled")
+        end
+    end)
 end
 
 ---------------------------------------------------------------------------
@@ -154,6 +220,7 @@ end
 -- full refresh of all groups.
 ---------------------------------------------------------------------------
 function AurasAddon:OnPlayerEnteringWorld()
+    -- Only act when the replacement aura system is active
     BuffFrame:Hide()
     DebuffFrame:Hide()
     Groups.RefreshAll()
@@ -209,7 +276,10 @@ function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
     if not presetStr then return end
 
     -- MergePreset is idempotent: skips layouts that already exist
-    CooldownViewer.MergePreset(presetStr)
+    local added = CooldownViewer.MergePreset(presetStr)
+    if added and added > 0 then
+        StaticPopup_Show("REALUI_AURAS_RELOAD")
+    end
 end
 
 ---------------------------------------------------------------------------

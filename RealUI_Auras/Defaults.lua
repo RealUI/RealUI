@@ -15,7 +15,7 @@ AurasAddon.defaults = {
             --    Anchor: RealUIPositionersBuffs (positioner frame)
             -----------------------------------------------------------------
             Buffs = {
-                disabled            = false,
+                disabled            = true,
                 name                = "Buffs",
                 unit                = "player",
                 detectBuffs         = true,
@@ -66,7 +66,7 @@ AurasAddon.defaults = {
             --    Anchor: RealUITargetFrame
             -----------------------------------------------------------------
             TargetBuffs = {
-                disabled            = false,
+                disabled            = true,
                 name                = "TargetBuffs",
                 unit                = "target",
                 detectBuffs         = true,
@@ -121,7 +121,7 @@ AurasAddon.defaults = {
             --    Anchor: RealUITargetFrame
             -----------------------------------------------------------------
             TargetDebuffs = {
-                disabled             = false,
+                disabled             = true,
                 name                 = "TargetDebuffs",
                 unit                 = "target",
                 detectBuffs          = false,
@@ -170,7 +170,7 @@ AurasAddon.defaults = {
             --    Anchor: RealUIFocusFrame
             -----------------------------------------------------------------
             FocusBuffs = {
-                disabled             = false,
+                disabled             = true,
                 name                 = "FocusBuffs",
                 unit                 = "focus",
                 detectBuffs          = true,
@@ -226,7 +226,7 @@ AurasAddon.defaults = {
             --    Anchor: RealUIFocusFrame
             -----------------------------------------------------------------
             FocusDebuffs = {
-                disabled             = false,
+                disabled             = true,
                 name                 = "FocusDebuffs",
                 unit                 = "focus",
                 detectBuffs          = false,
@@ -276,7 +276,7 @@ AurasAddon.defaults = {
             --    Anchor: RealUITargetTargetFrame
             -----------------------------------------------------------------
             ToTDebuffs = {
-                disabled             = false,
+                disabled             = true,
                 name                 = "ToTDebuffs",
                 unit                 = "targettarget",
                 detectBuffs          = false,

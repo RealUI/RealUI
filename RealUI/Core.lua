@@ -397,6 +397,27 @@ function RealUI:ChatCommand_Config(input)
                 print("|cff0099ffRealUI|r: Inventory module not loaded.")
             end
             return
+        elseif command == "resetauras" then
+            -- Disable all RealUI_Auras groups and re-enable oUF aura elements.
+            -- For users who ran the preview and want to revert to native auras.
+            local AurasAddon = _G.RealUI_Auras
+            if AurasAddon and AurasAddon.db then
+                local groups = AurasAddon.db.profile.groups
+                if groups then
+                    for name, group in pairs(groups) do
+                        group.disabled = true
+                    end
+                end
+                -- Re-enable oUF aura elements
+                if AurasAddon.EnableOufAuraElements then
+                    AurasAddon:EnableOufAuraElements()
+                end
+                print("|cff0099ffRealUI|r: Aura groups disabled. Reload UI to apply fully.")
+                self:ReloadUIDialog()
+            else
+                print("|cff0099ffRealUI|r: RealUI_Auras not loaded.")
+            end
+            return
         end
     end
 
