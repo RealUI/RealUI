@@ -2622,14 +2622,23 @@ do -- UI Tweaks
                     disabled = function() if RealUI:GetModuleEnabled(MODNAME) then return false else return true end end,
                     order = 60,
                     args = {
+                        scope = {
+                            name = "Position Scope",
+                            desc = "Per Character stores a separate position for each character. All Characters shares one position across your whole account.",
+                            type = "select",
+                            values = { char = "Per Character", global = "All Characters" },
+                            get = function(info) return MinimapAdv.db.global.positionScope end,
+                            set = function(info, value) MinimapAdv:SetPositionScope(value) end,
+                            order = 5,
+                        },
                         size = {
                             name = "Size",
                             desc = "Note: Minimap will refresh to fit the new size upon player movement.",
                             type = "range",
                             min = 134, max = 250, step = 1,
-                            get = function(info) return MinimapAdv.db.profile.position.size end,
+                            get = function(info) return MinimapAdv:GetPositionDB().size end,
                             set = function(info, value)
-                                MinimapAdv.db.profile.position.size = value
+                                MinimapAdv:GetPositionDB().size = value
                                 MinimapAdv:UpdateMinimapPosition()
                             end,
                             order = 10,
@@ -2645,9 +2654,9 @@ do -- UI Tweaks
                                     type = "range",
                                     isPercent = true,
                                     min = 0.5, max = 2, step = 0.05,
-                                    get = function(info) return MinimapAdv.db.profile.position.scale end,
+                                    get = function(info) return MinimapAdv:GetPositionDB().scale end,
                                     set = function(info, value)
-                                        MinimapAdv.db.profile.position.scale = value
+                                        MinimapAdv:GetPositionDB().scale = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
                                     order = 10,
@@ -2656,10 +2665,10 @@ do -- UI Tweaks
                                     name = "X Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return tostring(MinimapAdv.db.profile.position.x) end,
+                                    get = function(info) return tostring(MinimapAdv:GetPositionDB().x) end,
                                     set = function(info, value)
                                         value = ValidateOffset(value)
-                                        MinimapAdv.db.profile.position.x = value
+                                        MinimapAdv:GetPositionDB().x = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
                                     order = 20,
@@ -2668,10 +2677,10 @@ do -- UI Tweaks
                                     name = "Y Offset",
                                     type = "input",
                                     width = "half",
-                                    get = function(info) return tostring(MinimapAdv.db.profile.position.y) end,
+                                    get = function(info) return tostring(MinimapAdv:GetPositionDB().y) end,
                                     set = function(info, value)
                                         value = ValidateOffset(value)
-                                        MinimapAdv.db.profile.position.y = value
+                                        MinimapAdv:GetPositionDB().y = value
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
                                     order = 30,
@@ -2681,15 +2690,16 @@ do -- UI Tweaks
                                     type = "select",
                                     values = minimapAnchors,
                                     get = function(info)
-                                        for k,v in next, minimapAnchors do
-                                            if v == MinimapAdv.db.profile.position.anchorto then return k end
+                                        local pos = MinimapAdv:GetPositionDB()
+                                        for k, v in next, minimapAnchors do
+                                            if v == pos.anchorto then return k end
                                         end
                                     end,
                                     set = function(info, value)
-                                        --print("Set Anchor", info.option, value)
-                                        MinimapAdv.db.profile.position.anchorto = minimapAnchors[value]
-                                        MinimapAdv.db.profile.position.x = minimapOffsets[value].x
-                                        MinimapAdv.db.profile.position.y = minimapOffsets[value].y
+                                        local pos = MinimapAdv:GetPositionDB()
+                                        pos.anchorto = minimapAnchors[value]
+                                        pos.x        = minimapOffsets[value].x
+                                        pos.y        = minimapOffsets[value].y
                                         MinimapAdv:UpdateMinimapPosition()
                                     end,
                                     order = 40,

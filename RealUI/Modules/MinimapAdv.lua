@@ -11,6 +11,7 @@ local Skin = Aurora.Skin
 -- RealUI --
 local RealUI = private.RealUI
 local db
+local dbPos  -- position scope: char or global depending on positionScope setting
 
 -- Libs --
 local HBD = _G.LibStub("HereBeDragons-2.0", true)
@@ -42,6 +43,32 @@ local Textures = {
 local MMFrames = MinimapAdv.Frames
 local isInFarmMode = false
 local UpdateProcessing = false
+
+local function RefreshPositionDB()
+    if MinimapAdv.db.global.positionScope == "global" then
+        dbPos = MinimapAdv.db.global.position
+    else
+        dbPos = MinimapAdv.db.char.position
+    end
+end
+
+function MinimapAdv:GetPositionDB()
+    return dbPos
+end
+
+function MinimapAdv:SetPositionScope(scope)
+    local prev = dbPos
+    MinimapAdv.db.global.positionScope = scope
+    RefreshPositionDB()
+    if prev and dbPos ~= prev then
+        dbPos.size    = prev.size
+        dbPos.scale   = prev.scale
+        dbPos.anchorto = prev.anchorto
+        dbPos.x       = prev.x
+        dbPos.y       = prev.y
+    end
+    self:UpdateMinimapPosition()
+end
 
 ----------
 -- Zoom Out
@@ -85,7 +112,7 @@ end
 local function GetPositionData()
     -- Get Normal or Expanded data
     local mapPoints
-    local pos = db.position or { anchorto = "TOPLEFT", x = 7, y = -7, size = 134, scale = 1 }
+    local pos = dbPos or { anchorto = "TOPLEFT", x = 7, y = -7, size = 134, scale = 1 }
 
     if isInFarmMode then
         local expandPos = db.expand and db.expand.position or pos
@@ -346,7 +373,7 @@ function MinimapAdv:UpdateMinimapPosition()
     local isLeft = mapPoints.isLeft
 
     -- Set new size and position
-    _G.Minimap:SetSize(db.position.size, db.position.size)
+    _G.Minimap:SetSize(dbPos.size, dbPos.size)
     _G.Minimap:SetScale(scale)
     _G.Minimap:SetAlpha(opacity)
 
@@ -1369,7 +1396,7 @@ local function Garrison_OnEnter(self)
     MinimapAdv:debug("Garrison_OnEnter")
     if not self.title then return end
     self.mouseover = true
-    local isLeft = (db.position and db.position.anchorto or "TOPLEFT"):find("LEFT")
+    local isLeft = (dbPos and dbPos.anchorto or "TOPLEFT"):find("LEFT")
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
     _G.GameTooltip:AddLine(self.description, nil, nil, nil, true)
@@ -1790,7 +1817,7 @@ local function CreateFrames()
     local isTop
     local isLeft
     -- FIXLATER to make configurable
-    local anchorto = db.position and db.position.anchorto or "TOPLEFT"
+    local anchorto = dbPos and dbPos.anchorto or "TOPLEFT"
     if isInFarmMode then
         isTop = anchorto:find("TOP")
         isLeft = anchorto:find("LEFT")
@@ -1885,6 +1912,7 @@ end
 ----------
 function MinimapAdv:RefreshMod()
     db = self.db.profile
+    RefreshPositionDB()
 
     -- Only update if frames are initialized
     if MMFrames and MMFrames.info then
@@ -1897,6 +1925,25 @@ end
 function MinimapAdv:OnInitialize()
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
+        global = {
+            positionScope = "char",
+            position = {
+                size = 134,
+                scale = 1,
+                anchorto = "TOPLEFT",
+                x = 7,
+                y = -7,
+            },
+        },
+        char = {
+            position = {
+                size = 134,
+                scale = 1,
+                anchorto = "TOPLEFT",
+                x = 7,
+                y = -7,
+            },
+        },
         profile = {
             hidden = {
                 enabled = true,
@@ -1907,13 +1954,6 @@ function MinimapAdv:OnInitialize()
                     raid = false,
                     dvelve = false,
                 },
-            },
-            position = {
-                size = 134,
-                scale = 1,
-                anchorto = "TOPLEFT",
-                x = 7,
-                y = -7,
             },
             expand = {
                 appearance = {
@@ -1958,6 +1998,24 @@ end
 
 function MinimapAdv:OnEnable()
     db = self.db.profile
+
+    -- One-time migration: copy position from profile scope → char scope.
+    -- db.profile.position still exists in old saves even though it's no longer
+    -- in RegisterDefaults, so existing users keep their settings.
+    if not self.db.char.positionMigrated then
+        local savedPos = db.position
+        if savedPos and savedPos.anchorto then
+            local target = self.db.char.position
+            target.anchorto = savedPos.anchorto
+            target.size     = savedPos.size  or target.size
+            target.scale    = savedPos.scale or target.scale
+            target.x        = savedPos.x     or target.x
+            target.y        = savedPos.y     or target.y
+        end
+        self.db.char.positionMigrated = true
+    end
+
+    RefreshPositionDB()
 
     if not HBD then
         _G.C_AddOns.LoadAddOn("HereBeDragons")
