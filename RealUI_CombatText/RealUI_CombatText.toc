@@ -1,9 +1,9 @@
-## Interface: 120005
+## Interface: 120005, 120007
 ## Title: RealUI Combat Text
 ## Category: RealUI_Core
 ## Notes: Scrolling combat text designed for RealUI
 ## Author: Gethe, Hanshi
-## Version: 3.2.0
+## Version: 3.3.0
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## SavedVariables: RealUI_CombatTextDB
