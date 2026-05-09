@@ -405,6 +405,33 @@ function RealUI:ChatCommand_Config(input)
                 print("|cff0099ffRealUI|r: Inventory module not loaded.")
             end
             return
+        elseif command == "setupauras" then
+            local AurasAddon = _G.RealUI_Auras
+            if not AurasAddon or not AurasAddon.db then
+                print("|cff0099ffRealUI|r: RealUI_Auras not loaded.")
+                return
+            end
+            if not C_CooldownViewer.IsCooldownViewerAvailable() then
+                print("|cff0099ffRealUI|r: CooldownViewer is not available.")
+                return
+            end
+            local classID = select(3, UnitClass("player"))
+            local specIndex = GetSpecialization()
+            local presetStr = AurasAddon.Presets and AurasAddon.Presets[classID * 10 + specIndex]
+            if not presetStr then
+                print("|cff0099ffRealUI|r: No cooldown preset found for your specialization.")
+                return
+            end
+            local added, _, err = AurasAddon.CooldownViewer.MergePreset(presetStr)
+            AurasAddon.db.char.cooldownPresetOffered = true
+            if err then
+                print("|cff0099ffRealUI|r: Preset apply failed:", err)
+            elseif added and added > 0 then
+                StaticPopup_Show("REALUI_AURAS_RELOAD")
+            else
+                print("|cff0099ffRealUI|r: Cooldown presets are already applied for your specialization.")
+            end
+            return
         elseif command == "resetauras" then
             -- Disable all RealUI_Auras groups and re-enable oUF aura elements.
             -- For users who ran the preview and want to revert to native auras.
@@ -826,18 +853,20 @@ function RealUI:OnInitialize()
         self.FinalMigrations:Initialize()
     end
 
+    -- Register ProfileCoordinator's OnProfileChanged hook FIRST so linked
+    -- scopes (BT4, Skins) switch to the new profile BEFORE RealUI's own
+    -- cascade reads them. Modules like ActionBars touch BT4 data during
+    -- the cascade and need BT4 to already be on the right profile.
+    if self.ProfileCoordinator and self.ProfileCoordinator.RegisterProfileCallback then
+        self.ProfileCoordinator:RegisterProfileCallback()
+    end
+
     -- Register profile change callbacks
     debug("Registering profile callbacks")
     self.db.RegisterCallback(self, "OnNewProfile", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
-
-    -- Register ProfileCoordinator's OnProfileChanged hook so that ANY Core
-    -- profile switch (LibDualSpec, manual, etc.) coordinates linked scopes.
-    if self.ProfileCoordinator and self.ProfileCoordinator.RegisterProfileCallback then
-        self.ProfileCoordinator:RegisterProfileCallback()
-    end
 
     -- Register game events for specialization tracking (handled by DualSpecSystem)
     -- Events are now registered in DualSpecSystem:Initialize()
