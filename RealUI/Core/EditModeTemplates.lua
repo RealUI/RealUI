@@ -164,7 +164,7 @@ Templates.base = {
     -- System 4: Encounter Bar — bottom-right area
     -- =====================================================================
     Entry(SYSTEM_ENCOUNTER_BAR, nil,
-        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -349.69137573242, 217.77856445312),
+        Anchor("BOTTOM", "UIParent", "BOTTOM", 400.49374389648, 215.80352783203),
         {}),
 
     -- =====================================================================
@@ -292,16 +292,16 @@ Templates.base = {
     -- EditModeCooldownViewerSetting enum doesn't exist in this client).
     -- =====================================================================
     Entry(SYSTEM_COOLDOWN_VIEWER, 1,
-        Anchor("CENTER", "UIParent", "CENTER", -7.9012932777405, -218.06161499023),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 795.34619140625, -694.69165039062),
         {}),
     Entry(SYSTEM_COOLDOWN_VIEWER, 2,
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 761.66052246094, -778.80249023438),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 820.74536132812, -747.88134765625),
         {}),
     Entry(SYSTEM_COOLDOWN_VIEWER, 3,
-        Anchor("CENTER", "UIParent", "CENTER", -219.75315856934, -233.33322143555),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 901.16003417969, -741.75836181641),
         {}),
     Entry(SYSTEM_COOLDOWN_VIEWER, 4,
-        Anchor("CENTER", "UIParent", "CENTER", 314.56838989258, -242.04315185547),
+        Anchor("CENTER", "UIParent", "CENTER", 257.32406616211, -223.47106933594),
         {}),
 
     -- =====================================================================
@@ -376,18 +376,18 @@ Templates.overrides.healing = {
     ["5_nil"] = Entry(SYSTEM_EXTRA_ABILITIES, nil,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 380),
         {}),
-    -- Cooldown viewer: shifted up (all 4 indices)
+    -- Cooldown viewer: TODO tune for healing layout
     ["20_1"] = Entry(SYSTEM_COOLDOWN_VIEWER, 1,
-        Anchor("CENTER", "UIParent", "CENTER", 0, -123),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 795.34619140625, -694.69165039062),
         {}),
     ["20_2"] = Entry(SYSTEM_COOLDOWN_VIEWER, 2,
-        Anchor("CENTER", "UIParent", "CENTER", 0, -78),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 820.74536132812, -747.88134765625),
         {}),
     ["20_3"] = Entry(SYSTEM_COOLDOWN_VIEWER, 3,
-        Anchor("CENTER", "UIParent", "CENTER", 0, -40),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 901.16003417969, -741.75836181641),
         {}),
     ["20_4"] = Entry(SYSTEM_COOLDOWN_VIEWER, 4,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 303),
+        Anchor("CENTER", "UIParent", "CENTER", 257.32406616211, -223.47106933594),
         {}),
 }
 
