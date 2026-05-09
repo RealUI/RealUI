@@ -317,6 +317,15 @@ function HuDPositioning:UpdateRealUIPositions()
         return false
     end
 
+    -- Keys owned by runtime modules that HuDPositioning MUST NOT clobber:
+    --   ActionBarsBotY — Infobar writes Scale.Value(BAR_HEIGHT) here to
+    --     keep action bars stacked above the infobar. HuDPositioning only
+    --     has the raw default (16), which on HiDPI displays puts bars
+    --     underneath the infobar by ~29px.
+    local runtimeOwnedKeys = {
+        ["ActionBarsBotY"] = true,
+    }
+
     -- Update RealUI's position data with calculated values
     for layoutId, positions in pairs(hudState.calculatedPositions) do
         if not RealUI.defaultPositions[layoutId] then
@@ -324,7 +333,9 @@ function HuDPositioning:UpdateRealUIPositions()
         end
 
         for positionKey, value in pairs(positions) do
-            RealUI.defaultPositions[layoutId][positionKey] = value
+            if not runtimeOwnedKeys[positionKey] then
+                RealUI.defaultPositions[layoutId][positionKey] = value
+            end
         end
     end
 
@@ -337,7 +348,9 @@ function HuDPositioning:UpdateRealUIPositions()
             end
 
             for positionKey, value in pairs(positions) do
-                db.profile.positions[layoutId][positionKey] = value
+                if not runtimeOwnedKeys[positionKey] then
+                    db.profile.positions[layoutId][positionKey] = value
+                end
             end
         end
     end

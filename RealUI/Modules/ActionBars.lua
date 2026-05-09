@@ -42,6 +42,26 @@ local fixedSettings = {
 local function IsOdd(val)
     return val % 2 == 1
 end
+
+-- Compute the vertical space reserved at the bottom of the screen for the
+-- infobar. ActionBars positions bottom-most bars at `bottomBase = N + 14`
+-- above screen bottom so they stack above the infobar. The infobar's
+-- height is Scale.Value(BAR_HEIGHT=16) which scales with HiDPI. Reading
+-- this via the profile's positions table was unreliable across profile
+-- switches (removeDefaults/copyDefaults and stale Infobar:OnEnable writes
+-- resulted in the key reverting to the raw default of 16 and drifting the
+-- bars 29px downward each swap). Compute it live instead.
+local function GetActionBarsBotY(layoutPositions)
+    local infobar = _G.RealUI_Infobar
+    if infobar and infobar.GetHeight then
+        local h = infobar:GetHeight()
+        if h and h > 0 then return h end
+    end
+    if RealUI.Scale and RealUI.Scale.Value then
+        return RealUI.Scale.Value(16)
+    end
+    return (layoutPositions and layoutPositions["ActionBarsBotY"]) or 16
+end
 -- FIXMELATER: Refactor to calculate padding based on button size and desired spacing rather than hardcoding values
 -- To fix the complexity that we are supressing with luacheck, we would need to refactor the bar position and padding calculations to be more data-driven and less hardcoded. This would involve creating a more flexible system for defining bar layouts and their corresponding padding based on button sizes and desired spacing, rather than using fixed values in the code. This would likely reduce the number of conditional statements and make the code easier to maintain and extend in the future.
 function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
@@ -61,6 +81,7 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     end
 
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
+
     if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
 
     if BT4ActionBars and BT4ActionBars.actionbars and BT4ActionBars.db and BT4ActionBars.db.profile
@@ -71,6 +92,30 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     -- Refresh db reference to ensure we have the latest settings
     db = self.db.profile
     ndb = RealUI.db.profile
+
+    -- Trace: record every call so we can see which cLayout+prof combo
+    -- wrote the final data in the Bartender4 profile. Captures up to the
+    -- last 10 calls. Dump with /bardumptrace.
+    ActionBars._applyTrace = ActionBars._applyTrace or {}
+    do
+        local btCurrent = BT4 and BT4.db and BT4.db:GetCurrentProfile() or "(nil)"
+        local posLayout = ndb and ndb.positions and ndb.positions[RealUI.cLayout]
+        table.insert(ActionBars._applyTrace, {
+            t      = _G.GetTime(),
+            cL     = RealUI.cLayout,
+            prof   = prof,
+            btCur  = btCurrent,
+            tag    = tag or "(none)",
+            abY    = posLayout and posLayout["ActionBarsY"],
+            abBotY = posLayout and posLayout["ActionBarsBotY"],
+            hudY   = posLayout and posLayout["HuDY"],
+            hudSz  = ndb and ndb.settings and ndb.settings.hudSize,
+            cPos   = db and db[RealUI.cLayout] and db[RealUI.cLayout].centerPositions,
+        })
+        if #ActionBars._applyTrace > 10 then
+            table.remove(ActionBars._applyTrace, 1)
+        end
+    end
 
     local barSettings = db[RealUI.cLayout]
     local numTopBars = barSettings.centerPositions - 1
@@ -177,8 +222,14 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
 
                 -- y Offset
                 local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
-                local topYOfs = layoutPositions["HuDY"] + layoutPositions["ActionBarsY"] + RealUI.hudSizeOffsets[ndb.settings.hudSize]["ActionBarsY"]
-                local bottomBase = layoutPositions["ActionBarsBotY"] + 14
+                -- Defensive: if hudSize is nil or out-of-range, fall back to
+                -- size 2 (the default). Mid-session resolution changes can
+                -- leave settings.hudSize pointing at a stale/invalid value.
+                local hudSizeOffsets = RealUI.hudSizeOffsets
+                local hudSize = ndb.settings and ndb.settings.hudSize
+                local sizeOffsets = (hudSize and hudSizeOffsets[hudSize]) or hudSizeOffsets[2] or hudSizeOffsets[1] or {}
+                local topYOfs = layoutPositions["HuDY"] + layoutPositions["ActionBarsY"] + (sizeOffsets["ActionBarsY"] or 0)
+                local bottomBase = GetActionBarsBotY(layoutPositions) + 14
                 local barGap = math.ceil(centerPadding + centerPadding)
                 ActionBars:debug(id, "Y Offset", topYOfs, bottomBase)
                 if barPlace == 1 then
@@ -374,7 +425,7 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
             if BT4Stance and not(BT4Stance:IsEnabled()) then BT4Stance:Enable() end
 
             local sbX = -(_G.max(BarSizes[2], BarSizes[3]) / 2 - 4)
-            local sbY = (ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])["ActionBarsBotY"]
+            local sbY = GetActionBarsBotY(ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])
 
             -- Set Position
             local profileStanceBar = BT4DB["namespaces"]["StanceBar"]["profiles"][prof]
@@ -609,6 +660,63 @@ function ActionBars:BarChatCommand()
     end
 end
 
+-- Diagnostic: show the last few ApplyABSettings invocations
+-- Usage: /bardumptrace
+function ActionBars:BarDumpTraceCommand()
+    local trace = ActionBars._applyTrace or {}
+    if #trace == 0 then
+        _G.print("[bardumptrace] no calls recorded yet")
+        return
+    end
+    _G.print(("[bardumptrace] last %d ApplyABSettings calls:"):format(#trace))
+    for i, entry in ipairs(trace) do
+        _G.print(("  %d: t=%.2f cL=%s prof=%s bt=%s tag=%s cPos=%s abY=%s abBotY=%s hudY=%s hudSz=%s"):format(
+            i, entry.t,
+            tostring(entry.cL), entry.prof, entry.btCur, entry.tag,
+            tostring(entry.cPos),
+            tostring(entry.abY), tostring(entry.abBotY),
+            tostring(entry.hudY), tostring(entry.hudSz)))
+    end
+end
+
+-- Diagnostic: dump current BT4 actionbar positions for both RealUI profiles
+-- Usage: /bardump
+function ActionBars:BarDumpCommand()
+    if not BT4 then
+        _G.print("[bardump] Bartender4 not loaded"); return
+    end
+    local bt4db = _G.Bartender4DB
+    if not bt4db or not bt4db.namespaces or not bt4db.namespaces.ActionBars then
+        _G.print("[bardump] Bartender4DB.namespaces.ActionBars missing"); return
+    end
+
+    _G.print(("[bardump] RealUI.cLayout=%s (%s)"):format(
+        tostring(RealUI.cLayout),
+        RealUI.cLayout == 1 and "DPS/Tank" or "Healing"))
+    _G.print(("[bardump] BT4 current profile: %s"):format(tostring(BT4.db:GetCurrentProfile())))
+
+    local profiles = bt4db.namespaces.ActionBars.profiles
+    for _, profName in ipairs({"RealUI", "RealUI-Healing"}) do
+        local prof = profiles[profName]
+        if not prof then
+            _G.print(("[bardump] profile %s: MISSING"):format(profName))
+        else
+            _G.print(("[bardump] profile %s:"):format(profName))
+            local bars = prof.actionbars or {}
+            for id = 1, 6 do
+                local bar = bars[id]
+                if bar and bar.position then
+                    _G.print(("  bar%d point=%s x=%.1f y=%.1f"):format(
+                        id, tostring(bar.position.point),
+                        bar.position.x or 0, bar.position.y or 0))
+                else
+                    _G.print(("  bar%d: (no position)"):format(id))
+                end
+            end
+        end
+    end
+end
+
 function ActionBars:RefreshMod()
     db = self.db.profile
     ndb = RealUI.db.profile
@@ -643,7 +751,7 @@ function ActionBars:ToggleNagaBar(enable)
 
             -- Set position: anchor to BOTTOM, bottom row aligned with lowest action bar
             local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
-            local bottomBase = layoutPositions["ActionBarsBotY"] + 14
+            local bottomBase = GetActionBarsBotY(layoutPositions) + 14
             -- 4 rows of buttons, grow down from top — offset up by 3 rows worth
             local nagaY = bottomBase + (buttonSizes.bars * 3) + (3 * fixedSettings.buttonPadding)
             bar6Config.position = {
@@ -774,6 +882,8 @@ function ActionBars:OnEnable()
         self:RegisterChatCommand("bartender", "BarChatCommand")
         self:RegisterChatCommand("bartender4", "BarChatCommand")
         self:RegisterChatCommand("naga", "ToggleNagaCommand")
+        self:RegisterChatCommand("bardump", "BarDumpCommand")
+        self:RegisterChatCommand("bardumptrace", "BarDumpTraceCommand")
     end
 end
 

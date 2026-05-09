@@ -14,7 +14,16 @@ local PF = {}
 
 local function GetHuDSizeOffset(key)
     Positioners:debug("GetHuDSizeOffset", key)
-    return RealUI.hudSizeOffsets[ndb.settings.hudSize][key] or 0
+    -- Defensive: ndb.settings.hudSize can be nil or out-of-range (e.g. 3)
+    -- during early init or when HuDPositioning briefly tries to switch to
+    -- a HuD size that doesn't have an entry in RealUI.hudSizeOffsets.
+    -- Fall back to size 2 (the default) so positioners don't fail to init.
+    local offsets = RealUI.hudSizeOffsets
+    if not offsets then return 0 end
+    local size = ndb and ndb.settings and ndb.settings.hudSize
+    local sizeOffsets = (size and offsets[size]) or offsets[2] or offsets[1]
+    if not sizeOffsets then return 0 end
+    return sizeOffsets[key] or 0
 end
 
 local function GetPositionData(pT)

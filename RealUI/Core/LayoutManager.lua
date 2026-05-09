@@ -348,11 +348,21 @@ function LayoutManager:UpdateDatabasePositions(layoutId)
     if not db.profile.positions then
         db.profile.positions = {}
     end
+    if not db.profile.positions[layoutId] then
+        db.profile.positions[layoutId] = {}
+    end
 
-    -- Update positions for the layout
-    db.profile.positions[layoutId] = {}
+    -- Fill in ONLY missing keys with layout defaults. Do NOT wipe the
+    -- existing table — HuDPositioning:UpdateRealUIPositions has already
+    -- written scaled/offset values, and the Infobar owns ActionBarsBotY
+    -- (sets it to Scale.Value(BAR_HEIGHT) so bars stack above the infobar).
+    -- Wiping here replaced correct runtime values with raw defaults,
+    -- causing action bars to drift 29px downward on every spec swap.
+    local dest = db.profile.positions[layoutId]
     for key, value in pairs(config.positions) do
-        db.profile.positions[layoutId][key] = value
+        if dest[key] == nil then
+            dest[key] = value
+        end
     end
 
     debug("Database positions updated successfully")

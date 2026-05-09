@@ -255,44 +255,12 @@ function ProfileCoordinator:CoordinatedSwitch(profileName, forceCreate)
         end
     end
 
-    -- 1. Core scope — always switched
-    debug("Switching Core scope to:", profileName)
-    RealUI.db:SetProfile(profileName)  -- triggers OnProfileUpdate via AceDB callback
-    switchedScopes[#switchedScopes + 1] = self.SCOPE_CORE
-
-    -- Copy source data into new Core profile
-    if forceCreate and sourceCoreProfile and sourceCoreProfile ~= profileName then
-        debug("Copying Core profile data from:", sourceCoreProfile)
-        RealUI.db:CopyProfile(sourceCoreProfile, true)
-    end
-
-    -- 2. Skins scope
-    if self:IsScopeLinked(self.SCOPE_SKINS) then
-        local skinsDB = GetSkinsDB()
-        if skinsDB then
-            if forceCreate or ProfileExistsInDB(skinsDB, profileName) then
-                debug("Switching Skins scope to:", profileName)
-                skinsDB:SetProfile(profileName)
-                switchedScopes[#switchedScopes + 1] = self.SCOPE_SKINS
-
-                -- Copy source data into new Skins profile
-                if forceCreate and sourceSkinsProfile and sourceSkinsProfile ~= profileName then
-                    debug("Copying Skins profile data from:", sourceSkinsProfile)
-                    skinsDB:CopyProfile(sourceSkinsProfile, true)
-                end
-            else
-                local msg = "Skins: profile '" .. profileName .. "' does not exist — skipped."
-                debug(msg)
-                warnings[#warnings + 1] = msg
-            end
-        else
-            local msg = "Skins: database not available — skipped."
-            debug(msg)
-            warnings[#warnings + 1] = msg
-        end
-    end
-
-    -- 3. Bartender4 scope
+    -- 1. Bartender4 scope — switch FIRST so BT4 is already on the new
+    -- profile when Core's OnProfileUpdate cascade fires. RealUI's ActionBars
+    -- module applies positioning during that cascade and reads live BT4
+    -- state to reposition bars. If BT4 is still on the old profile when the
+    -- cascade runs, the bars are written/read to the wrong profile and need
+    -- a reload to self-correct.
     if self:IsScopeLinked(self.SCOPE_BT4) then
         local bt4Addon = _G.Bartender4
         if bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
@@ -324,6 +292,43 @@ function ProfileCoordinator:CoordinatedSwitch(profileName, forceCreate)
                 -- BT4 not loaded — silently skip (Req 7.4)
                 debug("Bartender4DB not loaded, skipping BT4 scope")
             end
+        end
+    end
+
+    -- 2. Core scope — fires the OnProfileUpdate cascade (modules, positioners, etc.)
+    debug("Switching Core scope to:", profileName)
+    RealUI.db:SetProfile(profileName)  -- triggers OnProfileUpdate via AceDB callback
+    switchedScopes[#switchedScopes + 1] = self.SCOPE_CORE
+
+    -- Copy source data into new Core profile
+    if forceCreate and sourceCoreProfile and sourceCoreProfile ~= profileName then
+        debug("Copying Core profile data from:", sourceCoreProfile)
+        RealUI.db:CopyProfile(sourceCoreProfile, true)
+    end
+
+    -- 3. Skins scope
+    if self:IsScopeLinked(self.SCOPE_SKINS) then
+        local skinsDB = GetSkinsDB()
+        if skinsDB then
+            if forceCreate or ProfileExistsInDB(skinsDB, profileName) then
+                debug("Switching Skins scope to:", profileName)
+                skinsDB:SetProfile(profileName)
+                switchedScopes[#switchedScopes + 1] = self.SCOPE_SKINS
+
+                -- Copy source data into new Skins profile
+                if forceCreate and sourceSkinsProfile and sourceSkinsProfile ~= profileName then
+                    debug("Copying Skins profile data from:", sourceSkinsProfile)
+                    skinsDB:CopyProfile(sourceSkinsProfile, true)
+                end
+            else
+                local msg = "Skins: profile '" .. profileName .. "' does not exist — skipped."
+                debug(msg)
+                warnings[#warnings + 1] = msg
+            end
+        else
+            local msg = "Skins: database not available — skipped."
+            debug(msg)
+            warnings[#warnings + 1] = msg
         end
     end
 

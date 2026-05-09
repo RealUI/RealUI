@@ -845,9 +845,30 @@ function Infobar:CreateBar()
             if block.AdjustElements then block:AdjustElements(blockInfo) end
         end
 
+        -- Write Infobar's reserved-space height into BOTH profiles'
+        -- position tables. ndb.positions only points at the ACTIVE
+        -- profile, so we have to reach through the raw AceDB storage to
+        -- update the inactive profile too. Otherwise RealUI-Healing
+        -- (or whichever profile wasn't active at Infobar init) keeps the
+        -- raw default of 16 and ActionBars computes bar positions 29px
+        -- too low on HiDPI displays.
+        local barBotY = Scale.Value(BAR_HEIGHT)
         if ndb and ndb.positions then
-            if ndb.positions[1] then ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
-            if ndb.positions[2] then ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
+            if ndb.positions[1] then ndb.positions[1]["ActionBarsBotY"] = barBotY end
+            if ndb.positions[2] then ndb.positions[2]["ActionBarsBotY"] = barBotY end
+        end
+        -- Reach into the saved-variable profile table so inactive
+        -- profiles pick up the same value on their next activation.
+        local coreDB = RealUI.db
+        local sv = coreDB and coreDB.sv
+        if sv and sv.profiles then
+            for _, profileName in ipairs({"RealUI", "RealUI-Healing"}) do
+                local prof = sv.profiles[profileName]
+                if prof and prof.positions then
+                    if prof.positions[1] then prof.positions[1]["ActionBarsBotY"] = barBotY end
+                    if prof.positions[2] then prof.positions[2]["ActionBarsBotY"] = barBotY end
+                end
+            end
         end
     end)
 
@@ -1160,8 +1181,21 @@ function Infobar:OnEnable()
         end
     end
 
-    -- Adjust ActionBar positions
+    -- Adjust ActionBar positions — write to BOTH profiles so either one
+    -- can load into ApplyABSettings with the correct Infobar-aware value
+    -- (see the matching logic in Infobar:CreateBar for rationale).
     ndb = RealUI.db.profile
-    if ndb.positions[1] then ndb.positions[1]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
-    if ndb.positions[2] then ndb.positions[2]["ActionBarsBotY"] = Scale.Value(BAR_HEIGHT) end
+    local barBotY = Scale.Value(BAR_HEIGHT)
+    if ndb.positions[1] then ndb.positions[1]["ActionBarsBotY"] = barBotY end
+    if ndb.positions[2] then ndb.positions[2]["ActionBarsBotY"] = barBotY end
+    local sv = RealUI.db and RealUI.db.sv
+    if sv and sv.profiles then
+        for _, profileName in ipairs({"RealUI", "RealUI-Healing"}) do
+            local prof = sv.profiles[profileName]
+            if prof and prof.positions then
+                if prof.positions[1] then prof.positions[1]["ActionBarsBotY"] = barBotY end
+                if prof.positions[2] then prof.positions[2]["ActionBarsBotY"] = barBotY end
+            end
+        end
+    end
 end

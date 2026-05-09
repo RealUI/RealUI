@@ -50,7 +50,16 @@ local LAYOUT_NAMES = {
 -- Internal Helpers
 ---------------------------------------------------------------------------
 
---- Finds the array index of a named layout within data.layouts.
+--- Number of built-in preset layouts (Modern, Classic). The
+-- C_EditMode.SetActiveLayout(index) API uses an index into the combined
+-- list [presets..., saved...], but C_EditMode.GetLayouts() returns the
+-- saved layouts only (without presets). So to convert an index inside
+-- data.layouts (saved) into the index SetActiveLayout expects, add this
+-- offset.
+local NUM_PRESET_LAYOUTS = 2
+
+--- Finds the array index of a named layout within data.layouts
+-- (saved-only array returned by C_EditMode.GetLayouts()).
 -- @param data table  The data returned by C_EditMode.GetLayouts()
 -- @param layoutName string  The layout name to search for
 -- @param preferredType number|nil  Preferred layoutType (1=Account, 2=Character)
@@ -261,7 +270,7 @@ function EditModeManager:ActivateLayout(role)
         return false
     end
 
-    local absoluteIndex = idx
+    local absoluteIndex = NUM_PRESET_LAYOUTS + idx
     local activateOk, activateErr = pcall(C_EditMode.SetActiveLayout, absoluteIndex)
     if not activateOk then
         debug("ERROR: C_EditMode.SetActiveLayout() failed:", activateErr)
@@ -426,9 +435,11 @@ function EditModeManager:MigrateFromPreEditMode()
     -- don't disrupt a user-selected custom layout.
     local ok, data = pcall(C_EditMode.GetLayouts)
     if ok and data then
-        local activeEntry = data.layouts[data.activeLayout]
-        -- layoutType 0 == Preset (Modern, Classic). Account(1), Character(2).
-        local currentIsBuiltIn = activeEntry and activeEntry.layoutType == 0
+        -- data.activeLayout is an index into the combined [presets, saved]
+        -- list, so any value <= NUM_PRESET_LAYOUTS means a preset is active.
+        -- Values > NUM_PRESET_LAYOUTS index into data.layouts (saved-only).
+        local activeIdx = data.activeLayout
+        local currentIsBuiltIn = activeIdx and activeIdx <= NUM_PRESET_LAYOUTS
 
         if currentIsBuiltIn then
             self:ActivateLayout(role)
@@ -469,7 +480,6 @@ local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
-eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "Blizzard_PlayerChoice" then
@@ -489,30 +499,6 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
         end
 
         self:UnregisterEvent("ADDON_LOADED")
-
-    elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
-        -- arg1 is the unit; only react to the player's own spec change
-        if arg1 ~= "player" then return end
-        if not state.initialized then return end
-
-        -- Re-activate the RealUI layout for the current role after spec switch.
-        -- Delay so WoW has time to update the specialization, and so
-        -- LayoutManager finishes its profile+layout switch first. Determine
-        -- role from RealUI.cLayout at callback time rather than from
-        -- state.currentRole — the latter is stale (or nil on the first
-        -- spec switch of the session) whenever the LayoutManager callback
-        -- doesn't fire (e.g. moving between two specs that share a profile).
-        C_Timer.After(0.5, function()
-            local role = (RealUI.cLayout == 2) and "healing" or "dpstank"
-            debug("Spec changed, re-activating layout for role:", role)
-
-            if InCombatLockdown() then
-                state.pendingLayout = { action = "activate", role = role }
-                debug("Combat lockdown — queued spec-change ActivateLayout")
-            else
-                EditModeManager:ActivateLayout(role)
-            end
-        end)
 
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- Process combat-deferred action
