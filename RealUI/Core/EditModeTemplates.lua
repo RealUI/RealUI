@@ -79,7 +79,7 @@ end
 ---------------------------------------------------------------------------
 Templates.base = {
     -- =====================================================================
-    -- System 0: Action Bars (indices 1-8 = bars, 9 = stance, 10 = pet, 11 = possess)
+    -- System 0: Action Bars (indices 1-8 = bars, 11 = stance, 12 = pet, 13 = possess)
     -- All hidden — Bartender4 replaces them
     -- =====================================================================
     Entry(SYSTEM_ACTION_BAR, 1,
@@ -127,7 +127,7 @@ Templates.base = {
     -- System 2: Minimap — top-right corner
     -- =====================================================================
     Entry(SYSTEM_MINIMAP, nil,
-        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -10, -10),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -15, -15),
         {}),
 
     -- =====================================================================
@@ -145,26 +145,26 @@ Templates.base = {
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
         {}),
     Entry(SYSTEM_UNIT_FRAME, 4, -- Party frames
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 220),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 680.66668701172, -1064.6667480469),
         {}),
     Entry(SYSTEM_UNIT_FRAME, 5, -- Raid frames
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 200),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 948.14776611328, -866.66552734375),
         {}),
     Entry(SYSTEM_UNIT_FRAME, 6, -- Boss frames
         Anchor("RIGHT", "UIParent", "RIGHT", -32, 314),
         {}),
     Entry(SYSTEM_UNIT_FRAME, 7, -- Arena frames
-        Anchor("RIGHT", "UIParent", "RIGHT", -32, 200),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -32.000122070312, -304.83334350586),
         {}),
     Entry(SYSTEM_UNIT_FRAME, 8, -- Pet (oUF replaces)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
         {}),
 
     -- =====================================================================
-    -- System 4: Encounter Bar — bottom-center above action area
+    -- System 4: Encounter Bar — bottom-right area
     -- =====================================================================
     Entry(SYSTEM_ENCOUNTER_BAR, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 160),
+        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -349.69137573242, 217.77856445312),
         {}),
 
     -- =====================================================================
@@ -179,27 +179,27 @@ Templates.base = {
     -- Top-right, below minimap
     -- =====================================================================
     Entry(SYSTEM_AURA_FRAME, 1, -- Buff Frame
-        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -180, -10),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -195, -15),
         {}),
     Entry(SYSTEM_AURA_FRAME, 2, -- Debuff Frame
-        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -180, -100),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -195, -105),
         {}),
     Entry(SYSTEM_AURA_FRAME, 3, -- External Defensives
         Anchor("LEFT", "UIParent", "LEFT", 371, -178),
         {}),
 
     -- =====================================================================
-    -- System 7: Talking Head — bottom-center
+    -- System 7: Talking Head — center
     -- =====================================================================
     Entry(SYSTEM_TALKING_HEAD, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 350),
+        Anchor("CENTER", "UIParent", "CENTER", -3.9505817890167, 0.33947628736496),
         {}),
 
     -- =====================================================================
     -- System 8: Chat Frame — bottom-left
     -- =====================================================================
     Entry(SYSTEM_CHAT_FRAME, nil,
-        Anchor("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 10, 30),
+        Anchor("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 36.234592437744, 52.284000396729),
         {}),
 
     -- =====================================================================
@@ -227,21 +227,21 @@ Templates.base = {
     -- System 12: Objective Tracker — right side
     -- =====================================================================
     Entry(SYSTEM_OBJECTIVE_TRACKER, nil,
-        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -10, -200),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -25, -210),
         {}),
 
     -- =====================================================================
     -- System 13: Micro Menu — bottom-right
     -- =====================================================================
     Entry(SYSTEM_MICRO_MENU, nil,
-        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -10, 30),
+        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -15, 35),
         {}),
 
     -- =====================================================================
     -- System 14: Bags — bottom-right above micro menu
     -- =====================================================================
     Entry(SYSTEM_BAGS, nil,
-        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -10, 55),
+        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -15, 60),
         {}),
 
     -- =====================================================================
@@ -285,20 +285,23 @@ Templates.base = {
 
     -- =====================================================================
     -- System 20: Cooldown Viewer (11.1.5) — center above action area
-    -- Index 1 = Essential Cooldowns, Index 2 = Buff Bar Cooldowns
-    -- Index 3 = Cooldown Viewer 3, Index 4 = Cooldown Viewer 4
+    -- Index 1 = Essential Cooldowns, Index 2 = Utility Cooldowns
+    -- Index 3 = Tracked Buffs (icons), Index 4 = Tracked Buff Bars
+    --
+    -- Size is controlled via SetScale() in EditModeManager (the
+    -- EditModeCooldownViewerSetting enum doesn't exist in this client).
     -- =====================================================================
     Entry(SYSTEM_COOLDOWN_VIEWER, 1,
-        Anchor("CENTER", "UIParent", "CENTER", 0, -183),
+        Anchor("CENTER", "UIParent", "CENTER", -7.9012932777405, -218.06161499023),
         {}),
     Entry(SYSTEM_COOLDOWN_VIEWER, 2,
-        Anchor("CENTER", "UIParent", "CENTER", 0, -138),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 761.66052246094, -778.80249023438),
         {}),
     Entry(SYSTEM_COOLDOWN_VIEWER, 3,
-        Anchor("CENTER", "UIParent", "CENTER", 0, -100),
+        Anchor("CENTER", "UIParent", "CENTER", -219.75315856934, -233.33322143555),
         {}),
     Entry(SYSTEM_COOLDOWN_VIEWER, 4,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 243),
+        Anchor("CENTER", "UIParent", "CENTER", 314.56838989258, -242.04315185547),
         {}),
 
     -- =====================================================================

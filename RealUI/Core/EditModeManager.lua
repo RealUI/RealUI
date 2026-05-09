@@ -38,6 +38,58 @@ local LAYOUT_NAMES = {
 }
 
 ---------------------------------------------------------------------------
+-- CooldownViewer Scale
+-- The EditModeCooldownViewerSetting.IconSize enum doesn't exist in this
+-- client version, so we apply scale via SetScale() after layout activation.
+-- Keys: frame global names. Values: scale factor (1.0 = default).
+-- Tiered sizing: Essential large, Utility medium, Tracked small.
+---------------------------------------------------------------------------
+local COOLDOWN_VIEWER_SCALES = {
+    EssentialCooldownViewer = 1.00,
+    UtilityCooldownViewer   = 0.75,
+    BuffIconCooldownViewer  = 0.75,
+    BuffBarCooldownViewer   = 0.75,
+}
+
+---------------------------------------------------------------------------
+-- ApplyCooldownViewerScales
+---------------------------------------------------------------------------
+
+--- Applies SetScale() to CooldownViewer frames.
+-- Called after layout activation since the EditMode settings enum for
+-- icon size doesn't exist in this client version.
+function EditModeManager:ApplyCooldownViewerScales()
+    for frameName, scale in pairs(COOLDOWN_VIEWER_SCALES) do
+        local frame = _G[frameName]
+        if frame and frame.SetScaleBase then
+            -- EditMode overrides SetScale; use the base version to avoid
+            -- triggering anchor recalculation during layout apply.
+            frame:SetScaleBase(scale)
+        elseif frame then
+            frame:SetScale(scale)
+        end
+    end
+
+    -- Force BuffIconCooldownViewer to horizontal layout.
+    -- The EditModeCooldownViewerSetting.Orientation enum doesn't exist in
+    -- this client, so the frame defaults to vertical. Set GridLayoutFrame
+    -- properties directly and re-run Layout().
+    local buffIcon = _G.BuffIconCooldownViewer
+    if buffIcon then
+        buffIcon.isHorizontal = true
+        buffIcon.layoutFramesGoingRight = true
+        buffIcon.layoutFramesGoingUp = false
+        buffIcon.stride = 20  -- plenty of room to grow sideways
+        if buffIcon.Layout then
+            buffIcon:Layout()
+        end
+    end
+end
+
+-- Local alias for internal callers
+local ApplyCooldownViewerScales = function() EditModeManager:ApplyCooldownViewerScales() end
+
+---------------------------------------------------------------------------
 -- Internal Helpers
 ---------------------------------------------------------------------------
 
@@ -148,11 +200,14 @@ end
 ---------------------------------------------------------------------------
 
 --- Ensures both "RealUI" and "RealUI-Healing" layouts exist and are up-to-date.
--- Builds layouts for both roles, finds or inserts them in the EditMode data,
--- and persists via C_EditMode.SaveLayouts().
+-- If a layout already exists, its user-modified positions/settings are
+-- preserved — the template is only used for initial creation.
+-- Pass `forceRebuild = true` to overwrite existing layouts with the template
+-- (used by InstallWizard to reset layouts to RealUI defaults).
 -- @param displayPresetId string  Display preset identifier
+-- @param forceRebuild boolean|nil  If true, overwrite existing layouts
 -- @return boolean  true if layouts were saved, false if deferred
-function EditModeManager:EnsureLayouts(displayPresetId)
+function EditModeManager:EnsureLayouts(displayPresetId, forceRebuild)
     if InCombatLockdown() then
         state.pendingLayout = { action = "ensure", displayPresetId = displayPresetId }
         debug("Combat lockdown — queued EnsureLayouts")
@@ -166,32 +221,41 @@ function EditModeManager:EnsureLayouts(displayPresetId)
     end
 
     local targetType = self:GetCurrentLayoutType()
+    local changed = false
 
     for role, layoutName in pairs(LAYOUT_NAMES) do
-        local layout = self:BuildLayout(role, displayPresetId)
-        if layout then
-            local existingIndex = FindLayoutIndex(data, layoutName, targetType)
-            if existingIndex then
-                data.layouts[existingIndex] = layout
-                debug("Updated existing layout:", layoutName, "at index", existingIndex)
-            else
-                table.insert(data.layouts, layout)
-                debug("Inserted new layout:", layoutName)
-            end
+        local existingIndex = FindLayoutIndex(data, layoutName, targetType)
+        if existingIndex and not forceRebuild then
+            -- Preserve user customizations; do nothing for existing layouts
+            debug("Preserving existing layout:", layoutName, "at index", existingIndex)
         else
-            debug("ERROR: BuildLayout returned nil for role:", role)
+            local layout = self:BuildLayout(role, displayPresetId)
+            if layout then
+                if existingIndex then
+                    data.layouts[existingIndex] = layout
+                    debug("Rebuilt existing layout:", layoutName, "at index", existingIndex)
+                else
+                    table.insert(data.layouts, layout)
+                    debug("Inserted new layout:", layoutName)
+                end
+                changed = true
+            else
+                debug("ERROR: BuildLayout returned nil for role:", role)
+            end
         end
     end
 
-    local saveOk, saveErr = pcall(C_EditMode.SaveLayouts, data)
-    if not saveOk then
-        debug("ERROR: C_EditMode.SaveLayouts() failed:", saveErr)
-        return false
+    if changed then
+        local saveOk, saveErr = pcall(C_EditMode.SaveLayouts, data)
+        if not saveOk then
+            debug("ERROR: C_EditMode.SaveLayouts() failed:", saveErr)
+            return false
+        end
     end
 
     state.layoutsCreated = true
     state.currentDisplayPreset = displayPresetId
-    debug("EnsureLayouts completed for preset:", displayPresetId)
+    debug("EnsureLayouts completed for preset:", displayPresetId, "changed:", changed)
     return true
 end
 
@@ -255,6 +319,13 @@ function EditModeManager:ActivateLayout(role)
 
     state.currentRole = role
     debug("Activated layout:", layoutName, "at absolute index", absoluteIndex)
+
+    -- Apply CooldownViewer scales (no native setting enum in this client).
+    -- Delay so we run after EditMode finishes its layout apply pass.
+    C_Timer.After(0.1, function()
+        EditModeManager:ApplyCooldownViewerScales()
+    end)
+
     return true
 end
 
@@ -397,11 +468,22 @@ function EditModeManager:MigrateFromPreEditMode()
             debug("Migration: activated layout for role:", role)
         else
             debug("Migration: user has custom layout active, skipping activation")
+            -- Still apply scales even if we don't activate our layout
+            ApplyCooldownViewerScales()
         end
     end
 
     self:SetMigrationFlag()
     debug("Migration from pre-EditMode completed")
+end
+
+--- Resets the RealUI layouts to their template defaults.
+-- Overwrites any user customizations. Used by the InstallWizard or when
+-- the user explicitly asks to reset.
+-- @param displayPresetId string|nil  Display preset (defaults to current)
+function EditModeManager:ResetLayout(displayPresetId)
+    local presetId = displayPresetId or state.currentDisplayPreset or "standard"
+    self:EnsureLayouts(presetId, true)
 end
 
 ---------------------------------------------------------------------------
@@ -414,6 +496,28 @@ function EditModeManager:IsInitialized()
     return state.initialized
 end
 
+--- Returns the CooldownViewer scale table (mutable reference).
+-- Modify values and call ApplyCooldownViewerScales() or reload to apply.
+-- @return table  Keys are frame global names, values are scale factors
+function EditModeManager:GetCooldownViewerScales()
+    return COOLDOWN_VIEWER_SCALES
+end
+
+--- Sets the scale for a specific CooldownViewer frame and applies it.
+-- @param frameName string  e.g. "EssentialCooldownViewer"
+-- @param scale number  Scale factor (1.0 = default size)
+function EditModeManager:SetCooldownViewerScale(frameName, scale)
+    COOLDOWN_VIEWER_SCALES[frameName] = scale
+    local frame = _G[frameName]
+    if frame then
+        if frame.SetScaleBase then
+            frame:SetScaleBase(scale)
+        else
+            frame:SetScale(scale)
+        end
+    end
+end
+
 ---------------------------------------------------------------------------
 -- Event Frame
 ---------------------------------------------------------------------------
@@ -422,11 +526,12 @@ local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
+eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "Blizzard_PlayerChoice" then
         state.initialized = true
-        self:UnregisterEvent("ADDON_LOADED")
         debug("Initialized — Blizzard_PlayerChoice loaded")
 
         -- Check for migration on first init
@@ -440,6 +545,53 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
             state.pendingLayout = nil
             ProcessPending(pending)
         end
+
+        -- Unregister if CooldownViewer is already loaded too
+        if C_AddOns.IsAddOnLoaded("Blizzard_CooldownViewer") then
+            self:UnregisterEvent("ADDON_LOADED")
+            ApplyCooldownViewerScales()
+        end
+
+    elseif event == "ADDON_LOADED" and arg1 == "Blizzard_CooldownViewer" then
+        -- CooldownViewer frames now exist — apply scales
+        -- Delay one frame to let the frames fully initialize
+        C_Timer.After(0, ApplyCooldownViewerScales)
+        -- Both addons loaded, no more ADDON_LOADED needed
+        if state.initialized then
+            self:UnregisterEvent("ADDON_LOADED")
+        end
+
+    elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
+        -- arg1 is the unit; only react to the player's own spec change
+        if arg1 ~= "player" then return end
+        if not state.initialized then return end
+
+        -- Re-activate the RealUI layout for the current role after spec switch.
+        -- WoW may revert to a built-in layout when specs change.
+        local role = state.currentRole or "dpstank"
+        debug("Spec changed, re-activating layout for role:", role)
+
+        -- Delay slightly to let WoW finish its own layout switch first
+        C_Timer.After(0.5, function()
+            if InCombatLockdown() then
+                state.pendingLayout = { action = "activate", role = role }
+                debug("Combat lockdown — queued spec-change ActivateLayout")
+            else
+                EditModeManager:ActivateLayout(role)
+            end
+        end)
+
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        -- Re-apply CooldownViewer scales after all addons have loaded and
+        -- EditMode has applied its layout (which may reset scales to 1).
+        -- A short delay ensures we run after EditMode's post-activation.
+        C_Timer.After(0.1, function()
+            EditModeManager:ApplyCooldownViewerScales()
+        end)
+        C_Timer.After(1.0, function()
+            -- Belt-and-suspenders: some display settings may re-scale later
+            EditModeManager:ApplyCooldownViewerScales()
+        end)
 
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- Process combat-deferred action
@@ -469,7 +621,6 @@ end)
 -- Check if Blizzard_PlayerChoice is already loaded (it may load before us)
 if C_AddOns.IsAddOnLoaded("Blizzard_PlayerChoice") then
     state.initialized = true
-    eventFrame:UnregisterEvent("ADDON_LOADED")
     debug("Initialized — Blizzard_PlayerChoice was already loaded")
 
     -- Defer migration check to next frame to ensure RealUI.db is ready
@@ -478,4 +629,10 @@ if C_AddOns.IsAddOnLoaded("Blizzard_PlayerChoice") then
             EditModeManager:MigrateFromPreEditMode()
         end
     end)
+
+    -- If CooldownViewer is also already loaded, apply scales and stop listening
+    if C_AddOns.IsAddOnLoaded("Blizzard_CooldownViewer") then
+        eventFrame:UnregisterEvent("ADDON_LOADED")
+        C_Timer.After(0, ApplyCooldownViewerScales)
+    end
 end
