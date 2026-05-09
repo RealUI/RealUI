@@ -11,14 +11,15 @@ function private.AddOns.Grid2()
     local Grid2Layout = namespaces.Grid2Layout.profiles
     Grid2Layout["RealUI-Healing"] = {
         ["BackgroundTexture"] = "None",
-        ["PosY"] = -199.041577582324,
+        ["PosY"] = -774,
         ["layouts"] = {
             ["solo"] = "None",
         },
         ["FrameLock"] = true,
         ["clamp"] = true,
-        ["PosX"] = -0.000104980466403504,
+        ["PosX"] = -2,
         ["anchor"] = "CENTER",
+        ["groupAnchor"] = "TOPLEFT",
         ["BorderTexture"] = "None",
     }
     Grid2Layout["RealUI"] = {
