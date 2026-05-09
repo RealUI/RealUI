@@ -13,7 +13,7 @@ local RealUI = _G.RealUI
 local L = RealUI.L
 -- local round = RealUI.Round
 
-local CombatFader = RealUI:GetModule("CombatFader")
+local _CombatFader = RealUI:GetModule("CombatFader")
 local FramePoint = RealUI:GetModule("FramePoint")
 local order = 0
 

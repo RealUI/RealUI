@@ -110,8 +110,8 @@ function RealUI_Tracker:SetupDisplay()
     -- These hooks fire whenever the tracker refreshes (quest add/remove/complete),
     -- so counts update live without additional event registration.
     for _, module in ipairs(HEADER_MODULES) do
-        hooksecurefunc(module, "Update", function(self)
-            UpdateModuleHeader(self)
+        hooksecurefunc(module, "Update", function(moduleSelf)
+            UpdateModuleHeader(moduleSelf)
         end)
     end
 

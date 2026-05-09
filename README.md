@@ -8,9 +8,19 @@ RealUI is a minimalistic UI designed to be functional, yet also efficient and el
 Information
 -----------
   * Current branch target is Midnight-era WoW (12.0.x).
+  * Current release line includes 3.3.0 (EditMode layouts, RealUI_Tracker, and RealUI_Auras modernization).
   * RealUI now includes the modernized setup pipeline, unified profile handling, and display setup stage.
   * User settings are automatically migrated from nibRealUIDB to RealUIDB when needed.
   * Report issues on GitHub or connect with us on Discord.
+
+
+What's New in 3.3.0
+-------------------
+
+  * EditMode integration now manages role-aware RealUI layouts (`RealUI` and `RealUI-Healing`) with account-wide or per-character layout support.
+  * RealUI_Tracker replaces ObjectivesAdv with a wrapped Blizzard tracker supporting custom positioning, instance hide/collapse behavior, CombatFader integration, quest counts, and quest difficulty coloring.
+  * RealUI_Auras introduces specialization-aware CooldownViewer preset setup and a reduced aura-group model for player/target/focus flows.
+  * Added aura migration helpers: `/realui setupauras` to apply presets, `/realui resetauras` to revert to native aura behavior.
 
 
 Quick Start
@@ -21,6 +31,8 @@ After first login, these are the most useful commands:
   * `/realui` - open configuration.
   * `/realui setup` - rerun setup flow.
   * `/realui display` - open display preset setup.
+  * `/realui setupauras` - apply RealUI_Auras cooldown presets for your current spec.
+  * `/realui resetauras` - disable RealUI_Auras groups and restore native aura behavior.
   * `/resetframes` - reset DragEmAll-managed frame positions.
   * `/framemover reset` - reset moved frame positions.
   * `/realui resetinventory` - reset inventory and bank positions.
@@ -70,6 +82,8 @@ Supported `/realui` subcommands:
 
   * `/realui setup` - run setup flow.
   * `/realui display` - open Display Setup stage.
+  * `/realui setupauras` - apply RealUI_Auras cooldown presets for your current spec.
+  * `/realui resetauras` - disable RealUI_Auras groups and restore native aura behavior.
   * `/realui grid2update` - apply the RealUI Grid2 modernization update.
   * `/realui resetinventory` - reset inventory and bank frame positions.
   * `/realui resetchar` - reset current character initialization and rerun setup on reload.
@@ -97,6 +111,8 @@ These folders are included in release packages:
   * `RealUI_Bugs`
   * `RealUI_CombatText`
   * `RealUI_Inventory`
+  * `RealUI_Tracker`
+  * `RealUI_Auras`
   * `RealUI_Skins` (includes embedded Aurora)
   * `RealUI_Tooltips`
 
