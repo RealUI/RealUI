@@ -68,8 +68,14 @@ function CooldownViewer.MergePreset(presetStr)
         return 1, 0
     end
 
-    local current = CooldownViewer.Decode(currentStr)
-    local preset  = CooldownViewer.Decode(presetStr)
+    local decOk, current = pcall(CooldownViewer.Decode, currentStr)
+    if not decOk then
+        return 0, 0, "Decode(current) failed: " .. tostring(current)
+    end
+    local decOk2, preset = pcall(CooldownViewer.Decode, presetStr)
+    if not decOk2 then
+        return 0, 0, "Decode(preset) failed: " .. tostring(preset)
+    end
 
     -- data[1]=version, data[2]=activeLayouts, data[3]=specLayouts, data[4]=layoutNames
     local activeLayouts = current[2] or {}
@@ -78,15 +84,26 @@ function CooldownViewer.MergePreset(presetStr)
     local presetSpecs = preset[3]  or {}
     local presetNames = preset[4]  or {}
 
-    -- Find highest layoutID in use
+    -- Find highest layoutID in use. Walk both specLayouts (values are
+    -- maps keyed by layoutID) and layoutNames (also keyed by layoutID).
+    -- Blizzard's CBOR roundtrip has in some cases returned stringified
+    -- numeric keys, so we coerce via tonumber and fall back safely.
+    local function toLayoutID(k)
+        if type(k) == "number" then return k end
+        if type(k) == "string" then return tonumber(k) end
+        return nil
+    end
+
     local maxID = 0
     for _, layouts in next, specLayouts do
         for id in next, layouts do
-            if type(id) == "number" and id > maxID then maxID = id end
+            local n = toLayoutID(id)
+            if n and n > maxID then maxID = n end
         end
     end
     for id in next, layoutNames do
-        if type(id) == "number" and id > maxID then maxID = id end
+        local n = toLayoutID(id)
+        if n and n > maxID then maxID = n end
     end
 
     local added, skipped = 0, 0
@@ -128,9 +145,111 @@ function CooldownViewer.MergePreset(presetStr)
     return added, skipped
 end
 
+--- Diagnostic: dump the current live CooldownViewer layout data
+--- to help diagnose merge failures. Prints names, specs, and active layout
+--- assignments. Handy when /reloading doesn't bring in an expected layout.
+function CooldownViewer.Dump()
+    if not C_CooldownViewer or not C_CooldownViewer.IsCooldownViewerAvailable() then
+        print("[CDV.Dump] CooldownViewer not available")
+        return
+    end
+
+    local data = C_CooldownViewer.GetLayoutData()
+    if not data or data == "" then
+        print("[CDV.Dump] GetLayoutData returned empty")
+        return
+    end
+
+    local payload = data:match("^%d+|(.+)$") or ""
+    if payload == EMPTY_PAYLOAD then
+        print("[CDV.Dump] Layout data is factory-default (empty)")
+        return
+    end
+
+    local ok, decoded = pcall(CooldownViewer.Decode, data)
+    if not ok then
+        print(("[CDV.Dump] Decode failed: %s"):format(tostring(decoded)))
+        return
+    end
+
+    local version      = decoded[1]
+    local activeByTag  = decoded[2] or {}
+    local layoutsByTag = decoded[3] or {}
+    local names        = decoded[4] or {}
+
+    print(("[CDV.Dump] version=%s"):format(tostring(version)))
+
+    -- Names
+    local nameCount = 0
+    for _ in next, names do nameCount = nameCount + 1 end
+    print(("[CDV.Dump] layoutNames (%d entries):"):format(nameCount))
+    for id, name in next, names do
+        print(("  [%s] (%s) = %s"):format(tostring(id), type(id), tostring(name)))
+    end
+
+    -- Specs
+    local specCount = 0
+    for _ in next, layoutsByTag do specCount = specCount + 1 end
+    print(("[CDV.Dump] specLayouts (%d spec tags):"):format(specCount))
+    for specTag, layouts in next, layoutsByTag do
+        local ids = {}
+        for id in next, layouts do ids[#ids + 1] = tostring(id) .. "(" .. type(id) .. ")" end
+        local active = activeByTag[specTag]
+        print(("  specTag %s(%s) active=%s layouts=[%s]"):format(
+            tostring(specTag), type(specTag),
+            tostring(active),
+            table.concat(ids, ",")))
+    end
+end
+
+-- Register slash command for quick dump
+if not _G.SLASH_REALUICDVDUMP1 then
+    _G.SLASH_REALUICDVDUMP1 = "/cdvdump"
+    _G.SlashCmdList["REALUICDVDUMP"] = CooldownViewer.Dump
+end
+
 ---------------------------------------------------------------------------
--- Query
+-- MergeAllSpecsForClass — merge presets for every spec of the player's
+-- class in one call. Avoids timing/per-spec issues by applying the full
+-- set on a single event (PLAYER_LOGIN or STAGE_COOLDOWNS), so every spec
+-- has its layout immediately after the next reload and spec swaps do not
+-- need to mutate layout data.
+--
+-- @return number added  total layouts added across all specs
+-- @return number skipped number of layouts already present
+-- @return string|nil err first error encountered (if any)
 ---------------------------------------------------------------------------
+function CooldownViewer.MergeAllSpecsForClass(classID)
+    if not C_CooldownViewer or not C_CooldownViewer.IsCooldownViewerAvailable() then
+        return 0, 0, "CooldownViewer unavailable"
+    end
+    classID = classID or select(3, UnitClass("player"))
+    if not classID then
+        return 0, 0, "unknown classID"
+    end
+
+    local Presets = RealUI_Auras and RealUI_Auras.Presets
+    if not Presets then
+        return 0, 0, "Presets table missing"
+    end
+
+    local totalAdded, totalSkipped = 0, 0
+    local firstErr
+    -- Specs are 1..4 in practice; iterate a small range to cover all
+    for specIndex = 1, 4 do
+        local specTag = classID * 10 + specIndex
+        local presetStr = Presets[specTag]
+        if presetStr then
+            local added, skipped, err = CooldownViewer.MergePreset(presetStr)
+            if err and not firstErr then
+                firstErr = ("specTag %d: %s"):format(specTag, tostring(err))
+            end
+            totalAdded = totalAdded + (added or 0)
+            totalSkipped = totalSkipped + (skipped or 0)
+        end
+    end
+    return totalAdded, totalSkipped, firstErr
+end
 
 --- Check whether any RealUI preset is already applied.
 --- @return boolean

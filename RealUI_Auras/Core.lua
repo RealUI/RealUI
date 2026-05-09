@@ -19,13 +19,16 @@ function AurasAddon:OnInitialize()
             description = "Apply RealUI's recommended cooldown tracker layouts for your specialization.",
             available   = function() return C_CooldownViewer.IsCooldownViewerAvailable() end,
             OnApply     = function()
-                local specTag = select(3, UnitClass("player")) * 10 + GetSpecialization()
-                local preset = RealUI_Auras.Presets and RealUI_Auras.Presets[specTag]
-                if preset then
-                    local added = RealUI_Auras.CooldownViewer.MergePreset(preset)
-                    if added and added > 0 then
-                        StaticPopup_Show("REALUI_AURAS_RELOAD")
-                    end
+                -- Merge presets for ALL specs of the player's class at once.
+                -- Doing it up-front avoids per-spec-swap merges (which have
+                -- historically been unreliable) and ensures the picker shows
+                -- every spec's layout immediately after the next reload.
+                local added, _, err = RealUI_Auras.CooldownViewer.MergeAllSpecsForClass()
+                if err then
+                    print(("|cffff4444[RealUI_Auras]|r Cooldown preset apply failed: %s"):format(err))
+                end
+                if added and added > 0 then
+                    StaticPopup_Show("REALUI_AURAS_RELOAD")
                 end
                 self.db.char.cooldownPresetOffered = true
             end,
@@ -106,13 +109,12 @@ function AurasAddon:OnEnable()
         self:EnableOufAuraElements()
     end
 
-    -- 4.1: PLAYER_LOGIN → first-login CooldownViewer preset check
-    -- (always active regardless of aura group state)
+    -- 4.1: PLAYER_LOGIN → first-login CooldownViewer preset check and
+    -- MergeAllSpecsForClass on subsequent logins (covers new specs/specs
+    -- that failed to apply previously). CDM merging is intentionally
+    -- NOT tied to PLAYER_SPECIALIZATION_CHANGED — merging during the
+    -- spec-switch cascade destabilised BT4 bar positioning.
     self:RegisterEvent("PLAYER_LOGIN")
-
-    -- 8.1: PLAYER_SPECIALIZATION_CHANGED → auto-apply preset for new spec
-    -- (always active regardless of aura group state)
-    self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 end
 
 ---------------------------------------------------------------------------
@@ -236,8 +238,22 @@ end
 function AurasAddon:PLAYER_LOGIN()
     local CooldownViewer = self.CooldownViewer
 
-    -- Already offered — nothing to do
-    if self.db.char.cooldownPresetOffered then return end
+    -- If the preset popup was already offered, also re-attempt merging
+    -- any missing per-spec layouts on login (covers new specs added in
+    -- game updates, and recovers from any earlier merge failures that
+    -- left specs without their preset).
+    if self.db.char.cooldownPresetOffered then
+        local added, _, err = CooldownViewer.MergeAllSpecsForClass()
+        if err then
+            print(("|cffff4444[RealUI_Auras]|r Cooldown merge-all-specs error: %s"):format(err))
+        end
+        if added and added > 0 then
+            -- A spec that was missing got added — nudge a reload so it
+            -- actually appears in the CDV picker.
+            StaticPopup_Show("REALUI_AURAS_RELOAD")
+        end
+        return
+    end
 
     -- Install wizard not yet completed — don't interrupt the user
     if not RealUI or not RealUI.db or not RealUI.db.char
@@ -253,41 +269,13 @@ function AurasAddon:PLAYER_LOGIN()
 end
 
 ---------------------------------------------------------------------------
--- 8.1  PLAYER_SPECIALIZATION_CHANGED — auto-apply preset for new spec
--- When the user switches spec, silently merge the new spec's preset if:
---   • The preset popup has already been offered (user accepted or skipped)
---   • CooldownViewer is available
---   • A preset exists for the new spec
--- MergePreset is idempotent — it skips if "RealUI - <name>" already exists.
--- The reload popup is shown at most once per session per spec: the user may
--- click "Later", swap specs, and swap back without being re-prompted. The
--- CVar is set on SetLayoutData so the merged data persists; the popup only
--- exists to nudge an immediate reload so the new layout becomes visible.
+-- NOTE: PLAYER_SPECIALIZATION_CHANGED is intentionally NOT registered.
+-- All cooldown layout presets are merged up-front on PLAYER_LOGIN via
+-- MergeAllSpecsForClass. Running MergePreset on spec change was
+-- historically unreliable (individual specs could fail to serialize,
+-- and SetCVar/SetLayoutData side effects during the spec-switch cascade
+-- visibly moved Bartender4 bars around until a reload).
 ---------------------------------------------------------------------------
-local sessionPromptedSpecs = {}
-
-function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
-    -- Don't auto-apply before the user has been asked via popup or wizard
-    if not self.db.char.cooldownPresetOffered then return end
-
-    local CooldownViewer = self.CooldownViewer
-    if not C_CooldownViewer.IsCooldownViewerAvailable() then return end
-
-    local classID = select(3, UnitClass("player"))
-    local specIndex = GetSpecialization()
-    if not specIndex then return end
-
-    local specTag = classID * 10 + specIndex
-    local presetStr = RealUI_Auras.Presets and RealUI_Auras.Presets[specTag]
-    if not presetStr then return end
-
-    -- MergePreset is idempotent: skips layouts that already exist
-    local added = CooldownViewer.MergePreset(presetStr)
-    if added and added > 0 and not sessionPromptedSpecs[specTag] then
-        sessionPromptedSpecs[specTag] = true
-        StaticPopup_Show("REALUI_AURAS_RELOAD")
-    end
-end
 
 ---------------------------------------------------------------------------
 -- Reload prompt — shown after a preset is applied so CooldownViewer picks
@@ -313,17 +301,14 @@ StaticPopupDialogs["REALUI_AURAS_PRESET"] = {
     button1 = "Apply",
     button2 = "Skip",
     OnAccept = function()
-        local classID = select(3, UnitClass("player"))
-        local specIndex = GetSpecialization()
-        local presetStr = RealUI_Auras.Presets
-            and RealUI_Auras.Presets[classID * 10 + specIndex]
-        if presetStr then
-            local added, _, err = RealUI_Auras.CooldownViewer.MergePreset(presetStr)
-            if err then
-                print("[RealUI_Auras] Preset apply failed:", err)
-            elseif added > 0 then
-                StaticPopup_Show("REALUI_AURAS_RELOAD")
-            end
+        -- Merge every spec's preset up-front so the CDV picker has all
+        -- layouts immediately — spec-change merging has proven unreliable
+        -- when the data-store roundtrip corrupts or drops individual specs.
+        local added, _, err = RealUI_Auras.CooldownViewer.MergeAllSpecsForClass()
+        if err then
+            print("[RealUI_Auras] Preset apply failed:", err)
+        elseif added and added > 0 then
+            StaticPopup_Show("REALUI_AURAS_RELOAD")
         end
         AurasAddon.db.char.cooldownPresetOffered = true
     end,
