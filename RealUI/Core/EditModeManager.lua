@@ -38,104 +38,17 @@ local LAYOUT_NAMES = {
 }
 
 ---------------------------------------------------------------------------
--- CooldownViewer Scale
--- The EditModeCooldownViewerSetting.IconSize enum doesn't exist in this
--- client version, so we apply scale via SetScale() after layout activation.
--- Keys: frame global names. Values: scale factor (1.0 = default).
--- Tiered sizing: Essential large, Utility medium, Tracked small.
+-- CooldownViewer
+-- Size, orientation, icon limit, etc. are configured via native EditMode
+-- settings in EditModeTemplates.base (see "System 20" block there).
+-- Blizzard's GridLayoutFrame:Layout() reads those settings from the active
+-- layout and sizes both the viewer frame and its child icons correctly,
+-- so no manual SetScale or child re-anchoring is needed.
 ---------------------------------------------------------------------------
-local COOLDOWN_VIEWER_SCALES = {
-    EssentialCooldownViewer = 1.00,
-    UtilityCooldownViewer   = 0.75,
-    BuffIconCooldownViewer  = 0.75,
-    BuffBarCooldownViewer   = 0.75,
-}
-
----------------------------------------------------------------------------
--- ApplyCooldownViewerScales
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
--- BuffIconCooldownViewer horizontal layout enforcement
----------------------------------------------------------------------------
-
---- Re-anchor active BuffIcon item frames in a left-to-right row.
-local function AnchorBuffIconItemsHorizontal(viewer)
-    if not viewer or not viewer.itemFramePool then return end
-    local prev
-    for child in viewer.itemFramePool:EnumerateActive() do
-        child:ClearAllPoints()
-        if prev then
-            child:SetPoint("LEFT", prev, "RIGHT", 2, 0)
-        else
-            child:SetPoint("LEFT", viewer, "LEFT", 0, 0)
-        end
-        prev = child
-    end
-end
-
-local buffIconHooked = false
-
---- Set grid properties, re-anchor, and hook RefreshLayout so CDV's own
---- re-layouts (on spec change, aura updates, edit mode exit) don't revert.
-local function EnforceBuffIconHorizontal()
-    local viewer = _G.BuffIconCooldownViewer
-    if not viewer then return end
-
-    viewer.isHorizontal = true
-    viewer.layoutFramesGoingRight = true
-    viewer.layoutFramesGoingUp = false
-    viewer.stride = 20
-
-    AnchorBuffIconItemsHorizontal(viewer)
-
-    if not buffIconHooked and viewer.RefreshLayout then
-        hooksecurefunc(viewer, "RefreshLayout", function(self)
-            -- Reassert properties in case something changed them,
-            -- then re-anchor children horizontally.
-            self.isHorizontal = true
-            self.layoutFramesGoingRight = true
-            self.layoutFramesGoingUp = false
-            self.stride = 20
-            AnchorBuffIconItemsHorizontal(self)
-        end)
-        buffIconHooked = true
-    end
-end
-
---- Applies SetScale() to CooldownViewer frames.
--- Called after layout activation since the EditMode settings enum for
--- icon size doesn't exist in this client version.
-function EditModeManager:ApplyCooldownViewerScales()
-    for frameName, scale in pairs(COOLDOWN_VIEWER_SCALES) do
-        local frame = _G[frameName]
-        if frame and frame.SetScaleBase then
-            -- EditMode overrides SetScale; use the base version to avoid
-            -- triggering anchor recalculation during layout apply.
-            frame:SetScaleBase(scale)
-        elseif frame then
-            frame:SetScale(scale)
-        end
-    end
-
-    -- Force BuffIconCooldownViewer to horizontal layout.
-    -- The EditModeCooldownViewerSetting.Orientation enum doesn't exist in
-    -- this client so the CDV mixin uses its vertical default.
-    EnforceBuffIconHorizontal()
-end
-
--- Local alias for internal callers
-local ApplyCooldownViewerScales = function() EditModeManager:ApplyCooldownViewerScales() end
 
 ---------------------------------------------------------------------------
 -- Internal Helpers
 ---------------------------------------------------------------------------
-
---- Returns the number of built-in layouts (Modern, Classic).
--- Custom layouts start at index (builtIn + 1) in absolute numbering.
-local function GetBuiltInLayoutCount()
-    return 2
-end
 
 --- Finds the array index of a named layout within data.layouts.
 -- @param data table  The data returned by C_EditMode.GetLayouts()
@@ -348,7 +261,7 @@ function EditModeManager:ActivateLayout(role)
         return false
     end
 
-    local absoluteIndex = GetBuiltInLayoutCount() + idx
+    local absoluteIndex = idx
     local activateOk, activateErr = pcall(C_EditMode.SetActiveLayout, absoluteIndex)
     if not activateOk then
         debug("ERROR: C_EditMode.SetActiveLayout() failed:", activateErr)
@@ -357,12 +270,6 @@ function EditModeManager:ActivateLayout(role)
 
     state.currentRole = role
     debug("Activated layout:", layoutName, "at absolute index", absoluteIndex)
-
-    -- Apply CooldownViewer scales (no native setting enum in this client).
-    -- Delay so we run after EditMode finishes its layout apply pass.
-    C_Timer.After(0.1, function()
-        EditModeManager:ApplyCooldownViewerScales()
-    end)
 
     return true
 end
@@ -447,12 +354,24 @@ end
 -- Migration
 ---------------------------------------------------------------------------
 
+--- Migration schema versions:
+--  1 = initial EditMode migration
+--  2 = CDV orientation/size settings moved from manual hooks to native
+--      EditMode settings; forces a template rebuild so existing
+--      auto-generated layouts pick up the new CDV settings.
+local MIGRATION_VERSION = 2
+
 --- Checks whether migration from pre-EditMode RealUI is needed.
 -- @return boolean  true if migration should run
 function EditModeManager:NeedsMigration()
     local dbg = RealUI.db and RealUI.db.global
     if dbg and dbg.editmode and dbg.editmode.migrationVersion then
-        return false
+        -- Already migrated to current schema; nothing to do
+        if dbg.editmode.migrationVersion >= MIGRATION_VERSION then
+            return false
+        end
+        -- Older schema version — migration will upgrade it
+        return true
     end
 
     if state.initialized then
@@ -474,13 +393,15 @@ function EditModeManager:SetMigrationFlag()
     local dbg = RealUI.db and RealUI.db.global
     if dbg then
         dbg.editmode = dbg.editmode or {}
-        dbg.editmode.migrationVersion = 1
-        debug("Migration flag set")
+        dbg.editmode.migrationVersion = MIGRATION_VERSION
+        debug("Migration flag set to v" .. MIGRATION_VERSION)
     end
 end
 
 --- Performs one-time migration from pre-EditMode RealUI versions.
 -- Creates both layouts and conditionally activates if user is on a built-in layout.
+-- When upgrading between schema versions, forces a rebuild of the
+-- auto-generated RealUI layouts so they pick up template changes.
 function EditModeManager:MigrateFromPreEditMode()
     if InCombatLockdown() then
         state.pendingLayout = { action = "migrate" }
@@ -492,22 +413,28 @@ function EditModeManager:MigrateFromPreEditMode()
     local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
     local presetId = (display and display.presetId) or "standard"
 
-    -- Create both layouts
-    self:EnsureLayouts(presetId)
+    -- If an older schema version exists, force-rebuild so template
+    -- changes propagate into the user's RealUI layout.
+    local dbg = RealUI.db and RealUI.db.global
+    local oldVersion = dbg and dbg.editmode and dbg.editmode.migrationVersion
+    local forceRebuild = (oldVersion ~= nil) and (oldVersion < MIGRATION_VERSION)
 
-    -- Only activate if user is on a built-in layout (don't disrupt custom layouts)
+    -- Create both layouts (rebuild if upgrading schema)
+    self:EnsureLayouts(presetId, forceRebuild)
+
+    -- Only activate if user is on a built-in (Preset) layout —
+    -- don't disrupt a user-selected custom layout.
     local ok, data = pcall(C_EditMode.GetLayouts)
     if ok and data then
-        local numBuiltIn = GetBuiltInLayoutCount()
-        local currentIsBuiltIn = data.activeLayout <= numBuiltIn
+        local activeEntry = data.layouts[data.activeLayout]
+        -- layoutType 0 == Preset (Modern, Classic). Account(1), Character(2).
+        local currentIsBuiltIn = activeEntry and activeEntry.layoutType == 0
 
         if currentIsBuiltIn then
             self:ActivateLayout(role)
             debug("Migration: activated layout for role:", role)
         else
             debug("Migration: user has custom layout active, skipping activation")
-            -- Still apply scales even if we don't activate our layout
-            ApplyCooldownViewerScales()
         end
     end
 
@@ -534,28 +461,6 @@ function EditModeManager:IsInitialized()
     return state.initialized
 end
 
---- Returns the CooldownViewer scale table (mutable reference).
--- Modify values and call ApplyCooldownViewerScales() or reload to apply.
--- @return table  Keys are frame global names, values are scale factors
-function EditModeManager:GetCooldownViewerScales()
-    return COOLDOWN_VIEWER_SCALES
-end
-
---- Sets the scale for a specific CooldownViewer frame and applies it.
--- @param frameName string  e.g. "EssentialCooldownViewer"
--- @param scale number  Scale factor (1.0 = default size)
-function EditModeManager:SetCooldownViewerScale(frameName, scale)
-    COOLDOWN_VIEWER_SCALES[frameName] = scale
-    local frame = _G[frameName]
-    if frame then
-        if frame.SetScaleBase then
-            frame:SetScaleBase(scale)
-        else
-            frame:SetScale(scale)
-        end
-    end
-end
-
 ---------------------------------------------------------------------------
 -- Event Frame
 ---------------------------------------------------------------------------
@@ -565,7 +470,6 @@ eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
 eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "Blizzard_PlayerChoice" then
@@ -584,20 +488,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
             ProcessPending(pending)
         end
 
-        -- Unregister if CooldownViewer is already loaded too
-        if C_AddOns.IsAddOnLoaded("Blizzard_CooldownViewer") then
-            self:UnregisterEvent("ADDON_LOADED")
-            ApplyCooldownViewerScales()
-        end
-
-    elseif event == "ADDON_LOADED" and arg1 == "Blizzard_CooldownViewer" then
-        -- CooldownViewer frames now exist — apply scales
-        -- Delay one frame to let the frames fully initialize
-        C_Timer.After(0, ApplyCooldownViewerScales)
-        -- Both addons loaded, no more ADDON_LOADED needed
-        if state.initialized then
-            self:UnregisterEvent("ADDON_LOADED")
-        end
+        self:UnregisterEvent("ADDON_LOADED")
 
     elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
         -- arg1 is the unit; only react to the player's own spec change
@@ -605,30 +496,22 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
         if not state.initialized then return end
 
         -- Re-activate the RealUI layout for the current role after spec switch.
-        -- WoW may revert to a built-in layout when specs change.
-        local role = state.currentRole or "dpstank"
-        debug("Spec changed, re-activating layout for role:", role)
-
-        -- Delay slightly to let WoW finish its own layout switch first
+        -- Delay so WoW has time to update the specialization, and so
+        -- LayoutManager finishes its profile+layout switch first. Determine
+        -- role from RealUI.cLayout at callback time rather than from
+        -- state.currentRole — the latter is stale (or nil on the first
+        -- spec switch of the session) whenever the LayoutManager callback
+        -- doesn't fire (e.g. moving between two specs that share a profile).
         C_Timer.After(0.5, function()
+            local role = (RealUI.cLayout == 2) and "healing" or "dpstank"
+            debug("Spec changed, re-activating layout for role:", role)
+
             if InCombatLockdown() then
                 state.pendingLayout = { action = "activate", role = role }
                 debug("Combat lockdown — queued spec-change ActivateLayout")
             else
                 EditModeManager:ActivateLayout(role)
             end
-        end)
-
-    elseif event == "PLAYER_ENTERING_WORLD" then
-        -- Re-apply CooldownViewer scales after all addons have loaded and
-        -- EditMode has applied its layout (which may reset scales to 1).
-        -- A short delay ensures we run after EditMode's post-activation.
-        C_Timer.After(0.1, function()
-            EditModeManager:ApplyCooldownViewerScales()
-        end)
-        C_Timer.After(1.0, function()
-            -- Belt-and-suspenders: some display settings may re-scale later
-            EditModeManager:ApplyCooldownViewerScales()
         end)
 
     elseif event == "PLAYER_REGEN_ENABLED" then
@@ -660,6 +543,7 @@ end)
 if C_AddOns.IsAddOnLoaded("Blizzard_PlayerChoice") then
     state.initialized = true
     debug("Initialized — Blizzard_PlayerChoice was already loaded")
+    eventFrame:UnregisterEvent("ADDON_LOADED")
 
     -- Defer migration check to next frame to ensure RealUI.db is ready
     C_Timer.After(0, function()
@@ -667,10 +551,4 @@ if C_AddOns.IsAddOnLoaded("Blizzard_PlayerChoice") then
             EditModeManager:MigrateFromPreEditMode()
         end
     end)
-
-    -- If CooldownViewer is also already loaded, apply scales and stop listening
-    if C_AddOns.IsAddOnLoaded("Blizzard_CooldownViewer") then
-        eventFrame:UnregisterEvent("ADDON_LOADED")
-        C_Timer.After(0, ApplyCooldownViewerScales)
-    end
 end
