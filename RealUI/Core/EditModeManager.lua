@@ -476,29 +476,38 @@ end
 -- Event Frame
 ---------------------------------------------------------------------------
 
+local function InitializeManager()
+    state.initialized = true
+    if EditModeManager:NeedsMigration() then
+        EditModeManager:MigrateFromPreEditMode()
+    end
+    if state.pendingLayout then
+        local pending = state.pendingLayout
+        state.pendingLayout = nil
+        ProcessPending(pending)
+    end
+end
+
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
+eventFrame:RegisterEvent("PLAYER_LOGIN")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "Blizzard_PlayerChoice" then
-        state.initialized = true
         debug("Initialized — Blizzard_PlayerChoice loaded")
-
-        -- Check for migration on first init
-        if EditModeManager:NeedsMigration() then
-            EditModeManager:MigrateFromPreEditMode()
-        end
-
-        -- Process any pending action queued before initialization
-        if state.pendingLayout then
-            local pending = state.pendingLayout
-            state.pendingLayout = nil
-            ProcessPending(pending)
-        end
-
         self:UnregisterEvent("ADDON_LOADED")
+        self:UnregisterEvent("PLAYER_LOGIN")
+        InitializeManager()
+
+    elseif event == "PLAYER_LOGIN" then
+        self:UnregisterEvent("PLAYER_LOGIN")
+        self:UnregisterEvent("ADDON_LOADED")
+        if not state.initialized then
+            debug("Initialized — PLAYER_LOGIN fallback")
+            InitializeManager()
+        end
 
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- Process combat-deferred action
