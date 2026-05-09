@@ -542,10 +542,30 @@ function RealUI:OnProfileUpdate(event, database, profile)
         end
     end
 
+    -- Update current/not-current layout BEFORE module callbacks run.
+    -- Modules like ActionBars key off RealUI.cLayout when applying
+    -- positions; if we leave the layout variables stale the bars are
+    -- positioned for the old profile's layout and only snap into place
+    -- after the user reloads.
+    local targetLayout = private.profileToLayout[profile]
+    if targetLayout and self.cLayout ~= targetLayout then
+        self.cLayout = targetLayout
+        self.ncLayout = (targetLayout == 1) and 2 or 1
+        if dbc and dbc.layout then
+            dbc.layout.current = targetLayout
+        end
+    end
+
     -- Module callbacks run immediately regardless of combat state — they
     -- only update non-protected data references (db.profile pointers, etc.)
+    -- Some entries in self.modules are lightweight proxies (e.g. created
+    -- by sub-addons that inject a `{ db = ... }` table so RealUI's path
+    -- helpers can find them). Skip entries that don't implement the
+    -- callback rather than crashing during profile switch.
     for _, module in self:IterateModules() do
-        module:OnProfileUpdate(event, profile)
+        if type(module) == "table" and type(module.OnProfileUpdate) == "function" then
+            module:OnProfileUpdate(event, profile)
+        end
     end
 
     -- Position/scale updates touch protected frames and must be deferred
