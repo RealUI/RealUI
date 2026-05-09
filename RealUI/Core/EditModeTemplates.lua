@@ -288,21 +288,74 @@ Templates.base = {
     -- Index 1 = Essential Cooldowns, Index 2 = Utility Cooldowns
     -- Index 3 = Tracked Buffs (icons), Index 4 = Tracked Buff Bars
     --
-    -- Size is controlled via SetScale() in EditModeManager (the
-    -- EditModeCooldownViewerSetting enum doesn't exist in this client).
+    -- Settings (EditModeCooldownViewerSetting enum values):
+    --   0 = Orientation    (0=Horizontal, 1=Vertical)
+    --   1 = IconLimit      (1-20; also controls stride/row width)
+    --   2 = IconDirection  (0=Left, 1=Right)
+    --   3 = IconSize       (50-200, percent; step 10)
+    --   4 = IconPadding    (0-14)
+    --   5 = Opacity        (0-100, percent)
+    --   6 = VisibleSetting (CooldownViewerVisibleSetting)
+    --   7 = BarContent     (BuffBar only)
+    --   8 = HideWhenInactive (BuffIcon/BuffBar only; 0 or 1)
+    --   9 = ShowTimer      (0 or 1)
+    --  10 = ShowTooltips   (0 or 1)
+    --  11 = BarWidthScale  (BuffBar only; 50-200, percent)
+    --
+    -- Essential, Utility, and BuffIcon are forced horizontal. BuffBar has
+    -- no orientation/iconLimit/iconDirection settings (it stacks bars
+    -- vertically). Setting Orientation via the native EditMode setting is
+    -- what makes Blizzard's GridLayoutFrame size the viewer frame and
+    -- anchor its children correctly — do not re-anchor children manually.
     -- =====================================================================
-    Entry(SYSTEM_COOLDOWN_VIEWER, 1,
+    Entry(SYSTEM_COOLDOWN_VIEWER, 1, -- Essential Cooldowns
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 795.34619140625, -694.69165039062),
-        {}),
-    Entry(SYSTEM_COOLDOWN_VIEWER, 2,
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 12 },   -- IconLimit = 12 (row width)
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 100 },  -- IconSize = 100%
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity = 100%
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 2, -- Utility Cooldowns
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 820.74536132812, -747.88134765625),
-        {}),
-    Entry(SYSTEM_COOLDOWN_VIEWER, 3,
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 12 },   -- IconLimit
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 80 },   -- IconSize = 80%
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 3, -- Tracked Buffs (BuffIcon)
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 901.16003417969, -741.75836181641),
-        {}),
-    Entry(SYSTEM_COOLDOWN_VIEWER, 4,
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 20 },   -- IconLimit = 20 (max row width)
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 80 },   -- IconSize = 80%
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 8, value = 1 },    -- HideWhenInactive
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
+    Entry(SYSTEM_COOLDOWN_VIEWER, 4, -- Tracked Buff Bars
         Anchor("CENTER", "UIParent", "CENTER", 257.32406616211, -223.47106933594),
-        {}),
+        {
+            { setting = 3, value = 80 },   -- IconSize = 80%
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 8, value = 1 },    -- HideWhenInactive
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+            { setting = 11, value = 100 }, -- BarWidthScale = 100%
+        }),
 
     -- =====================================================================
     -- System 21: Personal Resource Display (12.0.0) — off-screen (oUF replaces)
@@ -377,18 +430,56 @@ Templates.overrides.healing = {
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 380),
         {}),
     -- Cooldown viewer: TODO tune for healing layout
+    -- Only anchors differ from base for now; settings inherited by preserving the base entry
+    -- (these overrides fully replace the entry, so settings are duplicated).
     ["20_1"] = Entry(SYSTEM_COOLDOWN_VIEWER, 1,
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 795.34619140625, -694.69165039062),
-        {}),
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 12 },   -- IconLimit
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 100 },  -- IconSize
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
     ["20_2"] = Entry(SYSTEM_COOLDOWN_VIEWER, 2,
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 820.74536132812, -747.88134765625),
-        {}),
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 12 },   -- IconLimit
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 80 },   -- IconSize
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
     ["20_3"] = Entry(SYSTEM_COOLDOWN_VIEWER, 3,
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 901.16003417969, -741.75836181641),
-        {}),
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 20 },   -- IconLimit
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 80 },   -- IconSize
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 8, value = 1 },    -- HideWhenInactive
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
     ["20_4"] = Entry(SYSTEM_COOLDOWN_VIEWER, 4,
         Anchor("CENTER", "UIParent", "CENTER", 257.32406616211, -223.47106933594),
-        {}),
+        {
+            { setting = 3, value = 80 },   -- IconSize
+            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 8, value = 1 },    -- HideWhenInactive
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+            { setting = 11, value = 100 }, -- BarWidthScale
+        }),
 }
 
 ---------------------------------------------------------------------------
