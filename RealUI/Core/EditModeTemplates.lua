@@ -644,70 +644,91 @@ Templates.overrides.dpstank = {
         {}),
 }
 
--- Healing overrides: party/raid frames larger and more central, encounter bar shifted
+-- Healing overrides: encounter bar repositioned, talking head centered, CDV tuned for healer
+-- Party/raid frames (3_4, 3_5) match base — no override needed
 Templates.overrides.healing = {
-    -- Party frames: larger, more central (higher on screen)
-    ["3_4"] = Entry(SYSTEM_UNIT_FRAME, 4,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 320),
-        {}),
-    -- Raid frames: wider, more visible, higher position
-    ["3_5"] = Entry(SYSTEM_UNIT_FRAME, 5,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 300),
-        {}),
-    -- Encounter bar: shifted up to make room for party/raid frames
+    -- Encounter bar: bottom-center for healer layout
     ["4_nil"] = Entry(SYSTEM_ENCOUNTER_BAR, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 220),
+        Anchor("BOTTOM", "UIParent", "BOTTOM", -337.72973632812, 137.04301452637),
         {}),
-    -- Extra abilities: shifted up
+    -- Extra abilities: shifted up for healer layout
     ["5_nil"] = Entry(SYSTEM_EXTRA_ABILITIES, nil,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 380),
         {}),
-    -- Cooldown viewer: TODO tune for healing layout
-    -- Only anchors differ from base for now; settings inherited by preserving the base entry
-    -- (these overrides fully replace the entry, so settings are duplicated).
+    -- External Defensives: repositioned for healer view, fewer rows (setting 5=3 vs base 4)
+    ["6_3"] = Entry(SYSTEM_AURA_FRAME, 3,
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 658.40002441406, -618),
+        {
+            { setting = 0, value = 1 },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 0 },
+            { setting = 3, value = 10 },
+            { setting = 5, value = 3 },
+            { setting = 6, value = 5 },
+            { setting = 8, value = 0 },
+            { setting = 9, value = 100 },
+        }),
+    -- Talking Head: top-center for healer layout
+    ["7_nil"] = Entry(SYSTEM_TALKING_HEAD, nil,
+        Anchor("TOP", "UIParent", "TOP", 18.717330932617, -94.512390136719),
+        {}),
+    -- Cooldown Viewer (idx=1): center anchor, 20-icon limit for healer
     ["20_1"] = Entry(SYSTEM_COOLDOWN_VIEWER, 1,
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 795.34619140625, -694.69165039062),
-        {
-            { setting = 0, value = 0 },    -- Orientation = Horizontal
-            { setting = 1, value = 12 },   -- IconLimit
-            { setting = 2, value = 1 },    -- IconDirection = Right
-            { setting = 3, value = 100 },  -- IconSize
-            { setting = 4, value = 2 },    -- IconPadding
-            { setting = 5, value = 100 },  -- Opacity
-            { setting = 9, value = 1 },    -- ShowTimer
-            { setting = 10, value = 1 },   -- ShowTooltips
-        }),
-    ["20_2"] = Entry(SYSTEM_COOLDOWN_VIEWER, 2,
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 820.74536132812, -747.88134765625),
-        {
-            { setting = 0, value = 0 },    -- Orientation = Horizontal
-            { setting = 1, value = 12 },   -- IconLimit
-            { setting = 2, value = 1 },    -- IconDirection = Right
-            { setting = 3, value = 80 },   -- IconSize
-            { setting = 4, value = 2 },    -- IconPadding
-            { setting = 5, value = 100 },  -- Opacity
-            { setting = 9, value = 1 },    -- ShowTimer
-            { setting = 10, value = 1 },   -- ShowTooltips
-        }),
-    ["20_3"] = Entry(SYSTEM_COOLDOWN_VIEWER, 3,
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 901.16003417969, -741.75836181641),
+        Anchor("CENTER", "UIParent", "CENTER", -21.464200973511, -142.56060791016),
         {
             { setting = 0, value = 0 },    -- Orientation = Horizontal
             { setting = 1, value = 20 },   -- IconLimit
             { setting = 2, value = 1 },    -- IconDirection = Right
-            { setting = 3, value = 80 },   -- IconSize
+            { setting = 3, value = 3 },    -- BarCount
             { setting = 4, value = 2 },    -- IconPadding
             { setting = 5, value = 100 },  -- Opacity
+            { setting = 6, value = 0 },
             { setting = 8, value = 1 },    -- HideWhenInactive
             { setting = 9, value = 1 },    -- ShowTimer
             { setting = 10, value = 1 },   -- ShowTooltips
         }),
-    ["20_4"] = Entry(SYSTEM_COOLDOWN_VIEWER, 4,
-        Anchor("CENTER", "UIParent", "CENTER", 257.32406616211, -223.47106933594),
+    -- Cooldown Viewer (idx=2): 20-icon limit, 4 bars for healer
+    ["20_2"] = Entry(SYSTEM_COOLDOWN_VIEWER, 2,
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 779.38739013672, -697.49383544922),
         {
-            { setting = 3, value = 80 },   -- IconSize
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 20 },   -- IconLimit
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 4 },    -- BarCount
             { setting = 4, value = 2 },    -- IconPadding
             { setting = 5, value = 100 },  -- Opacity
+            { setting = 6, value = 0 },
+            { setting = 8, value = 1 },    -- HideWhenInactive
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
+    -- Cooldown Viewer (idx=3): Tracked Buffs, repositioned for healer
+    ["20_3"] = Entry(SYSTEM_COOLDOWN_VIEWER, 3,
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 817.06176757812, -728.20593261719),
+        {
+            { setting = 0, value = 0 },    -- Orientation = Horizontal
+            { setting = 1, value = 1 },    -- IconLimit
+            { setting = 2, value = 1 },    -- IconDirection = Right
+            { setting = 3, value = 2 },    -- BarCount
+            { setting = 4, value = 5 },    -- IconPadding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 6, value = 0 },
+            { setting = 8, value = 1 },    -- HideWhenInactive
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 1 },   -- ShowTooltips
+        }),
+    -- Cooldown Viewer (idx=4): Tracked Buff Bars, 3 bars for healer
+    ["20_4"] = Entry(SYSTEM_COOLDOWN_VIEWER, 4,
+        Anchor("BOTTOM", "UIParent", "BOTTOM", 352.61993408203, 203.55081176758),
+        {
+            { setting = 0, value = 1 },    -- Mode = Bars
+            { setting = 1, value = 1 },
+            { setting = 2, value = 0 },
+            { setting = 3, value = 3 },    -- BarCount
+            { setting = 4, value = 0 },    -- Padding
+            { setting = 5, value = 100 },  -- Opacity
+            { setting = 6, value = 0 },
+            { setting = 7, value = 0 },
             { setting = 8, value = 1 },    -- HideWhenInactive
             { setting = 9, value = 1 },    -- ShowTimer
             { setting = 10, value = 1 },   -- ShowTooltips
