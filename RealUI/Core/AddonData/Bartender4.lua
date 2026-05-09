@@ -235,9 +235,9 @@ function private.AddOns.Bartender4()
         ["hideArtwork"] = true,
         ["position"] = {
             ["point"] = "BOTTOM",
-            ["x"] = 126.5,
-            ["y"] = 120,
-            ["scale"] = 0.985,
+            ["x"] = -446,
+            ["y"] = 140,
+            ["scale"] = 0.98,
         },
     }
     ExtraActionBar["RealUI-Healing"] = {
@@ -245,9 +245,9 @@ function private.AddOns.Bartender4()
         ["hideArtwork"] = true,
         ["position"] = {
             ["point"] = "BOTTOM",
-            ["x"] = 126.5,
-            ["y"] = 120,
-            ["scale"] = 0.985,
+            ["x"] = -446,
+            ["y"] = 140,
+            ["scale"] = 0.98,
         },
     }
 
