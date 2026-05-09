@@ -74,8 +74,9 @@ local function Anchor(point, relativeTo, relativePoint, offsetX, offsetY)
 end
 
 ---------------------------------------------------------------------------
--- Base Template: All 39 system entries for RealUI's standard layout
+-- Base Template: All 50 system entries for RealUI's standard layout
 -- Positions calibrated for a 1920x1080 "standard" display preset.
+-- Last exported: 2026-05-09
 ---------------------------------------------------------------------------
 Templates.base = {
     -- =====================================================================
@@ -84,51 +85,140 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_ACTION_BAR, 1,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 6, value = 0 },
+            { setting = 8, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 2,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 3,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 4,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 5,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 6,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 7,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 8,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 12 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 0 },
+            { setting = 9, value = 1 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 11, -- Stance bar (WoW systemIndex = 11)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 12, -- Pet bar (WoW systemIndex = 12)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 9, value = 0 },
+        }),
     Entry(SYSTEM_ACTION_BAR, 13, -- Possess bar (WoW systemIndex = 13)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {{ setting = 0, value = VISIBILITY_ALWAYS_HIDDEN }}),
+        {
+            { setting = 0, value = VISIBILITY_ALWAYS_HIDDEN },
+            { setting = 1, value = 1 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+        }),
 
     -- =====================================================================
     -- System 1: Cast Bar — positioned center-bottom (used by RealUI)
     -- =====================================================================
     Entry(SYSTEM_CAST_BAR, nil,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 200),
-        {{ setting = 0, value = 0 }}), -- Lock to Player Frame = false
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 0 },
+        }),
 
     -- =====================================================================
     -- System 2: Minimap — top-right corner
     -- =====================================================================
     Entry(SYSTEM_MINIMAP, nil,
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -15, -15),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 5 },
+        }),
 
     -- =====================================================================
     -- System 3: Unit Frames
@@ -137,41 +227,91 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_UNIT_FRAME, 1, -- Player (oUF replaces)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {}),
+        {
+            { setting = 1, value = 0 },
+            { setting = 16, value = 0 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 2, -- Target (oUF replaces)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {}),
+        {
+            { setting = 2, value = 0 },
+            { setting = 16, value = 0 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 3, -- Focus (oUF replaces)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {}),
+        {
+            { setting = 2, value = 0 },
+            { setting = 3, value = 0 },
+            { setting = 16, value = 0 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 4, -- Party frames
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 680.66668701172, -1064.6667480469),
-        {}),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 680.70001220703, -1064.6999511719),
+        {
+            { setting = 4, value = 0 },
+            { setting = 5, value = 0 },
+            { setting = 6, value = 0 },
+            { setting = 10, value = 26 },
+            { setting = 11, value = 8 },
+            { setting = 12, value = 0 },
+            { setting = 14, value = 1 },
+            { setting = 16, value = 0 },
+            { setting = 18, value = 0 },
+            { setting = 19, value = 5 },
+            { setting = 20, value = 100 },
+            { setting = 21, value = 5 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 5, -- Raid frames
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 948.14776611328, -866.66552734375),
-        {}),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 948.09997558594, -866.70001220703),
+        {
+            { setting = 9, value = 0 },
+            { setting = 10, value = 26 },
+            { setting = 11, value = 8 },
+            { setting = 12, value = 0 },
+            { setting = 13, value = 0 },
+            { setting = 14, value = 0 },
+            { setting = 15, value = 5 },
+            { setting = 18, value = 0 },
+            { setting = 19, value = 5 },
+            { setting = 20, value = 100 },
+            { setting = 21, value = 5 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 6, -- Boss frames
         Anchor("RIGHT", "UIParent", "RIGHT", -32, 314),
-        {}),
+        {
+            { setting = 3, value = 0 },
+            { setting = 7, value = 1 },
+            { setting = 16, value = 0 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 7, -- Arena frames
-        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -32.000122070312, -304.83334350586),
-        {}),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -32, -304.79998779297),
+        {
+            { setting = 10, value = 26 },
+            { setting = 11, value = 8 },
+            { setting = 12, value = 0 },
+            { setting = 17, value = 1 },
+            { setting = 18, value = 0 },
+            { setting = 19, value = 5 },
+            { setting = 20, value = 100 },
+            { setting = 21, value = 5 },
+        }),
     Entry(SYSTEM_UNIT_FRAME, 8, -- Pet (oUF replaces)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {}),
+        {
+            { setting = 16, value = 0 },
+        }),
 
     -- =====================================================================
-    -- System 4: Encounter Bar — bottom-right area
+    -- System 4: Encounter Bar
     -- =====================================================================
     Entry(SYSTEM_ENCOUNTER_BAR, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 400.49374389648, 215.80352783203),
+        Anchor("CENTER", "UIParent", "CENTER", -406.90771484375, -218.58201599121),
         {}),
 
     -- =====================================================================
-    -- System 5: Extra Abilities — bottom-center
+    -- System 5: Extra Abilities
     -- =====================================================================
     Entry(SYSTEM_EXTRA_ABILITIES, nil,
-        Anchor("BOTTOM", "UIParent", "BOTTOM", 0, 300),
+        Anchor("LEFT", "UIParent", "LEFT", 171.29663085938, -177.7772064209),
         {}),
 
     -- =====================================================================
@@ -180,30 +320,59 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_AURA_FRAME, 1, -- Buff Frame
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -195, -15),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 0 },
+            { setting = 3, value = 11 },
+            { setting = 5, value = 5 },
+            { setting = 6, value = 5 },
+        }),
     Entry(SYSTEM_AURA_FRAME, 2, -- Debuff Frame
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -195, -105),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 0 },
+            { setting = 4, value = 8 },
+            { setting = 5, value = 5 },
+            { setting = 6, value = 5 },
+            { setting = 10, value = 1 },
+        }),
     Entry(SYSTEM_AURA_FRAME, 3, -- External Defensives
-        Anchor("LEFT", "UIParent", "LEFT", 371, -178),
-        {}),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 664.12640380859, -696.42596435547),
+        {
+            { setting = 0, value = 1 },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 0 },
+            { setting = 3, value = 10 },
+            { setting = 5, value = 4 },
+            { setting = 6, value = 5 },
+            { setting = 8, value = 0 },
+            { setting = 9, value = 100 },
+        }),
 
     -- =====================================================================
-    -- System 7: Talking Head — center
+    -- System 7: Talking Head
     -- =====================================================================
     Entry(SYSTEM_TALKING_HEAD, nil,
-        Anchor("CENTER", "UIParent", "CENTER", -3.9505817890167, 0.33947628736496),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 662.14819335938, -95.521003723145),
         {}),
 
     -- =====================================================================
     -- System 8: Chat Frame — bottom-left
     -- =====================================================================
     Entry(SYSTEM_CHAT_FRAME, nil,
-        Anchor("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 36.234592437744, 52.284000396729),
-        {}),
+        Anchor("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 36.200000762939, 52.299999237061),
+        {
+            { setting = 0, value = 4 },
+            { setting = 1, value = 30 },
+            { setting = 2, value = 1 },
+            { setting = 3, value = 70 },
+        }),
 
     -- =====================================================================
-    -- System 9: Vehicle Leave Button — bottom-center-right
+    -- System 9: Vehicle Leave Button
     -- =====================================================================
     Entry(SYSTEM_VEHICLE_LEAVE, nil,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 300, 100),
@@ -228,21 +397,34 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_OBJECTIVE_TRACKER, nil,
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -25, -210),
-        {}),
+        {
+            { setting = 0, value = 40 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 0 },
+        }),
 
     -- =====================================================================
     -- System 13: Micro Menu — bottom-right
     -- =====================================================================
     Entry(SYSTEM_MICRO_MENU, nil,
         Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -15, 35),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 6 },
+            { setting = 3, value = 10 },
+        }),
 
     -- =====================================================================
     -- System 14: Bags — bottom-right above micro menu
     -- =====================================================================
     Entry(SYSTEM_BAGS, nil,
         Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -15, 60),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 5 },
+        }),
 
     -- =====================================================================
     -- System 15: Status Tracking Bars (XP/Rep/Honor) — bottom-center
@@ -250,111 +432,113 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_STATUS_TRACKING, 1,
         Anchor("BOTTOM", "StatusTrackingBarManager", "BOTTOM", 0, 0),
-        {}),
+        {
+            { setting = 3, value = 10 },
+        }),
     Entry(SYSTEM_STATUS_TRACKING, 2,
         Anchor("BOTTOM", "StatusTrackingBarManager", "BOTTOM", 0, 17),
-        {}),
+        {
+            { setting = 3, value = 10 },
+        }),
 
     -- =====================================================================
     -- System 16: Durability Frame — top-right below minimap area
     -- =====================================================================
     Entry(SYSTEM_DURABILITY, nil,
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -100, -200),
-        {}),
+        {
+            { setting = 0, value = 5 },
+        }),
 
     -- =====================================================================
     -- System 17: Timer Bars (Duration Bars) — top-center
     -- =====================================================================
     Entry(SYSTEM_TIMER_BARS, nil,
         Anchor("TOP", "UIParent", "TOP", 0, -100),
-        {}),
+        {
+            { setting = 0, value = 0 },
+        }),
 
     -- =====================================================================
     -- System 18: Vehicle Seat Indicator — top-right
     -- =====================================================================
     Entry(SYSTEM_VEHICLE_SEAT, nil,
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -10, -180),
-        {}),
+        {
+            { setting = 0, value = 10 },
+        }),
 
     -- =====================================================================
     -- System 19: Archaeology Bar — top-center
     -- =====================================================================
     Entry(SYSTEM_ARCHAEOLOGY, nil,
         Anchor("TOP", "UIParent", "TOP", 0, -50),
-        {}),
+        {
+            { setting = 0, value = 0 },
+        }),
 
     -- =====================================================================
-    -- System 20: Cooldown Viewer (11.1.5) — center above action area
+    -- System 20: Cooldown Viewer
     -- Index 1 = Essential Cooldowns, Index 2 = Utility Cooldowns
     -- Index 3 = Tracked Buffs (icons), Index 4 = Tracked Buff Bars
-    --
-    -- Settings (EditModeCooldownViewerSetting enum values):
-    --   0 = Orientation    (0=Horizontal, 1=Vertical)
-    --   1 = IconLimit      (1-20; also controls stride/row width)
-    --   2 = IconDirection  (0=Left, 1=Right)
-    --   3 = IconSize       (50-200, percent; step 10)
-    --   4 = IconPadding    (0-14)
-    --   5 = Opacity        (0-100, percent)
-    --   6 = VisibleSetting (CooldownViewerVisibleSetting)
-    --   7 = BarContent     (BuffBar only)
-    --   8 = HideWhenInactive (BuffIcon/BuffBar only; 0 or 1)
-    --   9 = ShowTimer      (0 or 1)
-    --  10 = ShowTooltips   (0 or 1)
-    --  11 = BarWidthScale  (BuffBar only; 50-200, percent)
-    --
-    -- Essential, Utility, and BuffIcon are forced horizontal. BuffBar has
-    -- no orientation/iconLimit/iconDirection settings (it stacks bars
-    -- vertically). Setting Orientation via the native EditMode setting is
-    -- what makes Blizzard's GridLayoutFrame size the viewer frame and
-    -- anchor its children correctly — do not re-anchor children manually.
     -- =====================================================================
     Entry(SYSTEM_COOLDOWN_VIEWER, 1, -- Essential Cooldowns
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 795.34619140625, -694.69165039062),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 794.43096923828, -692.32843017578),
         {
-            { setting = 0, value = 0 },    -- Orientation = Horizontal
-            { setting = 1, value = 12 },   -- IconLimit = 12 (row width)
-            { setting = 2, value = 1 },    -- IconDirection = Right
-            { setting = 3, value = 100 },  -- IconSize = 100%
-            { setting = 4, value = 2 },    -- IconPadding
-            { setting = 5, value = 100 },  -- Opacity = 100%
-            { setting = 9, value = 1 },    -- ShowTimer
-            { setting = 10, value = 1 },   -- ShowTooltips
+            { setting = 0, value = 0 },
+            { setting = 1, value = 12 },
+            { setting = 2, value = 1 },
+            { setting = 3, value = 3 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 100 },
+            { setting = 6, value = 0 },
+            { setting = 8, value = 1 },
+            { setting = 9, value = 1 },
+            { setting = 10, value = 1 },
         }),
     Entry(SYSTEM_COOLDOWN_VIEWER, 2, -- Utility Cooldowns
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 820.74536132812, -747.88134765625),
+        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 804.86645507812, -736.42578125),
         {
-            { setting = 0, value = 0 },    -- Orientation = Horizontal
-            { setting = 1, value = 12 },   -- IconLimit
-            { setting = 2, value = 1 },    -- IconDirection = Right
-            { setting = 3, value = 80 },   -- IconSize = 80%
-            { setting = 4, value = 2 },    -- IconPadding
-            { setting = 5, value = 100 },  -- Opacity
-            { setting = 9, value = 1 },    -- ShowTimer
-            { setting = 10, value = 1 },   -- ShowTooltips
+            { setting = 0, value = 0 },
+            { setting = 1, value = 14 },
+            { setting = 2, value = 1 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 2 },
+            { setting = 5, value = 100 },
+            { setting = 6, value = 0 },
+            { setting = 8, value = 1 },
+            { setting = 9, value = 1 },
+            { setting = 10, value = 1 },
         }),
     Entry(SYSTEM_COOLDOWN_VIEWER, 3, -- Tracked Buffs (BuffIcon)
-        Anchor("TOPLEFT", "UIParent", "TOPLEFT", 901.16003417969, -741.75836181641),
+        Anchor("CENTER", "UIParent", "CENTER", -8.7646551132202, -250.50135803223),
         {
-            { setting = 0, value = 0 },    -- Orientation = Horizontal
-            { setting = 1, value = 20 },   -- IconLimit = 20 (max row width)
-            { setting = 2, value = 1 },    -- IconDirection = Right
-            { setting = 3, value = 80 },   -- IconSize = 80%
-            { setting = 4, value = 2 },    -- IconPadding
-            { setting = 5, value = 100 },  -- Opacity
-            { setting = 8, value = 1 },    -- HideWhenInactive
-            { setting = 9, value = 1 },    -- ShowTimer
-            { setting = 10, value = 1 },   -- ShowTooltips
+            { setting = 0, value = 0 },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 1 },
+            { setting = 3, value = 2 },
+            { setting = 4, value = 5 },
+            { setting = 5, value = 100 },
+            { setting = 6, value = 0 },
+            { setting = 8, value = 1 },
+            { setting = 9, value = 1 },
+            { setting = 10, value = 1 },
         }),
     Entry(SYSTEM_COOLDOWN_VIEWER, 4, -- Tracked Buff Bars
-        Anchor("CENTER", "UIParent", "CENTER", 257.32406616211, -223.47106933594),
+        Anchor("BOTTOM", "UIParent", "BOTTOM", 391.52154541016, 175.15902709961),
         {
-            { setting = 3, value = 80 },   -- IconSize = 80%
-            { setting = 4, value = 2 },    -- IconPadding
-            { setting = 5, value = 100 },  -- Opacity
-            { setting = 8, value = 1 },    -- HideWhenInactive
-            { setting = 9, value = 1 },    -- ShowTimer
-            { setting = 10, value = 1 },   -- ShowTooltips
-            { setting = 11, value = 100 }, -- BarWidthScale = 100%
+            { setting = 0, value = 1 },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 0 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 0 },
+            { setting = 5, value = 100 },
+            { setting = 6, value = 0 },
+            { setting = 7, value = 0 },
+            { setting = 8, value = 1 },
+            { setting = 9, value = 1 },
+            { setting = 10, value = 1 },
+            { setting = 11, value = 100 },
         }),
 
     -- =====================================================================
@@ -362,7 +546,10 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_PERSONAL_RESOURCE, nil,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+        }),
 
     -- =====================================================================
     -- System 22: Encounter Events (12.0.0) — multiple indices
@@ -373,23 +560,69 @@ Templates.base = {
     -- =====================================================================
     Entry(SYSTEM_ENCOUNTER_EVENTS, 1,
         Anchor("TOP", "UIParent", "TOP", 0, -40),
-        {}),
+        {
+            { setting = 0, value = 1 },
+            { setting = 1, value = 1 },
+            { setting = 2, value = 0 },
+            { setting = 3, value = 5 },
+            { setting = 4, value = 5 },
+            { setting = 5, value = 0 },
+            { setting = 6, value = 50 },
+            { setting = 7, value = 1 },
+            { setting = 8, value = 2 },
+            { setting = 9, value = 1 },
+            { setting = 10, value = 0 },
+            { setting = 11, value = 0 },
+            { setting = 12, value = 50 },
+            { setting = 13, value = 2 },
+        }),
     Entry(SYSTEM_ENCOUNTER_EVENTS, 2,
         Anchor("TOP", "UIParent", "TOP", 0, -90),
-        {}),
+        {
+            { setting = 3, value = 5 },
+            { setting = 4, value = 5 },
+            { setting = 6, value = 50 },
+            { setting = 7, value = 0 },
+            { setting = 8, value = 2 },
+        }),
     Entry(SYSTEM_ENCOUNTER_EVENTS, 3,
         Anchor("TOP", "UIParent", "TOP", 0, -130),
-        {}),
+        {
+            { setting = 3, value = 5 },
+            { setting = 4, value = 5 },
+            { setting = 6, value = 50 },
+            { setting = 7, value = 0 },
+            { setting = 8, value = 2 },
+        }),
     Entry(SYSTEM_ENCOUNTER_EVENTS, 4,
         Anchor("TOP", "UIParent", "TOP", 0, -170),
-        {}),
+        {
+            { setting = 3, value = 5 },
+            { setting = 4, value = 5 },
+            { setting = 6, value = 50 },
+            { setting = 7, value = 0 },
+            { setting = 8, value = 2 },
+        }),
 
     -- =====================================================================
     -- System 23: Damage Meter (12.0.0) — bottom-right above chat
     -- =====================================================================
     Entry(SYSTEM_DAMAGE_METER, nil,
         Anchor("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -10, 250),
-        {}),
+        {
+            { setting = 0, value = 0 },
+            { setting = 1, value = 0 },
+            { setting = 2, value = 1 },
+            { setting = 3, value = 100 },
+            { setting = 4, value = 20 },
+            { setting = 5, value = 2 },
+            { setting = 6, value = 50 },
+            { setting = 8, value = 1 },
+            { setting = 9, value = 1 },
+            { setting = 10, value = 1 },
+            { setting = 11, value = 5 },
+            { setting = 12, value = 50 },
+        }),
 }
 
 ---------------------------------------------------------------------------
