@@ -55,6 +55,54 @@ local COOLDOWN_VIEWER_SCALES = {
 -- ApplyCooldownViewerScales
 ---------------------------------------------------------------------------
 
+---------------------------------------------------------------------------
+-- BuffIconCooldownViewer horizontal layout enforcement
+---------------------------------------------------------------------------
+
+--- Re-anchor active BuffIcon item frames in a left-to-right row.
+local function AnchorBuffIconItemsHorizontal(viewer)
+    if not viewer or not viewer.itemFramePool then return end
+    local prev
+    for child in viewer.itemFramePool:EnumerateActive() do
+        child:ClearAllPoints()
+        if prev then
+            child:SetPoint("LEFT", prev, "RIGHT", 2, 0)
+        else
+            child:SetPoint("LEFT", viewer, "LEFT", 0, 0)
+        end
+        prev = child
+    end
+end
+
+local buffIconHooked = false
+
+--- Set grid properties, re-anchor, and hook RefreshLayout so CDV's own
+--- re-layouts (on spec change, aura updates, edit mode exit) don't revert.
+local function EnforceBuffIconHorizontal()
+    local viewer = _G.BuffIconCooldownViewer
+    if not viewer then return end
+
+    viewer.isHorizontal = true
+    viewer.layoutFramesGoingRight = true
+    viewer.layoutFramesGoingUp = false
+    viewer.stride = 20
+
+    AnchorBuffIconItemsHorizontal(viewer)
+
+    if not buffIconHooked and viewer.RefreshLayout then
+        hooksecurefunc(viewer, "RefreshLayout", function(self)
+            -- Reassert properties in case something changed them,
+            -- then re-anchor children horizontally.
+            self.isHorizontal = true
+            self.layoutFramesGoingRight = true
+            self.layoutFramesGoingUp = false
+            self.stride = 20
+            AnchorBuffIconItemsHorizontal(self)
+        end)
+        buffIconHooked = true
+    end
+end
+
 --- Applies SetScale() to CooldownViewer frames.
 -- Called after layout activation since the EditMode settings enum for
 -- icon size doesn't exist in this client version.
@@ -72,18 +120,8 @@ function EditModeManager:ApplyCooldownViewerScales()
 
     -- Force BuffIconCooldownViewer to horizontal layout.
     -- The EditModeCooldownViewerSetting.Orientation enum doesn't exist in
-    -- this client, so the frame defaults to vertical. Set GridLayoutFrame
-    -- properties directly and re-run Layout().
-    local buffIcon = _G.BuffIconCooldownViewer
-    if buffIcon then
-        buffIcon.isHorizontal = true
-        buffIcon.layoutFramesGoingRight = true
-        buffIcon.layoutFramesGoingUp = false
-        buffIcon.stride = 20  -- plenty of room to grow sideways
-        if buffIcon.Layout then
-            buffIcon:Layout()
-        end
-    end
+    -- this client so the CDV mixin uses its vertical default.
+    EnforceBuffIconHorizontal()
 end
 
 -- Local alias for internal callers
