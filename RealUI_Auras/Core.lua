@@ -259,7 +259,13 @@ end
 --   • CooldownViewer is available
 --   • A preset exists for the new spec
 -- MergePreset is idempotent — it skips if "RealUI - <name>" already exists.
+-- The reload popup is shown at most once per session per spec: the user may
+-- click "Later", swap specs, and swap back without being re-prompted. The
+-- CVar is set on SetLayoutData so the merged data persists; the popup only
+-- exists to nudge an immediate reload so the new layout becomes visible.
 ---------------------------------------------------------------------------
+local sessionPromptedSpecs = {}
+
 function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
     -- Don't auto-apply before the user has been asked via popup or wizard
     if not self.db.char.cooldownPresetOffered then return end
@@ -277,7 +283,8 @@ function AurasAddon:PLAYER_SPECIALIZATION_CHANGED()
 
     -- MergePreset is idempotent: skips layouts that already exist
     local added = CooldownViewer.MergePreset(presetStr)
-    if added and added > 0 then
+    if added and added > 0 and not sessionPromptedSpecs[specTag] then
+        sessionPromptedSpecs[specTag] = true
         StaticPopup_Show("REALUI_AURAS_RELOAD")
     end
 end
