@@ -453,6 +453,14 @@ function RealUI:ChatCommand_Config(input)
                 print("|cff0099ffRealUI|r: RealUI_Auras not loaded.")
             end
             return
+        elseif command == "platynator" then
+            if not _G.C_AddOns.IsAddOnLoaded("Platynator") then
+                print("|cff0099ffRealUI|r: Platynator is not loaded.")
+                return
+            end
+            self:SetUpAddonProfile("Platynator", true)
+            print("|cff0099ffRealUI|r: Platynator profile updated.")
+            return
         end
     end
 
