@@ -23,6 +23,13 @@ What's New in 3.3.0
   * Added aura migration helpers: `/realui setupauras` to apply presets, `/realui resetauras` to revert to native aura behavior.
 
 
+Recent Updates (post-3.3.0)
+----------------------------
+
+  * **Platynator profile improvements** — enemies outside attack range now fade to 60% alpha; friendly nameplates show party members with role-colored names (tank/healer/damage).
+  * **`/realui platynator`** — re-applies the bundled RealUI Platynator profile live, without a full UI reset. Use this after a RealUI update that ships Platynator changes.
+
+
 Quick Start
 -----------
 
@@ -31,6 +38,7 @@ After first login, these are the most useful commands:
   * `/realui` - open configuration.
   * `/realui setup` - rerun setup flow.
   * `/realui display` - open display preset setup.
+  * `/realui platynator` - re-apply the RealUI Platynator nameplate profile (no reload needed).
   * `/realui setupauras` - apply RealUI_Auras cooldown presets for your current spec.
   * `/realui resetauras` - disable RealUI_Auras groups and restore native aura behavior.
   * `/resetframes` - reset DragEmAll-managed frame positions.
@@ -82,6 +90,7 @@ Supported `/realui` subcommands:
 
   * `/realui setup` - run setup flow.
   * `/realui display` - open Display Setup stage.
+  * `/realui platynator` - re-apply the bundled RealUI Platynator nameplate profile live (no reload).
   * `/realui setupauras` - apply RealUI_Auras cooldown presets for your current spec.
   * `/realui resetauras` - disable RealUI_Auras groups and restore native aura behavior.
   * `/realui grid2update` - apply the RealUI Grid2 modernization update.
