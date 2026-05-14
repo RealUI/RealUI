@@ -1,3 +1,30 @@
+## [3.3.1] - 2026-05-14 ##
+### Summary ###
+Nameplate quality-of-life update with Aurora taint hardening. Platynator profile gains two player-facing improvements: out-of-range enemies now fade to 60% alpha for clearer target priority, and party members on friendly nameplates show role-colored names (tank blue, healer green, damage red). The profile has also been updated for compatibility with Platynator 380+. A new `/realui platynator` command lets users re-apply the bundled Platynator profile live without a full UI reset. A spec-swap Lua error (race condition on specialization change) is fixed. `Blizzard_PlayerChoice` is now preloaded at login so the advanced config EditMode panel works reliably. Aurora is updated from 12.0.5.8 to 12.0.5.9 with several taint fixes.
+
+### Modified AddOns ###
+  * RealUI
+  * Aurora (12.0.5.9)
+
+### Added ###
+  * add: `/realui platynator` — re-applies the bundled RealUI Platynator nameplate profile live without a UI reload
+
+### Changed ###
+  * chg: Aurora updated to 12.0.5.9 (from 12.0.5.8)
+  * chg: Platynator — enemies outside attack range now fade to 60% alpha
+  * chg: Platynator — party members on friendly nameplates now show role-colored names (tank/healer/damage)
+  * chg: Platynator profile updated for compatibility with Platynator 380 and later
+  * chg: `Blizzard_PlayerChoice` preloaded at login so EditMode config in RealUI_Advanced works correctly
+
+### Fixed ###
+
+  * fix: race condition on spec change that produced a Lua error
+  * fix: Aurora 12.0.5.9 makes `UIWidgetBaseStatusBarTemplate` taint-safe and guards `InitPartitions` barWidth with SafeNumber
+  * fix: Aurora 12.0.5.9 removes `UpdatePresence` mixin to eliminate `CommunitiesMemberList` taint
+  * fix: Aurora 12.0.5.9 resolves tooltip arithmetic taint — removes `securecallfunction` wrapper from `GameTooltip_AddWidgetSet`
+  * fix: Aurora 12.0.5.9 uses `Color.button` for inactive panel tabs so borders are visible
+
+
 ## [3.3.0] - 2026-05-09 ##
 ### Summary ###
 Release focused on RealUI's new EditMode integration plus tracker and aura modernization. RealUI now creates and manages dedicated EditMode layouts for DPS/Tank and Healing (with account-wide and per-character support), and this follow-up pass further tunes those layouts for Grid2, action bars, CooldownViewer, minimap behavior, and healer workflows. RealUI_Tracker and RealUI_Auras replace older objective/aura workflows with native WoW 12-friendly behavior, and the release also includes broad startup/runtime hardening. Aurora is updated from 12.0.5.6 to 12.0.5.8 with CooldownViewer icon fixes and SpellBook hook safety fixes.
@@ -855,6 +882,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.3.1]: https://github.com/RealUI/RealUI/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/RealUI/RealUI/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/RealUI/RealUI/compare/3.1.18...3.2.0
 [3.1.18]: https://github.com/RealUI/RealUI/compare/3.1.17...3.1.18
