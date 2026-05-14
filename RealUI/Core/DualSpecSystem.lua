@@ -751,8 +751,13 @@ end
 local function OnPlayerEnterWorld()
     debug("Player entered world, checking spec state")
 
-    -- Update spec information when entering world
-    UpdateSpec()
+    -- Defer profile switch out of the PLAYER_ENTERING_WORLD event batch.
+    -- The profile switch cascade (CoordinatedSwitch → ActionBars:RefreshMod)
+    -- touches restricted action bar frames which taints execution. Without
+    -- deferral that taint propagates to CastingBarMixin:OnEvent (also
+    -- registered for PLAYER_ENTERING_WORLD) and causes a "forbidden table"
+    -- error when it indexes CastingBarTypeInfo whose keys are secretwrap values.
+    _G.C_Timer.After(0, UpdateSpec)
 end
 
 -- Enhanced Initialization
