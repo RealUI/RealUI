@@ -37,6 +37,11 @@ local LAYOUT_NAMES = {
     healing = "RealUI-Healing",
 }
 
+-- EditMode system enum value for ObjectiveTracker. Mirrors the local
+-- constant in EditModeTemplates.lua, which is not exported. Any file that
+-- needs this value must declare its own local copy (see also Container.lua).
+local SYSTEM_OBJECTIVE_TRACKER = 12
+
 ---------------------------------------------------------------------------
 -- CooldownViewer
 -- Size, orientation, icon limit, etc. are configured via native EditMode
@@ -80,6 +85,74 @@ local function FindLayoutIndex(data, layoutName, preferredType)
     return fallbackIndex
 end
 
+--- Counts the number of keys in a table.
+-- Used by the Step 5 defensive snapshot to verify that preserved-data
+-- stores (`RealUI_TrackerDB.profile.position` and
+-- `Bartender4DB.namespaces.ActionBars.profiles.<*>`) have not had their
+-- key count change unexpectedly across the destructive Step 2 / Step 3
+-- migration body.
+--
+-- We count keys (not memory addresses via `tostring(t)`) because Lua's
+-- `tostring` on a table returns an opaque pointer string with no
+-- relationship to content — a useless proxy for "did anything change".
+-- A key-count delta is a cheap, content-aware diagnostic.
+--
+-- @param t any  Value to inspect
+-- @return number  Key count (0 for non-tables and empty tables)
+local function tableKeyCount(t)
+    if type(t) ~= "table" then return 0 end
+    local n = 0
+    for _ in pairs(t) do n = n + 1 end
+    return n
+end
+
+--- Snapshots key counts of every per-profile `position` table inside
+-- `RealUI_TrackerDB`. Returns a map keyed by profile name with one
+-- numeric entry per profile that has a `position` table. Profiles
+-- without a `position` table contribute no entry.
+--
+-- Iterating all profiles (rather than identifying the active profile via
+-- AceDB internals or `RealUI_TrackerDB.profileKeys[<charKey>]`) matches
+-- the iteration model used by Step 2b's `maxHeightOffset` cleanup, so
+-- the before/after snapshots cover exactly the same set of tables that
+-- the destructive step touches.
+--
+-- @return table  { [profileName] = keyCount, ... }
+local function snapshotTrackerPositionCounts()
+    local counts = {}
+    local trDB = _G.RealUI_TrackerDB
+    if not (trDB and trDB.profiles) then return counts end
+    for profileName, profile in pairs(trDB.profiles) do
+        if type(profile) == "table" and type(profile.position) == "table" then
+            counts[profileName] = tableKeyCount(profile.position)
+        end
+    end
+    return counts
+end
+
+--- Snapshots key counts of every per-profile ActionBars table inside
+-- `Bartender4DB.namespaces.ActionBars`. Returns a map keyed by profile
+-- name with one numeric entry per profile.
+--
+-- The migration MUST NOT write to Bartender4DB (Req 8.5), so any
+-- non-zero delta here is a real warning signal — unlike the Tracker
+-- store, no expected change exists.
+--
+-- @return table  { [profileName] = keyCount, ... }
+local function snapshotBartender4ProfileCounts()
+    local counts = {}
+    local btDB = _G.Bartender4DB
+    if not (btDB and btDB.namespaces) then return counts end
+    local ns = btDB.namespaces.ActionBars
+    if not (ns and ns.profiles) then return counts end
+    for profileName, profile in pairs(ns.profiles) do
+        if type(profile) == "table" then
+            counts[profileName] = tableKeyCount(profile)
+        end
+    end
+    return counts
+end
+
 --- Processes a pending layout action from the queue.
 -- @param pending table  The pending action descriptor
 local function ProcessPending(pending)
@@ -95,6 +168,8 @@ local function ProcessPending(pending)
         EditModeManager:MigrateFromPreEditMode()
     elseif pending.action == "removePerChar" then
         EditModeManager:RemovePerCharacterLayouts()
+    elseif pending.action == "trackerAnchor" then
+        EditModeManager:SetTrackerAnchor(pending.point, pending.relativePoint, pending.x, pending.y)
     end
 end
 
@@ -110,6 +185,91 @@ function EditModeManager:GetCurrentLayoutType()
         return 2
     end
     return 1
+end
+
+--- Returns the saved-array index of the currently-active layout, but only
+-- if it is one of the RealUI-managed layouts (LAYOUT_NAMES values).
+-- Used by SetTrackerAnchor (and other future writers) to enforce the
+-- sole-writer invariant: RealUI must never overwrite layout data while
+-- the user is on a non-RealUI layout (preset or third-party custom).
+--
+-- data.activeLayout is an index into the combined [presets..., saved...]
+-- list, while data.layouts contains saved layouts only. To map between
+-- them, subtract NUM_PRESET_LAYOUTS.
+--
+-- @param data table  The data returned by C_EditMode.GetLayouts()
+-- @return number|nil  Index into data.layouts of the active layout if it
+--                     is a RealUI-managed layout, otherwise nil.
+function EditModeManager:GetActiveRealUILayoutIndex(data)
+    if not data or not data.layouts or not data.activeLayout then
+        return nil
+    end
+
+    local savedIndex = data.activeLayout - NUM_PRESET_LAYOUTS
+    if savedIndex < 1 then
+        -- Active layout is a built-in preset, not a saved layout
+        return nil
+    end
+
+    local active = data.layouts[savedIndex]
+    if not active then
+        return nil
+    end
+
+    for _, name in pairs(LAYOUT_NAMES) do
+        if active.layoutName == name then
+            return savedIndex
+        end
+    end
+
+    return nil
+end
+
+--- Walks `layout.systems` and returns the matching `systemInfo` table.
+-- Each entry in layout.systems is a systemInfo table whose identity is the
+-- (system, systemIndex) pair (mirrors the structure produced by
+-- EditModeTemplates and consumed by Blizzard's C_EditMode API).
+--
+-- @param layout table  A saved layout entry from C_EditMode.GetLayouts().layouts
+-- @param system number  The EditMode system enum value (e.g. SYSTEM_OBJECTIVE_TRACKER)
+-- @param systemIndex number  The system instance index (0 for singletons)
+-- @return table|nil  The matching systemInfo table, or nil if not found
+function EditModeManager:FindSystemInfo(layout, system, systemIndex)
+    if not layout or not layout.systems then
+        return nil
+    end
+
+    for _, sysInfo in ipairs(layout.systems) do
+        if sysInfo.system == system and sysInfo.systemIndex == systemIndex then
+            return sysInfo
+        end
+    end
+
+    return nil
+end
+
+--- Convenience: returns the systemInfo entry for ObjectiveTracker
+-- (system 12, systemIndex 0) within the currently-active RealUI layout.
+-- Returns nil if the user is on a non-RealUI layout, if the layout data
+-- can't be read, or if the system 12 entry is missing.
+--
+-- Used by RealUI_Tracker/Container.lua's UpdatePosition seeding gate
+-- to inspect the live EditMode anchor and decide whether to seed the
+-- user's stored position into the layout.
+--
+-- @return table|nil  The systemInfo table for system 12, or nil
+function EditModeManager:GetActiveRealUITrackerSystemInfo()
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if not ok or not data then
+        return nil
+    end
+
+    local layoutIdx = self:GetActiveRealUILayoutIndex(data)
+    if not layoutIdx then
+        return nil
+    end
+
+    return self:FindSystemInfo(data.layouts[layoutIdx], SYSTEM_OBJECTIVE_TRACKER, 0)
 end
 
 ---------------------------------------------------------------------------
@@ -368,7 +528,11 @@ end
 --  2 = CDV orientation/size settings moved from manual hooks to native
 --      EditMode settings; forces a template rebuild so existing
 --      auto-generated layouts pick up the new CDV settings.
-local MIGRATION_VERSION = 2
+--  3 = FrameMover-managed frames (boss frames, vehicle seat indicator,
+--      durability frame, archaeology bar, etc.) migrated to native EditMode
+--      settings; forces a template rebuild so existing auto-generated
+--      layouts pick up the new EditMode positions.
+local MIGRATION_VERSION = 3
 
 --- Checks whether migration from pre-EditMode RealUI is needed.
 -- @return boolean  true if migration should run
@@ -428,8 +592,195 @@ function EditModeManager:MigrateFromPreEditMode()
     local oldVersion = dbg and dbg.editmode and dbg.editmode.migrationVersion
     local forceRebuild = (oldVersion ~= nil) and (oldVersion < MIGRATION_VERSION)
 
-    -- Create both layouts (rebuild if upgrading schema)
-    self:EnsureLayouts(presetId, forceRebuild)
+    -- Step 5 — Defensive key-count snapshot (BEFORE).
+    --
+    -- Capture key counts of the two preserved-data stores before running
+    -- the destructive body (Step 2 and Step 3). Step 5 is a diagnostic
+    -- assertion that backs Req 8.4 (RealUI_TrackerDB.profile.position
+    -- preserved) and Req 8.5 (Bartender4DB preserved): the migration
+    -- body MUST NOT change the key count of these stores, with one
+    -- documented exception — Step 2b intentionally removes the dead
+    -- `maxHeightOffset` key from each tracker profile's `position`
+    -- table, so a delta of exactly -1 per tracker profile is expected
+    -- on a user's first run of v3 and is suppressed below.
+    --
+    -- We snapshot key COUNTS rather than `tostring(table)` on purpose:
+    -- `tostring` on a table returns a memory-address string that has
+    -- no relationship to content, so it can't detect mutations. A key
+    -- count is cheap (O(n) once per migration) and content-aware.
+    local trackerPositionCountsBefore = snapshotTrackerPositionCounts()
+    local bartender4CountsBefore = snapshotBartender4ProfileCounts()
+
+    -- Step 2 — Remove the orphan `playerpowerbaralt` key from every
+    -- FrameMover profile's `uiframes` table. PlayerPowerBarAlt is owned by
+    -- EditMode system 21 (Personal Resource Display) and is parked
+    -- off-screen by the RealUI template; the FrameMover entry is redundant
+    -- and would otherwise leave a dead key in saved variables forever.
+    --
+    -- This step is BLOCKING: on pcall failure, we log the error and bail
+    -- out of the migration WITHOUT calling SetMigrationFlag, so the
+    -- migration retries next session. See design "Migration Steps → Step 2"
+    -- and "Migration ordering rationale" — BLOCKING steps must run before
+    -- the NON-BLOCKING Step 2b so a Step 2b failure cannot prevent Step 2's
+    -- protection from taking effect.
+    local fm_ok, fm_err = pcall(function()
+        local fmDB = _G.RealUIDB and _G.RealUIDB.namespaces and _G.RealUIDB.namespaces.FrameMover
+        if fmDB and fmDB.profiles then
+            for profileName, profile in pairs(fmDB.profiles) do
+                if profile.uiframes then
+                    profile.uiframes.playerpowerbaralt = nil
+                end
+            end
+        end
+    end)
+    if not fm_ok then
+        debug("ERROR: Step 2 FrameMover playerpowerbaralt cleanup failed (BLOCKING — bailing out, will retry next session):", fm_err)
+        return
+    end
+
+    -- Step 2b — Clean dead `maxHeightOffset` key out of every RealUI_Tracker
+    -- profile. Under inverted anchoring (Container.lua does
+    -- `RealUI_TrackerFrame:SetAllPoints(OTF)`), the container's height tracks
+    -- OTF's rect, so the old `maxHeightOffset` user-tunable does nothing.
+    -- This cleanup is COSMETIC and NON-BLOCKING: any pcall failure here is
+    -- logged as a warning and the migration continues to Step 3 / Step 7.
+    -- The on-disk key would otherwise sit dormant forever, confusing future
+    -- debugging — the bail-on-failure semantics of Step 2 / Step 3 are
+    -- reserved for changes whose absence would leave the user in a broken
+    -- state (orphan FrameMover key, stale layout anchor). See design
+    -- "Migration Steps → Step 2b" and "Migration ordering rationale".
+    local trClean_ok, trClean_err = pcall(function()
+        local trDB = _G.RealUI_TrackerDB
+        if trDB and trDB.profiles then
+            for _, profile in pairs(trDB.profiles) do
+                if profile.position then
+                    profile.position.maxHeightOffset = nil
+                end
+            end
+        end
+    end)
+    if not trClean_ok then
+        debug("WARNING: Step 2b RealUI_TrackerDB maxHeightOffset cleanup failed (non-blocking):", trClean_err)
+    end
+
+    -- Step 4 — RealUI_ConfigDB cleanup: VERIFIED NO-OP (no code).
+    --
+    -- Req 5.5 mandates that any saved-variable key under
+    -- `RealUI_ConfigDB.profiles[<active>]` corresponding to a removed
+    -- Advanced-panel option be set to `nil` during migration. Verification
+    -- shows there is nothing to clean up:
+    --
+    --   1. RealUI_Config declares NO SavedVariable. Verified by grep across
+    --      `RealUI/RealUI_Config/**/*.toc` for `## SavedVariables` —
+    --      zero matches. There is no `RealUI_ConfigDB` global to mutate.
+    --
+    --   2. Per-frame FrameMover data lives under
+    --      `RealUIDB.namespaces.FrameMover.profiles.<*>.uiframes`
+    --      (registered via `RealUI.db:RegisterNamespace("FrameMover")` in
+    --      `RealUI/RealUI/Modules/FrameMover.lua`). Step 2 above already
+    --      cleaned the only orphan key (`playerpowerbaralt`) from that
+    --      namespace.
+    --
+    --   3. The Advanced panel's option list is built dynamically from
+    --      `FrameMover.FrameList.uiframes` at
+    --      `RealUI/RealUI_Config/Advanced.lua:2184`
+    --      (`for uiSlug, ui in next, FrameList.uiframes do`). Removing the
+    --      `playerpowerbaralt` key from the static FrameList (task 1.1) is
+    --      sufficient to make its Ace3 option group disappear — no Advanced
+    --      panel code change is needed and no migration write is possible.
+    --
+    -- See design "Migration Steps → Step 4" and "Removed Config Surface →
+    -- Req 5.5 verification" / "RealUI_Config Advanced panel".
+
+    -- Step 3 — Force-rebuild RealUI layouts so the corrected ObjectiveTracker
+    -- entry (system 12 with `relativeTo = "UIParent"`) is written into the
+    -- saved layout data. The `forceRebuild` flag computed above is true
+    -- whenever the stored migrationVersion is less than MIGRATION_VERSION,
+    -- so any user upgrading from v2 (or earlier) gets a fresh rebuild that
+    -- overwrites any prior `relativeTo = "RealUI_TrackerFrame"` corruption
+    -- on disk (resolves Req 6.13).
+    --
+    -- This step is BLOCKING: on failure (EnsureLayouts returns false, or the
+    -- pcall traps a Lua error in the function body), we log and bail out
+    -- WITHOUT calling SetMigrationFlag, so the migration retries next
+    -- session. EnsureLayouts already wraps C_EditMode.SaveLayouts in pcall
+    -- internally and returns false on save failure; the outer pcall here
+    -- defends against any unexpected error in the function body itself
+    -- (e.g. BuildLayout throwing) so the bail-out semantics are explicit
+    -- regardless of where the failure originates. See design "Migration
+    -- Steps → Step 3" and "Migration ordering rationale".
+    local ensure_ok, ensure_result = pcall(self.EnsureLayouts, self, presetId, forceRebuild)
+    if not ensure_ok then
+        debug("ERROR: Step 3 EnsureLayouts pcall failed (BLOCKING — bailing out, will retry next session):", ensure_result)
+        return
+    end
+    if ensure_result == false then
+        debug("ERROR: Step 3 EnsureLayouts returned false (BLOCKING — bailing out, will retry next session)")
+        return
+    end
+
+    -- Step 5 — Defensive key-count snapshot (AFTER) and delta check.
+    --
+    -- Re-snapshot the two preserved-data stores and compare to the
+    -- BEFORE counts captured above. Any delta is logged as a warning
+    -- with two exceptions:
+    --
+    --   1. RealUI_TrackerDB tracker-position delta of exactly -1 per
+    --      profile is EXPECTED when Step 2b ran successfully, because
+    --      Step 2b nils out `maxHeightOffset` (typically taking the
+    --      count from 6 to 5). We suppress that specific signature.
+    --
+    --   2. A profile present in the BEFORE snapshot but absent from
+    --      AFTER is treated as a real warning (the profile or its
+    --      `position` table was destroyed). A profile present in
+    --      AFTER but absent from BEFORE is also a real warning (the
+    --      migration spuriously created a new entry).
+    --
+    -- Bartender4 has no expected delta — its store must be preserved
+    -- byte-for-byte (Req 8.5), so any non-zero delta there is a true
+    -- warning. Step 5 does NOT mutate either store; it is purely
+    -- diagnostic.
+    local trackerPositionCountsAfter = snapshotTrackerPositionCounts()
+    local bartender4CountsAfter = snapshotBartender4ProfileCounts()
+
+    for profileName, beforeCount in pairs(trackerPositionCountsBefore) do
+        local afterCount = trackerPositionCountsAfter[profileName]
+        if afterCount == nil then
+            debug("WARNING: Step 5 RealUI_TrackerDB profile lost during migration:",
+                profileName, "before=", beforeCount, "after=nil")
+        elseif beforeCount ~= afterCount then
+            local delta = beforeCount - afterCount
+            local expectedFromStep2b = (trClean_ok and delta == 1)
+            if not expectedFromStep2b then
+                debug("WARNING: Step 5 RealUI_TrackerDB.profile.position key-count changed unexpectedly:",
+                    "profile=", profileName, "before=", beforeCount, "after=", afterCount, "delta=", delta)
+            end
+        end
+    end
+    for profileName, afterCount in pairs(trackerPositionCountsAfter) do
+        if trackerPositionCountsBefore[profileName] == nil then
+            debug("WARNING: Step 5 RealUI_TrackerDB profile appeared during migration:",
+                profileName, "before=nil after=", afterCount)
+        end
+    end
+
+    for profileName, beforeCount in pairs(bartender4CountsBefore) do
+        local afterCount = bartender4CountsAfter[profileName]
+        if afterCount == nil then
+            debug("WARNING: Step 5 Bartender4DB profile lost during migration:",
+                profileName, "before=", beforeCount, "after=nil")
+        elseif beforeCount ~= afterCount then
+            debug("WARNING: Step 5 Bartender4DB.namespaces.ActionBars.profiles key-count changed (must be zero per Req 8.5):",
+                "profile=", profileName, "before=", beforeCount, "after=", afterCount,
+                "delta=", beforeCount - afterCount)
+        end
+    end
+    for profileName, afterCount in pairs(bartender4CountsAfter) do
+        if bartender4CountsBefore[profileName] == nil then
+            debug("WARNING: Step 5 Bartender4DB profile appeared during migration:",
+                profileName, "before=nil after=", afterCount)
+        end
+    end
 
     -- Only activate if user is on a built-in (Preset) layout —
     -- don't disrupt a user-selected custom layout.
@@ -451,6 +802,74 @@ function EditModeManager:MigrateFromPreEditMode()
 
     self:SetMigrationFlag()
     debug("Migration from pre-EditMode completed")
+end
+
+---------------------------------------------------------------------------
+-- SetTrackerAnchor
+---------------------------------------------------------------------------
+
+--- Writes the ObjectiveTracker (system 12) anchor into the active RealUI
+-- EditMode layout. This is the sole writer for system 12 anchorInfo from
+-- RealUI code paths and enforces three invariants:
+--   1. relativeTo is hard-coded to "UIParent" — the function does not
+--      accept a relativeTo parameter, preventing accidental references
+--      to non-standard targets like "RealUI_TrackerFrame" (Req 6.10).
+--   2. Writes are silently skipped when the user is on a non-RealUI
+--      layout (preset or third-party custom), so the migration cannot
+--      clobber user data outside the RealUI-managed layouts.
+--   3. Combat lockdown is honored by queueing the action for replay on
+--      PLAYER_REGEN_ENABLED (Req 6.6, 9.5).
+--
+-- @param point string         Anchor point on the tracker (e.g. "TOPRIGHT")
+-- @param relativePoint string Anchor point on UIParent (e.g. "TOPRIGHT")
+-- @param x number             X offset
+-- @param y number             Y offset
+function EditModeManager:SetTrackerAnchor(point, relativePoint, x, y)
+    if InCombatLockdown() then
+        state.pendingLayout = {
+            action = "trackerAnchor",
+            point = point,
+            relativePoint = relativePoint,
+            x = x,
+            y = y,
+        }
+        debug("Combat lockdown — queued SetTrackerAnchor")
+        return
+    end
+
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if not ok or not data then
+        debug("ERROR: C_EditMode.GetLayouts() failed:", data)
+        return
+    end
+
+    local layoutIdx = self:GetActiveRealUILayoutIndex(data)
+    if not layoutIdx then
+        -- User is on a non-RealUI layout — refuse the write to preserve
+        -- the sole-writer invariant on EditMode layout data (Req 10.1).
+        debug("SetTrackerAnchor: active layout is not RealUI-managed, skipping")
+        return
+    end
+
+    local sysInfo = self:FindSystemInfo(data.layouts[layoutIdx], SYSTEM_OBJECTIVE_TRACKER, 0)
+    if not sysInfo or not sysInfo.anchorInfo then
+        debug("SetTrackerAnchor: system 12 entry not found in active layout")
+        return
+    end
+
+    sysInfo.anchorInfo.point         = point
+    sysInfo.anchorInfo.relativeTo    = "UIParent"
+    sysInfo.anchorInfo.relativePoint = relativePoint
+    sysInfo.anchorInfo.offsetX       = x
+    sysInfo.anchorInfo.offsetY       = y
+
+    local saveOk, saveErr = pcall(C_EditMode.SaveLayouts, data)
+    if not saveOk then
+        debug("ERROR: C_EditMode.SaveLayouts() failed:", saveErr)
+        return
+    end
+
+    debug("SetTrackerAnchor: wrote", point, "UIParent", relativePoint, x, y)
 end
 
 --- Resets the RealUI layouts to their template defaults.
