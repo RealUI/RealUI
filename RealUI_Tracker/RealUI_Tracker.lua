@@ -10,7 +10,6 @@ function RealUI_Tracker:OnInitialize()
                 anchorFrom    = "TOPRIGHT",
                 x             = -50,
                 y             = -200,
-                maxHeightOffset = 300,
             },
             context = {
                 enabled = true,

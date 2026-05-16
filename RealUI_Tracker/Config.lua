@@ -25,7 +25,6 @@ function RealUI_Tracker:MigrateFromObjectivesAdv()
         db.position.anchorFrom      = op.position.anchorfrom or db.position.anchorFrom
         db.position.x               = op.position.x          or db.position.x
         db.position.y               = op.position.y          or db.position.y
-        db.position.maxHeightOffset = op.position.negheightofs or db.position.maxHeightOffset
     end
 
     -- Context hide/collapse
@@ -68,13 +67,6 @@ end
 
 local ACR = LibStub("AceConfigRegistry-3.0", true)
 
--- Fallback anchor points table in case RealUI is not loaded
-local ANCHOR_POINTS = {
-    "TOPLEFT",    "TOP",    "TOPRIGHT",
-    "LEFT",       "CENTER", "RIGHT",
-    "BOTTOMLEFT", "BOTTOM", "BOTTOMRIGHT",
-}
-
 -- Combat fade opacity key order and labels (matches CombatFader.lua keyOrder)
 local FADE_KEY_ORDER = {
     "incombat",
@@ -91,14 +83,6 @@ local FADE_KEY_LABELS = {
     outofcombat = "Out of Combat",
 }
 
-local function GetAnchorPoints()
-    local RealUI_Core = _G.RealUI
-    if RealUI_Core and RealUI_Core.globals and RealUI_Core.globals.anchorPoints then
-        return RealUI_Core.globals.anchorPoints
-    end
-    return ANCHOR_POINTS
-end
-
 local function BuildTrackerOptions()
     local db = RealUI_Tracker.db.profile
 
@@ -107,97 +91,6 @@ local function BuildTrackerOptions()
         local RealUI_Core = _G.RealUI
         return RealUI_Core and RealUI_Core:GetModule("CombatFader", true)
     end
-
-    ---------------------------------------------------------------------------
-    -- Position section
-    ---------------------------------------------------------------------------
-    local positionArgs = {
-        enabled = {
-            name = "Custom Position",
-            desc = "Enable custom positioning. When disabled, the tracker uses the Blizzard default position.",
-            type = "toggle",
-            width = "full",
-            get = function() return db.position.enabled end,
-            set = function(_, value)
-                db.position.enabled = value
-                RealUI_Tracker:UpdatePosition()
-            end,
-            order = 1,
-        },
-        anchorTo = {
-            name = "Anchor To",
-            desc = "The point on the screen to anchor to.",
-            type = "select",
-            values = GetAnchorPoints,
-            get = function()
-                local points = GetAnchorPoints()
-                for k, v in next, points do
-                    if v == db.position.anchorTo then return k end
-                end
-            end,
-            set = function(_, value)
-                db.position.anchorTo = GetAnchorPoints()[value]
-                RealUI_Tracker:UpdatePosition()
-            end,
-            disabled = function() return not db.position.enabled end,
-            order = 10,
-        },
-        anchorFrom = {
-            name = "Anchor From",
-            desc = "The point on the tracker frame to anchor from.",
-            type = "select",
-            values = GetAnchorPoints,
-            get = function()
-                local points = GetAnchorPoints()
-                for k, v in next, points do
-                    if v == db.position.anchorFrom then return k end
-                end
-            end,
-            set = function(_, value)
-                db.position.anchorFrom = GetAnchorPoints()[value]
-                RealUI_Tracker:UpdatePosition()
-            end,
-            disabled = function() return not db.position.enabled end,
-            order = 20,
-        },
-        x = {
-            name = "X Offset",
-            type = "input",
-            width = "half",
-            get = function() return tostring(db.position.x) end,
-            set = function(_, value)
-                db.position.x = tonumber(value) or db.position.x
-                RealUI_Tracker:UpdatePosition()
-            end,
-            disabled = function() return not db.position.enabled end,
-            order = 30,
-        },
-        y = {
-            name = "Y Offset",
-            type = "input",
-            width = "half",
-            get = function() return tostring(db.position.y) end,
-            set = function(_, value)
-                db.position.y = tonumber(value) or db.position.y
-                RealUI_Tracker:UpdatePosition()
-            end,
-            disabled = function() return not db.position.enabled end,
-            order = 40,
-        },
-        maxHeightOffset = {
-            name = "Height Offset",
-            desc = "How much shorter than screen height to make the tracker frame.",
-            type = "input",
-            width = "half",
-            get = function() return tostring(db.position.maxHeightOffset) end,
-            set = function(_, value)
-                db.position.maxHeightOffset = tonumber(value) or db.position.maxHeightOffset
-                RealUI_Tracker:UpdatePosition()
-            end,
-            disabled = function() return not db.position.enabled end,
-            order = 50,
-        },
-    }
 
     ---------------------------------------------------------------------------
     -- Context section
@@ -465,12 +358,6 @@ local function BuildTrackerOptions()
                 type = "description",
                 fontSize = "medium",
                 order = 1,
-            },
-            position = {
-                name = "Position",
-                type = "group",
-                order = 10,
-                args = positionArgs,
             },
             context = {
                 name = "Context",
