@@ -1,3 +1,30 @@
+## [3.3.2] - 2026-05-17 ##
+### Summary ###
+EditMode migration update. RealUI_Tracker's custom position panel is removed — the objective tracker is now positioned exclusively via the native EditMode UI (system 12). On the first session after upgrading, the tracker's previously stored custom position is seeded into the active RealUI EditMode layout, so users keep their placement without manual re-configuration. A migration cleans up orphan saved-variable keys (`playerpowerbaralt` from FrameMover profiles, `maxHeightOffset` from Tracker profiles) and force-rebuilds RealUI EditMode layouts to correct any legacy `RealUI_TrackerFrame` anchor references that caused a secureexecuterange warning. `PlayerPowerBarAlt` (Alternate Power Bar) is removed from FrameMover since EditMode already owns and positions that frame. Aurora is updated from 12.0.5.10 to 12.0.5.11 with broad Maps, NamePlate, Tooltip, and UIWidget taint fixes.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Tracker
+  * Aurora (12.0.5.11)
+
+### Changed ###
+
+  * chg: Aurora updated to 12.0.5.11 (from 12.0.5.10)
+  * chg: RealUI_Tracker positioning is now fully owned by EditMode — the tracker container uses inverted anchoring (`SetAllPoints(OTF)`) so OTF's position is driven by EditMode system 12 and the container passively tracks it
+  * chg: RealUI_Tracker Position config panel removed from Advanced options — adjust tracker position via the native EditMode UI
+  * chg: FrameMover: removed `PlayerPowerBarAlt` (Alternate Power Bar) — EditMode owns and positions this frame
+
+### Fixed ###
+  * fix: `RealUI_TrackerFrame` anchor reference in saved EditMode layouts — migration rebuilds RealUI layouts with `relativeTo = "UIParent"` for system 12, resolving the secureexecuterange warning "Couldn't find region named 'RealUI_TrackerFrame'"
+  * fix: periodic tracker disappearance — the old `hooksecurefunc(OTF, "SetPoint", ...)` hook left OTF un-anchored between EditMode clearing its points and the hook re-anchoring it; inverted anchoring eliminates that intermediate state entirely
+  * fix: Aurora 12.0.5.11 removes `MapCanvasScrollControllerMixin` method replacements that tainted the secure pin-acquisition path and blocked `SetPropagateMouseClicks`
+  * fix: Aurora 12.0.5.11 skips nameplate bar skinning to prevent `Base.SetBackdrop` taint from propagating into `CompactUnitFrame_UpdateHealPrediction`
+  * fix: Aurora 12.0.5.11 guards nameplate units in `CompactUnitFrame_UpdateHealthColor` to prevent `SetStatusBarColor` taint causing "secret number value" errors
+  * fix: Aurora 12.0.5.11 removes `GameTooltip_AddWidgetSet` global wrapper that tainted execution before `RegisterForWidgetSet` and caused `GetScaledRect` to return secret values
+  * fix: Aurora 12.0.5.11 removes `UIWidgetContainerMixin.CreateWidget` global `hooksecurefunc` that propagated taint into `UpdateWidgetLayout → DefaultWidgetLayout → GetScaledRect` for tooltip widget containers
+
+
 ## [3.3.1] - 2026-05-14 ##
 ### Summary ###
 Nameplate quality-of-life update with Aurora taint hardening. Platynator profile gains two player-facing improvements: out-of-range enemies now fade to 60% alpha for clearer target priority, and party members on friendly nameplates show role-colored names (tank blue, healer green, damage red). The profile has also been updated for compatibility with Platynator 380+. A new `/realui platynator` command lets users re-apply the bundled Platynator profile live without a full UI reset. A spec-swap Lua error (race condition on specialization change) is fixed. `Blizzard_PlayerChoice` is now preloaded at login so the advanced config EditMode panel works reliably. Aurora is updated from 12.0.5.8 to 12.0.5.9 with several taint fixes.
@@ -882,6 +909,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.3.2]: https://github.com/RealUI/RealUI/compare/3.3.1...3.3.2
 [3.3.1]: https://github.com/RealUI/RealUI/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/RealUI/RealUI/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/RealUI/RealUI/compare/3.1.18...3.2.0
