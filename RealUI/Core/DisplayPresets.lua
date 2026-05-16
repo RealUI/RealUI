@@ -245,6 +245,16 @@ function DisplayPresets.RefreshFontScale(scale)
     end
 
     -- Objective Tracker: scale the whole frame
+    --
+    -- Trigger classification (Req 7.9 candidate b — periodic SetScale): RULED OUT.
+    -- This SetScale is one-shot per preset change. RefreshFontScale is invoked from
+    -- Apply (line ~358) on explicit preset switch and from ApplyStored (line ~434),
+    -- where ApplyStored runs on PLAYER_ENTERING_WORLD via the eventFrame that
+    -- unregisters PLAYER_ENTERING_WORLD on first fire (see line ~458). There is no
+    -- timer, OnUpdate, or recurring event driving this code path. SetScale also
+    -- chains no SetPoint call — only the frame's effective scale is updated, the
+    -- tracker's anchor is untouched. Therefore this call cannot be the source of
+    -- the periodic-disappearance behavior described in Req 7.9.
     if _G.ObjectiveTrackerFrame then
         _G.ObjectiveTrackerFrame:SetScale(scale)
     end
