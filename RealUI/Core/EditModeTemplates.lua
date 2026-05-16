@@ -394,13 +394,32 @@ Templates.base = {
 
     -- =====================================================================
     -- System 12: Objective Tracker — right side
+    --
+    -- Resolved Enum.EditModeObjectiveTrackerSetting names (verified against
+    -- wow-ui-source/Interface/AddOns/Blizzard_APIDocumentationGenerated/
+    -- EditModeManagerConstantsDocumentation.lua, lines 528-530):
+    --   setting = 0 -> Enum.EditModeObjectiveTrackerSetting.Height
+    --   setting = 1 -> Enum.EditModeObjectiveTrackerSetting.Opacity
+    --   setting = 2 -> Enum.EditModeObjectiveTrackerSetting.TextSize
+    --
+    -- There is NO visibility setting in the ObjectiveTracker enum. The
+    -- "always shown" hard-coded value of 0 mentioned in Requirement 7.5 is
+    -- intentionally NOT applied here: per Requirement 7.11, since no enum
+    -- member documents that semantic, criterion 7.5's hard-coded 0 is
+    -- inapplicable. Bug B (periodic disappearance) is not addressed by an
+    -- enum-write at this site; see the design's "Bug Root Cause Analysis"
+    -- and the inverted-anchoring fix in RealUI_Tracker/Container.lua.
+    --
+    -- Anchor below uses relativeTo = "UIParent" and (implicit) relativeFrame
+    -- = nil (Requirement 6.3) so the saved layout never references a frame
+    -- name outside EditMode's standard target set.
     -- =====================================================================
     Entry(SYSTEM_OBJECTIVE_TRACKER, nil,
         Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -25, -210),
         {
-            { setting = 0, value = 40 },
-            { setting = 1, value = 0 },
-            { setting = 2, value = 0 },
+            { setting = 0, value = 40 },  -- Height
+            { setting = 1, value = 0 },   -- Opacity
+            { setting = 2, value = 0 },   -- TextSize
         }),
 
     -- =====================================================================
