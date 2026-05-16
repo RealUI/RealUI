@@ -33,10 +33,6 @@ local FrameList = {
             name = "Errors",
             frames = {[1] = {name = "UIErrorsFrame"},},
         },
-        playerpowerbaralt = {
-            name = "Alternate Power Bar",
-            frames = {[1] = {name = "PlayerPowerBarAlt"},},
-        },
     },
 }
 FrameMover.FrameList = FrameList
@@ -126,11 +122,6 @@ function FrameMover:OnInitialize()
                 worldstate = {
                     frames = {
                         [1] = {name = "WorldStateAlwaysUpFrame", parent = "UIParent", point = "TOP", rpoint = "TOP", x = -5, y = -20},
-                    },
-                },
-                playerpowerbaralt = {
-                    frames = {
-                        [1] = {name = "PlayerPowerBarAlt", parent = "UIParent", point = "CENTER", rpoint = "CENTER", x = 295, y = -275},
                     },
                 },
             },
