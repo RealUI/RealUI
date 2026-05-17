@@ -689,11 +689,10 @@ function EditModeManager:MigrateFromPreEditMode()
 
     -- Step 3 — Force-rebuild RealUI layouts so the corrected ObjectiveTracker
     -- entry (system 12 with `relativeTo = "UIParent"`) is written into the
-    -- saved layout data. The `forceRebuild` flag computed above is true
-    -- whenever the stored migrationVersion is less than MIGRATION_VERSION,
-    -- so any user upgrading from v2 (or earlier) gets a fresh rebuild that
-    -- overwrites any prior `relativeTo = "RealUI_TrackerFrame"` corruption
-    -- on disk (resolves Req 6.13).
+    -- saved layout data. `forceRebuild` is true whenever migrationVersion is
+    -- less than MIGRATION_VERSION OR was never recorded (nil), covering both
+    -- upgrade users and pre-flag users whose corrupted layout was previously
+    -- preserved by Bug B (resolves Req 6.13).
     --
     -- This step is BLOCKING: on failure (EnsureLayouts returns false, or the
     -- pcall traps a Lua error in the function body), we log and bail out
