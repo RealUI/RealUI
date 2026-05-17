@@ -174,10 +174,10 @@ function ConfigPersistence:SavePositionData()
         profile.positions = {}
     end
 
-    -- Save current layout positions
-    if RealUI.cLayout and RealUI.defaultPositions then
-        profile.positions[RealUI.cLayout] = self:DeepCopy(RealUI.defaultPositions[RealUI.cLayout])
-    end
+    -- profile.positions is the live AceDB table seeded from RealUI.defaultPositions
+    -- by GetDatabaseDefaults(). AceDB persists it automatically; overwriting it here
+    -- with RealUI.defaultPositions (which the slider never updates) would reset
+    -- user-modified values such as UFHorizontal every 5 minutes and on logout.
 
     return true
 end
