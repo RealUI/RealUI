@@ -1,3 +1,23 @@
+## [3.3.3] - 2026-05-18 ##
+### Summary ###
+Unit frame sizing and EditMode migration fixes. Player and target unit frames are now resizable via the config UI (width 150–400, height 18–50). A bug where `SavePositionData` reset the `UFHorizontal` position to its default every 5 minutes is fixed. The EditMode migration logic is tightened: `NeedsMigration()` no longer short-circuits for pre-flag layouts, and the `forceRebuild` condition in `MigrateFromPreEditMode()` is corrected.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Config
+
+### Added ###
+
+  * add: Player and target unit frames are now resizable — Width (150–400) and Height (18–50) sliders added to the Frame Size section in config
+
+### Fixed ###
+
+  * fix: `SavePositionData` was resetting `UFHorizontal` to its default value every 5 minutes
+  * fix: `NeedsMigration()` — removed bogus short-circuit that prevented pre-flag layouts from triggering migration
+  * fix: `forceRebuild` condition in `MigrateFromPreEditMode()` was not evaluating correctly
+
+
 ## [3.3.2] - 2026-05-17 ##
 ### Summary ###
 EditMode migration update. RealUI_Tracker's custom position panel is removed — the objective tracker is now positioned exclusively via the native EditMode UI (system 12). On the first session after upgrading, the tracker's previously stored custom position is seeded into the active RealUI EditMode layout, so users keep their placement without manual re-configuration. A migration cleans up orphan saved-variable keys (`playerpowerbaralt` from FrameMover profiles, `maxHeightOffset` from Tracker profiles) and force-rebuilds RealUI EditMode layouts to correct any legacy `RealUI_TrackerFrame` anchor references that caused a secureexecuterange warning. `PlayerPowerBarAlt` (Alternate Power Bar) is removed from FrameMover since EditMode already owns and positions that frame. Aurora is updated from 12.0.5.10 to 12.0.5.11 with broad Maps, NamePlate, Tooltip, and UIWidget taint fixes.
