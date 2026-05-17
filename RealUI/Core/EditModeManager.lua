@@ -578,11 +578,14 @@ function EditModeManager:MigrateFromPreEditMode()
     local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
     local presetId = (display and display.presetId) or "standard"
 
-    -- If an older schema version exists, force-rebuild so template
-    -- changes propagate into the user's RealUI layout.
+    -- Force-rebuild whenever migrating so any corrupted relativeTo=
+    -- "RealUI_TrackerFrame" anchor is overwritten with "UIParent".
+    -- nil oldVersion (pre-flag layout) was Bug B: the old expression
+    -- `(oldVersion ~= nil) and (...)` evaluated to false, preserving
+    -- the corrupted layout instead of rebuilding it.
     local dbg = RealUI.db and RealUI.db.global
     local oldVersion = dbg and dbg.editmode and dbg.editmode.migrationVersion
-    local forceRebuild = (oldVersion ~= nil) and (oldVersion < MIGRATION_VERSION)
+    local forceRebuild = (oldVersion == nil) or (oldVersion < MIGRATION_VERSION)
 
     -- Step 5 — Defensive key-count snapshot (BEFORE).
     --
