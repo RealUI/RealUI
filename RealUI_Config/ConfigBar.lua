@@ -1336,6 +1336,37 @@ do -- UnitFrames
                     end
                 end,
             }
+            unit.args.frameSizeHeader = {
+                name = "Frame Size",
+                type = "header",
+                order = 31,
+            }
+            unit.args.frameWidth = {
+                name = "Width",
+                type = "range",
+                min = 150, max = 400, step = 1, bigStep = 5,
+                order = 32,
+                get = function()
+                    return UnitFrames.db.profile.units[unitSlug].size.x
+                end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units[unitSlug].size.x = val
+                    UnitFrames:ResizeFrames()
+                end,
+            }
+            unit.args.frameHeight = {
+                name = "Height",
+                type = "range",
+                min = 18, max = 50, step = 1, bigStep = 2,
+                order = 33,
+                get = function()
+                    return UnitFrames.db.profile.units[unitSlug].size.y
+                end,
+                set = function(_, val)
+                    UnitFrames.db.profile.units[unitSlug].size.y = val
+                    UnitFrames:ResizeFrames()
+                end,
+            }
         end
         --[[ future times
         local unitInfo = db.units[unitSlug]

@@ -583,6 +583,69 @@ local function Shared(self, unit)
 
     unitData.create(self)
 
+    if isAngled then
+        local point = unitData.health.point
+        local healthHeightPct = unitDB.healthHeight or 0.6
+
+        function self:ApplySize(newWidth, newHeight)
+            local newHealthH = round((newHeight - 3) * healthHeightPct)
+            local newPowerH  = round((newHeight - 3) * (1 - healthHeightPct))
+            local newPowerW  = round(newWidth * 0.9)
+            local newXOffset = newHealthH - newPowerH
+
+            self:SetSize(newWidth, newHeight)
+
+            self.Health:SetSize(newWidth, newHealthH)
+            if self.HealthBG then self.HealthBG:SetSize(newWidth, newHealthH) end
+
+            if self.Health.HealingAll   then self.Health.HealingAll:SetWidth(newWidth)   end
+            if self.Health.DamageAbsorb then self.Health.DamageAbsorb:SetWidth(newWidth) end
+            if self.Health.HealAbsorb   then self.Health.HealAbsorb:SetWidth(newWidth)   end
+
+            if self.Power then
+                self.Power:SetSize(newPowerW, newPowerH)
+                self.Power:ClearAllPoints()
+                if point == "RIGHT" then
+                    self.Power:SetPoint("BOTTOMRIGHT", self, -newXOffset, 0)
+                else
+                    self.Power:SetPoint("BOTTOMLEFT", self, newXOffset, 0)
+                end
+            end
+
+            if self.CombatIndicator then self.CombatIndicator:SetHeight(newPowerH) end
+            if self.LeaderIndicator  then self.LeaderIndicator:SetHeight(newPowerH)  end
+
+            if self.AdditionalPower and self.Power then
+                self.AdditionalPower:ClearAllPoints()
+                self.AdditionalPower:SetPoint("BOTTOMLEFT",  self.Power, "TOPLEFT",  0, 0)
+                self.AdditionalPower:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -newPowerH, 0)
+            end
+
+            if self.EndBox then
+                local healthBox = self.EndBox[1]
+                if healthBox then
+                    healthBox:SetSize(6, newHealthH + 2)
+                    healthBox:ClearAllPoints()
+                    if point == "RIGHT" then
+                        healthBox:SetPoint("TOPLEFT",  self.Health, "TOPRIGHT", -(newHealthH - 2), 0)
+                    else
+                        healthBox:SetPoint("TOPRIGHT", self.Health, "TOPLEFT",  (newHealthH - 2), 0)
+                    end
+                end
+                local powerBox = self.EndBox[2]
+                if powerBox then
+                    powerBox:SetSize(6, newPowerH + 2)
+                    powerBox:ClearAllPoints()
+                    if point == "RIGHT" then
+                        powerBox:SetPoint("BOTTOMLEFT",  self.Power, "BOTTOMRIGHT", -(newPowerH - 2), 0)
+                    else
+                        powerBox:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMLEFT",  (newPowerH - 2), 0)
+                    end
+                end
+            end
+        end
+    end
+
     -- Create CastBars for units that had them before the rewrite
     if (unit == "player" or unit == "target" or unit == "focus") and RealUI:GetModuleEnabled("CastBars") then
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit, unitData)

@@ -474,10 +474,8 @@ function UnitFrames:ResizeFrames()
             if unitDB and unitDB.size then
                 local width = round(unitDB.size.x * sizeMod)
                 local height = round(unitDB.size.y * sizeMod)
-                local isAngled = unitData and unitData.health and unitData.health.leftVertex and unitData.health.rightVertex
-
-                if isAngled then
-                    frame:SetSize(width, height)
+                if frame.ApplySize then
+                    frame:ApplySize(width, height)
                 else
                     frame:SetSize(width - 2, height - 2)
                 end
