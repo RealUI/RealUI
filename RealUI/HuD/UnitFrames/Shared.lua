@@ -587,59 +587,59 @@ local function Shared(self, unit)
         local point = unitData.health.point
         local healthHeightPct = unitDB.healthHeight or 0.6
 
-        function self:ApplySize(newWidth, newHeight)
+        function self.ApplySize(frame, newWidth, newHeight)
             local newHealthH = round((newHeight - 3) * healthHeightPct)
             local newPowerH  = round((newHeight - 3) * (1 - healthHeightPct))
             local newPowerW  = round(newWidth * 0.9)
             local newXOffset = newHealthH - newPowerH
 
-            self:SetSize(newWidth, newHeight)
+            frame:SetSize(newWidth, newHeight)
 
-            self.Health:SetSize(newWidth, newHealthH)
-            if self.HealthBG then self.HealthBG:SetSize(newWidth, newHealthH) end
+            frame.Health:SetSize(newWidth, newHealthH)
+            if frame.HealthBG then frame.HealthBG:SetSize(newWidth, newHealthH) end
 
-            if self.Health.HealingAll   then self.Health.HealingAll:SetWidth(newWidth)   end
-            if self.Health.DamageAbsorb then self.Health.DamageAbsorb:SetWidth(newWidth) end
-            if self.Health.HealAbsorb   then self.Health.HealAbsorb:SetWidth(newWidth)   end
+            if frame.Health.HealingAll   then frame.Health.HealingAll:SetWidth(newWidth)   end
+            if frame.Health.DamageAbsorb then frame.Health.DamageAbsorb:SetWidth(newWidth) end
+            if frame.Health.HealAbsorb   then frame.Health.HealAbsorb:SetWidth(newWidth)   end
 
-            if self.Power then
-                self.Power:SetSize(newPowerW, newPowerH)
-                self.Power:ClearAllPoints()
+            if frame.Power then
+                frame.Power:SetSize(newPowerW, newPowerH)
+                frame.Power:ClearAllPoints()
                 if point == "RIGHT" then
-                    self.Power:SetPoint("BOTTOMRIGHT", self, -newXOffset, 0)
+                    frame.Power:SetPoint("BOTTOMRIGHT", frame, -newXOffset, 0)
                 else
-                    self.Power:SetPoint("BOTTOMLEFT", self, newXOffset, 0)
+                    frame.Power:SetPoint("BOTTOMLEFT", frame, newXOffset, 0)
                 end
             end
 
-            if self.CombatIndicator then self.CombatIndicator:SetHeight(newPowerH) end
-            if self.LeaderIndicator  then self.LeaderIndicator:SetHeight(newPowerH)  end
+            if frame.CombatIndicator then frame.CombatIndicator:SetHeight(newPowerH) end
+            if frame.LeaderIndicator  then frame.LeaderIndicator:SetHeight(newPowerH)  end
 
-            if self.AdditionalPower and self.Power then
-                self.AdditionalPower:ClearAllPoints()
-                self.AdditionalPower:SetPoint("BOTTOMLEFT",  self.Power, "TOPLEFT",  0, 0)
-                self.AdditionalPower:SetPoint("BOTTOMRIGHT", self.Power, "TOPRIGHT", -newPowerH, 0)
+            if frame.AdditionalPower and frame.Power then
+                frame.AdditionalPower:ClearAllPoints()
+                frame.AdditionalPower:SetPoint("BOTTOMLEFT",  frame.Power, "TOPLEFT",  0, 0)
+                frame.AdditionalPower:SetPoint("BOTTOMRIGHT", frame.Power, "TOPRIGHT", -newPowerH, 0)
             end
 
-            if self.EndBox then
-                local healthBox = self.EndBox[1]
+            if frame.EndBox then
+                local healthBox = frame.EndBox[1]
                 if healthBox then
                     healthBox:SetSize(6, newHealthH + 2)
                     healthBox:ClearAllPoints()
                     if point == "RIGHT" then
-                        healthBox:SetPoint("TOPLEFT",  self.Health, "TOPRIGHT", -(newHealthH - 2), 0)
+                        healthBox:SetPoint("TOPLEFT",  frame.Health, "TOPRIGHT", -(newHealthH - 2), 0)
                     else
-                        healthBox:SetPoint("TOPRIGHT", self.Health, "TOPLEFT",  (newHealthH - 2), 0)
+                        healthBox:SetPoint("TOPRIGHT", frame.Health, "TOPLEFT",  (newHealthH - 2), 0)
                     end
                 end
-                local powerBox = self.EndBox[2]
+                local powerBox = frame.EndBox[2]
                 if powerBox then
                     powerBox:SetSize(6, newPowerH + 2)
                     powerBox:ClearAllPoints()
                     if point == "RIGHT" then
-                        powerBox:SetPoint("BOTTOMLEFT",  self.Power, "BOTTOMRIGHT", -(newPowerH - 2), 0)
+                        powerBox:SetPoint("BOTTOMLEFT",  frame.Power, "BOTTOMRIGHT", -(newPowerH - 2), 0)
                     else
-                        powerBox:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMLEFT",  (newPowerH - 2), 0)
+                        powerBox:SetPoint("BOTTOMRIGHT", frame.Power, "BOTTOMLEFT",  (newPowerH - 2), 0)
                     end
                 end
             end
