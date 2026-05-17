@@ -532,32 +532,24 @@ end
 --      durability frame, archaeology bar, etc.) migrated to native EditMode
 --      settings; forces a template rebuild so existing auto-generated
 --      layouts pick up the new EditMode positions.
-local MIGRATION_VERSION = 3
+--  4 = Purge saved layouts that still contain relativeTo="RealUI_TrackerFrame"
+--      on the ObjectiveTracker entry (system 12). Prior versions had two bugs:
+--      (a) NeedsMigration short-circuited on existing pre-flag layouts without
+--      fixing them; (b) forceRebuild was false when oldVersion was nil, so
+--      EnsureLayouts preserved rather than rebuilt corrupted pre-flag layouts.
+local MIGRATION_VERSION = 4
 
 --- Checks whether migration from pre-EditMode RealUI is needed.
 -- @return boolean  true if migration should run
 function EditModeManager:NeedsMigration()
     local dbg = RealUI.db and RealUI.db.global
     if dbg and dbg.editmode and dbg.editmode.migrationVersion then
-        -- Already migrated to current schema; nothing to do
-        if dbg.editmode.migrationVersion >= MIGRATION_VERSION then
-            return false
-        end
-        -- Older schema version — migration will upgrade it
-        return true
+        return dbg.editmode.migrationVersion < MIGRATION_VERSION
     end
-
-    if state.initialized then
-        local ok, data = pcall(C_EditMode.GetLayouts)
-        if ok and data then
-            if FindLayoutIndex(data, "RealUI") then
-                -- Layout already exists — mark as migrated and skip
-                self:SetMigrationFlag()
-                return false
-            end
-        end
-    end
-
+    -- No migration version recorded — always migrate so any pre-existing
+    -- layout with a corrupted relativeTo anchor gets force-rebuilt.
+    -- The old "layout exists → skip" short-circuit was Bug A: it called
+    -- SetMigrationFlag without actually fixing the corrupted data.
     return true
 end
 
