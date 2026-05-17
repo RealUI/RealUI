@@ -470,7 +470,6 @@ function UnitFrames:ResizeFrames()
         if frame then
             local unitKey = frame.unit
             local unitDB = db.units[unitKey]
-            local unitData = UnitFrames[unitKey]
             if unitDB and unitDB.size then
                 local width = round(unitDB.size.x * sizeMod)
                 local height = round(unitDB.size.y * sizeMod)
