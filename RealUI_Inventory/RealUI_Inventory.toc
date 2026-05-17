@@ -1,9 +1,9 @@
-## Interface: 120005, 120007
+﻿## Interface: 120005, 120007
 ## Title: RealUI Inventory
 ## Category: RealUI_Core
 ## Notes: Categorized bags designed for RealUI
 ## Author: Gethe, Hanshi
-## Version: 3.3.2
+## Version: 3.3.3
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## SavedVariables: RealUI_InventoryDB
