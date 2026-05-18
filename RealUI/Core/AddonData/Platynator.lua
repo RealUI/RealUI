@@ -11,8 +11,8 @@ function private.AddOns.Platynator()
 end
 
 function private.Profiles.Platynator()
-    -- Switch the character's active Platynator profile to "RealUI".
-    -- PLATYNATOR_CURRENT_PROFILE is a per-character saved variable.
+    local settings = RealUI:GetAddonControlSettings("Platynator")
+    if settings.base == false then return end
     if _G.PLATYNATOR_CONFIG and _G.PLATYNATOR_CONFIG.Profiles
             and _G.PLATYNATOR_CONFIG.Profiles["RealUI"] then
         _G.PLATYNATOR_CURRENT_PROFILE = "RealUI"
