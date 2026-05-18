@@ -346,9 +346,11 @@ function RealUI:GetAddonControlSettings(addon)
         end
     end
 
+    local ctrl = db.addonControl and db.addonControl[addon]
+    if not ctrl then return {} end
     return {
-        position = db.addonControl[addon].control.position,
-        base = db.addonControl[addon].profiles.base.use,
+        position = ctrl.control.position,
+        base = ctrl.profiles.base.use,
     }
 end
 
