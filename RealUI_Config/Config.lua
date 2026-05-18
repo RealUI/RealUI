@@ -31,7 +31,6 @@ local isHuDShown = false
 local debug = RealUI.GetDebug(MOD_NAME)
 private.debug = debug
 
-local RavenTimer
 _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(dialog)
     if dialog._show then
         dialog:Show()
@@ -69,24 +68,6 @@ end
 
 function RealUI:HuDTestMode(isConfigMode)
     FramePoint:ToggleAll(not isConfigMode)
-
-    -- Toggle Test Modes
-    -- Raven
-    local Raven = _G.Raven
-    if Raven then
-        if isConfigMode then
-            Raven:TestBarGroups()
-            RavenTimer = _G.C_Timer.NewTicker(51, function()
-                Raven:TestBarGroups()
-            end)
-        else
-            if self.isConfigMode then
-                RavenTimer:Cancel()
-                RavenTimer = nil
-                Raven:TestBarGroups()
-            end
-        end
-    end
 
     RealUI:ToggleGridTestMode(isConfigMode)
 

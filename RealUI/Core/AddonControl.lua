@@ -19,7 +19,6 @@ local AddonControl = RealUI:NewModule(MODNAME, "AceEvent-3.0")
 
 
 local RealUIAddOns = {
-    ["Raven"] =         {isAce = true, db = "RavenDB",          profKey = "profileKeys"},
     ["Skada"] =         {isAce = true, db = "SkadaDB",          profKey = "profileKeys"},
 
     ["DBM"] =                    {isAce = false, db = "DBT_AllPersistentOptions"},
@@ -29,7 +28,6 @@ local RealUIAddOnsOrder = {
     "Masque",
     "Bartender4",
     "Platynator",
-    "Raven",
     "Skada",
 }
 
@@ -219,7 +217,6 @@ function AddonControl:CreateOptionsFrame()
     local PositionAddOns = {
         ["DBM"] = true,
         ["Bartender4"] = true,
-        ["Raven"] = true,
     }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
@@ -394,16 +391,6 @@ function AddonControl:OnInitialize()
                     },
                     control = {
                         position = false,
-                        style = false,
-                    },
-                },
-                ["Raven"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI"},
-                        layout =        {use = false,   key = "Healing"},
-                    },
-                    control = {
-                        position = true,
                         style = false,
                     },
                 },

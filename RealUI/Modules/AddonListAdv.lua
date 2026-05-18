@@ -62,8 +62,6 @@ local RealUISet = {
     "Masque",
     "RealUI",
     "RealUI_Config",
-    "Raven",
-    "Raven_Options",
     "RealUI_Bugs",
     "RealUI_Inventory",
     "RealUI_Skins",
