@@ -69,6 +69,7 @@ end
 
 function FramePoint:RestorePosition(mod)
     local module = modules[mod]
+    if not module then return end
     for frame, meta in next, module.frames do
         local config = RealUI.GetOptions(mod.moduleName, meta.optionPath)
         if config and config.x then

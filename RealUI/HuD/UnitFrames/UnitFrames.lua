@@ -614,6 +614,12 @@ function UnitFrames:RepositionFrames()
             end
         end
     end
+
+    -- Re-anchor FramePoint-managed frames to their drag frames and restore any
+    -- LibWindow-saved positions. RepositionFrames() sets frame anchors directly,
+    -- which breaks the frame -> dragFrame -> LibWindow chain for frames the user
+    -- has moved in the frame editor.
+    FramePoint:RestorePosition(self)
 end
 
 function UnitFrames:OnInitialize()
