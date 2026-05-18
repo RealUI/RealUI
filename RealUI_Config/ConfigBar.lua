@@ -943,20 +943,22 @@ do -- UnitFrames
             name = L["General_XOffset"],
             type = "input",
             order = 10,
-            get = function(info) return tostring(UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].x) end,
+            get = function(info) return tostring(UnitFrames.db.profile.positions[safeLayout()][unitSlug].x) end,
             set = function(info, value)
                 value = ValidateOffset(value)
-                UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].x = value
+                UnitFrames.db.profile.positions[safeLayout()][unitSlug].x = value
+                UnitFrames:RepositionFrames()
             end,
         }
         unit.args.y = {
             name = L["General_YOffset"],
             type = "input",
             order = 20,
-            get = function(info) return tostring(UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y) end,
+            get = function(info) return tostring(UnitFrames.db.profile.positions[safeLayout()][unitSlug].y) end,
             set = function(info, value)
                 value = ValidateOffset(value)
-                UnitFrames.db.profile.positions[RealUI.db.profile.settings.hudSize][unitSlug].y = value
+                UnitFrames.db.profile.positions[safeLayout()][unitSlug].y = value
+                UnitFrames:RepositionFrames()
             end,
         }
         if unitSlug == "player" or unitSlug == "target" then
