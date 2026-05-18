@@ -1,3 +1,39 @@
+## [3.3.4] - 2026-05-19 ##
+### Summary ###
+Unit frame and HuD position stability fixes. Unit frame X/Y config offsets now use the correct `safeLayout()` index and apply immediately. `HuDPositioning` no longer overwrites the user-saved `UFHorizontal` value on reload. User-moved frames are re-anchored with their saved positions restored at the end of `RepositionFrames()`. Platynator gains a `not_in_combat_alpha` setting, now appears in the `RealUIAddOnsOrder` display list, and respects the addon control configuration. All remaining Raven integration code is removed. Aurora updated from 12.0.5.11 to 12.0.5.13.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Config
+  * RealUI_Bugs
+  * Aurora (12.0.5.13)
+
+### Added ###
+
+  * add: Platynator `not_in_combat_alpha` setting bundled in the RealUI Platynator profile
+  * add: Platynator shown in `RealUIAddOnsOrder` display list (Base checkbox only)
+
+### Changed ###
+
+  * chg: Aurora updated to 12.0.5.13 (from 12.0.5.11)
+  * chg: Platynator now respects the addon control configuration
+  * chg: BugGrabber updated to v12.0.16
+
+### Removed ###
+
+  * removed: all remaining Raven integration code — `AddonData/Raven.lua`, addon control entries, and config panel
+
+### Fixed ###
+
+  * fix: unit frame X/Y offset config uses `safeLayout()` index and applies the change immediately
+  * fix: `HuDPositioning` no longer overwrites `UFHorizontal` with the default value on reload
+  * fix: `RepositionFrames()` re-anchors user-moved frames to their drag frame and re-applies saved positions at the end of the pass
+  * fix: Aurora 12.0.5.12 tracks skinned `UIWidget` frames in a separate weak-key table to prevent `GetScaledRect()` taint in the secure `OnNamePlateAdded` path
+  * fix: Aurora 12.0.5.12 removes `SetPoint`/`SetHeight` calls from `QueueStatusEntry` hooks that were tainting frame geometry
+  * fix: Aurora 12.0.5.13 removes `UIWidgetBaseStatusBarTemplateMixin.InitPartitions` replacement that was causing `GetScaledRect()` taint in the secure `OnNamePlateAdded` path
+
+
 ## [3.3.3] - 2026-05-18 ##
 ### Summary ###
 Unit frame sizing and EditMode migration fixes. Player and target unit frames are now resizable via the config UI (width 150–400, height 18–50). A bug where `SavePositionData` reset the `UFHorizontal` position to its default every 5 minutes is fixed. The EditMode migration logic is tightened: `NeedsMigration()` no longer short-circuits for pre-flag layouts, and the `forceRebuild` condition in `MigrateFromPreEditMode()` is corrected.
@@ -929,6 +965,8 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.3.4]: https://github.com/RealUI/RealUI/compare/3.3.3...3.3.4
+[3.3.3]: https://github.com/RealUI/RealUI/compare/3.3.2...3.3.3
 [3.3.2]: https://github.com/RealUI/RealUI/compare/3.3.1...3.3.2
 [3.3.1]: https://github.com/RealUI/RealUI/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/RealUI/RealUI/compare/3.2.0...3.3.0
