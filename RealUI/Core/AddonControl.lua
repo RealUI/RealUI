@@ -28,6 +28,7 @@ local RealUIAddOnsOrder = {
     "DBM",
     "Masque",
     "Bartender4",
+    "Platynator",
     "Raven",
     "Skada",
 }
@@ -413,6 +414,16 @@ function AddonControl:OnInitialize()
                     },
                     control = {
                         position = true,
+                        style = false,
+                    },
+                },
+                ["Platynator"] = {
+                    profiles = {
+                        base =          {use = true,    key = "RealUI"},
+                        layout =        {use = false,   key = "Healing"},
+                    },
+                    control = {
+                        position = false,
                         style = false,
                     },
                 },
