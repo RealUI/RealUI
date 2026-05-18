@@ -79,6 +79,10 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
     -- Swap oUF.colors.health based on alternative bar style (only affects angled bars via UpdateColor override)
     oUF.colors.health = oUF:CreateColor(0.66, 0.22, 0.22)
 
+    -- Profile may not be fully populated on a fresh profile switch; bail and wait for the
+    -- next RefreshMod call which will retry once AceDB has settled the new profile.
+    if not db.units or not db.overlay then return end
+
     for i = 1, #units do
         local frame = _G["RealUI" .. units[i] .. "Frame"]
         if not frame then
@@ -333,7 +337,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                 end
             end
 
-            if frame.Debuffs then
+            if frame.Debuffs and db.boss then
                 if db.boss.showBossDebuffs then
                     frame.Debuffs.num = db.boss.debuffCount
                     frame.Debuffs:Show()
@@ -348,7 +352,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                 frame.Debuffs:SetHeight(debuffRows * (frame.Debuffs.size + debuffSpacing))
                 frame.Debuffs:ForceUpdate()
             end
-            if frame.Buffs then
+            if frame.Buffs and db.boss then
                 if db.boss.showBossBuffs then
                     frame.Buffs.num = db.boss.buffCount
                     frame.Buffs:Show()
