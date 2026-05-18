@@ -322,8 +322,12 @@ function HuDPositioning:UpdateRealUIPositions()
     --     keep action bars stacked above the infobar. HuDPositioning only
     --     has the raw default (16), which on HiDPI displays puts bars
     --     underneath the infobar by ~29px.
+    --   UFHorizontal — user-owned via the ConfigBar "Anchor Width" slider.
+    --     Positioners already adds the hudSizeOffset at apply time, so writing
+    --     the scaled value back here causes double-offset and resets saved widths.
     local runtimeOwnedKeys = {
         ["ActionBarsBotY"] = true,
+        ["UFHorizontal"] = true,
     }
 
     -- Update RealUI's position data with calculated values
