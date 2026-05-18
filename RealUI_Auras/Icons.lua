@@ -126,6 +126,7 @@ function Icons.Update(btn, auraData, group)
     -- Store metadata for tooltip (OnEnter reads these)
     btn._unit = group.detectBuffsMonitor or group.detectDebuffsMonitor or group.unit
     btn._auraInstanceID = auraData.auraInstanceID
+    btn.auraInstanceID  = auraData.auraInstanceID  -- CooldownCount ShouldHaveTimer check
     btn._isDebuff = auraData.isDebuff
     btn._isEnchant = auraData._isEnchant
     btn._enchantSlot = auraData._enchantSlot
