@@ -1,123 +1,85 @@
 -- Defaults.lua: AceDB default profile for RealUI_Auras
--- Translated from RealUI/RealUI/Core/AddonData/Raven.lua
--- Raven-internal fields (configuration, i_*, pointX/Y, bars, backdrop*, border*,
--- hideSpark, barColors, iconColors, minimumDuration, minimumTimeLeft, labelInset,
--- anchorPoint) are dropped or mapped to the new schema.
 
 local AurasAddon = LibStub("AceAddon-3.0"):GetAddon("RealUI_Auras")
 
 AurasAddon.defaults = {
     profile = {
+        cooldownViewer = {
+            buffIconCountdown = false,
+        },
         groups = {
             -----------------------------------------------------------------
             -- 1. Buffs — player buffs, top-right buff strip
-            --    Source: profiles.RealUI.BarGroups.Buffs
             --    Anchor: RealUIPositionersBuffs (positioner frame)
             -----------------------------------------------------------------
             Buffs = {
-                disabled            = true,
-                name                = "Buffs",
-                unit                = "player",
-                detectBuffs         = true,
-                detectDebuffs       = false,
-                detectBuffsCastBy   = "anyone",
+                disabled          = true,
+                name              = "Buffs",
+                unit              = "player",
+                detectBuffs       = true,
+                detectDebuffs     = false,
+                detectBuffsCastBy = "anyone",
 
-                anchorFrame         = "RealUIPositionersBuffs",
-                anchorX             = -3,   -- small inset from right edge of positioner
-                anchorY             = -3,   -- small offset down from top of positioner
+                anchorFrame = "RealUIPositionersBuffs",
+                anchorX     = -3,
+                anchorY     = -3,
 
-                iconSize            = 30,   -- i_iconSize
-                spacingX            = 3,    -- i_spacingX
-                spacingY            = 15,   -- i_spacingY
-                wrap                = 20,
-                maxBars             = 40,
-                growDirection       = false,
-                iconAlign           = "RIGHT",
-                iconInset           = -18,
-                iconOffset          = 5,
+                iconSize  = 30,
+                spacingX  = 3,
+                spacingY  = 15,
+                wrap      = 20,
+                maxBars   = 40,
+                iconAlign = "RIGHT",
 
-                hideBar             = true,
-                barWidth            = 20,   -- i_barWidth
-                barHeight           = 5,    -- i_barHeight
-                hideLabel           = true,
+                showNoDuration  = true,
+                checkDuration   = true,
+                filterDuration  = 60,
+                checkTimeLeft   = true,
+                filterTimeLeft  = 60,
+                filterBuffTable   = "ClassBuffs",
+                filterDebuffTable = "ClassBuffs",
 
-                timeAlign           = "LEFT",
-                timeOffset          = 18,
-                timeInset           = 16,
-                timeFormat          = 23,
-
-                showNoDuration      = true,
-                checkDuration       = true,
-                filterDuration      = 60,
-                checkTimeLeft       = true,
-                filterTimeLeft      = 60,
-                filterBuffTable     = "ClassBuffs",
-                filterDebuffTable   = "ClassBuffs",
-                filterCooldownTable = "ClassBuffs",
-
-                sor                 = "T",
-                timeSort            = false,
-                reverseSort         = true,
+                timeSort    = false,
+                reverseSort = true,
             },
 
             -----------------------------------------------------------------
             -- 2. TargetBuffs — target buffs beside target frame
-            --    Source: profiles.RealUI.BarGroups.TargetBuffs
             --    Anchor: RealUITargetFrame
             -----------------------------------------------------------------
             TargetBuffs = {
-                disabled            = true,
-                name                = "TargetBuffs",
-                unit                = "target",
-                detectBuffs         = true,
-                detectDebuffs       = false,
-                detectBuffsCastBy   = "anyone",
-                detectBuffsMonitor  = "target",
+                disabled          = true,
+                name              = "TargetBuffs",
+                unit              = "target",
+                detectBuffs       = true,
+                detectDebuffs     = false,
+                detectBuffsCastBy = "anyone",
+                detectBuffsMonitor = "target",
 
-                parentFrame         = "RealUITargetFrame",
-                anchorX             = 0,
-                anchorY             = -2,
+                parentFrame = "RealUITargetFrame",
+                anchorX     = 0,
+                anchorY     = -2,
 
-                iconSize            = 30,   -- i_iconSize
-                spacingX            = 3,    -- i_spacingX
-                spacingY            = 15,   -- i_spacingY
-                wrap                = 6,
-                maxBars             = 12,
-                growDirection       = false,
-                iconAlign           = "RIGHT",
-                iconInset           = -18,
-                iconOffset          = 5,
+                iconSize  = 30,
+                spacingX  = 3,
+                spacingY  = 15,
+                wrap      = 6,
+                maxBars   = 12,
+                iconAlign = "RIGHT",
 
-                hideBar             = true,
-                barWidth            = 20,   -- i_barWidth
-                barHeight           = 5,    -- i_barHeight
-                hideLabel           = true,
+                showNoDuration    = true,
+                filterBuffTable   = "ClassBuffs",
+                filterDebuffTable = "PlayerExclusions",
 
-                timeAlign           = "LEFT",
-                timeOffset          = 18,
-                timeInset           = 16,
-                timeFormat          = 23,
+                timeSort    = false,
+                reverseSort = false,
 
-                showNoDuration      = true,
-                filterBuffSpells    = true,
-                filterBuffTypes     = false,
-                filterBuffTable     = "ClassBuffs",
-                filterBuffList      = {},
-                filterDebuffTable   = "PlayerExclusions",
-                filterCooldownTable = "ClassBuffs",
-
-                sor                 = "T",
-                timeSort            = false,
-                reverseSort         = false,
-                playerSort          = true,
-
-                desaturate          = true,
-                desaturateFriend    = true,
+                desaturate       = true,
+                desaturateFriend = true,
             },
 
             -----------------------------------------------------------------
             -- 3. TargetDebuffs — target debuffs beside target frame
-            --    Source: profiles.RealUI.BarGroups.TargetDebuffs
             --    Anchor: RealUITargetFrame
             -----------------------------------------------------------------
             TargetDebuffs = {
@@ -126,47 +88,32 @@ AurasAddon.defaults = {
                 unit                 = "target",
                 detectBuffs          = false,
                 detectDebuffs        = true,
-                detectDebuffsMonitor = "target",
                 detectOtherDebuffs   = false,
+                detectDebuffsMonitor = "target",
 
-                parentFrame          = "RealUITargetFrame",
-                anchorX              = 0,
-                anchorY              = -4,
+                parentFrame = "RealUITargetFrame",
+                anchorX     = 0,
+                anchorY     = -4,
 
-                iconSize             = 30,   -- i_iconSize
-                spacingX             = 3,    -- i_spacingX
-                spacingY             = 15,   -- i_spacingY
-                wrap                 = 10,
-                maxBars              = 8,
-                growDirection        = false,
-                iconAlign            = "LEFT",
+                iconSize  = 30,
+                spacingX  = 3,
+                spacingY  = 15,
+                wrap      = 10,
+                maxBars   = 8,
+                iconAlign = "LEFT",
 
-                hideBar              = true,
-                barWidth             = 20,   -- i_barWidth
-                barHeight            = 5,    -- i_barHeight
-                hideLabel            = true,
+                showNoDuration    = true,
+                filterDebuffTable = "ClassBuffs",
+                filterBuffTable   = "ClassBuffs",
 
-                timeAlign            = "RIGHT",
-                timeFormat           = 23,
+                timeSort    = false,
+                reverseSort = false,
 
-                showNoDuration       = true,
-                filterDebuffSpells   = true,
-                filterDebuffTypes    = false,
-                filterDebuffTable    = "ClassBuffs",
-                filterDebuffList     = {},
-                filterBuffTable      = "ClassBuffs",
-                filterCooldownTable  = "ClassBuffs",
-
-                sor                  = "T",
-                timeSort             = false,
-                reverseSort          = false,
-
-                desaturate           = true,
+                desaturate = true,
             },
 
             -----------------------------------------------------------------
             -- 4. FocusBuffs — focus buffs beside focus frame
-            --    Source: profiles.RealUI.BarGroups.FocusBuffs
             --    Anchor: RealUIFocusFrame
             -----------------------------------------------------------------
             FocusBuffs = {
@@ -179,50 +126,30 @@ AurasAddon.defaults = {
                 detectBuffsMonitor   = "focus",
                 detectDebuffsMonitor = "focus",
 
-                parentFrame          = "RealUIFocusFrame",
-                anchorX              = 0,
-                anchorY              = -2,
+                parentFrame = "RealUIFocusFrame",
+                anchorX     = 0,
+                anchorY     = -2,
 
-                iconSize             = 30,   -- i_iconSize
-                spacingX             = 3,    -- i_spacingX
-                spacingY             = 15,   -- i_spacingY
-                wrap                 = 7,
-                maxBars              = 7,
-                growDirection        = false,
-                iconAlign            = "RIGHT",
-                iconInset            = -18,
-                iconOffset           = 5,
+                iconSize  = 30,
+                spacingX  = 3,
+                spacingY  = 15,
+                wrap      = 7,
+                maxBars   = 7,
+                iconAlign = "RIGHT",
 
-                hideBar              = true,
-                barWidth             = 20,   -- i_barWidth
-                barHeight            = 5,    -- i_barHeight
-                hideLabel            = true,
+                showNoDuration    = false,
+                filterBuffTable   = "PlayerExclusions",
+                filterDebuffTable = "PlayerExclusions",
 
-                timeAlign            = "LEFT",
-                timeOffset           = 18,
-                timeInset            = 16,
-                timeFormat           = 23,
+                timeSort    = false,
+                reverseSort = false,
 
-                showNoDuration       = false,
-                filterDebuffTypes    = true,
-                filterBuffTable      = "PlayerExclusions",
-                filterDebuffTable    = "PlayerExclusions",
-                filterCooldownTable  = "PlayerExclusions",
-
-                sor                  = "T",
-                timeSort             = false,
-                reverseSort          = false,
-
-                desaturate           = true,
-                desaturateFriend     = true,
-
-                noPlayerBuffs        = true,
-                noTargetBuffs        = false,
+                desaturate       = true,
+                desaturateFriend = true,
             },
 
             -----------------------------------------------------------------
             -- 5. FocusDebuffs — focus debuffs beside focus frame
-            --    Source: profiles.RealUI.BarGroups.FocusDebuffs
             --    Anchor: RealUIFocusFrame
             -----------------------------------------------------------------
             FocusDebuffs = {
@@ -234,45 +161,27 @@ AurasAddon.defaults = {
                 detectDebuffsCastBy  = "anyone",
                 detectDebuffsMonitor = "focus",
 
-                parentFrame          = "RealUIFocusFrame",
-                anchorX              = 0,
-                anchorY              = -4,
+                parentFrame = "RealUIFocusFrame",
+                anchorX     = 0,
+                anchorY     = -4,
 
-                iconSize             = 35,   -- i_iconSize
-                spacingX             = -8,   -- i_spacingX
-                spacingY             = -8,   -- i_spacingY
-                wrap                 = 7,
-                maxBars              = 7,
-                growDirection        = false,
-                iconAlign            = "RIGHT",
-                iconInset            = -18,
-                iconOffset           = 5,
+                iconSize  = 35,
+                spacingX  = -8,
+                spacingY  = -8,
+                wrap      = 7,
+                maxBars   = 7,
+                iconAlign = "RIGHT",
 
-                hideBar              = true,
-                barWidth             = 20,   -- i_barWidth
-                barHeight            = 5,    -- i_barHeight
-                hideLabel            = true,
+                showNoDuration    = true,
+                filterBuffTable   = "PlayerExclusions",
+                filterDebuffTable = "PlayerExclusions",
 
-                timeAlign            = "LEFT",
-                timeOffset           = 18,
-                timeInset            = 16,
-                timeFormat           = 23,
-
-                showNoDuration       = true,
-                filterBuffTable      = "PlayerExclusions",
-                filterDebuffTable    = "PlayerExclusions",
-
-                sor                  = "T",
-                timeSort             = false,
-                reverseSort          = false,
-
-                noPlayerDebuffs      = true,
-                noTargetDebuffs      = true,
+                timeSort    = false,
+                reverseSort = false,
             },
 
             -----------------------------------------------------------------
             -- 6. ToTDebuffs — target-of-target debuffs
-            --    Source: profiles.RealUI.BarGroups.ToTDebuffs
             --    Anchor: RealUITargetTargetFrame
             -----------------------------------------------------------------
             ToTDebuffs = {
@@ -281,45 +190,26 @@ AurasAddon.defaults = {
                 unit                 = "targettarget",
                 detectBuffs          = false,
                 detectDebuffs        = true,
-                detectDebuffsMonitor = "targettarget",
                 detectOtherDebuffs   = false,
+                detectDebuffsMonitor = "targettarget",
 
-                parentFrame          = "RealUITargetTargetFrame",
-                anchorX              = 0,
-                anchorY              = -2,
+                parentFrame = "RealUITargetTargetFrame",
+                anchorX     = 0,
+                anchorY     = -2,
 
-                iconSize             = 35,   -- i_iconSize
-                spacingX             = -8,   -- i_spacingX
-                spacingY             = -8,   -- i_spacingY
-                wrap                 = 7,
-                maxBars              = 7,
-                growDirection        = false,
-                iconAlign            = "RIGHT",
-                iconInset            = -18,
-                iconOffset           = 5,
+                iconSize  = 35,
+                spacingX  = -8,
+                spacingY  = -8,
+                wrap      = 7,
+                maxBars   = 7,
+                iconAlign = "RIGHT",
 
-                hideBar              = true,
-                barWidth             = 20,   -- i_barWidth
-                barHeight            = 5,    -- i_barHeight
-                hideLabel            = true,
+                showNoDuration    = true,
+                filterBuffTable   = "PlayerExclusions",
+                filterDebuffTable = "PlayerExclusions",
 
-                timeAlign            = "LEFT",
-                timeOffset           = 18,
-                timeInset            = 16,
-                timeFormat           = 23,
-
-                showNoDuration       = true,
-                filterDebuffTypes    = false,
-                filterBuffTable      = "PlayerExclusions",
-                filterDebuffTable    = "PlayerExclusions",
-
-                sor                  = "T",
-                timeSort             = false,
-                reverseSort          = false,
-
-                noPlayerDebuffs      = true,
-                noTargetDebuffs      = true,
-                noFocusDebuffs       = false,
+                timeSort    = false,
+                reverseSort = false,
             },
 
         },
@@ -337,7 +227,7 @@ AurasAddon.defaults = {
         },
 
         -----------------------------------------------------------------
-        -- Default aura type colours (verbatim from Raven globals)
+        -- Default aura type colours
         -----------------------------------------------------------------
         DefaultBuffColor     = { r = 0.5215686274509804, g = 0.796078431372549,  b = 0.2,                a = 1 },
         DefaultDebuffColor   = { r = 0.6470588235294118, g = 0,                  b = 0,                  a = 1 },
@@ -346,65 +236,5 @@ AurasAddon.defaults = {
         DefaultDiseaseColor  = { r = 0,                  g = 0,                  b = 0,                  a = 1 },
         DefaultPoisonColor   = { r = 0,                  g = 0.6313725490196078, b = 0,                  a = 1 },
         DefaultCooldownColor = { r = 0.8431372549019608, g = 0.7803921568627451, b = 0.2549019607843137, a = 1 },
-
-        -----------------------------------------------------------------
-        -- Duration overrides (spell name → known duration in seconds)
-        -- Carried forward from profiles.RealUI.Durations in Raven
-        -----------------------------------------------------------------
-        Durations = {
-            ["Cloak of Shadows"]     = 5,
-            ["Deadly Poison"]        = 3600.022,
-            ["Blade Twisting"]       = 8,
-            ["Earthbind"]            = 5,
-            ["Slice and Dice"]       = 27,
-            ["Rupture"]              = 12,
-            ["Combat Readiness"]     = 20,
-            ["Dancing Steel"]        = 12,
-            ["Vendetta"]             = 20,
-            ["Drink"]                = 20,
-            ["Food"]                 = 20,
-            ["Anticipation"]         = 15,
-            ["Windswept Pages"]      = 20,
-            ["Garrote"]              = 18,
-            ["Blind"]                = 60,
-            ["Tricks of the Trade"]  = 6,
-            ["Recuperate"]           = 24,
-            ["Weakened Soul"]        = 15,
-            ["Jade Spirit"]          = 12,
-            ["Moderate Insight"]     = 15,
-            ["Arcane Missiles!"]     = 20,
-            ["Sprint"]              = 8,
-            ["Honorless Target"]     = 30,
-            ["Hand of Protection"]   = 10,
-            ["Resurrection Sickness"] = 600,
-            ["Deep Insight"]         = 15,
-            ["Frostbolt"]            = 9,
-            ["Revealing Strike"]     = 15,
-            ["Paralytic Poison"]     = 15,
-            ["Leeching Poison"]      = 3600.022,
-            ["Shallow Insight"]      = 15,
-            ["Grace"]                = 15,
-            ["Recently Bandaged"]    = 60,
-            ["Hurricane"]            = 12,
-            ["Vanish"]               = 3,
-            ["Eye of Vengeance"]     = 10,
-            ["Arrow of Time"]        = 20,
-            ["Harmony"]              = 20,
-            ["River's Song"]         = 7,
-            ["Blindside"]            = 10,
-            ["Deserter"]             = 900,
-            ["Kidney Shot"]          = 2,
-            ["Enlightenment"]        = 10,
-            ["First Aid"]            = 8,
-            ["Plague of Ages"]       = 9,
-            ["Adrenaline Rush"]      = 20,
-            ["Killing Spree"]        = 2,
-            ["Power Word: Shield"]   = 15,
-            ["Forbearance"]          = 60,
-            ["Paralysis"]            = 4,
-            ["Rejuvenation"]         = 12.597,
-            ["Cheap Shot"]           = 4,
-            ["Evasion"]              = 15,
-        },
     },
 }

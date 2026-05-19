@@ -22,7 +22,7 @@ local GROUP_ORDER = {
 ---------------------------------------------------------------------------
 -- Forward declarations
 ---------------------------------------------------------------------------
-local BuildAurasOptions, BuildGroupOptions, BuildSpellListOptions, BuildColourOptions
+local BuildAurasOptions, BuildGroupOptions, BuildSpellListOptions, BuildColourOptions, BuildCooldownMgrOptions
 
 ---------------------------------------------------------------------------
 -- Injection helper — inserts the auras options into the RealUI tree
@@ -88,8 +88,9 @@ function BuildAurasOptions()
     end
 
     -- Global sections
-    args.spellLists = BuildSpellListOptions(200)
-    args.colours = BuildColourOptions(300)
+    args.cooldownMgr = BuildCooldownMgrOptions(100)
+    args.spellLists  = BuildSpellListOptions(200)
+    args.colours     = BuildColourOptions(300)
 
     return {
         name = "Auras",
@@ -249,15 +250,6 @@ function BuildGroupOptions(groupName, order)
                 values = { LEFT = "Left", RIGHT = "Right" },
                 get = GetFromDB("iconAlign"),
                 set = SetAndRedraw("iconAlign"),
-                disabled = IsGroupDisabled,
-            },
-            growDirection = {
-                name = "Grow Left to Right",
-                desc = "When enabled, icons grow left to right. When disabled, icons grow right to left.",
-                type = "toggle",
-                order = 21,
-                get = GetFromDB("growDirection"),
-                set = SetAndRedraw("growDirection"),
                 disabled = IsGroupDisabled,
             },
 
@@ -635,6 +627,41 @@ local COLOUR_KEYS = {
     { key = "DefaultPoisonColor",   name = "Poison" },
     { key = "DefaultCooldownColor", name = "Cooldown" },
 }
+
+function BuildCooldownMgrOptions(order)
+    local function GetCDV(key)
+        return function()
+            local cdv = AurasAddon.db.profile.cooldownViewer
+            return cdv and cdv[key]
+        end
+    end
+    local function SetCDV(key)
+        return function(_, value)
+            local db = AurasAddon.db.profile
+            db.cooldownViewer[key] = value
+            AurasAddon.CooldownViewer.ApplyBuffIconCountdown(db.cooldownViewer.buffIconCountdown)
+            ACR:NotifyChange("RealUI")
+        end
+    end
+
+    return {
+        name = "Cooldown Manager",
+        type = "group",
+        order = order,
+        args = {
+            buffIconCountdown = {
+                name = "Buff Icon Countdown",
+                desc = "Show countdown numbers on the buff tracker (BuffIconCooldownViewer)."
+                    .. " Blizzard omits these by default.",
+                type = "toggle",
+                order = 1,
+                width = "full",
+                get = GetCDV("buffIconCountdown"),
+                set = SetCDV("buffIconCountdown"),
+            },
+        },
+    }
+end
 
 function BuildColourOptions(order)
     local args = {}
