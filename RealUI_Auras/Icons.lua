@@ -33,8 +33,10 @@ function Icons.Create(group)
     btn.DebuffBorder = btn:CreateTexture(nil, "OVERLAY")
     btn.DebuffBorder:SetAllPoints()
 
+    btn:RegisterForClicks("RightButtonUp")
     btn:SetScript("OnEnter", Icons.OnEnter)
     btn:SetScript("OnLeave", Icons.OnLeave)
+    btn:SetScript("OnClick", Icons.OnClick)
 
     -- Masque registration (Icons.MasqueGroup is set in Task 10)
     if Icons.MasqueGroup then
@@ -123,8 +125,9 @@ function Icons.Update(btn, auraData, group)
         btn.DebuffBorder:Hide()
     end
 
-    -- Store metadata for tooltip (OnEnter reads these)
+    -- Store metadata for tooltip and right-click cancellation
     btn._unit = group.detectBuffsMonitor or group.detectDebuffsMonitor or group.unit
+    btn._name = auraData.name
     btn._auraInstanceID = auraData.auraInstanceID
     btn.auraInstanceID  = auraData.auraInstanceID  -- CooldownCount ShouldHaveTimer check
     btn._isDebuff = auraData.isDebuff
@@ -199,6 +202,15 @@ function Icons.OnEnter(btn)
     GameTooltip:Show()
 end
 
-function Icons.OnLeave(btn)
+function Icons.OnLeave()
     GameTooltip:Hide()
+end
+
+function Icons.OnClick(btn, button)
+    if button ~= "RightButton" then return end
+    if btn._isEnchant then
+        CancelItemTempEnchantment(btn._enchantSlot)
+    elseif not btn._isDebuff and btn._unit == "player" and btn._name then
+        CancelUnitBuff("player", btn._name)
+    end
 end
