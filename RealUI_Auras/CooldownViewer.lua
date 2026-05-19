@@ -272,152 +272,63 @@ end
 
 ---------------------------------------------------------------------------
 -- BuffIconCooldownViewer countdown numbers
--- Blizzard intentionally omits cooldownFont from CooldownViewerBuffIconItemTemplate,
--- so no countdown text appears on buff tracker icons. We implement a custom
--- FontString overlay because SetUseAuraDisplayTime(true) — permanently set in
--- BuffIcon OnLoad — suppresses the built-in countdown text.
+-- BuffIconCooldownViewer countdown timer
 --
--- Timing strategy:
---   expirationTime returned by C_UnitAuras is a "secret" number in tainted
---   addon code while the player is in combat with an enemy target. Polling it
---   from OnUpdate therefore fails in combat.
+-- Blizzard intentionally omits cooldownFont from CooldownViewerBuffIconItemTemplate
+-- (compare CooldownViewerEssentialItemTemplate which has cooldownFont=GameFontHighlightHugeOutline).
+-- Without a font, the built-in C-side countdown text is invisible even though the
+-- CooldownFrame is driven correctly by RefreshCooldownInfo → CooldownFrame_Set.
 --
---   Instead, we hook the global CooldownFrame_Set Lua function. Blizzard's own
---   non-tainted code computes start = expirationTime - duration and passes that
---   plain (non-secret) result to CooldownFrame_Set. Our hook stores
---   endTime = start + duration in a table we own. OnUpdate reads only from that
---   table — plain numbers, no restrictions.
+-- Strategy: hook CooldownFrame_Set (global Lua function, fires AFTER CDM's
+-- non-tainted RefreshCooldownInfo). Call SetCountdownFont + SetHideCountdownNumbers(false)
+-- on the cooldown frame. Blizzard's own C code drives the display from there —
+-- no custom timer, no OnUpdate, no C_UnitAuras, no secret-number exposure.
 --
---   C_UnitAuras is used as a one-shot fallback to prime endTime on items that
---   already existed before the CooldownFrame_Set hook fired (e.g. on login when
---   the aura was applied before our hook was installed). It works then because
---   the player is not yet in combat.
---
--- Taint safety: overlay references and timing data live in module-level tables —
--- nothing is written onto Blizzard CDM item frames.
+-- CDM calls SetTimerShown(false) → SetHideCountdownNumbers(true) in OnAcquireItemFrame,
+-- which fires BEFORE CooldownFrame_Set in the RefreshLayout chain. Our hook therefore
+-- always wins in the same refresh cycle without hooking OnAcquireItemFrame (which would
+-- taint CDM's subsequent RefreshCooldownInfo call).
 ---------------------------------------------------------------------------
-local buffIconHookInstalled = false
-local buffIconOverlays = setmetatable({}, {__mode = "k"})  -- item  → overlay
-local cdToTiming       = setmetatable({}, {__mode = "k"})  -- item.Cooldown → timing table
-
+local buffIconCdEnabled     = false
+local buffIconCdFont        = "GameFontHighlightHugeOutline"
 local cooldownFrameSetHooked = false
+
+local function ApplyToBuffIconCooldown(cooldown, enabled)
+    if enabled then
+        cooldown:SetCountdownFont(buffIconCdFont)
+        cooldown:SetHideCountdownNumbers(false)
+    else
+        cooldown:SetHideCountdownNumbers(true)
+    end
+end
 
 local function EnsureCooldownFrameSetHooked()
     if cooldownFrameSetHooked then return end
     cooldownFrameSetHooked = true
 
-    -- CooldownFrame_Set is called by Blizzard's non-tainted RefreshCooldownInfo.
-    -- The start/duration args are the result of (expirationTime - duration) computed
-    -- in non-tainted code, so they arrive here as plain numbers even in combat.
-    _G.hooksecurefunc("CooldownFrame_Set", function(cooldown, start, duration)
-        local timing = cdToTiming[cooldown]
-        if not timing then return end
-        -- pcall guards the addition in case start/duration are ever secret;
-        -- on failure endTime stays unchanged so the last good value drives display
-        _G.pcall(function() timing.endTime = start + duration end)
-    end)
-
-    _G.hooksecurefunc("CooldownFrame_Clear", function(cooldown)
-        local timing = cdToTiming[cooldown]
-        if timing then timing.endTime = nil end
+    _G.hooksecurefunc("CooldownFrame_Set", function(cooldown)
+        if not buffIconCdEnabled then return end
+        -- Reading a field from a Blizzard frame is taint-safe (no write).
+        local item = cooldown:GetParent()
+        if not (item and item.viewerFrame == _G.BuffIconCooldownViewer) then return end
+        ApplyToBuffIconCooldown(cooldown, true)
     end)
 end
 
--- Formats remaining seconds into a display string.
-local function FormatRemain(s)
-    if s < 60   then return ("%d"):format(_G.math.ceil(s)) end
-    if s < 3600 then return ("%dm"):format(_G.math.floor(s / 60)) end
-    return ("%dh"):format(_G.math.floor(s / 3600))
-end
-
-local function CreateBuffIconOverlay(item)
-    local overlay = _G.CreateFrame("Frame", nil, item.Cooldown)
-    overlay:SetAllPoints()
-
-    local timing = {}           -- {endTime=number} owned by us, not the Blizzard frame
-    overlay._timing  = timing
-    overlay._item    = item     -- overlay is our frame; writing onto it is fine
-    cdToTiming[item.Cooldown] = timing
-
-    EnsureCooldownFrameSetHooked()
-
-    local text = overlay:CreateFontString(nil, "OVERLAY")
-    text:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
-    text:SetPoint("BOTTOMRIGHT", -2, 2)
-    overlay.text = text
-
-    overlay:SetScript("OnUpdate", function(self, elapsed)
-        self._t = (self._t or 0) + elapsed
-        if self._t < 0.1 then return end
-        self._t = 0
-
-        local t = self._timing
-
-        -- Prime endTime via C_UnitAuras when the hook hasn't fired yet.
-        -- This works at login / out-of-combat; in combat the hook is the source.
-        if not t.endTime then
-            local it = self._item
-            local aura = _G.C_UnitAuras.GetAuraDataByAuraInstanceID(
-                it.auraDataUnit, it.auraInstanceID)
-            if aura then
-                _G.pcall(function() t.endTime = aura.expirationTime end)
-            end
-        end
-
-        if not t.endTime then self.text:SetText(""); return end
-
-        local ok, txt = _G.pcall(function()
-            local s = t.endTime - _G.GetTime()
-            return s > 0 and FormatRemain(s) or ""
-        end)
-        self.text:SetText((ok and txt) or "")
-    end)
-
-    buffIconOverlays[item] = overlay  -- keyed on item, NOT stored on item
-    return overlay
-end
-
-local function ApplyToBuffIconItem(item, enabled)
-    if not item.Cooldown then return end
-    if enabled then
-        local overlay = buffIconOverlays[item] or CreateBuffIconOverlay(item)
-        overlay:Show()
-    elseif buffIconOverlays[item] then
-        buffIconOverlays[item]:Hide()
-    end
-end
-
---- Apply countdown visibility to all currently active BuffIcon items.
---- Call this when the setting changes at runtime.
+--- Apply or remove countdown font on all currently active BuffIcon items.
+--- Call this when the setting changes at runtime, or at login.
 function CooldownViewer.ApplyBuffIconCountdown(enabled)
+    buffIconCdEnabled = enabled
     local viewer = _G.BuffIconCooldownViewer
     if not viewer then return end
-    -- GetItemFrames() uses GetLayoutChildren() — returns only active (layout-participating)
-    -- item frames, matching what Blizzard itself uses to iterate items.
     for _, item in next, {viewer:GetItemFrames()} do
-        ApplyToBuffIconItem(item, enabled)
+        if item.Cooldown then
+            ApplyToBuffIconCooldown(item.Cooldown, enabled)
+        end
     end
 end
 
---- Install the OnAcquireItemFrame hook so every item frame gets an overlay before
---- RefreshCooldownInfo fires its CooldownFrame_Set call.
---- OnAcquireItemFrame is already Mixin-copied onto BuffIconCooldownViewer at
---- addon-load time, so we hook directly on that frame (not on the mixin table)
---- to guarantee the hook fires regardless of load order.
---- Safe to call multiple times — installs the hook only once.
+--- Install the global CooldownFrame_Set hook. Safe to call multiple times.
 function CooldownViewer.InitBuffIconCountdown()
-    if buffIconHookInstalled then return end
-    local viewer = _G.BuffIconCooldownViewer
-    if not viewer then return end
-    buffIconHookInstalled = true
-
-    -- Fires for every pool acquisition — both new frames and reused ones.
-    -- Runs before RefreshCooldownInfo, so cdToTiming is registered before
-    -- the first CooldownFrame_Set call for this item.
-    _G.hooksecurefunc(viewer, "OnAcquireItemFrame", function(_, itemFrame)
-        local db = RealUI_Auras.db
-        local enabled = db and db.profile and db.profile.cooldownViewer
-                        and db.profile.cooldownViewer.buffIconCountdown
-        ApplyToBuffIconItem(itemFrame, enabled)
-    end)
+    EnsureCooldownFrameSetHooked()
 end
