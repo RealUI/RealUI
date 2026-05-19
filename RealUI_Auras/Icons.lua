@@ -209,8 +209,8 @@ end
 function Icons.OnClick(btn, button)
     if button ~= "RightButton" then return end
     if btn._isEnchant then
-        CancelItemTempEnchantment(btn._enchantSlot)
+        _G.CancelItemTempEnchantment(btn._enchantSlot)
     elseif not btn._isDebuff and btn._unit == "player" and btn._name then
-        CancelUnitBuff("player", btn._name)
+        _G.CancelUnitBuff("player", btn._name)
     end
 end

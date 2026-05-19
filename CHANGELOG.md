@@ -1,3 +1,26 @@
+## [3.3.6] - 2026-05-20 ##
+### Summary ###
+Aura and menu polish release. BuffIconCooldownViewer buff timers now keep their Blizzard countdown numbers visible through combat refreshes by re-enabling the native cooldown text instead of maintaining a custom overlay timer. RealUI_Auras buff icons now support right-click cancellation for player buffs and weapon enchants. The RealUI game menu "New" tag now dismisses permanently after the config is opened once. RealUI_Bugs more reliably disables BugSack and other BugGrabber display addons, and RealUI_Tracker now normalizes AutoQuest popup quest IDs before applying difficulty coloring.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Auras
+  * RealUI_Bugs
+  * RealUI_Tracker
+
+### Changed ###
+
+  * chg: BuffIconCooldownViewer buff timers now use Blizzard's native cooldown countdown text and keep it visible through combat refreshes
+  * chg: Right-clicking player buff icons now cancels the buff, and right-clicking weapon enchant icons removes the enchant
+  * chg: The RealUI config button's game menu "New" tag is now dismissed persistently after first use
+
+### Fixed ###
+
+  * fix: RealUI_Bugs now disables BugSack and other BugGrabber display addons reliably by addon name
+  * fix: quest difficulty coloring in `RealUI_Tracker` now converts AutoQuest popup `block.id` values from string to number before lookup
+
+
 ## [3.3.5] - 2026-05-19 ##
 ### Summary ###
 RealUI_Auras gains countdown number overlays on BuffIconCooldownViewer buff tracker icons — Blizzard intentionally omits cooldown font from the buff icon template, so RealUI_Auras adds a custom `FontString` overlay driven by a `hooksecurefunc("CooldownFrame_Set")` timing strategy that stays taint-safe in combat (plain numbers from Blizzard's non-tainted `RefreshCooldownInfo` path; a `C_UnitAuras` one-shot fallback primes timing on login). Aura timers on cooldown manager icons are now enabled — the fix to the `_auraInstanceID` naming mismatch in 3.3.4 unblocked this. Unused aura config defaults are cleaned up. `RefreshUnit` is hardened against early calls that mix `db.unit` and `db.overlay`. `AddonControl` correctly populates Platynator entries when switching to another profile.
@@ -989,6 +1012,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.3.6]: https://github.com/RealUI/RealUI/compare/3.3.5...3.3.6
 [3.3.5]: https://github.com/RealUI/RealUI/compare/3.3.4...3.3.5
 [3.3.4]: https://github.com/RealUI/RealUI/compare/3.3.3...3.3.4
 [3.3.3]: https://github.com/RealUI/RealUI/compare/3.3.2...3.3.3
