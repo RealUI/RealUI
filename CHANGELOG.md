@@ -1,3 +1,27 @@
+## [3.3.5] - 2026-05-19 ##
+### Summary ###
+RealUI_Auras gains countdown number overlays on BuffIconCooldownViewer buff tracker icons — Blizzard intentionally omits cooldown font from the buff icon template, so RealUI_Auras adds a custom `FontString` overlay driven by a `hooksecurefunc("CooldownFrame_Set")` timing strategy that stays taint-safe in combat (plain numbers from Blizzard's non-tainted `RefreshCooldownInfo` path; a `C_UnitAuras` one-shot fallback primes timing on login). Aura timers on cooldown manager icons are now enabled — the fix to the `_auraInstanceID` naming mismatch in 3.3.4 unblocked this. Unused aura config defaults are cleaned up. `RefreshUnit` is hardened against early calls that mix `db.unit` and `db.overlay`. `AddonControl` correctly populates Platynator entries when switching to another profile.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Auras
+
+### Added ###
+
+  * add: Countdown number overlays on BuffIconCooldownViewer buff tracker icons — uses `hooksecurefunc("CooldownFrame_Set")` for taint-safe in-combat timing; `C_UnitAuras` primes end-time on login for auras already active before the hook fires
+  * add: Aura timers enabled on cooldown manager icons (previously blocked by `_auraInstanceID` naming mismatch)
+
+### Changed ###
+
+  * chg: Removed unused aura config options from `RealUI_Auras` config and defaults
+
+### Fixed ###
+
+  * fix: `RefreshUnit` hardened against early calls that mix `db.unit` and `db.overlay` parts before both are fully initialized
+  * fix: `AddonControl` missing `db.addonControl["Platynator"]` entries when switching to another profile
+
+
 ## [3.3.4] - 2026-05-19 ##
 ### Summary ###
 Unit frame and HuD position stability fixes. Unit frame X/Y config offsets now use the correct `safeLayout()` index and apply immediately. `HuDPositioning` no longer overwrites the user-saved `UFHorizontal` value on reload. User-moved frames are re-anchored with their saved positions restored at the end of `RepositionFrames()`. Platynator gains a `not_in_combat_alpha` setting, now appears in the `RealUIAddOnsOrder` display list, and respects the addon control configuration. All remaining Raven integration code is removed. Aurora updated from 12.0.5.11 to 12.0.5.13.
@@ -965,6 +989,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.3.5]: https://github.com/RealUI/RealUI/compare/3.3.4...3.3.5
 [3.3.4]: https://github.com/RealUI/RealUI/compare/3.3.3...3.3.4
 [3.3.3]: https://github.com/RealUI/RealUI/compare/3.3.2...3.3.3
 [3.3.2]: https://github.com/RealUI/RealUI/compare/3.3.1...3.3.2
