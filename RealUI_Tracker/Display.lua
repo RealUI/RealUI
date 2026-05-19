@@ -86,7 +86,7 @@ local function HookDifficultyColoring()
     for _, module in ipairs(QUEST_MODULES) do
         hooksecurefunc(module, "LayoutBlock", function(self, block)
             if not RealUI_Tracker.db.profile.display.difficultyColor then return end
-            local questID = block.id
+            local questID = tonumber(block.id)
             if not questID then return end
             local level = C_QuestLog.GetQuestDifficultyLevel(questID)
             if not level or level == 0 then return end
