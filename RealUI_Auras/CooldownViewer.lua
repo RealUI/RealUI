@@ -357,7 +357,7 @@ local function CreateBuffIconOverlay(item)
         -- This works at login / out-of-combat; in combat the hook is the source.
         if not t.endTime then
             local it = self._item
-            local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(
+            local aura = _G.C_UnitAuras.GetAuraDataByAuraInstanceID(
                 it.auraDataUnit, it.auraInstanceID)
             if aura then
                 _G.pcall(function() t.endTime = aura.expirationTime end)
