@@ -238,6 +238,11 @@ end
 function AurasAddon:PLAYER_LOGIN()
     local CooldownViewer = self.CooldownViewer
 
+    -- BuffIcon countdown: install hook for future items, apply to any already created.
+    CooldownViewer.InitBuffIconCountdown()
+    local cdvDB = self.db.profile.cooldownViewer
+    CooldownViewer.ApplyBuffIconCountdown(cdvDB and cdvDB.buffIconCountdown)
+
     -- If the preset popup was already offered, also re-attempt merging
     -- any missing per-spec layouts on login (covers new specs added in
     -- game updates, and recovers from any earlier merge failures that
