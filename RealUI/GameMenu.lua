@@ -2,7 +2,16 @@ local _, private = ...
 local Aurora = _G.Aurora
 local RealUI = private.RealUI
 
-local realUINewMarkerDismissed = false
+local function IsNewMarkerDismissed()
+    return type(_G.RealUI_Storage) == "table" and _G.RealUI_Storage.gameMenuNewDismissed == true
+end
+
+local function SetNewMarkerDismissed()
+    if type(_G.RealUI_Storage) ~= "table" then
+        _G.RealUI_Storage = {}
+    end
+    _G.RealUI_Storage.gameMenuNewDismissed = true
+end
 
 local function GetRealUIMenuLabel()
     local L = RealUI and RealUI.L
@@ -25,7 +34,7 @@ local function AddRealUIButton(menu)
     end
 
     local button = menu:AddButton(label, function()
-        realUINewMarkerDismissed = true
+        SetNewMarkerDismissed()
         if menu.RealUINewFeatureLabel then
             menu.RealUINewFeatureLabel:Hide()
         end
@@ -59,7 +68,7 @@ local function AddRealUIButton(menu)
             menu.RealUINewFeatureLabel:SetPoint("LEFT", button, "LEFT", 20, 10)
         end
 
-        if realUINewMarkerDismissed then
+        if IsNewMarkerDismissed() then
             menu.RealUINewFeatureLabel:Hide()
         else
             menu.RealUINewFeatureLabel:Show()
