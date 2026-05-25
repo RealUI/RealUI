@@ -85,9 +85,9 @@ _G.tinsert(UnitFrames.units, function()
         local boss = oUF:Spawn("boss" .. i, "RealUIBossFrame" .. i)
         if i == 1 then
             boss:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
+            FramePoint:PositionFrame(UnitFrames, boss, {"profile", "units", "boss", "framePoint"})
         else
             boss:SetPoint("TOP", _G["RealUIBossFrame" .. i - 1], "BOTTOM", 0, -db.boss.gap)
         end
-        FramePoint:PositionFrame(UnitFrames, boss, {"profile", "units", "boss", "framePoint"})
     end
 end)
