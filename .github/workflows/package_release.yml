@@ -5,7 +5,7 @@ on:
 
 jobs:
   is_release:
-    if: contains(github.ref, 'beta') == false
+    if: contains(github.ref, 'beta') == false && contains(github.ref, 'nightly') == false
     runs-on: ubuntu-latest
 
     steps:
