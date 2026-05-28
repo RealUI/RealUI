@@ -173,7 +173,6 @@ local function EnsureLegacyTooltipMethods(tooltip)
                 for columnIndex = colNum, rightColumn do
                     local column = self:GetColumn(columnIndex)
                     if widthPerColumn > column.Width then
-                        self.Width = (self.Width or 0) + widthPerColumn - column.Width
                         column.Width = widthPerColumn
                         column:SetWidth(widthPerColumn)
                     end
@@ -181,7 +180,6 @@ local function EnsureLegacyTooltipMethods(tooltip)
             end
 
             if setupHeight and row.Height ~= nil and setupHeight > row.Height then
-                self.Height = (self.Height or 0) + setupHeight - row.Height
                 row.Height = setupHeight
                 row:SetHeight(setupHeight)
             end
@@ -226,7 +224,7 @@ local function EnsureLegacyTooltipMethods(tooltip)
 
     function tooltip:SetCellTextColor(lineNum, colNum, r, g, b, a)
         local row = self:GetRow(lineNum)
-        local cell = row.Cells[colNum]
+        local cell = row.Cells and row.Cells[colNum]
         if cell then
             cell:SetTextColor(r, g, b, a)
         end
@@ -235,12 +233,7 @@ local function EnsureLegacyTooltipMethods(tooltip)
     function tooltip:SetLineTextColor(lineNum, r, g, b, a)
         local row = self:GetRow(lineNum)
         if row then
-            for columnIndex = 1, #row.Cells do
-                local cell = row.Cells[columnIndex]
-                if cell then
-                    cell:SetTextColor(r, g, b, a)
-                end
-            end
+            row:SetTextColor(r, g, b, a)
         end
     end
 
