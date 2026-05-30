@@ -353,6 +353,7 @@ function ClassResource:Setup(unitFrame, unit)
         if isEnabled then
             self.points = self:CreateSoulFragments(unitFrame, unit)
         end
+        self.points.info = {token = power.token, name = _G[power.token]}
     end
 end
 
