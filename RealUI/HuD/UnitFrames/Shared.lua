@@ -170,6 +170,9 @@ local function CreateHealthBar(parent, info, isAngled)
         DamageAbsorb:SetWidth(Health:GetWidth())
         DamageAbsorb:SetStatusBarColor(0.75, 0.75, 1.0, 0.35)
         Health.DamageAbsorb = DamageAbsorb
+        -- Default clamp mode (MissingHealth=0) returns 0 absorb when HP is full.
+        -- MaximumHealth clamps to maxHP so absorb shows even at 100% health.
+        Health.damageAbsorbClampMode = Enum.UnitDamageAbsorbClampMode.MaximumHealth
 
         local HealAbsorb = parent:CreateAngle("Prediction", nil, Health)
         HealAbsorb:SetPoint("TOP", Health)
