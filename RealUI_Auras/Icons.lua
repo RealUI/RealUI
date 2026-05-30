@@ -82,6 +82,8 @@ end
 -- cooldown, debuff border, and tooltip metadata.
 ---------------------------------------------------------------------------
 function Icons.Update(btn, auraData, group)
+    btn:SetSize(group.iconSize, group.iconSize)
+
     -- Spell icon texture
     btn.Icon:SetTexture(auraData.icon)
 
