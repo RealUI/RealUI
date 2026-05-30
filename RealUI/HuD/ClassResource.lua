@@ -331,6 +331,14 @@ end
 
 function ClassResource:Setup(unitFrame, unit)
     local isEnabled = ClassResource:IsEnabled()
+
+    -- DH spec index: 1 = Havoc (Devourer bar), 2 = Vengeance (discrete icons, max 5)
+    -- Must be resolved before CreateClassPower so it iterates the correct icon count.
+    local dhSpecIndex = playerClass == "DEMONHUNTER" and _G.GetSpecialization()
+    if dhSpecIndex == 2 then
+        power.max = 5
+    end
+
     -- Points
     if isEnabled then
         if playerClass == "DEATHKNIGHT" then
@@ -348,9 +356,8 @@ function ClassResource:Setup(unitFrame, unit)
         self.bar = isEnabled and self:CreateStagger(unitFrame, unit) or {}
         self.bar.info = _G.C_Spell.GetSpellInfo(124255)
     elseif playerClass == "DEMONHUNTER" then
-        -- DH Devourer uses normalized 0-1 Soul Fragments via ClassPower;
-        -- override points with a Stagger-style bar instead of discrete icons
-        if isEnabled then
+        if isEnabled and dhSpecIndex ~= 2 then
+            -- Havoc: Devourer uses a normalized 0-1 bar instead of discrete icons
             self.points = self:CreateSoulFragments(unitFrame, unit)
         end
         self.points.info = {token = power.token, name = _G[power.token]}
