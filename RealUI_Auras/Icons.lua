@@ -212,7 +212,7 @@ function Icons.OnClick(btn, button)
     if button ~= "RightButton" then return end
     if btn._isEnchant then
         _G.CancelItemTempEnchantment(btn._enchantSlot)
-    elseif not btn._isDebuff and btn._unit == "player" and btn._name then
-        _G.CancelUnitBuff("player", btn._name)
+    elseif not btn._isDebuff and btn._unit == "player" and btn._auraInstanceID then
+        _G.C_UnitAuras.RemoveAuraByAuraInstanceID("player", btn._auraInstanceID)
     end
 end
