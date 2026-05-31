@@ -25,13 +25,14 @@ jobs:
       - name: Create Nightly Package
         env:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          WAGO_API_KEY: ${{ secrets.WAGO_API_KEY }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_KEY }}
           BUNDLE_EXTERNAL_ADDONS: "yes"
           AURORA_NIGHTLY: "yes"
         run: |
           sudo apt-get install pandoc subversion
           curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
           bash release.sh -L -p 88269
-        # No CF_API_KEY, WAGO_API_KEY, or WOWI_API_TOKEN — GitHub release only
         # AURORA_NIGHTLY=yes: prefers Aurora nightly over latest release when newer
 
       - name: Mark as pre-release
