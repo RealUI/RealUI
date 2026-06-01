@@ -379,6 +379,7 @@ function DualSpecSystem:OnSpecializationChanged(specIndex)
 
         -- Update layout if needed
         local dbc = RealUI.db and RealUI.db.char
+        local layoutSwitched = false
         if dbc and dbc.layout and dbc.layout.spec[specIndex] then
             local targetLayout = dbc.layout.spec[specIndex]
             if dbc.layout.current ~= targetLayout then
@@ -388,7 +389,19 @@ function DualSpecSystem:OnSpecializationChanged(specIndex)
                 else
                     RealUI:UpdateLayout(targetLayout)
                 end
+                layoutSwitched = true
             end
+        end
+
+        -- When the RealUI layout index didn't change (DPS→DPS, DPS→Tank, etc.),
+        -- WoW 12's per-spec EditMode tracking may have reset the active layout to
+        -- a preset (often "Modern"). Re-activate explicitly. We skip this when
+        -- layoutSwitched=true because SwitchToLayout already calls ActivateLayout
+        -- via its RegisterLayoutChangeCallback — calling it twice races with BT4.
+        if not layoutSwitched and RealUI.EditModeManager and RealUI.EditModeManager:IsInitialized() then
+            local role = self:IsHealingSpec(specIndex) and "healing" or "dpstank"
+            debug("Same-layout spec swap: re-asserting EditMode layout for role:", role)
+            RealUI.EditModeManager:ActivateLayout(role)
         end
 
         -- Notify other systems of the spec change
