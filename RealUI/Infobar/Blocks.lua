@@ -442,7 +442,7 @@ local function SetupTextTable()
             self:SetRowOnClick(data.rowOnClick)
         end
 
-        local cellHeight = UpdateScroll(textTable.scrollArea)
+        UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
         -- Compute actual content extent: header + separator gap + visible rows.
