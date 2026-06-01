@@ -388,7 +388,7 @@ function ClassResource:Setup(unitFrame, unit)
         else
             self.points = {}
         end
-        self.points.info = {token = power.token, name = _G[power.token] or power.token}
+        self.points.info = {token = power.token, name = _G[power.token] or power.name or power.token}
 
         -- Let oUF handle visibility; call SwitchDHSpec to pre-hide if not
         -- Devourer (before oUF Enable runs).
@@ -406,7 +406,7 @@ function ClassResource:Setup(unitFrame, unit)
     else
         self.points = {}
     end
-    self.points.info = {token = power.token, name = _G[power.token] or power.token}
+    self.points.info = {token = power.token, name = _G[power.token] or power.name or power.token}
 
     -- Bars
     if playerClass == "MONK" then
@@ -476,7 +476,12 @@ local classPowers = {
         token = "RUNES",
         max = 6
     },
-    HUNTER = {token = "TIP_OF_THE_SPEAR", max = 3},
+    -- name: explicit display label for tokens that have no _G[token] global string.
+    -- Tokens like COMBO_POINTS, CHI, HOLY_POWER, etc. resolve via _G[token] at
+    -- runtime so they pick up localization automatically.  SOUL_FRAGMENTS,
+    -- TIP_OF_THE_SPEAR, and POWER_TYPE_ESSENCE are internal/alternate-power
+    -- identifiers that Blizzard does not expose as global strings.
+    HUNTER = {token = "TIP_OF_THE_SPEAR", max = 3, name = "Tip of the Spear"},
     MAGE = {type = _G.Enum.PowerType.ArcaneCharges, token = "ARCANE_CHARGES", max = 5}, -- 4 for Arcane, 5 for Frost Icicles
     MONK = {type = _G.Enum.PowerType.Chi, token = "CHI"},
     PALADIN = {
@@ -484,10 +489,10 @@ local classPowers = {
         token = "HOLY_POWER",
         max = 5
     },
-    DEMONHUNTER = {token = "SOUL_FRAGMENTS", max = 1},
+    DEMONHUNTER = {token = "SOUL_FRAGMENTS", max = 1, name = "Soul Fragments"},
     SHAMAN = {token = "MAELSTROM", max = 10},
     WARLOCK = {type = _G.Enum.PowerType.SoulShards, token = "SOUL_SHARDS"},
-    EVOKER = {type = _G.Enum.PowerType.Essence, token = "POWER_TYPE_ESSENCE"},
+    EVOKER = {type = _G.Enum.PowerType.Essence, token = "POWER_TYPE_ESSENCE", name = "Essence"},
 }
 function ClassResource:OnInitialize()
     self:debug("OnInitialize")
