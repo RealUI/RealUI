@@ -42,6 +42,42 @@ function ClassResource:ForceUpdate()
     CombatFader:RefreshMod()
 end
 
+-- Show or hide the DH SoulFragments bar based on the current spec.
+-- Only Devourer (spec 3) has a soul fragment resource tracked by oUF's
+-- ClassPower element. Havoc (spec 1) and Vengeance (spec 2) have no
+-- ClassPower-compatible resource, so the bar is hidden for those specs.
+--
+-- oUF's ClassPower Visibility function checks GetAuraInfo() which only
+-- returns POWER_TYPE_SOUL_FRAGMENTS for SPEC_DEMONHUNTER_DEVOURER (3).
+-- For other specs, oUF disables the element and hides the bar. We call
+-- ForceUpdate to let oUF re-run its Visibility path after the spec change,
+-- which naturally shows/hides the bar based on the new spec.
+function ClassResource:SwitchDHSpec(specIndex)
+    self:debug("SwitchDHSpec", specIndex)
+
+    -- Only Devourer (spec 3) uses the SoulFragments bar; for other specs
+    -- oUF will disable the element via its Visibility function.
+    local pts = self.points
+    if not pts then return end
+
+    -- Trigger oUF's Visibility path which will enable/disable ClassPower
+    -- based on the current spec. ForceUpdate routes through VisibilityPath
+    -- which calls GetAuraInfo() → only returns a power type for Devourer.
+    if pts.ForceUpdate then
+        pts:ForceUpdate()
+    elseif pts.frame and pts.frame.Hide then
+        -- If ForceUpdate isn't available yet (called from Setup before oUF
+        -- Enable), manually show/hide based on spec. oUF will correct this
+        -- once Enable runs.
+        local isDevourer = (specIndex == (_G.SPEC_DEMONHUNTER_DEVOURER or 3))
+        if isDevourer then
+            pts.frame:Show()
+        else
+            pts.frame:Hide()
+        end
+    end
+end
+
 local function PositionRune(rune, index)
     ClassResource:debug("PositionRune", rune, index)
     local size = pointDB.size
@@ -330,13 +366,27 @@ function ClassResource:CreateStagger(unitFrame, unit)
 end
 
 function ClassResource:Setup(unitFrame, unit)
+    -- Store unitFrame for potential future use by SwitchDHSpec
+    self._unitFrame = unitFrame
+
     local isEnabled = ClassResource:IsEnabled()
 
-    -- DH spec index: 1 = Havoc (Devourer bar), 2 = Vengeance (discrete icons, max 5)
-    -- Must be resolved before CreateClassPower so it iterates the correct icon count.
-    local dhSpecIndex = playerClass == "DEMONHUNTER" and _G.GetSpecialization()
-    if dhSpecIndex == 2 then
-        power.max = 5
+    -- Demon Hunter: only Devourer (spec 3) has a soul fragment resource
+    -- tracked by oUF's ClassPower element. Create the SoulFragments bar
+    -- unconditionally; oUF's Visibility function will show/hide it based
+    -- on the active spec. For Havoc/Vengeance, the bar stays hidden.
+    if playerClass == "DEMONHUNTER" then
+        if isEnabled then
+            self.points = self:CreateSoulFragments(unitFrame, unit)
+        else
+            self.points = {}
+        end
+        self.points.info = {token = power.token, name = _G[power.token] or power.token}
+
+        -- Let oUF handle visibility; call SwitchDHSpec to pre-hide if not
+        -- Devourer (before oUF Enable runs).
+        self:SwitchDHSpec(_G.GetSpecialization() or 1)
+        return
     end
 
     -- Points
@@ -349,18 +399,12 @@ function ClassResource:Setup(unitFrame, unit)
     else
         self.points = {}
     end
-    self.points.info = {token = power.token, name = _G[power.token]}
+    self.points.info = {token = power.token, name = _G[power.token] or power.token}
 
     -- Bars
     if playerClass == "MONK" then
         self.bar = isEnabled and self:CreateStagger(unitFrame, unit) or {}
         self.bar.info = _G.C_Spell.GetSpellInfo(124255)
-    elseif playerClass == "DEMONHUNTER" then
-        if isEnabled and dhSpecIndex ~= 2 then
-            -- Havoc: Devourer uses a normalized 0-1 bar instead of discrete icons
-            self.points = self:CreateSoulFragments(unitFrame, unit)
-        end
-        self.points.info = {token = power.token, name = _G[power.token]}
     end
 end
 
@@ -393,8 +437,12 @@ function ClassResource:ToggleConfigMode(isConfigMode)
             bar:SetMinMaxValues(0, maxHealth)
             bar:PostUpdate(maxHealth * 0.4, maxHealth)
         end
-        -- DH Soul Fragments bar in config mode
-        if playerClass == "DEMONHUNTER" and pts and pts[1] and pts[1].SetMinMaxValues then
+        -- DH Soul Fragments bar in config mode. The bar uses normalized 0-1
+        -- values and only exists for Devourer (spec 3). Show a preview fill
+        -- so the user can see the bar in config mode regardless of current
+        -- soul fragment count.
+        if playerClass == "DEMONHUNTER" and pts
+            and pts[1] and pts[1].SetMinMaxValues then
             pts[1]:SetMinMaxValues(0, 1)
             pts[1]:SetValue(0.6)
             pts[1]:Show()
@@ -516,6 +564,17 @@ function ClassResource:OnEnable()
 
     CombatFader:RegisterModForFade(MODNAME, "class", "combatfade")
     FramePoint:RegisterMod(self)
+
+    -- Demon Hunter: listen for spec changes so the SoulFragments bar
+    -- shows/hides correctly when switching to/from Devourer (spec 3).
+    if playerClass == "DEMONHUNTER" then
+        self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "OnSpecChanged")
+    end
+end
+
+function ClassResource:OnSpecChanged()
+    self:debug("OnSpecChanged")
+    self:SwitchDHSpec(_G.GetSpecialization() or 1)
 end
 
 function ClassResource:OnDisable()
