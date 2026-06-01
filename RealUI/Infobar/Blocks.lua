@@ -29,269 +29,10 @@ local function ToTooltipKey(key)
     return mappedKey
 end
 
-local function IsFontObject(value)
-    return type(value) == "table" and type(value.IsObjectType) == "function" and value:IsObjectType("Font")
-end
-
-local function IsFontArg(value)
-    if value == nil then
-        return true
-    end
-
-    if IsFontObject(value) then
-        return true
-    end
-
-    if type(value) == "string" then
-        local globalFont = _G[value]
-        return IsFontObject(globalFont)
-    end
-
-    return false
-end
-
-local function IsJustification(value)
-    return value == "LEFT" or value == "CENTER" or value == "RIGHT"
-end
-
-local function ParseSetCellArgs(...)
-    local index = 1
-    local current = select(index, ...)
-    local font, justification, colSpan, provider
-
-    if IsFontArg(current) then
-        font = current
-        index = index + 1
-        current = select(index, ...)
-    end
-
-    if current == nil or IsJustification(current) then
-        justification = current
-        index = index + 1
-        current = select(index, ...)
-    end
-
-    if current == nil or type(current) == "number" then
-        colSpan = current
-        index = index + 1
-        current = select(index, ...)
-    end
-
-    if current == nil or (type(current) == "table" and type(current.AcquireCell) == "function") then
-        provider = current
-        index = index + 1
-    end
-
-    return font, justification, colSpan, provider, index
-end
-
-local function EnsureLegacyTooltipMethods(tooltip)
-    if tooltip.__RealUIQTipCompat then
-        return tooltip
-    end
-
-    tooltip.__RealUIQTipCompat = true
-
-    function tooltip:AddLine(...)
-        local line = self:AddRow()
-        local lineNum = line.Index
-        local colNum = 1
-        local columnCount = self:GetColumnCount()
-
-        for columnIndex = 1, columnCount do
-            local value = select(columnIndex, ...)
-            if value ~= nil then
-                local _, nextCol = self:SetCell(lineNum, columnIndex, value)
-                colNum = nextCol or (columnCount + 1)
-            end
-        end
-
-        return lineNum, colNum <= columnCount and colNum or nil
-    end
-
-    function tooltip:AddHeader(...)
-        local line = self:AddHeadingRow()
-        local lineNum = line.Index
-        local colNum = 1
-        local columnCount = self:GetColumnCount()
-
-        for columnIndex = 1, columnCount do
-            local value = select(columnIndex, ...)
-            if value ~= nil then
-                local _, nextCol = self:SetCell(lineNum, columnIndex, value, self:GetDefaultHeadingFont())
-                colNum = nextCol or (columnCount + 1)
-            end
-        end
-
-        return lineNum, colNum <= columnCount and colNum or nil
-    end
-
-    function tooltip:SetFont(font)
-        self:SetDefaultFont(font)
-    end
-
-    function tooltip:SetHeaderFont(font)
-        self:SetDefaultHeadingFont(font)
-    end
-
-    function tooltip:SetCell(lineNum, colNum, value, ...)
-        local row = self:GetRow(lineNum)
-
-        if value == nil then
-            local existingCell = row.Cells[colNum]
-            if existingCell and existingCell.SetText then
-                existingCell:SetText("")
-            end
-            return lineNum, colNum
-        end
-
-        local font, justification, colSpan, provider, extraArgIndex = ParseSetCellArgs(...)
-        local cell = row:GetCell(colNum, provider)
-        local leftPadding = select(extraArgIndex, ...)
-        local rightPadding = select(extraArgIndex + 1, ...)
-        local maxWidth = select(extraArgIndex + 2, ...)
-        local minWidth = select(extraArgIndex + 3, ...)
-
-        if colSpan then
-            cell:SetColSpan(colSpan)
-        end
-
-        if justification then
-            cell:SetJustifyH(justification)
-        end
-
-        if provider and type(cell.SetupCell) == "function" then
-            local setupWidth, setupHeight = cell:SetupCell(self, value, justification, font, select(extraArgIndex, ...))
-            if setupWidth and setupWidth > 0 then
-                local effectiveColSpan = colSpan or 1
-                if effectiveColSpan < 1 then
-                    effectiveColSpan = 1
-                end
-
-                local widthPerColumn = setupWidth / effectiveColSpan
-                local rightColumn = min(self:GetColumnCount(), colNum + effectiveColSpan - 1)
-                for columnIndex = colNum, rightColumn do
-                    local column = self:GetColumn(columnIndex)
-                    if widthPerColumn > column.Width then
-                        column.Width = widthPerColumn
-                        column:SetWidth(widthPerColumn)
-                    end
-                end
-            end
-
-            if setupHeight and row.Height ~= nil and setupHeight > row.Height then
-                row.Height = setupHeight
-                row:SetHeight(setupHeight)
-            end
-        else
-            if font then
-                cell:SetFontObject(font)
-            end
-
-            if leftPadding ~= nil and cell.SetLeftPadding then
-                cell:SetLeftPadding(leftPadding)
-            end
-
-            if rightPadding ~= nil and cell.SetRightPadding then
-                cell:SetRightPadding(rightPadding)
-            end
-
-            if maxWidth ~= nil and cell.SetMaxWidth then
-                cell:SetMaxWidth(maxWidth)
-            end
-
-            if minWidth ~= nil and cell.SetMinWidth then
-                cell:SetMinWidth(minWidth)
-            end
-
-            cell:SetText(value)
-        end
-
-        local columnCount = self:GetColumnCount()
-        local rightColumn = colNum
-        if colSpan and colSpan > 0 then
-            rightColumn = min(columnCount, colNum + colSpan - 1)
-        elseif colSpan and colSpan <= 0 then
-            rightColumn = max(colNum, columnCount + colSpan)
-        end
-
-        if rightColumn < columnCount then
-            return lineNum, rightColumn + 1
-        end
-
-        return lineNum, nil
-    end
-
-    function tooltip:SetCellTextColor(lineNum, colNum, r, g, b, a)
-        local row = self:GetRow(lineNum)
-        local cell = row.Cells and row.Cells[colNum]
-        if cell then
-            cell:SetTextColor(r, g, b, a)
-        end
-    end
-
-    function tooltip:SetLineTextColor(lineNum, r, g, b, a)
-        local row = self:GetRow(lineNum)
-        if row then
-            row:SetTextColor(r, g, b, a)
-        end
-    end
-
-    function tooltip:SetLineScript(lineNum, scriptType, handler, arg)
-        local row = self:GetRow(lineNum)
-        if row then
-            row:SetScript(scriptType, handler, arg)
-        end
-    end
-
-    function tooltip:UpdateScrolling(maxHeight)
-        if maxHeight then
-            self:SetMaxHeight(maxHeight)
-        end
-        return self:UpdateLayout()
-    end
-
-    return tooltip
-end
-
-local function CompatCreateCellProvider(baseProvider)
-    local values = qTipLib:CreateCellProvider(baseProvider)
-    local newCellProvider = values.newCellProvider
-    local newCellPrototype = values.newCellPrototype
-    local baseCellPrototype = values.baseCellPrototype
-
-    if newCellPrototype and not newCellPrototype.__RealUIQTipCompatProvider then
-        newCellPrototype.__RealUIQTipCompatProvider = true
-
-        if newCellPrototype.OnCreation == nil then
-            newCellPrototype.OnCreation = function(self)
-                if type(self.InitializeCell) == "function" then
-                    self:InitializeCell()
-                end
-            end
-        end
-
-        if newCellPrototype.OnRelease == nil then
-            newCellPrototype.OnRelease = function(self)
-                if type(self.ReleaseCell) == "function" then
-                    self:ReleaseCell()
-                end
-            end
-        end
-
-        if newCellPrototype.GetContentHeight == nil and type(newCellPrototype.getContentHeight) == "function" then
-            newCellPrototype.GetContentHeight = newCellPrototype.getContentHeight
-        end
-    end
-
-    return newCellProvider, newCellPrototype, baseCellPrototype
-end
-
 local qTip = {}
 
 function qTip:Acquire(key, ...)
-    local tooltip = qTipLib:AcquireTooltip(ToTooltipKey(key), ...)
-    return EnsureLegacyTooltipMethods(tooltip)
+    return qTipLib:AcquireTooltip(ToTooltipKey(key), ...)
 end
 
 function qTip:Release(tooltip)
@@ -303,7 +44,8 @@ function qTip:IsAcquired(key)
 end
 
 function qTip:CreateCellProvider(baseProvider)
-    return CompatCreateCellProvider(baseProvider)
+    local values = qTipLib:CreateCellProvider(baseProvider)
+    return values.newCellProvider, values.newCellPrototype, values.baseCellPrototype
 end
 
 local fa = _G.LibStub("LibIconFonts-1.0"):GetIconFont("FontAwesome-4.7")
@@ -331,9 +73,9 @@ testCell:Hide()
 local houseLevelFavorCache = {}
 
 local iconFont
-local TextTableCellProvider, TextTableCellPrototype
+local TextTableCellProvider, TextTableCellPrototype, BaseCellPrototype
 local function SetupTextTable()
-    TextTableCellProvider, TextTableCellPrototype = qTip:CreateCellProvider()
+    TextTableCellProvider, TextTableCellPrototype, BaseCellPrototype = qTip:CreateCellProvider()
 
     local MAX_ROWS = 15
     local ROW_HEIGHT = Scale.Value(9)
@@ -533,8 +275,11 @@ local function SetupTextTable()
         end
     end
 
-    function TextTableCellPrototype:InitializeCell()
-        Infobar:debug("CellProto:InitializeCell")
+    function TextTableCellPrototype:OnCreation()
+        Infobar:debug("CellProto:OnCreation")
+
+        -- Initialize the base Cell fields (ColSpan, LeftPadding, RightPadding, FontString, etc.)
+        BaseCellPrototype.OnCreation(self)
 
         if not self.textTable then
             numTables = numTables + 1
@@ -603,7 +348,7 @@ local function SetupTextTable()
     function TextTableCellPrototype:SetupCell(tooltip, data, justification, font, r, g, b)
         Infobar:debug("CellProto:SetupCell")
         if not self.textTable then
-            self:InitializeCell()
+            self:OnCreation()
         end
         local textTable = self.textTable
         local width = Scale.Value(data.width or TABLE_WIDTH)
@@ -700,11 +445,31 @@ local function SetupTextTable()
         local cellHeight = UpdateScroll(textTable.scrollArea)
         textTable:Show()
 
-        return width, cellHeight + (MAX_ROWS + 1)
+        -- Compute actual content extent: header + separator gap + visible rows.
+        -- ROW_HEIGHT is per-row, scrollArea sits at offset (ROW_HEIGHT + 11) below textTable top
+        -- (header height + 5 px gap + 1 px line + 5 px gap).
+        local numToDisplay = min(MAX_ROWS, #data)
+        local actualHeight = ROW_HEIGHT + Scale.Value(11) + numToDisplay * ROW_HEIGHT
+
+        self.cellWidth = width
+        self.cellHeight = actualHeight
+
+        -- Push the computed size up to the row/column layout. The default OnContentChanged
+        -- uses self:GetSize(), which we override below to report textTable dimensions.
+        self:OnContentChanged()
+
+        return width, actualHeight
     end
 
-    function TextTableCellPrototype:ReleaseCell()
-        Infobar:debug("CellProto:ReleaseCell")
+    function TextTableCellPrototype:GetSize()
+        if self.cellWidth and self.cellHeight then
+            return self.cellWidth, self.cellHeight
+        end
+        return BaseCellPrototype.GetSize(self)
+    end
+
+    function TextTableCellPrototype:OnRelease()
+        Infobar:debug("CellProto:OnRelease")
         if self.textTable then
             local headerRow = self.textTable.header
             for col = 1, #headerRow do
@@ -724,15 +489,19 @@ local function SetupTextTable()
             end
             self.textTable:Hide()
         end
-    end
 
-    function TextTableCellPrototype:getContentHeight()
-        Infobar:debug("CellProto:getContentHeight")
-        return self.textTable:GetHeight()
+        self.cellWidth = nil
+        self.cellHeight = nil
+
+        -- Reset the base Cell fields (ColSpan, padding, FontString, etc.) so the Cell can be reused.
+        BaseCellPrototype.OnRelease(self)
     end
 
     function TextTableCellPrototype:GetContentHeight()
         Infobar:debug("CellProto:GetContentHeight")
+        if self.cellHeight then
+            return self.cellHeight
+        end
         if self.textTable then
             return self.textTable:GetHeight()
         end
@@ -741,8 +510,8 @@ local function SetupTextTable()
 end
 
 local function SetupTooltip(tooltip, block)
-    tooltip:SetHeaderFont("Fancy16Font")
-    tooltip:SetFont("SystemFont_Shadow_Med1")
+    tooltip:SetDefaultHeadingFont("Fancy16Font")
+    tooltip:SetDefaultFont("SystemFont_Shadow_Med1")
     tooltip:SmartAnchorTo(block)
     tooltip:SetAutoHideDelay(0.10, block)
     --RealUI.RegisterModdedFrame(tooltip)
@@ -1091,48 +860,47 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                local lineNum, colNum
 
-                tooltip:AddHeader(_G.TIMEMANAGER_TOOLTIP_TITLE)
+                tooltip:AddHeadingRow(_G.TIMEMANAGER_TOOLTIP_TITLE)
 
                 -- Realm time
                 local timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, false)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_REALMTIME, timeFormat:format(hour, min) .. " " .. suffix)
+                tooltip:AddRow(_G.TIMEMANAGER_TOOLTIP_REALMTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Local time
                 timeFormat, hour, min, suffix = RetrieveTime(block.isMilitary, true)
-                tooltip:AddLine(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, timeFormat:format(hour, min) .. " " .. suffix)
+                tooltip:AddRow(_G.TIMEMANAGER_TOOLTIP_LOCALTIME, timeFormat:format(hour, min) .. " " .. suffix)
 
                 -- Date
-                tooltip:AddLine(L["Clock_Date"], date("%b %d (%a)"))
+                tooltip:AddRow(L["Clock_Date"], date("%b %d (%a)"))
 
                 -- Invites
                 if block.invites and block.invites > 0 then
-                    tooltip:AddLine(" ")
-                    tooltip:AddLine(L["Clock_CalenderInvites"], block.invites)
+                    tooltip:AddRow(" ")
+                    tooltip:AddRow(L["Clock_CalenderInvites"], block.invites)
                 end
 
                 -- World Bosses
                 local numSavedBosses = _G.GetNumSavedWorldBosses()
                 if (_G.UnitLevel("player") >= 90) and (numSavedBosses > 0) then
-                    tooltip:AddLine(" ")
-                    lineNum, colNum = tooltip:AddHeader()
-                    tooltip:SetCell(lineNum, colNum, _G.LFG_LIST_BOSSES_DEFEATED, nil, 2)
+                    tooltip:AddRow(" ")
+                    local bossesHeader = tooltip:AddHeadingRow()
+                    bossesHeader:GetCell(1):SetColSpan(2):SetText(_G.LFG_LIST_BOSSES_DEFEATED)
                     for i = 1, numSavedBosses do
                         local bossName, _, bossReset = _G.GetSavedWorldBossInfo(i)
-                        tooltip:AddLine(bossName, _G.format(_G.SecondsToTimeAbbrev(bossReset)))
+                        tooltip:AddRow(bossName, _G.format(_G.SecondsToTimeAbbrev(bossReset)))
                     end
                 end
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Clock_ShowCalendar"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
+                local calRow = tooltip:AddRow()
+                calRow:GetCell(1):SetColSpan(2):SetText(L["Clock_ShowCalendar"])
+                calRow:GetCell(1):SetTextColor(Color.green:GetRGB())
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Clock_ShowTimer"], nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
+                local timerRow = tooltip:AddRow()
+                timerRow:GetCell(1):SetColSpan(2):SetText(L["Clock_ShowTimer"])
+                timerRow:GetCell(1):SetTextColor(Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1188,14 +956,14 @@ function Infobar:CreateBlocks()
                 if qTip:IsAcquired(block) then return end
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                tooltip:AddHeader("Chromie Time")
+                tooltip:AddHeadingRow("Chromie Time")
                 local chromieData = _G.C_ChromieTime.GetChromieTimeExpansionOptions()
                 for _, opt in ipairs(chromieData or {}) do
                     if opt then
                         if opt.alreadyOn then
-                            tooltip:AddLine(opt.name, "|cff00ff00Active|r")
+                            tooltip:AddRow(opt.name, "|cff00ff00Active|r")
                         else
-                            tooltip:AddLine(opt.name, "|cff999999Inactive|r")
+                            tooltip:AddRow(opt.name, "|cff999999Inactive|r")
                         end
                     end
                 end
@@ -1363,15 +1131,14 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
                 SetupTooltip(tooltip, block)
-                local lineNum, colNum
 
                 local gname = _G.GetGuildInfo("player")
-                tooltip:AddHeader(gname)
+                tooltip:AddHeadingRow(gname)
 
                 local motd = _G.GetGuildRosterMOTD()
                 if motd ~= "" then
-                    lineNum, colNum = tooltip:AddLine()
-                    tooltip:SetCell(lineNum, colNum, motd, nil, "LEFT", nil, nil, nil, nil, tableWidth)
+                    local row = tooltip:AddRow()
+                    row:GetCell(1):SetJustifyH("LEFT"):SetMaxWidth(tableWidth):SetText(motd)
                 end
 
                 wipe(guildData)
@@ -1415,12 +1182,12 @@ function Infobar:CreateBlocks()
                     end
                 end
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, guildData, TextTableCellProvider)
+                local row = tooltip:AddRow()
+                row:GetCell(1, TextTableCellProvider):SetupCell(tooltip, guildData, "LEFT")
 
-                tooltip:AddLine(" ")
-                lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
-                tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
+                tooltip:AddRow(" ")
+                local hintRow = tooltip:AddRow(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
+                hintRow:SetTextColor(Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1565,9 +1332,8 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 1, "LEFT")
                 SetupTooltip(tooltip, block)
-                local lineNum, colNum
 
-                tooltip:AddHeader(_G.FRIENDS)
+                tooltip:AddHeadingRow(_G.FRIENDS)
 
                 wipe(friendsData)
                 friendsData.width = tableWidth
@@ -1678,12 +1444,12 @@ function Infobar:CreateBlocks()
                     })
                 end
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, friendsData, TextTableCellProvider)
+                local row = tooltip:AddRow()
+                row:GetCell(1, TextTableCellProvider):SetupCell(tooltip, friendsData, "LEFT")
 
-                tooltip:AddLine(" ")
-                lineNum = tooltip:AddLine(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
-                tooltip:SetLineTextColor(lineNum, Color.green:GetRGB())
+                tooltip:AddRow(" ")
+                local hintRow = tooltip:AddRow(L["GuildFriend_WhisperInvite"]:format(_G[_G.GetDisplayedInviteType()]))
+                hintRow:SetTextColor(Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -1779,27 +1545,26 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                local lineNum, colNum
 
-                lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetCell(lineNum, colNum, _G.DURABILITY, nil, 2)
+                local headerRow = tooltip:AddHeadingRow()
+                headerRow:GetCell(1):SetColSpan(2):SetText(_G.DURABILITY)
 
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
                     if item.hasDura and item.dura then
-                        lineNum = tooltip:AddLine(item.slot, round(item.dura * 100, 1) .. "%")
+                        local row = tooltip:AddRow(item.slot, round(item.dura * 100, 1) .. "%")
                         if slotID == itemSlots.lowSlot then
-                            tooltip:SetLineTextColor(lineNum, RealUI.GetDurabilityColor(item.min, item.max):GetRGB())
+                            row:SetTextColor(RealUI.GetDurabilityColor(item.min, item.max):GetRGB())
                         else
-                            tooltip:SetCellTextColor(lineNum, 2, RealUI.GetDurabilityColor(item.min, item.max):GetRGB())
+                            row:GetCell(2):SetTextColor(RealUI.GetDurabilityColor(item.min, item.max):GetRGB())
                         end
                     end
                 end
 
                 -- Add click hints
-                tooltip:AddLine(" ")
-                tooltip:AddLine("|cffFFFFFFLeft Click:|r Open Character Panel")
-                tooltip:AddLine("|cffFFFFFFRight Click:|r Summon Repair Mount")
+                tooltip:AddRow(" ")
+                tooltip:AddRow("|cffFFFFFFLeft Click:|r Open Character Panel")
+                tooltip:AddRow("|cffFFFFFFRight Click:|r Summon Repair Mount")
 
                 tooltip:Show()
             end,
@@ -1881,19 +1646,19 @@ function Infobar:CreateBlocks()
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
                 local xpStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(curXP), RealUI.ReadableNumber(maxXP), (curXP/maxXP)*100)
-                local lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, xpStatus)
-                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
+                local row = tooltip:AddRow(_G.EXPERIENCE_COLON, xpStatus)
+                row:GetCell(1):SetTextColor(Color.orange:GetRGB())
+                row:GetCell(2):SetTextColor(Color.grayLight:GetRGB())
                 if _G.IsXPUserDisabled() then
-                    lineNum = tooltip:AddLine(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
-                    tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                    tooltip:SetCellTextColor(lineNum, 2, Color.gray:GetRGB())
+                    row = tooltip:AddRow(_G.EXPERIENCE_COLON, _G.VIDEO_OPTIONS_DISABLED)
+                    row:GetCell(1):SetTextColor(Color.orange:GetRGB())
+                    row:GetCell(2):SetTextColor(Color.gray:GetRGB())
                 elseif restXP then
-                    lineNum = tooltip:AddLine(_G.TUTORIAL_TITLE26, RealUI.ReadableNumber(restXP))
-                    tooltip:SetLineTextColor(lineNum, Color.grayLight:GetRGB())
+                    row = tooltip:AddRow(_G.TUTORIAL_TITLE26, RealUI.ReadableNumber(restXP))
+                    row:SetTextColor(Color.grayLight:GetRGB())
                 end
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
             end,
             OnClick = function(XP)
             end
@@ -1983,22 +1748,22 @@ function Infobar:CreateBlocks()
                 local curRep, maxRep, name, hasRewardPending = Rep:GetStats()
                 local r, g, b = Rep:GetColor()
 
-                local lineNum = tooltip:AddLine(_G.REPUTATION.._G.HEADER_COLON, name)
-                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                tooltip:SetCellTextColor(lineNum, 2, r, g, b)
+                local row = tooltip:AddRow(_G.REPUTATION.._G.HEADER_COLON, name)
+                row:GetCell(1):SetTextColor(Color.orange:GetRGB())
+                row:GetCell(2):SetTextColor(r, g, b)
 
 
                 local repStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(curRep), RealUI.ReadableNumber(maxRep), (curRep/maxRep)*100)
-                lineNum = tooltip:AddLine(Rep.factionStandingtext, repStatus)
-                tooltip:SetCellTextColor(lineNum, 1, r, g, b)
-                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
+                row = tooltip:AddRow(Rep.factionStandingtext, repStatus)
+                row:GetCell(1):SetTextColor(r, g, b)
+                row:GetCell(2):SetTextColor(Color.grayLight:GetRGB())
 
                 if hasRewardPending then
-                    lineNum = tooltip:AddLine(_G.BOUNTY_TUTORIAL_BOUNTY_FINISHED)
-                    tooltip:SetLineTextColor(lineNum, Color.gray:GetRGB())
+                    row = tooltip:AddRow(_G.BOUNTY_TUTORIAL_BOUNTY_FINISHED)
+                    row:SetTextColor(Color.gray:GetRGB())
                 end
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
             end,
             OnClick = function(Rep)
                 if Rep.isMajorFaction and Rep.factionID > 0 then
@@ -2078,15 +1843,15 @@ function Infobar:CreateBlocks()
                     title = _G.AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel)
                 end
 
-                local lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, title, nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, Color.orange:GetRGB())
+                local row = tooltip:AddRow()
+                row:GetCell(1):SetColSpan(2):SetText(title)
+                row:GetCell(1):SetTextColor(Color.orange:GetRGB())
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, _G.AZERITE_POWER_TOOLTIP_BODY:format(name), nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, Color.grayLight:GetRGB())
+                row = tooltip:AddRow()
+                row:GetCell(1):SetColSpan(2):SetText(_G.AZERITE_POWER_TOOLTIP_BODY:format(name))
+                row:GetCell(1):SetTextColor(Color.grayLight:GetRGB())
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
             end,
             OnClick = function(Art)
                 _G.ToggleCharacter("PaperDollFrame")
@@ -2123,11 +1888,11 @@ function Infobar:CreateBlocks()
                 local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(minHonor), RealUI.ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
 
                 local level = _G.UnitHonorLevel("player")
-                local lineNum = tooltip:AddLine(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
-                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
+                local row = tooltip:AddRow(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
+                row:GetCell(1):SetTextColor(Color.orange:GetRGB())
+                row:GetCell(2):SetTextColor(Color.grayLight:GetRGB())
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
             end,
             OnClick = function(Honor)
                 _G.PlayerSpellsUtil.TogglePlayerSpellsFrame(_G.PlayerSpellsUtil.FrameTabs.ClassTalents)
@@ -2175,10 +1940,10 @@ function Infobar:CreateBlocks()
                 local current, maxBar, _, level = Housing:GetStats()
                 local favourStats = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(current), RealUI.ReadableNumber(maxBar), (current/maxBar)*100)
                 local titleName = ("Hose level %d"):format(level)
-                local lineNum = tooltip:AddLine(titleName.._G.HEADER_COLON, favourStats)
-                tooltip:SetCellTextColor(lineNum, 1, Color.orange:GetRGB())
-                tooltip:SetCellTextColor(lineNum, 2, Color.grayLight:GetRGB())
-                tooltip:AddLine(" ")
+                local row = tooltip:AddRow(titleName.._G.HEADER_COLON, favourStats)
+                row:GetCell(1):SetTextColor(Color.orange:GetRGB())
+                row:GetCell(2):SetTextColor(Color.grayLight:GetRGB())
+                tooltip:AddRow(" ")
             end,
             OnClick = function(Housing)
                 _G.HousingFramesUtil.ToggleHousingDashboard();
@@ -2306,10 +2071,9 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                local lineNum, colNum
 
-                lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetCell(lineNum, colNum, L["Progress"], nil, nil, 2)
+                local headerRow = tooltip:AddHeadingRow()
+                headerRow:GetCell(1):SetColSpan(2):SetText(L["Progress"])
 
                 watchStates[dbc.progressState]:SetTooltip(tooltip)
 
@@ -2321,12 +2085,12 @@ function Infobar:CreateBlocks()
                     nextState = watchStates[nextState]:GetNext()
                 end
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, watchStates[dbc.progressState].hint, nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, 0, 1, 0)
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, L["Progress_Cycle"], nil, nil, 2)
-                tooltip:SetCellTextColor(lineNum, colNum, Color.green:GetRGB())
+                local hintRow = tooltip:AddRow()
+                hintRow:GetCell(1):SetColSpan(2):SetText(watchStates[dbc.progressState].hint)
+                hintRow:GetCell(1):SetTextColor(0, 1, 0)
+                local cycleRow = tooltip:AddRow()
+                cycleRow:GetCell(1):SetColSpan(2):SetText(L["Progress_Cycle"])
+                cycleRow:GetCell(1):SetTextColor(Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2416,14 +2180,14 @@ function Infobar:CreateBlocks()
 
                 local send1, send2, send3 = _G.GetLatestThreeSenders()
                 if (send1 or send2 or send3) then
-                    tooltip:AddHeader(_G.HAVE_MAIL_FROM)
+                    tooltip:AddHeadingRow(_G.HAVE_MAIL_FROM)
                 else
-                    tooltip:AddHeader(_G.HAVE_MAIL)
+                    tooltip:AddHeadingRow(_G.HAVE_MAIL)
                 end
 
-                if send1 then tooltip:AddLine(send1) end
-                if send2 then tooltip:AddLine(send2) end
-                if send3 then tooltip:AddLine(send3) end
+                if send1 then tooltip:AddRow(send1) end
+                if send2 then tooltip:AddRow(send2) end
+                if send3 then tooltip:AddRow(send3) end
 
                 tooltip:Show()
             end,
@@ -2487,12 +2251,11 @@ function Infobar:CreateBlocks()
 
     do -- Specialization
         local C_EquipmentSet = _G.C_EquipmentSet
-        local specInfo, specLines = RealUI.charInfo.specs, {}
+        local specInfo, specRows = RealUI.charInfo.specs, {}
         local equipmentSetIDs, equipmentSetInfos = {}, {}
         local equipmentNeedsUpdate = false
 
         local function Line_OnMouseUp(line, specIndex, button)
-            local tooltip = line:GetParent():GetParent():GetParent()
             if button == "LeftButton" then
                 if _G.IsAltKeyDown() then
                     _G.SetLootSpecialization(specInfo[specIndex].id)
@@ -2513,7 +2276,7 @@ function Infobar:CreateBlocks()
             elseif button == "RightButton" and #equipmentSetIDs > 0 then
                 if _G.IsAltKeyDown() then
                     dbc.specgear[specIndex] = -1
-                    tooltip:SetCell(specLines[specIndex], 2, "---")
+                    specRows[specIndex]:GetCell(2):SetText("---")
                 else
                     local equipIndex
                     if dbc.specgear[specIndex] < 0 then
@@ -2522,7 +2285,7 @@ function Infobar:CreateBlocks()
                         equipIndex = _G.Wrap(equipmentSetInfos[dbc.specgear[specIndex]].index + 1, #equipmentSetIDs)
                     end
                     dbc.specgear[specIndex] = equipmentSetIDs[equipIndex]
-                    tooltip:SetCell(specLines[specIndex], 2, equipmentSetInfos[dbc.specgear[specIndex]].name)
+                    specRows[specIndex]:GetCell(2):SetText(equipmentSetInfos[dbc.specgear[specIndex]].name)
                 end
             end
         end
@@ -2549,20 +2312,20 @@ function Infobar:CreateBlocks()
             block.dataObj.text = specInfo[specInfo.current.index].name
         end
 
-        local lootSpec, hintSpec, hintGear
+        local lootSpecRow, hintSpecRow, hintGearRow
         local function Spec_TooltipOnUpdate(tooltip)
             local numColumns = tooltip:GetColumnCount()
-            tooltip:SetCell(lootSpec, 1, ("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI.GetCurrentLootSpecName()), nil, numColumns)
-            tooltip:SetCell(hintGear, 1, nil, nil, numColumns)
+            lootSpecRow:GetCell(1):SetColSpan(numColumns):SetText(("%s: %s"):format(_G.SELECT_LOOT_SPECIALIZATION, RealUI.GetCurrentLootSpecName()))
+            hintGearRow:GetCell(1):SetColSpan(numColumns):SetText("")
 
             if tooltip:IsMouseOver() then
-                tooltip:SetCell(hintSpec, 1, L["Spec_ChangeSpec"], nil, numColumns)
+                hintSpecRow:GetCell(1):SetColSpan(numColumns):SetText(L["Spec_ChangeSpec"])
                 if #equipmentSetIDs > 0 then
-                    tooltip:SetCell(hintGear, 1, L["Spec_ChangeGear"], nil, numColumns)
-                    tooltip:SetCellTextColor(hintGear, 1, Color.green:GetRGB())
+                    hintGearRow:GetCell(1):SetColSpan(numColumns):SetText(L["Spec_ChangeGear"])
+                    hintGearRow:GetCell(1):SetTextColor(Color.green:GetRGB())
                 end
             else
-                tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, numColumns)
+                hintSpecRow:GetCell(1):SetColSpan(numColumns):SetText(L["Spec_Open"])
             end
         end
 
@@ -2591,32 +2354,32 @@ function Infobar:CreateBlocks()
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "LEFT")
                 SetupTooltip(tooltip, block)
                 tooltip:SetScript("OnUpdate", Spec_TooltipOnUpdate)
-                local lineNum, colNum
 
-                lineNum, colNum = tooltip:AddHeader()
-                tooltip:SetCell(lineNum, colNum, _G.SPECIALIZATION, nil, 2)
+                local headerRow = tooltip:AddHeadingRow()
+                headerRow:GetCell(1):SetColSpan(2):SetText(_G.SPECIALIZATION)
                 for specIndex = 1, #RealUI.charInfo.specs do
+                    local row
                     if #equipmentSetIDs > 0 then
                         tooltip:AddColumn("LEFT")
                         local equipSet = dbc.specgear[specIndex] >= 0 and equipmentSetInfos[dbc.specgear[specIndex]]
-                        lineNum = tooltip:AddLine(specInfo[specIndex].name, equipSet and equipSet.name or "---", RealUI.db:GetDualSpecProfile(specIndex))
+                        row = tooltip:AddRow(specInfo[specIndex].name, equipSet and equipSet.name or "---", RealUI.db:GetDualSpecProfile(specIndex))
                     else
-                        lineNum = tooltip:AddLine(specInfo[specIndex].name, RealUI.db:GetDualSpecProfile(specIndex))
+                        row = tooltip:AddRow(specInfo[specIndex].name, RealUI.db:GetDualSpecProfile(specIndex))
                     end
 
-                    tooltip:SetLineScript(lineNum, "OnMouseUp", Line_OnMouseUp, specIndex)
-                    specLines[specIndex] = lineNum
+                    row:SetScript("OnMouseUp", Line_OnMouseUp, specIndex)
+                    specRows[specIndex] = row
                     if specIndex == specInfo.current.index then
-                        tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
+                        row:SetTextColor(Color.orange:GetRGB())
                     end
                 end
 
-                tooltip:AddLine(" ")
-                lootSpec = tooltip:AddLine()
-                hintSpec = tooltip:AddLine()
-                hintGear = tooltip:AddLine()
-                tooltip:SetCell(hintSpec, 1, L["Spec_Open"], nil, tooltip:GetColumnCount())
-                tooltip:SetCellTextColor(hintSpec, 1, Color.green:GetRGB())
+                tooltip:AddRow(" ")
+                lootSpecRow = tooltip:AddRow()
+                hintSpecRow = tooltip:AddRow()
+                hintGearRow = tooltip:AddRow()
+                hintSpecRow:GetCell(1):SetColSpan(tooltip:GetColumnCount()):SetText(L["Spec_Open"])
+                hintSpecRow:GetCell(1):SetTextColor(Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -2849,12 +2612,12 @@ function Infobar:CreateBlocks()
             end
         end
 
-        local hintLine
+        local hintRow
         local function Currency_TooltipOnUpdate(tooltip)
             if tooltip:IsMouseOver() then
-                tooltip:SetCell(hintLine, 1, L["Currency_EraseData"])
+                hintRow:GetCell(1):SetText(L["Currency_EraseData"])
             else
-                tooltip:SetCell(hintLine, 1, L["Currency_Cycle"])
+                hintRow:GetCell(1):SetText(L["Currency_Cycle"])
             end
         end
 
@@ -2945,9 +2708,8 @@ function Infobar:CreateBlocks()
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
                 tooltip:SetScript("OnUpdate", Currency_TooltipOnUpdate)
-                local lineNum, colNum
 
-                tooltip:AddHeader(_G.CURRENCY)
+                tooltip:AddHeadingRow(_G.CURRENCY)
                 local mostTrackedTokens = 0
 
                 local currencyData = {}
@@ -3027,20 +2789,20 @@ function Infobar:CreateBlocks()
                 currencyData.rowOnClick = Currency_OnClick
                 currencyData.cellGetTooltipText = Currency_GetTooltipText
 
-                lineNum, colNum = tooltip:AddLine()
-                tooltip:SetCell(lineNum, colNum, currencyData, TextTableCellProvider)
+                local row = tooltip:AddRow()
+                row:GetCell(1, TextTableCellProvider):SetupCell(tooltip, currencyData, "LEFT")
 
-                tooltip:AddLine(L["Currency_TotalMoney"]..GetMoneyString(realmMoneyTotal))
-                tooltip:AddLine(" ")
-                tooltip:AddLine(L["Currency_TotalMoney_Account"]..GetMoneyString(accountMoneyTotal))
-                tooltip:AddLine(" ")
+                tooltip:AddRow(L["Currency_TotalMoney"]..GetMoneyString(realmMoneyTotal))
+                tooltip:AddRow(" ")
+                tooltip:AddRow(L["Currency_TotalMoney_Account"]..GetMoneyString(accountMoneyTotal))
+                tooltip:AddRow(" ")
 
-                hintLine = tooltip:AddLine(L["Currency_Cycle"])
-                tooltip:SetLineTextColor(hintLine, Color.green:GetRGB())
+                hintRow = tooltip:AddRow(L["Currency_Cycle"])
+                hintRow:SetTextColor(Color.green:GetRGB())
 
                 -- Add right-click hint for Mobile Warbank
-                local warbankLine = tooltip:AddLine("|cffFFFFFFRight Click:|r Cast Mobile Warbank")
-                tooltip:SetLineTextColor(warbankLine, Color.green:GetRGB())
+                local warbankRow = tooltip:AddRow("|cffFFFFFFRight Click:|r Cast Mobile Warbank")
+                warbankRow:SetTextColor(Color.green:GetRGB())
 
                 tooltip:Show()
             end,
@@ -3102,21 +2864,20 @@ function Infobar:CreateBlocks()
 
                 local tooltip = qTip:Acquire(block, 3, "LEFT", "RIGHT", "RIGHT")
                 SetupTooltip(tooltip, block)
-                local lineNum--, colNum
 
-                tooltip:AddHeader(_G.NETWORK_LABEL)
+                tooltip:AddHeadingRow(_G.NETWORK_LABEL)
 
-                lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
-                tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
-                tooltip:AddLine(lagFormat:format(_G.HOME, _G.MILLISECONDS_ABBR), round(home.cur), round(home.avg))
-                tooltip:AddLine(lagFormat:format(_G.WORLD, _G.MILLISECONDS_ABBR), round(world.cur), round(world.avg))
+                local statRow = tooltip:AddRow(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
+                statRow:SetTextColor(Color.orange:GetRGB())
+                tooltip:AddRow(lagFormat:format(_G.HOME, _G.MILLISECONDS_ABBR), round(home.cur), round(home.avg))
+                tooltip:AddRow(lagFormat:format(_G.WORLD, _G.MILLISECONDS_ABBR), round(world.cur), round(world.avg))
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
 
-                tooltip:AddHeader(_G.SYSTEMOPTIONS_MENU)
-                lineNum = tooltip:AddLine(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
-                tooltip:SetLineTextColor(lineNum, Color.orange:GetRGB())
-                tooltip:AddLine(_G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
+                tooltip:AddHeadingRow(_G.SYSTEMOPTIONS_MENU)
+                statRow = tooltip:AddRow(L["Sys_Stat"], L["Sys_CurrentAbbr"], L["Sys_AverageAbbr"])
+                statRow:SetTextColor(Color.orange:GetRGB())
+                tooltip:AddRow(_G.FRAMERATE_LABEL, round(fps.cur), round(fps.avg))
 
                 tooltip:Show()
             end,
@@ -3346,28 +3107,28 @@ function Infobar:CreateBlocks()
                 local tooltip = qTip:Acquire(block, 2, "LEFT", "RIGHT")
                 SetupTooltip(tooltip, block)
 
-                local lineNum = tooltip:AddHeader()
-                tooltip:SetCell(lineNum, 1, "Hearthstone", nil, 2)
+                local headerRow = tooltip:AddHeadingRow()
+                headerRow:GetCell(1):SetColSpan(2):SetText("Hearthstone")
 
-                tooltip:AddLine(" ")
+                tooltip:AddRow(" ")
 
                 -- Show bind location
                 local bindLoc = _G.GetBindLocation()
                 if bindLoc and bindLoc ~= "" then
-                    lineNum = tooltip:AddLine("Bound to:", bindLoc)
-                    tooltip:SetCellTextColor(lineNum, 2, 0.1, 1, 0.1)
-                    tooltip:AddLine(" ")
+                    local bindRow = tooltip:AddRow("Bound to:", bindLoc)
+                    bindRow:GetCell(2):SetTextColor(0.1, 1, 0.1)
+                    tooltip:AddRow(" ")
                 end
 
                 -- Primary hearthstone
                 local primaryHS = hearthstones[block.hearthstone.primary]
                 if primaryHS then
                     local ready, cooldownText = GetHearthstoneCooldown(block.hearthstone.primary)
-                    lineNum = tooltip:AddLine(primaryHS.name, cooldownText)
+                    local primaryRow = tooltip:AddRow(primaryHS.name, cooldownText)
                     if ready then
-                        tooltip:SetCellTextColor(lineNum, 2, 0.1, 1, 0.1)
+                        primaryRow:GetCell(2):SetTextColor(0.1, 1, 0.1)
                     else
-                        tooltip:SetCellTextColor(lineNum, 2, 1, 0.1, 0.1)
+                        primaryRow:GetCell(2):SetTextColor(1, 0.1, 0.1)
                     end
                 end
 
@@ -3375,17 +3136,17 @@ function Infobar:CreateBlocks()
                 local secondaryHS = hearthstones[block.hearthstone.secondary]
                 if secondaryHS then
                     local ready, cooldownText = GetHearthstoneCooldown(block.hearthstone.secondary)
-                    lineNum = tooltip:AddLine(secondaryHS.name, cooldownText)
+                    local secondaryRow = tooltip:AddRow(secondaryHS.name, cooldownText)
                     if ready then
-                        tooltip:SetCellTextColor(lineNum, 2, 0.1, 1, 0.1)
+                        secondaryRow:GetCell(2):SetTextColor(0.1, 1, 0.1)
                     else
-                        tooltip:SetCellTextColor(lineNum, 2, 1, 0.1, 0.1)
+                        secondaryRow:GetCell(2):SetTextColor(1, 0.1, 0.1)
                     end
                 end
 
-                tooltip:AddLine(" ")
-                tooltip:AddLine("|cffFFFFFFLeft Click:|r Use " .. (primaryHS and primaryHS.name or "Primary"))
-                tooltip:AddLine("|cffFFFFFFRight Click:|r Use " .. (secondaryHS and secondaryHS.name or "Secondary"))
+                tooltip:AddRow(" ")
+                tooltip:AddRow("|cffFFFFFFLeft Click:|r Use " .. (primaryHS and primaryHS.name or "Primary"))
+                tooltip:AddRow("|cffFFFFFFRight Click:|r Use " .. (secondaryHS and secondaryHS.name or "Secondary"))
 
                 tooltip:Show()
             end,
