@@ -52,29 +52,36 @@ end
 -- For other specs, oUF disables the element and hides the bar. We call
 -- ForceUpdate to let oUF re-run its Visibility path after the spec change,
 -- which naturally shows/hides the bar based on the new spec.
+--
+-- CombatFader also manages the bar's visibility (alpha fading on combat
+-- state changes). We use the .realUIHidden flag to prevent CombatFader
+-- from showing the bar when it shouldn't be visible.
 function ClassResource:SwitchDHSpec(specIndex)
     self:debug("SwitchDHSpec", specIndex)
 
-    -- Only Devourer (spec 3) uses the SoulFragments bar; for other specs
-    -- oUF will disable the element via its Visibility function.
     local pts = self.points
     if not pts then return end
+
+    local isDevourer = (specIndex == (_G.SPEC_DEMONHUNTER_DEVOURER or 3))
+
+    -- Set the CombatFader suppression flag. When realUIHidden is true,
+    -- CombatFader:FadeIt skips the frame entirely, preventing it from
+    -- being shown via UIFrameFadeIn on combat state changes.
+    local barFrame = pts.frame or pts[1]
+    if barFrame then
+        barFrame.realUIHidden = not isDevourer
+        if not isDevourer then
+            barFrame:Hide()
+        end
+    end
 
     -- Trigger oUF's Visibility path which will enable/disable ClassPower
     -- based on the current spec. ForceUpdate routes through VisibilityPath
     -- which calls GetAuraInfo() → only returns a power type for Devourer.
     if pts.ForceUpdate then
         pts:ForceUpdate()
-    elseif pts.frame and pts.frame.Hide then
-        -- If ForceUpdate isn't available yet (called from Setup before oUF
-        -- Enable), manually show/hide based on spec. oUF will correct this
-        -- once Enable runs.
-        local isDevourer = (specIndex == (_G.SPEC_DEMONHUNTER_DEVOURER or 3))
-        if isDevourer then
-            pts.frame:Show()
-        else
-            pts.frame:Hide()
-        end
+    elseif barFrame and isDevourer then
+        barFrame:Show()
     end
 end
 
