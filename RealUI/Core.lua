@@ -955,7 +955,7 @@ function RealUI:OnInitialize()
     self:RegisterChatCommand(
         "rc",
         function()
-            _G.DoReadyCheck()
+            _G.C_PartyInfo.DoReadyCheck()
         end
     )
 
