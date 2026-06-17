@@ -1,9 +1,9 @@
-﻿## Interface: 120005, 120007
+﻿## Interface: 120007
 ## Title: RealUI Skins
 ## Category: RealUI_Core
 ## Notes: Blizzard Interface Skin
 ## Author: Gethe, Hanshi
-## Version: 3.3.6
+## Version: 3.3.7
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadOnDemand: 1
 ## RequiredDeps: RealUI

@@ -1,9 +1,9 @@
-﻿## Interface: 120005, 120007
+﻿## Interface: 120007
 ## Title: !RealUI_Preloads
 ## Category: RealUI_Core
 ## Notes: The preload Blizzard Depencies essential core of RealUI and others
 ## Author: Hanshi
-## Version: 3.3.6
+## Version: 3.3.7
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
 ## LoadWith: Blizzard_CompactRaidFrames

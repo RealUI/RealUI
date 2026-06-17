@@ -1,3 +1,37 @@
+## [3.3.7] - 2026-06-17 ##
+### Summary ###
+WoW 12.0.7 maintenance release focused on Demon Hunter HUD support and library housekeeping. Vengeance DH now shows discrete soul fragment icons; Havoc DH switches to the Devourer power bar. The absorb bar stays visible at full health, and the DH resource tracker config tab is restored after `CreateSoulFragments`. Note: switching between Havoc and Vengeance mid-session without a reload updates power values but does not change the bar/icon display style — a full rebuild is required. `Blocks.lua` migrates from the LibQTip-1 compatibility shim to native LibQTip-2 calls. The Platynator profile advances through three schema versions (v9/m4 → v11/migration-6); Platynator itself updates to v422 with new padding and layout controls, and Kui enemy/simplified health bars now highlight casts and channels in vivid orange. `DoReadyCheck` is modernized to `C_PartyInfo.DoReadyCheck`. EditMode config no longer swaps layouts when changing between equivalent roles. Aurora updated to 12.0.7.0.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Auras
+  * RealUI_Bugs
+  * Aurora (12.0.7.0)
+
+### Changed ###
+
+  * chg: Aurora updated to 12.0.7.0 (from 12.0.5.13) — `Blizzard_ExpansionLandingPage` skinned, progress bar style updated for countdown dialogs, `ProfessionsCustomerOrders` tab layout guarded against third-party modifications, `TradeRecipientBG` white overlay hidden
+  * chg: `Blocks.lua` migrated from LibQTip-1 compatibility shim to native LibQTip-2 calls
+  * chg: Platynator updated to v422 — new padding and layout controls for improved compatibility
+  * chg: Platynator profile advanced to v11/migration-6 schema — Kui - Enemy and Kui - Simplified health bars now show vivid orange (#FF8000) when an enemy is casting or channeling
+
+### Fixed ###
+
+  * fix: Vengeance DH now shows discrete soul fragment icons; Havoc DH shows the Devourer power bar — spec switching mid-session (Havoc ↔ Vengeance) without a reload updates power values but requires a reload to change the display style
+  * fix: absorb bar now shown at full health using `MaximumHealth` clamp mode
+  * fix: DH resource tracker config tab restored by re-assigning `.info` after `CreateSoulFragments`
+  * fix: DH classpower display corrected
+  * fix: DH bar hidden in combat when outside Devour spec
+  * fix: class power info name now uses `power.name` as fallback
+  * fix: EditMode config no longer swaps layouts when switching between equivalent roles (DPS→DPS, DPS→Tank, etc.)
+  * fix: `DoReadyCheck` updated to `C_PartyInfo.DoReadyCheck`
+  * fix: all boss frames now use unique saved-position keys so they stack correctly
+  * fix: aura icon buttons resize on redraw so `iconSize` config changes take effect immediately
+  * fix: right-click buff cancellation now uses `RemoveAuraByAuraInstanceID`
+  * fix: `RealUI_Bugs` registers as a BugGrabber display addon to suppress duplicate chat error notifications
+
+
 ## [3.3.6] - 2026-05-20 ##
 ### Summary ###
 Aura and menu polish release. BuffIconCooldownViewer buff timers now keep their Blizzard countdown numbers visible through combat refreshes by re-enabling the native cooldown text instead of maintaining a custom overlay timer. RealUI_Auras buff icons now support right-click cancellation for player buffs and weapon enchants. The RealUI game menu "New" tag now dismisses permanently after the config is opened once. RealUI_Bugs more reliably disables BugSack and other BugGrabber display addons, and RealUI_Tracker now normalizes AutoQuest popup quest IDs before applying difficulty coloring.
@@ -1012,6 +1046,7 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.3.7]: https://github.com/RealUI/RealUI/compare/3.3.6...3.3.7
 [3.3.6]: https://github.com/RealUI/RealUI/compare/3.3.5...3.3.6
 [3.3.5]: https://github.com/RealUI/RealUI/compare/3.3.4...3.3.5
 [3.3.4]: https://github.com/RealUI/RealUI/compare/3.3.3...3.3.4

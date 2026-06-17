@@ -1,9 +1,9 @@
-﻿## Interface: 120005, 120007
+﻿## Interface: 120007
 ## Title: RealUI Auras
 ## Category: RealUI_Core
 ## Notes: Buff and debuff tracking for RealUI
 ## Author: Hanshi
-## Version: 3.3.6
+## Version: 3.3.7
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## OptionalDeps: Masque
