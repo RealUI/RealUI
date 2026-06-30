@@ -265,6 +265,7 @@ end
 
 local grabError
 do
+	local issecretvalue = issecretvalue or function() return false end
 	local GetErrorStack
 	do
 		local GetCallstackHeight, GetErrorCallstackHeight, debugstack = GetCallstackHeight, GetErrorCallstackHeight, debugstack
@@ -276,19 +277,36 @@ do
 				local debugStackLevel = currentStackHeight - errorStackOffset
 
 				local stack = debugstack(debugStackLevel)
-				return stack, debugStackLevel
+				if issecretvalue(stack) then
+					return "debugstack() returned secrets.", debugStackLevel
+				elseif stack then
+					return stack, debugStackLevel
+				else
+					return "debugstack() returned nil.", debugStackLevel
+				end
 			else
 				local stack = debugstack(3)
-				return stack, 3
+				if issecretvalue(stack) then
+					return "debugstack() returned secrets.", 3
+				elseif stack then
+					return stack, 3
+				else
+					return "debugstack() returned nil.", 3
+				end
 			end
 		end
 	end
+
 	local GetErrorLocals
 	do
 		local debuglocals = debuglocals
 		function GetErrorLocals(level)
 			local locals = debuglocals(level)
-			return locals
+			if issecretvalue(locals) then
+				return "debuglocals() returned secrets."
+			else
+				return locals
+			end
 		end
 	end
 
@@ -296,7 +314,6 @@ do
 	local GetTime, time = GetTime, time
 	local msgsAllowedLastTime = GetTime()
 	local lastWarningTime = 0
-	local issecretvalue = issecretvalue or function() return false end
 	function grabError(errorMessage, isSimple)
 		-- Flood protection --
 		msgsAllowed = msgsAllowed + (GetTime()-msgsAllowedLastTime)*BUGGRABBER_ERRORS_PER_SEC_BEFORE_THROTTLE
@@ -353,9 +370,8 @@ do
 				}
 				StoreError(errorObject) -- Always store the error before checking stack/locals incase something goes wrong whilst calling them
 				local stack, level = GetErrorStack()
-				errorObject.stack = stack or "Debugstack was nil."
-				local locals = GetErrorLocals(level)
-				errorObject.locals = locals or "Debuglocals was nil."
+				errorObject.stack = stack
+				errorObject.locals = GetErrorLocals(level)
 			end
 		else -- Old error
 			errorObject.counter = errorObject.counter + 1
@@ -369,9 +385,8 @@ do
 				errorObject.session = session
 				if not isSimple then
 					local stack, level = GetErrorStack()
-					errorObject.stack = stack or "Debugstack was nil."
-					local locals = GetErrorLocals(level)
-					errorObject.locals = locals or "Debuglocals was nil."
+					errorObject.stack = stack
+					errorObject.locals = GetErrorLocals(level)
 				end
 
 				if not isDisplayRegistered then
@@ -395,9 +410,8 @@ do
 						if not isSimple and elapsed > 120 then
 							-- More than 2 minutes, update the stack again
 							local stack, level = GetErrorStack()
-							errorObject.stack = stack or "Debugstack was nil."
-							local locals = GetErrorLocals(level)
-							errorObject.locals = locals or "Debuglocals was nil."
+							errorObject.stack = stack
+							errorObject.locals = GetErrorLocals(level)
 						end
 					end
 				end
