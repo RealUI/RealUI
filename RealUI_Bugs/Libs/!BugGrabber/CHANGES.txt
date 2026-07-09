@@ -1,8 +1,9 @@
 ------------------------------------------------------------------------
-r387 | funkehdude | 2026-05-17 23:36:48 +0000 (Sun, 17 May 2026) | 1 line
+r394 | funkehdude | 2026-07-01 00:04:33 +0000 (Wed, 01 Jul 2026) | 1 line
 Changed paths:
-   M /trunk/!BugGrabber.toc
+   M /trunk/.luacheckrc
+   M /trunk/BugGrabber.lua
 
-Bump toc
+Update for WoW 12.1 which changes how we need to unregister some UIParent events
 ------------------------------------------------------------------------
 

@@ -557,6 +557,10 @@ do
 	events.ADDON_ACTION_BLOCKED = events.ADDON_ACTION_FORBIDDEN
 	UIParent:UnregisterEvent("ADDON_ACTION_FORBIDDEN")
 	UIParent:UnregisterEvent("ADDON_ACTION_BLOCKED")
+	if GameEvent and GameEvent.UnregisterInternalEvent then -- XXX UIParent events are moved to GameEvent in WoW 12.1
+		GameEvent.UnregisterInternalEvent("ADDON_ACTION_BLOCKED")
+		GameEvent.UnregisterInternalEvent("ADDON_ACTION_FORBIDDEN")
+	end
 end
 
 function events:LUA_WARNING(_, warningText)
