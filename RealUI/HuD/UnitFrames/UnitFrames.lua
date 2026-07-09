@@ -107,9 +107,6 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                             -- Create HealthBG on demand
                             local unitData2 = UnitFrames[unitKey]
                             if unitData2 and unitData2.health and unitData2.health.leftVertex then
-                                local hb2 = unitDB and unitDB.healthBar
-                                local bgColor = (hb2 and hb2.background) or {0.78, 0.15, 0.15}
-                                local bgOpacity = (hb2 and hb2.backgroundOpacity) or 1.0
                                 local HealthBG = frame:CreateAngle("StatusBar", nil, frame.overlay)
                                 HealthBG:SetAngleVertex(unitData2.health.leftVertex, unitData2.health.rightVertex)
                                 HealthBG:SetSize(frame.Health:GetWidth(), frame.Health:GetHeight())
@@ -123,15 +120,43 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                                 HealthBG.fill:SetDrawLayer("BORDER")
                                 HealthBG:SetMinMaxValues(0, 1)
                                 HealthBG:SetValue(1)
-                                HealthBG:SetStatusBarColor(bgColor[1], bgColor[2], bgColor[3], bgOpacity)
                                 frame.HealthBG = HealthBG
                             end
                         else
                             frame.HealthBG:Show()
                         end
+
+                        -- Re-apply background color every refresh (not just at creation)
+                        -- so "Background Color" / "Class Color Background" changes take
+                        -- effect immediately, and honor colorBackgroundByClass the same
+                        -- way the foreground bar honors colorForegroundByClass.
+                        if frame.HealthBG then
+                            local bgOpacity = (hb and hb.backgroundOpacity) or 1.0
+                            local bgColor
+                            if hb and hb.colorBackgroundByClass then
+                                local _, class = _G.UnitClass(unitKey)
+                                bgColor = class and frame.colors and frame.colors.class[class]
+                            end
+                            if bgColor then
+                                local r, g, b = bgColor:GetRGB()
+                                frame.HealthBG:SetStatusBarColor(r, g, b, bgOpacity)
+                            else
+                                local c = (hb and hb.background) or {0.78, 0.15, 0.15}
+                                frame.HealthBG:SetStatusBarColor(c[1], c[2], c[3], bgOpacity)
+                            end
+                        end
                     elseif frame.HealthBG then
                         frame.HealthBG:Hide()
                     end
+                end
+
+                -- Force oUF to re-run color logic (Health.UpdateColor) immediately with
+                -- the flags/style just set above, instead of waiting for the next
+                -- natural health-update event (UNIT_HEALTH, etc). Without this, color
+                -- config changes only visibly apply once something else happens to
+                -- trigger a health update (e.g. taking damage).
+                if frame.Health.ForceUpdate then
+                    frame.Health:ForceUpdate()
                 end
 
                 -- Update fill direction: natural direction based on side, reverseFill toggles it
