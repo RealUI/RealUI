@@ -961,7 +961,11 @@ do -- UnitFrames
                 UnitFrames:RepositionFrames()
             end,
         }
-        if unitSlug == "player" or unitSlug == "target" then
+        -- reverseFill is generic (GetReverseFill/RefreshUnits key off db.units[unit]
+        -- for any unit), so it applies to every frame with a health bar, not just
+        -- player/target. Pet and TargetTarget previously had no way to set this.
+        if unitSlug == "player" or unitSlug == "target"
+            or unitSlug == "pet" or unitSlug == "targettarget" then
             unit.args.reverseFill = {
                 name = L["UnitFrames_ReverseFill"],
                 desc = L["UnitFrames_ReverseFillDesc"],
@@ -973,6 +977,8 @@ do -- UnitFrames
                     UnitFrames:RefreshUnits("ReverseFill")
                 end,
             }
+        end
+        if unitSlug == "player" or unitSlug == "target" then
             unit.args.reversePercent = {
                 name = L["UnitFrames_ReversePercent"],
                 desc = L["UnitFrames_ReversePercentDesc"],
