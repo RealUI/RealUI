@@ -654,6 +654,26 @@ _G.StaticPopupDialogs["REALUI_DISPLAY_CHANGED"] = {
     hideOnEscape = true,
 }
 
+-- DISPLAY_SIZE_CHANGED fires whenever the game's rendering context is
+-- recreated (e.g. graphics driver crash/TDR recovery, alt-tab on some
+-- setups), not only on an actual resolution change. Compare against the
+-- last size we prompted for so a driver reset at the same resolution
+-- doesn't re-nag every login; only a genuine size change shows the popup.
+local function HasScreenSizeActuallyChanged()
+    local w, h = _G.GetPhysicalScreenSize()
+    if not RealUI.db or not RealUI.db.char then return true end
+
+    RealUI.db.char.display = RealUI.db.char.display or {}
+    local last = RealUI.db.char.display.lastScreenSize
+
+    if last and last.w == w and last.h == h then
+        return false
+    end
+
+    RealUI.db.char.display.lastScreenSize = {w = w, h = h}
+    return true
+end
+
 -- 10.1 / 10.3: Handler for DISPLAY_SIZE_CHANGED and UI_SCALE_CHANGED
 local function OnDisplayChanged()
     -- Guard: don't show popups during combat
@@ -666,6 +686,10 @@ local function OnDisplayChanged()
         RefreshRecommendedBadge()
         return
     end
+
+    -- Ignore spurious fires (e.g. driver crash/recovery) where the actual
+    -- screen size didn't change from what we last prompted about.
+    if not HasScreenSizeActuallyChanged() then return end
 
     -- 10.2: Show the popup (unless suppressed for this session)
     if displayChangedSuppressed then return end
