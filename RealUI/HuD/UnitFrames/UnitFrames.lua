@@ -724,6 +724,7 @@ function UnitFrames:OnInitialize()
                 targettarget = {
                     size = {x = 138, y = 10},
                     position = {x = 0, y = 0},
+                    reverseFill = false,
                     framePoint = {},
                 },
                 focus = {
@@ -739,6 +740,7 @@ function UnitFrames:OnInitialize()
                 pet = {
                     size = {x = 126, y = 10},
                     position = {x = 0, y = 0},
+                    reverseFill = false,
                     framePoint = {},
                 },
                 arena = {
