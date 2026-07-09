@@ -191,6 +191,20 @@ local function ShouldHaveTimer(cd)
     end
 
     local parent = cd:GetParent()
+
+    -- Blizzard's native Cooldown Manager (Essential/Utility/BuffIcon/BuffBar
+    -- CooldownViewer) sets .auraInstanceID on every item frame natively via
+    -- CooldownViewerItemDataMixin, with no opt-in intent — indistinguishable
+    -- from RealUI_Auras' own icons (Icons.lua) which set the same field on
+    -- purpose. Every CooldownViewerItemMixin instance also sets .viewerFrame
+    -- (SetViewerFrame), which RealUI's own icons never do, so use that to
+    -- exclude native Cooldown Manager frames and avoid fighting the display
+    -- Blizzard/RealUI_Auras' CooldownViewer.lua already manages for them.
+    if parent and parent.viewerFrame then
+        ignore[cd] = true
+        return
+    end
+
     local primaryCooldown = parent and (parent.cooldown or parent.Cooldown)
     if parent and primaryCooldown == cd and (parent.AutoCastShine or parent.auraInstanceID) then
         return true
