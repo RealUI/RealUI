@@ -102,6 +102,7 @@ function VersionManager:CheckGameCompatibility()
         [120000] = true, -- Midnight Prepatch
         [120001] = true, -- Midnight Release
         [120005] = true, -- Midnight 12.0.5
+        [120007] = true, -- Midnight 12.0.7
     }
 
     if not supportedVersions[gameVersion] then
