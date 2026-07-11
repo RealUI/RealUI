@@ -663,10 +663,27 @@ function private.OnLoad()
         Frame.BorderFrame.NineSlice._stripes:SetParent(Frame)
     end)
 
+    -- Skip tooltip-family frames: Aurora's own GameTooltip skin (see
+    -- Blizzard_GameTooltip.lua) deliberately avoids marking _G.GameTooltip's
+    -- NineSlice as addon-touched to keep AreaPOI/widget-set processing
+    -- taint-free, but EmbeddedItemTooltip and ShoppingTooltip1/2 still go
+    -- through the full skin path and land here. Creating a new texture on
+    -- their NineSlice via AddFrameStripes marks that frame as addon-touched,
+    -- causing the same "secret number value" GetScaledRect/GetUnscaledFrameRect
+    -- failures elsewhere in the tooltip/widget layout chain.
+    local stripeExemptFrames = {
+        [_G.GameTooltip] = true,
+        [_G.EmbeddedItemTooltip] = true,
+        [_G.ShoppingTooltip1] = true,
+        [_G.ShoppingTooltip2] = true,
+    }
     _G.hooksecurefunc(Skin, "FrameTypeFrame", function(Frame)
-        if not Frame._stripes then
-            RealUI:AddFrameStripes(Frame)
+        if Frame._stripes then return end
+        local parent = Frame.GetParent and Frame:GetParent()
+        if stripeExemptFrames[Frame] or (parent and stripeExemptFrames[parent]) then
+            return
         end
+        RealUI:AddFrameStripes(Frame)
     end)
 
     _G.hooksecurefunc(Skin, "PanelTabButtonTemplate", function(Button)
