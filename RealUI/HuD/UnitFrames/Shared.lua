@@ -78,6 +78,52 @@ local function GetVertices(info, useOther)
     end
 end
 
+-- (Re)anchor the health prediction sub-widgets for the given fill direction.
+-- Called at creation and again whenever the health bar's reverse fill changes
+-- at runtime (per-unit "Reverse Fill Direction" toggle), so the bars track the
+-- live direction instead of the one captured at creation time.
+local function PositionHealthPredictions(Health, isReverse)
+    if not Health.HealingAll then return end
+    local fillTexture = Health:GetStatusBarTexture()
+
+    -- Incoming heals: stacked onto the health fill's moving edge
+    local HealingAll = Health.HealingAll
+    HealingAll:ClearAllPoints()
+    HealingAll:SetPoint("TOP", Health)
+    HealingAll:SetPoint("BOTTOM", Health)
+    if isReverse then
+        HealingAll:SetPoint("RIGHT", fillTexture, "LEFT")
+    else
+        HealingAll:SetPoint("LEFT", fillTexture, "RIGHT")
+    end
+    HealingAll:SetReverseFill(isReverse)
+
+    -- Damage absorb: overlay pinned to the bar's full-health end, growing
+    -- inward over the fill. Absorbs are reported even at max health
+    -- (damageAbsorbClampMode = MaximumHealth), so a bar stacked after the
+    -- fill edge would spill out past the end of the frame at full health;
+    -- the overlay instead shows how much of the bar the shield covers.
+    local DamageAbsorb = Health.DamageAbsorb
+    DamageAbsorb:ClearAllPoints()
+    DamageAbsorb:SetPoint("TOP", Health)
+    DamageAbsorb:SetPoint("BOTTOM", Health)
+    DamageAbsorb:SetPoint("LEFT", Health)
+    DamageAbsorb:SetPoint("RIGHT", Health)
+    DamageAbsorb:SetReverseFill(not isReverse)
+
+    -- Heal absorb: eats into the health fill from its moving edge
+    local HealAbsorb = Health.HealAbsorb
+    HealAbsorb:ClearAllPoints()
+    HealAbsorb:SetPoint("TOP", Health)
+    HealAbsorb:SetPoint("BOTTOM", Health)
+    if isReverse then
+        HealAbsorb:SetPoint("LEFT", fillTexture, "LEFT")
+    else
+        HealAbsorb:SetPoint("RIGHT", fillTexture, "RIGHT")
+    end
+    HealAbsorb:SetReverseFill(not isReverse)
+end
+
 local function CreateHealthBar(parent, info, isAngled)
     local Health
     if isAngled then
@@ -121,7 +167,13 @@ local function CreateHealthBar(parent, info, isAngled)
         end
 
         Health.PreUpdate = function(self)
-            self:SetReverseFill(GetReverseFill(parent.unit, info))
+            local isReverse = GetReverseFill(parent.unit, info)
+            self:SetReverseFill(isReverse)
+            -- Keep the prediction bars tracking the live fill direction
+            if self.predictionsReversed ~= isReverse then
+                self.predictionsReversed = isReverse
+                PositionHealthPredictions(self, isReverse)
+            end
         end
 
         -- Hook overlay alpha to hide HealthBG when faded (prevents red bleed-through)
@@ -146,27 +198,11 @@ local function CreateHealthBar(parent, info, isAngled)
         local isReverse = GetReverseFill(parent.unit, info)
 
         local HealingAll = parent:CreateAngle("Prediction", nil, Health)
-        HealingAll:SetPoint("TOP", Health)
-        HealingAll:SetPoint("BOTTOM", Health)
-        if isReverse then
-            HealingAll:SetPoint("RIGHT", Health:GetStatusBarTexture(), "LEFT")
-            HealingAll:SetReverseFill(true)
-        else
-            HealingAll:SetPoint("LEFT", Health:GetStatusBarTexture(), "RIGHT")
-        end
         HealingAll:SetWidth(Health:GetWidth())
         HealingAll:SetStatusBarColor(0.0, 0.659, 0.608, 0.4)
         Health.HealingAll = HealingAll
 
         local DamageAbsorb = parent:CreateAngle("Prediction", nil, Health)
-        DamageAbsorb:SetPoint("TOP", Health)
-        DamageAbsorb:SetPoint("BOTTOM", Health)
-        if isReverse then
-            DamageAbsorb:SetPoint("RIGHT", HealingAll:GetStatusBarTexture(), "LEFT")
-            DamageAbsorb:SetReverseFill(true)
-        else
-            DamageAbsorb:SetPoint("LEFT", HealingAll:GetStatusBarTexture(), "RIGHT")
-        end
         DamageAbsorb:SetWidth(Health:GetWidth())
         DamageAbsorb:SetStatusBarColor(0.75, 0.75, 1.0, 0.35)
         Health.DamageAbsorb = DamageAbsorb
@@ -175,17 +211,12 @@ local function CreateHealthBar(parent, info, isAngled)
         Health.damageAbsorbClampMode = Enum.UnitDamageAbsorbClampMode.MaximumHealth
 
         local HealAbsorb = parent:CreateAngle("Prediction", nil, Health)
-        HealAbsorb:SetPoint("TOP", Health)
-        HealAbsorb:SetPoint("BOTTOM", Health)
-        if isReverse then
-            HealAbsorb:SetPoint("LEFT", Health:GetStatusBarTexture(), "LEFT")
-        else
-            HealAbsorb:SetPoint("RIGHT", Health:GetStatusBarTexture(), "RIGHT")
-            HealAbsorb:SetReverseFill(true)
-        end
         HealAbsorb:SetWidth(Health:GetWidth())
         HealAbsorb:SetStatusBarColor(0.6, 0.15, 0.15, 0.5)
         Health.HealAbsorb = HealAbsorb
+
+        Health.predictionsReversed = isReverse
+        PositionHealthPredictions(Health, isReverse)
     else
         Health = _G.CreateFrame("StatusBar", nil, parent.overlay)
         Health:SetPoint("TOPLEFT", parent)
