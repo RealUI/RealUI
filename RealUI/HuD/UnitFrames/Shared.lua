@@ -233,11 +233,24 @@ local function CreateHealthBar(parent, info, isAngled)
             if not element then return end
 
             if GetMiscDB().alternativeBarStyle then
-                -- Alternative style: dark foreground, red bg shows through missing health
+                -- Alternative style: dark foreground, red bg shows through missing health.
+                -- Honor foregroundOpacity and colorForegroundByClass the same way the
+                -- HealthBG honors backgroundOpacity and colorBackgroundByClass.
                 local unitSettings = GetUnitsDB()[unit] or {}
                 local healthBarDB = unitSettings.healthBar or {}
-                local c = healthBarDB.foreground or {0.08, 0.08, 0.08}
-                element:SetStatusBarColor(c[1], c[2], c[3], 1.0)
+                local fgOpacity = healthBarDB.foregroundOpacity or 1.0
+                local classColor
+                if healthBarDB.colorForegroundByClass then
+                    local _, class = _G.UnitClass(unit)
+                    classColor = class and self.colors.class[class]
+                end
+                if classColor then
+                    local r, g, b = classColor:GetRGB()
+                    element:SetStatusBarColor(r, g, b, fgOpacity)
+                else
+                    local c = healthBarDB.foreground or {0.08, 0.08, 0.08}
+                    element:SetStatusBarColor(c[1], c[2], c[3], fgOpacity)
+                end
             else
                 -- Default oUF color logic
                 local color
