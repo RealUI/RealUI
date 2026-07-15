@@ -39,12 +39,25 @@ end)
 
 -- Prompt for /reload if any setting changed this session that can't apply
 -- live (see RealUI.NeedsReload / RealUI:FlagReloadPending in RealUI/Core.lua).
-_G.hooksecurefunc(ACD, "Close", function(_, appName)
-    debug("ACD Close", appName)
-    if RealUI:ConsumeReloadPending() then
-        RealUI:ReloadUIDialog()
-    end
-end)
+-- NOTE: AceConfigDialog:Close() is NOT called when the user clicks the
+-- window's own close button or presses Escape -- AceGUI's Frame widget
+-- hides itself directly and fires its internal "OnClose" callback instead
+-- (see AceGUIContainer-Frame.lua: frame:SetScript("OnHide", Frame_OnClose)).
+-- The underlying Blizzard frame's OnHide is the one event that fires no
+-- matter how the window closes, so hook that instead. The frame object is
+-- recycled from AceGUI's shared widget pool on each open/close, so re-hook
+-- (idempotently, via a weak-keyed set) every time we open a dialog.
+local reloadPromptHookedFrames = setmetatable({}, { __mode = "k" })
+local function HookReloadPromptOnClose(appName)
+    local widget = ACD.OpenFrames[appName]
+    if not widget or not widget.frame or reloadPromptHookedFrames[widget.frame] then return end
+    reloadPromptHookedFrames[widget.frame] = true
+    widget.frame:HookScript("OnHide", function()
+        if RealUI:ConsumeReloadPending() then
+            RealUI:ReloadUIDialog()
+        end
+    end)
+end
 
 function RealUI:ToggleGridTestMode(show)
     if not _G.Grid2Options then
@@ -295,6 +308,7 @@ local function InitializeOptions()
         else
             highlight.clicked = dialog.ID
             ACD:Open("HuD", dialog.slug)
+            HookReloadPromptOnClose("HuD")
             widget = ACD.OpenFrames["HuD"]
             widget:ClearAllPoints()
             Scale.Point(widget, "TOP", hudConfig, "BOTTOM")
@@ -420,10 +434,12 @@ function RealUI.ToggleConfig(app, ...)
             end
 
             ACD:Open(app, ...)
+            HookReloadPromptOnClose(app)
             ACD:SelectGroup(app, ...)
         end
     else
         ACD:Open(app)
+        HookReloadPromptOnClose(app)
         if not RealUI:IsFrameSkinned(ACD.OpenFrames[app]) then
             RealUI:RegisterSkinnedFrame(ACD.OpenFrames[app].frame, Color.frame)
             RealUI:RegisterSkinnedFrame(ACD.OpenFrames[app].frame:GetChildren(), Color.button)
