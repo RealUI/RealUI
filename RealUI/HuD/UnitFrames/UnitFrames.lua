@@ -175,8 +175,50 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
 
             -- Update power fill direction and retag power text
             if frame.Power then
+                local pInfo = unitData and unitData.power
+
+                -- Update alternative bar style (mirrors the Health block above)
+                if db.misc.alternativeBarStyle then
+                    if not frame.PowerBG then
+                        -- Create PowerBG on demand (style enabled mid-session)
+                        if pInfo and pInfo.leftVertex and frame.CreateAngle and frame.Health then
+                            local hbUnitDB = db.units[unitKey]
+                            local healthHeightPct = (hbUnitDB and hbUnitDB.healthHeight) or 0.6
+                            local pWidth = RealUI.Round(frame:GetWidth() * 0.9)
+                            local pHeight = RealUI.Round((frame:GetHeight() - 3) * (1 - healthHeightPct))
+                            local xOffset = frame.Health:GetHeight() - pHeight
+                            local PowerBG = frame:CreateAngle("StatusBar", nil, frame.overlay)
+                            PowerBG:SetSize(pWidth, pHeight)
+                            PowerBG:SetPoint("BOTTOM"..(pInfo.point or "LEFT"), frame, pInfo.point == "RIGHT" and -xOffset or xOffset, 0)
+                            PowerBG:SetAngleVertex(pInfo.leftVertex, pInfo.rightVertex)
+                            PowerBG:SetReverseFill(UnitFrames.GetReverseFill(unitKey, pInfo))
+                            PowerBG:SetFrameLevel(frame.Power:GetFrameLevel())
+                            PowerBG.bg:SetAlpha(0)
+                            PowerBG.top:Hide()
+                            PowerBG.bottom:Hide()
+                            PowerBG.left:Hide()
+                            PowerBG.right:Hide()
+                            PowerBG.fill:SetDrawLayer("BORDER")
+                            PowerBG:SetMinMaxValues(0, 1)
+                            PowerBG:SetValue(1)
+                            frame.PowerBG = PowerBG
+                        end
+                    else
+                        frame.PowerBG:Show()
+                    end
+                elseif frame.PowerBG then
+                    frame.PowerBG:Hide()
+                end
+
+                -- Re-run color logic now (PostUpdateColor repaints the fill
+                -- dark and recolors PowerBG) instead of waiting for the next
+                -- natural power event
+                if frame.Power.ForceUpdate then
+                    frame.Power:ForceUpdate()
+                end
+
                 if frame.Power.SetReverseFill then
-                    frame.Power:SetReverseFill(UnitFrames.GetReverseFill(unitKey, unitData and unitData.power))
+                    frame.Power:SetReverseFill(UnitFrames.GetReverseFill(unitKey, pInfo))
                 end
 
                 if frame.Power.text then

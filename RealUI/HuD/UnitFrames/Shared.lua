@@ -196,20 +196,18 @@ local function CreateHealthBar(parent, info, isAngled)
             end
         end
 
-        -- Hook overlay alpha to hide HealthBG when faded (prevents red bleed-through)
-        -- Delay activation until after CombatFader's initial setup completes
+        -- Hook overlay alpha to hide HealthBG/PowerBG when faded (prevents
+        -- color bleed-through). Delay activation until after CombatFader's
+        -- initial setup completes.
         if GetMiscDB().alternativeBarStyle then
             _G.C_Timer.After(1, function()
                 _G.hooksecurefunc(parent.overlay, "SetAlpha", function(overlay, alpha)
                     if not GetMiscDB().alternativeBarStyle then return end
-                    if not parent.HealthBG then return end
                     -- Hide only when deeply faded (below "hurt" threshold)
                     -- Target Selected = 0.75, so use 0.5 as threshold
-                    if alpha < 0.5 then
-                        parent.HealthBG:Hide()
-                    else
-                        parent.HealthBG:Show()
-                    end
+                    local show = alpha >= 0.5
+                    if parent.HealthBG then parent.HealthBG:SetShown(show) end
+                    if parent.PowerBG then parent.PowerBG:SetShown(show) end
                 end)
             end)
         end
@@ -394,6 +392,27 @@ local function CreatePowerBar(parent, info, isAngled)
         Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
         Power:SetReverseFill(GetReverseFill(parent.unit, info))
+
+        -- Alternative bar style: power-type colored background revealed as
+        -- power drains, mirroring HealthBG (fill at BORDER layer, between
+        -- Power's bg at BACKGROUND and its fill at ARTWORK)
+        if GetMiscDB().alternativeBarStyle then
+            local PowerBG = parent:CreateAngle("StatusBar", nil, parent.overlay)
+            PowerBG:SetSize(width, height)
+            PowerBG:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
+            PowerBG:SetAngleVertex(info.leftVertex, info.rightVertex)
+            PowerBG:SetReverseFill(GetReverseFill(parent.unit, info))
+            PowerBG:SetFrameLevel(Power:GetFrameLevel())
+            PowerBG.bg:SetAlpha(0)
+            PowerBG.top:Hide()
+            PowerBG.bottom:Hide()
+            PowerBG.left:Hide()
+            PowerBG.right:Hide()
+            PowerBG.fill:SetDrawLayer("BORDER")
+            PowerBG:SetMinMaxValues(0, 1)
+            PowerBG:SetValue(1)
+            parent.PowerBG = PowerBG
+        end
     else
         Power = _G.CreateFrame("StatusBar", nil, parent.overlay)
         Power:SetPoint("TOPLEFT", parent.Health, "BOTTOMLEFT", 0, -1)
@@ -428,6 +447,31 @@ local function CreatePowerBar(parent, info, isAngled)
     Power.frequentUpdates = true
 
     parent.Power = Power
+
+    -- Alternative bar style: repaint the power fill dark (reusing the Health
+    -- foreground settings — one foreground color overall) and give PowerBG the
+    -- power-type color oUF just resolved. PostUpdateColor runs after oUF's own
+    -- color logic on every color update, including UNIT_DISPLAYPOWER, so druid
+    -- form swaps recolor the background live.
+    if isAngled then
+        function Power.PostUpdateColor(element, unit, color, r, g, b)
+            if not GetMiscDB().alternativeBarStyle then return end
+
+            local healthBarDB = (GetUnitsDB()[unit] or {}).healthBar or {}
+            local c = healthBarDB.foreground or {0.08, 0.08, 0.08}
+            element:SetStatusBarColor(c[1], c[2], c[3], healthBarDB.foregroundOpacity or 1.0)
+
+            local PowerBG = parent.PowerBG
+            if PowerBG then
+                if color then
+                    r, g, b = color:GetRGB()
+                end
+                if r then
+                    PowerBG:SetStatusBarColor(r, g, b, healthBarDB.backgroundOpacity or 1.0)
+                end
+            end
+        end
+    end
 end
 
 
@@ -676,6 +720,16 @@ local function Shared(self, unit)
                     frame.Power:SetPoint("BOTTOMRIGHT", frame, -newXOffset, 0)
                 else
                     frame.Power:SetPoint("BOTTOMLEFT", frame, newXOffset, 0)
+                end
+
+                if frame.PowerBG then
+                    frame.PowerBG:SetSize(newPowerW, newPowerH)
+                    frame.PowerBG:ClearAllPoints()
+                    if point == "RIGHT" then
+                        frame.PowerBG:SetPoint("BOTTOMRIGHT", frame, -newXOffset, 0)
+                    else
+                        frame.PowerBG:SetPoint("BOTTOMLEFT", frame, newXOffset, 0)
+                    end
                 end
             end
 
