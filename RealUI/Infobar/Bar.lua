@@ -976,11 +976,12 @@ function Infobar:SettingsUpdate(setting, block)
     end
 
     -- print("setting:", setting, " block:", block)
-    if setting == "statusBar" or "HideStatusBarMaxLevel" then
+    local showBars = db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel())
+    if setting == "statusBar" or setting == "HideStatusBarMaxLevel" then
         local watch = self.frame.watch
-        watch.main:SetShown(db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()))
+        watch.main:SetShown(showBars)
         for i = 1, 2 do
-            watch[i]:SetShown(db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()))
+            watch[i]:SetShown(showBars)
         end
         if block then
             block:OnEvent("SettingsUpdate")
@@ -998,6 +999,18 @@ function Infobar:SettingsUpdate(setting, block)
             self.frame.right:UpdateBlocks(true)
         end
     else
+        -- No specific setting (e.g. a profile switch via RefreshMod):
+        -- refresh everything the profile can affect.
+        local watch = self.frame.watch
+        watch.main:SetShown(showBars)
+        for i = 1, 2 do
+            watch[i]:SetShown(showBars)
+        end
+        self.frame:SetBackdropColor(Aurora.Color.frame, db.bgAlpha)
+        self.frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
+        self.frame._stripes:SetAlpha(db.bgAlpha)
+        watch:UpdateColors()
+        blockFont.outline = self:GetFontOutline()
         self.frame.left:UpdateBlocks(true)
         self.frame.right:UpdateBlocks(true)
     end
@@ -1036,6 +1049,7 @@ end
 --------------------
 function Infobar:RefreshMod()
     db = self.db.profile
+    ndb = RealUI.db.profile
 
     -- Only update settings if frame is initialized
     if self.frame then

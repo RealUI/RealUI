@@ -597,9 +597,16 @@ function RealUI:OnProfileUpdate(event, database, profile)
     -- by sub-addons that inject a `{ db = ... }` table so RealUI's path
     -- helpers can find them). Skip entries that don't implement the
     -- callback rather than crashing during profile switch.
+    -- Each callback is isolated: an error in one module must not abort the
+    -- cascade for the remaining modules (or the layout update below), which
+    -- would leave the UI half-switched. Errors still reach BugGrabber.
     for _, module in self:IterateModules() do
         if type(module) == "table" and type(module.OnProfileUpdate) == "function" then
-            module:OnProfileUpdate(event, profile)
+            local ok, err = _G.pcall(module.OnProfileUpdate, module, event, profile)
+            if not ok then
+                debug("OnProfileUpdate failed for module", module.moduleName, err)
+                _G.geterrorhandler()(err)
+            end
         end
     end
 
