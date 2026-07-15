@@ -508,7 +508,9 @@ Templates.base = {
             { setting = 1, value = 12 },
             { setting = 2, value = 1 },
             { setting = 3, value = 3 },
-            { setting = 4, value = 2 },
+            -- IconPadding: effective grid gap is (value - 4); 7 gives the 3px
+            -- gap Aurora used to add via a taint-unsafe RefreshLayout hook
+            { setting = 4, value = 7 },
             { setting = 5, value = 100 },
             { setting = 6, value = 0 },
             { setting = 8, value = 1 },
@@ -522,7 +524,7 @@ Templates.base = {
             { setting = 1, value = 14 },
             { setting = 2, value = 1 },
             { setting = 3, value = 5 },
-            { setting = 4, value = 2 },
+            { setting = 4, value = 7 },   -- IconPadding (see Essential entry)
             { setting = 5, value = 100 },
             { setting = 6, value = 0 },
             { setting = 8, value = 1 },
@@ -536,7 +538,7 @@ Templates.base = {
             { setting = 1, value = 1 },
             { setting = 2, value = 1 },
             { setting = 3, value = 2 },
-            { setting = 4, value = 5 },
+            { setting = 4, value = 7 },   -- IconPadding (see Essential entry)
             { setting = 5, value = 100 },
             { setting = 6, value = 0 },
             { setting = 8, value = 1 },
@@ -699,7 +701,7 @@ Templates.overrides.healing = {
             { setting = 1, value = 20 },   -- IconLimit
             { setting = 2, value = 1 },    -- IconDirection = Right
             { setting = 3, value = 3 },    -- BarCount
-            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 4, value = 7 },    -- IconPadding (gap = value - 4; see Essential entry)
             { setting = 5, value = 100 },  -- Opacity
             { setting = 6, value = 0 },
             { setting = 8, value = 1 },    -- HideWhenInactive
@@ -714,7 +716,7 @@ Templates.overrides.healing = {
             { setting = 1, value = 20 },   -- IconLimit
             { setting = 2, value = 1 },    -- IconDirection = Right
             { setting = 3, value = 4 },    -- BarCount
-            { setting = 4, value = 2 },    -- IconPadding
+            { setting = 4, value = 7 },    -- IconPadding (gap = value - 4; see Essential entry)
             { setting = 5, value = 100 },  -- Opacity
             { setting = 6, value = 0 },
             { setting = 8, value = 1 },    -- HideWhenInactive
@@ -729,7 +731,7 @@ Templates.overrides.healing = {
             { setting = 1, value = 1 },    -- IconLimit
             { setting = 2, value = 1 },    -- IconDirection = Right
             { setting = 3, value = 2 },    -- BarCount
-            { setting = 4, value = 5 },    -- IconPadding
+            { setting = 4, value = 7 },    -- IconPadding (gap = value - 4; see Essential entry)
             { setting = 5, value = 100 },  -- Opacity
             { setting = 6, value = 0 },
             { setting = 8, value = 1 },    -- HideWhenInactive

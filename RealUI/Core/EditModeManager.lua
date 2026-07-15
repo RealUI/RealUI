@@ -537,7 +537,11 @@ end
 --      (a) NeedsMigration short-circuited on existing pre-flag layouts without
 --      fixing them; (b) forceRebuild was false when oldVersion was nil, so
 --      EnsureLayouts preserved rather than rebuilt corrupted pre-flag layouts.
-local MIGRATION_VERSION = 4
+--  5 = CooldownViewer IconPadding raised (2/5 → 7) in EditModeTemplates so the
+--      icon gap comes from Blizzard's secure layout path. Replaces Aurora's
+--      RefreshLayout childXPadding hook, which tainted the CooldownViewer
+--      and caused mass secret-value errors at raid-end cinematics.
+local MIGRATION_VERSION = 5
 
 --- Checks whether migration from pre-EditMode RealUI is needed.
 -- @return boolean  true if migration should run
