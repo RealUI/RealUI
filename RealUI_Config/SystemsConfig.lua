@@ -102,7 +102,7 @@ local function CreateSystemsConfig()
             order = order + 1
             local state = RealUI.ModuleFramework:GetModuleState(name)
 
-            systemsConfig.args.moduleFramework.args.modules.args[name] = {
+            systemsConfig.args.moduleFramework.args.modules.args[name] = RealUI.NeedsReload({
                 name = name,
                 desc = ("Type: %s\nState: %s"):format(info.type, state),
                 type = "toggle",
@@ -122,7 +122,7 @@ local function CreateSystemsConfig()
                     end)
                 end,
                 order = order,
-            }
+            })
         end
     end
 

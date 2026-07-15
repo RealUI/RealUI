@@ -37,6 +37,15 @@ _G.hooksecurefunc(_G.ZoneAbilityFrame, "Hide", function(dialog)
     end
 end)
 
+-- Prompt for /reload if any setting changed this session that can't apply
+-- live (see RealUI.NeedsReload / RealUI:FlagReloadPending in RealUI/Core.lua).
+_G.hooksecurefunc(ACD, "Close", function(_, appName)
+    debug("ACD Close", appName)
+    if RealUI:ConsumeReloadPending() then
+        RealUI:ReloadUIDialog()
+    end
+end)
+
 function RealUI:ToggleGridTestMode(show)
     if not _G.Grid2Options then
         _G.C_AddOns.LoadAddOn("Grid2Options")

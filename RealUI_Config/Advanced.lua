@@ -1478,52 +1478,52 @@ do -- Skins
                         type = "description",
                         order = 0,
                     },
-                    bags = {
+                    bags = RealUI.NeedsReload({
                         name = "Skin Bags",
                         desc = "Skin bag frames",
                         type = "toggle",
                         get = function() return auroraGetValue("bags", true) end,
                         set = function(info, value) auroraSetValue("bags", value) end,
                         order = 1,
-                    },
-                    banks = {
+                    }),
+                    banks = RealUI.NeedsReload({
                         name = "Skin Banks",
                         desc = "Skin bank frames",
                         type = "toggle",
                         get = function() return auroraGetValue("banks", true) end,
                         set = function(info, value) auroraSetValue("banks", value) end,
                         order = 2,
-                    },
-                    chat = {
+                    }),
+                    chat = RealUI.NeedsReload({
                         name = "Skin Chat",
                         desc = "Skin chat frames",
                         type = "toggle",
                         get = function() return auroraGetValue("chat", true) end,
                         set = function(info, value) auroraSetValue("chat", value) end,
                         order = 3,
-                    },
-                    loot = {
+                    }),
+                    loot = RealUI.NeedsReload({
                         name = "Skin Loot",
                         desc = "Skin loot frames",
                         type = "toggle",
                         get = function() return auroraGetValue("loot", true) end,
                         set = function(info, value) auroraSetValue("loot", value) end,
                         order = 4,
-                    },
-                    mainmenubar = {
+                    }),
+                    mainmenubar = RealUI.NeedsReload({
                         name = "Skin Main Menu Bar",
                         desc = "Skin main menu bar",
                         type = "toggle",
                         get = function() return auroraGetValue("mainmenubar", false) end,
                         set = function(info, value) auroraSetValue("mainmenubar", value) end,
                         order = 5,
-                    },
+                    }),
                     -- [Duplication Resolution] Font Replacement: This is AuroraConfig.fonts —
                     -- a master toggle for whether font replacement happens at all. Distinct
                     -- from the SkinsDB font selectors (normal/chat/header) above, which
                     -- control which fonts are used when replacement is active.
                     -- See design: Duplication Resolution Matrix — Font Replacement.
-                    fonts = {
+                    fonts = RealUI.NeedsReload({
                         name = "Replace Fonts",
                         desc = "Controls whether the skin engine replaces default UI fonts."
                             .. "\n\n|cffffcc00Note:|r This is separate from the font selectors under Fonts above, which choose which fonts to use. This toggle must be enabled for those font selections to take effect.",
@@ -1531,32 +1531,32 @@ do -- Skins
                         get = function() return auroraGetValue("fonts", true) end,
                         set = function(info, value) auroraSetValue("fonts", value) end,
                         order = 6,
-                    },
-                    tooltips = {
+                    }),
+                    tooltips = RealUI.NeedsReload({
                         name = "Skin Tooltips",
                         desc = "Skin tooltip frames",
                         type = "toggle",
                         get = function() return auroraGetValue("tooltips", true) end,
                         set = function(info, value) auroraSetValue("tooltips", value) end,
                         order = 7,
-                    },
-                    chatBubbles = {
+                    }),
+                    chatBubbles = RealUI.NeedsReload({
                         name = "Skin Chat Bubbles",
                         desc = "Skin chat bubbles",
                         type = "toggle",
                         get = function() return auroraGetValue("chatBubbles", true) end,
                         set = function(info, value) auroraSetValue("chatBubbles", value) end,
                         order = 8,
-                    },
-                    chatBubbleNames = {
+                    }),
+                    chatBubbleNames = RealUI.NeedsReload({
                         name = "Show Chat Bubble Names",
                         desc = "Show names on chat bubbles",
                         type = "toggle",
                         get = function() return auroraGetValue("chatBubbleNames", true) end,
                         set = function(info, value) auroraSetValue("chatBubbleNames", value) end,
                         order = 9,
-                    },
-                    characterSheet = {
+                    }),
+                    characterSheet = RealUI.NeedsReload({
                         name = "Skin Character Sheet",
                         desc = "Skin the character sheet frame."
                             .. "\n\n|cff888888Disable when using addons like ChonkyCharacterSheet that replace the character sheet.|r",
@@ -1564,8 +1564,8 @@ do -- Skins
                         get = function() return auroraGetValue("characterSheet", true) end,
                         set = function(info, value) auroraSetValue("characterSheet", value) end,
                         order = 10,
-                    },
-                    objectiveTracker = {
+                    }),
+                    objectiveTracker = RealUI.NeedsReload({
                         name = "Skin Objective Tracker",
                         desc = "Skin the objective/quest tracker frame."
                             .. "\n\n|cff888888Disabling restores Blizzard's default tracker appearance.|r",
@@ -1573,7 +1573,7 @@ do -- Skins
                         get = function() return auroraGetValue("objectiveTracker", true) end,
                         set = function(info, value) auroraSetValue("objectiveTracker", value) end,
                         order = 11,
-                    },
+                    }),
                 },
             },
             skinStyle = {
@@ -1611,7 +1611,10 @@ do -- Skins
                             .. "\n|cffffcc00Requires UI reload to take effect.|r",
                         type = "toggle",
                         get = function() return auroraGetValue("heroTalentsCustomAnchor", false) end,
-                        set = function(info, value) auroraSetValue("heroTalentsCustomAnchor", value) end,
+                        set = function(info, value)
+                            auroraSetValue("heroTalentsCustomAnchor", value)
+                            RealUI:FlagReloadPending()
+                        end,
                         order = 3,
                     },
                     heroTalentsAnchorPreset = {
@@ -1628,7 +1631,10 @@ do -- Skins
                             compact = "Compact (38, -18)",
                         },
                         get = function() return auroraGetValue("heroTalentsAnchorPreset", "default") end,
-                        set = function(info, value) auroraSetValue("heroTalentsAnchorPreset", value) end,
+                        set = function(info, value)
+                            auroraSetValue("heroTalentsAnchorPreset", value)
+                            RealUI:FlagReloadPending()
+                        end,
                         disabled = function() return not auroraGetValue("heroTalentsCustomAnchor", false) end,
                         order = 4,
                     },

@@ -651,6 +651,49 @@ function RealUI:ReloadUIDialog()
     _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
+---------------------------------------------------------------------------
+-- Reload-pending tracking
+-- Some config settings can't take effect without a /reload (they touch
+-- frames/state that's only set up once at login). Rather than prompting
+-- immediately on every such change, config UIs flag the change here and
+-- prompt once when the settings panel closes. See RealUI.NeedsReload below
+-- for the AceConfig option wrapper that hooks into this automatically.
+---------------------------------------------------------------------------
+RealUI.reloadPending = false
+
+--- Mark that a pending settings change requires /reload to take effect.
+--- Call from a config "set" handler for options that can't apply live.
+function RealUI:FlagReloadPending()
+    self.reloadPending = true
+end
+
+--- Read and clear the pending-reload flag in one step.
+--- @return boolean wasPending
+function RealUI:ConsumeReloadPending()
+    local wasPending = self.reloadPending
+    self.reloadPending = false
+    return wasPending
+end
+
+--- Wrap an AceConfig option table so that changing it flags a pending
+--- reload and notes the requirement in its tooltip. The option's own
+--- "set" handler still runs first; this only adds the reload flag on top.
+--- Usage: args.someToggle = RealUI.NeedsReload({ type = "toggle", ... })
+--- @param option table  AceConfig option definition (mutated and returned)
+function RealUI.NeedsReload(option)
+    local origSet = option.set
+    option.set = function(info, ...)
+        if origSet then origSet(info, ...) end
+        RealUI:FlagReloadPending()
+    end
+    if type(option.desc) == "string" then
+        option.desc = option.desc .. "\n\n|cffffcc00Requires UI reload to take effect.|r"
+    elseif option.desc == nil then
+        option.desc = "|cffffcc00Requires UI reload to take effect.|r"
+    end
+    return option
+end
+
 function RealUI:OnInitialize()
     debug("OnInitialize starting...")
 
