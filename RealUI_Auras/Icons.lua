@@ -15,6 +15,7 @@ function Icons.Create(group)
     local state = Groups.GetState(group.name)
     local btn = CreateFrame("Button", nil, state.container)
     btn:SetSize(group.iconSize, group.iconSize)
+    btn._iconSize = group.iconSize
     btn:EnableMouse(true)
 
     btn.Icon = btn:CreateTexture(nil, "ARTWORK")
@@ -82,7 +83,18 @@ end
 -- cooldown, debuff border, and tooltip metadata.
 ---------------------------------------------------------------------------
 function Icons.Update(btn, auraData, group)
-    btn:SetSize(group.iconSize, group.iconSize)
+    if btn._iconSize ~= group.iconSize then
+        btn:SetSize(group.iconSize, group.iconSize)
+        -- Masque skins its border/backdrop textures to the button's size at
+        -- skin time; they don't follow later SetSize calls on their own, so
+        -- the config-menu Icon Size slider silently did nothing visually
+        -- (only the layout spacing moved) until the next Masque skin. Force
+        -- a targeted reskin of just this button to pick up the new size.
+        if Icons.MasqueGroup then
+            Icons.MasqueGroup:ReSkin(btn)
+        end
+        btn._iconSize = group.iconSize
+    end
 
     -- Spell icon texture
     btn.Icon:SetTexture(auraData.icon)
