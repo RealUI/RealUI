@@ -208,11 +208,28 @@ function Icons.OnLeave()
     GameTooltip:Hide()
 end
 
+-- CancelUnitBuff takes a 1-based buff index, not an auraInstanceID or name
+-- (name-based cancellation was removed in patch 8.0.1). Resolve the current
+-- index by matching auraInstanceID against the live buff list at click time.
+local function FindPlayerBuffIndex(auraInstanceID)
+    for i = 1, 100 do
+        local aura = _G.C_UnitAuras.GetBuffDataByIndex("player", i)
+        if not aura then break end
+        if aura.auraInstanceID == auraInstanceID then
+            return i
+        end
+    end
+    return nil
+end
+
 function Icons.OnClick(btn, button)
     if button ~= "RightButton" then return end
     if btn._isEnchant then
         _G.CancelItemTempEnchantment(btn._enchantSlot)
     elseif not btn._isDebuff and btn._unit == "player" and btn._auraInstanceID then
-        _G.C_UnitAuras.RemoveAuraByAuraInstanceID("player", btn._auraInstanceID)
+        local index = FindPlayerBuffIndex(btn._auraInstanceID)
+        if index then
+            _G.CancelUnitBuff("player", index)
+        end
     end
 end
