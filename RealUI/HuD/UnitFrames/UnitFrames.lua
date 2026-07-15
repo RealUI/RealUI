@@ -159,18 +159,10 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                     frame.Health:ForceUpdate()
                 end
 
-                -- Update fill direction: natural direction based on side, reverseFill toggles it
-                local natural = false
-                if unitData and unitData.health and unitData.health.point then
-                    natural = unitData.health.point == "RIGHT"
-                end
-                local reverseFill = natural
-                if unitDB and unitDB.reverseFill then
-                    reverseFill = not natural
-                end
-
+                -- Update fill direction (shared rule: natural side, parent
+                -- inheritance for pet/targettarget, per-unit toggle)
                 if frame.Health.SetReverseFill then
-                    frame.Health:SetReverseFill(reverseFill)
+                    frame.Health:SetReverseFill(UnitFrames.GetReverseFill(unitKey, unitData and unitData.health))
                 end
 
                 -- Retag health text
@@ -183,18 +175,8 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
 
             -- Update power fill direction and retag power text
             if frame.Power then
-                local natural = false
-                if unitData and unitData.power and unitData.power.point then
-                    natural = unitData.power.point == "RIGHT"
-                end
-                local unitDB = db.units[unitKey]
-                local reverseFill = natural
-                if unitDB and unitDB.reverseFill then
-                    reverseFill = not natural
-                end
-
                 if frame.Power.SetReverseFill then
-                    frame.Power:SetReverseFill(reverseFill)
+                    frame.Power:SetReverseFill(UnitFrames.GetReverseFill(unitKey, unitData and unitData.power))
                 end
 
                 if frame.Power.text then

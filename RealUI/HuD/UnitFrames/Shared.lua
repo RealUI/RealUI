@@ -47,6 +47,16 @@ RealUI.ReversePowers = {
     ["PAIN"] = true,
 }
 
+-- Attached frames mirror their parent's fill direction: pet hangs off the
+-- player frame and targettarget off the target frame, so reversing the
+-- parent's health bar must flip them too ("Pet and ToT don't respect
+-- health's Reverse Fill Direction"). Their own reverseFill toggle then
+-- flips them *relative to* the parent rather than absolutely.
+local reverseFillParent = {
+    pet = "player",
+    targettarget = "target",
+}
+
 local function GetReverseFill(unit, info)
     -- Natural fill direction based on bar side:
     -- Player (RIGHT side): natural=true → fill anchored RIGHT, grows right→left
@@ -56,14 +66,24 @@ local function GetReverseFill(unit, info)
         natural = info.point == "RIGHT"
     end
 
-    -- Per-unit toggle flips the natural direction
-    local unitDB = db and db.units and db.units[unit]
-    if unitDB and unitDB.reverseFill then
-        return not natural
+    local reverse = natural
+    local unitsDB = db and db.units
+
+    -- Inherit the parent frame's toggle first
+    local parentDB = unitsDB and reverseFillParent[unit] and unitsDB[reverseFillParent[unit]]
+    if parentDB and parentDB.reverseFill then
+        reverse = not reverse
     end
 
-    return natural
+    -- Per-unit toggle flips relative to the direction so far
+    local unitDB = unitsDB and unitsDB[unit]
+    if unitDB and unitDB.reverseFill then
+        reverse = not reverse
+    end
+
+    return reverse
 end
+UnitFrames.GetReverseFill = GetReverseFill
 
 local function GetVertices(info, useOther)
     local side = info.point

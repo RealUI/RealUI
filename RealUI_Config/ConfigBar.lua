@@ -963,7 +963,9 @@ do -- UnitFrames
         }
         -- reverseFill is generic (GetReverseFill/RefreshUnits key off db.units[unit]
         -- for any unit), so it applies to every frame with a health bar, not just
-        -- player/target. Pet and TargetTarget previously had no way to set this.
+        -- player/target. Pet and TargetTarget inherit their parent frame's
+        -- direction (pet→player, targettarget→target) automatically; their own
+        -- toggle flips them relative to that inherited direction.
         if unitSlug == "player" or unitSlug == "target"
             or unitSlug == "pet" or unitSlug == "targettarget" then
             unit.args.reverseFill = {
