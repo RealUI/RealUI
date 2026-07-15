@@ -31,10 +31,14 @@ AurasAddon.defaults = {
                 maxBars   = 40,
                 iconAlign = "RIGHT",
 
+                -- checkDuration/checkTimeLeft default OFF: a 60s cap here would
+                -- silently hide long self-buffs (Arcane Intellect at 3600s,
+                -- Fortitude, Well Fed, flasks, ...). filterDuration/filterTimeLeft
+                -- stay set so the values are sane if a user opts the checks back in.
                 showNoDuration  = true,
-                checkDuration   = true,
+                checkDuration   = false,
                 filterDuration  = 60,
-                checkTimeLeft   = true,
+                checkTimeLeft   = false,
                 filterTimeLeft  = 60,
                 filterBuffTable   = "ClassBuffs",
                 filterDebuffTable = "ClassBuffs",
