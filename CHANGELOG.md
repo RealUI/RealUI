@@ -1,3 +1,47 @@
+## [3.3.8] - 2026-07-16 ##
+### Summary ###
+WoW 12.0.7 maintenance and quality-of-life release. Unit frames gain proper Reverse Fill Direction inheritance for pet and target-of-target health bars, and Alternative Bar Style now extends to power bars with a dark power-type-colored foreground that live-recolors on power type changes. Health bar Class Color and Background Color changes now apply immediately instead of waiting for the next health event, and the absorb bar overlays inward from the bar end so it no longer grows past full health or ignores runtime reverse-fill changes. In RealUI_Auras, the buff-cancel click now resolves a live buff index for `CancelUnitBuff` (the previous call relied on an API that doesn't exist), buff icon size changes now force an immediate Masque reskin, and duration/time-left filtering defaults to off so long self-buffs like Arcane Intellect, Fortitude, and flasks aren't silently hidden. Cooldown Manager icon spacing now goes through EditMode's native IconPadding instead of Aurora's taint-unsafe padding hook (migration v5 rebuilds existing layouts). A new `RealUI.NeedsReload` config-option wrapper flags settings that require `/reload`, and the reload prompt now fires reliably no matter how the settings window is closed (Escape, close button, or programmatic close). The infobar now refreshes correctly on a healer profile switch at login, with per-module profile-update callbacks isolated so one module's error can't abort the rest of the switch. WoW 12.0.7 is now recognized as a supported client version, and the display-changed popup no longer re-prompts after a graphics driver reset at the same resolution. BugGrabber updates to v12.0.19, and RealUI's bundled default Platynator profile advances to v14. Aurora updates to 12.0.7.2, removing a CooldownViewer grid-padding hook that tainted the CDM and threw mass secret-value errors at raid-end cinematics, and disabling a SubtitlesFrame backdrop that caused a black bar during cinematics.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Auras
+  * RealUI_Bugs
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora (12.0.7.2)
+
+### Added ###
+
+  * add: power bars now respect Alternative Bar Style — dark foreground (reuses Health foreground settings) over a power-type colored PowerBG, with live recolor on `UNIT_DISPLAYPOWER` and fade/resize handled
+  * add: `RealUI.NeedsReload` system — wraps a config option so changing it flags a pending `/reload` and appends a note to its tooltip; the settings window prompts once on close if any flagged option changed
+
+### Changed ###
+
+  * chg: Cooldown Manager icon gap now set via EditMode's native `IconPadding` (2/5 → 7) instead of Aurora's taint-unsafe padding hook; migration v5 rebuilds existing layouts
+  * chg: buff icon "Icon Size" now driven from `group.iconSize` and forces a targeted Masque reskin on change, so the config slider updates border/backdrop textures immediately instead of only on the next full reskin
+  * chg: Aurora's `GameTooltip` skin no longer marks other tooltip-family frames as addon-touched, avoiding a conflict with its own deliberate NineSlice handling
+  * chg: BugGrabber updated to v12.0.19 (from r388)
+  * chg: RealUI's bundled default Platynator nameplate profile advanced to v14
+  * chg: Aurora updated to 12.0.7.2 (from 12.0.7.0) — removed the CooldownViewer grid-padding hook (writing `childXPadding`/`oldGridSettings` from addon context tainted the CDM and caused mass secret-value errors at raid-end cinematics); disabled the `SubtitlesFrame` backdrop that was causing a black bar during cinematics
+
+### Fixed ###
+
+  * fix: pet and target-of-target health bars now follow their parent frame's Reverse Fill Direction (pet→player, tot→target); the per-unit toggle flips relative to the inherited direction, with `GetReverseFill` centralized
+  * fix: absorb bar no longer grows out of the health bar at full health and now follows runtime reverse-fill changes — absorbs overlay inward from the bar end, with prediction anchors following live fill direction
+  * fix: alt-style health foreground now respects Foreground Opacity and Class Color Foreground — `UpdateColor` previously hardcoded alpha 1.0 and never checked `colorForegroundByClass`
+  * fix: health bar color changes (Class Color, Background Color) now apply immediately instead of waiting for the next health event; `HealthBG` now respects Class Color Background
+  * fix: infobar now refreshes correctly on a healer login profile switch — fixed branch precedence, isolated per-module `OnProfileUpdate` errors so one failure can't abort the cascade, and refreshed a stale `ndb` reference
+  * fix: RealUI_Auras buff/debuff duration and time-left filters now default off, so long self-buffs (Arcane Intellect, Fortitude, Well Fed, flasks) aren't silently hidden by the 60s default cap
+  * fix: reload prompt now fires on settings window close regardless of how it's closed (Escape, close button, or `ACD:Close`) — hooked onto the underlying frame's `OnHide` instead of only `ACD:Close`
+  * fix(auras): right-click buff cancellation now resolves the live buff index and calls `CancelUnitBuff` — the previous `C_UnitAuras.RemoveAuraByAuraInstanceID` call referenced an API that doesn't exist
+  * fix: WoW 12.0.7 (120007) added to RealUI's supported game version list
+  * fix: display-changed popup no longer re-prompts when `DISPLAY_SIZE_CHANGED` fires without an actual resolution change (e.g. graphics driver crash/recovery) — compares against the screen size last shown
+  * fix: pet and target-of-target default blocks now set `reverseFill = false`
+  * fix: "Reverse Fill Direction" toggle now shown for pet and target-of-target (in addition to player/target), wired through the existing `RefreshUnits("ReverseFill")` live-update path
+  * fix: CooldownCount module now removes duration trackers from Cooldown Manager's aura tracker
+
+
 ## [3.3.7] - 2026-06-17 ##
 ### Summary ###
 WoW 12.0.7 maintenance release focused on Demon Hunter HUD support and library housekeeping. Vengeance DH now shows discrete soul fragment icons; Havoc DH switches to the Devourer power bar. The absorb bar stays visible at full health, and the DH resource tracker config tab is restored after `CreateSoulFragments`. Note: switching between Havoc and Vengeance mid-session without a reload updates power values but does not change the bar/icon display style — a full rebuild is required. `Blocks.lua` migrates from the LibQTip-1 compatibility shim to native LibQTip-2 calls. The Platynator profile advances through three schema versions (v9/m4 → v11/migration-6); Platynator itself updates to v422 with new padding and layout controls, and Kui enemy/simplified health bars now highlight casts and channels in vivid orange. `DoReadyCheck` is modernized to `C_PartyInfo.DoReadyCheck`. EditMode config no longer swaps layouts when changing between equivalent roles. Aurora updated to 12.0.7.0.
