@@ -534,7 +534,7 @@ do -- UnitFrames
                     },
                     showPrivateAuras = {
                         name = "Private Auras",
-                        desc = "Show Blizzard private aura anchors below player and target frames (visible during certain boss encounters).",
+                        desc = "Show Blizzard private aura anchors below the player frame (visible during certain boss encounters).",
                         type = "toggle",
                         get = function() return UnitFrames.db.profile.misc.showPrivateAuras end,
                         set = function(_, value)

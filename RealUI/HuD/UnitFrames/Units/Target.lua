@@ -32,20 +32,9 @@ UnitFrames.target = {
         dialog.Range.frequentUpdates = true
         dialog:Tag(dialog.Range, "[realui:range]")
 
-        --[[ Private Auras ]]--
-        local PrivateAuras = _G.CreateFrame("Frame", nil, dialog)
-        PrivateAuras:SetPoint("TOPRIGHT", dialog, "BOTTOMRIGHT", -10, -30)
-        PrivateAuras:SetSize(dialog:GetWidth(), 24)
-        PrivateAuras.size = 22
-        PrivateAuras.spacing = 2
-        PrivateAuras.initialAnchor = "BOTTOMRIGHT"
-        PrivateAuras.growthX = "LEFT"
-        PrivateAuras.growthY = "DOWN"
-        PrivateAuras.num = 6
-        dialog._privateAurasFrame = PrivateAuras
-        if db.misc.showPrivateAuras then
-            dialog.PrivateAuras = PrivateAuras
-        end
+        -- No PrivateAuras element here: private aura anchors for external
+        -- units ("target", "focus", "boss") crash Blizzard's aura code since
+        -- the 2026-07-21 client patch — see known-wow-ui-bugs.md #5.
 
         -- Target Debuffs
         local debuffSize = (db.units.target and db.units.target.debuffSize) or 20
