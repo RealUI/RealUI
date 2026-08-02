@@ -1165,9 +1165,27 @@ function Infobar:OnInitialize()
     self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
+local function UpdateSecureClickRegistration()
+    local clicks = _G.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp"
+    for _, block in ipairs(orderedBlocks) do
+        if block.secureFrame then
+            block.secureFrame:RegisterForClicks(clicks)
+        end
+    end
+end
+
 function Infobar:OnEnable()
     LDB.RegisterCallback(self, "LibDataBroker_DataObjectCreated")
     LDB.RegisterCallback(self, "LibDataBroker_AttributeChanged")
+
+    -- Secure block overlays capture ActionButtonUseKeyDown at creation;
+    -- re-register clicks when it changes so they stay in sync with the
+    -- action bars instead of holding the stale edge until a reload.
+    self:RegisterEvent("CVAR_UPDATE", function(_, cvarName)
+        if cvarName == "ActionButtonUseKeyDown" or cvarName == "ACTION_BUTTON_USE_KEY_DOWN" then
+            RealUI.TryInCombat(UpdateSecureClickRegistration, false)
+        end
+    end)
 
     -- Use a fallback font since RealUI_Skins is a separate addon
     local fontPath = "Fonts\\FRIZQT__.TTF" -- Default WoW font
