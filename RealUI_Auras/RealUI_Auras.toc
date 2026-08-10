@@ -1,4 +1,4 @@
-﻿## Interface: 120007
+﻿## Interface: 120100
 ## Title: RealUI Auras
 ## Category: RealUI_Core
 ## Notes: Buff and debuff tracking for RealUI

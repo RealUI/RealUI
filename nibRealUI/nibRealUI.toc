@@ -1,4 +1,4 @@
-﻿## Interface: 120007
+﻿## Interface: 120100
 ## Title: nibRealUI (Migration Stub)
 ## Notes: Loads legacy SavedVariables for migration to RealUI 3.0
 ## Author: Nibelheim, Gethe, Hanshi

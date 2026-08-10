@@ -1,4 +1,4 @@
-﻿## Interface: 120007
+﻿## Interface: 120100
 ## Title: RealUI Config
 ## Category: RealUI_Core
 ## Notes: Graphical configuration for RealUI

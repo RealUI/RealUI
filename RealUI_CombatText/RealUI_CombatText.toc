@@ -1,4 +1,4 @@
-﻿## Interface: 120007
+﻿## Interface: 120100
 ## Title: RealUI Combat Text
 ## Category: RealUI_Core
 ## Notes: Scrolling combat text designed for RealUI
