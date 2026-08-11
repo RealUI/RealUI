@@ -103,6 +103,7 @@ function VersionManager:CheckGameCompatibility()
         [120001] = true, -- Midnight Release
         [120005] = true, -- Midnight 12.0.5
         [120007] = true, -- Midnight 12.0.7
+        [120100] = true, -- Midnight 12.1.0 "Curse of Ula'tek"
     }
 
     if not supportedVersions[gameVersion] then
