@@ -43,6 +43,12 @@ local SYSTEM_COOLDOWN_VIEWER    = 20
 local SYSTEM_PERSONAL_RESOURCE  = 21
 local SYSTEM_ENCOUNTER_EVENTS   = 22
 local SYSTEM_DAMAGE_METER       = 23
+-- 12.1 appends RaidWarning=24, TotemActionBar=25, LossOfControl=26 (IDs 0-23
+-- unchanged). Only RaidWarning gets an entry here — it replaces the old
+-- FrameMover "Raid Alerts" SetPoint (which would fight EditMode layout
+-- application). TotemActionBar/LossOfControl deliberately stay at Blizzard
+-- defaults until a calibrated position exists (decision 2026-08-12).
+local SYSTEM_RAID_WARNING       = 24
 
 -- Action bar visibility setting: 3 = Always Hidden
 local VISIBILITY_ALWAYS_HIDDEN = 3
@@ -256,9 +262,13 @@ Templates.base = {
             { setting = 14, value = 1 },
             { setting = 16, value = 0 },
             { setting = 18, value = 0 },
+            -- 12.1: setting 19 renamed IconSize -> DebuffIconSize; raw stored
+            -- scale unchanged (Blizzard's own presets store 5). 22 = new
+            -- BuffIconSize, added at the same value.
             { setting = 19, value = 5 },
             { setting = 20, value = 100 },
             { setting = 21, value = 5 },
+            { setting = 22, value = 5 },
         }),
     Entry(SYSTEM_UNIT_FRAME, 5, -- Raid frames
         Anchor("TOPLEFT", "UIParent", "TOPLEFT", 948.09997558594, -866.70001220703),
@@ -271,9 +281,10 @@ Templates.base = {
             { setting = 14, value = 0 },
             { setting = 15, value = 5 },
             { setting = 18, value = 0 },
-            { setting = 19, value = 5 },
+            { setting = 19, value = 5 },  -- DebuffIconSize (12.1 rename)
             { setting = 20, value = 100 },
             { setting = 21, value = 5 },
+            { setting = 22, value = 5 },  -- BuffIconSize (new in 12.1)
         }),
     Entry(SYSTEM_UNIT_FRAME, 6, -- Boss frames
         Anchor("RIGHT", "UIParent", "RIGHT", -32, 314),
@@ -290,9 +301,10 @@ Templates.base = {
             { setting = 12, value = 0 },
             { setting = 17, value = 1 },
             { setting = 18, value = 0 },
-            { setting = 19, value = 5 },
+            { setting = 19, value = 5 },  -- DebuffIconSize (12.1 rename)
             { setting = 20, value = 100 },
             { setting = 21, value = 5 },
+            { setting = 22, value = 5 },  -- BuffIconSize (new in 12.1)
         }),
     Entry(SYSTEM_UNIT_FRAME, 8, -- Pet (oUF replaces)
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),
@@ -644,6 +656,15 @@ Templates.base = {
             { setting = 11, value = 5 },
             { setting = 12, value = 50 },
         }),
+
+    -- =====================================================================
+    -- System 24: Raid Warning (12.1.0) — center, above the HuD
+    -- Position migrated from FrameMover's "Raid Alerts" entry (CENTER 0,214);
+    -- Enum.EditModeRaidWarningSetting has no members, so no settings.
+    -- =====================================================================
+    Entry(SYSTEM_RAID_WARNING, nil,
+        Anchor("CENTER", "UIParent", "CENTER", 0, 214),
+        {}),
 }
 
 ---------------------------------------------------------------------------

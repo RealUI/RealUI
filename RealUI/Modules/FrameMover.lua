@@ -17,10 +17,9 @@ local FrameList = {
             name = "Zoning Text",
             frames = {[1] = {name = "ZoneTextFrame"},},
         },
-        raidmessages = {
-            name = "Raid Alerts",
-            frames = {[1] = {name = "RaidWarningFrame"},},
-        },
+        -- raidmessages removed 12.1: RaidWarningFrame is an EditMode system
+        -- (24) now — moving it by SetPoint fights EditMode layout
+        -- application. Position lives in Core/EditModeTemplates.lua.
         ticketstatus = {
             name = "Ticket Status",
             frames = {[1] = {name = "TicketStatusFrame"},},
@@ -102,11 +101,6 @@ function FrameMover:OnInitialize()
                 zonetext = {
                     frames = {
                         [1] = {name = "ZoneTextFrame", parent = "UIParent", point = "TOP", rpoint = "TOP", x = 0, y = -85},
-                    },
-                },
-                raidmessages = {
-                    frames = {
-                        [1] = {name = "RaidWarningFrame", parent = "UIParent", point = "CENTER", rpoint = "CENTER", x = 0, y = 214},
                     },
                 },
                 errorframe = {
