@@ -27,5 +27,12 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <!-- Core Fixes and Enhancements -->
     <Script file="Fixes\BlizzBugsSuck.lua"/>
     <Script file="Fixes\InspectFix.lua"/>
-    <Script file="Fixes\LibStrataFix.lua"/>
+    <!-- LibStrataFix RETIRED 2026-08-13: fixes a WoD 6.0 frame-level bug
+         Blizzard resolved in Legion; upstream dead since 2015 (rev 34 is
+         final). Its global CreateFrame/SetParent hooks are a stutter
+         suspect (RealUI_Dev/tests/StutterDiagnostic.lua) and a recurring
+         taint liability on 12.1 secure-env frames. File kept on disk for
+         rollback — re-enable this line if z-order regressions appear,
+         though the modern fix would be a targeted SetFrameLevel. -->
+    <!--Script file="Fixes\LibStrataFix.lua"/-->
 </Ui>
