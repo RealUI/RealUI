@@ -116,19 +116,28 @@ lib.templateExceptions = {
 local function GetChild(parent,num)
   return select(num,parent:GetChildren())
 end
+
+-- 12.1: Blizzard_AuraContainer's secure environment creates frames whose
+-- parent tables cannot be indexed AT ALL from insecure code (stronger than
+-- forbidden — even :IsForbidden() throws "cannot be accessed while
+-- tainted"). pcall-guard the whole check; inaccessible means skip.
+local function IsAccessibleFrame(frame)
+  local ok, forbidden = pcall(function() return frame:IsForbidden() end)
+  return ok and not forbidden
+end
 --------------------------------------------------------------------
 -- upgradeable hooks
 function lib.CreateFrameHook(frameType, name, parent, template)
   local te = template and lib.templateExceptions[template]
-  if te then 
+  if te then
      if type(te) == "string" and _G[te] then
        te = _G[te]
      end
-     if type(te) == "table" and te.IsObjectType and te:IsObjectType("Frame") then 
+     if type(te) == "table" and te.IsObjectType and te:IsObjectType("Frame") then
        parent = te
      end
   end
-  if parent and not parent:IsForbidden() then
+  if parent and IsAccessibleFrame(parent) then
     local num = parent:GetNumChildren()
     if not num or (num <= 0) then -- should never happen
       debug("Something very strange happenned in CreateFrameHook: num="..(num or "nil"))
@@ -153,8 +162,8 @@ function lib.SetParentHook(self,parent)
   if type(parent) == "string" then -- handle Frame:SetParent("name")
     parent = _G[parent]
   end
-  if parent 
-     and not parent:IsForbidden() then  -- ticket 9: skip forbidden frames, which generate errors
+  if parent
+     and IsAccessibleFrame(parent) then  -- ticket 9 + 12.1 secure-env tables
     CheckOne(self, parent, "SetParent")
   end
 end
