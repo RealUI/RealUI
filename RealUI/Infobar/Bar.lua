@@ -976,7 +976,7 @@ function Infobar:SettingsUpdate(setting, block)
     end
 
     -- print("setting:", setting, " block:", block)
-    local showBars = db.showBars and not (db.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel())
+    local showBars = db.showBars and not (db.HideStatusBarMaxLevel and _G.GameRulesUtil.IsPlayerAtEffectiveMaxLevel())
     if setting == "statusBar" or setting == "HideStatusBarMaxLevel" then
         local watch = self.frame.watch
         watch.main:SetShown(showBars)

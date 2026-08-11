@@ -124,7 +124,7 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                     self.dura:Hide()
                 end
 
-                if _G.IsPlayerAtEffectiveMaxLevel() then
+                if _G.GameRulesUtil.IsPlayerAtEffectiveMaxLevel() then
                     local itemString = itemLink:match("item[%-?%d:]+") or ""
                     local _, _, enchantID, gem1, gem2, gem3, gem4 = _G.strsplit(":", itemString)
                     if tonumber(enchantID) then

@@ -237,7 +237,11 @@ end
 function Icons.OnClick(btn, button)
     if button ~= "RightButton" then return end
     if btn._isEnchant then
-        _G.CancelItemTempEnchantment(btn._enchantSlot)
+        -- 12.1: CancelItemTempEnchantment is a CVar-gated deprecation shim;
+        -- the replacement takes an inventory slot ID (same 1→MH/2→OH
+        -- mapping as the tooltip path above)
+        local invSlot = (btn._enchantSlot == 1) and _G.INVSLOT_MAINHAND or _G.INVSLOT_OFFHAND
+        _G.C_PaperDollInfo.CancelTemporaryEnchantment(invSlot)
     elseif not btn._isDebuff and btn._unit == "player" and btn._auraInstanceID then
         local index = FindPlayerBuffIndex(btn._auraInstanceID)
         if index then

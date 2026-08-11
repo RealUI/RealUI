@@ -299,10 +299,14 @@ end
 
 -- To help position UI elements
 function _G.RealUI_TestRaidWarnings()
+    -- 12.1: RaidNotice_AddMessage is a CVar-gated deprecation shim and
+    -- RaidBossEmoteFrame is gone — boss emotes are a MessageType on the
+    -- single rebuilt RaidWarningFrame, driven via RaidWarningUtil
+    local MessageType = _G.RaidWarningUtil.MessageType
     RealUI:ScheduleRepeatingTimer(
         function()
-            _G.RaidNotice_AddMessage(_G.RaidWarningFrame, _G.CHAT_MSG_RAID_WARNING, {r = 0, g = 1, b = 0})
-            _G.RaidNotice_AddMessage(_G.RaidBossEmoteFrame, _G.CHAT_MSG_RAID_BOSS_EMOTE, {r = 0, g = 1, b = 0})
+            _G.RaidWarningUtil.AddMessage(_G.CHAT_MSG_RAID_WARNING, {r = 0, g = 1, b = 0}, nil, MessageType.RaidWarning)
+            _G.RaidWarningUtil.AddMessage(_G.CHAT_MSG_RAID_BOSS_EMOTE, {r = 0, g = 1, b = 0}, nil, MessageType.BossEmote)
         end,
         5
     )

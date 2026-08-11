@@ -599,7 +599,7 @@ function Infobar:CreateBlocks()
     --[[ Static Blocks ]]--
     do  -- Start
         local guildText
-        if _G.CommunitiesFrame_IsEnabled() then
+        if _G.C_Club.IsEnabled() then
             guildText = _G.GUILD_AND_COMMUNITIES
         elseif _G.IsInGuild() then
             guildText = _G.GUILD
@@ -1641,7 +1641,7 @@ function Infobar:CreateBlocks()
                 end
             end,
             IsValid = function(XP)
-                return not _G.IsPlayerAtEffectiveMaxLevel()
+                return not _G.GameRulesUtil.IsPlayerAtEffectiveMaxLevel()
             end,
             SetTooltip = function(XP, tooltip)
                 local curXP, maxXP, restXP = XP:GetStats()
@@ -1767,9 +1767,8 @@ function Infobar:CreateBlocks()
             end,
             OnClick = function(Rep)
                 if Rep.isMajorFaction and Rep.factionID > 0 then
-                    if not _G.MajorFactionRenownFrame then
-                        _G.MajorFactions_LoadUI()
-                    end
+                    -- 12.1: MajorFactions_LoadUI removed; Blizzard_MajorFactions
+                    -- is LoadOnDemand 0 now, so the frame always exists
                     if _G.MajorFactionRenownFrame then
                         _G.HideUIPanel(_G.MajorFactionRenownFrame)
                         _G.EventRegistry:TriggerEvent("MajorFactionRenownMixin.MajorFactionRenownRequest", Rep.factionID)
@@ -1980,7 +1979,7 @@ function Infobar:CreateBlocks()
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
 
-            if Infobar.db.profile.showBars and not (Infobar.db.profile.HideStatusBarMaxLevel and _G.IsPlayerAtEffectiveMaxLevel()) then
+            if Infobar.db.profile.showBars and not (Infobar.db.profile.HideStatusBarMaxLevel and _G.GameRulesUtil.IsPlayerAtEffectiveMaxLevel()) then
                 local watch = Infobar.frame.watch
                 Infobar:debug("progress:main", dbc.progressState, curValue, maxValue)
 
