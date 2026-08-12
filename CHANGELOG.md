@@ -1,4 +1,44 @@
-## [3.3.8] - 2026-07-16 ##
+## [3.4.0] - 2026-08-13 ##
+### Summary ###
+The WoW 12.1 "Curse of Ula'tek" release, and the biggest under-the-hood update of the 3.x line. The HuD migrates to oUF 14: unit frames, castbars, and class resources now run on Blizzard's new secure aura-container and callback-driven APIs, which makes cast time text secret-value-safe (C++-rendered), keeps aura layouts native, and enables features that were previously impossible — buffs can now be **right-click cancelled even in combat**, target debuffs show **dispel-type colored borders** (magic/curse/poison/disease), and an optional **global cooldown bar** can be enabled on the player castbar (off by default, `/reload` to apply). The bundled Grid2 profiles are updated for Grid2 4.0's aura-engine rewrite — healer HoT tracking consolidates onto a single multi-buff icon, the "my casts only" filters survive Grid2's DB migration, and the private-aura dispel indicator is retired on both sides (Blizzard's 12.1 private-aura anchors crash for external units; Grid2 4.0 reached the same conclusion and disabled them entirely). All 12.1-removed APIs are patched (XP/Rep infobar blocks, temp-enchant cancelling, raid-warning testing, communities check), RaidWarningFrame becomes an EditMode-managed system instead of a FrameMover entry, party/raid/arena presets gain the new BuffIconSize setting, and the ancient LibStrataFix global CreateFrame hook is retired (its WoD-era bug was fixed by Blizzard in Legion; the hook was a stutter suspect and a 12.1 taint liability). Aurora updates to 12.1.0.0 with skins for the 12.1 surfaces and hotfixes for everything the patch moved or removed.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Auras
+  * RealUI_Bugs
+  * RealUI_Config
+  * RealUI_Dev
+  * RealUI_Skins
+  * Aurora (12.1.0.1)
+
+### Added ###
+
+  * add: buffs on the player frame can be right-click cancelled **in combat** — the oUF 14 aura containers are combat-legal (was impossible with the old insecure aura buttons)
+  * add: target debuffs show dispel-type colored borders (magic/curse/poison/disease) driven by Blizzard's dispel color table
+  * add: optional global cooldown bar on the player castbar (`showGCD`, default off, `/reload` to apply)
+  * add: castbar pushback/delay display as its own red text next to the cast time
+  * add: WoW 12.1.0 (120100) added to the supported game version list; all TOCs at Interface 120100
+  * add: party/raid/arena EditMode presets gain the new 12.1 `BuffIconSize` setting (22); `DebuffIconSize` values carry over unchanged
+  * add: infobar secure blocks re-register clicks on `ActionButtonUseKeyDown` CVAR_UPDATE (combat-deferred) so the click edge stays in sync with action bars
+
+### Changed ###
+
+  * chg: **HuD migrated to oUF 14** — unit frames on the privatized `__unit` model, buffs/debuffs on Blizzard's secure AuraContainer intrinsics (config changes for count/growth/anchor/width apply live; icon size applies on `/reload`), castbars rebuilt on callback-argument state with C++-driven secret-safe cast time text, class power on the new varargs signatures
+  * chg: bundled Grid2 profiles updated for **Grid2 4.0** — healer HoT icon consolidates five per-spell statuses into one multi-buff status (Grid2 4.0 renders one aura slot per icon indicator), `mine` filters made migration-proof, Prayer of Mending gains its missing spell ID, private-aura dispel indicator removed, dead status references cleaned; existing users are migrated automatically (profile migration v2, also via `/realui grid2update`)
+  * chg: `RaidWarningFrame` position is now an EditMode-managed system (12.1 system 24) instead of a FrameMover entry — the old SetPoint fought EditMode layout application
+  * chg: **LibStrataFix retired** — it worked around a WoD 6.0 frame-level bug Blizzard fixed in Legion; its global CreateFrame/SetParent hooks were a stutter suspect and a recurring 12.1 secure-frame taint liability (file kept for rollback)
+  * chg: bundled Platynator nameplate profile advanced to v454
+  * chg: BugGrabber updated to v12.0.21
+  * chg: Aurora updated to 12.1.0.1 — 12.1.0.0 brings skins for the 12.1 Social UI, Housing Blueprint panels, Cooldown Manager group-buff filter and edit alerts, Discord chat-config colors and guild-control pane, House Editor pet customization, plus fixes for everything 12.1 moved (BattleNet invite dialog, color picker, splash screen, chat bubbles, role poll, housing controls/dashboard) and secret-value guards for aura-button skinning; the 12.1.0.1 hotfix corrects the secret-layer icon-border fallback that painted aura icons as black boxes
+
+### Fixed ###
+
+  * fix: 12.1-removed APIs — XP/Rep infobar blocks and character-pane max-level checks (`GameRulesUtil`), communities check (`C_Club.IsEnabled`), temp-enchant right-click cancel (`C_PaperDollInfo.CancelTemporaryEnchantment`), raid-warning position testing (`RaidWarningUtil`), dead `MajorFactions_LoadUI` branch removed
+  * fix: RealUI ↔ RealUI_Skins TOC dependency cycle (12.1 loader warned x7 at login); actual load order unchanged
+  * fix: unit frame tooltips under oUF 14 — Blizzard's tooltip path reads a field oUF no longer maintains; refreshed at hover time
+  * fix: target-frame private aura anchors dropped — external-unit anchors crash the client since the 2026-07-21 patch (the player frame keeps its private auras); Grid2 4.0 independently disabled its private-aura indicators for the same reason
+  * fix: secret-value hardening — class colors fall back to `C_ClassColor` when the class token is secret; frame-property reads on secure-environment aura buttons guarded throughout
 ### Summary ###
 WoW 12.0.7 maintenance and quality-of-life release. Unit frames gain proper Reverse Fill Direction inheritance for pet and target-of-target health bars, and Alternative Bar Style now extends to power bars with a dark power-type-colored foreground that live-recolors on power type changes. Health bar Class Color and Background Color changes now apply immediately instead of waiting for the next health event, and the absorb bar overlays inward from the bar end so it no longer grows past full health or ignores runtime reverse-fill changes. In RealUI_Auras, the buff-cancel click now resolves a live buff index for `CancelUnitBuff` (the previous call relied on an API that doesn't exist), buff icon size changes now force an immediate Masque reskin, and duration/time-left filtering defaults to off so long self-buffs like Arcane Intellect, Fortitude, and flasks aren't silently hidden. Cooldown Manager icon spacing now goes through EditMode's native IconPadding instead of Aurora's taint-unsafe padding hook (migration v5 rebuilds existing layouts). A new `RealUI.NeedsReload` config-option wrapper flags settings that require `/reload`, and the reload prompt now fires reliably no matter how the settings window is closed (Escape, close button, or programmatic close). The infobar now refreshes correctly on a healer profile switch at login, with per-module profile-update callbacks isolated so one module's error can't abort the rest of the switch. WoW 12.0.7 is now recognized as a supported client version, and the display-changed popup no longer re-prompts after a graphics driver reset at the same resolution. BugGrabber updates to v12.0.19, and RealUI's bundled default Platynator profile advances to v14. Aurora updates to 12.0.7.2, removing a CooldownViewer grid-padding hook that tainted the CDM and threw mass secret-value errors at raid-end cinematics, and disabling a SubtitlesFrame backdrop that caused a black bar during cinematics.
 
@@ -1090,6 +1130,8 @@ All user settings are automatically migrated from nibRealUIDB to RealUIDB, ensur
   * LibObjectiveProgress-1.0 updated to latest
 
 ## Detailed Changes ##
+[3.4.0]: https://github.com/RealUI/RealUI/compare/3.3.8...3.4.0
+[3.3.8]: https://github.com/RealUI/RealUI/compare/3.3.7...3.3.8
 [3.3.7]: https://github.com/RealUI/RealUI/compare/3.3.6...3.3.7
 [3.3.6]: https://github.com/RealUI/RealUI/compare/3.3.5...3.3.6
 [3.3.5]: https://github.com/RealUI/RealUI/compare/3.3.4...3.3.5
