@@ -459,8 +459,7 @@ function private.AddOns.Grid2()
             },
             ["buff-PrayerOfMending-mine"] = {
                 ["type"] = "buff",
-                ["spellName"] = 33076, -- was missing; Grid2 4.0 migration builds the aura list from it
-                ["mine"] = 1,
+                ["mine"] = 1, -- Grid2 4.0 migration only maps mine==1/2
                 ["color1"] = {
                     ["a"] = 1,
                     ["r"] = 1,
@@ -1043,7 +1042,6 @@ function private.AddOns.Grid2()
             },
             ["buff-PrayerOfMending-mine"] = {
                 ["type"] = "buff",
-                ["spellName"] = 33076, -- was missing; Grid2 4.0 migration builds the aura list from it
                 ["mine"] = 1, -- Grid2 4.0 migration only maps mine==1/2
                 ["color1"] = {
                     ["a"] = 1,
@@ -1204,8 +1202,8 @@ function private.Grid2ProfileMigration()
                         changed = true
                     end
                 end
-                -- PrayerOfMending shipped without a spellName; Grid2 4.0
-                -- builds the aura list from it
+                -- Defensive: Grid2 4.0 builds the aura list from spellName;
+                -- restore it if a user-modified profile lost it
                 local pom = profile.statuses["buff-PrayerOfMending-mine"]
                 if pom and not pom.spellName then
                     pom.spellName = 33076

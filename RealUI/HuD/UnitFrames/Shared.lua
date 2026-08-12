@@ -155,19 +155,19 @@ local function PositionHealthPredictions(Health, isReverse)
     HealAbsorb:SetReverseFill(not isReverse)
 end
 
-local function CreateHealthBar(parent, info, isAngled, unit)
+local function CreateHealthBar(parent, info, isAngled, unitToken)
     local Health
     if isAngled then
         local width, height = parent:GetWidth(), parent:GetHeight()
-        if db.units[unit].healthHeight then
-            height = round((height - 3) * db.units[unit].healthHeight)
+        if db.units[unitToken].healthHeight then
+            height = round((height - 3) * db.units[unitToken].healthHeight)
         end
 
         Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
         Health:SetAngleVertex(info.leftVertex, info.rightVertex)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
-        Health:SetReverseFill(GetReverseFill(unit, info))
+        Health:SetReverseFill(GetReverseFill(unitToken, info))
 
         -- Set initial bg color: red when alternative style is active
         -- Use a separate HealthBG StatusBar at the same frame level, with fill at BORDER layer
@@ -177,7 +177,7 @@ local function CreateHealthBar(parent, info, isAngled, unit)
             HealthBG:SetAngleVertex(info.leftVertex, info.rightVertex)
             HealthBG:SetSize(width, height)
             HealthBG:SetPoint("TOP"..info.point, parent)
-            HealthBG:SetReverseFill(GetReverseFill(unit, info))
+            HealthBG:SetReverseFill(GetReverseFill(unitToken, info))
             HealthBG:SetFrameLevel(Health:GetFrameLevel())
             -- Hide HealthBG's own bg and borders
             HealthBG.bg:SetAlpha(0)
@@ -190,7 +190,7 @@ local function CreateHealthBar(parent, info, isAngled, unit)
             HealthBG:SetMinMaxValues(0, 1)
             HealthBG:SetValue(1)
             local unitsDB = GetUnitsDB()
-            local hbDB = unitsDB[unit] and unitsDB[unit].healthBar
+            local hbDB = unitsDB[unitToken] and unitsDB[unitToken].healthBar
             local bgColor = (hbDB and hbDB.background) or {0.78, 0.15, 0.15}
             local bgOpacity = (hbDB and hbDB.backgroundOpacity) or 1.0
             HealthBG:SetStatusBarColor(bgColor[1], bgColor[2], bgColor[3], bgOpacity)
@@ -198,7 +198,7 @@ local function CreateHealthBar(parent, info, isAngled, unit)
         end
 
         Health.PreUpdate = function(self)
-            local isReverse = GetReverseFill(unit, info)
+            local isReverse = GetReverseFill(unitToken, info)
             self:SetReverseFill(isReverse)
             -- Keep the prediction bars tracking the live fill direction
             if self.predictionsReversed ~= isReverse then
@@ -224,7 +224,7 @@ local function CreateHealthBar(parent, info, isAngled, unit)
         end
 
         -- Health prediction sub-widgets
-        local isReverse = GetReverseFill(unit, info)
+        local isReverse = GetReverseFill(unitToken, info)
 
         local HealingAll = parent:CreateAngle("Prediction", nil, Health)
         HealingAll:SetWidth(Health:GetWidth())
@@ -275,7 +275,7 @@ local function CreateHealthBar(parent, info, isAngled, unit)
     end
 
     Health.barType = "health"
-    local unitDB = GetUnitsDB()[unit] or {}
+    local unitDB = GetUnitsDB()[unitToken] or {}
     local hb = unitDB.healthBar or {}
     Health.colorClass = db.overlay.classColor or hb.colorForegroundByClass
     Health.colorTapping = true
@@ -362,7 +362,7 @@ local CreateHealthStatus do
         self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
-    function CreateHealthStatus(parent, info, isAngled, unit)
+    function CreateHealthStatus(parent, info, isAngled, unitToken)
         local PvPIndicator
         if isAngled then
             local leftVertex, rightVertex = GetVertices(info)
@@ -374,7 +374,7 @@ local CreateHealthStatus do
 
             PvPIndicator.Override = UpdatePvP
 
-            if not (unit == "player" or unit == "pet") then
+            if not (unitToken == "player" or unitToken == "pet") then
                 local class = parent:CreateAngle("Frame", nil, parent.Health)
                 class:SetSize(width, height)
                 class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
@@ -394,17 +394,17 @@ local CreateHealthStatus do
 end
 
 
-local function CreatePowerBar(parent, info, isAngled, unit)
+local function CreatePowerBar(parent, info, isAngled, unitToken)
     local Power
     if isAngled then
-        local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unit].healthHeight))
+        local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unitToken].healthHeight))
         local xOffset = parent.Health:GetHeight() - height
 
         Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
         Power:SetSize(width, height)
         Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
-        Power:SetReverseFill(GetReverseFill(unit, info))
+        Power:SetReverseFill(GetReverseFill(unitToken, info))
 
         -- Alternative bar style: power-type colored background revealed as
         -- power drains, mirroring HealthBG (fill at BORDER layer, between
@@ -414,7 +414,7 @@ local function CreatePowerBar(parent, info, isAngled, unit)
             PowerBG:SetSize(width, height)
             PowerBG:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
             PowerBG:SetAngleVertex(info.leftVertex, info.rightVertex)
-            PowerBG:SetReverseFill(GetReverseFill(unit, info))
+            PowerBG:SetReverseFill(GetReverseFill(unitToken, info))
             PowerBG:SetFrameLevel(Power:GetFrameLevel())
             PowerBG.bg:SetAlpha(0)
             PowerBG.top:Hide()
@@ -451,7 +451,7 @@ local function CreatePowerBar(parent, info, isAngled, unit)
         end
         UnitFrames:ApplyStatusTextFont(Power.text)
         local statusText = GetMiscDB().statusText
-        local _, powerType = _G.UnitPowerType(unit)
+        local _, powerType = _G.UnitPowerType(unitToken)
         parent:Tag(Power.text, UnitFrames.GetPowerTagString(statusText, powerType))
     end
 
