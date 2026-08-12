@@ -44,7 +44,6 @@ function RealUI:IsNewerVersion(newVer, oldVer)
 end
 
 -- Configuration Mode Management
-RealUI.configModeModules = {}
 RealUI.isConfigMode = false
 
 -- Layout Position Defaults

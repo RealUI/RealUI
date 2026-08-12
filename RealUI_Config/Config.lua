@@ -93,14 +93,8 @@ function RealUI:HuDTestMode(isConfigMode)
 
     RealUI:ToggleGridTestMode(isConfigMode)
 
-    -- RealUI Modules
-    for k, mod in next, RealUI.configModeModules do
-        debug("Config Test", mod.moduleName)
-        if mod:IsEnabled() then
-            debug("Is enabled")
-            mod:ToggleConfigMode(isConfigMode)
-        end
-    end
+    -- Module ToggleConfigMode calls route through FramePoint:ToggleAll
+    -- above (the old configModeModules table was never populated)
 
     if not _G.ObjectiveTrackerFrame.collapsed then
         _G.ObjectiveTrackerFrame:SetShown(not isConfigMode)
