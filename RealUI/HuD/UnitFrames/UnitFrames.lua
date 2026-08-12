@@ -40,6 +40,69 @@ function UnitFrames.SetAuraPosition(auraFrame, parent, posAnchor, initialAnchor)
     auraFrame:SetPoint(initialAnchor, parent, pos[1], pos[2], pos[3])
 end
 
+-- oUF 14: aura containers are AuraContainer intrinsics built via
+-- frame:CreateAuras() + AddGroup, replacing the old widget-based
+-- Buffs/Debuffs element. One element per legacy container; positioning on
+-- the parent stays the caller's job (Player/Target use SetAuraPosition,
+-- Boss anchors directly).
+local function AuraPostCreateButton(_, button)
+    if button.Icon then
+        _G.Aurora.Base.CropIcon(button.Icon, button)
+    end
+    if button.Count then
+        button.Count:SetFontObject("NumberFont_Outline_Med")
+    end
+end
+
+-- settings = {filter, count, size, spacing, growthX, growthY, maxWidth}
+function UnitFrames.CreateAuraElement(dialog, settings)
+    local frameWidth = (settings.maxWidth and settings.maxWidth > 0 and settings.maxWidth) or dialog:GetWidth()
+    local element = dialog:CreateAuras({
+        initialAnchor = UnitFrames.GetInitialAnchor(settings.growthX, settings.growthY),
+        growthX = settings.growthX,
+        growthY = settings.growthY,
+        layoutLimit = frameWidth,
+    })
+    element.PostCreateButton = AuraPostCreateButton
+    element._ruiGroupKey = element:AddGroup(settings.filter, {
+        maxFrameCount = settings.count,
+        size = settings.size,
+        elementSpacing = settings.spacing,
+        lineSpacing = settings.spacing,
+        showCount = true,
+    })
+    return element
+end
+
+-- Runtime config refresh. Everything except button size is live-mutable on
+-- the intrinsic (SetAuraGroupMaxFrameCount + the SetFlowLayout* family);
+-- size is resolved at button creation and needs a /reload to change.
+-- opts = {show, count, layout (auraLayout sub-table), defaultAnchor,
+--         defaultGrowthX, defaultGrowthY}; defaultAnchor nil = caller owns
+--         positioning (boss frames).
+function UnitFrames.RefreshAuraElement(element, frame, opts)
+    element:SetEnabled(opts.show and true or false)
+    if not opts.show then return end
+
+    if element._ruiGroupKey then
+        element:SetAuraGroupMaxFrameCount(element._ruiGroupKey, opts.count or 16)
+    end
+
+    local layout = opts.layout or {}
+    local growthX = layout.growthX or opts.defaultGrowthX
+    local growthY = layout.growthY or opts.defaultGrowthY
+    local initialAnchor = UnitFrames.GetInitialAnchor(growthX, growthY)
+    element:SetFlowLayoutAnchorPoint(initialAnchor)
+    element:SetFlowLayoutGrowthDirection(growthX == "LEFT" and -1 or 1, growthY == "DOWN" and -1 or 1)
+    local maxWidth = layout.maxWidth
+    element:SetFlowLayoutMaximumLineSize((maxWidth and maxWidth > 0 and maxWidth) or frame:GetWidth())
+    if opts.defaultAnchor then
+        UnitFrames.SetAuraPosition(element, frame, layout.anchor or opts.defaultAnchor, initialAnchor)
+    end
+
+    element:ForceUpdate()
+end
+
 local units = {
     "Player",
     "Target",
@@ -88,7 +151,9 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
         if not frame then
             self:debug("Unit frame not found:", units[i])
         else
-            local unitKey = frame.unit
+            -- oUF 14 privatized frame.unit; the key derives from our own
+            -- units table ("Player" -> "player", "FocusTarget" -> "focustarget")
+            local unitKey = units[i]:lower()
             local unitData = UnitFrames[unitKey]
 
             -- Update class color settings
@@ -229,100 +294,42 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                 end
             end
 
-            -- Update aura toggles/counts on target frame
+            -- Update aura toggles/counts on target frame (oUF 14: live
+            -- intrinsic mutation via RefreshAuraElement; size needs /reload)
             if unitKey == "target" then
                 if frame.Debuffs then
-                    if db.units.target.showTargetDebuffs then
-                        frame.Debuffs.num = db.units.target.debuffCount
-                        frame.Debuffs:Show()
-                    else
-                        frame.Debuffs.num = 0
-                        frame.Debuffs:Hide()
-                    end
-
-                    frame.Debuffs.size = db.units.target.debuffSize or 20
-
-                    -- Update debuff layout from config
-                    local debuffLayout = db.units.target.auraLayout and db.units.target.auraLayout.debuffs
-                    if debuffLayout then
-                        if debuffLayout.growthX then frame.Debuffs.growthX = debuffLayout.growthX end
-                        if debuffLayout.growthY then frame.Debuffs.growthY = debuffLayout.growthY end
-                        frame.Debuffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Debuffs.growthX or "RIGHT", frame.Debuffs.growthY or "UP")
-                        UnitFrames.SetAuraPosition(frame.Debuffs, frame, debuffLayout.anchor or "TOPLEFT", frame.Debuffs.initialAnchor)
-                    end
-                    -- Recalculate container size
-                    local debuffSize = frame.Debuffs.size
-                    local debuffSpacing = frame.Debuffs.spacing or 2
-                    local debuffMaxWidth = debuffLayout and debuffLayout.maxWidth
-                    local debuffFrameWidth = (debuffMaxWidth and debuffMaxWidth > 0 and debuffMaxWidth) or frame:GetWidth()
-                    local debuffCols = _G.math.floor((debuffFrameWidth + debuffSpacing) / (debuffSize + debuffSpacing))
-                    local debuffRows = _G.math.ceil(frame.Debuffs.num / _G.math.max(debuffCols, 1))
-                    frame.Debuffs:SetWidth(debuffFrameWidth)
-                    frame.Debuffs:SetHeight(debuffRows * (debuffSize + debuffSpacing))
-                    frame.Debuffs:ForceUpdate()
+                    UnitFrames.RefreshAuraElement(frame.Debuffs, frame, {
+                        show = db.units.target.showTargetDebuffs,
+                        count = db.units.target.debuffCount,
+                        layout = db.units.target.auraLayout and db.units.target.auraLayout.debuffs,
+                        defaultAnchor = "TOPLEFT",
+                        defaultGrowthX = "RIGHT",
+                        defaultGrowthY = "UP",
+                    })
                 end
                 if frame.Buffs then
-                    if db.units.target.showTargetBuffs then
-                        frame.Buffs.num = db.units.target.buffCount
-                        frame.Buffs:Show()
-                    else
-                        frame.Buffs.num = 0
-                        frame.Buffs:Hide()
-                    end
-
-                    frame.Buffs.size = db.units.target.buffSize or 20
-
-                    -- Update buff layout from config
-                    local buffLayout = db.units.target.auraLayout and db.units.target.auraLayout.buffs
-                    if buffLayout then
-                        if buffLayout.growthX then frame.Buffs.growthX = buffLayout.growthX end
-                        if buffLayout.growthY then frame.Buffs.growthY = buffLayout.growthY end
-                        frame.Buffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Buffs.growthX or "LEFT", frame.Buffs.growthY or "UP")
-                        UnitFrames.SetAuraPosition(frame.Buffs, frame, buffLayout.anchor or "TOPRIGHT", frame.Buffs.initialAnchor)
-                    end
-                    -- Recalculate container size
-                    local buffSize = frame.Buffs.size
-                    local buffSpacing = frame.Buffs.spacing or 2
-                    local buffMaxWidth = buffLayout and buffLayout.maxWidth
-                    local buffFrameWidth = (buffMaxWidth and buffMaxWidth > 0 and buffMaxWidth) or frame:GetWidth()
-                    local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
-                    local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
-                    frame.Buffs:SetWidth(buffFrameWidth)
-                    frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
-                    frame.Buffs:ForceUpdate()
+                    UnitFrames.RefreshAuraElement(frame.Buffs, frame, {
+                        show = db.units.target.showTargetBuffs,
+                        count = db.units.target.buffCount,
+                        layout = db.units.target.auraLayout and db.units.target.auraLayout.buffs,
+                        defaultAnchor = "TOPRIGHT",
+                        defaultGrowthX = "LEFT",
+                        defaultGrowthY = "UP",
+                    })
                 end
             end
 
             -- Update aura toggles/counts on player frame
             if unitKey == "player" then
                 if frame.Buffs then
-                    if db.units.player.showPlayerBuffs then
-                        frame.Buffs.num = db.units.player.buffCount
-                        frame.Buffs:Show()
-                    else
-                        frame.Buffs.num = 0
-                        frame.Buffs:Hide()
-                    end
-
-                    frame.Buffs.size = db.units.player.buffSize or 20
-
-                    local buffLayout = db.units.player.auraLayout and db.units.player.auraLayout.buffs
-                    if buffLayout then
-                        if buffLayout.growthX then frame.Buffs.growthX = buffLayout.growthX end
-                        if buffLayout.growthY then frame.Buffs.growthY = buffLayout.growthY end
-                        frame.Buffs.initialAnchor = UnitFrames.GetInitialAnchor(frame.Buffs.growthX or "RIGHT", frame.Buffs.growthY or "UP")
-                        UnitFrames.SetAuraPosition(frame.Buffs, frame, buffLayout.anchor or "TOPLEFT", frame.Buffs.initialAnchor)
-                    end
-                    -- Recalculate container size
-                    local buffSize = frame.Buffs.size
-                    local buffSpacing = frame.Buffs.spacing or 2
-                    local buffMaxWidth = buffLayout and buffLayout.maxWidth
-                    local buffFrameWidth = (buffMaxWidth and buffMaxWidth > 0 and buffMaxWidth) or frame:GetWidth()
-                    local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
-                    local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
-                    frame.Buffs:SetWidth(buffFrameWidth)
-                    frame.Buffs:SetHeight(buffRows * (buffSize + buffSpacing))
-                    frame.Buffs:ForceUpdate()
+                    UnitFrames.RefreshAuraElement(frame.Buffs, frame, {
+                        show = db.units.player.showPlayerBuffs,
+                        count = db.units.player.buffCount,
+                        layout = db.units.player.auraLayout and db.units.player.auraLayout.buffs,
+                        defaultAnchor = "TOPLEFT",
+                        defaultGrowthX = "RIGHT",
+                        defaultGrowthY = "UP",
+                    })
                 end
             end
 
@@ -331,7 +338,8 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                 if db.misc.showPrivateAuras then
                     if not frame.PrivateAuras then
                         frame.PrivateAuras = frame._privateAurasFrame
-                        frame:EnableElement("PrivateAuras", frame.unit)
+                        -- oUF 14: EnableElement defaults to the frame's __unit
+                        frame:EnableElement("PrivateAuras")
                     end
                 else
                     if frame.PrivateAuras then
@@ -386,35 +394,23 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                 end
             end
 
+            -- oUF 14: boss anchors are fixed (no defaultAnchor = caller-owned
+            -- positioning); growth defaults mirror the create site
             if frame.Debuffs and db.boss then
-                if db.boss.showBossDebuffs then
-                    frame.Debuffs.num = db.boss.debuffCount
-                    frame.Debuffs:Show()
-                else
-                    frame.Debuffs.num = 0
-                    frame.Debuffs:Hide()
-                end
-                frame.Debuffs.size = db.boss.debuffSize or 20
-                local debuffSpacing = frame.Debuffs.spacing or 2
-                local debuffCols = _G.math.floor((frame:GetWidth() + debuffSpacing) / (frame.Debuffs.size + debuffSpacing))
-                local debuffRows = _G.math.ceil(frame.Debuffs.num / _G.math.max(debuffCols, 1))
-                frame.Debuffs:SetHeight(debuffRows * (frame.Debuffs.size + debuffSpacing))
-                frame.Debuffs:ForceUpdate()
+                UnitFrames.RefreshAuraElement(frame.Debuffs, frame, {
+                    show = db.boss.showBossDebuffs,
+                    count = db.boss.debuffCount,
+                    defaultGrowthX = "RIGHT",
+                    defaultGrowthY = "UP",
+                })
             end
             if frame.Buffs and db.boss then
-                if db.boss.showBossBuffs then
-                    frame.Buffs.num = db.boss.buffCount
-                    frame.Buffs:Show()
-                else
-                    frame.Buffs.num = 0
-                    frame.Buffs:Hide()
-                end
-                frame.Buffs.size = db.boss.buffSize or 20
-                local buffSpacing = frame.Buffs.spacing or 2
-                local buffCols = _G.math.floor((frame:GetWidth() + buffSpacing) / (frame.Buffs.size + buffSpacing))
-                local buffRows = _G.math.ceil(frame.Buffs.num / _G.math.max(buffCols, 1))
-                frame.Buffs:SetHeight(buffRows * (frame.Buffs.size + buffSpacing))
-                frame.Buffs:ForceUpdate()
+                UnitFrames.RefreshAuraElement(frame.Buffs, frame, {
+                    show = db.boss.showBossBuffs,
+                    count = db.boss.buffCount,
+                    defaultGrowthX = "RIGHT",
+                    defaultGrowthY = "DOWN",
+                })
             end
 
             frame:UpdateAllElements(event)
@@ -463,18 +459,21 @@ function RealUI:DemoUnitGroup(unitType, toggle)
     for i = 1, unitGroups[unitType] do
         local frame = _G[baseName .. i]
         if frame then
+            -- oUF 14: the unit attribute swap is still honoured (the
+            -- attribute driver rewrites __unit and updates all elements);
+            -- the old direct frame.unit writes were inert and are gone.
+            -- _ruiRealUnit is RealUI-owned (was __realunit — one capital
+            -- letter from oUF's private __realUnit).
             if toggle then
-                if not frame.__realunit then
-                    frame.__realunit = frame:GetAttribute("unit") or frame.unit
+                if not frame._ruiRealUnit then
+                    frame._ruiRealUnit = frame:GetAttribute("unit")
                     frame:SetAttribute("unit", "player")
-                    frame.unit = "player"
                     frame:Show()
                 end
             else
-                if frame.__realunit then
-                    frame:SetAttribute("unit", frame.__realunit)
-                    frame.unit = frame.__realunit
-                    frame.__realunit = nil
+                if frame._ruiRealUnit then
+                    frame:SetAttribute("unit", frame._ruiRealUnit)
+                    frame._ruiRealUnit = nil
                     frame:Hide()
                 end
             end
@@ -521,7 +520,7 @@ function UnitFrames:ResizeFrames()
     for i = 1, #units do
         local frame = _G["RealUI" .. units[i] .. "Frame"]
         if frame then
-            local unitKey = frame.unit
+            local unitKey = units[i]:lower() -- oUF 14: frame.unit privatized
             local unitDB = db.units[unitKey]
             if unitDB and unitDB.size then
                 local width = round(unitDB.size.x * sizeMod)

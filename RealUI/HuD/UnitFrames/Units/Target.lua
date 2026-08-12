@@ -2,7 +2,6 @@ local _, private = ...
 
 -- Libs --
 local oUF = private.oUF
-local Base = _G.Aurora.Base
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -36,62 +35,40 @@ UnitFrames.target = {
         -- units ("target", "focus", "boss") crash Blizzard's aura code since
         -- the 2026-07-21 client patch — see known-wow-ui-bugs.md #5.
 
-        -- Target Debuffs
-        local debuffSize = (db.units.target and db.units.target.debuffSize) or 20
-        local debuffSpacing = 2
-        local debuffNum = (db.units.target and db.units.target.debuffCount) or 16
+        -- Target Debuffs (oUF 14: AuraContainer elements via the shared helper)
         local debuffLayout = (db.units.target and db.units.target.auraLayout and db.units.target.auraLayout.debuffs) or {}
-        local debuffAnchor = debuffLayout.anchor or "TOPLEFT"
         local debuffGrowthX = debuffLayout.growthX or "RIGHT"
         local debuffGrowthY = debuffLayout.growthY or "UP"
-        local debuffMaxWidth = debuffLayout.maxWidth or 0
-        local debuffFrameWidth = (debuffMaxWidth > 0 and debuffMaxWidth) or dialog:GetWidth()
-        local debuffCols = _G.math.floor((debuffFrameWidth + debuffSpacing) / (debuffSize + debuffSpacing))
-        local debuffRows = _G.math.ceil(debuffNum / _G.math.max(debuffCols, 1))
 
-        local Debuffs = _G.CreateFrame("Frame", nil, dialog)
-
-        Debuffs:SetSize(debuffFrameWidth, debuffRows * (debuffSize + debuffSpacing))
-        Debuffs.num = debuffNum
-        Debuffs.size = debuffSize
-        Debuffs.spacing = debuffSpacing
-        Debuffs.initialAnchor = UnitFrames.GetInitialAnchor(debuffGrowthX, debuffGrowthY)
-        UnitFrames.SetAuraPosition(Debuffs, dialog, debuffAnchor, Debuffs.initialAnchor)
-        Debuffs.growthX = debuffGrowthX
-        Debuffs.growthY = debuffGrowthY
-        Debuffs.PostCreateButton = function(_, button)
-            Base.CropIcon(button.Icon, button)
-            button.Count:SetFontObject("NumberFont_Outline_Med")
-        end
+        local Debuffs = UnitFrames.CreateAuraElement(dialog, {
+            filter = "HARMFUL",
+            count = (db.units.target and db.units.target.debuffCount) or 16,
+            size = (db.units.target and db.units.target.debuffSize) or 20,
+            spacing = 2,
+            growthX = debuffGrowthX,
+            growthY = debuffGrowthY,
+            maxWidth = debuffLayout.maxWidth or 0,
+        })
+        UnitFrames.SetAuraPosition(Debuffs, dialog, debuffLayout.anchor or "TOPLEFT",
+            UnitFrames.GetInitialAnchor(debuffGrowthX, debuffGrowthY))
         dialog.Debuffs = Debuffs
 
         -- Target Buffs
-        local buffSize = (db.units.target and db.units.target.buffSize) or 20
-        local buffSpacing = 2
-        local buffNum = (db.units.target and db.units.target.buffCount) or 16
         local buffLayout = (db.units.target and db.units.target.auraLayout and db.units.target.auraLayout.buffs) or {}
-        local buffAnchor = buffLayout.anchor or "TOPRIGHT"
         local buffGrowthX = buffLayout.growthX or "LEFT"
         local buffGrowthY = buffLayout.growthY or "UP"
-        local buffMaxWidth = buffLayout.maxWidth or 0
-        local buffFrameWidth = (buffMaxWidth > 0 and buffMaxWidth) or dialog:GetWidth()
-        local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
-        local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
 
-        local Buffs = _G.CreateFrame("Frame", nil, dialog)
-
-        Buffs:SetSize(buffFrameWidth, buffRows * (buffSize + buffSpacing))
-        Buffs.num = buffNum
-        Buffs.size = buffSize
-        Buffs.spacing = buffSpacing
-        Buffs.initialAnchor = UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY)
-        UnitFrames.SetAuraPosition(Buffs, dialog, buffAnchor, Buffs.initialAnchor)
-        Buffs.growthX = buffGrowthX
-        Buffs.growthY = buffGrowthY
-        Buffs.PostCreateButton = function(_, button)
-            Base.CropIcon(button.Icon, button)
-            button.Count:SetFontObject("NumberFont_Outline_Med")
-        end
+        local Buffs = UnitFrames.CreateAuraElement(dialog, {
+            filter = "HELPFUL",
+            count = (db.units.target and db.units.target.buffCount) or 16,
+            size = (db.units.target and db.units.target.buffSize) or 20,
+            spacing = 2,
+            growthX = buffGrowthX,
+            growthY = buffGrowthY,
+            maxWidth = buffLayout.maxWidth or 0,
+        })
+        UnitFrames.SetAuraPosition(Buffs, dialog, buffLayout.anchor or "TOPRIGHT",
+            UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY))
         dialog.Buffs = Buffs
     end,
     health = {

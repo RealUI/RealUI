@@ -3,7 +3,6 @@ local _, private = ...
 -- Libs --
 local oUF = private.oUF
 
-local Base = _G.Aurora.Base
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -127,35 +126,25 @@ UnitFrames.player = {
         end
 
         --[[ Class Resource ]]--
-        RealUI:GetModule("ClassResource"):Setup(dialog, dialog.unit)
+        RealUI:GetModule("ClassResource"):Setup(dialog, "player")
 
         --[[ Player Buffs ]]--
-        local buffSize = (db.units.player and db.units.player.buffSize) or 20
-        local buffSpacing = 2
-        local buffNum = (db.units.player and db.units.player.buffCount) or 16
+        -- oUF 14: AuraContainer element via the shared helper
         local buffLayout = (db.units.player and db.units.player.auraLayout and db.units.player.auraLayout.buffs) or {}
-        local buffAnchor = buffLayout.anchor or "TOPLEFT"
         local buffGrowthX = buffLayout.growthX or "RIGHT"
         local buffGrowthY = buffLayout.growthY or "UP"
-        local buffMaxWidth = buffLayout.maxWidth or 0
-        local buffFrameWidth = (buffMaxWidth > 0 and buffMaxWidth) or dialog:GetWidth()
-        local buffCols = _G.math.floor((buffFrameWidth + buffSpacing) / (buffSize + buffSpacing))
-        local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
 
-        local Buffs = _G.CreateFrame("Frame", nil, dialog)
-
-        Buffs:SetSize(buffFrameWidth, buffRows * (buffSize + buffSpacing))
-        Buffs.num = buffNum
-        Buffs.size = buffSize
-        Buffs.spacing = buffSpacing
-        Buffs.initialAnchor = UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY)
-        UnitFrames.SetAuraPosition(Buffs, dialog, buffAnchor, Buffs.initialAnchor)
-        Buffs.growthX = buffGrowthX
-        Buffs.growthY = buffGrowthY
-        Buffs.PostCreateButton = function(_, button)
-            Base.CropIcon(button.Icon, button)
-            button.Count:SetFontObject("NumberFont_Outline_Med")
-        end
+        local Buffs = UnitFrames.CreateAuraElement(dialog, {
+            filter = "HELPFUL",
+            count = (db.units.player and db.units.player.buffCount) or 16,
+            size = (db.units.player and db.units.player.buffSize) or 20,
+            spacing = 2,
+            growthX = buffGrowthX,
+            growthY = buffGrowthY,
+            maxWidth = buffLayout.maxWidth or 0,
+        })
+        UnitFrames.SetAuraPosition(Buffs, dialog, buffLayout.anchor or "TOPLEFT",
+            UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY))
         dialog.Buffs = Buffs
     end,
     health = {

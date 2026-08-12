@@ -24,50 +24,31 @@ UnitFrames.boss = {
         dialog.RaidTargetIndicator:SetSize(20, 20)
         dialog.RaidTargetIndicator:SetPoint("CENTER", dialog)
 
-        -- Boss Debuffs
+        -- Boss Debuffs (oUF 14: AuraContainer elements; boss anchors are
+        -- fixed, so positioning stays a direct SetPoint here)
         local db = UnitFrames.db.profile
-        local Base = _G.Aurora.Base
-        local debuffSize = (db.boss and db.boss.debuffSize) or 20
-        local debuffSpacing = 2
-        local debuffNum = (db.boss and db.boss.debuffCount) or 16
-        local debuffCols = _G.math.floor((dialog:GetWidth() + debuffSpacing) / (debuffSize + debuffSpacing))
-        local debuffRows = _G.math.ceil(debuffNum / _G.math.max(debuffCols, 1))
 
-        local Debuffs = _G.CreateFrame("Frame", nil, dialog)
+        local Debuffs = UnitFrames.CreateAuraElement(dialog, {
+            filter = "HARMFUL",
+            count = (db.boss and db.boss.debuffCount) or 16,
+            size = (db.boss and db.boss.debuffSize) or 20,
+            spacing = 2,
+            growthX = "RIGHT",
+            growthY = "UP",
+        })
         Debuffs:SetPoint("BOTTOMLEFT", dialog, "TOPLEFT", 0, 2)
-        Debuffs:SetSize(dialog:GetWidth(), debuffRows * (debuffSize + debuffSpacing))
-        Debuffs.num = debuffNum
-        Debuffs.size = debuffSize
-        Debuffs.spacing = debuffSpacing
-        Debuffs.initialAnchor = "BOTTOMLEFT"
-        Debuffs.growthX = "RIGHT"
-        Debuffs.growthY = "UP"
-        Debuffs.PostCreateButton = function(_, button)
-            Base.CropIcon(button.Icon, button)
-            button.Count:SetFontObject("NumberFont_Outline_Med")
-        end
         dialog.Debuffs = Debuffs
 
         -- Boss Buffs
-        local buffSize = (db.boss and db.boss.buffSize) or 20
-        local buffSpacing = 2
-        local buffNum = (db.boss and db.boss.buffCount) or 16
-        local buffCols = _G.math.floor((dialog:GetWidth() + buffSpacing) / (buffSize + buffSpacing))
-        local buffRows = _G.math.ceil(buffNum / _G.math.max(buffCols, 1))
-
-        local Buffs = _G.CreateFrame("Frame", nil, dialog)
+        local Buffs = UnitFrames.CreateAuraElement(dialog, {
+            filter = "HELPFUL",
+            count = (db.boss and db.boss.buffCount) or 16,
+            size = (db.boss and db.boss.buffSize) or 20,
+            spacing = 2,
+            growthX = "RIGHT",
+            growthY = "DOWN",
+        })
         Buffs:SetPoint("TOPLEFT", dialog, "BOTTOMLEFT", 0, -2)
-        Buffs:SetSize(dialog:GetWidth(), buffRows * (buffSize + buffSpacing))
-        Buffs.num = buffNum
-        Buffs.size = buffSize
-        Buffs.spacing = buffSpacing
-        Buffs.initialAnchor = "TOPLEFT"
-        Buffs.growthX = "RIGHT"
-        Buffs.growthY = "DOWN"
-        Buffs.PostCreateButton = function(_, button)
-            Base.CropIcon(button.Icon, button)
-            button.Count:SetFontObject("NumberFont_Outline_Med")
-        end
         dialog.Buffs = Buffs
     end,
     health = {

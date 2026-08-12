@@ -57,6 +57,17 @@ local reverseFillParent = {
     targettarget = "target",
 }
 
+-- Secret-safe class color lookup: UnitClass can return a secret class token
+-- in tainted contexts, and indexing colors.class with a secret errors.
+-- C_ClassColor.GetClassColor handles secrets natively (the oUF 14 pattern).
+local function GetClassColor(colors, class)
+    if not class then return nil end
+    if _G.issecretvalue(class) then
+        return _G.C_ClassColor.GetClassColor(class)
+    end
+    return colors.class[class]
+end
+
 local function GetReverseFill(unit, info)
     -- Natural fill direction based on bar side:
     -- Player (RIGHT side): natural=true → fill anchored RIGHT, grows right→left
@@ -144,19 +155,19 @@ local function PositionHealthPredictions(Health, isReverse)
     HealAbsorb:SetReverseFill(not isReverse)
 end
 
-local function CreateHealthBar(parent, info, isAngled)
+local function CreateHealthBar(parent, info, isAngled, unit)
     local Health
     if isAngled then
         local width, height = parent:GetWidth(), parent:GetHeight()
-        if db.units[parent.unit].healthHeight then
-            height = round((height - 3) * db.units[parent.unit].healthHeight)
+        if db.units[unit].healthHeight then
+            height = round((height - 3) * db.units[unit].healthHeight)
         end
 
         Health = parent:CreateAngle("StatusBar", nil, parent.overlay)
         Health:SetAngleVertex(info.leftVertex, info.rightVertex)
         Health:SetSize(width, height)
         Health:SetPoint("TOP"..info.point, parent)
-        Health:SetReverseFill(GetReverseFill(parent.unit, info))
+        Health:SetReverseFill(GetReverseFill(unit, info))
 
         -- Set initial bg color: red when alternative style is active
         -- Use a separate HealthBG StatusBar at the same frame level, with fill at BORDER layer
@@ -166,7 +177,7 @@ local function CreateHealthBar(parent, info, isAngled)
             HealthBG:SetAngleVertex(info.leftVertex, info.rightVertex)
             HealthBG:SetSize(width, height)
             HealthBG:SetPoint("TOP"..info.point, parent)
-            HealthBG:SetReverseFill(GetReverseFill(parent.unit, info))
+            HealthBG:SetReverseFill(GetReverseFill(unit, info))
             HealthBG:SetFrameLevel(Health:GetFrameLevel())
             -- Hide HealthBG's own bg and borders
             HealthBG.bg:SetAlpha(0)
@@ -179,7 +190,7 @@ local function CreateHealthBar(parent, info, isAngled)
             HealthBG:SetMinMaxValues(0, 1)
             HealthBG:SetValue(1)
             local unitsDB = GetUnitsDB()
-            local hbDB = unitsDB[parent.unit] and unitsDB[parent.unit].healthBar
+            local hbDB = unitsDB[unit] and unitsDB[unit].healthBar
             local bgColor = (hbDB and hbDB.background) or {0.78, 0.15, 0.15}
             local bgOpacity = (hbDB and hbDB.backgroundOpacity) or 1.0
             HealthBG:SetStatusBarColor(bgColor[1], bgColor[2], bgColor[3], bgOpacity)
@@ -187,7 +198,7 @@ local function CreateHealthBar(parent, info, isAngled)
         end
 
         Health.PreUpdate = function(self)
-            local isReverse = GetReverseFill(parent.unit, info)
+            local isReverse = GetReverseFill(unit, info)
             self:SetReverseFill(isReverse)
             -- Keep the prediction bars tracking the live fill direction
             if self.predictionsReversed ~= isReverse then
@@ -213,7 +224,7 @@ local function CreateHealthBar(parent, info, isAngled)
         end
 
         -- Health prediction sub-widgets
-        local isReverse = GetReverseFill(parent.unit, info)
+        local isReverse = GetReverseFill(unit, info)
 
         local HealingAll = parent:CreateAngle("Prediction", nil, Health)
         HealingAll:SetWidth(Health:GetWidth())
@@ -264,7 +275,7 @@ local function CreateHealthBar(parent, info, isAngled)
     end
 
     Health.barType = "health"
-    local unitDB = GetUnitsDB()[parent.unit] or {}
+    local unitDB = GetUnitsDB()[unit] or {}
     local hb = unitDB.healthBar or {}
     Health.colorClass = db.overlay.classColor or hb.colorForegroundByClass
     Health.colorTapping = true
@@ -277,7 +288,9 @@ local function CreateHealthBar(parent, info, isAngled)
     -- For angled bars with alternative style: override oUF's UpdateColor to apply dark foreground
     if isAngled then
         Health.UpdateColor = function(self, event, unit)
-            if not unit or self.unit ~= unit then return end
+            -- oUF 14: the live unit is the private __unit (tracks vehicle
+            -- swaps exactly like the old frame.unit did)
+            if not unit or self.__unit ~= unit then return end
             local element = self.Health
             if not element then return end
 
@@ -291,7 +304,7 @@ local function CreateHealthBar(parent, info, isAngled)
                 local classColor
                 if healthBarDB.colorForegroundByClass then
                     local _, class = _G.UnitClass(unit)
-                    classColor = class and self.colors.class[class]
+                    classColor = GetClassColor(self.colors, class)
                 end
                 if classColor then
                     local r, g, b = classColor:GetRGB()
@@ -309,7 +322,7 @@ local function CreateHealthBar(parent, info, isAngled)
                     color = self.colors.tapped
                 elseif element.colorClass and (_G.UnitIsPlayer(unit) or _G.UnitInPartyIsAI(unit)) then
                     local _, class = _G.UnitClass(unit)
-                    color = self.colors.class[class]
+                    color = GetClassColor(self.colors, class)
                 elseif element.colorReaction and _G.UnitReaction(unit, "player") then
                     color = self.colors.reaction[_G.UnitReaction(unit, "player")]
                 elseif element.colorHealth then
@@ -345,11 +358,11 @@ local CreateHealthStatus do
         end
     end
     local function UpdateClassification(self, event)
-        local color = classification[_G.UnitClassification(self.unit)] or _G.Aurora.Color.frame
+        local color = classification[_G.UnitClassification(self.__unit)] or _G.Aurora.Color.frame
         self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
-    function CreateHealthStatus(parent, info, isAngled)
+    function CreateHealthStatus(parent, info, isAngled, unit)
         local PvPIndicator
         if isAngled then
             local leftVertex, rightVertex = GetVertices(info)
@@ -361,7 +374,7 @@ local CreateHealthStatus do
 
             PvPIndicator.Override = UpdatePvP
 
-            if not (parent.unit == "player" or parent.unit == "pet") then
+            if not (unit == "player" or unit == "pet") then
                 local class = parent:CreateAngle("Frame", nil, parent.Health)
                 class:SetSize(width, height)
                 class:SetPoint("TOP"..info.point, parent.Health, info.point == "RIGHT" and -16 or 16, 0)
@@ -381,17 +394,17 @@ local CreateHealthStatus do
 end
 
 
-local function CreatePowerBar(parent, info, isAngled)
+local function CreatePowerBar(parent, info, isAngled, unit)
     local Power
     if isAngled then
-        local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[parent.unit].healthHeight))
+        local width, height = round(parent:GetWidth() * 0.9), round((parent:GetHeight() - 3) * (1 - db.units[unit].healthHeight))
         local xOffset = parent.Health:GetHeight() - height
 
         Power = parent:CreateAngle("StatusBar", nil, parent.overlay)
         Power:SetSize(width, height)
         Power:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
         Power:SetAngleVertex(info.leftVertex, info.rightVertex)
-        Power:SetReverseFill(GetReverseFill(parent.unit, info))
+        Power:SetReverseFill(GetReverseFill(unit, info))
 
         -- Alternative bar style: power-type colored background revealed as
         -- power drains, mirroring HealthBG (fill at BORDER layer, between
@@ -401,7 +414,7 @@ local function CreatePowerBar(parent, info, isAngled)
             PowerBG:SetSize(width, height)
             PowerBG:SetPoint("BOTTOM"..info.point, parent, info.point == "RIGHT" and -xOffset or xOffset, 0)
             PowerBG:SetAngleVertex(info.leftVertex, info.rightVertex)
-            PowerBG:SetReverseFill(GetReverseFill(parent.unit, info))
+            PowerBG:SetReverseFill(GetReverseFill(unit, info))
             PowerBG:SetFrameLevel(Power:GetFrameLevel())
             PowerBG.bg:SetAlpha(0)
             PowerBG.top:Hide()
@@ -438,7 +451,7 @@ local function CreatePowerBar(parent, info, isAngled)
         end
         UnitFrames:ApplyStatusTextFont(Power.text)
         local statusText = GetMiscDB().statusText
-        local _, powerType = _G.UnitPowerType(parent.unit)
+        local _, powerType = _G.UnitPowerType(unit)
         parent:Tag(Power.text, UnitFrames.GetPowerTagString(statusText, powerType))
     end
 
@@ -484,7 +497,7 @@ local CreatePowerStatus do
         resting = {0, 1, 0},
     }
     local function UpdateStatus(self, event)
-        local unit = self.unit
+        local unit = self.__unit
         local isConnected = _G.UnitIsConnected(unit)
         local isLeader = _G.UnitIsGroupLeader(unit)
         local inCombat = _G.UnitAffectingCombat(unit)
@@ -571,7 +584,7 @@ end
 
 local CreateEndBox do
     local function UpdateEndBox(self, ...)
-        local unit = self.unit
+        local unit = self.__unit
         local isPlayer = _G.UnitIsPlayer(unit)
         local isPlayerControlled = _G.UnitPlayerControlled(unit)
         local isTapDenied = _G.UnitIsTapDenied(unit)
@@ -579,7 +592,7 @@ local CreateEndBox do
         local color
         if isPlayer or (isPlayerControlled and not isPlayer) then
             local _, classToken = _G.UnitClass(unit)
-            color = self.colors.class[classToken]
+            color = GetClassColor(self.colors, classToken)
         elseif not isPlayerControlled and isTapDenied then
             color = self.colors.tapped
         elseif _G.UnitReaction(unit, "player") then
@@ -587,9 +600,18 @@ local CreateEndBox do
         else
             color = self.colors.selection[_G.UnitSelectionType(unit, true)]
         end
+        if not color then return end
 
+        -- GetRGB works for both oUF colors and C_ClassColor ColorMixins
+        -- (the latter have no [1][2][3] array form)
+        local r, g, b
+        if color.GetRGB then
+            r, g, b = color:GetRGB()
+        else
+            r, g, b = color[1], color[2], color[3]
+        end
         for i = 1, #self.EndBox do
-            self.EndBox[i]:SetBackgroundColor(color[1], color[2], color[3], 1)
+            self.EndBox[i]:SetBackgroundColor(r, g, b, 1)
         end
     end
     function CreateEndBox(parent, data)
@@ -637,8 +659,13 @@ end
 
 -- Init
 local function Shared(self, unit)
+    -- oUF 14 privatized frame.unit (now __unit). unitToken keeps the raw
+    -- spawn token ("boss1") for construction-time db lookups — the same
+    -- value oUF 13 exposed as frame.unit (AceDB wildcard defaults key off
+    -- it); the normalized `unit` drives unitData lookups as before.
+    local unitToken = unit
     unit = unit:match("(%a+)%d*")
-    UnitFrames:debug("Shared", self, self.unit, unit)
+    UnitFrames:debug("Shared", self, unitToken, unit)
 
     self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
@@ -649,7 +676,7 @@ local function Shared(self, unit)
         local ModKey = misc.focuskey or "SHIFT"
         local MouseButton = 1
         local key = ModKey .. "-type" .. (MouseButton or "")
-        if(self.unit == "focus") then
+        if(unit == "focus") then
             self:SetAttribute(key, "macro")
             self:SetAttribute("macrotext", "/clearfocus")
         else
@@ -679,12 +706,12 @@ local function Shared(self, unit)
     unitData.nameLength = ceil(width / 10)
 
     if unitData.health then
-        CreateHealthBar(self, unitData.health, isAngled)
-        CreateHealthStatus(self, unitData.health, isAngled)
+        CreateHealthBar(self, unitData.health, isAngled, unitToken)
+        CreateHealthStatus(self, unitData.health, isAngled, unitToken)
     end
 
     if unitData.power then
-        CreatePowerBar(self, unitData.power, isAngled)
+        CreatePowerBar(self, unitData.power, isAngled, unitToken)
     end
 
     if isAngled then
