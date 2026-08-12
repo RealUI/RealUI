@@ -184,9 +184,14 @@ function ClassResource:CreateClassPower(unitFrame, unit)
     end
 
     local lastChargedIndex
-    function ClassPower.PostUpdate(element, curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
+    -- oUF 14: hasCurChanged inserted as arg 3, and charged points arrive as
+    -- an unpacked varargs tail (..., powerType, idx1, idx2, ...) instead of
+    -- a single chargedIndex. RealUI renders the first charged index only
+    -- (matching its previous single-index visual capability).
+    function ClassPower.PostUpdate(element, curPoints, maxPoints, hasCurChanged, hasMaxChanged, powerType, ...)
         if not curPoints or not powerType then return end
-        self:debug("ClassPower:PostUpdate", curPoints, maxPoints, hasMaxChanged, powerType, chargedIndex)
+        local chargedIndex = ...
+        self:debug("ClassPower:PostUpdate", curPoints, maxPoints, hasCurChanged, hasMaxChanged, powerType, chargedIndex)
 
         local showUnused = not pointDB.hideempty or self.configMode
         local hasPartial = (curPoints - floor(curPoints)) > 0
@@ -311,7 +316,8 @@ function ClassResource:CreateSoulFragments(unitFrame, unit)
     ClassPower[1] = bar
     ClassPower.frame = bar
 
-    function ClassPower.PostUpdate(element, cur, maxVal, hasMaxChanged, powerType)
+    -- oUF 14 signature (hasCurChanged inserted as arg 3)
+    function ClassPower.PostUpdate(element, cur, maxVal, hasCurChanged, hasMaxChanged, powerType)
         self:debug("SoulFragments:PostUpdate", cur, maxVal, powerType)
         if self.configMode then
             cur = 0.6

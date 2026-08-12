@@ -204,7 +204,9 @@ end
 
 local function PlayFlash(anim)
     CastBars:debug("flashAnim:PlayFlash")
-    anim.bar.Time:SetText("")
+    -- oUF 14's DurationTextBinding owns the Time text — hide instead of
+    -- writing over it
+    anim.bar.Time:Hide()
     anim.bar.Text:SetTextColor(anim.color:GetRGB())
     anim.bar:SetStatusBarColor(anim.color:GetRGB())
 
@@ -223,45 +225,58 @@ local function EndFlash(anim, ...)
     CastBars:debug("flashAnim:EndFlash", ...)
     anim.color = nil
     anim.bar:SetAlpha(1)
+    anim.bar.Time:Show()
     anim.bar.Text:SetTextColor(1, 1, 1, 1)
     anim.bar:SetStatusBarColor(uninterruptible:GetRGB())
     anim.bar:Hide()
 end
 
-local function PostCastStart(self, unit)
-    CastBars:debug("PostCastStart", unit)
-    if self.flashAnim:IsPlaying() then
-        self.flashAnim:Stop()
-    end
+-- oUF 14 privatized all castbar state; the PostCast* callbacks now carry it
+-- as arguments and RealUI caches what its OnUpdate needs in the namespaced
+-- _ruiState table (never loose fields that could collide with oUF privates).
 
-    -- Reset tracking for new cast
-
-    -- notInterruptible can be a secret boolean (for other players' casts).
-    -- Secret booleans cannot be tested, compared, or even == checked in Lua.
-    -- Use issecretvalue() to detect them, then fall back to interruptible color.
-    local notInt = self.notInterruptible
-    if _G.issecretvalue(notInt) or notInt == nil then
+local function SetInterruptColor(self, notInterruptible)
+    -- notInterruptible can be a secret boolean (other players' casts).
+    -- Secret booleans cannot be tested or compared — issecretvalue() first,
+    -- then fall back to the interruptible color.
+    if _G.issecretvalue(notInterruptible) or notInterruptible == nil then
         self:SetStatusBarColor(interruptible:GetRGB())
-    elseif notInt then
+    elseif notInterruptible then
         self:SetStatusBarColor(uninterruptible:GetRGB())
     else
         self:SetStatusBarColor(interruptible:GetRGB())
     end
+end
+
+local function PostCastStart(self, unit, spellID, notInterruptible)
+    CastBars:debug("PostCastStart", unit, spellID)
+    if self.flashAnim:IsPlaying() then
+        self.flashAnim:Stop()
+    end
+
+    -- oUF no longer exposes element.channeling; distinguish at callback time
+    local state = self._ruiState
+    local channelName = _G.UnitChannelInfo(unit)
+    if _G.issecretvalue(channelName) then channelName = nil end
+    state.channeling = channelName and true or nil
+    state.casting = not state.channeling or nil
+    state.holdTime = nil
+
+    SetInterruptColor(self, notInterruptible)
 
     if self.tickPool then
         self.tickPool:ReleaseAll()
 
-        if self.channeling then
-            self:SetBarTicks(ChannelingTicks[self.spellID])
+        if state.channeling and spellID and not _G.issecretvalue(spellID) then
+            self:SetBarTicks(ChannelingTicks[spellID])
         end
     end
 end
---local function PostCastUpdate(self, unit)
---    CastBars:debug("PostCastUpdate", unit)
---end
-local function PostCastStop(self, unit, empowerComplete)
-    CastBars:debug("PostCastStop", unit, empowerComplete)
-    self.holdTime = self.timeToHold
+local function PostCastStop(self, unit, spellID, empowerComplete)
+    CastBars:debug("PostCastStop", unit, spellID, empowerComplete)
+    local state = self._ruiState
+    state.casting, state.channeling = nil, nil
+    state.holdTime = self.timeToHold
     self.Text:SetText(_G.SUCCESS)
     self:Show()
     self.flashAnim.color = Color.green
@@ -270,25 +285,21 @@ local function PostCastStop(self, unit, empowerComplete)
     end
     self.flashAnim:Play()
 end
-local function PostCastFail(self, unit)
-    CastBars:debug("PostCastFail", unit)
+local function PostCastFail(self, unit, spellID)
+    CastBars:debug("PostCastFail", unit, spellID)
+    local state = self._ruiState
+    state.casting, state.channeling = nil, nil
+    -- oUF 13 wrote holdTime for us on fail; under 14 the hold is ours
+    state.holdTime = self.timeToHold
     self.flashAnim.color = Color.red
     if _G.InCombatLockdown and _G.InCombatLockdown() then
         return
     end
     self.flashAnim:Play()
 end
-local function PostCastInterruptible(self, unit)
-    CastBars:debug("PostCastInterruptible", unit)
-    -- notInterruptible can be a secret boolean, use issecretvalue() first
-    local notInt = self.notInterruptible
-    if _G.issecretvalue(notInt) or notInt == nil then
-        self:SetStatusBarColor(interruptible:GetRGB())
-    elseif notInt then
-        self:SetStatusBarColor(uninterruptible:GetRGB())
-    else
-        self:SetStatusBarColor(interruptible:GetRGB())
-    end
+local function PostCastInterruptible(self, unit, spellID, notInterruptible)
+    CastBars:debug("PostCastInterruptible", unit, spellID)
+    SetInterruptColor(self, notInterruptible)
 end
 
 
@@ -312,7 +323,17 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     Aurora.Base.CropIcon(Castbar.Icon, Castbar)
 
     Castbar.Text = Castbar.textOverlay:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1_Outline")
+    -- oUF 14 installs a C++-driven DurationTextBinding on .Time (secret-safe
+    -- cast time); .Delay is the new pushback sub-widget (oUF's default
+    -- CustomDelayText drives it with a signed '%s%.2f')
     Castbar.Time = Castbar.textOverlay:CreateFontString(nil, "OVERLAY", "NumberFont_Outline_Large")
+    Castbar.Delay = Castbar.textOverlay:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1_Outline")
+    Castbar.Delay:SetTextColor(1, 0, 0)
+    Castbar.Delay:SetPoint("BOTTOMLEFT", Castbar.Time, "BOTTOMRIGHT", 2, 0)
+
+    -- RealUI-owned cast state, fed by the PostCast* callbacks (oUF 14
+    -- privatized casting/channeling/spellID/holdTime)
+    Castbar._ruiState = {}
 
     local SafeZone = unitFrame:CreateAngle("Texture", nil, Castbar)
     SafeZone:SetColorTexture(uninterruptible:GetRGB())
@@ -360,26 +381,26 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     -- SetBarValue. We follow Blizzard's pattern: query UnitCastingInfo/
     -- UnitChannelInfo for startTime/endTime (works for ALL units), compute
     -- the current value, and drive SetBarValue directly.
+    -- oUF 14: state comes from _ruiState (fed by the callbacks); time text
+    -- left entirely to the DurationTextBinding on .Time — this OnUpdate's
+    -- only job is the AngleStatusBar trapezoid fill (plus hold/reset).
     Castbar.OnUpdate = function(castbar, elapsed) -- luacheck: ignore 432
-        if castbar.casting or castbar.channeling or castbar.empowering then
-            local ownerUnit = castbar.__owner and castbar.__owner.unit
+        local state = castbar._ruiState
+        if state.casting or state.channeling then
+            local ownerUnit = castbar.__owner and castbar.__owner.__unit
             local startTime, endTime, duration, value
 
-            -- Try oUF's cached values first (player casts)
-            if castbar.startTime and castbar.endTime then
-                startTime = castbar.startTime
-                endTime = castbar.endTime
-            elseif ownerUnit then
-                -- Query the API directly for non-player casts.
-                -- startTime/endTime may be secret numbers for enemy units,
-                -- so we must check with issecretvalue before arithmetic.
-                if castbar.casting then
+            -- Query the API for cast times (works for ALL units).
+            -- startTime/endTime may be secret numbers for enemy units,
+            -- so we must check with issecretvalue before arithmetic.
+            if ownerUnit then
+                if state.casting then
                     local _, _, _, st, et = _G.UnitCastingInfo(ownerUnit)
                     if st and et and not _G.issecretvalue(st) and not _G.issecretvalue(et) then
                         startTime = st / 1000
                         endTime = et / 1000
                     end
-                elseif castbar.channeling or castbar.empowering then
+                elseif state.channeling then
                     local _, _, _, st, et = _G.UnitChannelInfo(ownerUnit)
                     if st and et and not _G.issecretvalue(st) and not _G.issecretvalue(et) then
                         startTime = st / 1000
@@ -392,7 +413,7 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
                 local now = _G.GetTime()
                 duration = endTime - startTime
                 if duration > 0 then
-                    if castbar.channeling then
+                    if state.channeling then
                         value = endTime - now
                     else
                         value = now - startTime
@@ -406,16 +427,6 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
                         meta.minVal = 0
                         meta.maxVal = duration
                         ASB:SetBarValue(castbar, value)
-                    end
-
-                    -- Update Time text
-                    if castbar.Time then
-                        local remaining = castbar.channeling and value or (duration - value)
-                        if castbar.delay and castbar.delay ~= 0 then
-                            castbar.Time:SetFormattedText('%.1f|cffff0000%s%.2f|r', remaining, castbar.channeling and '-' or '+', castbar.delay)
-                        else
-                            castbar.Time:SetFormattedText('%.1f', remaining)
-                        end
                     end
                 end
             else
@@ -447,32 +458,17 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
                         castbar.fill:SetShown(true)
                     end
                 end
-
-                -- Update Time text — SetFormattedText handles secret numbers
-                local nativeGetTimer = _G.getmetatable(castbar).__index.GetTimerDuration
-                if nativeGetTimer and castbar.Time then
-                    local ok, durationObj = _G.pcall(nativeGetTimer, castbar)
-                    if ok and durationObj then
-                        local ok2, remaining = _G.pcall(function() return durationObj:GetRemainingDuration() end)
-                        if ok2 and remaining then
-                            castbar.Time:SetFormattedText('%.1f', remaining)
-                        end
-                    end
-                end
             end
-        elseif castbar.holdTime and castbar.holdTime > 0 then
-            castbar.holdTime = castbar.holdTime - elapsed
+        elseif state.holdTime and state.holdTime > 0 then
+            state.holdTime = state.holdTime - elapsed
         else
-            -- Reset and hide (same as oUF's default)
-            castbar.castID = nil
-            castbar.casting = nil
-            castbar.channeling = nil
-            castbar.empowering = nil
-            castbar.notInterruptible = nil
-            castbar.spellID = nil
-            castbar.spellName = nil
-            for _, pip in _G.next, castbar.Pips do
-                pip:Hide()
+            -- Reset and hide; config-mode demo bars stay shown
+            if castbar.config then return end
+            state.holdTime = nil
+            if castbar.Pips then
+                for _, pip in _G.next, castbar.Pips do
+                    pip:Hide()
+                end
             end
             castbar:Hide()
         end
@@ -503,9 +499,8 @@ function CastBars:ToggleConfigMode(isConfigMode)
 
         castbar.config = isConfigMode
         if isConfigMode then
-            CastBars:debug("Setup bar", castbar.__owner.unit, castbar.config)
-            castbar.duration, castbar.max = 0, 10
-            castbar:SetMinMaxValues(castbar.duration, castbar.max)
+            CastBars:debug("Setup bar", castbar.__owner.__unit, castbar.config)
+            castbar:SetMinMaxValues(0, 10)
             castbar.Text:SetText(_G.SPELL_CASTING)
             castbar.Icon:SetTexture([[Interface\Icons\INV_Misc_Dice_02]])
             castbar.SafeZone:Hide()
