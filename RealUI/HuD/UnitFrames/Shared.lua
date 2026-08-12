@@ -667,7 +667,13 @@ local function Shared(self, unit)
     unit = unit:match("(%a+)%d*")
     UnitFrames:debug("Shared", self, unitToken, unit)
 
-    self:SetScript("OnEnter", _G.UnitFrame_OnEnter)
+    -- Blizzard's UnitFrame_OnEnter/UnitFrame_UpdateTooltip read self.unit,
+    -- which oUF 14 no longer maintains — refresh a compat copy from __unit
+    -- at hover time (oUF itself never touches .unit anymore)
+    self:SetScript("OnEnter", function(frame, ...)
+        frame.unit = frame.__unit
+        return _G.UnitFrame_OnEnter(frame, ...)
+    end)
     self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
     self:RegisterForClicks("AnyUp")
 
