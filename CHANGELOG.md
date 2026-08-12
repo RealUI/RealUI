@@ -10,7 +10,7 @@ The WoW 12.1 "Curse of Ula'tek" release, and the biggest under-the-hood update o
   * RealUI_Config
   * RealUI_Dev
   * RealUI_Skins
-  * Aurora (12.1.0.1)
+  * Aurora (12.1.0.0)
 
 ### Added ###
 
@@ -30,7 +30,7 @@ The WoW 12.1 "Curse of Ula'tek" release, and the biggest under-the-hood update o
   * chg: **LibStrataFix retired** — it worked around a WoD 6.0 frame-level bug Blizzard fixed in Legion; its global CreateFrame/SetParent hooks were a stutter suspect and a recurring 12.1 secure-frame taint liability (file kept for rollback)
   * chg: bundled Platynator nameplate profile advanced to v454
   * chg: BugGrabber updated to v12.0.21
-  * chg: Aurora updated to 12.1.0.1 — 12.1.0.0 brings skins for the 12.1 Social UI, Housing Blueprint panels, Cooldown Manager group-buff filter and edit alerts, Discord chat-config colors and guild-control pane, House Editor pet customization, plus fixes for everything 12.1 moved (BattleNet invite dialog, color picker, splash screen, chat bubbles, role poll, housing controls/dashboard) and secret-value guards for aura-button skinning; the 12.1.0.1 hotfix corrects the secret-layer icon-border fallback that painted aura icons as black boxes
+  * chg: Aurora updated to 12.1.0.0 — skins for the 12.1 Social UI, Housing Blueprint panels, Cooldown Manager group-buff filter and edit alerts, Discord chat-config colors and guild-control pane, House Editor pet customization; fixes for everything 12.1 moved (BattleNet invite dialog, color picker, splash screen, chat bubbles, role poll, housing controls/dashboard) and secret-value guards for aura-button skinning
 
 ### Fixed ###
 
@@ -39,6 +39,9 @@ The WoW 12.1 "Curse of Ula'tek" release, and the biggest under-the-hood update o
   * fix: unit frame tooltips under oUF 14 — Blizzard's tooltip path reads a field oUF no longer maintains; refreshed at hover time
   * fix: target-frame private aura anchors dropped — external-unit anchors crash the client since the 2026-07-21 patch (the player frame keeps its private auras); Grid2 4.0 independently disabled its private-aura indicators for the same reason
   * fix: secret-value hardening — class colors fall back to `C_ClassColor` when the class token is secret; frame-property reads on secure-environment aura buttons guarded throughout
+
+
+## [3.3.8] - 2026-07-16 ##
 ### Summary ###
 WoW 12.0.7 maintenance and quality-of-life release. Unit frames gain proper Reverse Fill Direction inheritance for pet and target-of-target health bars, and Alternative Bar Style now extends to power bars with a dark power-type-colored foreground that live-recolors on power type changes. Health bar Class Color and Background Color changes now apply immediately instead of waiting for the next health event, and the absorb bar overlays inward from the bar end so it no longer grows past full health or ignores runtime reverse-fill changes. In RealUI_Auras, the buff-cancel click now resolves a live buff index for `CancelUnitBuff` (the previous call relied on an API that doesn't exist), buff icon size changes now force an immediate Masque reskin, and duration/time-left filtering defaults to off so long self-buffs like Arcane Intellect, Fortitude, and flasks aren't silently hidden. Cooldown Manager icon spacing now goes through EditMode's native IconPadding instead of Aurora's taint-unsafe padding hook (migration v5 rebuilds existing layouts). A new `RealUI.NeedsReload` config-option wrapper flags settings that require `/reload`, and the reload prompt now fires reliably no matter how the settings window is closed (Escape, close button, or programmatic close). The infobar now refreshes correctly on a healer profile switch at login, with per-module profile-update callbacks isolated so one module's error can't abort the rest of the switch. WoW 12.0.7 is now recognized as a supported client version, and the display-changed popup no longer re-prompts after a graphics driver reset at the same resolution. BugGrabber updates to v12.0.19, and RealUI's bundled default Platynator profile advances to v14. Aurora updates to 12.0.7.2, removing a CooldownViewer grid-padding hook that tainted the CDM and threw mass secret-value errors at raid-end cinematics, and disabling a SubtitlesFrame backdrop that caused a black bar during cinematics.
 
