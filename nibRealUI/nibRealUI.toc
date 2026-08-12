@@ -1,8 +1,8 @@
-﻿## Interface: 120100
+## Interface: 120100
 ## Title: nibRealUI (Migration Stub)
 ## Notes: Loads legacy SavedVariables for migration to RealUI 3.0
 ## Author: Nibelheim, Gethe, Hanshi
-## Version: 3.3.8
+## Version: 3.4.0
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## SavedVariables: nibRealUIDB
 ## SavedVariablesPerCharacter: nibRealUICharacter

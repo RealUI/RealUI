@@ -1,9 +1,9 @@
-﻿## Interface: 120100
+## Interface: 120100
 ## Title: RealUI Tooltips
 ## Category: RealUI_Core
 ## Notes: Useful tooltip mods
 ## Author: Gethe, Hanshi
-## Version: 3.3.8
+## Version: 3.4.0
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## OptionalDeps: LibObjectiveProgress-1.0
