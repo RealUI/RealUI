@@ -48,6 +48,7 @@ UnitFrames.target = {
             growthX = debuffGrowthX,
             growthY = debuffGrowthY,
             maxWidth = debuffLayout.maxWidth or 0,
+            showDebuffBorder = true, -- dispel-type coloring (oUF 14)
         })
         UnitFrames.SetAuraPosition(Debuffs, dialog, debuffLayout.anchor or "TOPLEFT",
             UnitFrames.GetInitialAnchor(debuffGrowthX, debuffGrowthY))

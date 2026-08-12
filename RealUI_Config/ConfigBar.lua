@@ -1610,6 +1610,17 @@ do -- CastBars
                     end,
                     order = 1,
                 },
+                showGCD = {
+                    name = _G.SHOW_GLOBAL_COOLDOWN or "Show Global Cooldown",
+                    desc = "Show the global cooldown on the cast bar (requires /reload)",
+                    type = "toggle",
+                    hidden = unit ~= "player",
+                    get = function() return CastBars.db.profile[unit].showGCD end,
+                    set = function(info, value)
+                        CastBars.db.profile[unit].showGCD = value
+                    end,
+                    order = 1.5,
+                },
                 text = {
                     name = _G.LOCALE_TEXT_LABEL,
                     type = "select",

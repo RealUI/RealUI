@@ -261,6 +261,7 @@ local function PostCastStart(self, unit, spellID, notInterruptible)
     state.channeling = channelName and true or nil
     state.casting = not state.channeling or nil
     state.holdTime = nil
+    state.gcdEnd = nil -- a real cast overrides any GCD window
 
     SetInterruptColor(self, notInterruptible)
 
@@ -300,6 +301,15 @@ end
 local function PostCastInterruptible(self, unit, spellID, notInterruptible)
     CastBars:debug("PostCastInterruptible", unit, spellID)
     SetInterruptColor(self, notInterruptible)
+end
+local function PostCastGlobal(self, unit, spellID, cooldownInfo, duration)
+    -- oUF 14 GCD display (player only, gated on showGlobalCooldown). A real
+    -- cast always takes precedence over the GCD window.
+    local state = self._ruiState
+    if state.casting or state.channeling then return end
+    if not duration or _G.issecretvalue(duration) or duration <= 0 then return end
+    state.gcdDuration = duration
+    state.gcdEnd = _G.GetTime() + duration
 end
 
 
@@ -370,6 +380,12 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
     Castbar.PostCastStop = PostCastStop
     Castbar.PostCastFail = PostCastFail
     Castbar.PostCastInterruptible = PostCastInterruptible
+
+    -- GCD bar (oUF 14, player only, default off — flashes on every global)
+    if unit == "player" and unitDB.showGCD then
+        Castbar.showGlobalCooldown = true
+        Castbar.PostCastGlobal = PostCastGlobal
+    end
 
     -- Custom OnUpdate that syncs the native timer to AngleStatusBar fill.
     -- oUF checks element.OnUpdate before falling back to its default onUpdate,
@@ -461,6 +477,23 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
             end
         elseif state.holdTime and state.holdTime > 0 then
             state.holdTime = state.holdTime - elapsed
+        elseif state.gcdEnd then
+            -- GCD window (showGlobalCooldown): drive the angled fill from
+            -- the PostCastGlobal-cached end time
+            local now = _G.GetTime()
+            if now < state.gcdEnd then
+                local duration = state.gcdDuration
+                local meta = ASB:GetBarMeta(castbar)
+                if meta and duration and duration > 0 then
+                    meta.minVal = 0
+                    meta.maxVal = duration
+                    ASB:SetBarValue(castbar, duration - (state.gcdEnd - now))
+                end
+            else
+                state.gcdEnd = nil
+                state.gcdDuration = nil
+                castbar:Hide()
+            end
         else
             -- Reset and hide; config-mode demo bars stay shown
             if castbar.config then return end
@@ -536,6 +569,7 @@ function CastBars:OnInitialize()
                 scale = 1,
                 text = "BOTTOMRIGHT",
                 reverse = true,
+                showGCD = false, -- oUF 14 showGlobalCooldown (player only)
                 debug = false
             },
             target = {
