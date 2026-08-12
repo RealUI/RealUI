@@ -55,7 +55,8 @@ local function AuraPostCreateButton(_, button)
 end
 
 -- settings = {filter, count, size, spacing, growthX, growthY, maxWidth,
---             cancelButton (combat-legal right-click cancel; player buffs),
+--             cancelButton (RegisterForClicks string, e.g. "RightButtonUp" —
+--             combat-legal cancel; player buffs),
 --             showDebuffBorder (dispel-type coloring from colors.dispel)}
 function UnitFrames.CreateAuraElement(dialog, settings)
     local frameWidth = (settings.maxWidth and settings.maxWidth > 0 and settings.maxWidth) or dialog:GetWidth()

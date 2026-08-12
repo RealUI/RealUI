@@ -142,7 +142,9 @@ UnitFrames.player = {
             growthX = buffGrowthX,
             growthY = buffGrowthY,
             maxWidth = buffLayout.maxWidth or 0,
-            cancelButton = true, -- combat-legal right-click cancel (oUF 14)
+            -- combat-legal right-click cancel (oUF 14); a
+            -- RegisterForClicks-style string, not a boolean
+            cancelButton = "RightButtonUp",
         })
         UnitFrames.SetAuraPosition(Buffs, dialog, buffLayout.anchor or "TOPLEFT",
             UnitFrames.GetInitialAnchor(buffGrowthX, buffGrowthY))
