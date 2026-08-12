@@ -71,12 +71,24 @@ local function RunGrid2ModernizationTest()
             check(bg and bg.type == "background",
                 profileName .. ": background indicator should exist with type 'background'")
 
-            -- Req 4.1, 4.2: private-auras-dispel indicator
+            -- Req 4 (inverted for Grid2 4.0): private-auras-dispel must be
+            -- ABSENT — the type never registers on 12.1 and Grid2's own DB
+            -- migration deletes the indicator
             local pad = profile.indicators and profile.indicators["private-auras-dispel"]
-            check(pad and pad.type == "privateaurasdispel",
-                profileName .. ": private-auras-dispel should have type 'privateaurasdispel'")
-            check(pad and pad.level == 7,
-                profileName .. ": private-auras-dispel should have level 7")
+            check(pad == nil,
+                profileName .. ": private-auras-dispel indicator should be absent (Grid2 4.0)")
+            check(not (profile.statusMap and profile.statusMap["private-auras-dispel"]),
+                profileName .. ": private-auras-dispel statusMap should be absent (Grid2 4.0)")
+
+            -- Grid2 4.0: mine filters must be numeric (boolean true is
+            -- dropped by Grid2's <200 migration)
+            for _, mineStatus in _G.ipairs({"buff-Renew-mine", "buff-PrayerOfMending-mine"}) do
+                local status = profile.statuses and profile.statuses[mineStatus]
+                if status then
+                    check(status.mine == 1,
+                        profileName .. ": " .. mineStatus .. " should have mine = 1")
+                end
+            end
 
             -- Req 5.1, 5.2: threat status has blinkThreshold, no disableBlink
             local threat = profile.statuses and profile.statuses["threat"]
@@ -122,6 +134,17 @@ local function RunGrid2ModernizationTest()
             "RealUI-Healing: raid-debuffs status should exist")
         check(rd and rd.debuffs and _G.next(rd.debuffs) == nil,
             "RealUI-Healing: raid-debuffs.debuffs should be empty table")
+
+        -- Grid2 4.0: consolidated HoT status drives icon-left (one aura
+        -- slot per icon indicator)
+        local myHoTs = healingProfile.statuses and healingProfile.statuses["buffs-MyHoTs"]
+        check(myHoTs ~= nil,
+            "RealUI-Healing: buffs-MyHoTs status should exist (Grid2 4.0 icon-left consolidation)")
+        local iconLeft = healingProfile.statusMap and healingProfile.statusMap["icon-left"]
+        check(iconLeft and iconLeft["buffs-MyHoTs"] ~= nil,
+            "RealUI-Healing: icon-left should map buffs-MyHoTs")
+        check(not (iconLeft and iconLeft["raid-icon-player"]),
+            "RealUI-Healing: icon-left should not map raid-icon-player (mixed-indicator overlap)")
     end
 
     -- Req 8.1, 8.2, 8.3: Grid2RaidDebuffs enabledModules

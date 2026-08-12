@@ -314,10 +314,8 @@ function private.AddOns.Grid2()
             ["background"] = {
                 ["type"] = "background",
             },
-            ["private-auras-dispel"] = {
-                ["type"] = "privateaurasdispel",
-                ["level"] = 7,
-            },
+            -- private-auras-dispel removed (Grid2 4.0: the indicator type
+            -- never registers on 12.1 and Grid2's own DB migration deletes it)
         },
         ["statuses"] = {
             ["health-deficit"] = {
@@ -326,12 +324,29 @@ function private.AddOns.Grid2()
             ["buff-Renew-mine"] = {
                 ["spellName"] = 139,
                 ["type"] = "buff",
-                ["mine"] = true,
+                -- Grid2 4.0 migration only maps mine==1/2; boolean true
+                -- silently loses the "my casts only" filter
+                ["mine"] = 1,
                 ["color1"] = {
                     ["a"] = 1,
                     ["r"] = 1,
                     ["g"] = 1,
                     ["b"] = 1,
+                },
+            },
+            -- One multi-buff status for the healer HoT icon: Grid2 4.0
+            -- renders ONE aura slot per icon indicator, so five separate
+            -- buff-* statuses on icon-left would show only the first.
+            -- Migrates to mbuffs with HELPFUL|PLAYER (mine=1).
+            ["buffs-MyHoTs"] = {
+                ["type"] = "buffs",
+                ["auras"] = {139, 61295, 119611, 774, 33763},
+                ["mine"] = 1,
+                ["color1"] = {
+                    ["a"] = 1,
+                    ["r"] = 0,
+                    ["g"] = 1,
+                    ["b"] = 0,
                 },
             },
             ["buff-PowerWordShield"] = {
@@ -444,7 +459,8 @@ function private.AddOns.Grid2()
             },
             ["buff-PrayerOfMending-mine"] = {
                 ["type"] = "buff",
-                ["mine"] = true,
+                ["spellName"] = 33076, -- was missing; Grid2 4.0 migration builds the aura list from it
+                ["mine"] = 1,
                 ["color1"] = {
                     ["a"] = 1,
                     ["r"] = 1,
@@ -501,27 +517,25 @@ function private.AddOns.Grid2()
             ["Grid2RaidDebuffs"] = 4,
         },
         ["statusMap"] = {
+            -- debuff-Disease/Magic/Poison/Curse refs removed: those statuses
+            -- never existed in the shipped blob (inert since 3.4.4); a
+            -- dispellable-debuff status is a docs/oUF-Backlog.md candidate
             ["corner-top-left"] = {
-                ["debuff-Disease"] = 53,
-                ["debuff-Magic"] = 52,
-                ["debuff-Poison"] = 51,
-                ["debuff-Curse"] = 50,
             },
             ["health-deficit"] = {
             },
+            -- Grid2 4.0: one aura slot per icon indicator — the five
+            -- separate buff-* statuses became the single buffs-MyHoTs;
+            -- raid-icon-player moved off (mixed aura+icon indicators
+            -- overlap under 4.0; it remains on icon-right)
             ["icon-left"] = {
-                ["buff-Rejuvenation-mine"] = 55,
-                ["buff-Lifebloom-mine"] = 56,
-                ["buff-RenewingMist-mine"] = 50,
-                ["buff-Riptide-mine"] = 52,
-                ["buff-Renew-mine"] = 54,
-                ["raid-icon-player"] = 155,
+                ["buffs-MyHoTs"] = 50,
             },
             ["border"] = {
                 ["target"] = 50,
                 ["afk"] = 51,
                 ["threat"] = 50,
-                ["health-low"] = 55,
+                -- health-low removed: status never existed in the shipped blob
             },
             ["text-down-color"] = {
                 ["classcolor"] = 50,
@@ -856,23 +870,23 @@ function private.AddOns.Grid2()
             ["background"] = {
                 ["type"] = "background",
             },
-            ["private-auras-dispel"] = {
-                ["type"] = "privateaurasdispel",
-                ["level"] = 7,
-            },
+            -- private-auras-dispel removed (Grid2 4.0: the indicator type
+            -- never registers on 12.1 and Grid2's own DB migration deletes it)
         },
         ["statusMap"] = {
+            -- dead debuff-* refs removed (statuses never shipped); Renew
+            -- alone makes this a pure aura indicator — no 4.0 mixed overlap
             ["corner-top-left"] = {
-                ["debuff-Disease"] = 53,
-                ["debuff-Poison"] = 51,
-                ["debuff-Curse"] = 50,
-                ["debuff-Magic"] = 52,
                 ["buff-Renew-mine"] = 99,
             },
             ["health-deficit"] = {
                 ["health-deficit"] = 50,
             },
+            -- PowerWordShield moved here from corner-top-right: mixed
+            -- aura+icon indicators overlap under Grid2 4.0; icon-left was
+            -- empty and is now a pure aura indicator
             ["icon-left"] = {
+                ["buff-PowerWordShield"] = 99,
             },
             ["border"] = {
                 ["afk"] = 51,
@@ -903,7 +917,6 @@ function private.AddOns.Grid2()
             ["corner-top-right"] = {
                 ["raid-assistant"] = 50,
                 ["leader"] = 51,
-                ["buff-PowerWordShield"] = 99,
             },
             ["health-color"] = {
             },
@@ -984,7 +997,7 @@ function private.AddOns.Grid2()
                     ["r"] = 1,
                 },
                 ["type"] = "buff",
-                ["mine"] = true,
+                ["mine"] = 1, -- Grid2 4.0 migration only maps mine==1/2
                 ["spellName"] = 139,
             },
             ["buff-PowerWordShield"] = {
@@ -1030,7 +1043,8 @@ function private.AddOns.Grid2()
             },
             ["buff-PrayerOfMending-mine"] = {
                 ["type"] = "buff",
-                ["mine"] = true,
+                ["spellName"] = 33076, -- was missing; Grid2 4.0 migration builds the aura list from it
+                ["mine"] = 1, -- Grid2 4.0 migration only maps mine==1/2
                 ["color1"] = {
                     ["a"] = 1,
                     ["b"] = 0.2,
@@ -1100,6 +1114,12 @@ function private.Grid2ProfileMigration()
         "buff-EternalFlame-mine",
         "debuff-WeakenedSoul",
     }
+    -- statusMap refs whose statuses never existed in the shipped blob
+    -- (inert since 3.4.4; Grid2 4.0 surfaces them as dangling)
+    local DEAD_STATUSMAP_REFS = {
+        "debuff-Curse", "debuff-Magic", "debuff-Poison", "debuff-Disease",
+        "health-low",
+    }
 
     local changed = false
     for _, profileName in _G.ipairs({"RealUI", "RealUI-Healing"}) do
@@ -1120,9 +1140,15 @@ function private.Grid2ProfileMigration()
                 changed = true
             end
 
-            -- private-auras-dispel indicator (migration v105)
-            if not profile.indicators["private-auras-dispel"] then
-                profile.indicators["private-auras-dispel"] = { type = "privateaurasdispel", level = 7 }
+            -- private-auras-dispel indicator REMOVED (was added by
+            -- migration v105): Grid2 4.0 never registers the type on 12.1
+            -- and its own DB migration deletes the indicator — re-adding it
+            -- would inject a permanently orphaned entry
+            if profile.indicators["private-auras-dispel"] then
+                profile.indicators["private-auras-dispel"] = nil
+                if profile.statusMap then
+                    profile.statusMap["private-auras-dispel"] = nil
+                end
                 changed = true
             end
 
@@ -1158,6 +1184,66 @@ function private.Grid2ProfileMigration()
                             changed = true
                         end
                     end
+                    for _, dead in _G.ipairs(DEAD_STATUSMAP_REFS) do
+                        if mappings[dead] then
+                            mappings[dead] = nil
+                            changed = true
+                        end
+                    end
+                end
+            end
+
+            -- Grid2 4.0 compatibility (migration v2):
+            if profile.statuses then
+                -- mine=true loses the "my casts only" filter in Grid2's own
+                -- <200 migration (it only maps mine==1/2)
+                for _, statusName in _G.ipairs({"buff-Renew-mine", "buff-PrayerOfMending-mine"}) do
+                    local status = profile.statuses[statusName]
+                    if status and status.mine == true then
+                        status.mine = 1
+                        changed = true
+                    end
+                end
+                -- PrayerOfMending shipped without a spellName; Grid2 4.0
+                -- builds the aura list from it
+                local pom = profile.statuses["buff-PrayerOfMending-mine"]
+                if pom and not pom.spellName then
+                    pom.spellName = 33076
+                    changed = true
+                end
+            end
+
+            if profileName == "RealUI-Healing" and profile.statuses and profile.statusMap then
+                -- One aura slot per icon indicator under 4.0: consolidate the
+                -- five HoT statuses on icon-left into a single multi-buff
+                -- status, and move raid-icon-player off the mixed indicator
+                -- (it stays on icon-right)
+                if not profile.statuses["buffs-MyHoTs"] then
+                    profile.statuses["buffs-MyHoTs"] = {
+                        type = "buffs",
+                        auras = {139, 61295, 119611, 774, 33763},
+                        mine = 1,
+                        color1 = { a = 1, r = 0, g = 1, b = 0 },
+                    }
+                    changed = true
+                end
+                local iconLeft = profile.statusMap["icon-left"]
+                if iconLeft and not iconLeft["buffs-MyHoTs"] then
+                    _G.table.wipe(iconLeft)
+                    iconLeft["buffs-MyHoTs"] = 50
+                    changed = true
+                end
+            end
+
+            if profileName == "RealUI" and profile.statusMap then
+                -- PowerWordShield moves off the mixed corner-top-right
+                -- (aura+icon overlap under 4.0) onto the empty icon-left
+                local cornerTR = profile.statusMap["corner-top-right"]
+                if cornerTR and cornerTR["buff-PowerWordShield"] then
+                    cornerTR["buff-PowerWordShield"] = nil
+                    profile.statusMap["icon-left"] = profile.statusMap["icon-left"] or {}
+                    profile.statusMap["icon-left"]["buff-PowerWordShield"] = 99
+                    changed = true
                 end
             end
 
@@ -1174,9 +1260,10 @@ function private.Grid2ProfileMigration()
             end
 
             -- versions.RealUIGrid2 for future migration tracking
+            -- (2 = the Grid2 4.0 compatibility pass)
             profile.versions = profile.versions or {}
-            if not profile.versions.RealUIGrid2 then
-                profile.versions.RealUIGrid2 = 1
+            if not profile.versions.RealUIGrid2 or profile.versions.RealUIGrid2 < 2 then
+                profile.versions.RealUIGrid2 = 2
                 changed = true
             end
         end
