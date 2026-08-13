@@ -68,6 +68,13 @@ local function GetClassColor(colors, class)
     return colors.class[class]
 end
 
+-- Secret-safe boolean: unit-state queries return secret booleans in tainted
+-- execution contexts, and a boolean test on one errors. Substitute a default.
+local function SafeBool(value, default)
+    if _G.issecretvalue(value) then return default end
+    return value
+end
+
 local function GetReverseFill(unit, info)
     -- Natural fill direction based on bar side:
     -- Player (RIGHT side): natural=true → fill anchored RIGHT, grows right→left
@@ -498,15 +505,15 @@ local CreatePowerStatus do
     }
     local function UpdateStatus(self, event)
         local unit = self.__unit
-        local isConnected = _G.UnitIsConnected(unit)
-        local isLeader = _G.UnitIsGroupLeader(unit)
-        local inCombat = _G.UnitAffectingCombat(unit)
-        local isResting = _G.IsResting()
 
-        -- UnitIsAFK can return a secret boolean in tainted execution contexts;
-        -- check with issecretvalue before testing it
-        local isAFK = _G.UnitIsAFK(unit)
-        if _G.issecretvalue(isAFK) then isAFK = false end
+        -- Every one of these can hand back a secret boolean when the unit is
+        -- restricted and we are running tainted, so route them all through
+        -- SafeBool rather than testing the raw return.
+        local isConnected = SafeBool(_G.UnitIsConnected(unit), true)
+        local isLeader = SafeBool(_G.UnitIsGroupLeader(unit), false)
+        local inCombat = SafeBool(_G.UnitAffectingCombat(unit), false)
+        local isResting = SafeBool(_G.IsResting(), false)
+        local isAFK = SafeBool(_G.UnitIsAFK(unit), false)
 
         if isAFK then
             self.LeaderIndicator.status = "afk"
@@ -585,9 +592,9 @@ end
 local CreateEndBox do
     local function UpdateEndBox(self, ...)
         local unit = self.__unit
-        local isPlayer = _G.UnitIsPlayer(unit)
-        local isPlayerControlled = _G.UnitPlayerControlled(unit)
-        local isTapDenied = _G.UnitIsTapDenied(unit)
+        local isPlayer = SafeBool(_G.UnitIsPlayer(unit), false)
+        local isPlayerControlled = SafeBool(_G.UnitPlayerControlled(unit), false)
+        local isTapDenied = SafeBool(_G.UnitIsTapDenied(unit), false)
 
         local color
         if isPlayer or (isPlayerControlled and not isPlayer) then
@@ -595,10 +602,18 @@ local CreateEndBox do
             color = GetClassColor(self.colors, classToken)
         elseif not isPlayerControlled and isTapDenied then
             color = self.colors.tapped
-        elseif _G.UnitReaction(unit, "player") then
-            color = self.colors.reaction[_G.UnitReaction(unit, "player")]
         else
-            color = self.colors.selection[_G.UnitSelectionType(unit, true)]
+            -- Reaction/selection indices can be secret too, and indexing a
+            -- normal table with a secret key errors the same way.
+            local reaction = _G.UnitReaction(unit, "player")
+            if reaction and not _G.issecretvalue(reaction) then
+                color = self.colors.reaction[reaction]
+            else
+                local selection = _G.UnitSelectionType(unit, true)
+                if selection and not _G.issecretvalue(selection) then
+                    color = self.colors.selection[selection]
+                end
+            end
         end
         if not color then return end
 
