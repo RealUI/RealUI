@@ -29,15 +29,33 @@ function DiagnosticTools:Initialize()
 end
 
 -- Taint Logging Toggle
-function DiagnosticTools:ToggleTaintLogging()
+-- level: optional "0", "1" or "2". Omitted toggles between off and 1.
+--   1 = log the taint behind blocked actions. Small file, no measurable cost,
+--       so it can be left on for a whole session while chasing an intermittent
+--       ADDON_ACTION_FORBIDDEN (which is the only way to catch one).
+--   2 = also log every taint event. Very large and visibly stuttery; only
+--       worth it when level 1 does not name the culprit.
+function DiagnosticTools:ToggleTaintLogging(level)
     local taintLog = _G.GetCVar("taintLog")
-    local newValue = (taintLog ~= "0") and "0" or "2"
+
+    local newValue
+    if level == "0" or level == "1" or level == "2" then
+        newValue = level
+    else
+        newValue = (taintLog ~= "0") and "0" or "1"
+    end
+
+    if newValue == taintLog then
+        print(("Taint logging is already at level %s."):format(taintLog))
+        return
+    end
+
     _G.SetCVar("taintLog", newValue)
 
     diagnosticState.taintLoggingEnabled = (newValue ~= "0")
 
     local message = diagnosticState.taintLoggingEnabled
-        and "Taint logging enabled. UI will reload."
+        and ("Taint logging enabled (level %s). Log: Logs\\taint.log — UI will reload."):format(newValue)
         or "Taint logging disabled. UI will reload."
 
     if RealUI.FeedbackSystem then
@@ -51,6 +69,96 @@ end
 
 function DiagnosticTools:IsTaintLoggingEnabled()
     return diagnosticState.taintLoggingEnabled
+end
+
+-- Taint Scanner
+-- Walks a dot separated path down from _G, e.g.
+--   ItemUpgradeFrame
+--   ItemUpgradeFrame.LeftItemPreviewFrame.NineSlice
+local function ResolvePath(path)
+    local obj = _G
+    for part in path:gmatch("[^%.]+") do
+        if type(obj) ~= "table" then
+            return nil
+        end
+        obj = obj[part]
+        if obj == nil then
+            return nil
+        end
+    end
+    return obj
+end
+
+-- Reports which fields of a table or frame have been written by an addon.
+-- issecurevariable returns isSecure, taintingAddon — so an insecure field
+-- names both the value a protected call could choke on and who dirtied it.
+function DiagnosticTools:ScanTaint(input)
+    local path = input and input:match("^%s*([%w_%.]+)")
+    local obj, label
+
+    if path then
+        obj, label = ResolvePath(path), path
+        if obj == nil then
+            print(("|cffff0000Taint scan:|r no such object |cffffff00%s|r"):format(path))
+            return
+        end
+    else
+        local foci = _G.GetMouseFoci and _G.GetMouseFoci()
+        obj = foci and foci[1]
+        if not obj then
+            print("Usage: |cff8080FF/taintscan|r |cff22dd22Global[.Sub.Path]|r — or hover a frame and run it with no argument.")
+            return
+        end
+        label = (obj.GetDebugName and obj:GetDebugName()) or "<frame under mouse>"
+    end
+
+    if type(obj) ~= "table" then
+        print(("|cffff0000Taint scan:|r |cffffff00%s|r is a %s, not a table or frame."):format(label, type(obj)))
+        return
+    end
+
+    if obj.IsForbidden and obj:IsForbidden() then
+        print(("|cffff0000Taint scan:|r |cffffff00%s|r is forbidden."):format(label))
+        return
+    end
+
+    local insecure, total = {}, 0
+    local ok = pcall(function()
+        for key in next, obj do
+            if type(key) == "string" then
+                total = total + 1
+                local isSecure, taintedBy = _G.issecurevariable(obj, key)
+                if not isSecure then
+                    insecure[#insecure + 1] = {key = key, by = taintedBy or "?"}
+                end
+            end
+        end
+    end)
+
+    if not ok then
+        print(("|cffff0000Taint scan:|r could not iterate |cffffff00%s|r."):format(label))
+        return
+    end
+
+    table.sort(insecure, function(a, b) return a.key < b.key end)
+
+    print(("|cff22dd22Taint scan:|r %s — %d of %d fields addon-written"):format(label, #insecure, total))
+
+    -- A plain global can also be checked as a variable in its own right
+    if path and not path:find("%.") then
+        local isSecure, taintedBy = _G.issecurevariable(path)
+        if not isSecure then
+            print(("  |cffff8000_G.%s|r itself <- |cffff0000%s|r"):format(path, taintedBy or "?"))
+        end
+    end
+
+    for i = 1, #insecure do
+        print(("  |cffff8000%s|r <- |cffff0000%s|r"):format(insecure[i].key, insecure[i].by))
+    end
+
+    if #insecure == 0 then
+        print("  |cff888888(nothing addon-written)|r")
+    end
 end
 
 -- Performance Monitoring Commands

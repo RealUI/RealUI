@@ -983,11 +983,22 @@ function RealUI:OnInitialize()
     )
     self:RegisterChatCommand(
         "taintLogging",
-        function()
+        function(input)
+            local level = input and input:match("^%s*([012])%s*$")
             if self.DiagnosticTools then
-                self.DiagnosticTools:ToggleTaintLogging()
+                self.DiagnosticTools:ToggleTaintLogging(level)
             else
                 self:Taint_Logging_Toggle()
+            end
+        end
+    )
+    self:RegisterChatCommand(
+        "taintScan",
+        function(input)
+            if self.DiagnosticTools then
+                self.DiagnosticTools:ScanTaint(input)
+            else
+                _G.print("DiagnosticTools not available.")
             end
         end
     )
