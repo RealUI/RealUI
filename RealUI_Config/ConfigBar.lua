@@ -1018,6 +1018,18 @@ do -- UnitFrames
                                 end,
                                 order = 22,
                             },
+                            hotsFilter = {
+                                name = "HoTs/shields only",
+                                desc = "Limit the left icons to a curated heal-over-time and shield list instead of all your buffs.",
+                                type = "toggle",
+                                disabled = function() return _G.Grid2 ~= nil or not UnitFrames.db.profile.units.raid.icons.hots end,
+                                get = function() return UnitFrames.db.profile.units.raid.icons.hotsFilter ~= false end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.icons.hotsFilter = value
+                                    if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
+                                end,
+                                order = 23,
+                            },
                         }
                     },
                 }
@@ -1793,6 +1805,15 @@ do -- CastBars
         }
     end
 
+    do -- Nameplates (RealUI_Nameplates standalone addon)
+        local Nameplates = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+        if Nameplates and Nameplates.GetConfigOptions then
+            local nameplateOpts = Nameplates:GetConfigOptions()
+            nameplateOpts.name = "Nameplates"
+            nameplateOpts.icon = "crosshairs"
+            optArgs.nameplates = nameplateOpts
+        end
+    end
     optArgs.castbars = {
         name = L[MODNAME],
         icon = "bolt",

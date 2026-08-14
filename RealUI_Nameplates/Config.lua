@@ -21,9 +21,17 @@ local function RefreshAll()
     end
 end
 
+-- Path resolution starts at the first known profile root so the same options
+-- table works standalone AND embedded deeper in RealUI's config tree (where
+-- info[] carries extra parent keys like "nameplates").
+local PROFILE_ROOTS = { enemy = true, friendly = true, alpha = true, target = true, font = true }
 local function GetPath(info)
     local db = NP.db.profile
-    for i = 1, #info - 1 do
+    local start = 1
+    while info[start] and not PROFILE_ROOTS[info[start]] do
+        start = start + 1
+    end
+    for i = start, #info - 1 do
         db = db[info[i]]
     end
     return db, info[#info]
@@ -185,6 +193,11 @@ local function BuildOptions()
             },
         },
     }
+end
+
+-- Public: RealUI_Config embeds this into the RealUI options tree.
+function NP:GetConfigOptions()
+    return BuildOptions()
 end
 
 local registered = false
