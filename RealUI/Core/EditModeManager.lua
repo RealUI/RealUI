@@ -27,6 +27,9 @@ local state = {
     currentRole = nil,
     currentDisplayPreset = nil,
     layoutsCreated = false,
+    -- Set once any C_EditMode.SaveLayouts write succeeds this session. EditMode
+    -- is tainted from that point until a reload; see the write gate below.
+    layoutsWritten = false,
 }
 
 ---------------------------------------------------------------------------
@@ -50,6 +53,73 @@ local SYSTEM_OBJECTIVE_TRACKER = 12
 -- layout and sizes both the viewer frame and its child icons correctly,
 -- so no manual SetScale or child re-anchoring is needed.
 ---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- Layout write gate (taint containment)
+---------------------------------------------------------------------------
+--
+-- `C_EditMode.SaveLayouts(data)` called from addon code stores a table that
+-- insecure code has written into. When EditMode reads it back through
+-- `EditModeManagerFrameMixin:UpdateLayoutInfo`, `EditModeManagerFrame.layoutInfo`
+-- becomes tainted for the rest of the session — and `UpdateSystems` runs
+-- `secureexecuterange(self.registeredSystemFrames, callUpdateSystem)`, where
+-- every `UpdateSystem` call reads that layoutInfo. So one addon write taints
+-- the update pass for *every* registered system, not just ours.
+--
+-- Before 12.1 that was invisible. Since 12.1 Blizzard_CooldownViewer is full of
+-- restricted tables and secret values (`hasTotem`, `charges`,
+-- `allowAvailableAlert`), so a tainted UpdateSystems pass makes it throw on
+-- every UNIT_AURA — hundreds of errors per session, none of them in our code.
+--
+-- Taint is per-session and does not survive a reload, so the containment rule
+-- is: only write layouts from an explicitly user-initiated flow that ends in a
+-- reload prompt (install wizard, display preset change, config toggle,
+-- one-time migration). Automatic and event-driven writes are refused here
+-- rather than left to taint the session silently.
+--
+-- Wrap legitimate writers in EditModeManager:BeginUserWrite() /
+-- :EndUserWrite(). Anything outside that scope is logged and dropped.
+
+local writeScope = 0
+
+--- Opens a user-initiated layout write scope. Must be paired with EndUserWrite.
+function EditModeManager:BeginUserWrite()
+    writeScope = writeScope + 1
+end
+
+--- Closes a user-initiated layout write scope.
+function EditModeManager:EndUserWrite()
+    if writeScope > 0 then
+        writeScope = writeScope - 1
+    end
+end
+
+--- Whether layout writes are currently permitted.
+function EditModeManager:IsUserWriteScopeOpen()
+    return writeScope > 0
+end
+
+--- Sole gateway to C_EditMode.SaveLayouts. Refuses writes outside a
+-- user-initiated scope so automatic paths cannot taint EditMode.
+-- @param data table  Layout data from C_EditMode.GetLayouts()
+-- @param reason string  Caller label, for debug output
+-- @return boolean  true if the write was performed
+local function SaveLayouts(data, reason)
+    if writeScope == 0 then
+        debug("REFUSED layout write outside user-initiated scope:", reason)
+        return false
+    end
+
+    local ok, err = pcall(C_EditMode.SaveLayouts, data)
+    if not ok then
+        debug("ERROR: C_EditMode.SaveLayouts() failed:", err)
+        return false
+    end
+
+    state.layoutsWritten = true
+    debug("Wrote EditMode layouts:", reason)
+    return true
+end
 
 ---------------------------------------------------------------------------
 -- Internal Helpers
@@ -154,9 +224,15 @@ local function snapshotBartender4ProfileCounts()
 end
 
 --- Processes a pending layout action from the queue.
+-- Queued actions are always the tail of a user-initiated flow that hit combat
+-- lockdown, so the write scope is reopened for the replay. `EnsureLayouts` and
+-- `RemovePerCharacterLayouts` are raw writers with no scope of their own —
+-- their normal callers supply it, so the replay must too.
 -- @param pending table  The pending action descriptor
 local function ProcessPending(pending)
     if not pending then return end
+
+    EditModeManager:BeginUserWrite()
 
     if pending.action == "ensure" then
         EditModeManager:EnsureLayouts(pending.displayPresetId)
@@ -171,6 +247,8 @@ local function ProcessPending(pending)
     elseif pending.action == "trackerAnchor" then
         EditModeManager:SetTrackerAnchor(pending.point, pending.relativePoint, pending.x, pending.y)
     end
+
+    EditModeManager:EndUserWrite()
 end
 
 ---------------------------------------------------------------------------
@@ -366,9 +444,7 @@ function EditModeManager:EnsureLayouts(displayPresetId, forceRebuild)
     end
 
     if changed then
-        local saveOk, saveErr = pcall(C_EditMode.SaveLayouts, data)
-        if not saveOk then
-            debug("ERROR: C_EditMode.SaveLayouts() failed:", saveErr)
+        if not SaveLayouts(data, "EnsureLayouts") then
             return false
         end
     end
@@ -459,10 +535,25 @@ function EditModeManager:ApplyLayout(role, displayPresetId)
         return false
     end
 
-    local ensureOk = self:EnsureLayouts(displayPresetId)
-    if not ensureOk then return false end
+    -- ApplyLayout is only reached from user-initiated flows (install wizard,
+    -- display preset change, config panel) — the DISPLAY_SIZE_CHANGED handler
+    -- deliberately no longer calls it. Opening the write scope here is what
+    -- lets EnsureLayouts persist; see the taint containment note at the top.
+    --
+    -- The scope must span ActivateLayout too: when the named layout is missing
+    -- it calls EnsureLayouts itself, and that write would otherwise be refused.
+    self:BeginUserWrite()
 
-    return self:ActivateLayout(role)
+    local ensureOk = self:EnsureLayouts(displayPresetId)
+    if not ensureOk then
+        self:EndUserWrite()
+        return false
+    end
+
+    local activated = self:ActivateLayout(role)
+
+    self:EndUserWrite()
+    return activated
 end
 
 ---------------------------------------------------------------------------
@@ -484,9 +575,14 @@ function EditModeManager:SetPerCharacter(enabled)
         local presetId = state.currentDisplayPreset or "standard"
         self:ApplyLayout(role, presetId)
     else
-        self:RemovePerCharacterLayouts()
+        -- RemovePerCharacterLayouts is a raw writer, and ActivateLayout can
+        -- fall back to EnsureLayouts; both need the scope.
         local role = state.currentRole or "dpstank"
+
+        self:BeginUserWrite()
+        self:RemovePerCharacterLayouts()
         self:ActivateLayout(role)
+        self:EndUserWrite()
     end
 end
 
@@ -513,10 +609,7 @@ function EditModeManager:RemovePerCharacterLayouts()
         end
     end
 
-    local saveOk, saveErr = pcall(C_EditMode.SaveLayouts, data)
-    if not saveOk then
-        debug("ERROR: C_EditMode.SaveLayouts() failed:", saveErr)
-    end
+    SaveLayouts(data, "RemovePerCharacterLayouts")
 end
 
 ---------------------------------------------------------------------------
@@ -707,7 +800,15 @@ function EditModeManager:MigrateFromPreEditMode()
     -- (e.g. BuildLayout throwing) so the bail-out semantics are explicit
     -- regardless of where the failure originates. See design "Migration
     -- Steps → Step 3" and "Migration ordering rationale".
+    --
+    -- The one-time migration is the only automatic path still permitted to
+    -- write layouts — refusing it would strand upgrading users forever, since
+    -- the flag is never set and it retries every session. The reload prompt at
+    -- the end of this function clears the resulting session taint.
+    self:BeginUserWrite()
     local ensure_ok, ensure_result = pcall(self.EnsureLayouts, self, presetId, forceRebuild)
+    self:EndUserWrite()
+
     if not ensure_ok then
         debug("ERROR: Step 3 EnsureLayouts pcall failed (BLOCKING — bailing out, will retry next session):", ensure_result)
         return
@@ -791,7 +892,11 @@ function EditModeManager:MigrateFromPreEditMode()
         local currentIsBuiltIn = activeIdx and activeIdx <= NUM_PRESET_LAYOUTS
 
         if currentIsBuiltIn then
+            -- Scope spans this too: ActivateLayout falls back to EnsureLayouts
+            -- if the named layout is somehow still missing.
+            self:BeginUserWrite()
             self:ActivateLayout(role)
+            self:EndUserWrite()
             debug("Migration: activated layout for role:", role)
         else
             debug("Migration: user has custom layout active, skipping activation")
@@ -800,6 +905,15 @@ function EditModeManager:MigrateFromPreEditMode()
 
     self:SetMigrationFlag()
     debug("Migration from pre-EditMode completed")
+
+    -- Clear the session taint the layout write just introduced. Without a
+    -- reload, EditModeManagerFrame.layoutInfo stays tainted and every later
+    -- UpdateSystems pass runs tainted for all registered systems — which is
+    -- what made Blizzard_CooldownViewer throw on every UNIT_AURA. The
+    -- migration runs once per user, so this prompt is not recurring.
+    if state.layoutsWritten and RealUI.ReloadUIDialog then
+        RealUI:ReloadUIDialog()
+    end
 end
 
 ---------------------------------------------------------------------------
@@ -861,9 +975,7 @@ function EditModeManager:SetTrackerAnchor(point, relativePoint, x, y)
     sysInfo.anchorInfo.offsetX       = x
     sysInfo.anchorInfo.offsetY       = y
 
-    local saveOk, saveErr = pcall(C_EditMode.SaveLayouts, data)
-    if not saveOk then
-        debug("ERROR: C_EditMode.SaveLayouts() failed:", saveErr)
+    if not SaveLayouts(data, "SetTrackerAnchor") then
         return
     end
 
@@ -944,9 +1056,16 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
 
         local newPresetId = DisplayPresets.Suggest()
         if newPresetId and newPresetId ~= state.currentDisplayPreset then
-            local role = state.currentRole or "dpstank"
-            debug("Display changed, re-applying layout for preset:", newPresetId)
-            EditModeManager:ApplyLayout(role, newPresetId)
+            -- Do NOT write layouts here. This handler fires on resolution and
+            -- UI-scale changes, including transient ones like a graphics driver
+            -- reset, and an automatic C_EditMode.SaveLayouts would taint
+            -- EditMode for the rest of the session (see the write gate note at
+            -- the top of this file). DisplayPresets owns the user-facing
+            -- prompt; when the user accepts it, DisplayPresets.Apply calls
+            -- ApplyLayout inside a proper write scope and prompts for reload.
+            -- DisplayStage's REALUI_DISPLAY_CHANGED popup ("Reconfigure") is
+            -- the user path from here into DisplayPresets.Apply.
+            debug("Display changed; suggested preset (no automatic layout write):", newPresetId)
         end
     end
 end)

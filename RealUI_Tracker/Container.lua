@@ -138,20 +138,54 @@ function RealUI_Tracker:UpdatePosition()
     _G.RealUI_TrackerFrame:ClearAllPoints()
     _G.RealUI_TrackerFrame:SetAllPoints(_G.ObjectiveTrackerFrame)
 
-    -- One-time seeding of the user's stored position into the active
-    -- RealUI EditMode layout. Local name `pos` (NOT `db`) avoids the
-    -- historical `db.profile.position.enabled` shadow bug where a
-    -- local named `db` aliased the AceDB root and made `db.enabled`
-    -- silently nil-dereference instead of resolving to position.enabled.
-    if not private.trackerSeedingDone then
-        local pos = self.db.profile.position
-        local EMM = RealUI and RealUI.EditModeManager
-        local sysInfo = EMM and EMM:GetActiveRealUITrackerSystemInfo()
-        if pos.enabled and sysInfo and isDefaultAnchor(sysInfo.anchorInfo) then
-            private.trackerSeedingDone = true
-            EMM:SetTrackerAnchor(pos.anchorFrom, pos.anchorTo, pos.x, pos.y)
-        end
+    -- NOTE: position seeding deliberately does NOT happen here.
+    --
+    -- This function runs from UI_SCALE_CHANGED, DISPLAY_SIZE_CHANGED and
+    -- EDIT_MODE_LAYOUTS_UPDATED. Calling EditModeManager:SetTrackerAnchor from
+    -- any of them means C_EditMode.SaveLayouts fires automatically at login,
+    -- which taints EditModeManagerFrame.layoutInfo for the whole session. Every
+    -- later EditMode UpdateSystems pass then runs tainted for all registered
+    -- systems, and Blizzard_CooldownViewer (restricted tables and secret values
+    -- since 12.1) throws on every UNIT_AURA as a result — user reports showed
+    -- hundreds of "secret boolean"/"cannot be accessed while tainted" errors
+    -- attributed to RealUI_Tracker with no RealUI frame anywhere on the stack.
+    -- Seeding from the EDIT_MODE_LAYOUTS_UPDATED handler was doubly wrong: the
+    -- write re-entered the very layout update it was reacting to.
+    --
+    -- Seeding is now a user-initiated action instead — see
+    -- RealUI_Tracker:SeedPositionIntoEditMode, called from the install/setup
+    -- flow, which opens a write scope and prompts for the reload that clears
+    -- the taint. DO NOT reintroduce a layout write on this path.
+end
+
+-- 2.5b: One-time seeding of the user's stored tracker position into the active
+-- RealUI EditMode layout. Must only be called from an explicitly user-initiated
+-- flow (install wizard / config action), never from an event handler — see the
+-- note in UpdatePosition.
+--
+-- Local name `pos` (NOT `db`) avoids the historical
+-- `db.profile.position.enabled` shadow bug where a local named `db` aliased the
+-- AceDB root and made `db.enabled` silently nil-dereference instead of
+-- resolving to position.enabled.
+-- @return boolean  true if an anchor was written
+function RealUI_Tracker:SeedPositionIntoEditMode()
+    if private.trackerSeedingDone then return false end
+
+    local pos = self.db.profile.position
+    local EMM = RealUI and RealUI.EditModeManager
+    local sysInfo = EMM and EMM:GetActiveRealUITrackerSystemInfo()
+
+    if not (pos.enabled and sysInfo and isDefaultAnchor(sysInfo.anchorInfo)) then
+        return false
     end
+
+    private.trackerSeedingDone = true
+
+    EMM:BeginUserWrite()
+    EMM:SetTrackerAnchor(pos.anchorFrom, pos.anchorTo, pos.x, pos.y)
+    EMM:EndUserWrite()
+
+    return true
 end
 
 -- 2.7: Cleanup on disable

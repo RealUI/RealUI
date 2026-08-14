@@ -556,6 +556,17 @@ function InstallWizard:Complete()
         RealUI.EditModeManager:ApplyLayout(role, presetId)
     end
 
+    -- Seed the stored objective-tracker position into the freshly applied
+    -- layout. This is the only sanctioned moment for that write: it is
+    -- user-initiated and the wizard ends with a reload, which clears the
+    -- EditMode taint any layout write introduces. RealUI_Tracker must never do
+    -- this from an event handler — see the note in RealUI_Tracker/Container.lua.
+    local Tracker = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+    Tracker = Tracker and Tracker:GetAddon("RealUI_Tracker", true)
+    if Tracker and Tracker.SeedPositionIntoEditMode then
+        Tracker:SeedPositionIntoEditMode()
+    end
+
     -- Hide installation wizard UI
     if RealUI.InstallUI then
         RealUI.InstallUI:Hide()
