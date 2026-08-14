@@ -131,7 +131,12 @@ function Query.GetAuras(group, auraType)
     local filter = Query.BuildFilter(group, auraType)
     local results = {}
 
-    AuraUtil.ForEachAura(unit, filter, nil, function(auraData)
+    -- WoW 12: the aura LIST itself can be secret for tainted code (GetAuraSlots
+    -- throws before any per-field guard runs) — typical for hostile/target units
+    -- in combat. pcall the whole scan; a secret list degrades to "no auras shown"
+    -- for this redraw. The real fix is the AuraContainer-intrinsic migration
+    -- tracked in the realui-auras spec.
+    local scanOk = pcall(AuraUtil.ForEachAura, unit, filter, nil, function(auraData)
         local ok, shouldShow = pcall(Filter.ShouldShow, group, auraType, auraData)
         if ok and shouldShow then
             local name = SafeString(auraData.name)
@@ -172,6 +177,9 @@ function Query.GetAuras(group, auraType)
         end
         -- Return nil to continue iterating (no early exit)
     end, true)  -- usePackedAura = true: receive auraData as a table, not unpacked args
+    if not scanOk and #results == 0 then
+        return results
+    end
 
     -- Sort results
     Sort.Apply(results, group)
