@@ -93,6 +93,12 @@ function RealUI:HuDTestMode(isConfigMode)
 
     RealUI:ToggleGridTestMode(isConfigMode)
 
+    -- Built-in raid frames: placeholder cells while positioning (solo, no Grid2)
+    local UnitFrames = RealUI:GetModule("UnitFrames", true)
+    if UnitFrames and UnitFrames.ToggleRaidTestMode then
+        UnitFrames:ToggleRaidTestMode(isConfigMode)
+    end
+
     -- Module ToggleConfigMode calls route through FramePoint:ToggleAll
     -- above (the old configModeModules table was never populated)
 

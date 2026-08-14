@@ -2,4 +2,5 @@
 https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Boss.lua"/>
     <Script file="Arena.lua"/>
+    <Script file="Raid.lua"/>
 </Ui>

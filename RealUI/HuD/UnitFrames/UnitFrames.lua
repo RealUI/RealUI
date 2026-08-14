@@ -75,6 +75,10 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         showCount = true,
         cancelButton = settings.cancelButton,
         showDebuffBorder = settings.showDebuffBorder,
+        -- Must be an AddGroup option, not a post-hoc element flag: the intrinsic
+        -- pre-creates its button pool during AddGroup, so flags set after
+        -- CreateAuraElement returns are too late (raid-cell mini icons).
+        disableCooldown = settings.disableCooldown,
     })
     return element
 end
@@ -814,9 +818,17 @@ function UnitFrames:OnInitialize()
                         colorBackgroundByClass = false,
                     },
                 },
-                party = {
-                    size = {x = 100, y = 50},
-                    position = {x = 0, y = 0},
+                raid = {
+                    enabled = true,
+                    size = {x = 70, y = 30},
+                    spacing = 2,
+                    rangeAlpha = 0.4,
+                    icons = {
+                        centerDebuff = true,
+                        hots = true,
+                        hotsCount = 2,
+                    },
+                    framePoint = {},
                 },
             },
             arena = {

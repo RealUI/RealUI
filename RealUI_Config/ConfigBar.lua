@@ -906,14 +906,117 @@ do -- UnitFrames
                         childGroups = "tab",
                         order = 30,
                         args = {
-                            advanced = {
+                            grid2Note = {
+                                name = "Grid2 is handling group frames — RealUI's built-in raid frames are inactive while it is enabled.",
+                                type = "description",
+                                hidden = not _G.Grid2,
+                                order = 0,
+                            },
+                            grid2Config = {
                                 name = "Grid 2",
                                 type = "execute",
-                                disabled = not _G.Grid2,
+                                hidden = not _G.Grid2,
                                 func = function(info, ...)
                                     _G.Grid2:OnChatCommand("")
                                 end,
-                                order = 0,
+                                order = 1,
+                            },
+                            enabled = {
+                                name = L["General_Enabled"] or "Enabled",
+                                desc = "Show RealUI's built-in party/raid frames. Enabling requires a UI reload.",
+                                type = "toggle",
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.enabled ~= false end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.enabled = value
+                                    if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
+                                    if value and not UnitFrames.raidHeader then
+                                        RealUI:ReloadUIDialog()
+                                    end
+                                end,
+                                order = 5,
+                            },
+                            width = {
+                                name = "Cell width",
+                                desc = "Requires a UI reload.",
+                                type = "range", min = 50, max = 140, step = 1,
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.size.x end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.size.x = value
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 10,
+                            },
+                            height = {
+                                name = "Cell height",
+                                desc = "Requires a UI reload.",
+                                type = "range", min = 20, max = 60, step = 1,
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.size.y end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.size.y = value
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 11,
+                            },
+                            spacing = {
+                                name = "Spacing",
+                                desc = "Requires a UI reload.",
+                                type = "range", min = 0, max = 10, step = 1,
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.spacing end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.spacing = value
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 12,
+                            },
+                            rangeAlpha = {
+                                name = "Out-of-range opacity",
+                                type = "range", min = 0.1, max = 1, step = 0.05, isPercent = true,
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.rangeAlpha end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.rangeAlpha = value
+                                    if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
+                                end,
+                                order = 13,
+                            },
+                            centerDebuff = {
+                                name = "Dispellable debuff icon",
+                                desc = "Requires a UI reload.",
+                                type = "toggle",
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.icons.centerDebuff end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.icons.centerDebuff = value
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 20,
+                            },
+                            hots = {
+                                name = "My buffs icon",
+                                desc = "Requires a UI reload.",
+                                type = "toggle",
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.icons.hots end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.icons.hots = value
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 21,
+                            },
+                            hotsCount = {
+                                name = "My buffs shown",
+                                type = "range", min = 1, max = 4, step = 1,
+                                disabled = function() return _G.Grid2 ~= nil or not UnitFrames.db.profile.units.raid.icons.hots end,
+                                get = function() return UnitFrames.db.profile.units.raid.icons.hotsCount or 2 end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.icons.hotsCount = value
+                                    if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
+                                end,
+                                order = 22,
                             },
                         }
                     },
