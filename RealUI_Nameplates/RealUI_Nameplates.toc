@@ -1,0 +1,22 @@
+## Interface: 120100
+## Title: RealUI Nameplates
+## Category: RealUI_Core
+## Notes: Clean-room nameplates for RealUI, KUI-style look
+## Author: Hanshi
+## Version: 3.4.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## OptionalDeps: RealUI, RealUI_Skins, Aurora, LibSharedMedia-3.0, LibRangeCheck-3.0
+## SavedVariables: RealUI_NameplatesDB
+
+Libs\Libs.xml
+
+RealUI_Nameplates.lua
+Defaults.lua
+Elements\Health.lua
+Elements\CastBar.lua
+Elements\PowerBar.lua
+Elements\Auras.lua
+Elements\Texts.lua
+Elements\Markers.lua
+Elements\Highlight.lua
+Config.lua
