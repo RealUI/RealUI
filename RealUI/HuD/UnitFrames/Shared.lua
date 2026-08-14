@@ -75,6 +75,15 @@ local function SafeBool(value, default)
     return value
 end
 
+-- Secret-safe table lookup: indexing a normal table with a secret key errors
+-- the same way a boolean test on a secret does, so unit queries used as color
+-- table keys (UnitReaction, UnitSelectionType, UnitClassification) have to be
+-- screened before use. Returns nil when the key is absent or secret.
+local function SafeIndex(tbl, key)
+    if key == nil or _G.issecretvalue(key) then return nil end
+    return tbl[key]
+end
+
 local function GetReverseFill(unit, info)
     -- Natural fill direction based on bar side:
     -- Player (RIGHT side): natural=true → fill anchored RIGHT, grows right→left
@@ -323,15 +332,23 @@ local function CreateHealthBar(parent, info, isAngled, unitToken)
             else
                 -- Default oUF color logic
                 local color
-                if element.colorDisconnected and not _G.UnitIsConnected(unit) then
+                -- Same secret-value exposure as the other unit-state readers in
+                -- this file: guard every test, and screen the reaction index
+                -- before it reaches the color table. Resolved once up front —
+                -- the original called UnitReaction twice.
+                local reactionColor = SafeIndex(self.colors.reaction, _G.UnitReaction(unit, "player"))
+
+                if element.colorDisconnected and not SafeBool(_G.UnitIsConnected(unit), true) then
                     color = self.colors.disconnected
-                elseif element.colorTapping and not _G.UnitPlayerControlled(unit) and _G.UnitIsTapDenied(unit) then
+                elseif element.colorTapping and not SafeBool(_G.UnitPlayerControlled(unit), false)
+                    and SafeBool(_G.UnitIsTapDenied(unit), false) then
                     color = self.colors.tapped
-                elseif element.colorClass and (_G.UnitIsPlayer(unit) or _G.UnitInPartyIsAI(unit)) then
+                elseif element.colorClass and (SafeBool(_G.UnitIsPlayer(unit), false)
+                    or SafeBool(_G.UnitInPartyIsAI(unit), false)) then
                     local _, class = _G.UnitClass(unit)
                     color = GetClassColor(self.colors, class)
-                elseif element.colorReaction and _G.UnitReaction(unit, "player") then
-                    color = self.colors.reaction[_G.UnitReaction(unit, "player")]
+                elseif element.colorReaction and reactionColor then
+                    color = reactionColor
                 elseif element.colorHealth then
                     color = self.colors.health
                 end
@@ -353,19 +370,27 @@ local CreateHealthStatus do
 
     local function UpdatePvP(self, event, unit)
         local PvPIndicator = self.PvPIndicator
-        if _G.UnitIsPVP(unit) then
-            local reaction = _G.UnitReaction(unit, "player")
-            if not reaction then
-                reaction = _G.UnitIsFriend(unit, "player") and 5 or 2
+
+        -- UnitIsPVP, UnitReaction and UnitIsFriend all return secrets for a
+        -- restricted unit; a secret reaction would also poison the color lookup.
+        local color
+        if SafeBool(_G.UnitIsPVP(unit), false) then
+            color = SafeIndex(self.colors.reaction, _G.UnitReaction(unit, "player"))
+            if not color then
+                local isFriend = SafeBool(_G.UnitIsFriend(unit, "player"), false)
+                color = self.colors.reaction[isFriend and 5 or 2]
             end
-            local color = self.colors.reaction[reaction]
+        end
+
+        if color then
             PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
         else
             PvPIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
         end
     end
     local function UpdateClassification(self, event)
-        local color = classification[_G.UnitClassification(self.__unit)] or _G.Aurora.Color.frame
+        local color = SafeIndex(classification, _G.UnitClassification(self.__unit))
+            or _G.Aurora.Color.frame
         self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
@@ -603,17 +628,8 @@ local CreateEndBox do
         elseif not isPlayerControlled and isTapDenied then
             color = self.colors.tapped
         else
-            -- Reaction/selection indices can be secret too, and indexing a
-            -- normal table with a secret key errors the same way.
-            local reaction = _G.UnitReaction(unit, "player")
-            if reaction and not _G.issecretvalue(reaction) then
-                color = self.colors.reaction[reaction]
-            else
-                local selection = _G.UnitSelectionType(unit, true)
-                if selection and not _G.issecretvalue(selection) then
-                    color = self.colors.selection[selection]
-                end
-            end
+            color = SafeIndex(self.colors.reaction, _G.UnitReaction(unit, "player"))
+                or SafeIndex(self.colors.selection, _G.UnitSelectionType(unit, true))
         end
         if not color then return end
 
