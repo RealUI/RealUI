@@ -26,6 +26,32 @@ local function GetRaidDB()
     return UnitFrames.db.profile.units.raid
 end
 
+-- HoT/shield watch-list for the left icons (Grid2-profile parity set + the
+-- obvious modern additions). Combined across healer classes: the PLAYER filter
+-- already limits it to the player's own casts, so foreign entries never match.
+local HOT_SPELLS = {
+    139,    -- Renew
+    33076,  -- Prayer of Mending
+    17,     -- Power Word: Shield
+    61295,  -- Riptide
+    774,    -- Rejuvenation
+    33763,  -- Lifebloom
+    8936,   -- Regrowth
+    48438,  -- Wild Growth
+    119611, -- Renewing Mist
+    124682, -- Enveloping Mist
+    53563,  -- Beacon of Light
+    364343, -- Echo (Evoker)
+    355941, -- Dream Breath
+}
+local HOT_CANDIDATES = { includeSpellIDs = HOT_SPELLS }
+
+local function ApplyHotFilter(element, filtered)
+    if not (element and element._ruiGroupKey) then return end
+    _G.pcall(element.SetAuraGroupCandidateFilters, element,
+        element._ruiGroupKey, filtered and HOT_CANDIDATES or nil)
+end
+
 --[[ Blizzard party/raid frame suppression (reversible, spec req 2.3) ]]--
 
 local hider
@@ -215,6 +241,7 @@ local function RaidStyle(self, unit)
             growthY = "UP",
             disableCooldown = true,
         })
+        ApplyHotFilter(Buffs, rdb.icons.hotsFilter ~= false)
         Buffs:SetPoint("LEFT", self, "LEFT", 2, 0)
         self.Buffs = Buffs
     end
@@ -375,6 +402,7 @@ function UnitFrames:RefreshRaid()
             if cell and cell.Buffs and cell.Buffs._ruiGroupKey then
                 _G.pcall(cell.Buffs.SetAuraGroupMaxFrameCount, cell.Buffs,
                     cell.Buffs._ruiGroupKey, rdb.icons.hotsCount or 2)
+                ApplyHotFilter(cell.Buffs, rdb.icons.hotsFilter ~= false)
             end
         end
     end

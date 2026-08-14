@@ -827,6 +827,7 @@ function UnitFrames:OnInitialize()
                         centerDebuff = true,
                         hots = true,
                         hotsCount = 2,
+                        hotsFilter = true,
                     },
                     framePoint = {},
                 },
