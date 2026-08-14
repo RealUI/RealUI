@@ -394,6 +394,37 @@ local CreateHealthStatus do
         self.Classification:SetBackgroundColor(color.r, color.g, color.b, color.a)
     end
 
+    -- oUF's default PvPIndicator update passes a possibly-secret honor level to
+    -- C_PvP.GetHonorRewardInfo (upstream guards UnitIsPVP but missed this one;
+    -- logged in docs/oUF-Backlog.md). Our non-angled indicators have no Badge,
+    -- so honor data is irrelevant — icon-only override with guarded reads.
+    local function UpdatePvPIcon(self, event, unit)
+        if unit and unit ~= self.__unit then return end
+        unit = unit or self.__unit
+        local element = self.PvPIndicator
+
+        local status
+        local ffa = _G.UnitIsPVPFreeForAll(unit)
+        if not _G.issecretvalue(ffa) and ffa then
+            status = "FFA"
+        else
+            local factionGroup = _G.UnitFactionGroup(unit)
+            local isPvP = _G.UnitIsPVP(unit)
+            if factionGroup and not _G.issecretvalue(factionGroup) and factionGroup ~= "Neutral"
+                and not _G.issecretvalue(isPvP) and isPvP then
+                status = factionGroup
+            end
+        end
+
+        if status then
+            element:SetTexture([[Interface\TargetingFrame\UI-PVP-]] .. status)
+            element:SetTexCoord(0, 0.65625, 0, 0.65625)
+            element:Show()
+        else
+            element:Hide()
+        end
+    end
+
     function CreateHealthStatus(parent, info, isAngled, unitToken)
         local PvPIndicator
         if isAngled then
@@ -420,6 +451,7 @@ local CreateHealthStatus do
             PvPIndicator = parent.overlay:CreateTexture(nil, 'ARTWORK', nil, 1)
             PvPIndicator:SetSize(16, 16)
             PvPIndicator:SetPoint('RIGHT', parent.overlay, 'LEFT')
+            PvPIndicator.Override = UpdatePvPIcon
         end
         parent.PvPIndicator = PvPIndicator
     end
