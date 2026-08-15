@@ -48,6 +48,11 @@ local auroraConfigDefaults = {
     hasAnalytics = true,
     customClassColors = {},
     gcMode = "smooth",
+
+    -- DEV: run Blizzard's original GameTooltip_InsertFrame instead of Aurora's
+    -- replacement. Aurora owning that global taints it for every secure reader,
+    -- which blocks C_ItemUpgrade.UpgradeItem(). Toggle with /auroraInsertFrame.
+    devRestoreInsertFrame = false,
 }
 
 local auroraCharacterConfigDefaults = {
@@ -613,6 +618,38 @@ function private.OnLoad()
     private.skinsDB = skinsDB.profile
     private.skinsCharDB = skinsDB.char
     SyncRuntimeAuroraConfig(private.skinsDB)
+
+    -- DEV A/B for the GameTooltip_InsertFrame taint.  Standalone Aurora exposes
+    -- this as `/aurora insertframe`, but RealUI_Skins embeds only Aurora's
+    -- skin XML — gui.lua and config.lua never load — so the toggle is mirrored
+    -- here against the RealUI_Skins profile that feeds _G.AuroraConfig.
+    -- OnLoad can run against the early RealUI stub (before the AceAddon with
+    -- AceConsole exists), so registration is deferred when needed.
+    local function ToggleInsertFrame()
+        local profileConfig = EnsureProfileAuroraConfig(private.skinsDB)
+        profileConfig.devRestoreInsertFrame = not profileConfig.devRestoreInsertFrame
+        SyncRuntimeAuroraConfig(private.skinsDB)
+
+        if profileConfig.devRestoreInsertFrame then
+            _G.print("|cff00a0ffAurora:|r GameTooltip_InsertFrame — using |cff00ff00Blizzard's original|r (global untainted).")
+            _G.print("  Exercise: LootHistory \"all passed\", Professions reagent/reward, delve widget")
+            _G.print("  sets, Garrison mission threats, quest-offer map pins, trinket item upgrade.")
+        else
+            _G.print("|cff00a0ffAurora:|r GameTooltip_InsertFrame — using |cffffcc00Aurora's replacement|r (global tainted).")
+        end
+        RealUI:ReloadUIDialog()
+    end
+
+    if RealUI.RegisterChatCommand then
+        RealUI:RegisterChatCommand("auroraInsertFrame", ToggleInsertFrame)
+    else
+        _G.C_Timer.After(0, function()
+            local fullRealUI = _G.RealUI
+            if fullRealUI and fullRealUI.RegisterChatCommand then
+                fullRealUI:RegisterChatCommand("auroraInsertFrame", ToggleInsertFrame)
+            end
+        end)
+    end
 
     -- Set flags
     private.disabled.bags = true
