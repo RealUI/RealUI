@@ -1811,6 +1811,7 @@ do -- CastBars
             local nameplateOpts = Nameplates:GetConfigOptions()
             nameplateOpts.name = "Nameplates"
             nameplateOpts.icon = "crosshairs"
+            nameplateOpts.order = 5 -- must be unique and contiguous; drives the HuD bar button slot
             optArgs.nameplates = nameplateOpts
         end
     end
