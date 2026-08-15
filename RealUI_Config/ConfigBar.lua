@@ -224,10 +224,22 @@ do -- Other
                 type = "group",
                 args = {
                     advanced = {
-                        name = "Bartender 4",
+                        name = function()
+                            local rab = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
+                            return (rab and rab:IsEnabled()) and "Action Bar Settings" or "Bartender 4"
+                        end,
                         type = "execute",
                         func = function(info, ...)
-                            ACD:Open("Bartender4")
+                            -- RealUI_ActionBars owns the bars unless Bartender4
+                            -- is present (coexistence window).
+                            local rab = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
+                            if rab and rab:IsEnabled() and rab.OpenConfig then
+                                rab:OpenConfig()
+                            elseif _G.Bartender4 then
+                                ACD:Open("Bartender4")
+                            else
+                                _G.print("No action bar addon is active.")
+                            end
                         end,
                         order = 10,
                     },

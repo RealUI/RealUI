@@ -61,6 +61,7 @@ local RealUISet = {
     "Platynator",
     "Masque",
     "RealUI",
+    "RealUI_ActionBars",
     "RealUI_Nameplates",
     "RealUI_Config",
     "RealUI_Bugs",

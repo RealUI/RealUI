@@ -1,0 +1,23 @@
+## Interface: 120100
+## Title: RealUI Action Bars
+## Category: RealUI_Core
+## Notes: Action bars for RealUI, built on LibActionButton-1.0
+## Author: Hanshi
+## Version: 4.0.0
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## OptionalDeps: RealUI, RealUI_Skins, Aurora, Masque
+## SavedVariables: RealUI_ActionBarsDB
+
+Libs\Libs.xml
+
+RealUI_ActionBars.lua
+Defaults.lua
+Visibility.lua
+Bar.lua
+ActionBars.lua
+StancePetBar.lua
+Bindings.lua
+Import.lua
+Integration.lua
+Skin.lua
+Options.lua
