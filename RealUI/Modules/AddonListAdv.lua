@@ -248,8 +248,20 @@ local accountTitle = {
     text = "Account Sets",
     isTitle = true,
 }
+-- Count only addons that exist on disk: the set keeps optional entries (Grid2,
+-- user-installed extras) without over-reporting when they aren't installed.
+local function CountInstalled(set)
+    local count = 0
+    for i = 1, #set do
+        if _G.C_AddOns.GetAddOnInfo(set[i]) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
 local setRealUI = {
-    text = ("%s (%d)"):format(RealUISet.name, #RealUISet),
+    text = ("%s (%d)"):format(RealUISet.name, CountInstalled(RealUISet)),
     menuList = GetSetOptions(RealUISet.name)
 }
 local setClass = {
