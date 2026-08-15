@@ -23,8 +23,10 @@ local function RunGrid2ModernizationTest()
 
     local Grid2DB = _G.Grid2DB
     if not Grid2DB then
-        _G.print("|cffff0000[FAIL]|r Grid2DB not found — is Grid2 loaded?")
-        return false
+        -- Grid2 is an optional user install since de-bundling (2026-08-15);
+        -- its absence is expected, not a failure.
+        _G.print("|cffffcc00[SKIP]|r Grid2 not loaded — test skipped (Grid2 is optional).")
+        return true
     end
 
     local profiles = Grid2DB.profiles
