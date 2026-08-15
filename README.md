@@ -120,8 +120,24 @@ These folders are included in release packages:
 * `RealUI_Auras`
 * `RealUI_Skins` (includes embedded Aurora)
 * `RealUI_Tooltips`
+* `RealUI_Nameplates`
 
 Not packaged:
 
 * `RealUI_Dev`
 * `RealUI_Chat`
+
+Recommended optional AddOns
+---------------------------
+
+These are no longer bundled, but RealUI detects and auto-configures them when
+you install them yourself (from CurseForge/Wago/WoWInterface):
+
+* **BadBoy** (plus `BadBoy_CCleaner`, `BadBoy_Guilded`) - chat spam and gold-seller
+  filtering. RealUI does not filter chat itself; install BadBoy if you want that back.
+* **Grid2** - advanced raid frames. RealUI ships its own party/raid frames as the
+  default; installing Grid2 makes RealUI's frames stand down and applies the
+  RealUI Grid2 profile automatically.
+* **Platynator** - alternative nameplates. RealUI ships `RealUI_Nameplates` as the
+  default; installing Platynator makes RealUI's nameplates stand down and applies
+  the RealUI Platynator profile automatically.
