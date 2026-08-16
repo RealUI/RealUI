@@ -13,6 +13,7 @@ tests\BankBagsVisibilityTest.lua
 tests\BankBagUpdateTest.lua
 tests\BankFreeSlotCountTest.lua
 tests\BankFilterConsistencyTest.lua
+tests\InventoryMenuCheckboxTest.lua
 tests\BankItemSortOrderTest.lua
 tests\BankEmptyFilterBagsTest.lua
 tests\BankTypeSwitcherTest.lua
