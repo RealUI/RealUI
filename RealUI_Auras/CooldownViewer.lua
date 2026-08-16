@@ -308,6 +308,12 @@ local function EnsureCooldownFrameSetHooked()
 
     _G.hooksecurefunc("CooldownFrame_Set", function(cooldown)
         if not buffIconCdEnabled then return end
+        -- This global hook also fires for FORBIDDEN cooldowns (Blizzard's
+        -- restricted nameplate aura frames route through CooldownFrame_Set);
+        -- even GetParent throws on those from tainted code. pcall-guarded
+        -- accessibility check first (LibStrataFix pattern).
+        local ok, forbidden = _G.pcall(cooldown.IsForbidden, cooldown)
+        if not ok or forbidden then return end
         -- Reading a field from a Blizzard frame is taint-safe (no write).
         local item = cooldown:GetParent()
         if not (item and item.viewerFrame == _G.BuffIconCooldownViewer) then return end
