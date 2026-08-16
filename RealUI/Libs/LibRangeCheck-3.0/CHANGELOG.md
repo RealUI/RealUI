@@ -1,8 +1,11 @@
 # Lib: RangeCheck-3.0
 
-## [1.0.17-10-ga6b43e6](https://github.com/WeakAuras/LibRangeCheck-3.0/tree/a6b43e614b018f0121fadcb51c5bd7933b40bf52) (2026-04-09)
-[Full Changelog](https://github.com/WeakAuras/LibRangeCheck-3.0/compare/1.0.17...a6b43e614b018f0121fadcb51c5bd7933b40bf52) [Previous Releases](https://github.com/WeakAuras/LibRangeCheck-3.0/releases)
+## [1.0.17-13-g5362807](https://github.com/WeakAuras/LibRangeCheck-3.0/tree/53628079a07872e492016108000a58e17f976f90) (2026-07-04)
+[Full Changelog](https://github.com/WeakAuras/LibRangeCheck-3.0/compare/1.0.17...53628079a07872e492016108000a58e17f976f90) [Previous Releases](https://github.com/WeakAuras/LibRangeCheck-3.0/releases)
 
+- bump minor version  
+- Add mists TOC and add Beacon/Sac for paladins in tbc, mists and retail  
+- Harden GitHub Actions workflows  
 - Fix: Titan event registration and use C\_EventUtils.IsEventValid  
     Titan no longer has the LEARNED\_SPELL\_IN\_TAB event  
     Switched to C\_EventUtils.IsEventValid across all expansions to prevent lua errors on titan and future lua errors  
