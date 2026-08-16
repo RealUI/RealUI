@@ -199,7 +199,9 @@ do -- Other
                         desc = L["Misc_SpellAlertsWidthDesc"],
                         type = "range",
                         width = "full",
-                        min = round(uiWidth * 0.1),
+                        -- not 0: the SpellAlerts positioner has no base width, so 0 would
+                        -- collapse SpellActivationOverlayFrame to nothing
+                        min = 1,
                         max = round(uiWidth * 0.5),
                         step = 1,
                         bigStep = 4,
