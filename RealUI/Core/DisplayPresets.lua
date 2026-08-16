@@ -380,12 +380,9 @@ function DisplayPresets.Apply(id, hdrEnabled)
         RealUI.EditModeManager:ApplyLayout(role, id)
     end
 
-    -- Engine scale changes require a reload to take effect.
-    -- Suppress during the install wizard — the wizard will handle reload
-    -- at the end of the full setup flow.
-    local IW = RealUI.InstallWizard
-    local wizardActive = IW and IW:GetCurrentStage() and IW:GetCurrentStage() >= 0
-    if not wizardActive and RealUI.ReloadUIDialog then
+    -- Engine scale changes require a reload to take effect. The wizard-active
+    -- suppression now lives in RealUI:ReloadUIDialog, so every caller gets it.
+    if RealUI.ReloadUIDialog then
         RealUI:ReloadUIDialog()
     end
 end

@@ -657,7 +657,38 @@ _G.StaticPopupDialogs["PUDRUIRELOADUI"] = {
     hideOnEscape = true,
     notClosableByLogout = false
 }
+--- True while the install wizard is on screen mid-flow.
+--- STAGE_COMPLETE is -1; every real stage is >= 0.
+function RealUI:IsInstallWizardActive()
+    local IW = self.InstallWizard
+    if not IW or not IW.GetCurrentStage then return false end
+
+    local stage = IW:GetCurrentStage()
+    if not stage or stage < 0 then return false end
+
+    -- The wizard's X button only hides the frame — it does not Complete(), so
+    -- the stage deliberately stays >= 0 for NeedsResume to pick up later.
+    -- Requiring the frame to be visible stops a dismissed-but-unfinished
+    -- wizard from suppressing every reload prompt for the rest of the session.
+    local UI = self.InstallUI
+    if UI and UI.IsShown then
+        return UI:IsShown() and true or false
+    end
+
+    return true
+end
+
 function RealUI:ReloadUIDialog()
+    -- The install wizard raises its own reload at the end of the flow
+    -- (REALUI_SETUP_RELOAD, STAGE_FINISH). Any other reload prompt raised
+    -- while it is running stacks a second dialog on top of the wizard — which
+    -- is what testers hit on first login. Suppress rather than flag pending:
+    -- ConsumeReloadPending is only read when the config panel closes, so
+    -- flagging here would surface the prompt at an unrelated later moment.
+    if self:IsInstallWizardActive() then
+        return
+    end
+
     _G.StaticPopup_Show("PUDRUIRELOADUI")
 end
 
