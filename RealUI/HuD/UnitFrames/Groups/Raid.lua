@@ -8,6 +8,15 @@ local RealUI = private.RealUI
 local UnitFrames = RealUI:GetModule("UnitFrames")
 local FramePoint = RealUI:GetModule("FramePoint")
 
+-- Default anchor per layout (1 = DPS/Tank, 2 = Healing), mirroring the presets
+-- in Modules/GridLayout.lua. Kept in UIParent coordinates: GridLayout scales
+-- these by the effective scale because Grid2 stores UI-root-scaled values —
+-- our headers are plain UIParent children, so no scaling applies here.
+local DEFAULT_POSITIONS = {
+    [1] = { point = "BOTTOMLEFT", x = 80, y = 200 },  -- DPS/Tank: bottom-left, above chat
+    [2] = { point = "BOTTOM",     x = 0,  y = 200 },  -- Healing: centre-bottom
+}
+
 --[[ RealUI raid/party frames (spec: realui-raidframes).
 
      oUF secure group headers in their own lightweight "RealUI-Raid" style —
@@ -269,18 +278,20 @@ _G.tinsert(UnitFrames.units, function()
 
     local spacing = rdb.spacing or 2
 
-    -- One movable anchor for both headers. Default hangs below the HuD center
-    -- positioner (tracks HuD position/scale like boss frames do), group 1
-    -- centered under it; saved FramePoint positions are per-profile, so the
-    -- DPS and Healing layouts remember their own spots once moved.
+    -- One movable anchor for both headers. Saved FramePoint positions are
+    -- per-profile, so the DPS and Healing layouts remember their own spots
+    -- once moved; these are only the defaults.
+    --
+    -- Defaults come from GridLayout.lua's presets, which the raidframes spec
+    -- names as the source of truth (req 3.2). The previous default hung 150px
+    -- below the HuD centre positioner, which put the frames on top of the
+    -- action bars on a fresh install.
+    local layout = RealUI.cLayout or 1
+    local default = DEFAULT_POSITIONS[layout] or DEFAULT_POSITIONS[1]
+
     anchorHolder = _G.CreateFrame("Frame", "RealUIRaidAnchor", _G.UIParent)
     anchorHolder:SetSize(rdb.size.x, rdb.size.y)
-    local anchored = _G.pcall(anchorHolder.SetPoint, anchorHolder,
-        "TOP", "RealUIPositionersUnitFrames", "BOTTOM",
-        -_G.math.floor(rdb.size.x / 2), -150)
-    if not anchored then
-        anchorHolder:SetPoint("BOTTOM", _G.UIParent, "BOTTOM", 0, 300)
-    end
+    anchorHolder:SetPoint(default.point, _G.UIParent, default.point, default.x, default.y)
 
     -- oUF 14: SpawnHeader takes (name, template, ...attribute pairs) — NO
     -- visibility parameter (removed from oUF 13); visibility is driven below
