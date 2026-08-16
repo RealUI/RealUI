@@ -19,12 +19,18 @@ do --[[ SharedXML\FriendsFrame.lua ]]
         local nameText, nameColor
         nameText = _G.BNet_GetBNetAccountName(accountInfo)
 
+        -- Blizzard's FriendsFrame_GetBNetAccountNameAndStatus always returns a colour,
+        -- keyed off isOnline. Default it here for the same reason: a friend who is
+        -- online but not in a game has an empty characterName, which skips the block
+        -- below and would otherwise return a nil colour to the caller.
+        nameColor = accountInfo.gameAccountInfo.isOnline and _G.FRIENDS_BNET_NAME_COLOR or _G.FRIENDS_GRAY_COLOR
+
 		local characterName = _G.FriendsFrame_GetFormattedCharacterName(accountInfo.gameAccountInfo.characterName, nil, accountInfo.gameAccountInfo.clientProgram, accountInfo.gameAccountInfo.timerunningSeasonID);
 
         if characterName ~= "" then
             if accountInfo.gameAccountInfo.clientProgram == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
                 local classToken = _G.CUSTOM_CLASS_COLORS:GetClassToken(accountInfo.gameAccountInfo.className)
-                nameColor = _G.CUSTOM_CLASS_COLORS[classToken]
+                nameColor = _G.CUSTOM_CLASS_COLORS[classToken] or nameColor
             else
                 if _G.ENABLE_COLORBLIND_MODE == "1" then
                     characterName = accountInfo.gameAccountInfo.characterName.._G.CANNOT_COOPERATE_LABEL
@@ -45,7 +51,8 @@ do --[[ SharedXML\FriendsFrame.lua ]]
             if info.connected then
                 local classToken = _G.CUSTOM_CLASS_COLORS:GetClassToken(info.className)
                 nameText = wowFormat:format(info.name, info.level)
-                nameColor = _G.CUSTOM_CLASS_COLORS[classToken]
+                -- GetClassToken returns nil for an unknown/missing class name
+                nameColor = _G.CUSTOM_CLASS_COLORS[classToken] or _G.FRIENDS_WOW_NAME_COLOR
             end
         elseif button.buttonType == _G.FRIENDS_BUTTON_TYPE_BNET then
             local accountInfo = _G.C_BattleNet.GetFriendAccountInfo(button.id)
@@ -58,7 +65,7 @@ do --[[ SharedXML\FriendsFrame.lua ]]
             end
         end
 
-        if nameText then
+        if nameText and nameColor then
             button.name:SetText(nameText)
             button.name:SetTextColor(nameColor:GetRGB())
 
