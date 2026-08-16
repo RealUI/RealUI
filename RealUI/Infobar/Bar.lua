@@ -682,7 +682,11 @@ function DockMixin:AddBlock(block, position)
         })
     end
 
-    if ( self.primary ~= block ) then
+    -- Never touch the block being dragged: it is mid-StartMoving, and
+    -- UpdateBlocks lays out the spacer in its place rather than re-anchoring
+    -- it. Clearing its points here leaves it unanchored for the rest of the
+    -- drag, after which GetCenter() returns nil.
+    if ( self.primary ~= block and block ~= MOVING_BLOCK ) then
         block:ClearAllPoints()
         block:SetMovable(false)
         block:SetResizable(false)
@@ -808,6 +812,12 @@ end
 
 function DockMixin:GetInsertIndex()
     local moveX = MOVING_BLOCK:GetCenter()
+    if not moveX then
+        -- The dragged block has no resolved position this frame; leave it
+        -- where it is rather than guessing an index.
+        return MOVING_BLOCK.index, false
+    end
+
     local insertIndex, detachedIndex
     for index = 2, #self.DOCKED_BLOCKS do
         local block, isDetatched = self:GetBlockAtIndex(index)
@@ -816,10 +826,12 @@ function DockMixin:GetInsertIndex()
             detachedIndex = index
         end
 
-        local width = min(block:GetWidth(), MOVING_BLOCK:GetWidth()) / 2
-        local left, right = center - width, center + width
-        if moveX > left and moveX < right then
-            insertIndex = index
+        if center then
+            local width = min(block:GetWidth(), MOVING_BLOCK:GetWidth()) / 2
+            local left, right = center - width, center + width
+            if moveX > left and moveX < right then
+                insertIndex = index
+            end
         end
     end
     insertIndex = (insertIndex or detachedIndex) or #self.DOCKED_BLOCKS
