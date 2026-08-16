@@ -14,6 +14,78 @@ local FramePoint = RealUI:NewModule(MODNAME)
 
 local modules = {}
 
+---------------------------------------------------------------------------
+-- Unit-frame anchoring
+--
+-- LibWindow stores positions relative to UIParent, which is right for a
+-- free-floating HuD element but wrong when the user wants something pinned
+-- to a unit frame (class power under the player frame, a cast bar on its
+-- unit). When a frame's config carries `anchorTo`, we bypass LibWindow's
+-- restore and anchor the dragFrame to that unit frame instead, keeping
+-- `point`/`x`/`y` as an offset from it.
+--
+-- `anchorTo` is nil/"screen" by default, so existing profiles are unchanged.
+---------------------------------------------------------------------------
+local ANCHOR_FRAMES = {
+    player = "RealUIPlayerFrame",
+    target = "RealUITargetFrame",
+    focus  = "RealUIFocusFrame",
+}
+FramePoint.ANCHOR_FRAMES = ANCHOR_FRAMES
+
+--- Resolve a config's `anchorTo` to a live frame, or nil for screen-anchored.
+local function GetAnchorFrame(config)
+    if not config then return end
+
+    local key = config.anchorTo
+    if not key or key == "screen" then return end
+
+    local globalName = ANCHOR_FRAMES[key]
+    return globalName and _G[globalName]
+end
+FramePoint.GetAnchorFrame = GetAnchorFrame
+
+--- Screen-space coordinates of a named anchor point on a frame, in that
+--- frame's own units. Callers multiply by effective scale to compare frames.
+local function GetPointCoords(frame, point)
+    local left, bottom, width, height = frame:GetRect()
+    if not left then return end
+
+    local x
+    if point:find("LEFT") then
+        x = left
+    elseif point:find("RIGHT") then
+        x = left + width
+    else
+        x = left + (width / 2)
+    end
+
+    local y
+    if point:find("BOTTOM") then
+        y = bottom
+    elseif point:find("TOP") then
+        y = bottom + height
+    else
+        y = bottom + (height / 2)
+    end
+
+    return x, y
+end
+
+--- Apply a config's anchor to its dragFrame. Returns true when the frame was
+--- anchored to a unit frame (so callers know to skip LibWindow's restore).
+local function ApplyAnchor(dragFrame, config)
+    local anchorFrame = GetAnchorFrame(config)
+    if not anchorFrame then return false end
+
+    local point = config.point or "CENTER"
+    dragFrame:ClearAllPoints()
+    dragFrame:SetPoint(point, anchorFrame, point, config.x or 0, config.y or 0)
+
+    return true
+end
+FramePoint.ApplyAnchor = ApplyAnchor
+
 function FramePoint:LockMod(mod)
     local module = modules[mod]
 
@@ -67,6 +139,72 @@ function FramePoint:ToggleAll(setLocked)
     end
 end
 
+--- Switch a managed frame between screen- and unit-frame anchoring, keeping
+--- it visually in place.
+---
+--- `point`/`x`/`y` mean different things in each mode (UIParent-relative vs
+--- offset-from-anchor), so simply writing `anchorTo` would teleport the frame.
+--- This captures where it currently sits and rewrites the offsets into the
+--- new coordinate space before re-applying.
+---@param mod table          the module that owns the frame
+---@param optionPath table   same path passed to PositionFrame
+---@param anchorTo string    "screen" | key of ANCHOR_FRAMES
+function FramePoint:SetAnchorTo(mod, optionPath, anchorTo)
+    local module = modules[mod]
+    if not module then return end
+
+    -- Option paths are built fresh at each call site, so compare by content.
+    -- Several frames can share one path (ClassResource registers both the
+    -- holder and the rune frame under "class.points.position"); matching the
+    -- first is enough because RestorePosition below re-applies to all of them.
+    local function PathsMatch(a, b)
+        if not a or not b or #a ~= #b then return false end
+        for i = 1, #a do
+            if a[i] ~= b[i] then return false end
+        end
+        return true
+    end
+
+    for _, meta in next, module.frames do
+        if PathsMatch(meta.optionPath, optionPath) then
+            local dragFrame = meta.dragFrame
+            local config = RealUI.GetOptions(mod.moduleName, meta.optionPath)
+            if not config then return end
+
+            local point = config.point or "CENTER"
+            local scale = dragFrame:GetEffectiveScale()
+            local fx, fy = GetPointCoords(dragFrame, point)
+
+            config.anchorTo = anchorTo
+
+            local anchorFrame = GetAnchorFrame(config)
+            if fx then
+                if anchorFrame then
+                    -- screen -> anchored: offsets become relative to the unit frame
+                    local ax, ay = GetPointCoords(anchorFrame, point)
+                    local anchorScale = anchorFrame:GetEffectiveScale()
+                    if ax then
+                        config.x = RealUI.Round((fx * scale - ax * anchorScale) / scale, 1)
+                        config.y = RealUI.Round((fy * scale - ay * anchorScale) / scale, 1)
+                    end
+                else
+                    -- anchored -> screen: offsets become UIParent-relative, which
+                    -- is what LibWindow expects on the next restore.
+                    local parentScale = _G.UIParent:GetEffectiveScale()
+                    local px, py = GetPointCoords(_G.UIParent, point)
+                    if px then
+                        config.x = RealUI.Round((fx * scale - px * parentScale) / scale, 1)
+                        config.y = RealUI.Round((fy * scale - py * parentScale) / scale, 1)
+                    end
+                end
+            end
+
+            self:RestorePosition(mod)
+            return
+        end
+    end
+end
+
 function FramePoint:RestorePosition(mod)
     local module = modules[mod]
     if not module then return end
@@ -75,7 +213,10 @@ function FramePoint:RestorePosition(mod)
         if config and config.x then
             frame:ClearAllPoints()
             frame:SetPoint("CENTER", meta.dragFrame)
-            LibWin.RestorePosition(meta.dragFrame)
+
+            if not ApplyAnchor(meta.dragFrame, config) then
+                LibWin.RestorePosition(meta.dragFrame)
+            end
         end
     end
 end
@@ -142,7 +283,30 @@ function FramePoint.OnDragStop(frame)
         end
 
         RealUI.SetPixelPoint(frame)
-        LibWin.OnDragStop(frame)
+
+        -- Anchored frames store offsets from their unit frame, not from
+        -- UIParent, so LibWindow's save would write the wrong numbers.
+        -- Convert the dragged position into anchor-relative offsets and
+        -- re-apply, keeping drag working the same as for screen-anchored
+        -- frames.
+        local config = frame._framePointConfig
+        local anchorFrame = GetAnchorFrame(config)
+        if anchorFrame then
+            local anchorPoint = config.point or "CENTER"
+            local scale = frame:GetEffectiveScale()
+            local anchorScale = anchorFrame:GetEffectiveScale()
+
+            local fx, fy = GetPointCoords(frame, anchorPoint)
+            local ax, ay = GetPointCoords(anchorFrame, anchorPoint)
+            if fx and ax then
+                config.x = RealUI.Round((fx * scale - ax * anchorScale) / scale, 1)
+                config.y = RealUI.Round((fy * scale - ay * anchorScale) / scale, 1)
+                ApplyAnchor(frame, config)
+            end
+        else
+            LibWin.OnDragStop(frame)
+        end
+
         if frame.dragBG then
             frame.dragBG:Hide()
         end
@@ -185,10 +349,17 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
     local config = RealUI.GetOptions(mod.moduleName, optionPath)
     LibWin.RegisterConfig(dragFrame, config)
 
-    -- Only call RestorePosition if LibWindow has actual saved data.
-    -- An empty table means the user never moved the frame, so keep the inherited anchor.
-    if config and _G.next(config) ~= nil then
-        LibWin.RestorePosition(dragFrame)
+    -- OnDragStop needs the config to convert a drag into anchor-relative
+    -- offsets; LibWindow keeps its own reference privately.
+    dragFrame._framePointConfig = config
+
+    -- Unit-frame anchoring wins over LibWindow's UIParent-relative position.
+    if not ApplyAnchor(dragFrame, config) then
+        -- Only call RestorePosition if LibWindow has actual saved data.
+        -- An empty table means the user never moved the frame, so keep the inherited anchor.
+        if config and _G.next(config) ~= nil then
+            LibWin.RestorePosition(dragFrame)
+        end
     end
 
     modules[mod].frames[frame] = {

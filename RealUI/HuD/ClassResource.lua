@@ -515,6 +515,8 @@ function ClassResource:OnInitialize()
                 x = -160,
                 y = -40.5,
                 point = "CENTER",
+                -- "screen" | "player" | "target" | "focus" (FramePoint.ANCHOR_FRAMES)
+                anchorTo = "screen",
             },
         }
 
@@ -551,6 +553,7 @@ function ClassResource:OnInitialize()
                     x = 0,
                     y = -128,
                     point = "CENTER",
+                    anchorTo = "screen",
                 },
             },
             points = points,

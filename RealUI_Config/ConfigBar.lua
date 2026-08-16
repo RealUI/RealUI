@@ -27,6 +27,17 @@ local function safeLayout()
     return RealUI.cLayout or (RealUI.db and RealUI.db.char.layout.current) or 1
 end
 
+-- Anchor targets for FramePoint-managed HuD elements. Keys match
+-- FramePoint.ANCHOR_FRAMES; "screen" means the legacy UIParent-relative
+-- LibWindow position.
+local ANCHOR_TO_VALUES = {
+    screen = "Screen",
+    player = _G.PLAYER or "Player",
+    target = _G.TARGET or "Target",
+    focus  = _G.FOCUS or "Focus",
+}
+local ANCHOR_TO_ORDER = { "screen", "player", "target", "focus" }
+
 -- Safe position accessor: returns the positions table for the current layout,
 -- or nil if unavailable.
 local function safePositions()
@@ -1772,6 +1783,24 @@ do -- CastBars
                     inline = true,
                     order = 3,
                     args = {
+                        anchorTo = {
+                            name = "Anchor To",
+                            desc = "Anchor this cast bar to the screen, or pin it to a unit frame so it follows that frame."
+                                .. "\n\nWhen pinned, the offsets below are measured from the unit frame instead of the screen.",
+                            type = "select",
+                            values = ANCHOR_TO_VALUES,
+                            sorting = ANCHOR_TO_ORDER,
+                            get = function(info)
+                                return CastBars.db.profile[unit].position.anchorTo or "screen"
+                            end,
+                            set = function(info, value)
+                                -- Goes through SetAnchorTo so the offsets are
+                                -- rewritten into the new coordinate space and
+                                -- the bar does not jump.
+                                FramePoint:SetAnchorTo(CastBars, {"profile", unit, "position"}, value)
+                            end,
+                            order = 5,
+                        },
                         point = {
                             name = L["General_AnchorPoint"],
                             type = "select",
@@ -1953,6 +1982,21 @@ do -- ClassResource
                     inline = true,
                     order = 20,
                     args = {
+                        anchorTo = {
+                            name = "Anchor To",
+                            desc = "Anchor the class resource to the screen, or pin it to a unit frame so it follows that frame."
+                                .. "\n\nWhen pinned, the offsets below are measured from the unit frame instead of the screen.",
+                            type = "select",
+                            values = ANCHOR_TO_VALUES,
+                            sorting = ANCHOR_TO_ORDER,
+                            get = function(info)
+                                return ClassResource.db.class.points.position.anchorTo or "screen"
+                            end,
+                            set = function(info, value)
+                                FramePoint:SetAnchorTo(ClassResource, {"class", "points", "position"}, value)
+                            end,
+                            order = 0,
+                        },
                         point = {
                             name = L["General_AnchorPoint"],
                             type = "select",
