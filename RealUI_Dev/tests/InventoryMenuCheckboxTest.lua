@@ -48,19 +48,37 @@ local function FindShownMenuFrames()
     return found
 end
 
+--- The label carries a default anchor from SetNormalFontObject, and Update
+--- adds the checkbox-relative one on top. Check every point, not just the
+--- first, or a correctly anchored label reads as misanchored.
+local function IsAnchoredTo(label, target)
+    if not label then return false end
+
+    for i = 1, label:GetNumPoints() do
+        local _, relativeTo = label:GetPoint(i)
+        if relativeTo == target then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function ReportMenu(menu)
     local rows, missing, overdrawn = 0, 0, 0
 
     for _, child in _G.ipairs({ menu:GetChildren() }) do
         local checkBox = child.checkBox
-        if checkBox then
+        -- Only rows that are supposed to have a checkbox. Titles and spacers
+        -- carry no `checked` value and correctly render without one.
+        local info = child.info
+        if checkBox and info and info.checked ~= nil then
             rows = rows + 1
 
             local label = child.GetFontString and child:GetFontString()
-            local _, relativeTo = label and label:GetPoint(1)
 
             local shown = checkBox:IsShown()
-            local anchored = relativeTo == checkBox
+            local anchored = IsAnchoredTo(label, checkBox)
 
             if not shown then
                 missing = missing + 1
