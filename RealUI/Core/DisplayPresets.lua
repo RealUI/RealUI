@@ -63,7 +63,11 @@ local DISPLAY_PRESETS = {
         gameCursorScale = 1.2,
         fontScale       = 1.0,
         chatFontSize    = 14,
-        uiModScale      = 1,
+        -- Pixel-perfect at 2160p lands around 0.36 effective scale, which
+        -- leaves the HuD config bar labels and infobar text too small to read.
+        -- 4K Theater already compensates at 1.25 from an even smaller 0.30
+        -- base; this preset had no compensation at all.
+        uiModScale      = 1.25,    -- boost infobar/HuD elements via Scale.Value()
     },
     {
         id              = "4k_theater",
