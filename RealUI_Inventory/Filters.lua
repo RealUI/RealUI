@@ -68,12 +68,11 @@ local menu do
     function menu:UpdateLines()
         wipe(menuList)
         tinsert(menuList, 1, title)
-        for i, filter in Inventory:IndexedFilters() do
-            if not filter then
-                _G.print("Inventory:UpdateLines - Filter is nil at index", i)
-                return
-            end
-            if filter:IsEnabled() then
+        for _, filter in Inventory:IndexedFilters() do
+            -- Skip a nil filter rather than returning: bailing out here drops
+            -- every remaining filter from the menu, so one bad index silently
+            -- truncates the list instead of losing a single row.
+            if filter and filter:IsEnabled() then
                 self:AddFilter(filter)
             end
         end
@@ -287,15 +286,12 @@ tinsert(private.filterList, {
 
 tinsert(private.filterList, {
     tag = "ToBnetAccountUntilEquipped",
-    name = "ToBnetAccountUntilEquipped",
+    -- Prefer Blizzard's localized string, as every other filter here does;
+    -- fall back to a readable label rather than the raw enum name.
+    name = _G.ITEM_ACCOUNTBOUND_UNTIL_EQUIP or _G.ITEM_BNETACCOUNTBOUND or "Warbound until Equipped",
     rank = 21,
     filter = function(slot)
-        local itemName, _, _, _, _, _, _, _, _, _, _, _, _, bindType, _, _, _ = _G.C_Item.GetItemInfo(slot.item:GetItemID())
-        if bindType and bindType == _G.Enum.ItemBind.BnetAccountUntilEquipped then
-            _G.print("ToBnetAccountUntilEquipped", itemName)
-            _G.print("ToBnetAccountUntilEquipped", slot.item:GetItemID())
-            _G.print("BindType", bindType)
-        end
+        local _, _, _, _, _, _, _, _, _, _, _, _, _, bindType, _, _, _ = _G.C_Item.GetItemInfo(slot.item:GetItemID())
         return bindType == _G.Enum.ItemBind.BnetAccountUntilEquipped
     end,
 })
