@@ -26,6 +26,19 @@ local function GetHuDSizeOffset(key)
     return sizeOffsets[key] or 0
 end
 
+-- The positions table for a layout is populated lazily (LayoutManager fills
+-- missing keys only, HuDPositioning writes the calculated ones at login), so
+-- an individual key can legitimately be absent when the config sliders drive
+-- an update. A missing key contributes no offset rather than erroring.
+local function GetKeyAdjust(key)
+    local layout = (ndbc and ndbc.layout and ndbc.layout.current) or RealUI.cLayout or 1
+    local positions = ndb and ndb.positions and ndb.positions[layout]
+    local value = positions and positions[key]
+    if not value then return 0 end
+
+    return value + GetHuDSizeOffset(key)
+end
+
 local function GetPositionData(pT)
     Positioners:debug("GetPositionData", pT)
     local point, parent, rPoint, x, y, width, height, xKeyTable, yKeyTable, widthKeyTable, heightKeyTable =
@@ -35,22 +48,22 @@ local function GetPositionData(pT)
 
     if xKeyTable then
         for k,v in next, xKeyTable do
-            xAdj = xAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
+            xAdj = xAdj + GetKeyAdjust(v)
         end
     end
     if yKeyTable then
         for k,v in next, yKeyTable do
-            yAdj = yAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
+            yAdj = yAdj + GetKeyAdjust(v)
         end
     end
     if widthKeyTable then
         for k,v in next, widthKeyTable do
-            widthAdj = widthAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
+            widthAdj = widthAdj + GetKeyAdjust(v)
         end
     end
     if heightKeyTable then
         for k,v in next, heightKeyTable do
-            heightAdj = heightAdj + ndb.positions[ndbc.layout.current][v] + GetHuDSizeOffset(v)
+            heightAdj = heightAdj + GetKeyAdjust(v)
         end
     end
     x = floor(x + xAdj)
