@@ -144,6 +144,14 @@ function MenuItemMixin:SetCheckedState(isChecked, isClick)
             isChecked = isChecked()
         end
 
+        -- A `checked` callback that returns nil used to leave the checkbox
+        -- shown while reporting nil to the caller, which then anchored the
+        -- label at MENU_MARGIN — drawing the text on top of the checkbox and
+        -- reading as a missing one. Treat "resolved to nil" as unchecked.
+        if isChecked == nil then
+            isChecked = false
+        end
+
         if isClick then
             isChecked = not isChecked
         end
