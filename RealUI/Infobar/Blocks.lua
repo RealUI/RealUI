@@ -512,7 +512,18 @@ end
 local function SetupTooltip(tooltip, block)
     tooltip:SetDefaultHeadingFont("Fancy16Font")
     tooltip:SetDefaultFont("SystemFont_Shadow_Med1")
-    tooltip:SmartAnchorTo(block)
+
+    -- LibQTip's SmartAnchorTo falls back to SetPoint("TOPLEFT", "BOTTOMLEFT")
+    -- when the anchor frame has no resolved position, which anchors the tooltip
+    -- to nothing. UpdateLayout then errors on a nil GetTop(). Anchor to the bar
+    -- instead if the block isn't placed.
+    if block:GetCenter() then
+        tooltip:SmartAnchorTo(block)
+    else
+        tooltip:ClearAllPoints()
+        tooltip:SetPoint("BOTTOM", Infobar.frame or _G.UIParent, "TOP")
+    end
+
     tooltip:SetAutoHideDelay(0.10, block)
     --RealUI.RegisterModdedFrame(tooltip)
     block.tooltip = tooltip
