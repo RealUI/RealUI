@@ -95,6 +95,17 @@ externals:
     RealUI_Tracker/Libs/AceEvent-3.0:
         url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
 
+    RealUI_ActionBars/Libs/LibStub:
+        url: https://github.com/WoWUIDev/Ace3.git/LibStub
+    RealUI_ActionBars/Libs/CallbackHandler-1.0:
+        url: https://github.com/WoWUIDev/Ace3.git/CallbackHandler-1.0
+    RealUI_ActionBars/Libs/AceAddon-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceAddon-3.0
+    RealUI_ActionBars/Libs/AceDB-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
+    RealUI_ActionBars/Libs/AceEvent-3.0:
+        url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
+
     RealUI_Nameplates/Libs/LibStub:
         url: https://github.com/WoWUIDev/Ace3.git/LibStub
     RealUI_Nameplates/Libs/CallbackHandler-1.0:
@@ -122,5 +133,6 @@ move-folders:
     RealUI/RealUI_Tooltips: RealUI_Tooltips
     RealUI/RealUI_Tracker: RealUI_Tracker
     RealUI/RealUI_Nameplates: RealUI_Nameplates
+    RealUI/RealUI_ActionBars: RealUI_ActionBars
     Aurora: RealUI_Skins/Aurora
     RealUI/!RealUI_Preloads: "!RealUI_Preloads"
