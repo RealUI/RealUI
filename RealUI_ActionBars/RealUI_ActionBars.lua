@@ -72,6 +72,8 @@ function AB:OnEnable()
     -- Blizzard bars; re-suppress each time.
     self:RegisterEvent("PLAYER_ENTERING_WORLD", function()
         private.QueueSecure(private.HideBlizzardBars)
+        -- The zone-ability frames get recreated/re-laid-out on zone changes.
+        private.QueueSecure(private.ApplyExtraButtons)
     end)
     self:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED", function()
         private.QueueSecure(private.HideBlizzardBars)
@@ -100,6 +102,7 @@ function AB:OnEnable()
     -- lands after our file-scope one, so reclaim the hash mapping here.
     _G.hash_SlashCmdList["/NAGA"] = "REALUIABNAGA"
     private.QueueSecure(private.BuildStancePetBars)
+    private.QueueSecure(private.ApplyExtraButtons)
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", function()
         private.QueueSecure(private.BuildStanceBar)
     end)
@@ -129,6 +132,9 @@ local BLIZZARD_BARS = {
     "MainMenuBar", "MainActionBar", "MultiBarBottomLeft", "MultiBarBottomRight",
     "MultiBarRight", "MultiBarLeft", "MultiBar5", "MultiBar6", "MultiBar7",
     "BagsBar", "MicroMenuContainer",
+    -- XP/rep tracking bars (the RealUI infobar shows these; BT4's art module
+    -- used to park them)
+    "StatusTrackingBarManager", "MainStatusTrackingBarContainer", "SecondaryStatusTrackingBarContainer",
     -- Containers only: the stance/pet BUTTONS get adopted into our own bars
     -- (StancePetBar.lua) before these empty shells are parked.
     "StanceBar", "PetActionBar", "PossessActionBar",

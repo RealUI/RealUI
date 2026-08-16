@@ -8,11 +8,6 @@ local LAB = _G.LibStub("LibActionButton-1.0")
      hookable Layout() live here; per-button behavior is all LAB's. ]]--
 
 local function BuildButtonConfig(barDB, keyBoundTarget)
-    -- Negative padding overlaps buttons; text must anchor inside the VISUAL
-    -- cell (inset by half the overlap), or hotkeys render beside the
-    -- neighboring icon. LAB's config merge is recursive, so supplying only
-    -- position overrides keeps its font/color defaults.
-    local inset = _G.math.max(0, -(barDB.padding or 0) / 2)
     return {
         outOfRangeColoring = "button",
         tooltip = "enabled",
@@ -33,20 +28,14 @@ local function BuildButtonConfig(barDB, keyBoundTarget)
                 font = { size = 11 },
                 position = {
                     anchor = "TOPRIGHT", relAnchor = "TOPRIGHT",
-                    offsetX = -(2 + inset), offsetY = -(2 + inset),
+                    offsetX = -1, offsetY = -1,
                 },
             },
             count = {
                 font = { size = 12 },
                 position = {
                     anchor = "BOTTOMRIGHT", relAnchor = "BOTTOMRIGHT",
-                    offsetX = -(2 + inset), offsetY = 2 + inset,
-                },
-            },
-            macro = {
-                position = {
-                    anchor = "BOTTOM", relAnchor = "BOTTOM",
-                    offsetX = 0, offsetY = 2 + inset,
+                    offsetX = -1, offsetY = 1,
                 },
             },
         },
@@ -110,16 +99,10 @@ function barMixin:ApplyConfig()
     self:SetPoint(cornerV .. cornerH, _G.UIParent, db.position.point,
         db.position.x, db.position.y)
 
-    -- Negative padding = overlapping buttons; inset the skin's visual cell by
-    -- half the overlap so cells tile seamlessly (Masque handles its own).
-    local inset = _G.math.max(0, -(db.padding or 0) / 2)
     for i = 1, 12 do
         local button = self.buttons[i]
         button.config = BuildButtonConfig(db, button.config and button.config.keyBoundTarget)
         button:UpdateConfig(button.config)
-        if not private.usingMasque then
-            private.ApplyButtonInset(button, inset)
-        end
     end
 
     self:Layout()
@@ -139,12 +122,21 @@ function private.CreateBar(id)
 
     private.SetupVisibility(bar)
 
+    -- Bars occupying Blizzard action pages mirror the matching Blizzard
+    -- binding commands — pressed via override bindings (Bindings.lua) and
+    -- displayed via LAB's keyBoundTarget. Bar 2 (page 2) has no Blizzard
+    -- binding set; it uses custom captures only.
+    local KEYBOUND_TARGETS = {
+        [1] = "ACTIONBUTTON%d",
+        [3] = "MULTIACTIONBAR3BUTTON%d",
+        [4] = "MULTIACTIONBAR4BUTTON%d",
+        [5] = "MULTIACTIONBAR2BUTTON%d",
+        [6] = "MULTIACTIONBAR1BUTTON%d",
+    }
+
     local db = AB.dbActionBars.profile.actionbars[id]
     for i = 1, 12 do
-        -- Bar 1 mirrors Blizzard's main bar, so its buttons display (and are
-        -- pressed by) the user's ACTIONBUTTON bindings. Other bars use custom
-        -- click bindings (Bindings.lua).
-        local keyBoundTarget = (id == 1) and ("ACTIONBUTTON" .. i) or nil
+        local keyBoundTarget = KEYBOUND_TARGETS[id] and KEYBOUND_TARGETS[id]:format(i) or nil
         local button = LAB:CreateButton(i, bar:GetName() .. "B" .. i, bar,
             BuildButtonConfig(db, keyBoundTarget))
 

@@ -13,7 +13,6 @@ local AB = private.AB
 
 local MATH_BUTTON = 35       -- geometry cell (matches ApplyABSettings' buttonSizes.bars)
 local MATH_PADDING = 1       -- geometry padding (fixedSettings.buttonPadding)
-local BAR_PADDING = MATH_PADDING - 10  -- real per-bar padding (-9, overlap)
 
 local function IsOdd(value)
     return value % 2 == 1
@@ -73,8 +72,8 @@ function private.ApplyRealUILayout()
             -- REAL rendered extent (button size + overlap pitch), not the
             -- 35+1 math cells ApplyABSettings used — centering with the math
             -- width left bars half-a-cell-per-button off on screen.
-            local buttonSize = db.buttonSize or 36
-            local pitch = buttonSize + BAR_PADDING
+            local buttonSize = db.buttonSize or 27
+            local pitch = buttonSize + (db.padding or 0)
             barSizes[id] = buttonSize + pitch * (numButtons - 1)
 
             local isVertBar = id > 3
@@ -132,8 +131,8 @@ function private.ApplyRealUILayout()
                 db.growHorizontal = "RIGHT"
             end
 
-            db.padding = BAR_PADDING
-            db.buttonSize = 36
+            db.padding = 0
+            db.buttonSize = 27  -- == BT4's 36 at -9 overlap, without the overlap
             db.scale = 1
             db.growVertical = "DOWN"
             db.position.point = point

@@ -15,12 +15,25 @@ local bindingOwner = _G.CreateFrame("Frame", "RealUI_AB_BindingOwner", _G.UIPare
 function private.ApplyBindings()
     _G.ClearOverrideBindings(bindingOwner)
 
-    -- Bar 1: every key the user has on ACTIONBUTTONi presses our button i.
-    for i = 1, 12 do
-        local buttonName = "RealUI_AB_Bar1B" .. i
-        local keys = { _G.GetBindingKey("ACTIONBUTTON" .. i) }
-        for k = 1, #keys do
-            _G.SetOverrideBindingClick(bindingOwner, false, keys[k], buttonName, "LeftButton")
+    -- Blizzard binding mirrors: keys bound through the standard Blizzard
+    -- commands press our equivalent buttons. Bar 1 = ACTIONBUTTON; bars 3-6
+    -- occupy the same action pages as Blizzard's multibars, so their
+    -- MULTIACTIONBAR bindings map straight across (bar 2 = page 2 has no
+    -- Blizzard binding set; it pages via bar 1).
+    local BLIZZARD_MIRRORS = {
+        [1] = "ACTIONBUTTON%d",
+        [3] = "MULTIACTIONBAR3BUTTON%d",  -- page 3 / MultiBarRight
+        [4] = "MULTIACTIONBAR4BUTTON%d",  -- page 4 / MultiBarLeft
+        [5] = "MULTIACTIONBAR2BUTTON%d",  -- page 5 / MultiBarBottomRight
+        [6] = "MULTIACTIONBAR1BUTTON%d",  -- page 6 / MultiBarBottomLeft
+    }
+    for barID, commandFormat in _G.next, BLIZZARD_MIRRORS do
+        for i = 1, 12 do
+            local buttonName = ("RealUI_AB_Bar%dB%d"):format(barID, i)
+            local keys = { _G.GetBindingKey(commandFormat:format(i)) }
+            for k = 1, #keys do
+                _G.SetOverrideBindingClick(bindingOwner, false, keys[k], buttonName, "LeftButton")
+            end
         end
     end
 

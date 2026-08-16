@@ -60,7 +60,11 @@ function private.SetupVisibility(bar)
             self:Show()
         end
     ]])
-    bar:SetScript("OnAttributeChanged", OnAttributeChanged)
+    -- HookScript, NEVER SetScript: SecureHandlerStateTemplate's own
+    -- OnAttributeChanged script IS the dispatcher that executes every
+    -- _onstate-* snippet — replacing it silently kills paging and secure
+    -- show/hide on the whole bar (fade kept working, which masked it).
+    bar:HookScript("OnAttributeChanged", OnAttributeChanged)
 end
 
 function private.ApplyVisibility(bar, conditional)

@@ -179,6 +179,15 @@ local function BuildOptions()
                 desc = "Hover a button and press a key to bind it (ESC clears). Also /rab bind.",
                 func = function() private.ToggleBindMode() end,
             },
+            moveExtraButton = {
+                type = "toggle", name = "Anchor Extra/Zone ability to bar 1", order = 0.5,
+                desc = "Places the Extra Action Button and Zone Ability left of bar 1. Off = wherever EditMode puts the container.",
+                get = function() return AB.db.profile.moveExtraButton end,
+                set = function(_, v)
+                    AB.db.profile.moveExtraButton = v
+                    if v then private.QueueSecure(private.ApplyExtraButtons) end
+                end,
+            },
             stance = AuxBarOptions("Stance Bar", 7, function() return AB.dbStanceBar.profile end),
             pet = AuxBarOptions("Pet Bar", 8, function() return AB.dbPetBar.profile end),
         },

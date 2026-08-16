@@ -45,11 +45,61 @@ local function ImportBar(target, source)
     return true
 end
 
+--[[ Keybind conversion. Unlike Bartender4DB (addon SavedVariables, only in
+     memory while BT4 loads), keybinds live in the CLIENT's binding system as
+     plain command->key maps — "CLICK BT4Button1:Keybind" survives with the
+     addon gone, and GetBindingKey answers from the saved bindings any time.
+     Bar 1 note: BT4 preferred the Blizzard ACTIONBUTTON bindings there, which
+     our mirror already honors; the CLICK binds converted here are the extras
+     users bound directly to BT4 buttons. Stance/pet used SHAPESHIFTBUTTON /
+     BONUSACTIONBUTTON (still live on our adopted Blizzard buttons) with CLICK
+     fallbacks, converted here to the adopted buttons' names. ]]--
+
+function private.ImportBartender4Keybinds()
+    local bindings = AB.db.profile.bindings
+    local claimed = {}
+    for _, key in _G.next, bindings do claimed[key] = true end
+
+    local imported = 0
+    local function convert(command, targetButton)
+        local keys = { _G.GetBindingKey(command) }
+        for k = 1, #keys do
+            local key = keys[k]
+            if key and not claimed[key] and not bindings[targetButton] then
+                bindings[targetButton] = key
+                claimed[key] = true
+                imported = imported + 1
+            end
+        end
+    end
+
+    for id = 1, 72 do  -- bars 1-6
+        local bar = _G.math.ceil(id / 12)
+        local btn = (id - 1) % 12 + 1
+        convert(("CLICK BT4Button%d:Keybind"):format(id),
+            ("RealUI_AB_Bar%dB%d"):format(bar, btn))
+    end
+    for i = 1, 10 do
+        convert(("CLICK BT4StanceButton%d:LeftButton"):format(i), "StanceButton" .. i)
+        convert(("CLICK BT4PetButton%d:LeftButton"):format(i), "PetActionButton" .. i)
+    end
+
+    return imported
+end
+
 function private.ImportFromBartender4(manual)
+    -- Keybinds first: they need no Bartender4 data at all.
+    local importedKeys = private.ImportBartender4Keybinds()
+    if importedKeys > 0 then
+        private.QueueSecure(private.ApplyBindings)
+        _G.print(("|cff30d0ffRealUI ActionBars|r: converted %d Bartender4 keybinds."):format(importedKeys))
+    end
+
     local bt4db = _G.Bartender4DB
     if not (bt4db and bt4db.namespaces and bt4db.namespaces.ActionBars) then
         if manual then
-            _G.print("|cff30d0ffRealUI ActionBars|r: no Bartender4 saved variables found.")
+            _G.print("|cff30d0ffRealUI ActionBars|r: no Bartender4 profile data in memory (layout import needs BT4 installed once)."
+                .. (importedKeys > 0 and "" or " No BT4 keybinds found either."))
         end
         return
     end

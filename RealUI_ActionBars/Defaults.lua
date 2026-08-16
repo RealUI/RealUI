@@ -18,8 +18,10 @@ local function bar(overrides)
         enabled = true,
         buttons = 12,
         rows = 1,
-        buttonSize = 36,
-        padding = -9,
+        -- 27px at 0 padding == BT4's 36px at -9 visually (shared 1px borders),
+        -- without the hit-rect overlap.
+        buttonSize = 27,
+        padding = 0,
         scale = 1,
         alpha = 1,
         showgrid = true,
@@ -88,6 +90,7 @@ private.nsDefaults = {
 private.defaults = {
     profile = {
         bindings = {},  -- [buttonName] = key (custom, beyond the bar-1 ACTIONBUTTON mirror)
+        moveExtraButton = true,  -- anchor ExtraAction/ZoneAbility left of bar 1
     },
     global = {
         importedBT4 = false,
