@@ -163,6 +163,14 @@ local InventorySlotMixin = _G.CreateFromMixins(ItemSlotMixin)
 function InventorySlotMixin:OnLoad()
     ItemSlotMixin.OnLoad(self)
 
+    -- Regular bag slots were never Aurora-skinned — only BankSlotMixin and the
+    -- Bag Slots panel (BagSlotMixin:Init) were. That left them with Blizzard's
+    -- rounded WhiteIconFrame quality border, and without _auroraIconBorder it
+    -- also made the quest-item border colouring in ItemSlotMixin:Update a
+    -- silent no-op. Same call BankSlotMixin makes; the pool creates these from
+    -- ContainerFrameItemButtonTemplate.
+    Skin.ContainerFrameItemButtonTemplate(self)
+
     self.IconQuestTexture = _G[self:GetName().."IconQuestTexture"]
 end
 function InventorySlotMixin:Update()
