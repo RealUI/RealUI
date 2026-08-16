@@ -611,6 +611,14 @@ function InstallWizard:ApplyAccountCVars()
         -- Quests
         ["autoQuestWatch"] = 1,                    -- Auto Track Quests
 
+        -- Map
+        -- Replaces RealUI's hand-rolled coordinate overlay, retired 2026-08-16.
+        -- Blizzard's WorldMapCoordsPanel renders the same two values from
+        -- inside secure code; the addon overlay had to dodge the pin-creation
+        -- taint path by hand (aurora-121-surfaces task 4.2).
+        ["worldMapShowPlayerCoords"] = 1,          -- Show player map coordinates
+        ["worldMapShowCursorCoords"] = 1,          -- Show cursor map coordinates
+
         -- Names
         ["UnitNameNPC"] = 1,                       -- Turn on NPC Names
         ["UnitNamePlayerPVPTitle"] = 0,            -- Turn off PvP Player Titles
