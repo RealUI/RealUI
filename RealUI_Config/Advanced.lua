@@ -3159,6 +3159,14 @@ do -- UI Tweaks
     end
 end
 
+do -- Auras (RealUI_Auras standalone addon)
+    debug("Adv Auras")
+    local Auras = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Auras", true)
+    if Auras and Auras.GetConfigOptions then
+        optArgs.auras = Auras:GetConfigOptions()
+    end
+end
+
 --[[
 local core do
     order = order + 1

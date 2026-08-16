@@ -1,9 +1,23 @@
 -- Config.lua: AceConfig options table for RealUI_Auras
--- Injects an "Auras" group into the shared RealUI options tree
--- after RealUI_Config loads.
+-- Exposes an "Auras" group that RealUI_Config pulls into the shared
+-- RealUI options tree while it builds.
 
 local AurasAddon = LibStub("AceAddon-3.0"):GetAddon("RealUI_Auras")
-local ACR = LibStub("AceConfigRegistry-3.0")
+
+-- AceConfigRegistry-3.0 ships inside RealUI_Config, which is LoadOnDemand, so it
+-- does not exist when this file runs. Resolve it lazily instead.
+local ACR
+local function GetACR()
+    ACR = ACR or LibStub("AceConfigRegistry-3.0", true)
+    return ACR
+end
+
+local function NotifyChange()
+    local acr = GetACR()
+    if acr then
+        acr:NotifyChange("RealUI")
+    end
+end
 
 local Groups -- resolved lazily from AurasAddon.Groups
 
@@ -25,36 +39,29 @@ local GROUP_ORDER = {
 local BuildAurasOptions, BuildGroupOptions, BuildSpellListOptions, BuildColourOptions, BuildCooldownMgrOptions
 
 ---------------------------------------------------------------------------
--- Injection helper — inserts the auras options into the RealUI tree
+-- Public: RealUI_Config pulls this into the RealUI options tree when it
+-- loads. Pulling avoids racing RealUI_Config's InitializeOptions, which only
+-- registers the "RealUI" table on the first config open.
 ---------------------------------------------------------------------------
-local function InjectAurasOptions()
-    local rootOptions = ACR:GetOptionsTable("RealUI", "dialog", "RealUI-1.0")
-    if rootOptions and rootOptions.args then
-        rootOptions.args.auras = BuildAurasOptions()
-        ACR:NotifyChange("RealUI")
-    end
+function AurasAddon:GetConfigOptions()
+    return BuildAurasOptions()
 end
 
 ---------------------------------------------------------------------------
--- Hook: inject options after RealUI_Config registers its table
+-- Rebuild the "Auras" group in place. The spell-list editors generate their
+-- entries from the DB, so the group has to be regenerated when a list
+-- changes. Only ever reached from an open config UI, by which point
+-- RealUI_Config has registered the "RealUI" table.
 ---------------------------------------------------------------------------
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, _, addonName)
-    if addonName == "RealUI_Config" then
-        self:UnregisterEvent("ADDON_LOADED")
-        -- Defer to ensure RealUI_Config has finished InitializeOptions
-        C_Timer.After(0, InjectAurasOptions)
-    end
-end)
+local function RebuildAurasOptions()
+    local acr = GetACR()
+    if not acr then return end
 
----------------------------------------------------------------------------
--- Fallback: if RealUI_Config is already loaded when this file runs,
--- ADDON_LOADED won't fire. Check and inject on next frame.
----------------------------------------------------------------------------
-if C_AddOns.IsAddOnLoaded("RealUI_Config") then
-    frame:UnregisterEvent("ADDON_LOADED")
-    C_Timer.After(0, InjectAurasOptions)
+    local rootOptions = acr:GetOptionsTable("RealUI", "dialog", "RealUI-1.0")
+    if rootOptions and rootOptions.args then
+        rootOptions.args.auras = BuildAurasOptions()
+        acr:NotifyChange("RealUI")
+    end
 end
 
 ---------------------------------------------------------------------------
@@ -124,7 +131,7 @@ function BuildGroupOptions(groupName, order)
         return function(_, value)
             AurasAddon.db.profile.groups[groupName][key] = value
             Groups.Redraw(Groups.Get(groupName))
-            ACR:NotifyChange("RealUI")
+            NotifyChange()
         end
     end
 
@@ -171,7 +178,7 @@ function BuildGroupOptions(groupName, order)
                         -- Enabling: redraw the group
                         Groups.Redraw(group)
                     end
-                    ACR:NotifyChange("RealUI")
+                    NotifyChange()
                 end,
             },
 
@@ -416,7 +423,7 @@ function BuildGroupOptions(groupName, order)
                         end
                     end
                     Groups.Redraw(Groups.Get(groupName))
-                    ACR:NotifyChange("RealUI")
+                    NotifyChange()
                 end,
                 disabled = IsGroupDisabled,
             },
@@ -453,7 +460,7 @@ function BuildGroupOptions(groupName, order)
                         end
                     end
                     Groups.Redraw(Groups.Get(groupName))
-                    ACR:NotifyChange("RealUI")
+                    NotifyChange()
                 end,
                 disabled = IsGroupDisabled,
             },
@@ -562,7 +569,7 @@ function BuildSpellListOptions(order)
                 end
                 Groups.RefreshAll()
                 -- Rebuild the entire options table so the new entry appears
-                InjectAurasOptions()
+                RebuildAurasOptions()
             end,
         }
 
@@ -592,7 +599,7 @@ function BuildSpellListOptions(order)
                     AurasAddon.db.global.SpellLists[listName][capturedKey] = nil
                     Groups.RefreshAll()
                     -- Rebuild the entire options table so the entry disappears
-                    InjectAurasOptions()
+                    RebuildAurasOptions()
                 end,
             }
             entryOrder = entryOrder + 1
@@ -640,7 +647,7 @@ function BuildCooldownMgrOptions(order)
             local db = AurasAddon.db.profile
             db.cooldownViewer[key] = value
             AurasAddon.CooldownViewer.ApplyBuffIconCountdown(db.cooldownViewer.buffIconCountdown)
-            ACR:NotifyChange("RealUI")
+            NotifyChange()
         end
     end
 
@@ -681,7 +688,7 @@ function BuildColourOptions(order)
                 local c = AurasAddon.db.global[key]
                 c.r, c.g, c.b, c.a = r, g, b, a
                 Groups.RefreshAll()
-                ACR:NotifyChange("RealUI")
+                NotifyChange()
             end,
         }
     end
