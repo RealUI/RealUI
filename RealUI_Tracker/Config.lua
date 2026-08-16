@@ -65,7 +65,13 @@ end
 -- Config panel (Task 14)
 ---------------------------------------------------------
 
-local ACR = LibStub("AceConfigRegistry-3.0", true)
+-- AceConfigRegistry-3.0 ships inside RealUI_Config, which is LoadOnDemand, so it
+-- does not exist when this file runs. Resolve it lazily instead.
+local ACR
+local function GetACR()
+    ACR = ACR or LibStub("AceConfigRegistry-3.0", true)
+    return ACR
+end
 
 -- Combat fade opacity key order and labels (matches CombatFader.lua keyOrder)
 local FADE_KEY_ORDER = {
@@ -386,18 +392,19 @@ end
 ---------------------------------------------------------
 
 local function InjectTrackerOptions()
-    if not ACR then return end
-    local rootOptions = ACR:GetOptionsTable("RealUI", "dialog", "RealUI-1.0")
+    local acr = GetACR()
+    if not acr then return end
+
+    local rootOptions = acr:GetOptionsTable("RealUI", "dialog", "RealUI-1.0")
     if rootOptions and rootOptions.args then
         rootOptions.args.tracker = BuildTrackerOptions()
-        ACR:NotifyChange("RealUI")
+        acr:NotifyChange("RealUI")
     end
 end
 
 function RealUI_Tracker:SetupConfig()
     local RealUI_Core = _G.RealUI
     if not RealUI_Core then return end
-    if not ACR then return end
 
     -- If RealUI_Config is already loaded, inject on next frame
     if C_AddOns.IsAddOnLoaded("RealUI_Config") then
