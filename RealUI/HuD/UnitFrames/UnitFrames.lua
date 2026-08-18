@@ -405,11 +405,12 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
 
             -- oUF 14: boss anchors are fixed (no defaultAnchor = caller-owned
             -- positioning); growth defaults mirror the create site
+            -- (B34: debuffs anchor to the frame's left edge and grow LEFT)
             if frame.Debuffs and db.boss then
                 UnitFrames.RefreshAuraElement(frame.Debuffs, frame, {
                     show = db.boss.showBossDebuffs,
                     count = db.boss.debuffCount,
-                    defaultGrowthX = "RIGHT",
+                    defaultGrowthX = "LEFT",
                     defaultGrowthY = "UP",
                 })
             end
@@ -691,7 +692,12 @@ function UnitFrames:OnInitialize()
             misc = {
                 focusclick = true,
                 focuskey = "shift",
-                statusText = "smart",
+                -- B27: default to "Both" so fresh installs always see HP values.
+                -- The old default ("smart") isn't offered by the config dropdown
+                -- (it rendered as a blank selection) and Tags.lua treats it as
+                -- percent-only. NO migration for saved profiles here — that's
+                -- the B47 one-time defaults nudge, handled separately.
+                statusText = "both",
                 statusTextOutline = "outline",
                 alwaysDisplayFullHealth = true,
                 showPrediction = true,
@@ -778,25 +784,36 @@ function UnitFrames:OnInitialize()
                         colorBackgroundByClass = false,
                     },
                 },
+                -- B14: the small (health-only) frames declare healthHeight = 1
+                -- so creation (Shared.lua CreateHealthBar) and runtime resizing
+                -- (ApplySize, which falls back to 0.6 when healthHeight is nil)
+                -- agree on the health bar height. Without it, the first
+                -- ResizeFrames call squished these bars to 60% of the frame.
+                -- size.y is 13 so the (y - 3) health height stays the familiar
+                -- 10px bar.
                 targettarget = {
-                    size = {x = 138, y = 10},
+                    size = {x = 138, y = 13},
                     position = {x = 0, y = 0},
+                    healthHeight = 1,
                     reverseFill = false,
                     framePoint = {},
                 },
                 focus = {
-                    size = {x = 138, y = 10},
+                    size = {x = 138, y = 13},
                     position = {x = 0, y = 0},
+                    healthHeight = 1,
                     framePoint = {},
                 },
                 focustarget = {
-                    size = {x = 126, y = 10},
+                    size = {x = 126, y = 13},
                     position = {x = 0, y = 0},
+                    healthHeight = 1,
                     framePoint = {},
                 },
                 pet = {
-                    size = {x = 126, y = 10},
+                    size = {x = 126, y = 13},
                     position = {x = 0, y = 0},
+                    healthHeight = 1,
                     reverseFill = false,
                     framePoint = {},
                 },
@@ -830,6 +847,13 @@ function UnitFrames:OnInitialize()
                         hotsFilter = true,
                     },
                     framePoint = {},
+                    -- B31: party header sub-settings (own anchor + orientation).
+                    -- Registering these here makes the guarded runtime
+                    -- defaults-extension in Groups/Raid.lua a no-op.
+                    party = {
+                        horizontal = false,
+                        framePoint = {},
+                    },
                 },
             },
             arena = {

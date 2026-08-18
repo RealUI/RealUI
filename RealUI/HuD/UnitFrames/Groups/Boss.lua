@@ -26,6 +26,10 @@ UnitFrames.boss = {
 
         -- Boss Debuffs (oUF 14: AuraContainer elements; boss anchors are
         -- fixed, so positioning stays a direct SetPoint here)
+        -- B34: boss frames sit at the right screen edge, so debuffs hang off
+        -- the frame's LEFT edge and grow LEFT (toward screen center). The
+        -- container auto-sizes to content with its RIGHT edge pinned, and
+        -- wrapped rows stay vertically centered on the frame.
         local db = UnitFrames.db.profile
 
         local Debuffs = UnitFrames.CreateAuraElement(dialog, {
@@ -33,10 +37,10 @@ UnitFrames.boss = {
             count = (db.boss and db.boss.debuffCount) or 16,
             size = (db.boss and db.boss.debuffSize) or 20,
             spacing = 2,
-            growthX = "RIGHT",
+            growthX = "LEFT",
             growthY = "UP",
         })
-        Debuffs:SetPoint("BOTTOMLEFT", dialog, "TOPLEFT", 0, 2)
+        Debuffs:SetPoint("RIGHT", dialog, "LEFT", -4, 0)
         dialog.Debuffs = Debuffs
 
         -- Boss Buffs
