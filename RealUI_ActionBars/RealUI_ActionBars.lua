@@ -197,7 +197,13 @@ _G.SlashCmdList.REALUIACTIONBARS = function(input)
             if bar and db then
                 local point, rel, _, x, y = bar:GetPoint(1)
                 local relName = rel and rel.GetName and (rel:GetName() or "?anon?") or "?nil?"
-                _G.print(("bar%d: db=%s %s,%s r%d s%.2f | live=%s->%s %.1f,%.1f %s | frame %dx%d"):format(
+                -- Sizes print with %.4g, not %d: GetWidth/GetHeight return the
+                -- on-screen rect, which carries float error at fractional
+                -- anchors and non-integer UI scale (e.g. 26.9999996). %d
+                -- truncates that to "26" and invents a 1px discrepancy that
+                -- isn't there; %.4g rounds, and still shows genuinely
+                -- fractional sizes instead of hiding them.
+                _G.print(("bar%d: db=%s %s,%s r%d s%.2f | live=%s->%s %.1f,%.1f %s | frame %.4gx%.4g"):format(
                     id, db.position.point, db.position.x, db.position.y,
                     db.rows or 1, db.scale or 1,
                     point or "?", relName, x or 0, y or 0,
@@ -210,7 +216,7 @@ _G.SlashCmdList.REALUIACTIONBARS = function(input)
                     local b1x, b1y = b1:GetLeft(), b1:GetTop()
                     local b2x, b2y = b2:GetLeft(), b2:GetTop()
                     if b1x and b2x then
-                        _G.print(("   b1 %dx%d shown=%s | b2 delta %.1f,%.1f"):format(
+                        _G.print(("   b1 %.4gx%.4g shown=%s | b2 delta %.1f,%.1f"):format(
                             b1:GetWidth(), b1:GetHeight(), _G.tostring(b1:IsShown()),
                             b2x - b1x, b2y - b1y))
                     else
