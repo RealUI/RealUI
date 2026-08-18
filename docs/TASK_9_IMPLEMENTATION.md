@@ -1,5 +1,7 @@
 # Task 9: Advanced Features and Optimizations - Implementation Summary
 
+> **Historical document.** Task-implementation summary from the RealUI interface-suite build-out; kept for reference. It describes the state at the time of writing and is not maintained — the code is the source of truth.
+
 ## Overview
 This document summarizes the implementation of Task 9 and its three subtasks for the RealUI Interface Suite.
 
