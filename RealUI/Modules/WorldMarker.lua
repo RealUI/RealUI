@@ -105,11 +105,16 @@ local function CreateButton(index, id)
     button:SetNormalFontObject("GameFontNormal")
     -- SecureActionButtonTemplate only dispatches to SECURE_ACTIONS for click
     -- types the button is registered for; without this the attributes below are
-    -- set correctly but clicking does nothing at all (B33 — the tooltip worked,
-    -- so the button was clearly live, it just never ran the handler).
-    -- "AnyUp" only: the default worldmarker action is "toggle", so registering
-    -- down as well would place and immediately clear the marker in one click.
-    button:RegisterForClicks("AnyUp")
+    -- set correctly but clicking does nothing at all (B33).
+    --
+    -- BOTH up and down are required, not just one. SecureActionButton_OnClick
+    -- computes useOnKeyDown from the "useOnKeyDown" attribute, falling back to
+    -- the ActionButtonUseKeyDown CVar, and then only acts when the click phase
+    -- matches: down-clicks when that setting is on, up-clicks when it is off.
+    -- Registering a single phase therefore leaves the button dead for anyone on
+    -- the opposite setting. It cannot double-fire — the handler runs the action
+    -- for exactly one phase.
+    button:RegisterForClicks("AnyUp", "AnyDown")
     button:SetAttribute("type", "worldmarker")
     button:SetScript("OnEnter", OnEnter)
     button:SetScript("OnLeave", OnLeave)
