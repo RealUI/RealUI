@@ -65,7 +65,16 @@ function ProfileSystem:GetDatabaseDefaults()
                 current = 1, -- 1 = DPS/Tank, 2 = Healing
                 spec = GetDefaultSpec()
             },
-            specProfiles = {} -- Custom spec-to-profile mapping
+            specProfiles = {}, -- Custom spec-to-profile mapping
+            -- Scope link toggles for coordinated profile switching.
+            -- Per-character (ProfileCoordinator reads db.char.scopeLinks) —
+            -- these lived under profile defaults while the reader was already
+            -- per-char, so the table never existed and every scope read as
+            -- unlinked (bars DB never followed layout profiles).
+            scopeLinks = {
+                skins = false,  -- Appearance shared across specs by default
+                bt4 = true      -- Action bars change with spec by default
+            }
         },
         profile = {
             modules = {
@@ -82,12 +91,9 @@ function ProfileSystem:GetDatabaseDefaults()
                 hudSize = 2,
                 reverseUnitFrameBars = false
             },
-            profileVersion = PROFILE_VERSION,
-            -- Scope link toggles for coordinated profile switching
-            scopeLinks = {
-                skins = false,  -- Appearance shared across specs by default
-                bt4 = true      -- Action bars change with spec by default
-            }
+            profileVersion = PROFILE_VERSION
+            -- scopeLinks moved to the char section above — ProfileCoordinator
+            -- stores link state per-character, not per-profile.
         }
     }
 end

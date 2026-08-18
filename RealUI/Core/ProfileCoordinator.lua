@@ -75,6 +75,77 @@ local function ProfileExistsInBT4(profileName)
     return false
 end
 
+------------------------------------------------------------
+-- RealUI_ActionBars scope (4.0.0: replaces bundled Bartender4)
+--
+-- The bars scope is gated by the same SCOPE_BT4 link flag ("action bars
+-- change with spec", default true). When Bartender4 is installed it wins
+-- (RealUI_ActionBars disables itself); otherwise RealUI_ActionBarsDB is
+-- the DB that must follow RealUI/RealUI-Healing so per-layout bar
+-- settings apply on layout switches (B44).
+------------------------------------------------------------
+
+--- Get the RealUI_ActionBars AceAddon (registered as "RealUIActionBars"), or nil.
+local function GetRABAddon()
+    local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+    local addon = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+    if addon and addon.db and addon.db.SetProfile then
+        return addon
+    end
+    return nil
+end
+
+--- Check whether a profile name already exists in RealUI_ActionBarsDB.
+local function ProfileExistsInRAB(profileName)
+    local sv = _G.RealUI_ActionBarsDB
+    if type(sv) ~= "table" then return false end
+    if type(sv.profiles) == "table" and sv.profiles[profileName] ~= nil then
+        return true
+    end
+    if type(sv.namespaces) == "table" then
+        for _, nsData in pairs(sv.namespaces) do
+            if type(nsData) == "table" and type(nsData.profiles) == "table"
+               and nsData.profiles[profileName] ~= nil then
+                return true
+            end
+        end
+    end
+    if type(sv.profileKeys) == "table" then
+        for _, pName in pairs(sv.profileKeys) do
+            if pName == profileName then return true end
+        end
+    end
+    return false
+end
+
+--- Switch RealUI_ActionBars to profileName. A brand-new profile is seeded by
+--- copying the current one so the user's bar settings carry over instead of
+--- resetting to defaults (never write defaults over saved settings).
+--- Returns true if the scope was switched.
+local function SwitchActionBarsScope(profileName)
+    local rab = GetRABAddon()
+    if not rab then
+        debug("RealUI_ActionBars not loaded, skipping bars scope")
+        return false
+    end
+
+    local current = rab.db:GetCurrentProfile()
+    if current == profileName then
+        debug("RealUI_ActionBars already on profile:", profileName)
+        return true
+    end
+
+    local isNew = not ProfileExistsInRAB(profileName)
+    debug("Switching RealUI_ActionBars scope to:", profileName, "isNew:", tostring(isNew))
+    rab.db:SetProfile(profileName)
+
+    if isNew and current and current ~= profileName then
+        debug("Seeding new RealUI_ActionBars profile from:", current)
+        rab.db:CopyProfile(current, true)
+    end
+    return true
+end
+
 
 ------------------------------------------------------------
 -- Scope Link State (reads/writes from db.profile.scopeLinks)
@@ -85,13 +156,15 @@ end
 --- @return boolean
 function ProfileCoordinator:IsScopeLinked(scope)
     if not RealUI.db then return false end
+    -- nil falls back to the documented default (skins unlinked, bt4 linked):
+    -- characters whose saved variables predate char-scoped scopeLinks have no
+    -- stored table, and requiring an explicit true silently unlinked the bars
+    -- scope for them (same nil-tolerant reading /systemstatus already uses).
     local links = RealUI.db.char.scopeLinks
-    if not links then return false end
-
     if scope == self.SCOPE_SKINS then
-        return links.skins == true
+        return (links and links.skins) == true
     elseif scope == self.SCOPE_BT4 then
-        return links.bt4 == true
+        return not links or links.bt4 ~= false
     end
     -- Core is always "linked" (it is the primary scope)
     return false
@@ -255,13 +328,19 @@ function ProfileCoordinator:CoordinatedSwitch(profileName, forceCreate)
         end
     end
 
-    -- 1. Bartender4 scope — switch FIRST so BT4 is already on the new
-    -- profile when Core's OnProfileUpdate cascade fires. RealUI's ActionBars
-    -- module applies positioning during that cascade and reads live BT4
-    -- state to reposition bars. If BT4 is still on the old profile when the
-    -- cascade runs, the bars are written/read to the wrong profile and need
-    -- a reload to self-correct.
+    -- 1. Action bars scope — switch FIRST so the bars DB is already on the
+    -- new profile when Core's OnProfileUpdate cascade fires. RealUI's
+    -- ActionBars module applies positioning during that cascade and reads
+    -- live bar state to reposition bars. If the bars DB is still on the old
+    -- profile when the cascade runs, the bars are written/read to the wrong
+    -- profile and need a reload to self-correct.
+    -- 4.0.0: RealUI_ActionBars replaced bundled Bartender4. BT4 wins when
+    -- installed (RealUI_ActionBars disables itself in that case); otherwise
+    -- RealUI_ActionBarsDB is the bars scope.
     if self:IsScopeLinked(self.SCOPE_BT4) then
+        if not _G.Bartender4 and SwitchActionBarsScope(profileName) then
+            switchedScopes[#switchedScopes + 1] = self.SCOPE_BT4
+        end
         local bt4Addon = _G.Bartender4
         if bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
             if forceCreate or ProfileExistsInBT4(profileName) then
@@ -403,6 +482,14 @@ local function OnCoreProfileChanged(_, _, newProfile)
                 skinsDB:CopyProfile(sourceProfile, true)
             end
         end
+    end
+
+    -- Switch bars scope (RealUI_ActionBars when BT4 is not installed).
+    -- This callback registers BEFORE RealUI's own OnProfileUpdate, so the
+    -- bars DB is on the new profile before the Core cascade reads it —
+    -- the same bars-before-Core invariant CoordinatedSwitch enforces.
+    if linkBT4 and not _G.Bartender4 then
+        SwitchActionBarsScope(newProfile)
     end
 
     -- Switch BT4 scope
