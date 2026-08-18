@@ -142,7 +142,7 @@ end
 
 local function RaidStyle(self, unit)
     local rdb = GetRaidDB()
-    local width, height = rdb.size.x, rdb.size.y
+    local width = rdb.size.x
 
     self:RegisterForClicks("AnyUp")
     self:SetScript("OnEnter", function(frame, ...)
