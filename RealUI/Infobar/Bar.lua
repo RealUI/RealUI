@@ -946,12 +946,22 @@ function Infobar:CreateBar()
     self.frame = frame
 end
 
+-- Blocks with a secure action overlay (e.g. hearthstone) never receive drag
+-- events while the overlay owns the mouse, so toggle it with the lock state.
+-- The overlay is a protected frame — leave it alone during combat lockdown.
+local function SetSecureFrameMouse(block, enable)
+    if block.secureFrame and not _G.InCombatLockdown() then
+        block.secureFrame:EnableMouse(enable)
+    end
+end
+
 function Infobar:Unlock()
     local left = self.frame.left
     for i, block in next, left.DOCKED_BLOCKS do
         if i > 1 then
             block:RegisterForDrag("LeftButton")
             block.bg:Show()
+            SetSecureFrameMouse(block, false)
         end
     end
 
@@ -960,6 +970,7 @@ function Infobar:Unlock()
         if i > 1 then
             block:RegisterForDrag("LeftButton")
             block.bg:Show()
+            SetSecureFrameMouse(block, false)
         end
     end
 
@@ -970,12 +981,14 @@ function Infobar:Lock()
     for i, block in next, left.DOCKED_BLOCKS do
         block:RegisterForDrag()
         block.bg:Hide()
+        SetSecureFrameMouse(block, true)
     end
 
     local right = self.frame.right
     for i, block in next, right.DOCKED_BLOCKS do
         block:RegisterForDrag()
         block.bg:Hide()
+        SetSecureFrameMouse(block, true)
     end
 
     self.locked = true
