@@ -12,7 +12,9 @@ local FramePoint = RealUI:GetModule("FramePoint")
 UnitFrames.pet = {
     create = function(dialog)
         dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
-        dialog.Name:SetPoint("BOTTOMLEFT", dialog, "BOTTOMRIGHT", 9, 2 - UnitFrames.layoutSize)
+        -- B42 (follow-on): identical anchor pattern to Focus/FocusTarget/ToT;
+        -- same 5px shift keeps the whole small-frame family consistent
+        dialog.Name:SetPoint("BOTTOMLEFT", dialog, "BOTTOMRIGHT", 9, -3 - UnitFrames.layoutSize)
         dialog.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
         dialog:Tag(dialog.Name, "[realui:name]")
     end,
