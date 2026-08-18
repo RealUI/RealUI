@@ -529,7 +529,77 @@ RealUILootFrame:SetScript("OnHide", function(dialog)
     _G.CloseLoot()
 end)
 
+-- Instant loot ---------------------------------------------------------------
+-- Can slot `i` actually be looted right now? Returning false leaves the slot
+-- for the loot window rather than issuing a call the server will refuse — the
+-- historic auto-loot disconnect pattern is re-issuing refused loot calls.
+local function SlotIsLootable(i)
+    local slotType = _G.GetLootSlotType(i)
+    if slotType == _G.Enum.LootSlotType.Money
+    or slotType == _G.Enum.LootSlotType.Currency then
+        return true
+    end
+
+    local link = _G.GetLootSlotLink(i)
+    if not link then return false end -- locked or unreadable
+
+    local itemFamily = _G.C_Item.GetItemFamily(link) or 0
+    for bag = 0, _G.NUM_TOTAL_EQUIPPED_BAG_SLOTS do
+        local free, bagFamily = _G.C_Container.GetContainerNumFreeSlots(bag)
+        if free and free > 0 then
+            if not bagFamily or bagFamily == 0 or itemFamily == 0
+            or _G.bit.band(itemFamily, bagFamily) > 0 then
+                return true
+            end
+        end
+    end
+
+    -- No free slot, but a partial stack may still have room. Approximate:
+    -- count % maxStack ~= 0 means at least one non-full stack exists. Errs
+    -- toward looting; the window + sound path is the safety net if the merge
+    -- turns out to be narrower than the loot quantity.
+    local itemID = _G.C_Item.GetItemInfoInstant(link)
+    local maxStack = itemID and _G.C_Item.GetItemMaxStackSizeByID(itemID)
+    if maxStack and maxStack > 1 then
+        local count = _G.C_Item.GetItemCount(itemID)
+        if count > 0 and (count % maxStack) ~= 0 then
+            return true
+        end
+    end
+
+    return false
+end
+
+-- LOOT_READY can fire more than once for a single loot session; this makes the
+-- pass and its sound cue single-shot. Cleared in LOOT_CLOSED.
+local lootPassDone
+
 function Loot:LOOT_READY(event, autoLoot)
+    if self.db.global.instantLoot and autoLoot and not lootPassDone then
+        lootPassDone = true
+
+        local blocked = false
+        -- Top-down: slot indices collapse as slots clear.
+        for i = _G.GetNumLootItems(), 1, -1 do
+            local ok, lootable = _G.pcall(SlotIsLootable, i)
+            if ok and lootable then
+                _G.LootSlot(i) -- one call per slot, never retried
+            else
+                blocked = true
+            end
+        end
+
+        if not blocked then
+            -- Everything dispatched; the server closes the session and the
+            -- window never appears.
+            return
+        end
+
+        -- Something could not be looted (full bags or a locked slot): cue the
+        -- user and fall through to the window so they can see what is left.
+        _G.PlaySound(_G.SOUNDKIT.IG_BACKPACK_OPEN)
+    end
+
     --print("Loot:", event, autoLoot)
     RealUILootFrame:Show()
     RealUILootFrame:SetWidth(db.lootwidth)
@@ -602,6 +672,7 @@ end
 
 function Loot:LOOT_CLOSED(...)
     --print("Loot:", ...)
+    lootPassDone = nil
     _G.StaticPopup_Hide"LOOT_BIND"
     RealUILootFrame:Hide()
 
@@ -664,6 +735,12 @@ function Loot:OnInitialize()
 
     self.db = RealUI.db:RegisterNamespace(MODNAME)
     self.db:RegisterDefaults({
+        global = {
+            -- Account-wide: the install wizard already opts users into auto
+            -- loot, so fast auto-loot is the expected experience. New key, so
+            -- existing profiles are unaffected.
+            instantLoot = true,
+        },
         profile = {
             ["**"] = {
                 enabled = true,
