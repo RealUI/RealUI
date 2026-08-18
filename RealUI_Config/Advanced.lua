@@ -564,6 +564,48 @@ do -- RealUI
             inline = true,
             order = 80,
             args = {
+                autoRepairHeader = {
+                    name = "Auto-Repair",
+                    type = "header",
+                    order = 0.1,
+                },
+                autoRepair = {
+                    name = "Repair automatically",
+                    desc = "Repair all your gear when you talk to a merchant that offers repairs.",
+                    type = "toggle",
+                    order = 0.2,
+                    get = function()
+                        local cfg = RealUI.db.profile.infobar and RealUI.db.profile.infobar.autoRepair
+                        -- Absent means "not configured yet", which is on.
+                        return cfg == nil or cfg.enabled == true
+                    end,
+                    set = function(info, value)
+                        RealUI.db.profile.infobar = RealUI.db.profile.infobar or {}
+                        local cfg = RealUI.db.profile.infobar.autoRepair or {}
+                        cfg.enabled = value
+                        RealUI.db.profile.infobar.autoRepair = cfg
+                    end,
+                },
+                autoRepairGuild = {
+                    name = "Use guild funds",
+                    desc = "Repair from the guild bank when your guild allowance covers the cost; otherwise your own money is used.",
+                    type = "toggle",
+                    order = 0.3,
+                    disabled = function()
+                        local cfg = RealUI.db.profile.infobar and RealUI.db.profile.infobar.autoRepair
+                        return not (cfg == nil or cfg.enabled == true)
+                    end,
+                    get = function()
+                        local cfg = RealUI.db.profile.infobar and RealUI.db.profile.infobar.autoRepair
+                        return cfg and cfg.useGuildFunds or false
+                    end,
+                    set = function(info, value)
+                        RealUI.db.profile.infobar = RealUI.db.profile.infobar or {}
+                        local cfg = RealUI.db.profile.infobar.autoRepair or {}
+                        cfg.useGuildFunds = value
+                        RealUI.db.profile.infobar.autoRepair = cfg
+                    end,
+                },
                 header = {
                     name = "Repair Mount",
                     type = "header",
@@ -3138,6 +3180,28 @@ do -- UI Tweaks
             frameMover = frameMover,
             minimap = minimap,
             mirrorBar = mirrorBar,
+            instantLoot = {
+                name = "Instant loot",
+                desc = "Loot everything immediately when auto-loot is on, without showing the loot window."
+                    .. "\n\nItems that cannot be looted (full bags, locked slots) are left in the window and play a sound."
+                    .. "\n\nAccount-wide.",
+                type = "toggle",
+                order = 50,
+                get = function()
+                    local Loot = RealUI:GetModule("Loot", true)
+                    return Loot and Loot.db and Loot.db.global.instantLoot or false
+                end,
+                set = function(_, value)
+                    local Loot = RealUI:GetModule("Loot", true)
+                    if Loot and Loot.db then
+                        Loot.db.global.instantLoot = value
+                    end
+                end,
+                disabled = function()
+                    local Loot = RealUI:GetModule("Loot", true)
+                    return not (Loot and Loot.db)
+                end,
+            },
         }
     }
 
