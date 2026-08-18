@@ -17,6 +17,13 @@ local DEFAULT_POSITIONS = {
     [2] = { point = "BOTTOM",     x = 0,  y = 200 },  -- Healing: centre-bottom
 }
 
+-- B31: deliberate party default — its own anchor, separate from the raid one.
+-- Left edge of the screen, offset up so the 5-cell vertical stack ends up
+-- roughly vertically centred: clear of chat (bottom-left), the HuD (centre)
+-- and the raid anchor. Same spot for both layouts; each profile remembers its
+-- own position once moved (FramePoint).
+local PARTY_DEFAULT_POSITION = { point = "LEFT", x = 80, y = 80 }
+
 --[[ RealUI raid/party frames (spec: realui-raidframes).
 
      oUF secure group headers in their own lightweight "RealUI-Raid" style —
@@ -33,6 +40,28 @@ local DEFAULT_POSITIONS = {
 
 local function GetRaidDB()
     return UnitFrames.db.profile.units.raid
+end
+
+-- B31: party sub-settings. Lazily initialized because the AceDB defaults table
+-- lives in UnitFrames.lua (owned elsewhere); once `party = { horizontal = false,
+-- framePoint = {} }` is added to the `units.raid` defaults there, this collapses
+-- to a plain accessor. `horizontal` = party cells in a row instead of a column.
+local function GetPartyDB()
+    local rdb = GetRaidDB()
+    if not rdb.party then rdb.party = {} end
+    if rdb.party.horizontal == nil then rdb.party.horizontal = false end
+    if not rdb.party.framePoint then rdb.party.framePoint = {} end
+    return rdb.party
+end
+
+-- Secure header attributes for the two party orientations. Applied at spawn and
+-- from RefreshRaid (via QueueSecure — attribute writes are combat-locked).
+local function GetPartyLayoutAttributes(rdb)
+    local spacing = rdb.spacing or 2
+    if GetPartyDB().horizontal then
+        return "LEFT", spacing, 0   -- point, xOffset, yOffset: grow right
+    end
+    return "TOP", 0, -spacing       -- grow down
 end
 
 -- HoT/shield watch-list for the left icons (Grid2-profile parity set + the
@@ -188,28 +217,37 @@ local function RaidStyle(self, unit)
     nameText:SetWordWrap(false)
     self:Tag(nameText, "[realui:raidname]")
 
-    -- Indicator icons (all built-in oUF elements).
-    local RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY")
+    -- Indicator icons (all built-in oUF elements). B39: Health is a child FRAME
+    -- of the cell, so textures created directly on the cell render underneath
+    -- the health fill no matter what draw layer they use. Put the indicators on
+    -- a dedicated overlay frame parented to the cell (NOT to Health, whose
+    -- SetClipsChildren would clip the icons that hang past the cell edge) with
+    -- a frame level safely above Health and its heal/absorb child bars.
+    local Overlay = _G.CreateFrame("Frame", nil, self)
+    Overlay:SetAllPoints(self)
+    Overlay:SetFrameLevel(Health:GetFrameLevel() + 5)
+
+    local RaidTargetIndicator = Overlay:CreateTexture(nil, "OVERLAY")
     RaidTargetIndicator:SetSize(12, 12)
     RaidTargetIndicator:SetPoint("RIGHT", self, "RIGHT", -2, 0)
     self.RaidTargetIndicator = RaidTargetIndicator
 
-    local GroupRoleIndicator = self:CreateTexture(nil, "OVERLAY")
+    local GroupRoleIndicator = Overlay:CreateTexture(nil, "OVERLAY")
     GroupRoleIndicator:SetSize(10, 10)
     GroupRoleIndicator:SetPoint("BOTTOM", self, "BOTTOM", 0, -4)
     self.GroupRoleIndicator = GroupRoleIndicator
 
-    local LeaderIndicator = self:CreateTexture(nil, "OVERLAY")
+    local LeaderIndicator = Overlay:CreateTexture(nil, "OVERLAY")
     LeaderIndicator:SetSize(10, 10)
     LeaderIndicator:SetPoint("TOPRIGHT", self, "TOPRIGHT", 2, 4)
     self.LeaderIndicator = LeaderIndicator
 
-    local AssistantIndicator = self:CreateTexture(nil, "OVERLAY")
+    local AssistantIndicator = Overlay:CreateTexture(nil, "OVERLAY")
     AssistantIndicator:SetSize(10, 10)
     AssistantIndicator:SetPoint("TOPRIGHT", self, "TOPRIGHT", 2, 4)
     self.AssistantIndicator = AssistantIndicator
 
-    local ReadyCheckIndicator = self:CreateTexture(nil, "OVERLAY", nil, 2)
+    local ReadyCheckIndicator = Overlay:CreateTexture(nil, "OVERLAY", nil, 2)
     ReadyCheckIndicator:SetSize(16, 16)
     ReadyCheckIndicator:SetPoint("CENTER", self)
     self.ReadyCheckIndicator = ReadyCheckIndicator
@@ -262,7 +300,7 @@ local function BuildInitialConfig(rdb)
     return ([[self:SetWidth(%d) self:SetHeight(%d)]]):format(rdb.size.x, rdb.size.y)
 end
 
-local anchorHolder
+local anchorHolder, partyAnchor
 _G.tinsert(UnitFrames.units, function()
     local rdb = GetRaidDB()
     if not rdb or rdb.enabled == false then return end
@@ -273,19 +311,35 @@ _G.tinsert(UnitFrames.units, function()
         return
     end
 
+    -- B31: extend the registered AceDB defaults with the party sub-table so
+    -- every profile activated after this point (switch / new / reset) resolves
+    -- units.raid.party.framePoint BEFORE FramePoint:RefreshMod re-reads the
+    -- option path on profile-change (AceDB copies defaults into the new
+    -- profile before firing its callbacks). The proper home for this is the
+    -- defaults table in UnitFrames.lua — this is runtime-equivalent and keeps
+    -- the change local to this file; GetPartyDB() covers the active profile.
+    local defaults = UnitFrames.db.defaults
+    local defRaid = defaults and defaults.profile and defaults.profile.units
+        and defaults.profile.units.raid
+    if defRaid and not defRaid.party then
+        defRaid.party = { horizontal = false, framePoint = {} }
+    end
+
     oUF:RegisterStyle("RealUI-Raid", RaidStyle)
     oUF:SetActiveStyle("RealUI-Raid")
 
     local spacing = rdb.spacing or 2
 
-    -- One movable anchor for both headers. Saved FramePoint positions are
-    -- per-profile, so the DPS and Healing layouts remember their own spots
-    -- once moved; these are only the defaults.
+    -- Separate movable anchors per header (B31): party and raid live in
+    -- different screen regions, so sharing one anchor forced a compromise
+    -- position on both. Saved FramePoint positions are per-profile, so the
+    -- DPS and Healing layouts remember their own spots once moved; these are
+    -- only the defaults.
     --
-    -- Defaults come from GridLayout.lua's presets, which the raidframes spec
-    -- names as the source of truth (req 3.2). The previous default hung 150px
-    -- below the HuD centre positioner, which put the frames on top of the
-    -- action bars on a fresh install.
+    -- Raid defaults come from GridLayout.lua's presets, which the raidframes
+    -- spec names as the source of truth (req 3.2). The previous default hung
+    -- 150px below the HuD centre positioner, which put the frames on top of
+    -- the action bars on a fresh install.
     local layout = RealUI.cLayout or 1
     local default = DEFAULT_POSITIONS[layout] or DEFAULT_POSITIONS[1]
 
@@ -293,18 +347,25 @@ _G.tinsert(UnitFrames.units, function()
     anchorHolder:SetSize(rdb.size.x, rdb.size.y)
     anchorHolder:SetPoint(default.point, _G.UIParent, default.point, default.x, default.y)
 
+    partyAnchor = _G.CreateFrame("Frame", "RealUIPartyAnchor", _G.UIParent)
+    partyAnchor:SetSize(rdb.size.x, rdb.size.y)
+    partyAnchor:SetPoint(PARTY_DEFAULT_POSITION.point, _G.UIParent,
+        PARTY_DEFAULT_POSITION.point, PARTY_DEFAULT_POSITION.x, PARTY_DEFAULT_POSITION.y)
+
     -- oUF 14: SpawnHeader takes (name, template, ...attribute pairs) — NO
     -- visibility parameter (removed from oUF 13); visibility is driven below
     -- with RegisterStateDriver. A stray string in the vararg list shifts every
     -- attribute pair by one and ends in SetAttribute(true, ...) → blocked.
+    local pPoint, pXOff, pYOff = GetPartyLayoutAttributes(rdb)
     local party = oUF:SpawnHeader("RealUIParty", nil,
         "showParty", true,
         "showPlayer", true,
         "showSolo", false,
-        "point", "TOP",
-        "yOffset", -spacing,
+        "point", pPoint,
+        "xOffset", pXOff,
+        "yOffset", pYOff,
         "oUF-initialConfigFunction", BuildInitialConfig(rdb))
-    party:SetPoint("TOPLEFT", anchorHolder, "TOPLEFT", 0, 0)
+    party:SetPoint("TOPLEFT", partyAnchor, "TOPLEFT", 0, 0)
     _G.RegisterStateDriver(party, "visibility", "[group:raid] hide; [group:party] show; hide")
 
     local raid = oUF:SpawnHeader("RealUIRaid", nil,
@@ -325,15 +386,21 @@ _G.tinsert(UnitFrames.units, function()
     UnitFrames.partyHeader = party
     UnitFrames.raidHeader = raid
 
-    -- Register the mover AFTER the headers exist (Boss.lua order), then raise
-    -- its strata: header CHILDREN are created later still (roster processing),
+    -- Register the movers AFTER the headers exist (Boss.lua order), then raise
+    -- their strata: header CHILDREN are created later still (roster processing),
     -- so creation order alone leaves the mover buried under the cells when in
-    -- a group. FramePoint re-anchors our holder onto its dragFrame, so the
+    -- a group. FramePoint re-anchors our holders onto their dragFrames, so the
     -- dragFrame is recoverable from the holder's anchor point.
-    FramePoint:PositionFrame(UnitFrames, anchorHolder, {"profile", "units", "raid", "framePoint"})
-    local _, dragFrame = anchorHolder:GetPoint(1)
-    if dragFrame and dragFrame ~= _G.UIParent then
-        dragFrame:SetFrameStrata("HIGH")
+    GetPartyDB()  -- ensure the party.framePoint table exists before FramePoint reads it
+    for holder, path in _G.next, {
+        [anchorHolder] = {"profile", "units", "raid", "framePoint"},
+        [partyAnchor]  = {"profile", "units", "raid", "party", "framePoint"},
+    } do
+        FramePoint:PositionFrame(UnitFrames, holder, path)
+        local _, dragFrame = holder:GetPoint(1)
+        if dragFrame and dragFrame ~= _G.UIParent then
+            dragFrame:SetFrameStrata("HIGH")
+        end
     end
 
     -- Hand the style token back for anything spawned later.
@@ -344,7 +411,8 @@ end)
 
 --[[ Config-mode placeholder cells: secure headers can't show fake units, so
      positioning while solo gets styled dummy textures anchored exactly where
-     the party header renders. Toggled by RealUI:HuDTestMode. ]]--
+     the raid and party headers render (one preview per anchor since B31 split
+     them). Toggled by RealUI:HuDTestMode. ]]--
 
 local testFrame
 local TEST_CLASSES = {
@@ -353,6 +421,29 @@ local TEST_CLASSES = {
     "DEATHKNIGHT", "DEMONHUNTER", "EVOKER",
 }
 local TEST_GROUPS, TEST_PER_GROUP = 4, 5  -- 20-man preview, like Grid2's test mode
+
+-- B31: party preview — 5 cells on the party anchor, re-flowed on every show so
+-- the column ↔ row orientation setting is previewed live.
+local partyTestFrame, partyTestCells
+local function LayoutPartyTest(rdb)
+    local spacing = rdb.spacing or 2
+    local horizontal = GetPartyDB().horizontal
+    local cellW, cellH = rdb.size.x, rdb.size.y
+    if horizontal then
+        partyTestFrame:SetSize((cellW + spacing) * TEST_PER_GROUP, cellH)
+    else
+        partyTestFrame:SetSize(cellW, (cellH + spacing) * TEST_PER_GROUP)
+    end
+    for i, cell in _G.ipairs(partyTestCells) do
+        cell:ClearAllPoints()
+        if horizontal then
+            cell:SetPoint("TOPLEFT", partyTestFrame, "TOPLEFT", (i - 1) * (cellW + spacing), 0)
+        else
+            cell:SetPoint("TOPLEFT", partyTestFrame, "TOPLEFT", 0, -((i - 1) * (cellH + spacing)))
+        end
+    end
+end
+
 function UnitFrames:ToggleRaidTestMode(show)
     local rdb = GetRaidDB()
     if show then
@@ -391,8 +482,32 @@ function UnitFrames:ToggleRaidTestMode(show)
             end
         end
         testFrame:Show()
-    elseif testFrame then
-        testFrame:Hide()
+
+        if partyAnchor then
+            if not partyTestFrame then
+                partyTestFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
+                partyTestFrame:SetPoint("TOPLEFT", partyAnchor, "TOPLEFT", 0, 0)
+                partyTestCells = {}
+                for i = 1, TEST_PER_GROUP do
+                    local cell = partyTestFrame:CreateTexture(nil, "ARTWORK")
+                    cell:SetSize(rdb.size.x, rdb.size.y)
+                    local color = _G.RAID_CLASS_COLORS[TEST_CLASSES[i]]
+                    cell:SetColorTexture(color.r, color.g, color.b, 0.7)
+
+                    local label = partyTestFrame:CreateFontString(nil, "OVERLAY")
+                    label:SetFontObject("SystemFont_Shadow_Small")
+                    label:SetTextColor(1, 1, 1)
+                    label:SetPoint("BOTTOM", cell, "BOTTOM", 0, 2)
+                    label:SetFormattedText("%s %d", _G.PARTY, i)
+                    partyTestCells[i] = cell
+                end
+            end
+            LayoutPartyTest(rdb)
+            partyTestFrame:Show()
+        end
+    else
+        if testFrame then testFrame:Hide() end
+        if partyTestFrame then partyTestFrame:Hide() end
     end
 end
 
@@ -417,6 +532,11 @@ function UnitFrames:RefreshRaid()
             end
         end
     end
+    -- Keep the config-mode preview in sync with the orientation setting.
+    if partyTestFrame and partyTestFrame:IsShown() then
+        LayoutPartyTest(rdb)
+    end
+
     QueueSecure(function()
         if rdb.enabled == false then
             _G.UnregisterStateDriver(self.partyHeader, "visibility")
@@ -425,6 +545,12 @@ function UnitFrames:RefreshRaid()
             self.raidHeader:Hide()
             UnitFrames:RestoreBlizzardGroupFrames()
         else
+            -- B31: party orientation (column ↔ row) is header attributes, so it
+            -- is live-applied here; the secure header re-flows on SetAttribute.
+            local point, xOffset, yOffset = GetPartyLayoutAttributes(rdb)
+            self.partyHeader:SetAttribute("point", point)
+            self.partyHeader:SetAttribute("xOffset", xOffset)
+            self.partyHeader:SetAttribute("yOffset", yOffset)
             _G.RegisterStateDriver(self.partyHeader, "visibility",
                 "[group:raid] hide; [group:party] show; hide")
             _G.RegisterStateDriver(self.raidHeader, "visibility", "[group:raid] show; hide")
