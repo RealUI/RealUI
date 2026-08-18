@@ -7,6 +7,12 @@ local LAB = _G.LibStub("LibActionButton-1.0")
      buttons. Layout math (rows/padding/grow, negative padding legal) and the
      hookable Layout() live here; per-button behavior is all LAB's. ]]--
 
+-- The skin draws a 1px black border OUTSIDE each button frame (Skin.lua
+-- CreateBorder), so a button's on-screen cell is buttonSize + 2. All layout
+-- math counts it: db.padding is the ACTUAL visible gap between neighbouring
+-- buttons' border art (B28 box model), not the frame-to-frame distance.
+private.BUTTON_BORDER = 1
+
 local function BuildButtonConfig(barDB, keyBoundTarget)
     return {
         outOfRangeColoring = "button",
@@ -56,12 +62,17 @@ function barMixin:Layout()
     local rows = _G.math.max(1, _G.math.min(db.rows or 1, shown))
     local perRow = _G.math.ceil(shown / rows)
     local size, pad = db.buttonSize or 26, db.padding or 2
+    -- Border-aware spacing (B28): neighbouring buttons put both of their
+    -- 1px outside borders between the frames before any padding, so the
+    -- frame-to-frame gap is padding + 2*border. padding 0 = borders
+    -- touching; padding 2 = a true 2px visible gap.
+    local gap = pad + private.BUTTON_BORDER * 2
 
     local dirH = (db.growHorizontal == "LEFT") and -1 or 1
     local dirV = (db.growVertical == "UP") and 1 or -1
     local corner = ((dirV == -1) and "TOP" or "BOTTOM") .. ((dirH == 1) and "LEFT" or "RIGHT")
 
-    self:SetSize(perRow * (size + pad) - pad, rows * (size + pad) - pad)
+    self:SetSize(perRow * (size + gap) - gap, rows * (size + gap) - gap)
 
     for i = 1, 12 do
         local button = self.buttons[i]
@@ -73,8 +84,8 @@ function barMixin:Layout()
             local row = _G.math.floor((i - 1) / perRow)
             button:SetSize(size, size)
             button:SetPoint(corner, self, corner,
-                col * (size + pad) * dirH,
-                row * (size + pad) * dirV)
+                col * (size + gap) * dirH,
+                row * (size + gap) * dirV)
             button:Show()
         end
     end
@@ -113,6 +124,34 @@ function barMixin:ApplyConfig()
     end
 end
 
+-- LAB abbreviates hotkey text only through LibKeyBound, which failed our
+-- license gate and is not shipped — without it LAB renders the RAW binding
+-- string ("SHIFT-2"), which clips on 27px buttons (part of B05: side bars
+-- showed "SHIF…" while bar 1's plain "1".."=" keys looked fine). Replace
+-- per-button: same Blizzard-abbreviated text (GetBindingText's abbreviated
+-- form, exactly what Blizzard's own UpdateHotkeys uses) on EVERY bar, and
+-- fold in our own /rab bind captures so they ride the same pipeline.
+local function GetHotkeyText(self)
+    local key
+    local target = self.config and self.config.keyBoundTarget
+    if target then
+        key = _G.GetBindingKey(target)
+    end
+    if not key then
+        key = _G.GetBindingKey(("CLICK %s:LeftButton"):format(self:GetName()))
+    end
+    if not key then
+        local bindings = AB.db and AB.db.profile and AB.db.profile.bindings
+        key = bindings and bindings[self:GetName()]
+    end
+    if key and key ~= "" then
+        local text = _G.GetBindingText(key, 1)
+        if text and text ~= "" then
+            return text
+        end
+    end
+end
+
 function private.CreateBar(id)
     local bar = _G.CreateFrame("Frame", "RealUI_AB_Bar" .. id, _G.UIParent,
         "SecureHandlerStateTemplate")
@@ -139,6 +178,10 @@ function private.CreateBar(id)
         local keyBoundTarget = KEYBOUND_TARGETS[id] and KEYBOUND_TARGETS[id]:format(i) or nil
         local button = LAB:CreateButton(i, bar:GetName() .. "B" .. i, bar,
             BuildButtonConfig(db, keyBoundTarget))
+        -- Instance override beats LAB's Generic:GetHotkey (metatable) — this
+        -- is the only hook point LAB offers for hotkey text; UpdateHotkeys
+        -- always routes through self:GetHotkey().
+        button.GetHotkey = GetHotkeyText
 
         if id == 1 then
             -- Paged: state N = action page N (the state driver in ActionBars.lua

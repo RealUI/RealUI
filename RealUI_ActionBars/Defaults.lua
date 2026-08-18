@@ -18,10 +18,11 @@ local function bar(overrides)
         enabled = true,
         buttons = 12,
         rows = 1,
-        -- 27px at 0 padding == BT4's 36px at -9 visually (shared 1px borders),
-        -- without the hit-rect overlap.
+        -- 27px buttons with a 1px border drawn outside the frame. padding is
+        -- the TRUE visible gap between neighbouring borders (Bar.lua box
+        -- model, B28): the shipped look is a clean 2px gap.
         buttonSize = 27,
-        padding = 0,
+        padding = 2,
         scale = 1,
         alpha = 1,
         showgrid = true,
@@ -41,14 +42,19 @@ private.nsDefaults = {
     ActionBars = {
         profile = {
             actionbars = {
+                -- Static geometry mirrors what Integration.lua computes for
+                -- the default RealUI layout (12 buttons, 27px, 2px visible
+                -- gap -> 368px frame extent): center bars at -width/2, side
+                -- bars border-flush with the screen edge (B05), bar 4
+                -- stacked above bar 5 with the same 2px visible gap.
                 [1] = bar({ flyoutDirection = "DOWN",
-                            position = { point = "CENTER", x = -224.5, y = -199.5 } }),
-                [2] = bar({ position = { point = "BOTTOM", x = -224.5, y = 89 } }),
-                [3] = bar({ position = { point = "BOTTOM", x = -224.5, y = 62 } }),
+                            position = { point = "CENTER", x = -184, y = -199.5 } }),
+                [2] = bar({ position = { point = "BOTTOM", x = -184, y = 93 } }),
+                [3] = bar({ position = { point = "BOTTOM", x = -184, y = 62 } }),
                 [4] = bar({ rows = 12, flyoutDirection = "LEFT",
-                            position = { point = "RIGHT", x = -36, y = 334.5 } }),
+                            position = { point = "RIGHT", x = -1, y = 382.5 } }),
                 [5] = bar({ rows = 12, flyoutDirection = "LEFT",
-                            position = { point = "RIGHT", x = -36, y = 10.5 } }),
+                            position = { point = "RIGHT", x = -1, y = 10.5 } }),
                 [6] = bar({ enabled = false, rows = 4,
                             position = { point = "CENTER", x = 210, y = -360 } }),
             },
@@ -64,8 +70,10 @@ private.nsDefaults = {
             fadeoutalpha = 0,
             growHorizontal = "LEFT",
             visibility = VIS_SHOW,
-            -- Grow-corner semantics: right edge just left of the centered bars.
-            position = { point = "BOTTOM", x = -175, y = 49 },
+            -- Grow-corner semantics: right edge just left of the centered
+            -- bars (which are 368px wide with the B28 box model — keep the
+            -- same 13px clearance the old 324px-wide bars had).
+            position = { point = "BOTTOM", x = -197, y = 49 },
         },
     },
     PetBar = {

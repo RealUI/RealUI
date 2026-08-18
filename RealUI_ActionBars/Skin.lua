@@ -6,26 +6,29 @@ local AB = private.AB
      When the user runs their own Masque, its groups win and we stand aside
      (the "RealUI" Masque skin ships in RealUI_Skins as always). ]]--
 
+-- Border width is part of the layout box model: Bar.lua counts
+-- private.BUTTON_BORDER on every side when spacing buttons (B28).
 local function CreateBorder(button)
+    local w = private.BUTTON_BORDER or 1
     local border = {}
     for i = 1, 4 do
         border[i] = button:CreateTexture(nil, "BACKGROUND", nil, -8)
         border[i]:SetColorTexture(0, 0, 0, 1)
     end
-    border[1]:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 1)
-    border[1]:SetPoint("BOTTOMRIGHT", button, "TOPRIGHT", 1, 0)
-    border[2]:SetPoint("TOPLEFT", button, "BOTTOMLEFT", -1, 0)
-    border[2]:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, -1)
-    border[3]:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 0)
+    border[1]:SetPoint("TOPLEFT", button, "TOPLEFT", -w, w)
+    border[1]:SetPoint("BOTTOMRIGHT", button, "TOPRIGHT", w, 0)
+    border[2]:SetPoint("TOPLEFT", button, "BOTTOMLEFT", -w, 0)
+    border[2]:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", w, -w)
+    border[3]:SetPoint("TOPLEFT", button, "TOPLEFT", -w, 0)
     border[3]:SetPoint("BOTTOMRIGHT", button, "BOTTOMLEFT", 0, 0)
     border[4]:SetPoint("TOPLEFT", button, "TOPRIGHT", 0, 0)
-    border[4]:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, 0)
+    border[4]:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", w, 0)
     return border
 end
 
--- Buttons are sized to their VISUAL cell (no overlap trick — 27px at 0
--- padding renders identically to BT4's 36px at -9, with shared 1px borders),
--- so hit rect == visual box.
+-- Buttons are sized to their icon (no overlap trick), with the 1px border
+-- drawn outside the frame and counted by the layout box model (B28:
+-- db.padding == the visible gap between borders), so hit rect == icon box.
 --
 -- This previously claimed LAB's resets "stay correct by construction". They do
 -- not: LAB hard-codes the state-texture geometry (see ApplyStateTextures), so
@@ -40,6 +43,26 @@ local function GetHighlightColor()
         return color:GetRGB()
     end
     return 0.243, 0.570, 1
+end
+
+-- Blizzard's assisted-combat rotation/highlight templates carry fixed-size
+-- artwork authored for 45px action buttons (a 128px gold ring frame, a 66px
+-- ants flipbook) anchored CENTER with no relation to the parent's size. LAB
+-- spawns them as-is, so on a 27px button the spinner dwarfs the button
+-- (B18). Scale the whole overlay by buttonSize/45 — proportionally identical
+-- to the default UI — and re-center it (the template's CENTER (-2, 1) offset
+-- matches Blizzard's off-center slot art, not our full-bleed square).
+local ASSIST_ART_BUTTON_SIZE = 45
+local function ConstrainAssistOverlay(button, overlay)
+    if not overlay then return end
+    local size = button:GetWidth()
+    if not size or size <= 0 then return end
+    local scale = size / ASSIST_ART_BUTTON_SIZE
+    if overlay._ruiAssistScale == scale then return end
+    overlay._ruiAssistScale = scale
+    overlay:SetScale(scale)
+    overlay:ClearAllPoints()
+    overlay:SetPoint("CENTER", button, "CENTER")
 end
 
 -- LAB re-sizes and re-anchors HighlightTexture/CheckedTexture to hardcoded
@@ -70,6 +93,26 @@ local function ApplyStateTextures(button)
         checked:SetAllPoints(button)
         checked:SetColorTexture(r, g, b, 0.45)
     end
+
+    -- B16: LAB re-anchors the cooldown swipe to Blizzard's 45px-button
+    -- insets (TOPLEFT 3,-2 / BOTTOMRIGHT -3,3) on every Update — on a 27px
+    -- button the swipe covers barely half the face. Full-face, every update
+    -- (this runs after LAB's re-anchor, same as the state textures above).
+    local cooldown = button.cooldown
+    if cooldown then
+        cooldown:ClearAllPoints()
+        cooldown:SetAllPoints(button)
+    end
+    local charge = button.chargeCooldown
+    if charge then
+        charge:ClearAllPoints()
+        charge:SetAllPoints(button)
+    end
+
+    -- B18: assisted-combat overlays (created lazily by LAB from Blizzard
+    -- templates).
+    ConstrainAssistOverlay(button, button.AssistedCombatRotationFrame)
+    ConstrainAssistOverlay(button, button.AssistedCombatHighlightFrame)
 end
 
 local function SkinButton(button)
@@ -95,6 +138,21 @@ local function SkinButton(button)
     backdrop:SetAllPoints(button)
     backdrop:SetColorTexture(0, 0, 0, 0.5)
     button._ruiBackdrop = backdrop
+
+    -- B16: LAB creates the charge cooldown lazily, anchored 2px inside the
+    -- icon (45px-button geometry), and only re-skins it when Masque is
+    -- present. Pre-create it full-face — LAB adopts an existing
+    -- button.chargeCooldown — so the first charge sweep is already sized
+    -- right instead of waiting for the next OnButtonUpdate.
+    if not button.chargeCooldown then
+        local charge = _G.CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+        charge:SetHideCountdownNumbers(true)
+        charge:SetDrawSwipe(false)
+        charge:SetAllPoints(button)
+        charge:SetFrameLevel(button:GetFrameLevel())
+        button.chargeCooldown = charge
+    end
+
     ApplyStateTextures(button)
     if button.SpellHighlightTexture then
         button.SpellHighlightTexture:ClearAllPoints()

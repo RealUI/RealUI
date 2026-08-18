@@ -45,6 +45,7 @@ local function BarOptions(id)
             },
             padding = {
                 type = "range", name = "Padding", min = -9, max = 12, step = 1, order = 5,
+                desc = "Visible gap between buttons, borders included: 0 = borders touching, 2 = a true 2px gap (default).",
                 get = function() return db().padding end,
                 set = function(_, v) db().padding = v; refresh() end,
             },
