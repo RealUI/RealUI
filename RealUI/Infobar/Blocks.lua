@@ -77,8 +77,13 @@ local TextTableCellProvider, TextTableCellPrototype, BaseCellPrototype
 local function SetupTextTable()
     TextTableCellProvider, TextTableCellPrototype, BaseCellPrototype = qTip:CreateCellProvider()
 
+    --[[ The text table renders inside a LibQTip tooltip, which is laid out in
+        plain UI units from font objects (SystemFont_Shadow_Med1 etc.). All
+        sizes here must be plain units too — running them through Scale.Value
+        (physical pixels) inflated these tooltips by the pixel-scale factor
+        relative to the font-driven blocks (B36). ]]
     local MAX_ROWS = 15
-    local ROW_HEIGHT = Scale.Value(9)
+    local ROW_HEIGHT = 15
     local TABLE_WIDTH = 320
     local numTables = 0
     local extData = {}
@@ -121,10 +126,10 @@ local function SetupTextTable()
                     if not cell then
                         cell = _G.CreateFrame("Button", "$parentCell"..col, row)
                         cell:SetID(col)
-                        Scale.Point(cell, "TOP")
-                        Scale.Point(cell, "BOTTOM")
-                        Scale.Point(cell, "LEFT", header[col])
-                        Scale.Point(cell, "RIGHT", header[col])
+                        cell:SetPoint("TOP")
+                        cell:SetPoint("BOTTOM")
+                        cell:SetPoint("LEFT", header[col])
+                        cell:SetPoint("RIGHT", header[col])
                         cell.row = row
                         row[col] = cell
 
@@ -284,8 +289,8 @@ local function SetupTextTable()
         if not self.textTable then
             numTables = numTables + 1
             local textTable = _G.CreateFrame("Frame", "IL_TextTable"..numTables, self)
-            Scale.Point(textTable, "TOPLEFT")
-            Scale.Point(textTable, "BOTTOMRIGHT")
+            textTable:SetPoint("TOPLEFT")
+            textTable:SetPoint("BOTTOMRIGHT")
             textTable:EnableMouse(true)
 
             --[[ Test BG
@@ -294,19 +299,19 @@ local function SetupTextTable()
             test:SetAllPoints(textTable)]]
 
             textTable.header = _G.CreateFrame("Frame", "$parentHeader", textTable)
-            Scale.Point(textTable.header, "TOPLEFT")
-            Scale.Point(textTable.header, "RIGHT")
+            textTable.header:SetPoint("TOPLEFT")
+            textTable.header:SetPoint("RIGHT")
             textTable.header:SetHeight(ROW_HEIGHT)
 
             local line = textTable:CreateTexture(nil, "BACKGROUND")
             line:SetColorTexture(1, 1, 1)
-            Scale.Point(line, "TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
-            Scale.Point(line, "RIGHT")
+            line:SetPoint("TOPLEFT", textTable.header, "BOTTOMLEFT", 0, -5)
+            line:SetPoint("RIGHT")
             line:SetHeight(1)
 
             textTable.scrollArea = _G.CreateFrame("ScrollFrame", "$parentScroll", textTable, "FauxScrollFrameTemplate")
-            Scale.Point(textTable.scrollArea, "TOPLEFT", line, 0, -5)
-            Scale.Point(textTable.scrollArea, "BOTTOMRIGHT")
+            textTable.scrollArea:SetPoint("TOPLEFT", line, 0, -5)
+            textTable.scrollArea:SetPoint("BOTTOMRIGHT")
             textTable.scrollArea:SetScript("OnVerticalScroll", function(scroll, offset)
                 _G.FauxScrollFrame_OnVerticalScroll(scroll, offset, ROW_HEIGHT, UpdateScroll)
             end)
@@ -317,11 +322,11 @@ local function SetupTextTable()
             for index = 1, MAX_ROWS do
                 local row = _G.CreateFrame("Button", "$parentRow"..index, textTable)
                 if index == 1 then
-                    Scale.Point(row, "TOPLEFT", prev)
+                    row:SetPoint("TOPLEFT", prev)
                 else
-                    Scale.Point(row, "TOPLEFT", prev, "BOTTOMLEFT")
+                    row:SetPoint("TOPLEFT", prev, "BOTTOMLEFT")
                 end
-                Scale.Point(row, "RIGHT")
+                row:SetPoint("RIGHT")
                 row:SetHeight(ROW_HEIGHT)
                 row:SetScript("OnEnter", function(r)
                     r.highlight:Show()
@@ -351,7 +356,7 @@ local function SetupTextTable()
             self:OnCreation()
         end
         local textTable = self.textTable
-        local width = Scale.Value(data.width or TABLE_WIDTH)
+        local width = data.width or TABLE_WIDTH
         extData[data] = extData[data] or {}
         textTable.data = data
 
@@ -363,12 +368,12 @@ local function SetupTextTable()
             if not header then
                 header = _G.CreateFrame("Button", nil, headerRow)
                 header:SetID(col)
-                Scale.Point(header, "TOP", 0, -4)
-                Scale.Point(header, "BOTTOM")
+                header:SetPoint("TOP", 0, -4)
+                header:SetPoint("BOTTOM")
                 if col == 1 then
-                    Scale.Point(header, "LEFT")
+                    header:SetPoint("LEFT")
                 else
-                    Scale.Point(header, "LEFT", headerRow[col-1], "RIGHT", 2, 0)
+                    header:SetPoint("LEFT", headerRow[col-1], "RIGHT", 2, 0)
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
@@ -379,8 +384,8 @@ local function SetupTextTable()
                 local hR, hG, hB = RealUI.charInfo.class.color:GetRGB()
                 local highlight = header:CreateTexture(nil, "ARTWORK")
                 highlight:SetColorTexture(hR, hG, hB)
-                Scale.Point(highlight, "TOPLEFT", header, "BOTTOMLEFT", 0, -5)
-                Scale.Point(highlight, "RIGHT")
+                highlight:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -5)
+                highlight:SetPoint("RIGHT")
                 highlight:SetHeight(3)
                 header:SetHighlightTexture(highlight)
                 header.hl = highlight
@@ -449,7 +454,7 @@ local function SetupTextTable()
         -- ROW_HEIGHT is per-row, scrollArea sits at offset (ROW_HEIGHT + 11) below textTable top
         -- (header height + 5 px gap + 1 px line + 5 px gap).
         local numToDisplay = min(MAX_ROWS, #data)
-        local actualHeight = ROW_HEIGHT + Scale.Value(11) + numToDisplay * ROW_HEIGHT
+        local actualHeight = ROW_HEIGHT + 11 + numToDisplay * ROW_HEIGHT
 
         self.cellWidth = width
         self.cellHeight = actualHeight
