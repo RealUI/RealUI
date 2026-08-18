@@ -103,6 +103,13 @@ local function CreateButton(index, id)
     button.id = id
 
     button:SetNormalFontObject("GameFontNormal")
+    -- SecureActionButtonTemplate only dispatches to SECURE_ACTIONS for click
+    -- types the button is registered for; without this the attributes below are
+    -- set correctly but clicking does nothing at all (B33 — the tooltip worked,
+    -- so the button was clearly live, it just never ran the handler).
+    -- "AnyUp" only: the default worldmarker action is "toggle", so registering
+    -- down as well would place and immediately clear the marker in one click.
+    button:RegisterForClicks("AnyUp")
     button:SetAttribute("type", "worldmarker")
     button:SetScript("OnEnter", OnEnter)
     button:SetScript("OnLeave", OnLeave)
