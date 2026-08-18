@@ -45,12 +45,34 @@ end
 -- Buffs/Debuffs element. One element per legacy container; positioning on
 -- the parent stays the caller's job (Player/Target use SetAuraPosition,
 -- Boss anchors directly).
+-- B19/B45: the timer text we could never restyle is the COOLDOWN WIDGET's
+-- built-in countdown (CooldownFrameTemplate draws it by default), not something
+-- oUF owns — hence the silent SetFontObject refusals.
+--
+-- oUF 14 provides the supported route: pass `showDuration` and it creates a
+-- `button.Time` FontString and drives it via button:SetDurationText(), with
+-- durationFormat / durationFormatter / durationColors as options
+-- (oUF/elements/auras.lua:181-190). That FontString is oUF's, so it is ours to
+-- style and position. Hiding the cooldown's own numbers leaves exactly one
+-- timer per icon. No secret aura data is read at any point.
 local function AuraPostCreateButton(_, button)
     if button.Icon then
         _G.Aurora.Base.CropIcon(button.Icon, button)
     end
     if button.Count then
         button.Count:SetFontObject("NumberFont_Outline_Med")
+    end
+
+    -- Blizzard's countdown numbers on the cooldown spiral: unstylable from here
+    -- and the source of the oversized digits. oUF's Time string replaces them.
+    if button.Cooldown and button.Cooldown.SetHideCountdownNumbers then
+        button.Cooldown:SetHideCountdownNumbers(true)
+    end
+
+    if button.Time then
+        button.Time:SetFontObject("NumberFont_Outline_Small")
+        button.Time:ClearAllPoints()
+        button.Time:SetPoint("BOTTOM", button, "BOTTOM", 0, 1)
     end
 end
 
@@ -73,6 +95,11 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         elementSpacing = settings.spacing,
         lineSpacing = settings.spacing,
         showCount = true,
+        -- B19: oUF-owned duration text (button.Time), replacing the cooldown
+        -- widget's own countdown numbers which cannot be restyled. Minutes and
+        -- hours are shown without decimals so long raid buffs stay narrow.
+        showDuration = true,
+        durationFormat = settings.durationFormat,
         cancelButton = settings.cancelButton,
         showDebuffBorder = settings.showDebuffBorder,
         -- Must be an AddGroup option, not a post-hoc element flag: the intrinsic
@@ -103,6 +130,12 @@ function UnitFrames.RefreshAuraElement(element, frame, opts)
     local initialAnchor = UnitFrames.GetInitialAnchor(growthX, growthY)
     element:SetFlowLayoutAnchorPoint(initialAnchor)
     element:SetFlowLayoutGrowthDirection(growthX == "LEFT" and -1 or 1, growthY == "DOWN" and -1 or 1)
+    -- B19 note: target buffs and debuffs share the frame's top edge and grow
+    -- toward each other (debuffs TOPLEFT→right, buffs TOPRIGHT→left), so with
+    -- many of both they meet in the middle and overlap. Capping each at half the
+    -- frame width was tried 2026-08-19 and is WORSE — they wrap after ~3 icons
+    -- into a tall narrow block. The real fix is separate anchors for the two
+    -- groups, which is a layout decision, not a line-size tweak.
     local maxWidth = layout.maxWidth
     element:SetFlowLayoutMaximumLineSize((maxWidth and maxWidth > 0 and maxWidth) or frame:GetWidth())
     if opts.defaultAnchor then
