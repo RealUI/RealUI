@@ -791,7 +791,7 @@ function UnitFrames:OnInitialize()
                     reversePercent = false,
                     framePoint = {},
                     buffCount = 16,
-                    buffSize = 20,
+                    buffSize = 28,
                     showPlayerBuffs = true,
                     auraLayout = {
                         buffs = {
@@ -817,9 +817,9 @@ function UnitFrames:OnInitialize()
                     reverseFill = false,
                     framePoint = {},
                     debuffCount = 16,
-                    debuffSize = 20,
+                    debuffSize = 28,
                     buffCount = 16,
-                    buffSize = 20,
+                    buffSize = 28,
                     showTargetDebuffs = true,
                     showTargetBuffs = true,
                     auraLayout = {
