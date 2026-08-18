@@ -462,6 +462,64 @@ function RealUI:ChatCommand_Config(input)
             self:SetUpAddonProfile("Platynator", true)
             print("|cff0099ffRealUI|r: Platynator profile updated.")
             return
+        elseif command == "devcheck" then
+            -- Reports anything left in a non-shipping state: dev A/B toggles,
+            -- taint logging, disabled skins, leftover diagnostic keys. Three
+            -- separate debugging detours in Aug 2026 turned out to be a stale
+            -- toggle from an earlier session (objectiveTracker, chat,
+            -- devRestoreInsertFrame), each of which looked exactly like a bug.
+            local found = 0
+            local function report(label, value, expected)
+                found = found + 1
+                print(("|cffff9900  %s|r = %s |cff808080(expected %s)|r")
+                    :format(label, tostring(value), tostring(expected)))
+            end
+
+            print("|cff0099ffRealUI|r: dev/diagnostic state check")
+
+            local taintLog = _G.GetCVar("taintLog")
+            if taintLog and taintLog ~= "0" then
+                report("CVar taintLog", taintLog, 0)
+            end
+
+            local ac = _G.AuroraConfig
+            if ac then
+                -- Dev A/B toggles: anything true here is a test flag.
+                if ac.devRestoreInsertFrame then
+                    report("AuroraConfig.devRestoreInsertFrame", true, false)
+                end
+
+                -- Skin toggles that default ON. A disabled skin is a valid user
+                -- choice, but it also silently changes what is being tested.
+                -- Only keys whose shipping default is true; mainmenubar
+                -- deliberately defaults false and is not listed.
+                for _, key in next, {
+                    "chat", "fonts", "objectiveTracker", "bags", "banks",
+                    "tooltips",
+                } do
+                    if ac[key] == false then
+                        report("AuroraConfig." .. key, false, true)
+                    end
+                end
+
+                -- Leftover keys from removed diagnostic harnesses.
+                for _, key in next, { "fontBisect", "chatBisect" } do
+                    if ac[key] then
+                        report("AuroraConfig." .. key .. " (harness removed)", ac[key], "nil")
+                    end
+                end
+            end
+
+            if _G.C_AddOns.IsAddOnLoaded("RealUI_Dev") then
+                print("|cff808080  RealUI_Dev is loaded (not shipped to users).|r")
+            end
+
+            if found == 0 then
+                print("|cff00ff00  Nothing unusual — everything is at its shipping default.|r")
+            else
+                print(("|cffff9900  %d setting(s) differ from shipping defaults.|r"):format(found))
+            end
+            return
         end
     end
 
