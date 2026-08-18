@@ -37,11 +37,6 @@ local auroraConfigDefaults = {
     characterSheet = true,
     objectiveTracker = true,
     talentArtBackground = true,
-    -- Diagnostic: font-replacement bisect range (see Aurora Skin/api.lua).
-    fontBisect = false,
-    -- Diagnostic: chat-skin bisect range (see Aurora
-    -- Skin/Interface/AddOns/Blizzard_ChatFrameBase/Mainline/FloatingChatFrame.lua).
-    chatBisect = false,
     buttonsHaveGradient = true,
     customHighlight = {
         enabled = false,
