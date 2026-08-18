@@ -15,6 +15,9 @@ function Markers.Create(plate)
     raidIcon:SetPoint("LEFT", plate, "RIGHT", 30, 0)
     raidIcon:Hide()
 
+    -- B32: anchored in front of the name text in Attach (element creation order
+    -- is nondeterministic, so plate.Texts may not exist yet). This point is only
+    -- a fallback.
     local rare = plate:CreateTexture(nil, "OVERLAY")
     rare:SetSize(14, 14)
     rare:SetPoint("RIGHT", plate, "LEFT", -2, 8)
@@ -88,6 +91,19 @@ local function UpdateQuest(plate)
 end
 
 function Markers.Attach(plate, unit)
+    local markers = plate.Markers
+    -- B32: the classification (rare/elite) icon used to sit at the plate's left
+    -- edge, where it overlapped the castbar icon. Anchor it in front of the name
+    -- text instead — the name row sits above the plate, the castbar icon spans
+    -- downward from the plate's top-left, so the two can no longer collide.
+    -- (The name box is fixed-width because a secret name's string width is
+    -- itself secret, so "in front of the name" means the box's left edge.)
+    -- The quest icon is anchored to the rare icon and rides along.
+    if plate.Texts and not markers.rareAnchoredToName then
+        markers.rare:ClearAllPoints()
+        markers.rare:SetPoint("RIGHT", plate.Texts.name, "LEFT", -2, 0)
+        markers.rareAnchoredToName = true
+    end
     UpdateRaidIcon(plate)
     UpdateRare(plate)
     UpdateQuest(plate)
