@@ -1586,6 +1586,48 @@ function Infobar:CreateBlocks()
             end,
             OnEvent = function(block, event, ...)
                 Infobar:debug("Durability1: OnEvent", event, ...)
+
+                -- Auto-repair. Lives here because this block already owns the
+                -- repair UX (repair-mount summon on right-click).
+                if event == "MERCHANT_SHOW" then
+                    if not RealUI.db.profile.infobar then
+                        RealUI.db.profile.infobar = {}
+                    end
+                    -- profile.infobar has no registered defaults anywhere; the
+                    -- whole table is created lazily, so seed ours on first use.
+                    local cfg = RealUI.db.profile.infobar.autoRepair
+                    if not cfg then
+                        cfg = { enabled = true, useGuildFunds = false }
+                        RealUI.db.profile.infobar.autoRepair = cfg
+                    end
+
+                    if cfg.enabled and not block.repairedThisVisit
+                    and _G.CanMerchantRepair() then
+                        block.repairedThisVisit = true -- once per merchant visit
+
+                        local cost, canRepair = _G.GetRepairAllCost()
+                        if canRepair and cost > 0 then
+                            local coins = _G.C_CurrencyInfo.GetCoinTextureString(cost)
+                            local guildLimit = _G.GetGuildBankWithdrawMoney()
+
+                            if cfg.useGuildFunds and _G.CanGuildBankRepair()
+                            and (guildLimit == -1 or guildLimit >= cost) then
+                                _G.RepairAllItems(true)
+                                RealUI:Print(("Repaired for %s (guild funds)."):format(coins))
+                            elseif _G.GetMoney() >= cost then
+                                _G.RepairAllItems()
+                                RealUI:Print(("Repaired for %s."):format(coins))
+                            else
+                                RealUI:Print(("Not enough money to repair (%s needed)."):format(coins))
+                            end
+                        end
+                    end
+                    return
+                elseif event == "MERCHANT_CLOSED" then
+                    block.repairedThisVisit = nil
+                    return
+                end
+
                 local lowDur, lowMin, lowMax, lowSlot = 1, 1, 1
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
@@ -1616,6 +1658,8 @@ function Infobar:CreateBlocks()
             events = {
                 "UPDATE_INVENTORY_DURABILITY",
                 "PLAYER_EQUIPMENT_CHANGED",
+                "MERCHANT_SHOW",
+                "MERCHANT_CLOSED",
             },
         })
     end
