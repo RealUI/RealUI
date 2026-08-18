@@ -52,6 +52,40 @@ private.auraPositionNames = {
 
 local Auras = {}
 
+-- B23: the native countdown text overlapped the icon and used the tiny default
+-- font. Move it above the icon and size it to match the nameplate name font.
+-- The Cooldown widget creates its countdown FontString natively (possibly
+-- lazily), so we hunt for it at creation AND on every OnShow until found; the
+-- anchor is re-asserted each show in case the engine repositions it. Font size
+-- is read at button creation — like button size, changes need a /reload.
+-- Widget-only access: we never read the (engine-driven, possibly secret) text.
+-- The cooldown sits under an access-restricted aura button, where script
+-- assignment is blocked ("blocked by secret aspects") — so the lazily created
+-- countdown FontString cannot be caught with an OnShow hook. Cooldowns whose
+-- FontString hasn't appeared yet are retried from Attach, which runs in our
+-- own execution context on every plate attach.
+local pendingTimers = _G.setmetatable({}, { __mode = "k" })
+local function StyleTimerText(cooldown)
+    local text = cooldown.realUITimerText
+    if not text then
+        for _, region in _G.next, { cooldown:GetRegions() } do
+            if region:GetObjectType() == "FontString" then
+                text = region
+                cooldown.realUITimerText = text
+                private.ApplyFont(text, NP.db.profile.enemy.texts.name.size)
+                break
+            end
+        end
+    end
+    if text then
+        pendingTimers[cooldown] = nil
+        text:ClearAllPoints()
+        text:SetPoint("BOTTOM", cooldown:GetParent(), "TOP", 0, 1)
+    else
+        pendingTimers[cooldown] = true
+    end
+end
+
 local function InitializeButton(dispelBorder, button)
     local size = NP.db.profile.enemy.auras.size
     button:SetSize(size, size)
@@ -63,6 +97,7 @@ local function InitializeButton(dispelBorder, button)
     cooldown:SetHideCountdownNumbers(false)
     cooldown:SetDrawEdge(false)
     button:SetDurationCooldown(cooldown)
+    StyleTimerText(cooldown)
 
     local icon = button:CreateTexture(nil, "ARTWORK")
     icon:SetAllPoints(button)
@@ -144,6 +179,11 @@ local function ConfigureContainer(container, def, groupDB, size)
 end
 
 function Auras.Attach(plate, unit)
+    private.Try(function()
+        for cooldown in _G.next, pendingTimers do
+            StyleTimerText(cooldown)
+        end
+    end)
     local db = NP.db.profile.enemy.auras
     for key, container in _G.next, plate.Auras.containers do
         local groupDB = db[key]
