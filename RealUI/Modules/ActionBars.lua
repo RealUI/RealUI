@@ -82,23 +82,27 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
 
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
 
-    if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
-
-    if BT4ActionBars and BT4ActionBars.actionbars and BT4ActionBars.db and BT4ActionBars.db.profile
-        and BT4ActionBars.db.profile.actionbars and BT4ActionBars.ApplyConfig then
-        BT4ActionBars:ApplyConfig()
-    end
-
     -- Refresh db reference to ensure we have the latest settings
     db = self.db.profile
     ndb = RealUI.db.profile
 
     -- Trace: record every call so we can see which cLayout+prof combo
-    -- wrote the final data in the Bartender4 profile. Captures up to the
-    -- last 10 calls. Dump with /bardumptrace.
+    -- wrote the final data. Captures up to the last 10 calls; dump with
+    -- /bardumptrace. Recorded BEFORE the Bartender4 gate below: with
+    -- RealUI_ActionBars as the bar backend (4.0.0) this function is a BT4
+    -- no-op, but RealUI_ActionBars hooksecurefuncs it and re-derives the
+    -- layout from the same values — so the trace stays the shared
+    -- diagnostic for both backends. btCur shows the active bars profile.
     ActionBars._applyTrace = ActionBars._applyTrace or {}
     do
-        local btCurrent = BT4 and BT4.db and BT4.db:GetCurrentProfile() or "(nil)"
+        local btCurrent
+        if BT4 and BT4.db then
+            btCurrent = BT4.db:GetCurrentProfile()
+        else
+            local sv = _G.RealUI_ActionBarsDB
+            btCurrent = (type(sv) == "table" and type(sv.profileKeys) == "table"
+                and RealUI.key and ("RAB:" .. _G.tostring(sv.profileKeys[RealUI.key]))) or "(nil)"
+        end
         local posLayout = ndb and ndb.positions and ndb.positions[RealUI.cLayout]
         table.insert(ActionBars._applyTrace, {
             t      = _G.GetTime(),
@@ -115,6 +119,13 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
         if #ActionBars._applyTrace > 10 then
             table.remove(ActionBars._applyTrace, 1)
         end
+    end
+
+    if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
+
+    if BT4ActionBars and BT4ActionBars.actionbars and BT4ActionBars.db and BT4ActionBars.db.profile
+        and BT4ActionBars.db.profile.actionbars and BT4ActionBars.ApplyConfig then
+        BT4ActionBars:ApplyConfig()
     end
 
     local barSettings = db[RealUI.cLayout]
@@ -679,23 +690,32 @@ function ActionBars:BarDumpTraceCommand()
     end
 end
 
--- Diagnostic: dump current BT4 actionbar positions for both RealUI profiles
+-- Diagnostic: dump current actionbar positions for both RealUI profiles.
+-- Backend-aware: reads Bartender4DB when BT4 is installed (legacy), else
+-- RealUI_ActionBarsDB (4.0.0 default).
 -- Usage: /bardump
 function ActionBars:BarDumpCommand()
-    if not BT4 then
-        _G.print("[bardump] Bartender4 not loaded"); return
+    local dbTable, dbLabel, currentProf
+    if BT4 then
+        dbTable = _G.Bartender4DB
+        dbLabel = "Bartender4DB"
+        currentProf = BT4.db and BT4.db:GetCurrentProfile()
+    else
+        dbTable = _G.RealUI_ActionBarsDB
+        dbLabel = "RealUI_ActionBarsDB"
+        currentProf = dbTable and _G.type(dbTable.profileKeys) == "table"
+            and RealUI.key and dbTable.profileKeys[RealUI.key]
     end
-    local bt4db = _G.Bartender4DB
-    if not bt4db or not bt4db.namespaces or not bt4db.namespaces.ActionBars then
-        _G.print("[bardump] Bartender4DB.namespaces.ActionBars missing"); return
+    if not dbTable or not dbTable.namespaces or not dbTable.namespaces.ActionBars then
+        _G.print(("[bardump] %s.namespaces.ActionBars missing"):format(dbLabel)); return
     end
 
     _G.print(("[bardump] RealUI.cLayout=%s (%s)"):format(
         tostring(RealUI.cLayout),
         RealUI.cLayout == 1 and "DPS/Tank" or "Healing"))
-    _G.print(("[bardump] BT4 current profile: %s"):format(tostring(BT4.db:GetCurrentProfile())))
+    _G.print(("[bardump] %s current profile: %s"):format(dbLabel, tostring(currentProf)))
 
-    local profiles = bt4db.namespaces.ActionBars.profiles
+    local profiles = dbTable.namespaces.ActionBars.profiles
     for _, profName in ipairs({"RealUI", "RealUI-Healing"}) do
         local prof = profiles[profName]
         if not prof then
@@ -856,6 +876,17 @@ function ActionBars:OnEnable()
     BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
     self:debug("OnEnable", BT4)
 
+    -- Diagnostics are backend-agnostic (/bardump reads whichever bars DB is
+    -- active, /bardumptrace records every ApplyABSettings call — which
+    -- RealUI_ActionBars rides via hooksecurefunc). Register them even when
+    -- Bartender4 is absent (the 4.0.0 default), otherwise they silently
+    -- vanish with the BT4-only branch below.
+    if not self._diagCommandsRegistered then
+        self:RegisterChatCommand("bardump", "BarDumpCommand")
+        self:RegisterChatCommand("bardumptrace", "BarDumpTraceCommand")
+        self._diagCommandsRegistered = true
+    end
+
     if EnteredWorld then
         self:debug("Post EnteredWorld")
         self:RefreshDoodads()
@@ -882,8 +913,6 @@ function ActionBars:OnEnable()
         self:RegisterChatCommand("bartender", "BarChatCommand")
         self:RegisterChatCommand("bartender4", "BarChatCommand")
         self:RegisterChatCommand("naga", "ToggleNagaCommand")
-        self:RegisterChatCommand("bardump", "BarDumpCommand")
-        self:RegisterChatCommand("bardumptrace", "BarDumpTraceCommand")
     end
 end
 

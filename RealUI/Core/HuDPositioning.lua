@@ -250,9 +250,11 @@ end
 
 function HuDPositioning:IsScalablePosition(positionKey)
     -- Define which position types should be scaled with HuD size
+    -- (B13: SpellAlertWidth is retired — spell alerts are statically
+    -- center-anchored and sized by Modules/SpellAlerts.lua's scale setting.
+    -- Stale SpellAlertWidth values in saved profiles are simply ignored.)
     local scalablePositions = {
         ["UFHorizontal"] = true,
-        ["SpellAlertWidth"] = true,
         ["ActionBarsY"] = true,
         ["ActionBarsBotY"] = true,
         ["CastBarPlayerY"] = true,
@@ -343,7 +345,17 @@ function HuDPositioning:UpdateRealUIPositions()
         end
     end
 
-    -- Update database positions if available
+    -- Update database positions if available — fill in MISSING keys only.
+    -- db.profile.positions is user-owned state: the HuD Vertical slider
+    -- writes HuDY, per-layout bar heights derive from ActionBarsY, the cast
+    -- bar offsets are config-set, etc. Positioners:GetKeyAdjust and
+    -- ActionBars:ApplyABSettings add hudSize offsets at READ time, so writing
+    -- the calculated (scaled + offset) values here both wiped user-saved
+    -- values on every layout switch/login/resolution event (B44: layout
+    -- toggle reset the UI vertical position and bar heights to defaults) and
+    -- double-applied the hudSize offset. Calculated values still flow into
+    -- RealUI.defaultPositions above, which is the shared fallback source.
+    -- Same fill-missing rule as LayoutManager:UpdateDatabasePositions.
     local db = RealUI.db
     if db and db.profile and db.profile.positions then
         for layoutId, positions in pairs(hudState.calculatedPositions) do
@@ -351,9 +363,10 @@ function HuDPositioning:UpdateRealUIPositions()
                 db.profile.positions[layoutId] = {}
             end
 
+            local dest = db.profile.positions[layoutId]
             for positionKey, value in pairs(positions) do
-                if not runtimeOwnedKeys[positionKey] then
-                    db.profile.positions[layoutId][positionKey] = value
+                if not runtimeOwnedKeys[positionKey] and dest[positionKey] == nil then
+                    dest[positionKey] = value
                 end
             end
         end
@@ -446,13 +459,11 @@ function HuDPositioning:ApplyHighResolutionOptimizations()
     end
 
     -- Adjust spacing for better proportions
+    -- (B13: SpellAlertWidth no longer adjusted here — key retired, see
+    -- IsScalablePosition.)
     for layoutId, positions in pairs(hudState.calculatedPositions) do
         if positions["UFHorizontal"] then
             positions["UFHorizontal"] = positions["UFHorizontal"] * 1.1
-            optimized = true
-        end
-        if positions["SpellAlertWidth"] then
-            positions["SpellAlertWidth"] = positions["SpellAlertWidth"] * 1.1
             optimized = true
         end
     end

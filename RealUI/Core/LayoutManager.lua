@@ -33,7 +33,7 @@ local layoutConfigurations = {
             ["CastBarPlayerY"] = 0,
             ["CastBarTargetX"] = 0,
             ["CastBarTargetY"] = 0,
-            ["SpellAlertWidth"] = 150,
+            -- (B13: SpellAlertWidth retired — key no longer read anywhere)
             ["BossX"] = -32,
             ["BossY"] = 314
         }
@@ -52,7 +52,6 @@ local layoutConfigurations = {
             ["CastBarPlayerY"] = -20,
             ["CastBarTargetX"] = 0,
             ["CastBarTargetY"] = -20,
-            ["SpellAlertWidth"] = 150,
             ["BossX"] = -32,
             ["BossY"] = 314
         }
@@ -213,10 +212,18 @@ function LayoutManager:SaveCurrentLayoutPositions()
         if not db.profile.positions then
             db.profile.positions = {}
         end
+        if not db.profile.positions[layoutState.currentLayout] then
+            db.profile.positions[layoutState.currentLayout] = {}
+        end
 
-        db.profile.positions[layoutState.currentLayout] = {}
+        -- Merge in place — never wipe the stored table. Runtime writers
+        -- (HuDPositioning, Infobar) and user config (HuD Vertical slider,
+        -- Anchor Width) own keys in here; a wipe-and-restore replaces their
+        -- values with raw layout defaults (the same settings-loss class as
+        -- the 2026-05-09 bar-drift post-mortem).
+        local dest = db.profile.positions[layoutState.currentLayout]
         for key, value in pairs(currentConfig.positions) do
-            db.profile.positions[layoutState.currentLayout][key] = value
+            dest[key] = value
         end
 
         debug("Layout positions saved successfully")

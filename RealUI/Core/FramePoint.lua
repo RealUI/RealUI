@@ -214,6 +214,16 @@ function FramePoint:RestorePosition(mod)
             frame:ClearAllPoints()
             frame:SetPoint("CENTER", meta.dragFrame)
 
+            -- Profile/layout switches swap the options table out from under
+            -- LibWindow: the dragFrame was registered against the OLD
+            -- profile's framePoint table at spawn, so RestorePosition would
+            -- re-apply the old profile's coordinates and strand the frame
+            -- (B43: focus/focustarget orphaned after a layout switch).
+            -- Re-register against the table the CURRENT profile resolves to
+            -- before restoring.
+            LibWin.RegisterConfig(meta.dragFrame, config)
+            meta.dragFrame._framePointConfig = config
+
             if not ApplyAnchor(meta.dragFrame, config) then
                 LibWin.RestorePosition(meta.dragFrame)
             end
