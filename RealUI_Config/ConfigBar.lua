@@ -961,24 +961,26 @@ do -- UnitFrames
                             },
                             enabled = {
                                 name = L["General_Enabled"] or "Enabled",
-                                desc = "Show RealUI's built-in party/raid frames. Enabling requires a UI reload.",
+                                desc = "Show RealUI's built-in party/raid frames. Requires a UI reload.",
                                 type = "toggle",
                                 disabled = function() return _G.Grid2 ~= nil end,
                                 get = function() return UnitFrames.db.profile.units.raid.enabled ~= false end,
                                 set = function(info, value)
                                     UnitFrames.db.profile.units.raid.enabled = value
                                     if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
-                                    if value and not UnitFrames.raidHeader then
-                                        RealUI:ReloadUIDialog()
-                                    end
+                                    -- Always prompt: the headers are spawn-time,
+                                    -- so both enabling and disabling leave the
+                                    -- frames in a stale layout until a reload.
+                                    RealUI:ReloadUIDialog()
                                 end,
                                 order = 5,
                             },
-                            -- B31: party orientation — header attributes, applied
-                            -- live by RefreshRaid (queued until combat ends).
+                            -- B31: party orientation is a spawn-time header
+                            -- attribute — see the note in Groups/Raid.lua's
+                            -- RefreshRaid for why it is not applied live.
                             partyHorizontal = {
                                 name = "Horizontal party layout",
-                                desc = "Arrange the party frames in a row instead of a column.",
+                                desc = "Arrange the party frames in a row instead of a column. Requires a UI reload.",
                                 type = "toggle",
                                 disabled = function() return _G.Grid2 ~= nil end,
                                 get = function()
@@ -989,7 +991,7 @@ do -- UnitFrames
                                     local rdb = UnitFrames.db.profile.units.raid
                                     rdb.party = rdb.party or {}
                                     rdb.party.horizontal = value
-                                    if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
+                                    RealUI:ReloadUIDialog()
                                 end,
                                 order = 6,
                             },
