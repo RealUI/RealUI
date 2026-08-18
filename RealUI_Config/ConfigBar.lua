@@ -205,28 +205,30 @@ do -- Other
                         end,
                         order = 30,
                     },
-                    position = {
-                        name = L["HuD_Width"],
-                        desc = L["Misc_SpellAlertsWidthDesc"],
+                    -- B13: spell alerts are statically centered on the character;
+                    -- the only settings are on/off and scale (the old Width slider
+                    -- wrote the retired SpellAlertWidth position key).
+                    scale = {
+                        name = L["General_Scale"],
+                        desc = "Adjust the size of the Spell Alerts around your character.",
                         type = "range",
                         width = "full",
-                        -- not 0: the SpellAlerts positioner has no base width, so 0 would
-                        -- collapse SpellActivationOverlayFrame to nothing
-                        min = 1,
-                        max = round(uiWidth * 0.5),
-                        step = 1,
-                        bigStep = 4,
-                        order = 30,
+                        min = 0.5,
+                        max = 2,
+                        step = 0.05,
+                        isPercent = true,
+                        order = 40,
+                        disabled = function() return not RealUI:GetModuleEnabled("SpellAlerts") end,
                         get = function(info)
-                            local pos = safePositions()
-                            return pos and pos["SpellAlertWidth"] or 150
+                            local SpellAlerts = RealUI:GetModule("SpellAlerts")
+                            return (SpellAlerts.db and SpellAlerts.db.profile.scale) or 1
                         end,
                         set = function(info, value)
-                            local pos = safePositions()
-                            if pos then
-                                pos["SpellAlertWidth"] = value
-                                RealUI:UpdatePositioners()
+                            local SpellAlerts = RealUI:GetModule("SpellAlerts")
+                            if SpellAlerts.db then
+                                SpellAlerts.db.profile.scale = value
                             end
+                            SpellAlerts:UpdatePosition()
                         end,
                     }
                 }
@@ -925,12 +927,23 @@ do -- UnitFrames
                             },
                         }
                     },
+                    -- B15: the RealUIParty header shares the raid cells' style and
+                    -- DB (units.raid), so party and raid are configured together
+                    -- on one tab. Party-only settings (B31: own anchor +
+                    -- orientation) live on the same tab; split it into its own
+                    -- tab if they ever outgrow it.
                     raid = {
-                        name = _G.RAID,
+                        name = ("%s / %s"):format(_G.PARTY, _G.RAID),
                         type = "group",
                         childGroups = "tab",
                         order = 30,
                         args = {
+                            sharedNote = {
+                                name = "Party and raid frames share these cell settings. The party frames have their own anchor (RealUIPartyAnchor) — move it in config mode.",
+                                type = "description",
+                                order = 2,
+                                fontSize = "medium",
+                            },
                             grid2Note = {
                                 name = "Grid2 is handling group frames — RealUI's built-in raid frames are inactive while it is enabled.",
                                 type = "description",
@@ -960,6 +973,25 @@ do -- UnitFrames
                                     end
                                 end,
                                 order = 5,
+                            },
+                            -- B31: party orientation — header attributes, applied
+                            -- live by RefreshRaid (queued until combat ends).
+                            partyHorizontal = {
+                                name = "Horizontal party layout",
+                                desc = "Arrange the party frames in a row instead of a column.",
+                                type = "toggle",
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function()
+                                    local rdb = UnitFrames.db.profile.units.raid
+                                    return rdb.party and rdb.party.horizontal or false
+                                end,
+                                set = function(info, value)
+                                    local rdb = UnitFrames.db.profile.units.raid
+                                    rdb.party = rdb.party or {}
+                                    rdb.party.horizontal = value
+                                    if UnitFrames.RefreshRaid then UnitFrames:RefreshRaid() end
+                                end,
+                                order = 6,
                             },
                             width = {
                                 name = "Cell width",
@@ -1463,6 +1495,9 @@ do -- UnitFrames
                 end,
             }
         end
+        -- The anchor-width slider drives the shared UFHorizontal position key
+        -- (the gap between the player and target frames), so it only belongs
+        -- on the two anchored frames.
         if unitSlug == "player" or unitSlug == "target" then
             unit.args.anchorWidth = {
                 name = L["UnitFrames_AnchorWidth"],
@@ -1486,105 +1521,48 @@ do -- UnitFrames
                     end
                 end,
             }
-            unit.args.frameSizeHeader = {
-                name = "Frame Size",
-                type = "header",
-                order = 31,
-            }
-            unit.args.frameWidth = {
-                name = "Width",
-                type = "range",
-                min = 150, max = 400, step = 1, bigStep = 5,
-                order = 32,
-                get = function()
-                    return UnitFrames.db.profile.units[unitSlug].size.x
-                end,
-                set = function(_, val)
-                    UnitFrames.db.profile.units[unitSlug].size.x = val
-                    UnitFrames:ResizeFrames()
-                end,
-            }
-            unit.args.frameHeight = {
-                name = "Height",
-                type = "range",
-                min = 18, max = 50, step = 1, bigStep = 2,
-                order = 33,
-                get = function()
-                    return UnitFrames.db.profile.units[unitSlug].size.y
-                end,
-                set = function(_, val)
-                    UnitFrames.db.profile.units[unitSlug].size.y = val
-                    UnitFrames:ResizeFrames()
-                end,
-            }
         end
-        --[[ future times
-        local unitInfo = db.units[unitSlug]
-        unit.args = {
-            width = {
-                name = L["HuD_Width"],
-                type = "input",
-                --width = "half",
-                order = 10,
-                get = function(info) return tostring(unitInfo.height.x) end,
-                set = function(info, value)
-                    unitInfo.height.x = value
-                end,
-                pattern = "^(%d+)$",
-                usage = "You can only use whole numbers."
-            },
-            height = {
-                name = L["HuD_Height"],
-                type = "input",
-                --width = "half",
-                order = 20,
-                get = function(info) return tostring(unitInfo.height.y) end,
-                set = function(info, value)
-                    unitInfo.height.y = value
-                end,
-                pattern = "^(%d+)$",
-                usage = "You can only use whole numbers."
-            },
-            healthHeight = {
-                name = "Health bar height",
-                desc = "The height of the health bar as a percentage of the total unit height",
-                type = "range",
-                width = "double",
-                min = 0,
-                max = 1,
-                step = .01,
-                isPercent = true,
-                order = 50,
-                get = function(info) return unitInfo.healthHeight end,
-                set = function(info, value)
-                    unitInfo.healthHeight = value
-                end,
-            },
-            x = {
-                name = L["General_XOffset"],
-                type = "range",
-                min = -100,
-                max = 50,
-                step = 1,
-                order = 30,
-                get = function(info) return unitInfo.position.x end,
-                set = function(info, value)
-                    unitInfo.position.x = value
-                end,
-            },
-            y = {
-                name = "L["General_YOffset"],
-                type = "range",
-                min = -100,
-                max = 100,
-                step = 1,
-                order = 40,
-                get = function(info) return unitInfo.position.y end,
-                set = function(info, value)
-                    unitInfo.position.y = value
-                end,
-            },
-        --]]
+        -- B14: per-unit width/height for every unit frame. All six units go
+        -- through db.units[unit].size + UnitFrames:ResizeFrames(), which uses
+        -- the frame's ApplySize (defined for all angled frames). The small
+        -- frames (pet/ToT/focus/focustarget) get smaller ranges to match
+        -- their defaults (126-138 x 10-13).
+        local isBigFrame = unitSlug == "player" or unitSlug == "target"
+        unit.args.frameSizeHeader = {
+            name = "Frame Size",
+            type = "header",
+            order = 31,
+        }
+        unit.args.frameWidth = {
+            name = L["HuD_Width"],
+            type = "range",
+            min = isBigFrame and 150 or 60,
+            max = isBigFrame and 400 or 300,
+            step = 1, bigStep = 5,
+            order = 32,
+            get = function()
+                return UnitFrames.db.profile.units[unitSlug].size.x
+            end,
+            set = function(_, val)
+                UnitFrames.db.profile.units[unitSlug].size.x = val
+                UnitFrames:ResizeFrames()
+            end,
+        }
+        unit.args.frameHeight = {
+            name = L["HuD_Height"],
+            type = "range",
+            min = isBigFrame and 18 or 8,
+            max = isBigFrame and 50 or 30,
+            step = 1, bigStep = 2,
+            order = 33,
+            get = function()
+                return UnitFrames.db.profile.units[unitSlug].size.y
+            end,
+            set = function(_, val)
+                UnitFrames.db.profile.units[unitSlug].size.y = val
+                UnitFrames:ResizeFrames()
+            end,
+        }
     end
     local groups = ufArgs.groups.args
     for groupSlug, group in next, groups do
