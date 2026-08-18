@@ -359,6 +359,29 @@ local function UpdateGarrisonButton(isTop, isLeft)
     _G.ExpansionLandingPageMinimapButton:SetPoint(point, x, y)
 end
 
+-- Keep the LFG eye docked to the Minimap's inner corner (the corner facing
+-- screen center). Blizzard's MicroMenu re-anchors QueueStatusButton to the
+-- EditMode-managed micro menu via QueueStatusButton:UpdatePosition, which is
+-- what detaches it from the map — a hook in SetUpMinimapFrame re-asserts this
+-- whenever that happens.
+local updatingQueueStatus = false
+function MinimapAdv:UpdateQueueStatusPosition()
+    local queueStatusButton = _G.QueueStatusButton
+    if not queueStatusButton or updatingQueueStatus then return end
+    updatingQueueStatus = true
+
+    local mapPoints = GetPositionData()
+    local point = (mapPoints.isTop and "BOTTOM" or "TOP") .. (mapPoints.isLeft and "RIGHT" or "LEFT")
+
+    queueStatusButton:SetParent(_G.Minimap)
+    queueStatusButton:ClearAllPoints()
+    queueStatusButton:SetPoint(point, mapPoints.isLeft and 2 or -2, mapPoints.isTop and 2 or -2)
+    queueStatusButton:SetScale(0.5)
+    queueStatusButton:SetAlpha(0.7)
+
+    updatingQueueStatus = false
+end
+
 -- Set Minimap position
 function MinimapAdv:UpdateMinimapPosition()
     self:debug("UpdateMinimapPosition")
@@ -385,6 +408,9 @@ function MinimapAdv:UpdateMinimapPosition()
     -- Garrisons
     UpdateGarrisonButton(isTop, isLeft)
 
+    -- LFG eye follows the configured corner
+    self:UpdateQueueStatusPosition()
+
     _G.ButtonCollectFrame:ClearAllPoints()
     if isTop then
         _G.ButtonCollectFrame:SetPoint("TOPLEFT", _G.Minimap, "BOTTOMLEFT", -1, -5)
@@ -405,6 +431,7 @@ end
 ---------------------
 do -- ButtonCollectFrame
     local ignoreList = {
+        QueueStatusButton = true,
         QueueStatusMinimapButton = true,
         ExpansionLandingPageMinimapButton = true,
         GarrisonLandingPageMinimapButton = true,
@@ -470,8 +497,34 @@ do -- ButtonCollectFrame
         buttonFrame:SetHeight(_G.ceil(row) * 32)
     end
 
+    -- LibDBIcon-registered buttons (LibDBIcon10_*) are swept via the library's
+    -- own registry instead of relying on the name scan below.
+    local LDBIcon
+    local function CollectLibDBIconButtons()
+        if not LDBIcon then
+            LDBIcon = _G.LibStub and _G.LibStub("LibDBIcon-1.0", true)
+            if LDBIcon and LDBIcon.RegisterCallback then
+                LDBIcon.RegisterCallback(MinimapAdv, "LibDBIcon_IconCreated", function()
+                    MinimapAdv:UpdateButtonCollection()
+                end)
+            end
+        end
+        if not (LDBIcon and LDBIcon.GetButtonList) then return end
+
+        for _, name in next, LDBIcon:GetButtonList() do
+            local button
+            if LDBIcon.GetMinimapButton then
+                button = LDBIcon:GetMinimapButton(name)
+            elseif LDBIcon.objects then
+                button = LDBIcon.objects[name]
+            end
+            setupButton(button)
+        end
+    end
+
     function MinimapAdv:UpdateButtonCollection()
         if not db.information or not db.information.minimapbuttons then return end
+        CollectLibDBIconButtons()
         for i, child in next, {_G.Minimap:GetChildren()} do
             if child:GetName() then
                 if not(ignoreList[child:GetName()]) and not child.questID then
@@ -1897,11 +1950,14 @@ local function SetUpMinimapFrame()
     end
 
     local queueStatusButton = _G.QueueStatusButton
-    queueStatusButton:SetParent(_G.Minimap)
-    queueStatusButton:ClearAllPoints()
-    queueStatusButton:SetAlpha(0.7)
-    queueStatusButton:SetPoint("BOTTOMRIGHT", 2, 2)
-    queueStatusButton:SetScale(0.5)
+    if queueStatusButton then
+        MinimapAdv:UpdateQueueStatusPosition()
+        -- Blizzard's MicroMenu (EditMode-managed) calls UpdatePosition to pull
+        -- the eye back to the micro menu; re-assert our minimap attachment.
+        _G.hooksecurefunc(queueStatusButton, "UpdatePosition", function()
+            MinimapAdv:UpdateQueueStatusPosition()
+        end)
+    end
 
     -- _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
     -- _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
