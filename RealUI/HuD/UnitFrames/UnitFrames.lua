@@ -55,10 +55,15 @@ end
 -- (oUF/elements/auras.lua:181-190). That FontString is oUF's, so it is ours to
 -- style and position. Hiding the cooldown's own numbers leaves exactly one
 -- timer per icon. No secret aura data is read at any point.
--- Blizzard's DefaultAuraDurationFormatter renders "60 m" (OneLetter with a
--- space). On a 20-28px icon that space is pure width, so build the same
--- formatter with the whitespace stripped: "60m". Mirrors
--- Blizzard_AuraContainerShared.lua:93-98.
+-- Mirrors Blizzard's DefaultAuraDurationFormatter
+-- (Blizzard_AuraContainerShared.lua:93-98) so we own it rather than inherit it.
+--
+-- NOTE: this still renders "51 m", not "51m". SetStripIntervalWhitespace only
+-- removes whitespace BETWEEN intervals ("1m 33s" -> "1m33s"), so with
+-- SetDesiredUnitCount(1) it is a no-op — the space belongs to the locale's
+-- OneLetter abbreviation. Removing it needs the structured `textFormat`
+-- (DurationTextBindingFormatOptions: formatString + components), not a
+-- formatter tweak.
 local durationFormatter
 local function GetDurationFormatter()
     if durationFormatter == nil and _G.C_StringUtil and _G.C_StringUtil.CreateSecondsFormatter then
@@ -91,7 +96,9 @@ local function AuraPostCreateButton(_, button)
     end
 
     if button.Time then
-        button.Time:SetFontObject("NumberFont_Outline_Small")
+        -- NumberFont_Outline_Small does NOT exist; the outline family is only
+        -- Med/Large/Huge. Shadow_Small is the smallest number font available.
+        button.Time:SetFontObject("NumberFont_Shadow_Small")
         button.Time:ClearAllPoints()
         button.Time:SetPoint("BOTTOM", button, "BOTTOM", 0, 1)
     end
