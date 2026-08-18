@@ -53,6 +53,7 @@ These are the same tools used for A/B taint testing during development:
 | `/taintLogging [0\|1\|2]` | Set the `taintLog` CVar and reload. **1** = blocked-action taint only (small log), **2** = every taint event (large log, stutters). Output: `Logs/taint.log` in the WoW folder. RealUI reminds you on login if it's left on. |
 | `/taintScan [Global.Sub.Path]` | Field-level `issecurevariable` walk; with no argument, scans the frame under the mouse cursor. Prints `field <- taintingAddon`. |
 | `/auroraInsertFrame` | A/B toggle for the `GameTooltip_InsertFrame` taint fix; prints its own test instructions |
+| `/realui devcheck` | Reports any dev/diagnostic setting left in a non-shipping state — taint logging, the InsertFrame A/B toggle, disabled skins, leftover harness keys. Run this first when something looks broken after a debugging session |
 
 ## Errors & debug logs
 
