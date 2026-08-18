@@ -55,6 +55,27 @@ end
 -- (oUF/elements/auras.lua:181-190). That FontString is oUF's, so it is ours to
 -- style and position. Hiding the cooldown's own numbers leaves exactly one
 -- timer per icon. No secret aura data is read at any point.
+-- Blizzard's DefaultAuraDurationFormatter renders "60 m" (OneLetter with a
+-- space). On a 20-28px icon that space is pure width, so build the same
+-- formatter with the whitespace stripped: "60m". Mirrors
+-- Blizzard_AuraContainerShared.lua:93-98.
+local durationFormatter
+local function GetDurationFormatter()
+    if durationFormatter == nil and _G.C_StringUtil and _G.C_StringUtil.CreateSecondsFormatter then
+        local ok, formatter = _G.pcall(_G.C_StringUtil.CreateSecondsFormatter)
+        if ok and formatter then
+            _G.pcall(formatter.SetDefaultAbbreviation, formatter, _G.Enum.SecondsFormatterAbbreviation.OneLetter)
+            _G.pcall(formatter.SetMinInterval, formatter, _G.Enum.SecondsFormatterInterval.Seconds)
+            _G.pcall(formatter.SetDesiredUnitCount, formatter, 1)
+            _G.pcall(formatter.SetStripIntervalWhitespace, formatter, true)
+            durationFormatter = formatter
+        else
+            durationFormatter = false
+        end
+    end
+    return durationFormatter or nil
+end
+
 local function AuraPostCreateButton(_, button)
     if button.Icon then
         _G.Aurora.Base.CropIcon(button.Icon, button)
@@ -99,7 +120,7 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         -- widget's own countdown numbers which cannot be restyled. Minutes and
         -- hours are shown without decimals so long raid buffs stay narrow.
         showDuration = true,
-        durationFormat = settings.durationFormat,
+        durationFormatter = GetDurationFormatter(),
         cancelButton = settings.cancelButton,
         showDebuffBorder = settings.showDebuffBorder,
         -- Must be an AddGroup option, not a post-hoc element flag: the intrinsic
