@@ -139,7 +139,12 @@ function Positioners:OnInitialize()
                 --                      {point,     parent,     rpoint,     x, y, w, h,     xKeyTable,                  yKeyTable,                  widthKeyTable,                      heightKeyTable},
                 ["Center"] =            {"CENTER",  "UIParent", "CENTER",   0, 0, 2, 2,     nil,                        {"HuDY"}},
                 ["Buffs"] =             {"TOPRIGHT","UIParent", "TOPRIGHT", -1, -1, 2, 2},
-                ["SpellAlerts"] =       {"CENTER",  "UIParent", "CENTER",   0, 0, 0, 140,   {"HuDX"},                   {"HuDY"},                   {"SpellAlertWidth"}},
+                -- B13: static screen-center anchor — spell alerts appear around the
+                -- player character, so they must NOT follow the HuD sliders
+                -- (HuDX/HuDY) or the retired SpellAlertWidth key. Sizing is now
+                -- owned by Modules/SpellAlerts.lua (scale setting); the 250x140
+                -- rect here matches the old default footprint for reference.
+                ["SpellAlerts"] =       {"CENTER",  "UIParent", "CENTER",   0, 0, 250, 140},
                 ["CastBarPlayer"] =     {"TOP",     "UIParent", "CENTER",   -2, -130, 2, 2, {"HuDX", "CastBarPlayerX"}, {"HuDY", "CastBarPlayerY"}},
                 ["CastBarTarget"] =     {"TOP",     "UIParent", "CENTER",   2, -130, 2, 2,  {"HuDX", "CastBarTargetX"}, {"HuDY", "CastBarTargetY"}},
                 ["UnitFrames"] =        {"CENTER",  "UIParent", "CENTER",   0, 0, 80, 2,    {"HuDX"},                   {"HuDY"},                   {"UFHorizontal"}},

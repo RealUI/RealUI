@@ -59,7 +59,8 @@ RealUI.defaultPositions = {
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetX"] = 0,
         ["CastBarTargetY"] = 0,
-        ["SpellAlertWidth"] = 150,
+        -- (B13: SpellAlertWidth retired — spell alerts are statically sized
+        -- by Modules/SpellAlerts.lua; stale saved values are ignored.)
         ["BossX"] = -32, -- Boss anchored to RIGHT
         ["BossY"] = 314
     },
@@ -74,7 +75,6 @@ RealUI.defaultPositions = {
         ["CastBarPlayerY"] = -20,
         ["CastBarTargetX"] = 0,
         ["CastBarTargetY"] = -20,
-        ["SpellAlertWidth"] = 150,
         ["BossX"] = -32, -- Boss anchored to RIGHT
         ["BossY"] = 314
     }
@@ -95,7 +95,6 @@ RealUI.hudSizeOffsets = {
     [1] = {
         -- Small HuD
         ["UFHorizontal"] = 0,
-        ["SpellAlertWidth"] = 0,
         ["ActionBarsY"] = 0,
         ["CastBarPlayerY"] = 0,
         ["CastBarTargetY"] = 0
@@ -103,7 +102,6 @@ RealUI.hudSizeOffsets = {
     [2] = {
         -- Large HuD
         ["UFHorizontal"] = 100,
-        ["SpellAlertWidth"] = 100,
         ["ActionBarsY"] = -20,
         ["CastBarPlayerY"] = -20,
         ["CastBarTargetY"] = -20
