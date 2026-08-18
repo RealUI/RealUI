@@ -545,12 +545,15 @@ function UnitFrames:RefreshRaid()
             self.raidHeader:Hide()
             UnitFrames:RestoreBlizzardGroupFrames()
         else
-            -- B31: party orientation (column ↔ row) is header attributes, so it
-            -- is live-applied here; the secure header re-flows on SetAttribute.
-            local point, xOffset, yOffset = GetPartyLayoutAttributes(rdb)
-            self.partyHeader:SetAttribute("point", point)
-            self.partyHeader:SetAttribute("xOffset", xOffset)
-            self.partyHeader:SetAttribute("yOffset", yOffset)
+            -- B31: party orientation is deliberately NOT written here. The
+            -- attributes are spawn-time: writing them to a live header updates
+            -- the stored values without re-flowing the children, leaving the
+            -- cells anchored diagonally (verified in game 2026-08-19 — the
+            -- attributes read back as LEFT/2/0 on a visible header while the
+            -- layout stayed stale). Forcing a re-flow means calling Blizzard's
+            -- SecureGroupHeader_Update from an addon, which is exactly the
+            -- secure-frame meddling that caused the delve tracker taint, so the
+            -- orientation toggle prompts a reload instead (RealUI_Config).
             _G.RegisterStateDriver(self.partyHeader, "visibility",
                 "[group:raid] hide; [group:party] show; hide")
             _G.RegisterStateDriver(self.raidHeader, "visibility", "[group:raid] show; hide")
