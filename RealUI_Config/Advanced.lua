@@ -1496,12 +1496,8 @@ do -- Skins
                     }),
                     chat = RealUI.NeedsReload({
                         name = "Skin Chat",
-                        desc = "Skin chat frames"
-                            .. "\n\n|cffff4040Temporarily disabled|r: the chat skin currently breaks the objective tracker in delves (known issue, fix in progress). The setting is remembered and will apply again once fixed.",
+                        desc = "Skin chat frames",
                         type = "toggle",
-                        -- Setting preserved but inert while the chat skin is
-                        -- force-disabled in Aurora (aurora.lua, KNOWN ISSUE).
-                        disabled = true,
                         get = function() return auroraGetValue("chat", true) end,
                         set = function(info, value) auroraSetValue("chat", value) end,
                         order = 3,
