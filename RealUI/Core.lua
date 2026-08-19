@@ -1732,8 +1732,20 @@ function RealUI:GetModuleEnabled(module)
 end
 
 function RealUI:SetModuleEnabled(module, value)
-    local currentValue = self:GetModuleEnabled(module)
-    if currentValue == value then
+    value = value and true or false
+
+    -- Compare against the module's live state as well as the stored flag.
+    -- The two can disagree, and testing only the flag turned this into a
+    -- silent no-op in exactly the case where the user most needs it: the
+    -- setting reads enabled while the module is not actually running, so
+    -- ticking the box did nothing and there was no way out through the UI
+    -- (the shape of B54). Bailing only when BOTH already match lets the
+    -- toggle repair a desync instead of ignoring it.
+    local moduleObj = self:GetModule(module, true)
+    local flagMatches = (self:GetModuleEnabled(module) and true or false) == value
+    local stateMatches = (moduleObj == nil)
+        or ((moduleObj:IsEnabled() and true or false) == value)
+    if flagMatches and stateMatches then
         return value
     end
 
