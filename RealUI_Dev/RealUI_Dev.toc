@@ -96,6 +96,7 @@ tests\RealUI_Config_TestRunner.lua
 tests\UnifiedProfiles_BT4PreserveTest.lua
 tests\UnifiedProfiles_ProfileUpdateRefsTest.lua
 tests\UnifiedProfiles_ProfileUpdateModulesTest.lua
+tests\UnifiedProfiles_ModuleDisableRespectedTest.lua
 tests\UnifiedProfiles_NewProfileDefaultsTest.lua
 tests\UnifiedProfiles_CoordinatedSwitchTest.lua
 tests\UnifiedProfiles_DisabledScopeTest.lua
