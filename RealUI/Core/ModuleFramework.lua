@@ -72,6 +72,22 @@ local modulePrototype = {
     SetEnabledState = function(self, enabled)
         self.debug(self, "SetEnabledState", enabled)
 
+        -- This prototype replaces AceAddon's SetEnabledState for EVERY RealUI
+        -- module, but EnableModule/DisableModule below only act on modules that
+        -- registered with ModuleFramework — and most never do. Without this
+        -- fallback the call is a silent no-op for them: the module keeps
+        -- AceAddon's default enabled state no matter what the saved profile
+        -- says, and ConfigPersistence:PersistModuleStates then writes that
+        -- stale runtime state back over the user's setting. That is what made
+        -- CastBars impossible to keep disabled (B54).
+        --
+        -- Fall back to AceAddon's own behaviour (record the state; enabling
+        -- proper happens via Enable/Disable) so unregistered modules honour it.
+        if not ModuleFramework:IsModuleRegistered(self.moduleName) then
+            self.enabledState = enabled and true or false
+            return true
+        end
+
         if enabled and not self:IsEnabled() then
             return ModuleFramework:EnableModule(self.moduleName)
         elseif not enabled and self:IsEnabled() then
