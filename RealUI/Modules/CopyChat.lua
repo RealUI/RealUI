@@ -2,6 +2,7 @@ local _, private = ...
 
 -- Lua Globals --
 local next = _G.next
+local type = _G.type
 
 -- Libs --
 local textDump = _G.LibStub("LibTextDump-1.0")
@@ -23,17 +24,49 @@ function CopyChat:CreateFrames()
     --dump:Hide()
 end
 
+-- Chat lines can carry secret strings (common in raids and delves).
+-- LibTextDump's InsertLine does `text == ""`, which throws on a secret string,
+-- so lines have to be checked before they reach the library.
+-- See .kiro/steering/secret-values-canaccessvalue.md.
+local function SafeString(value)
+    if type(value) ~= "string" then return nil end
+    if _G.canaccessvalue then
+        return _G.canaccessvalue(value) and value or nil
+    end
+    local ok = _G.pcall(function() return _G.strsub(value, 1, 0) end)
+    return ok and value or nil
+end
+
+-- Stands in for a line we cannot read, so the copy stays line-for-line with the
+-- chat frame instead of silently losing rows.
+local PROTECTED_LINE = "|cff9f9f9f<protected value - line cannot be copied>|r"
+
 local function copyChat(self)
     local chat = _G[self:GetName()]
     local lineCount = chat:GetNumMessages()
 
     dump:Clear()
+
+    local added = 0
     for i = 1, lineCount do
         local msg = chat:GetMessageInfo(i)
-        dump:AddLine(msg)
+        local safe = SafeString(msg)
+        if safe then
+            -- InsertLine also rejects an empty string; chat frames do hand
+            -- those out, and the error aborts the whole copy.
+            if safe ~= "" then
+                dump:AddLine(safe)
+                added = added + 1
+            end
+        elseif type(msg) == "string" then
+            dump:AddLine(PROTECTED_LINE)
+            added = added + 1
+        end
     end
 
-    if (lineCount > 0) then
+    -- Count what actually made it into the buffer, not what chat reported:
+    -- Display errors on an empty buffer.
+    if added > 0 then
         dump.frame.title:SetText(chat:GetName() .. " Copy Frame")
 
         dump:Display()
