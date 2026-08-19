@@ -622,16 +622,17 @@ function RealUI:OnProfileUpdate(event, database, profile)
             end
         end
 
-        -- Restore any modules that were incorrectly disabled by the cascade
+        -- Restore any modules that were incorrectly disabled by the cascade.
+        -- Only modules that were enabled *before* the cascade are restored, so
+        -- a module the user deliberately turned off stays off. Do not add
+        -- per-module special cases here: a blanket "always re-enable X" cannot
+        -- tell a cascade-cleared flag from a user-cleared one, which is exactly
+        -- how CastBars became impossible to disable (B54).
         if db.modules then
             for modName, wasEnabled in next, moduleSnapshot do
                 if wasEnabled and not db.modules[modName] then
                     db.modules[modName] = true
                 end
-            end
-            -- Ensure CastBars is always enabled across profile switches
-            if db.modules["CastBars"] == false then
-                db.modules["CastBars"] = true
             end
         end
     end
