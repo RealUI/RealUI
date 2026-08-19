@@ -683,7 +683,7 @@ function DualSpecSystem:ApplyConfiguration(configData)
 
     -- NOTE: Do NOT apply configData.modules here. Module enabled states
     -- are authoritative in db.profile.modules and managed by AceDB's
-    -- profile system + the CastBars guard in Core:OnProfileUpdate.
+    -- profile system + the snapshot restore in Core:OnProfileUpdate.
     -- Wholesale-replacing db.profile.modules with a stale snapshot was
     -- a persistence vector for the CastBars-disabled-on-healer-login bug.
 
