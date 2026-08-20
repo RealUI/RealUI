@@ -400,7 +400,10 @@ function InventoryBagMixin:Init()
 
     self.new = {}
     self:ClearAllPoints()
-    self:SetPoint("TOPLEFT", 100, -100)
+    -- B62: TOPLEFT 100,-100 sat on top of RealUI's minimap. Bottom-right is
+    -- where the 3.x bags lived and keeps the default clear of the minimap,
+    -- HuD and Infobar; the offset clears the Infobar strip.
+    self:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT", -50, 100)
     self:SetUserPlaced(false)
     self:RegisterEvent("QUEST_ACCEPTED")
     self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
@@ -1306,6 +1309,21 @@ function private.CreateFilterBag(main, filter)
 
     bag.parent = main
     bag.filter = filter
+
+    -- B63: only the primary bag was draggable. Categorized bags are children
+    -- anchored to it, so forward their drag to the primary — dragging any bag
+    -- moves the whole cluster, and the drop reuses the primary's pixel
+    -- snapping.
+    bag:RegisterForDrag("LeftButton")
+    bag:SetScript("OnDragStart", function(this)
+        if this.parent:IsMovable() then
+            this.parent:StartMoving()
+        end
+    end)
+    bag:SetScript("OnDragStop", function(this)
+        this.parent:StopMovingOrSizing()
+        RealUI.SetPixelPoint(this.parent)
+    end)
 
     if tag == "new" then
         bag.resetNew = CreateFeatureButton(bag, _G.RESET, "check", function(dialog)
