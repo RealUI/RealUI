@@ -22,7 +22,16 @@ local function BuildButtonConfig(barDB, keyBoundTarget)
         hideElements = {
             macro = barDB.hidemacrotext,
             hotkey = false,
-            equipped = false,
+            -- B64 (real cause): LAB draws a green border on any button holding
+            -- an EQUIPPED item — `Border:SetVertexColor(0, 1.0, 0, 0.35)` at
+            -- LibActionButton-1.0.lua:1817. That is the green box: it only
+            -- appears on equipped gear, which is why it came and went between
+            -- sessions and sat alone at the end of a bar. Skin.lua already
+            -- alpha-0'd Border, but only once at skin time; LAB re-Shows it on
+            -- every Update. Setting this takes LAB's `else` branch instead,
+            -- which calls Border:Hide() — durable, and matches the intent the
+            -- one-shot SetAlpha(0) already expressed.
+            equipped = true,
             -- B64: left unset, LAB paints every *empty* slot with Blizzard's
             -- "UI-HUD-ActionBar-IconFrame-AddRow" atlas — the green box
             -- reported at the end of a bar (/fstack named it exactly:
