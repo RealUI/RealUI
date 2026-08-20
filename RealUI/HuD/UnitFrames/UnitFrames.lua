@@ -124,6 +124,30 @@ local function AuraPostCreateButton(_, button)
     if button.Icon then
         _G.Aurora.Base.CropIcon(button.Icon, button)
     end
+
+    -- B19: the double icon on dispellable target debuffs. With the default
+    -- Border style the engine stamps AuraUtil.SetAuraBorderAtlas — full-size
+    -- Blizzard border art at OVERLAY over our cropped icon, reading as two
+    -- stacked squares. The group passes dispelBorderStyle = PreserveAsset, so
+    -- the engine only ever SetVertexColors this texture (dispel color,
+    -- through oUF's colors.dispel map) and never touches its asset. Reshape
+    -- it into Aurora's iconBorder geometry — a white fill 1px outside the
+    -- icon at BACKGROUND 1: above the black CropIcon border (BACKGROUND 0),
+    -- below the icon. Dispellable debuffs get a colored 1px border, exactly
+    -- the RealUI button style. NOT done in Auras:PostUpdate (oUF 14.0.1):
+    -- that fires only on oUF-initiated updates, while the engine restyles
+    -- recycled buttons on its own — asset-preservation is the reliable path.
+    if button.Border then
+        button.Border:SetColorTexture(1, 1, 1)
+        button.Border:SetDrawLayer("BACKGROUND", 1)
+        button.Border:ClearAllPoints()
+        if button.Icon then
+            button.Border:SetPoint("TOPLEFT", button.Icon, -1, 1)
+            button.Border:SetPoint("BOTTOMRIGHT", button.Icon, 1, -1)
+        else
+            button.Border:SetAllPoints(button)
+        end
+    end
     if button.Count then
         button.Count:SetFontObject("NumberFont_Outline_Med")
     end
@@ -170,6 +194,10 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         durationFormatter = GetDurationFormatter(),
         cancelButton = settings.cancelButton,
         showDebuffBorder = settings.showDebuffBorder,
+        -- B19: PreserveAsset = the engine colors button.Border but never
+        -- replaces its asset (see AuraPostCreateButton).
+        dispelBorderStyle = _G.Enum.CustomAuraButtonDispelTypeTextureStyle
+            and _G.Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
         -- Must be an AddGroup option, not a post-hoc element flag: the intrinsic
         -- pre-creates its button pool during AddGroup, so flags set after
         -- CreateAuraElement returns are too late (raid-cell mini icons).
