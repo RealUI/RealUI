@@ -305,17 +305,26 @@ tags.Methods["realui:range"] = function()
     end
 end
 
+-- B58: resolve a possibly-secret boolean without throwing. Secret booleans
+-- throw on truth tests, and a pcall-caught throw still writes a taint.log
+-- entry — issecretvalue answers without either. nil = inaccessible/unknown.
+local function PlainBool(fn, unit)
+    local value = fn(unit)
+    if value == nil or (_G.issecretvalue and _G.issecretvalue(value)) then
+        return nil
+    end
+    return value and true or false
+end
+
 -- Raid cell name: NOT class-colored (the bar behind it already is — colored text
 -- on same-colored fill is unreadable). White via the fontstring; grey when dead,
 -- ghost, or offline. Truncation is left to the fontstring's width clipping
--- (auto-ellipsis), which is UTF-8 safe. Status booleans pcall-guarded.
+-- (auto-ellipsis), which is UTF-8 safe. Status booleans secret-checked, no pcall.
 tags.Methods["realui:raidname"] = function(unit)
     local name = _G.UnitName(unit) or ""
     if _G.issecretvalue(name) then return name end
-    local ok, faded = _G.pcall(function()
-        return _G.UnitIsDeadOrGhost(unit) or not _G.UnitIsConnected(unit)
-    end)
-    if ok and faded then
+    if PlainBool(_G.UnitIsDeadOrGhost, unit)
+        or PlainBool(_G.UnitIsConnected, unit) == false then
         return ("|cff8f8f8f%s|r"):format(name)
     end
     return name
@@ -323,28 +332,31 @@ end
 tags.Events["realui:raidname"] = "UNIT_NAME_UPDATE UNIT_CONNECTION UNIT_FLAGS"
 
 -- Raid cell top text: status override chain (charmed > feign > offline > dead >
--- vehicle), else health deficit. All combat reads are secret-guarded: booleans
--- throw on truth tests, deficit math throws on secret health — pcall-wrapped
--- with empty-string fallback (see .kiro/steering/secret-values-canaccessvalue.md).
+-- vehicle), else health deficit. All combat reads can return secrets: booleans
+-- throw on truth tests, deficit math throws on secret health. B58: guarded
+-- with issecretvalue pre-checks instead of pcall — a caught throw still
+-- writes a taint.log entry, and these two sites alone produced ~350 of them
+-- in one 8-minute log, swamping other investigations. Display behaviour is
+-- unchanged (blank when secret; the cell's health bar is secret-capable and
+-- keeps carrying the information).
 tags.Methods["realui:raidtop"] = function(unit)
-    local ok, status = _G.pcall(function()
-        if _G.UnitIsCharmed(unit) then return "|cffff33ffCHARMED|r" end
-        if _G.UnitIsFeignDeath(unit) then return "|cffcccc33FEIGN|r" end
-        if not _G.UnitIsConnected(unit) then return "|cff8f8f8fOFFLINE|r" end
-        if _G.UnitIsDeadOrGhost(unit) then return "|cff8f8f8fDEAD|r" end
-        if _G.UnitInVehicle and _G.UnitInVehicle(unit) then return "|cff33ccffVEHICLE|r" end
-    end)
-    if ok and status then return status end
+    if PlainBool(_G.UnitIsCharmed, unit) then return "|cffff33ffCHARMED|r" end
+    if PlainBool(_G.UnitIsFeignDeath, unit) then return "|cffcccc33FEIGN|r" end
+    if PlainBool(_G.UnitIsConnected, unit) == false then return "|cff8f8f8fOFFLINE|r" end
+    if PlainBool(_G.UnitIsDeadOrGhost, unit) then return "|cff8f8f8fDEAD|r" end
+    if _G.UnitInVehicle and PlainBool(_G.UnitInVehicle, unit) then return "|cff33ccffVEHICLE|r" end
 
-    local okDeficit, deficit = _G.pcall(function()
-        local missing = _G.UnitHealthMax(unit) - _G.UnitHealth(unit)
-        if missing <= 0 then return nil end
-        if missing >= 1000 then
-            return ("-%.1fk"):format(missing / 1000)
-        end
-        return ("-%d"):format(missing)
-    end)
-    if okDeficit and deficit then return deficit end
+    local max, cur = _G.UnitHealthMax(unit), _G.UnitHealth(unit)
+    if _G.issecretvalue and (_G.issecretvalue(max) or _G.issecretvalue(cur)) then
+        return
+    end
+    if not (max and cur) then return end
+    local missing = max - cur
+    if missing <= 0 then return end
+    if missing >= 1000 then
+        return ("-%.1fk"):format(missing / 1000)
+    end
+    return ("-%d"):format(missing)
 end
 tags.Events["realui:raidtop"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_CONNECTION UNIT_FLAGS PLAYER_FLAGS_CHANGED UNIT_ENTERED_VEHICLE UNIT_EXITED_VEHICLE"
 
