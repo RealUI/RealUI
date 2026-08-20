@@ -58,12 +58,48 @@ end
 -- Mirrors Blizzard's DefaultAuraDurationFormatter
 -- (Blizzard_AuraContainerShared.lua:93-98) so we own it rather than inherit it.
 --
--- NOTE: this still renders "51 m", not "51m". SetStripIntervalWhitespace only
--- removes whitespace BETWEEN intervals ("1m 33s" -> "1m33s"), so with
--- SetDesiredUnitCount(1) it is a no-op — the space belongs to the locale's
--- OneLetter abbreviation. Removing it needs the structured `textFormat`
--- (DurationTextBindingFormatOptions: formatString + components), not a
--- formatter tweak.
+-- B19: the SecondsFormatter path rendered "51 m" — the space belongs to the
+-- locale's OneLetter abbreviation ("%d m"), and SetStripIntervalWhitespace
+-- only removes whitespace BETWEEN intervals, so no formatter tweak can drop
+-- it. The structured textFormat (DurationTextBindingFormatOptions) owns the
+-- whole string instead: a NumericRuleFormatter with magnitude breakpoints
+-- renders bare seconds, then 51m / 3h / 2d. Seconds round up so 0.4s reads
+-- "1", not "0"; m/h/d floor via quotient division, the usual convention.
+local durationTextFormat
+local function GetDurationTextFormat()
+    if durationTextFormat == nil then
+        durationTextFormat = false
+        if _G.C_StringUtil and _G.C_StringUtil.CreateNumericRuleFormatter then
+            local ok, formatter = _G.pcall(_G.C_StringUtil.CreateNumericRuleFormatter)
+            if ok and formatter then
+                local set = _G.pcall(formatter.SetBreakpoints, formatter, {
+                    { threshold = 0, format = "%d", components = {
+                        { step = 1, rounding = _G.Enum.NumericRuleFormatRounding.Up },
+                    } },
+                    { threshold = 60, format = "%dm", components = { { div = 60 } } },
+                    { threshold = 3600, format = "%dh", components = { { div = 3600 } } },
+                    { threshold = 86400, format = "%dd", components = { { div = 86400 } } },
+                })
+                if set then
+                    durationTextFormat = {
+                        formatString = "%s",
+                        components = {
+                            {
+                                property = _G.Enum.DurationTextBindingProperty.RemainingDuration,
+                                formatter = formatter,
+                            },
+                        },
+                    }
+                end
+            end
+        end
+    end
+    return durationTextFormat or nil
+end
+
+-- Fallback when NumericRuleFormatter is unavailable: the old SecondsFormatter
+-- ("51 m" spacing and all). SetDurationText only consults textFormatter when
+-- no textFormat was given.
 local durationFormatter
 local function GetDurationFormatter()
     if durationFormatter == nil and _G.C_StringUtil and _G.C_StringUtil.CreateSecondsFormatter then
@@ -127,6 +163,7 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         -- widget's own countdown numbers which cannot be restyled. Minutes and
         -- hours are shown without decimals so long raid buffs stay narrow.
         showDuration = true,
+        durationFormat = GetDurationTextFormat(),
         durationFormatter = GetDurationFormatter(),
         cancelButton = settings.cancelButton,
         showDebuffBorder = settings.showDebuffBorder,
