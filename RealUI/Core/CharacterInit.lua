@@ -124,14 +124,8 @@ function CharacterInit:SetupChatFrames()
     -- Clear any existing points
     chatFrame:ClearAllPoints()
 
-    -- Position based on layout
-    if layout == 1 then
-        -- DPS/Tank layout - bottom left
-        chatFrame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT", 6, 32)
-    else
-        -- Healing layout - adjusted for raid frames
-        chatFrame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT", 6, 52)
-    end
+    -- Position based on layout, clearing the Infobar at any scale (B66)
+    chatFrame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT", 6, RealUI.GetChatYOffset(layout))
 
     -- Set chat frame size
     chatFrame:SetFrameLevel(15)

@@ -341,6 +341,25 @@ function RealUI.MakeFrameDraggable(frame, noClamp)
     frame:SetScript("OnDragStop", OnDragStop)
 end
 
+-- B66: the chat frame's default y-offset must clear the Infobar, whose height
+-- is 16 *scaled* pixels (Scale.Value) — at high resolutions that exceeds the
+-- old hardcoded 32/52 units, so the chat box sat on the bar. Compute from the
+-- live frame, with the same scale math as a fallback before it exists. The
+-- old numbers are reproduced exactly at scale 1: 16 bar + 16 margin (+20 for
+-- the healing layout's grid frames).
+function RealUI.GetChatYOffset(layout)
+    local infobar = _G.RealUI_Infobar
+    local barHeight = infobar and infobar:GetHeight()
+    if not barHeight or barHeight == 0 then
+        barHeight = RealUI.Scale and RealUI.Scale.Value(16) or 16
+    end
+    local yOfs = math.ceil(barHeight) + 16
+    if layout == 2 then
+        yOfs = yOfs + 20
+    end
+    return yOfs
+end
+
 
 ----====#####################====----
 --          Miscellaneous          --

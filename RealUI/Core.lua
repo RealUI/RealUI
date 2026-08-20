@@ -1553,7 +1553,7 @@ function RealUI:OnInitialize()
     -- Initialize chat frame positioning if needed
     if dbc.init.needchatmoved then
         _G.ChatFrame1:ClearAllPoints()
-        _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, 32)
+        _G.ChatFrame1:SetPoint("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 6, RealUI.GetChatYOffset())
         _G.ChatFrame1:SetFrameLevel(15)
         _G.ChatFrame1:SetHeight(145)
         _G.ChatFrame1:SetWidth(400)
