@@ -92,13 +92,15 @@ local function GetBaseFontSize(timer)
     end
 
     -- GetWidth/GetHeight can return secret numbers on nameplate cooldown
-    -- frames (Blizzard secure context in BGs). Force arithmetic inside
-    -- pcall so secret values error there instead of leaking out.
-    local ok, shortestSide = _G.pcall(function()
-        local pw, ph = parent:GetWidth() or 0, parent:GetHeight() or 0
-        return _G.math.min(pw + 0, ph + 0)
-    end)
-    if not ok or not shortestSide or shortestSide <= 0 then
+    -- frames (Blizzard secure context in BGs). B58: pre-check with
+    -- canaccessvalue instead of arithmetic-in-pcall — the caught throw still
+    -- wrote a taint.log entry. Same fallback: default sizes.
+    local pw, ph = parent:GetWidth() or 0, parent:GetHeight() or 0
+    if _G.canaccessvalue and not (_G.canaccessvalue(pw) and _G.canaccessvalue(ph)) then
+        return CD_FONT.size, CD_FONT.size + sizeAdjust[1].adj
+    end
+    local shortestSide = _G.math.min(pw, ph)
+    if shortestSide <= 0 then
         return CD_FONT.size, CD_FONT.size + sizeAdjust[1].adj
     end
 
@@ -137,13 +139,20 @@ function Timer:UpdateText()
 end
 
 function Timer:Start(start, duration, modRate)
-    -- In battlegrounds, Blizzard can pass tainted ("secret") number values
-    -- that cannot be used in arithmetic or comparisons by addon code.
-    -- Guard against this by wrapping the check in pcall.
-    local ok, shouldStart = _G.pcall(function()
-        return start and duration and start > 0 and duration > db.minDuration
-    end)
-    if ok and shouldStart then
+    -- In battlegrounds, Blizzard can pass secret number values that cannot be
+    -- used in arithmetic or comparisons by addon code. B58: pre-check with
+    -- canaccessvalue instead of comparing inside a pcall — the caught throw
+    -- still wrote a taint.log entry. Secret values gate here, so UpdateText's
+    -- arithmetic only ever sees plain numbers.
+    local shouldStart = start and duration
+    if shouldStart and _G.canaccessvalue
+        and not (_G.canaccessvalue(start) and _G.canaccessvalue(duration)) then
+        shouldStart = false
+    end
+    if shouldStart then
+        shouldStart = start > 0 and duration > db.minDuration
+    end
+    if shouldStart then
         self.start = start
         self.duration = duration
         self.enabled = true
