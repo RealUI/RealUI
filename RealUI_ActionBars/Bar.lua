@@ -23,6 +23,12 @@ local function BuildButtonConfig(barDB, keyBoundTarget)
             macro = barDB.hidemacrotext,
             hotkey = false,
             equipped = false,
+            -- B64: left unset, LAB paints every *empty* slot with Blizzard's
+            -- "UI-HUD-ActionBar-IconFrame-AddRow" atlas — the green box
+            -- reported at the end of a bar (/fstack named it exactly:
+            -- RealUI_AB_Bar6B11NormalTexture, that atlas). Setting this makes
+            -- LAB clear the texture instead, on every Update rather than once.
+            borderIfEmpty = true,
         },
         keyBoundTarget = keyBoundTarget,
         colors = {

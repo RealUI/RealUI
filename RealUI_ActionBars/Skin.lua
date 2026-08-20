@@ -73,6 +73,16 @@ end
 local function ApplyStateTextures(button)
     local r, g, b = GetHighlightColor()
 
+    -- B64: the same class of one-shot loss. For a button that *holds* an
+    -- action LAB calls SetNormalAtlas("UI-HUD-ActionBar-IconFrame-AddRow") on
+    -- every Update, and that creates NormalTexture if the region did not
+    -- exist yet — so SkinButton's single SetAlpha(0) is missed entirely on any
+    -- button whose NormalTexture LAB created after we skinned it. Re-assert.
+    local normal = button:GetNormalTexture()
+    if normal then
+        normal:SetAlpha(0)
+    end
+
     local highlight = button:GetHighlightTexture()
     if highlight then
         highlight:ClearAllPoints()
