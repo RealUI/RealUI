@@ -82,7 +82,10 @@ local function GetDurationTextFormat()
                 })
                 if set then
                     durationTextFormat = {
-                        formatString = "%s",
+                        -- The binding's placeholder syntax is "{}", one per
+                        -- component ("%s" reads as zero placeholders and
+                        -- SetTextFormat rejects the mismatch).
+                        formatString = "{}",
                         components = {
                             {
                                 property = _G.Enum.DurationTextBindingProperty.RemainingDuration,
