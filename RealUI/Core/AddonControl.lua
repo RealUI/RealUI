@@ -315,6 +315,16 @@ function AddonControl:ShowOptionsWindow()
     if not AddonControl.options then self:CreateOptionsFrame() end
     AddonControl.options:Show()
 end
+
+-- B61: the HuD config buttons should toggle their pane like Advanced
+-- Options does, not just open it.
+function AddonControl:ToggleOptionsWindow()
+    if AddonControl.options and AddonControl.options:IsShown() then
+        AddonControl.options:Hide()
+    else
+        self:ShowOptionsWindow()
+    end
+end
 _G.SlashCmdList.AC = function()
     AddonControl:ShowOptionsWindow()
 end

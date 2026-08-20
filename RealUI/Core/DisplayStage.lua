@@ -533,6 +533,16 @@ function DisplayStage.Hide()
     end
 end
 
+--- Toggle the standalone display stage. B61: the HuD config buttons should
+--- toggle their pane like Advanced Options does, not just open it.
+function DisplayStage.Toggle()
+    if standaloneFrame and standaloneFrame:IsShown() then
+        standaloneFrame:Hide()
+    else
+        DisplayStage.Open()
+    end
+end
+
 --- Open the display stage as a standalone frame (outside the wizard).
 function DisplayStage.Open()
     isWizardMode = false

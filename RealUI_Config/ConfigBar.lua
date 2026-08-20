@@ -94,7 +94,8 @@ do -- Other
                 name = L["Control_AddonControl"],
                 type = "execute",
                 func = function(info, ...)
-                    RealUI:GetModule("AddonControl"):ShowOptionsWindow()
+                    -- B61: toggle like Advanced Options, don't just open
+                    RealUI:GetModule("AddonControl"):ToggleOptionsWindow()
                 end,
                 order = 2,
             },
@@ -103,7 +104,7 @@ do -- Other
                 type = "execute",
                 func = function()
                     if RealUI.DisplayStage then
-                        RealUI.DisplayStage.Open()
+                        RealUI.DisplayStage.Toggle()
                     end
                 end,
                 order = 3,
