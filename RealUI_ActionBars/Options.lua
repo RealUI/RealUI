@@ -20,6 +20,15 @@ local function BarOptions(id)
         private.RefreshBar(id)
     end
 
+    -- B59: the HuD layout engine owns geometry on bars 1-5 — Integration.lua's
+    -- ApplyRealUILayout rewrites rows, grow direction and position on every
+    -- recompute (layout swap, spec change, HuD size change, reload). Offering
+    -- those controls here meant a user could set them and silently lose the
+    -- change on the next recompute. Hide them on the managed bars and say who
+    -- owns them; bar 6 is not touched by the engine, so it keeps the full set.
+    -- Same boundary the buttonSize/padding/scale carve-out established.
+    local layoutOwned = id <= 5
+
     return {
         type = "group", name = (id == 6) and "Bar 6 (Naga)" or ("Bar " .. id), order = id,
         args = {
@@ -33,8 +42,13 @@ local function BarOptions(id)
                 get = function() return db().buttons end,
                 set = function(_, v) db().buttons = v; refresh() end,
             },
+            layoutNote = {
+                type = "description", order = 3, hidden = not layoutOwned,
+                name = "|cffffcc00Rows, grow direction and position|r on this bar are set by the HuD layout — they follow layout swaps, spec changes and HuD size. Button size, padding, scale and everything below are yours.",
+            },
             rows = {
                 type = "range", name = "Rows", min = 1, max = 12, step = 1, order = 3,
+                hidden = layoutOwned,
                 get = function() return db().rows end,
                 set = function(_, v) db().rows = v; refresh() end,
             },
@@ -61,16 +75,19 @@ local function BarOptions(id)
             },
             growHorizontal = {
                 type = "select", name = "Grow (horizontal)", values = GROW_H, order = 8,
+                hidden = layoutOwned,
                 get = function() return db().growHorizontal end,
                 set = function(_, v) db().growHorizontal = v; refresh() end,
             },
             growVertical = {
                 type = "select", name = "Grow (vertical)", values = GROW_V, order = 9,
+                hidden = layoutOwned,
                 get = function() return db().growVertical end,
                 set = function(_, v) db().growVertical = v; refresh() end,
             },
             position = {
                 type = "group", name = "Position", inline = true, order = 10,
+                hidden = layoutOwned,
                 args = {
                     point = {
                         type = "select", name = "Anchor", values = POINTS, order = 1,
