@@ -42,15 +42,17 @@ local function RunSetEnabledStateFallbackTest()
         return false
     end
 
-    local original = module:IsEnabled()
+    -- IsEnabled() can report nil rather than false, so normalise to a real
+    -- boolean everywhere before comparing.
+    local original = module:IsEnabled() and true or false
     local failures = 0
 
     -- Both directions, starting from whichever state the module is in, so the
     -- test does not depend on the player's current setting.
     for _, target in _G.ipairs({false, true, false, true}) do
         module:SetEnabledState(target)
-        local actual = module:IsEnabled()
-        if not actual ~= not target then
+        local actual = module:IsEnabled() and true or false
+        if actual ~= target then
             failures = failures + 1
             _G.print(("|cffff0000[FAIL]|r SetEnabledState(%s) then IsEnabled()=%s"):format(
                 _G.tostring(target), _G.tostring(actual)))
@@ -59,7 +61,7 @@ local function RunSetEnabledStateFallbackTest()
 
     -- Restore whatever the player had.
     module:SetEnabledState(original)
-    if not module:IsEnabled() ~= not original then
+    if (module:IsEnabled() and true or false) ~= original then
         failures = failures + 1
         _G.print(("|cffff0000[FAIL]|r could not restore original state (%s)"):format(_G.tostring(original)))
     end
