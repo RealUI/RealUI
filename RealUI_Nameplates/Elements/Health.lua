@@ -101,11 +101,12 @@ local function ResolveColor(plate, unit)
     local colors = db.colors
 
     if db.execute.enabled then
-        local inExecute = private.SafeTest(function()
-            local max = _G.UnitHealthMax(unit)
-            return max > 0 and (_G.UnitHealth(unit) / max) <= db.execute.threshold
-        end)
-        if inExecute then
+        -- B58: pre-check with Accessible instead of computing inside a pcall —
+        -- the caught throw still logged (765 taint.log entries in 8 minutes).
+        -- Same degradation: no execute colouring while health is secret.
+        local max, cur = _G.UnitHealthMax(unit), _G.UnitHealth(unit)
+        if private.Accessible(max) and private.Accessible(cur)
+            and max > 0 and (cur / max) <= db.execute.threshold then
             return private.SafeTest(_G.UnitAffectingCombat, unit) and colors.executeCombat or colors.execute
         end
     end

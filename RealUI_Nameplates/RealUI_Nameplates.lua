@@ -28,13 +28,23 @@ function private.Try(fn, ...)
     return (_G.pcall(fn, ...))
 end
 
--- Truth-test fn's result inside pcall; false when the test throws (secret value).
--- Secret BOOLEANS throw on truth tests (unlike secret strings/numbers), so any
--- condition built on combat-API booleans goes through here.
+-- Truth-test fn's result without throwing. Secret BOOLEANS throw on truth
+-- tests (unlike secret strings/numbers), so any condition built on combat-API
+-- booleans goes through here. B58: the result is resolved via SafeBool
+-- (canaccessvalue) instead of a bare truth test — a pcall-caught throw still
+-- writes a taint.log entry, and these guards were producing thousands per
+-- session. The pcall stays only to isolate real errors from fn itself.
 function private.SafeTest(fn, ...)
     local ok, result = _G.pcall(fn, ...)
-    if ok and result then return true end
-    return false
+    return ok and private.SafeBool(result) == true
+end
+
+-- True when value exists and is plain (non-secret). canaccessvalue never
+-- throws and never logs, unlike arithmetic-in-pcall probing (B58).
+function private.Accessible(value)
+    if value == nil then return false end
+    if _G.canaccessvalue then return _G.canaccessvalue(value) end
+    return true -- pre-secret client: nothing is secret
 end
 
 -- Resolve a possibly-secret boolean to plain true/false, or nil if inaccessible.

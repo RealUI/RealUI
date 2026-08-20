@@ -70,14 +70,18 @@ local function UpdateHealthPercent(plate)
         texts.healthPercent:Hide()
         return
     end
-    local shown = Safe(function()
-        local max = _G.UnitHealthMax(plate.unit)
-        if max <= 0 then return false end
-        local percent = _G.math.floor(_G.UnitHealth(plate.unit) / max * 100 + 0.5)
+    -- B58: pre-check with Accessible instead of computing inside a pcall —
+    -- the caught throw still logged (623 taint.log entries in 8 minutes).
+    -- Same degradation: the percentage text hides while health is secret;
+    -- the health bar itself keeps updating (secret-capable SetValue).
+    local shown = false
+    local max, cur = _G.UnitHealthMax(plate.unit), _G.UnitHealth(plate.unit)
+    if private.Accessible(max) and private.Accessible(cur) and max > 0 then
+        local percent = _G.math.floor(cur / max * 100 + 0.5)
         texts.healthPercent:SetFormattedText("%d%%", percent)
-        return true
-    end)
-    texts.healthPercent:SetShown(shown or false)
+        shown = true
+    end
+    texts.healthPercent:SetShown(shown)
 end
 
 function Texts.Attach(plate, unit)
