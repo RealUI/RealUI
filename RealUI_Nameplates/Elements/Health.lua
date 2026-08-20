@@ -2,6 +2,18 @@ local _, private = ...
 local NP = private.NP
 local Safe = private.Safe
 
+-- B58: one shared engine-side heal-prediction calculator. Each UpdateValue
+-- refills it via UnitGetDetailedHealPrediction and reads synchronously, so
+-- sharing across plates is safe. Its getters are secret-capable inputs to
+-- StatusBar SetValue/SetMinMaxValues (see oUF 14 health element).
+local calculator = _G.CreateUnitHealPredictionCalculator
+    and _G.CreateUnitHealPredictionCalculator() or nil
+if calculator then
+    -- Absorbs clamp to missing health, ignoring incoming heals — keeps the
+    -- overlay from shrinking whenever a heal is in flight.
+    calculator:SetDamageAbsorbClampMode(_G.Enum.UnitDamageAbsorbClampMode.MissingHealthWithoutIncomingHeals)
+end
+
 --[[ Shared element helpers (this file loads first of the elements) ]]--
 
 function private.ApplyFont(fontString, size)
@@ -117,16 +129,23 @@ function Health.Create(plate)
     bg:SetAllPoints(plate)
     bg:SetColorTexture(db.background.r, db.background.g, db.background.b, db.background.a)
 
-    local absorbBar = _G.CreateFrame("StatusBar", nil, plate)
-    absorbBar:SetAllPoints(plate)
-    absorbBar:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
-    absorbBar:SetStatusBarColor(1, 1, 1, 0.45)
-    absorbBar:SetFrameLevel(plate:GetFrameLevel() + 1)
-
     local bar = _G.CreateFrame("StatusBar", nil, plate)
     bar:SetAllPoints(plate)
     bar:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
     bar:SetFrameLevel(plate:GetFrameLevel() + 2)
+
+    -- B58: the absorb overlay spans the missing-health region — anchored from
+    -- the health fill's edge to the plate's right edge. With min/max set to
+    -- (0, missing health), a fill of absorb/missing over that region is
+    -- geometrically identical to absorb/max over the full bar, so no Lua
+    -- arithmetic is needed anywhere: anchors track the fill edge and the
+    -- values come secret-capable from the heal-prediction calculator.
+    local absorbBar = _G.CreateFrame("StatusBar", nil, plate)
+    absorbBar:SetPoint("TOPLEFT", bar:GetStatusBarTexture(), "TOPRIGHT")
+    absorbBar:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT")
+    absorbBar:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
+    absorbBar:SetStatusBarColor(1, 1, 1, 0.45)
+    absorbBar:SetFrameLevel(plate:GetFrameLevel() + 1)
 
     plate.Health = {
         bg = bg,
@@ -145,14 +164,16 @@ local function UpdateValue(plate)
         health.bar:SetMinMaxValues(0, _G.UnitHealthMax(unit))
         health.bar:SetValue(_G.UnitHealth(unit))
     end)
-    -- Absorb needs arithmetic, so it degrades independently: when health is secret,
-    -- the overlay just stops updating while the health bar keeps working.
-    if NP.db.profile.enemy.health.absorb then
+    -- B58: absorb via the engine's heal-prediction calculator — the old
+    -- min(health + absorb, max) arithmetic threw on secret health in combat
+    -- (599 silent no-ops in one 8-minute taint log), so the overlay never
+    -- tracked when it mattered. Calculator getters feed SetMinMaxValues/
+    -- SetValue secret-capably, same as oUF 14's health element.
+    if NP.db.profile.enemy.health.absorb and calculator then
         Safe(function()
-            local max = _G.UnitHealthMax(unit)
-            local absorb = _G.UnitGetTotalAbsorbs(unit) or 0
-            health.absorbBar:SetMinMaxValues(0, max)
-            health.absorbBar:SetValue(_G.math.min(_G.UnitHealth(unit) + absorb, max))
+            _G.UnitGetDetailedHealPrediction(unit, nil, calculator)
+            health.absorbBar:SetMinMaxValues(0, calculator:GetMissingHealth())
+            health.absorbBar:SetValue((calculator:GetDamageAbsorbs()))
         end)
     else
         Safe(health.absorbBar.SetValue, health.absorbBar, 0)
