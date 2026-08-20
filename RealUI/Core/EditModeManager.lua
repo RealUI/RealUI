@@ -459,6 +459,57 @@ end
 -- ActivateLayout
 ---------------------------------------------------------------------------
 
+--- B60: the role→layout mapping is user-configurable. The RealUI-named
+-- layouts stay the maintained defaults (creation, templates and the
+-- sole-writer guard all keep using LAYOUT_NAMES), but *activation* honours a
+-- per-character override so a user-made EditMode layout can be the one RealUI
+-- re-asserts on reloads and spec swaps, instead of being stomped by it.
+-- @param role string  "dpstank" or "healing"
+-- @return string  The layout name activation should target
+function EditModeManager:GetConfiguredLayoutName(role)
+    local dbc = RealUI.db and RealUI.db.char
+    local override = dbc and dbc.editmode and dbc.editmode.layouts
+        and dbc.editmode.layouts[role]
+    return override or LAYOUT_NAMES[role]
+end
+
+--- Sets (or clears) the layout a role activates. nil or the default name
+-- clears the override.
+-- @param role string  "dpstank" or "healing"
+-- @param layoutName string|nil  Saved EditMode layout name
+function EditModeManager:SetRoleLayout(role, layoutName)
+    local dbc = RealUI.db and RealUI.db.char
+    if not dbc or not LAYOUT_NAMES[role] then return end
+    dbc.editmode = dbc.editmode or {}
+    dbc.editmode.layouts = dbc.editmode.layouts or {}
+    if layoutName == LAYOUT_NAMES[role] then layoutName = nil end
+    dbc.editmode.layouts[role] = layoutName
+    debug("SetRoleLayout:", role, layoutName or "(default)")
+    if role == (state.currentRole or "dpstank") then
+        -- Config-panel click = user-initiated; the scope covers the
+        -- EnsureLayouts fallback inside ActivateLayout.
+        self:BeginUserWrite()
+        self:ActivateLayout(role)
+        self:EndUserWrite()
+    end
+end
+
+--- Lists saved EditMode layout names for the config dropdowns.
+-- @return table  { [layoutName] = layoutName }
+function EditModeManager:GetSavedLayoutNames()
+    local values = {}
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if ok and data and data.layouts then
+        for _, layout in ipairs(data.layouts) do
+            values[layout.layoutName] = layout.layoutName
+        end
+    end
+    -- The maintained defaults are always offered, even before first creation
+    values[LAYOUT_NAMES.dpstank] = LAYOUT_NAMES.dpstank
+    values[LAYOUT_NAMES.healing] = LAYOUT_NAMES.healing
+    return values
+end
+
 --- Activates the EditMode layout for the specified role.
 -- Finds the layout by name and calls C_EditMode.SetActiveLayout() with the
 -- correct absolute index (built-in count + custom index).
@@ -471,11 +522,11 @@ function EditModeManager:ActivateLayout(role)
         return false
     end
 
-    local layoutName = LAYOUT_NAMES[role]
-    if not layoutName then
+    if not LAYOUT_NAMES[role] then
         debug("ERROR: Unknown role:", role)
         return false
     end
+    local layoutName = self:GetConfiguredLayoutName(role)
 
     local ok, data = pcall(C_EditMode.GetLayouts)
     if not ok or not data then
@@ -485,6 +536,15 @@ function EditModeManager:ActivateLayout(role)
 
     local targetType = self:GetCurrentLayoutType()
     local idx = FindLayoutIndex(data, layoutName, targetType)
+
+    -- B60: a configured user layout that no longer exists (deleted in
+    -- EditMode) cannot be created by EnsureLayouts — fall back to the
+    -- maintained default for the role rather than failing.
+    if not idx and layoutName ~= LAYOUT_NAMES[role] then
+        debug("Configured layout missing, falling back to default:", layoutName)
+        layoutName = LAYOUT_NAMES[role]
+        idx = FindLayoutIndex(data, layoutName, targetType)
+    end
 
     if not idx then
         -- Layout doesn't exist yet — create both, then find again

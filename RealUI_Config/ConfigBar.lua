@@ -137,6 +137,41 @@ do -- Other
                         end,
                         order = 10,
                     },
+                    -- B60: which EditMode layout each role activates. RealUI
+                    -- re-asserts the role's layout on reload and spec swaps
+                    -- (WoW 12's per-spec EditMode tracking resets to a preset
+                    -- otherwise); these pickers let that re-assert target a
+                    -- user-made layout instead of always forcing RealUI's own.
+                    editModeDpsTank = {
+                        name = "Edit Mode layout: DPS/Tank",
+                        desc = "The Edit Mode layout RealUI keeps active for DPS and Tank specs. Default: RealUI.",
+                        type = "select",
+                        values = function()
+                            return RealUI.EditModeManager:GetSavedLayoutNames()
+                        end,
+                        get = function()
+                            return RealUI.EditModeManager:GetConfiguredLayoutName("dpstank")
+                        end,
+                        set = function(info, value)
+                            RealUI.EditModeManager:SetRoleLayout("dpstank", value)
+                        end,
+                        order = 12,
+                    },
+                    editModeHealing = {
+                        name = "Edit Mode layout: Healing",
+                        desc = "The Edit Mode layout RealUI keeps active for Healing specs. Default: RealUI-Healing.",
+                        type = "select",
+                        values = function()
+                            return RealUI.EditModeManager:GetSavedLayoutNames()
+                        end,
+                        get = function()
+                            return RealUI.EditModeManager:GetConfiguredLayoutName("healing")
+                        end,
+                        set = function(info, value)
+                            RealUI.EditModeManager:SetRoleLayout("healing", value)
+                        end,
+                        order = 14,
+                    },
                     linkLayout = {
                         name = L["Layout_Link"],
                         desc = L["Layout_LinkDesc"],
