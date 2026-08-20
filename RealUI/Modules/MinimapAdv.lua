@@ -1947,6 +1947,19 @@ local function SetUpMinimapFrame()
         landingButton:SetScript("OnEnter", Garrison_OnEnter)
         landingButton.shouldShow = false
         landingButton.mouseover = false
+
+        -- Midnight: RefreshButton/UpdateIcon runs SetLandingPageIconOffset,
+        -- which re-anchors the button to Blizzard's TOPLEFT offsets (the
+        -- expansion overlay — Omnium Folio — supplies a customOffset) on
+        -- every overlay or mode refresh, after our placement. Same disease
+        -- as the LFG eye's UpdatePosition re-anchor; same cure: re-assert
+        -- the corner-aware dock after every stomp.
+        if landingButton.SetLandingPageIconOffset then
+            _G.hooksecurefunc(landingButton, "SetLandingPageIconOffset", function()
+                local mapPoints = GetPositionData()
+                UpdateGarrisonButton(mapPoints.isTop, mapPoints.isLeft)
+            end)
+        end
     end
 
     local queueStatusButton = _G.QueueStatusButton
