@@ -37,11 +37,17 @@ end
 
 local function InterruptReady()
     if not interruptSpellID then return false end
-    return private.SafeTest(function()
-        local cooldown = _G.C_Spell.GetSpellCooldown(interruptSpellID)
-        return cooldown and (cooldown.duration == 0
-            or (cooldown.startTime + cooldown.duration - _G.GetTime()) <= 0.3)
-    end)
+    -- B58: cooldown getters return secrets in restricted contexts; pre-check
+    -- with Accessible instead of comparing inside a pcall — the caught throw
+    -- still logged (77 taint.log entries in 8 minutes). Same degradation:
+    -- treat an unreadable cooldown as not-ready.
+    local cooldown = _G.C_Spell.GetSpellCooldown(interruptSpellID)
+    if not cooldown then return false end
+    local duration, start = cooldown.duration, cooldown.startTime
+    if not (private.Accessible(duration) and private.Accessible(start)) then
+        return false
+    end
+    return duration == 0 or (start + duration - _G.GetTime()) <= 0.3
 end
 
 local CastBar = {}
