@@ -15,18 +15,27 @@ function Texts.Create(plate)
     local healthPercent = plate:CreateFontString(nil, "OVERLAY")
     healthPercent:SetPoint("LEFT", plate, "RIGHT", 4, 0)
 
+    -- Fonts at CREATION, not just in Attach: Detach calls SetText on a plate
+    -- that may never have been attached (rapid plate churn in a battleground
+    -- releases pooled plates before the attach pass), and SetText on a
+    -- font-less FontString throws "FontString:SetText(): Font not set"
+    -- (x7, 2026-08-22). Attach re-applies the configured sizes afterwards.
+    private.ApplyFont(name, NP.db.profile.enemy.texts.name.size)
+    private.ApplyFont(healthPercent, 9)
+
     plate.Texts = { name = name, healthPercent = healthPercent }
 end
 
 local function FriendlyNameColor(unit)
     local db = NP.db.profile.friendly.name
+    -- Role and class are both secret-capable in a battleground; indexing a
+    -- plain table with either throws (see private.ClassColor in Health.lua).
     local role = _G.UnitGroupRolesAssigned(unit)
-    if db.roleColors[role] then return db.roleColors[role] end
-    if _G.UnitIsPlayer(unit) then
-        local _, class = _G.UnitClass(unit)
-        local color = class and _G.RAID_CLASS_COLORS[class]
-        if color then return color end
+    if private.Accessible(role) and db.roleColors[role] then
+        return db.roleColors[role]
     end
+    local classColor = private.ClassColor(unit)
+    if classColor then return classColor end
     return NP.db.profile.enemy.colors.reaction.friendly
 end
 

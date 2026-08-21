@@ -55,7 +55,14 @@ local function UpdateRare(plate)
         markers.rare:Hide()
         return
     end
+    -- UnitClassification can hand back a SECRET string in combat, and comparing
+    -- one against a plain string throws (same shape as the B52 chat-copy bug).
+    -- No classification data → no elite/rare marker, like every other tier.
     local classification = _G.UnitClassification(plate.unit)
+    if not private.Accessible(classification) then
+        markers.rare:Hide()
+        return
+    end
     if classification == "rare" then
         Safe(markers.rare.SetAtlas, markers.rare, "nameplates-icon-elite-silver", false)
         markers.rare:Show()

@@ -16,6 +16,29 @@ end
 
 --[[ Shared element helpers (this file loads first of the elements) ]]--
 
+--- Class colour for a unit, secret-safe. BOTH reads bite on enemy players:
+--- UnitIsPlayer returns a secret boolean (a bare truth test throws) and
+--- UnitClass returns a secret class token — indexing RAID_CLASS_COLORS with it
+--- throws "attempted to index a table that cannot be indexed with secret keys"
+--- (x54 in one battleground, 2026-08-22: every enemy player plate, and the
+--- friendly-name path had the same defect). C_ClassColor.GetClassColor accepts
+--- secret tokens natively — the route the HuD unit frames already take
+--- (`HuD/UnitFrames/Shared.lua` GetClassColor).
+function private.ClassColor(unit)
+    if not private.SafeTest(_G.UnitIsPlayer, unit) then return nil end
+
+    local _, class = _G.UnitClass(unit)
+    if class == nil then return nil end
+
+    if private.Accessible(class) then
+        return _G.RAID_CLASS_COLORS[class]
+    end
+    if _G.C_ClassColor and _G.C_ClassColor.GetClassColor then
+        return _G.C_ClassColor.GetClassColor(class)
+    end
+    return nil
+end
+
 function private.ApplyFont(fontString, size)
     local db = NP.db.profile.font
     local path = [[Fonts\FRIZQT__.TTF]]
@@ -111,11 +134,8 @@ local function ResolveColor(plate, unit)
         end
     end
     if plate.state.casting then return colors.cast end
-    if _G.UnitIsPlayer(unit) then
-        local _, class = _G.UnitClass(unit)
-        local color = class and _G.RAID_CLASS_COLORS[class]
-        if color then return color end
-    end
+    local classColor = private.ClassColor(unit)
+    if classColor then return classColor end
     if private.SafeTest(_G.UnitIsTapDenied, unit) then return colors.tapped end
     return Safe(ThreatColor, unit, colors) or Safe(ReactionColor, unit, colors)
         or colors.reaction.neutral
@@ -184,7 +204,11 @@ end
 function private.UpdateHealthColor(plate)
     if plate.design ~= "enemy" or not plate.unit then return end
     local color = ResolveColor(plate, plate.unit)
-    plate.Health.bar:SetStatusBarColor(color.r, color.g, color.b)
+    -- A class colour resolved from a SECRET class token carries secret
+    -- components; SetStatusBarColor takes those, but keep the whole apply in
+    -- Safe so a future secret-tier change degrades to "bar keeps its colour"
+    -- instead of erroring once per plate per update (B58 doctrine).
+    Safe(plate.Health.bar.SetStatusBarColor, plate.Health.bar, color.r, color.g, color.b)
 end
 
 function Health.Attach(plate, unit)
