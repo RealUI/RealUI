@@ -15,6 +15,7 @@ The authoritative list of RealUI slash commands, including the diagnostics and t
 | `/charinit setup\|reset\|info` | Character-specific setup (role detection, chat positioning) |
 | `/tutorial` | Open the tutorial |
 | `/realui reset` / `/realui resetchar` | Reset settings (account / character) |
+| `/realui newdefaults` | Open the "new defaults since 3.4.0" picker — tick which changed defaults to apply to your saved settings (auto-shows once per character) |
 | `/rl` | Reload the UI |
 
 ## Layout & positioning
