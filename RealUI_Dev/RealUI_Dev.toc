@@ -62,6 +62,7 @@ tests\HuDFixExplorationTest.lua
 tests\HuDFixPreservationTest.lua
 tests\PositionerResizeTest.lua
 tests\ToTStabilityDiag.lua
+tests\CopyChatDiag.lua
 tests\DeprecatedAPIAbsenceTest.lua
 tests\AdvancedFeaturesTest.lua
 tests\ModuleFrameworkTest.lua

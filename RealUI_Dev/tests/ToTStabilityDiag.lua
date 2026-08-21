@@ -33,6 +33,18 @@ local function fmtNum(v)
     return tostring(v)
 end
 
+-- GetText on a unit-name FontString returns a SECRET string for restricted
+-- units in combat (hit live 2026-08-21 — `text ~= ""` threw). House guard:
+-- canaccessvalue when present, pcall-strsub probe otherwise.
+local function SafeText(value)
+    if type(value) ~= "string" then return nil end
+    if _G.canaccessvalue then
+        return _G.canaccessvalue(value) and value or "<secret>"
+    end
+    local ok = _G.pcall(function() return _G.strsub(value, 1, 0) end)
+    return ok and value or "<secret>"
+end
+
 local function SizeOf(region)
     if not region then return "nil" end
     local w, h = region:GetSize()
@@ -165,8 +177,8 @@ end
 
 -- B24: blink watcher --------------------------------------------------------
 
-local watcher -- { counts = {}, endTime, ticker }
-local hooksInstalled = false
+local watcher -- { counts = {} }
+local hookedFrames = {}
 
 local function BumpCount(key)
     if watcher then
@@ -174,31 +186,66 @@ local function BumpCount(key)
     end
 end
 
-local function InstallHooks(frame)
-    if hooksInstalled then return end
-    hooksInstalled = true
+local function InstallHooks(frame, tag)
+    if hookedFrames[frame] then return end
+    hookedFrames[frame] = true
 
-    frame:HookScript("OnShow", function() BumpCount("OnShow") end)
-    frame:HookScript("OnHide", function() BumpCount("OnHide") end)
-    _G.hooksecurefunc(frame, "SetSize", function() BumpCount("frame SetSize") end)
-    _G.hooksecurefunc(frame, "SetPoint", function() BumpCount("frame SetPoint") end)
-    _G.hooksecurefunc(frame, "UpdateAllElements", function() BumpCount("UpdateAllElements") end)
-    if frame.Health then
-        _G.hooksecurefunc(frame.Health, "SetSize", function() BumpCount("Health SetSize") end)
-        if frame.Health.SetSmooth then
-            _G.hooksecurefunc(frame.Health, "SetSmooth", function(_, enable)
-                BumpCount(enable and "SetSmooth(true)" or "SetSmooth(false)")
+    frame:HookScript("OnShow", function() BumpCount(tag .. " OnShow") end)
+    frame:HookScript("OnHide", function() BumpCount(tag .. " OnHide") end)
+    _G.hooksecurefunc(frame, "SetSize", function() BumpCount(tag .. " frame SetSize") end)
+    _G.hooksecurefunc(frame, "SetPoint", function() BumpCount(tag .. " frame SetPoint") end)
+    _G.hooksecurefunc(frame, "UpdateAllElements", function() BumpCount(tag .. " UpdateAllElements") end)
+    _G.hooksecurefunc(frame, "SetAlpha", function(_, alpha)
+        if _G.issecretvalue(alpha) then
+            BumpCount(tag .. " frame SetAlpha(<secret>)")
+        else
+            BumpCount(("%s frame SetAlpha(%.2f)"):format(tag, alpha))
+        end
+    end)
+
+    -- CombatFader drives frame.overlay's alpha; a re-triggering fade would
+    -- pulse everything parented to it — the "whole frame flickers" suspect.
+    if frame.overlay then
+        _G.hooksecurefunc(frame.overlay, "SetAlpha", function(_, alpha)
+            if _G.issecretvalue(alpha) then
+                BumpCount(tag .. " overlay SetAlpha(<secret>)")
+            else
+                BumpCount(("%s overlay SetAlpha(%.2f)"):format(tag, alpha))
+            end
+        end)
+    end
+
+    local Health = frame.Health
+    if Health then
+        _G.hooksecurefunc(Health, "SetSize", function() BumpCount(tag .. " Health SetSize") end)
+        if Health.SetSmooth then
+            _G.hooksecurefunc(Health, "SetSmooth", function(_, enable)
+                BumpCount(tag .. (enable and " SetSmooth(true)" or " SetSmooth(false)"))
             end)
         end
-        if frame.Health.SetValue then
-            _G.hooksecurefunc(frame.Health, "SetValue", function() BumpCount("Health SetValue") end)
+        if Health.SetValue then
+            _G.hooksecurefunc(Health, "SetValue", function() BumpCount(tag .. " Health SetValue") end)
+        end
+        -- The fill texture is what actually renders; catch geometry churn and
+        -- visibility flapping directly on it.
+        local fill = Health.fill
+        if fill then
+            _G.hooksecurefunc(fill, "SetShown", function(_, shown)
+                BumpCount(tag .. (shown and " fill SetShown(true)" or " fill SetShown(false)"))
+            end)
+            _G.hooksecurefunc(fill, "Hide", function() BumpCount(tag .. " fill Hide") end)
+            _G.hooksecurefunc(fill, "SetVertexOffset", function() BumpCount(tag .. " fill SetVertexOffset") end)
+            _G.hooksecurefunc(fill, "SetTexCoord", function() BumpCount(tag .. " fill SetTexCoord") end)
         end
     end
 end
 
 function ns.commands:totwatch()
-    local frame = GetToT()
-    if not frame then
+    local frames = {
+        ToT = GetToT(),
+        FocusTarget = _G.RealUIFocusTargetFrame,
+    }
+    if not frames.ToT then
         _G.print("|cffff0000[ToTWatch]|r RealUITargetTargetFrame not found.")
         return
     end
@@ -208,25 +255,33 @@ function ns.commands:totwatch()
         return
     end
 
-    InstallHooks(frame)
+    for tag, frame in _G.next, frames do
+        if frame then
+            InstallHooks(frame, tag)
+        end
+    end
 
     local DURATION = 15
     watcher = { counts = {} }
-    _G.print(("|cff00ccff[ToTWatch]|r watching for %ds — keep the blink on screen (target something that has a target)..."):format(DURATION))
+    _G.print(("|cff00ccff[ToTWatch]|r watching ToT + FocusTarget for %ds — keep the flicker on screen..."):format(DURATION))
 
     _G.C_Timer.After(DURATION, function()
         local counts = watcher.counts
         watcher = nil
         _G.print("|cff00ccff[ToTWatch]|r results over " .. DURATION .. "s:")
-        local any = false
-        for key, count in _G.next, counts do
-            _G.print(("  %s: %d (%.1f/s)"):format(key, count, count / DURATION))
-            any = true
+        -- Sorted output so repeated runs compare cleanly
+        local keys = {}
+        for key in _G.next, counts do
+            keys[#keys + 1] = key
         end
-        if not any then
+        _G.table.sort(keys)
+        for _, key in _G.ipairs(keys) do
+            _G.print(("  %s: %d (%.1f/s)"):format(key, counts[key], counts[key] / DURATION))
+        end
+        if #keys == 0 then
             _G.print("  no instrumented activity at all")
         end
-        _G.print("|cff00ccff[ToTWatch]|r OnShow/OnHide pairs = unit-watch churn; SetSmooth pairs at ~2/s = eventless poll re-render (blink suspect).")
+        _G.print("|cff00ccff[ToTWatch]|r overlay SetAlpha churn = CombatFader re-fading (whole-frame pulse); fill SetShown/Hide = bar visibility flapping.")
     end)
 end
 
@@ -247,7 +302,7 @@ local function DumpFontStrings(frame, label)
             for i = 1, _G.select("#", f:GetRegions()) do
                 local region = _G.select(i, f:GetRegions())
                 if region and region.GetObjectType and region:GetObjectType() == "FontString" then
-                    local text = region:GetText()
+                    local text = SafeText(region:GetText())
                     if text and text ~= "" then
                         local point, rel, relPoint, x, y = region:GetPoint(1)
                         _G.print(("  \"%s\" on %s [%s] %s->%s (%s, %s) shown=%s"):format(
