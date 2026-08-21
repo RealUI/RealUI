@@ -1011,23 +1011,27 @@ function UnitFrames:OnInitialize()
                 showBossBuffs = true,
             },
             -- TODO: Convert to FramePoint
+            -- B47/B12: focus, ToT and pet moved 15px lower (2026-08-21) — the
+            -- pinned cast bar default occupies ~-42..-60 below its unit frame,
+            -- and the old -62/-67 row collided with it. AceDB defaults, so
+            -- untouched profiles pick the new stack up on reload.
             positions = {
                 [1] = {
                     player =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    pet =          { x = 51,  y = -84}, -- Anchored to Player
-                    focus =        { x = 29,  y = -62}, -- Anchored to Player
+                    pet =          { x = 51,  y = -112}, -- Anchored to Player
+                    focus =        { x = 29,  y = -90}, -- Anchored to Player
                     focustarget =  { x = 11,  y = -2},  -- Anchored to Focus
                     target =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    targettarget = { x = -29, y = -62}, -- Anchored to Target
+                    targettarget = { x = -29, y = -90}, -- Anchored to Target
                     boss =         { x = 0,   y = 0},   -- Anchored to Positioner
                 },
                 [2] = {
                     player =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    pet =          { x = 60,  y = -91}, -- Anchored to Player
-                    focus =        { x = 36,  y = -67}, -- Anchored to Player
+                    pet =          { x = 60,  y = -119}, -- Anchored to Player
+                    focus =        { x = 36,  y = -95}, -- Anchored to Player
                     focustarget =  { x = 12,  y = -2},  -- Anchored to Focus
                     target =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    targettarget = { x = -36, y = -67}, -- Anchored to Target
+                    targettarget = { x = -36, y = -95}, -- Anchored to Target
                     boss =         { x = 0,   y = 0},   -- Anchored to Positioner
                 },
             },
