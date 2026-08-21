@@ -16,6 +16,34 @@ local bars = {}
 
 local Lerp = _G.Lerp
 
+-- Narrow-fill trapezoid geometry, shared by every value path. The narrow
+-- branch used to re-apply SetPoint + two SetVertexOffsets UNCONDITIONALLY on
+-- every SetValue — for bars whose steady state is a narrow fill (ToT at full
+-- health with missing-health style) that meant a re-tessellation on every
+-- 0.5s eventless poll, rendering as a visible 2Hz flicker (B24, caught live
+-- 2026-08-21: "ToT fill SetVertexOffset: 30 (2.0/s)"). Guarded on the actual
+-- offset value now; the widen branch was already guarded by isLess.
+local function UpdateTrapezoid(self, meta, width)
+    if not meta.isTrapezoid then return end
+
+    if width < (meta.minWidth * 2) then
+        local vertexOfs = width / 2
+        if meta.lastVertexOfs ~= vertexOfs then
+            meta.lastVertexOfs = vertexOfs
+            self.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
+            self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
+            self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
+        end
+        meta.isLess = true
+    elseif meta.isLess then
+        meta.lastVertexOfs = nil
+        self.fill:SetPoint(meta.isTrapezoid)
+        self.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
+        self.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
+        meta.isLess = false
+    end
+end
+
 --[[ Core bar fill logic — simplified for oUF-native values (no secret arithmetic) ]]--
 local function SetBarValue(self, value)
     local meta = bars[self]
@@ -28,20 +56,7 @@ local function SetBarValue(self, value)
         local width = self.fill:GetWidth()
         if not _G.issecretvalue(width) and width > 0.001 then
             self.fill:SetShown(true)
-            if meta.isTrapezoid then
-                if width < (meta.minWidth * 2) then
-                    local vertexOfs = width / 2
-                    self.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
-                    self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
-                    self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
-                    meta.isLess = true
-                elseif meta.isLess then
-                    self.fill:SetPoint(meta.isTrapezoid)
-                    self.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
-                    self.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
-                    meta.isLess = false
-                end
-            end
+            UpdateTrapezoid(self, meta, width)
         else
             -- Width is secret or zero — just show fill and let native handle it
             self.fill:SetShown(true)
@@ -74,20 +89,7 @@ local function SetBarValue(self, value)
     if width < 0.001 then width = 0.001 end
     self.fill:SetWidth(width)
 
-    if meta.isTrapezoid then
-        if width < (minWidth * 2) then
-            local vertexOfs = width / 2
-            self.fill:SetPoint(meta.isTrapezoid, 0, (minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
-            self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
-            self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
-            meta.isLess = true
-        elseif meta.isLess then
-            self.fill:SetPoint(meta.isTrapezoid)
-            self.fill:SetVertexOffset(meta.leftVertex, minWidth, 0)
-            self.fill:SetVertexOffset(meta.rightVertex, -minWidth, 0)
-            meta.isLess = false
-        end
-    end
+    UpdateTrapezoid(self, meta, width)
 
     if meta.texture then
         self.fill:SetTexCoord(left, right, top, bottom)
@@ -229,6 +231,9 @@ local UpdateAngle do
         end
 
         if meta.value then
+            -- The offsets above overwrote whatever the narrow-fill branch had
+            -- applied; invalidate its cache so UpdateTrapezoid re-applies.
+            meta.lastVertexOfs = nil
             SetBarValue(self, meta.value)
         end
     end
@@ -456,20 +461,7 @@ function AngleStatusBarMixin:SetValue(value)
         if not _G.issecretvalue(width) and width > 0.001 then
             -- We have a usable width — update trapezoid geometry
             self.fill:SetShown(true)
-            if meta.isTrapezoid then
-                if width < (meta.minWidth * 2) then
-                    local vertexOfs = width / 2
-                    self.fill:SetPoint(meta.isTrapezoid, 0, (meta.minWidth - vertexOfs) * (meta.isTrapezoid == "TOP" and -1 or 1))
-                    self.fill:SetVertexOffset(meta.leftVertex, vertexOfs, 0)
-                    self.fill:SetVertexOffset(meta.rightVertex, -vertexOfs, 0)
-                    meta.isLess = true
-                elseif meta.isLess then
-                    self.fill:SetPoint(meta.isTrapezoid)
-                    self.fill:SetVertexOffset(meta.leftVertex, meta.minWidth, 0)
-                    self.fill:SetVertexOffset(meta.rightVertex, -meta.minWidth, 0)
-                    meta.isLess = false
-                end
-            end
+            UpdateTrapezoid(self, meta, width)
         else
             -- Width is also secret or zero — let native rendering show through
             self.fill:SetShown(true)
@@ -528,6 +520,9 @@ end
 
 function AngleStatusBarMixin:SetReverseFill(isReverseFill)
     bars[self].isReverseFill = isReverseFill
+    -- Re-anchoring the fill below discards the narrow-fill SetPoint tweak;
+    -- invalidate the trapezoid cache so the next value update re-applies it.
+    bars[self].lastVertexOfs = nil
     -- Sync native StatusBar state for oUF compatibility (Defect 1.3)
     local nativeSetReverseFill = _G.getmetatable(self).__index.SetReverseFill
     if nativeSetReverseFill then
