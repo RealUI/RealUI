@@ -12,17 +12,19 @@ local FramePoint = RealUI:GetModule("FramePoint")
 -- in Modules/GridLayout.lua. Kept in UIParent coordinates: GridLayout scales
 -- these by the effective scale because Grid2 stores UI-root-scaled values —
 -- our headers are plain UIParent children, so no scaling applies here.
+-- B10 reference layout, measured from Arnvid's hand placement via
+-- /realdev layoutdump (2026-08-22): left edge, first cell just above vertical
+-- centre — the grid grows down/right from there, clear of chat, HuD and bars.
+-- Healing keeps the centre-bottom convention pending a healer-layout session.
 local DEFAULT_POSITIONS = {
-    [1] = { point = "BOTTOMLEFT", x = 80, y = 200 },  -- DPS/Tank: bottom-left, above chat
-    [2] = { point = "BOTTOM",     x = 0,  y = 200 },  -- Healing: centre-bottom
+    [1] = { point = "LEFT",   x = 25, y = 17 },   -- DPS/Tank: left edge, mid-height
+    [2] = { point = "BOTTOM", x = 0,  y = 200 },  -- Healing: centre-bottom
 }
 
--- B31: deliberate party default — its own anchor, separate from the raid one.
--- Left edge of the screen, offset up so the 5-cell vertical stack ends up
--- roughly vertically centred: clear of chat (bottom-left), the HuD (centre)
--- and the raid anchor. Same spot for both layouts; each profile remembers its
--- own position once moved (FramePoint).
-local PARTY_DEFAULT_POSITION = { point = "LEFT", x = 80, y = 80 }
+-- B31/B10: party shares the raid spot by design — the two headers are
+-- mutually exclusive ([group:raid] hides party), so one region serves both.
+-- Same for both layouts; each profile remembers its own position once moved.
+local PARTY_DEFAULT_POSITION = { point = "LEFT", x = 25, y = 17 }
 
 --[[ RealUI raid/party frames (spec: realui-raidframes).
 
