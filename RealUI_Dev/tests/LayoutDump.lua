@@ -40,6 +40,69 @@ local function RelativeOffset(frame, anchor, mode)
     end
 end
 
+-- Alignment grid overlay for hand-positioning: `/realdev grid [spacing]`
+-- toggles it (default 32px). Center lines are red, everything else faint
+-- white. Click-through; independent of Edit Mode and config mode.
+local gridFrame
+local function BuildGrid(spacing)
+    if gridFrame then
+        gridFrame:Hide()
+        gridFrame = nil
+    end
+
+    gridFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
+    gridFrame:SetAllPoints()
+    gridFrame:SetFrameStrata("BACKGROUND")
+    gridFrame:EnableMouse(false)
+
+    local width = _G.UIParent:GetWidth()
+    local height = _G.UIParent:GetHeight()
+    local cx, cy = width / 2, height / 2
+
+    local function line(vertical, offset, isCenter)
+        local tex = gridFrame:CreateTexture(nil, "BACKGROUND")
+        if isCenter then
+            tex:SetColorTexture(1, 0.2, 0.2, 0.6)
+        else
+            tex:SetColorTexture(1, 1, 1, 0.25)
+        end
+        if vertical then
+            tex:SetSize(1, height)
+            tex:SetPoint("TOPLEFT", offset, 0)
+        else
+            tex:SetSize(width, 1)
+            tex:SetPoint("TOPLEFT", 0, -offset)
+        end
+    end
+
+    line(true, cx, true)
+    line(false, cy, true)
+    local i = spacing
+    while cx + i < width do
+        line(true, cx - i)
+        line(true, cx + i)
+        i = i + spacing
+    end
+    i = spacing
+    while cy + i < height do
+        line(false, cy - i)
+        line(false, cy + i)
+        i = i + spacing
+    end
+end
+
+function ns.commands:grid(arg)
+    if gridFrame and gridFrame:IsShown() and not _G.tonumber(arg) then
+        gridFrame:Hide()
+        gridFrame = nil
+        _G.print("|cff00ccff[Grid]|r off")
+        return
+    end
+    local spacing = _G.tonumber(arg) or 32
+    BuildGrid(spacing)
+    _G.print(("|cff00ccff[Grid]|r on, %dpx (red = screen center). `/realdev grid` again to hide."):format(spacing))
+end
+
 function ns.commands:layoutdump()
     local layout = (RealUI.db and RealUI.db.char.layout and RealUI.db.char.layout.current) or 1
     _G.print(("|cff00ccff[LayoutDump]|r layout=%d (1=DPS/Tank, 2=Healing)"):format(layout))
