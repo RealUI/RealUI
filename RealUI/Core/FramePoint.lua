@@ -275,53 +275,69 @@ function FramePoint.OnDragStart(frame)
         frame.dragBG:Show()
     end
 end
-function FramePoint.OnDragStop(frame)
+function FramePoint.OnDragStop(frame, retries)
+    -- Stop the move IMMEDIATELY and unconditionally. The anchored branch
+    -- below never called StopMovingOrSizing at all (LibWin.OnDragStop only
+    -- ran for screen-anchored frames), so dragging a PINNED frame could stay
+    -- glued to the cursor with mouse capture held — hit live 2026-08-21 on
+    -- the player and focus cast bars right after the B47 nudge pinned them.
+    -- The nil-x retry path had the same hole, and mid-drag GetPoint can also
+    -- hand back SECRET coords, where a bare `not x` test throws.
+    frame:StopMovingOrSizing()
+
     local point, anchor, relPoint, x, y = frame:GetPoint()
-    if not x then
-        _G.C_Timer.After(0, function ()
-            FramePoint.OnDragStop(frame)
-        end)
-    else
-        if frame:GetName() == "CollectionsJournalMover" then
-            FixCollectionJournal(point, anchor, relPoint, x, y)
-        end
-        if frame:GetName() == "CommunitiesFrameMover" then
-            FixCommunitiesFrame(point, anchor, relPoint, x, y)
-        end
-        if frame:GetName() == "HouseEditorStoragePanelMover" then
-            FixHouseEditorStoragePanel(point, anchor, relPoint, x, y)
-        end
-
-        RealUI.SetPixelPoint(frame)
-
-        -- Anchored frames store offsets from their unit frame, not from
-        -- UIParent, so LibWindow's save would write the wrong numbers.
-        -- Convert the dragged position into anchor-relative offsets and
-        -- re-apply, keeping drag working the same as for screen-anchored
-        -- frames.
-        local config = frame._framePointConfig
-        local anchorFrame = GetAnchorFrame(config)
-        if anchorFrame then
-            local anchorPoint = config.point or "CENTER"
-            local scale = frame:GetEffectiveScale()
-            local anchorScale = anchorFrame:GetEffectiveScale()
-
-            local fx, fy = GetPointCoords(frame, anchorPoint)
-            local ax, ay = GetPointCoords(anchorFrame, anchorPoint)
-            if fx and ax then
-                config.x = RealUI.Round((fx * scale - ax * anchorScale) / scale, 1)
-                config.y = RealUI.Round((fy * scale - ay * anchorScale) / scale, 1)
-                ApplyAnchor(frame, config)
-            end
-        else
-            LibWin.OnDragStop(frame)
-        end
-
-        if frame.dragBG then
+    if x == nil or _G.issecretvalue(x) or _G.issecretvalue(y) then
+        retries = retries or 0
+        if retries < 10 then
+            _G.C_Timer.After(0, function ()
+                FramePoint.OnDragStop(frame, retries + 1)
+            end)
+        elseif frame.dragBG then
+            -- Give up on saving this drag; the frame is already released.
             frame.dragBG:Hide()
         end
+        return
     end
 
+    if frame:GetName() == "CollectionsJournalMover" then
+        FixCollectionJournal(point, anchor, relPoint, x, y)
+    end
+    if frame:GetName() == "CommunitiesFrameMover" then
+        FixCommunitiesFrame(point, anchor, relPoint, x, y)
+    end
+    if frame:GetName() == "HouseEditorStoragePanelMover" then
+        FixHouseEditorStoragePanel(point, anchor, relPoint, x, y)
+    end
+
+    RealUI.SetPixelPoint(frame)
+
+    -- Anchored frames store offsets from their unit frame, not from
+    -- UIParent, so LibWindow's save would write the wrong numbers.
+    -- Convert the dragged position into anchor-relative offsets and
+    -- re-apply, keeping drag working the same as for screen-anchored
+    -- frames.
+    local config = frame._framePointConfig
+    local anchorFrame = GetAnchorFrame(config)
+    if anchorFrame then
+        local anchorPoint = config.point or "CENTER"
+        local scale = frame:GetEffectiveScale()
+        local anchorScale = anchorFrame:GetEffectiveScale()
+
+        local fx, fy = GetPointCoords(frame, anchorPoint)
+        local ax, ay = GetPointCoords(anchorFrame, anchorPoint)
+        if fx and ax and not (_G.issecretvalue(fx) or _G.issecretvalue(fy)
+            or _G.issecretvalue(ax) or _G.issecretvalue(ay)) then
+            config.x = RealUI.Round((fx * scale - ax * anchorScale) / scale, 1)
+            config.y = RealUI.Round((fy * scale - ay * anchorScale) / scale, 1)
+            ApplyAnchor(frame, config)
+        end
+    else
+        LibWin.OnDragStop(frame)
+    end
+
+    if frame.dragBG then
+        frame.dragBG:Hide()
+    end
 end
 function FramePoint:PositionFrame(mod, frame, optionPath)
     local dragFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
