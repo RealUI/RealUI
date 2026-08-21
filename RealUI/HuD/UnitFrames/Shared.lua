@@ -829,8 +829,19 @@ local function Shared(self, unit)
                 end
             end
 
-            if frame.CombatIndicator then frame.CombatIndicator:SetHeight(newPowerH) end
-            if frame.LeaderIndicator  then frame.LeaderIndicator:SetHeight(newPowerH)  end
+            -- B25: the status indicators are anchored to the Power bar only on
+            -- frames that have one (CreatePowerStatus); on the small health-only
+            -- frames they hang off Health, and newPowerH is 0 there
+            -- (healthHeight == 1), which collapsed them on every ResizeFrames.
+            local indicatorH = frame.Power and newPowerH or newHealthH
+            if frame.CombatIndicator then frame.CombatIndicator:SetHeight(indicatorH) end
+            if frame.LeaderIndicator  then frame.LeaderIndicator:SetHeight(indicatorH)  end
+            if frame.PvPIndicator and frame.PvPIndicator.SetAngleVertex then
+                frame.PvPIndicator:SetHeight(_G.ceil(newHealthH * 0.65))
+            end
+            if frame.Classification then
+                frame.Classification:SetHeight(_G.ceil(newHealthH * 0.65))
+            end
 
             if frame.AdditionalPower and frame.Power then
                 frame.AdditionalPower:ClearAllPoints()
@@ -839,9 +850,13 @@ local function Shared(self, unit)
             end
 
             if frame.EndBox then
+                -- B25: creation geometry (CreateEndBox) is 6 wide / +2 tall only
+                -- for the big frames; the small frames use 4 wide at bar height.
+                -- ApplySize hardcoded the big variant, so any ResizeFrames call
+                -- visibly fattened the small frames' end boxes.
                 local healthBox = frame.EndBox[1]
                 if healthBox then
-                    healthBox:SetSize(6, newHealthH + 2)
+                    healthBox:SetSize(unitData.isBig and 6 or 4, newHealthH + (unitData.isBig and 2 or 0))
                     healthBox:ClearAllPoints()
                     if point == "RIGHT" then
                         healthBox:SetPoint("TOPLEFT",  frame.Health, "TOPRIGHT", -(newHealthH - 2), 0)
@@ -868,8 +883,15 @@ local function Shared(self, unit)
         RealUI:GetModule("CastBars"):CreateCastBars(self, unit, unitData)
     end
 
+    -- B24: the smooth-disable exists so a full refresh (unit change, spawn)
+    -- snaps to the new unit's values instead of animating from the old ones.
+    -- Eventless units (targettarget, focustarget) are updated ONLY by oUF's
+    -- 0.5s poll, which also runs UpdateAllElements — with the toggle applied
+    -- there too, their bars never smoothed and stepped visibly at 2Hz (the
+    -- ToT "blink"). The poll passes the literal event string "OnUpdate";
+    -- real refreshes keep the snap.
     function self.PreUpdate(frame, event)
-        if isAngled then
+        if isAngled and event ~= "OnUpdate" then
             frame.Health:SetSmooth(false)
             if frame.Power then
                 frame.Power:SetSmooth(false)
@@ -883,9 +905,11 @@ local function Shared(self, unit)
 
     function self.PostUpdate(frame, event)
         if isAngled then
-            frame.Health:SetSmooth(true)
-            if frame.Power then
-                frame.Power:SetSmooth(true)
+            if event ~= "OnUpdate" then
+                frame.Health:SetSmooth(true)
+                if frame.Power then
+                    frame.Power:SetSmooth(true)
+                end
             end
             frame.EndBox.Update(frame, event)
         end
