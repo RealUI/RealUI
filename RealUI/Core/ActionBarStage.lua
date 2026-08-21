@@ -49,12 +49,18 @@ local SELECTED_COLOR = {r = 0.3, g = 0.6, b = 1.0}
 local NORMAL_BG = {r = 0.15, g = 0.15, b = 0.15, a = 0.8}
 local HOVER_BG  = {r = 0.2, g = 0.2, b = 0.2, a = 0.9}
 
-local OPTION_WIDTH = 118
-local OPTION_HEIGHT = 44
-local OPTION_GAP = 8
+-- The wizard's content frame is only 510x240 (InstallUI: 550x500 window,
+-- content inset TOPLEFT 20,-200 / BOTTOMRIGHT -20,60), so everything here is
+-- budgeted against that: a 262px left column of single-line options and a
+-- 230px schematic beside it, totalling ~220px of height.
+local LEFT_WIDTH = 262
+local OPTION_HEIGHT = 26
+local OPTION_GAP = 4
+local SIDE_OPTION_WIDTH = 82
+local SIDE_OPTION_GAP = 8
 
-local SCHEMATIC_WIDTH = 300
-local SCHEMATIC_HEIGHT = 172
+local SCHEMATIC_WIDTH = 230
+local SCHEMATIC_HEIGHT = 180
 
 -- (centerPositions) -> centre bars above the HuD, bars along the bottom
 local CENTER_OPTIONS = {
@@ -152,7 +158,7 @@ local function RefreshSchematic()
         return bar
     end
 
-    local barW, barH = 96, 7
+    local barW, barH = 78, 6
     local gap = 3
 
     -- Centre bars: stacked upward from just under the HuD dot
@@ -177,15 +183,15 @@ local function RefreshSchematic()
     for i = 1, side.left do
         local bar = NextBar()
         if bar then
-            bar:SetSize(barH, 60)
-            bar:SetPoint("LEFT", schematic, "LEFT", 8 + (i - 1) * (barH + gap), 0)
+            bar:SetSize(barH, 56)
+            bar:SetPoint("LEFT", schematic, "LEFT", 8 + (i - 1) * (barH + gap), 6)
         end
     end
     for i = 1, side.right do
         local bar = NextBar()
         if bar then
-            bar:SetSize(barH, 60)
-            bar:SetPoint("RIGHT", schematic, "RIGHT", -8 - (i - 1) * (barH + gap), 0)
+            bar:SetSize(barH, 56)
+            bar:SetPoint("RIGHT", schematic, "RIGHT", -8 - (i - 1) * (barH + gap), 6)
         end
     end
 end
@@ -221,9 +227,9 @@ local function RefreshHighlights()
     end
 end
 
-local function CreateOptionButton(parent, labelText, subText, value, isDefault, onClick)
+local function CreateOptionButton(parent, width, labelText, value, isDefault, onClick)
     local btn = _G.CreateFrame("Button", nil, parent)
-    btn:SetSize(OPTION_WIDTH, OPTION_HEIGHT)
+    btn:SetSize(width, OPTION_HEIGHT)
     btn.value = value
 
     local bg = btn:CreateTexture(nil, "BACKGROUND")
@@ -238,22 +244,18 @@ local function CreateOptionButton(parent, labelText, subText, value, isDefault, 
     border:SetColorTexture(0.3, 0.3, 0.3, 1)
     btn.border = border
 
-    local name = btn:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    name:SetPoint("TOPLEFT", 10, -7)
-    name:SetPoint("TOPRIGHT", -6, -7)
+    -- Single line: at 26px there is no room for a heading plus a subtitle,
+    -- and the descriptive line ("1 centre, 2 bottom") is the useful half.
+    local name = btn:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    name:SetPoint("LEFT", 9, 0)
+    name:SetPoint("RIGHT", isDefault and -16 or -6, 0)
     name:SetJustifyH("LEFT")
     name:SetText(labelText)
 
-    local sub = btn:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
-    sub:SetPoint("BOTTOMLEFT", 10, 7)
-    sub:SetPoint("BOTTOMRIGHT", -6, 7)
-    sub:SetJustifyH("LEFT")
-    sub:SetText(subText)
-
     if isDefault then
         local badge = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        badge:SetPoint("TOPRIGHT", -6, -6)
-        badge:SetText("|cff33cc33•|r")
+        badge:SetPoint("RIGHT", -5, 0)
+        badge:SetText("|cff33cc33*|r")
     end
 
     btn:SetScript("OnEnter", function(self)
@@ -283,51 +285,51 @@ local function Build(parent)
     container = _G.CreateFrame("Frame", nil, parent)
     container:SetAllPoints()
 
-    local intro = container:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    -- Plain ASCII only: the wizard's font rendered the UTF-8 arrow escapes as
+    -- replacement glyphs on first run.
+    local intro = container:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     intro:SetPoint("TOPLEFT", 0, 0)
     intro:SetPoint("TOPRIGHT", 0, 0)
     intro:SetJustifyH("LEFT")
-    intro:SetText("Choose how your action bars are arranged. You can change this at any time in HuD config \226\134\146 Other \226\134\146 Action Bars.")
+    intro:SetText("Choose how your action bars are arranged. Changeable later in HuD config > Other > Action Bars.")
 
     BuildSchematic(container)
-    schematic:SetPoint("TOPRIGHT", intro, "BOTTOMRIGHT", 0, -10)
+    schematic:SetPoint("TOPRIGHT", container, "TOPRIGHT", 0, -30)
 
-    -- Centre row
-    local centerLabel = container:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    centerLabel:SetPoint("TOPLEFT", intro, "BOTTOMLEFT", 0, -14)
+    -- Main-bar options: single column down the left
+    local centerLabel = container:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    centerLabel:SetPoint("TOPLEFT", container, "TOPLEFT", 0, -30)
     centerLabel:SetText("Main bars")
 
     for i, option in ipairs(CENTER_OPTIONS) do
-        local btn = CreateOptionButton(container,
-            ("%d + %d"):format(option.top, option.bottom),
+        local btn = CreateOptionButton(container, LEFT_WIDTH,
             ("%d centre, %d bottom"):format(option.top, option.bottom),
             option.value, option.value == DEFAULT_CENTER,
             function(value) ActionBarStage.centerPositions = value end)
         btn.axis = "center"
         if i == 1 then
-            btn:SetPoint("TOPLEFT", centerLabel, "BOTTOMLEFT", 0, -6)
+            btn:SetPoint("TOPLEFT", centerLabel, "BOTTOMLEFT", 0, -4)
         else
             btn:SetPoint("TOPLEFT", centerButtons[i - 1], "BOTTOMLEFT", 0, -OPTION_GAP)
         end
         centerButtons[i] = btn
     end
 
-    -- Side row
-    local sideLabel = container:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    sideLabel:SetPoint("TOPLEFT", centerButtons[#CENTER_OPTIONS], "BOTTOMLEFT", 0, -14)
+    -- Side-bar options: one row underneath
+    local sideLabel = container:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    sideLabel:SetPoint("TOPLEFT", centerButtons[#CENTER_OPTIONS], "BOTTOMLEFT", 0, -8)
     sideLabel:SetText("Side bars")
 
     for i, option in ipairs(SIDE_OPTIONS) do
-        local btn = CreateOptionButton(container,
-            ("%d | %d"):format(option.left, option.right),
-            ("%d left, %d right"):format(option.left, option.right),
+        local btn = CreateOptionButton(container, SIDE_OPTION_WIDTH,
+            ("%dL / %dR"):format(option.left, option.right),
             option.value, option.value == DEFAULT_SIDE,
             function(value) ActionBarStage.sidePositions = value end)
         btn.axis = "side"
         if i == 1 then
-            btn:SetPoint("TOPLEFT", sideLabel, "BOTTOMLEFT", 0, -6)
+            btn:SetPoint("TOPLEFT", sideLabel, "BOTTOMLEFT", 0, -4)
         else
-            btn:SetPoint("LEFT", sideButtons[i - 1], "RIGHT", OPTION_GAP, 0)
+            btn:SetPoint("LEFT", sideButtons[i - 1], "RIGHT", SIDE_OPTION_GAP, 0)
         end
         sideButtons[i] = btn
     end

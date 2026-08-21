@@ -240,7 +240,7 @@ The system can automatically switch layouts based on your specialization.
             else
                 self.stageText:SetText("Action bar layout options are unavailable; "
                     .. "the default arrangement will be used. You can change it later "
-                    .. "in HuD config \226\134\146 Other \226\134\146 Action Bars.")
+                    .. "in HuD config > Other > Action Bars.")
             end
         end,
         onHide = function()
