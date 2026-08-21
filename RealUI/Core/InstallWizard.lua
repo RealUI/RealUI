@@ -35,6 +35,10 @@ InstallWizard.STAGE_DISPLAY = 2
 InstallWizard.STAGE_CHAT = 3
 InstallWizard.STAGE_QOL = 4
 InstallWizard.STAGE_FINISH = 5
+-- B04: appended numerically (saved `installStage` values must keep their
+-- meaning), but ordered between LAYOUT and DISPLAY in the STAGES table below —
+-- navigation iterates that table, never the numbers.
+InstallWizard.STAGE_ACTIONBARS = 6
 
 -- Ordered STAGES table is the single authority for flow order.
 -- Navigation (Advance/Retreat) must iterate this table, not compare
@@ -43,6 +47,7 @@ InstallWizard.STAGE_FINISH = 5
 InstallWizard.STAGES = {
     InstallWizard.STAGE_WELCOME,
     InstallWizard.STAGE_LAYOUT,
+    InstallWizard.STAGE_ACTIONBARS,
     InstallWizard.STAGE_DISPLAY,
     InstallWizard.STAGE_CHAT,
     InstallWizard.STAGE_QOL,

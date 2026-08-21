@@ -222,6 +222,38 @@ The system can automatically switch layouts based on your specialization.
             end
         end
     },
+    -- B04: action bar layout choice. Sits after the role/layout stage (it
+    -- refines that choice) and before Display Setup.
+    [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_ACTIONBARS or 6] = {
+        title = "Action Bar Layout",
+        text = "",
+        showPrev = true,
+        showNext = true,
+        showSkip = true,
+        onShow = function(self)
+            -- ActionBarStage renders its own content; the stage text would
+            -- overlap it (same arrangement as Display Setup). Guarded: a
+            -- broken stage must not take the whole first-install wizard down.
+            self.stageText:SetText("")
+            if RealUI.ActionBarStage then
+                RealUI.ActionBarStage.Show(self.content)
+            else
+                self.stageText:SetText("Action bar layout options are unavailable; "
+                    .. "the default arrangement will be used. You can change it later "
+                    .. "in HuD config \226\134\146 Other \226\134\146 Action Bars.")
+            end
+        end,
+        onHide = function()
+            if RealUI.ActionBarStage then
+                RealUI.ActionBarStage.Hide()
+            end
+        end,
+        onAdvance = function()
+            if RealUI.ActionBarStage then
+                _G.pcall(RealUI.ActionBarStage.Apply)
+            end
+        end,
+    },
     [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_DISPLAY or 2] = {
         title = "Display Setup",
         text = "",

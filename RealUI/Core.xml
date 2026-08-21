@@ -23,6 +23,7 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\EditModeTemplates.lua"/>
     <Script file="Core\EditModeManager.lua"/>
     <Script file="Core\DisplayStage.lua"/>
+    <Script file="Core\ActionBarStage.lua"/>
     <Script file="Core\InstallUI.lua"/>
     <Script file="Core\CharacterInit.lua"/>
     <Script file="Core\SetupSystem.lua"/>
