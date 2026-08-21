@@ -64,7 +64,7 @@ local items = {
     {
         id = "pinned",
         label = "Cast bars and class resource pinned to unit frames",
-        desc = "Pinned elements follow their unit frame instead of a fixed screen position.",
+        desc = "Moves them to the default position and pins them there, so they follow their unit frame from now on.",
         changed = "beta 4",
         available = function()
             local CastBars = RealUI:GetModule("CastBars", true)
@@ -76,19 +76,38 @@ local items = {
         isApplied = function()
             local CastBars = RealUI:GetModule("CastBars", true)
             local ClassResource = RealUI:GetModule("ClassResource", true)
-            return CastBars.db.profile.player.position.anchorTo == "player"
-                and CastBars.db.profile.target.position.anchorTo == "target"
-                and ClassResource.db.class.points.position.anchorTo == "player"
+            local function at(live, anchorTo, point, x, y)
+                return live.anchorTo == anchorTo and live.point == point
+                    and live.x == x and live.y == y
+            end
+            return at(CastBars.db.profile.player.position, "player", "TOP", 0, -40)
+                and at(CastBars.db.profile.target.position, "target", "TOP", 0, -40)
+                and at(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -20)
         end,
         apply = function()
             local FramePoint = RealUI:GetModule("FramePoint", true)
             local CastBars = RealUI:GetModule("CastBars", true)
             local ClassResource = RealUI:GetModule("ClassResource", true)
-            -- SetAnchorTo rewrites the offsets into the new coordinate space,
-            -- so the elements keep their on-screen position instead of jumping.
-            FramePoint:SetAnchorTo(CastBars, {"profile", "player", "position"}, "player")
-            FramePoint:SetAnchorTo(CastBars, {"profile", "target", "position"}, "target")
-            FramePoint:SetAnchorTo(ClassResource, {"class", "points", "position"}, "player")
+
+            -- "Move to the new default position" (Arnvid, 2026-08-21). The DB
+            -- defaults are the old SCREEN positions — a pinned default did not
+            -- exist, so the offsets are defined here (FramePoint.ApplyAnchor
+            -- anchors point-to-same-point on the unit frame): cast bars hang
+            -- centered just below their unit frame; the class resource row
+            -- hangs under the player frame.
+            local function pinAt(live, anchorTo, point, x, y)
+                live.anchorTo = anchorTo
+                live.point = point
+                live.x = x
+                live.y = y
+            end
+
+            pinAt(CastBars.db.profile.player.position, "player", "TOP", 0, -40)
+            pinAt(CastBars.db.profile.target.position, "target", "TOP", 0, -40)
+            FramePoint:RestorePosition(CastBars)
+
+            pinAt(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -20)
+            FramePoint:RestorePosition(ClassResource)
         end,
     },
     {
@@ -100,7 +119,10 @@ local items = {
             return _G.RealUIInventory ~= nil
         end,
         isApplied = function()
-            return nil -- position lives in WoW's layout cache; not detectable
+            local point, _, relPoint, x, y = _G.RealUIInventory:GetPoint(1)
+            if not point or _G.issecretvalue(x) or _G.issecretvalue(y) then return nil end
+            return point == "BOTTOMRIGHT" and relPoint == "BOTTOMRIGHT"
+                and _G.math.abs((x or 0) + 50) < 1 and _G.math.abs((y or 0) - 100) < 1
         end,
         apply = function()
             local main = _G.RealUIInventory
@@ -118,7 +140,12 @@ local items = {
             return _G.ChatFrame1 ~= nil
         end,
         isApplied = function()
-            return nil -- Blizzard-saved position; not detectable
+            local point, _, relPoint, x, y = _G.ChatFrame1:GetPoint(1)
+            if not point or _G.issecretvalue(x) or _G.issecretvalue(y) then return nil end
+            local layout = RealUI.db.char.layout and RealUI.db.char.layout.current or 1
+            local wantY = RealUI.GetChatYOffset(layout)
+            return point == "BOTTOMLEFT" and relPoint == "BOTTOMLEFT"
+                and _G.math.abs((x or 0) - 6) < 1 and _G.math.abs((y or 0) - wantY) < 1
         end,
         apply = function()
             local layout = RealUI.db.char.layout and RealUI.db.char.layout.current or 1
@@ -146,7 +173,7 @@ local function BuildDialog()
     dialog:Hide()
 
     if _G.Aurora then
-        _G.Aurora.Base.SetBackdrop(dialog)
+        _G.Aurora.Base.SetBackdrop(dialog, _G.Aurora.Color.black, 0.85)
     else
         local bg = dialog:CreateTexture(nil, "BACKGROUND")
         bg:SetAllPoints()
