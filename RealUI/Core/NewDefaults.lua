@@ -83,7 +83,7 @@ local items = {
             return at(CastBars.db.profile.player.position, "player", "TOP", -10, -48)
                 and at(CastBars.db.profile.target.position, "target", "TOP", 10, -48)
                 and at(CastBars.db.profile.focus.position, "focus", "TOP", -6, -34)
-                and at(ClassResource.db.class.points.position, "player", "CENTER", -451, -13)
+                and at(ClassResource.db.class.points.position, "player", "CENTER", -85, -25)
         end,
         apply = function()
             local FramePoint = RealUI:GetModule("FramePoint", true)
@@ -109,9 +109,11 @@ local items = {
             pinAt(CastBars.db.profile.focus.position, "focus", "TOP", -6, -34)
             FramePoint:RestorePosition(CastBars)
 
-            -- Class points off to the left of the HuD (Arnvid's placement,
-            -- measured 2026-08-22), still riding the player frame.
-            pinAt(ClassResource.db.class.points.position, "player", "CENTER", -451, -13)
+            -- Class points left-below the player frame (Arnvid's placement,
+            -- re-measured 2026-08-22 AFTER the ClassResource drag-save fix —
+            -- the first two readings were LibWindow screen coords masquerading
+            -- as player-relative offsets).
+            pinAt(ClassResource.db.class.points.position, "player", "CENTER", -85, -25)
             FramePoint:RestorePosition(ClassResource)
         end,
     },
