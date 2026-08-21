@@ -510,6 +510,12 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
     for i = 1, 5 do
         local frame = _G["RealUIBossFrame" .. i]
         if frame then
+            -- B56: live-apply the alt-power-only toggle (UpdateAllElements
+            -- below re-runs the Power update with the new flag)
+            if frame.Power then
+                frame.Power.displayAltPowerOnly = (db.boss and db.boss.altPowerOnly) or nil
+            end
+
             if frame.Health then
                 local hb = db.units.boss and db.units.boss.healthBar
                 local colorByClass = db.overlay.classColor or (hb and hb.colorForegroundByClass)
@@ -994,6 +1000,9 @@ function UnitFrames:OnInitialize()
             },
             boss = {
                 gap = 3,
+                -- B56: hide the boss power strip unless the encounter provides
+                -- alt power. Default off = current always-visible behaviour.
+                altPowerOnly = false,
                 debuffCount = 16,
                 debuffSize = 20,
                 buffCount = 16,

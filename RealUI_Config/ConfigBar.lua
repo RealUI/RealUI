@@ -1658,6 +1658,18 @@ do -- UnitFrames
                 order = 6,
             }
             if groupSlug == "boss" then
+                args.altPowerOnly = {
+                    name = "Power Bar Only With Alt Power",
+                    desc = "Hide the boss power bar unless the encounter provides alternative power. Leaving this off keeps boss mana visible on drain/interrupt fights.",
+                    type = "toggle",
+                    width = "full",
+                    order = 8,
+                    get = function() return UnitFrames.db.profile.boss.altPowerOnly end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.altPowerOnly = val
+                        UnitFrames:RefreshUnits("BossAltPower")
+                    end,
+                }
                 args.showBossDebuffs = {
                     name = "Show Boss Debuffs",
                     type = "toggle",

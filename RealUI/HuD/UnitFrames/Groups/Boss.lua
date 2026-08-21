@@ -13,6 +13,12 @@ UnitFrames.boss = {
 
         dialog.Health.text:SetPoint("LEFT", dialog.Health, 1, 0)
         dialog.Power.displayAltPower = true
+        -- B56: optionally hide the power strip unless the encounter supplies
+        -- alternative power (oUF 14.0.1 displayAltPowerOnly). Off by default —
+        -- always-visible power keeps boss mana readable on drain/interrupt
+        -- fights. oUF re-Shows the element on the next update when cleared.
+        local bossDB = UnitFrames.db.profile.boss
+        dialog.Power.displayAltPowerOnly = (bossDB and bossDB.altPowerOnly) or nil
 
         dialog.Name = dialog.Health:CreateFontString(nil, "OVERLAY")
         dialog.Name:SetPoint("RIGHT", dialog.Health, -1, 0)
