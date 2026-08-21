@@ -355,7 +355,27 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
     dragFrame:Hide()
 
     local name = dragFrame:CreateFontString(nil, "BACKGROUND", "Game12Font")
-    name:SetText(frame:GetDebugName())
+    -- Anonymous frames render GetDebugName() as a parent chain ending in a
+    -- hex address (the class points mover read "RealUIPlayerFr...cfe0").
+    -- Build a readable label from the module + option path instead; named
+    -- frames keep their real name.
+    local label = frame:GetName()
+    if not label then
+        local structuralKeys = {
+            profile = true, class = true, char = true, global = true,
+            units = true, position = true, framePoint = true,
+        }
+        local parts = {mod.moduleName}
+        if type(optionPath) == "table" then
+            for i = 1, #optionPath do
+                if not structuralKeys[optionPath[i]] then
+                    parts[#parts + 1] = optionPath[i]
+                end
+            end
+        end
+        label = _G.table.concat(parts, " ")
+    end
+    name:SetText(label)
     name:SetPoint("CENTER")
 
     -- Copy the frame's original anchor onto the dragFrame as the default position.
