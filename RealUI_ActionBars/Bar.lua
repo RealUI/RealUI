@@ -13,7 +13,31 @@ local LAB = _G.LibStub("LibActionButton-1.0")
 -- buttons' border art (B28 box model), not the frame-to-frame distance.
 private.BUTTON_BORDER = 1
 
+-- Task 7.1 (final piece): RealUI fonts on the LAB-managed button text.
+-- LAB only takes a font through the config's text section
+-- (UpdateTextElement: `config.font.font or defaultFont`), so it belongs here
+-- rather than in Skin.lua — the skin can't reach these without fighting
+-- LAB's every-update reset.
+--
+-- Font source mirrors Modules/CooldownCount.lua: RealUI_Skins owns the media
+-- and is a SEPARATE addon, so read its saved variables defensively and fall
+-- back to the stock font. `chat` is the condensed number face (Aurora maps
+-- every NumberFont to it); `normal` is the text face used for macro names.
+local function GetSkinFont(fontType, fallback)
+    if _G.C_AddOns.IsAddOnLoaded("RealUI_Skins") then
+        local skinsDB = _G.RealUI_SkinsDB
+        local fonts = skinsDB and skinsDB.profile and skinsDB.profile.fonts
+        local font = fonts and fonts[fontType]
+        if font and font.path then
+            return font.path
+        end
+    end
+    return fallback
+end
+
 local function BuildButtonConfig(barDB, keyBoundTarget)
+    local numberFont = GetSkinFont("chat", [[Fonts\ARIALN.TTF]])
+    local nameFont = GetSkinFont("normal", [[Fonts\FRIZQT__.TTF]])
     return {
         outOfRangeColoring = "button",
         tooltip = "enabled",
@@ -46,17 +70,26 @@ local function BuildButtonConfig(barDB, keyBoundTarget)
         },
         text = {
             hotkey = {
-                font = { size = 11 },
+                font = { font = numberFont, size = 11, flags = "OUTLINE" },
                 position = {
                     anchor = "TOPRIGHT", relAnchor = "TOPRIGHT",
                     offsetX = -1, offsetY = -1,
                 },
             },
             count = {
-                font = { size = 12 },
+                font = { font = numberFont, size = 12, flags = "OUTLINE" },
                 position = {
                     anchor = "BOTTOMRIGHT", relAnchor = "BOTTOMRIGHT",
                     offsetX = -1, offsetY = 1,
+                },
+            },
+            -- Macro names sit on the button face, so they get the text face at
+            -- a small size; LAB's default position (BOTTOM, +2) is kept.
+            macro = {
+                font = { font = nameFont, size = 10, flags = "OUTLINE" },
+                position = {
+                    anchor = "BOTTOM", relAnchor = "BOTTOM",
+                    offsetX = 0, offsetY = 1,
                 },
             },
         },
