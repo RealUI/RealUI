@@ -70,6 +70,16 @@ local function copyChat(self)
         dump.frame.title:SetText(chat:GetName() .. " Copy Frame")
 
         dump:Display()
+
+        -- B69: the scroll frame keeps its scroll offset across copies. A big
+        -- copy scrolled down, followed by a short one, leaves the viewport
+        -- past the end of the new content — window opens looking blank while
+        -- the text sits above the view. LibTextDump is read-only reference,
+        -- so reset on our side of the boundary.
+        local scrollArea = dump.frame.scrollArea
+        if scrollArea and scrollArea.SetVerticalScroll then
+            scrollArea:SetVerticalScroll(0)
+        end
     end
 end
 
