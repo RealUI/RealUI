@@ -58,7 +58,6 @@ local RealUISet = {
     "Grid2Options",
     "Grid2RaidDebuffs",
     "Grid2RaidDebuffsOptions",
-    "Platynator",
     "Masque",
     "RealUI",
     "RealUI_ActionBars",
