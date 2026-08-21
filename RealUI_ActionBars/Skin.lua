@@ -119,6 +119,18 @@ local function ApplyStateTextures(button)
         charge:SetAllPoints(button)
     end
 
+    -- The auto-attack / auto-repeat flash. Blizzard's template declares it
+    -- `atlas="UI-HUD-ActionBar-IconFrame-Flash" useAtlasSize="true"` with a
+    -- single TOPLEFT anchor, so it draws at the atlas's native (45px-button)
+    -- size and overhangs a 27px button to the right and bottom — the oversized
+    -- red box seen on the auto-attack button in combat. SetAllPoints overrides
+    -- the atlas sizing; keep the atlas art itself.
+    local flash = button.Flash
+    if flash then
+        flash:ClearAllPoints()
+        flash:SetAllPoints(button)
+    end
+
     -- B18: assisted-combat overlays (created lazily by LAB from Blizzard
     -- templates).
     ConstrainAssistOverlay(button, button.AssistedCombatRotationFrame)
