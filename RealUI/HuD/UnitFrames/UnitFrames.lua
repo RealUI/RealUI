@@ -1011,27 +1011,28 @@ function UnitFrames:OnInitialize()
                 showBossBuffs = true,
             },
             -- TODO: Convert to FramePoint
-            -- B47/B12: focus, ToT and pet moved 15px lower (2026-08-21) — the
-            -- pinned cast bar default occupies ~-42..-60 below its unit frame,
-            -- and the old -62/-67 row collided with it. AceDB defaults, so
-            -- untouched profiles pick the new stack up on reload.
+            -- B47/B12 reference layout: layout 1 measured from Arnvid's
+            -- hand-tuned placement (/realdev layoutdump, 2026-08-22), spaced
+            -- clear of the pinned cast bars. Layout 2 = layout 1 x 1.176
+            -- (frames render at 85% in layout 1, so offsets scale by 1/0.85 —
+            -- the same relationship the old defaults approximated).
             positions = {
                 [1] = {
                     player =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    pet =          { x = 51,  y = -112}, -- Anchored to Player
-                    focus =        { x = 29,  y = -90}, -- Anchored to Player
-                    focustarget =  { x = 11,  y = -2},  -- Anchored to Focus
+                    pet =          { x = -4,  y = -64}, -- Anchored to Player
+                    focus =        { x = 69,  y = -78}, -- Anchored to Player
+                    focustarget =  { x = -9,  y = -6},  -- Anchored to Focus
                     target =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    targettarget = { x = -29, y = -90}, -- Anchored to Target
+                    targettarget = { x = -77, y = -79}, -- Anchored to Target
                     boss =         { x = 0,   y = 0},   -- Anchored to Positioner
                 },
                 [2] = {
                     player =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    pet =          { x = 60,  y = -119}, -- Anchored to Player
-                    focus =        { x = 36,  y = -95}, -- Anchored to Player
-                    focustarget =  { x = 12,  y = -2},  -- Anchored to Focus
+                    pet =          { x = -5,  y = -75}, -- Anchored to Player
+                    focus =        { x = 81,  y = -92}, -- Anchored to Player
+                    focustarget =  { x = -11, y = -7},  -- Anchored to Focus
                     target =       { x = 0,   y = 0},   -- Anchored to Positioner
-                    targettarget = { x = -36, y = -95}, -- Anchored to Target
+                    targettarget = { x = -91, y = -93}, -- Anchored to Target
                     boss =         { x = 0,   y = 0},   -- Anchored to Positioner
                 },
             },
