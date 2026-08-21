@@ -711,6 +711,77 @@ do -- RealUI
             },
         }
     end
+    -- B17: enable/disable the suite's optional component ADDONS from settings
+    -- instead of the AddOn list. Per-character, same scope as the AddOn list's
+    -- default; changes need a /reload (addons cannot unload live).
+    local components do
+        local charName = RealUI.charInfo and RealUI.charInfo.name
+        local componentAddons = {
+            {addon = "RealUI_ActionBars", label = "Action Bars",
+                blurb = "RealUI's action bar system. Disabling it leaves you with Blizzard's default bars."},
+            {addon = "RealUI_Auras", label = "Auras",
+                blurb = "Cooldown viewer presets and aura tracking."},
+            {addon = "RealUI_Chat", label = "Chat",
+                blurb = "Chat styling, positioning, and the chat copy button."},
+            {addon = "RealUI_CombatText", label = "Combat Text",
+                blurb = "RealUI's scrolling combat text. Disabling it returns Blizzard's floating combat text."},
+            {addon = "RealUI_Inventory", label = "Inventory",
+                blurb = "The categorized bag system. Disabling it returns Blizzard's bags."},
+            {addon = "RealUI_Nameplates", label = "Nameplates",
+                blurb = "RealUI's nameplates. Disabling it returns Blizzard's nameplates."},
+            {addon = "RealUI_Tooltips", label = "Tooltips",
+                blurb = "Tooltip styling and extra tooltip information."},
+            {addon = "RealUI_Tracker", label = "Objective Tracker",
+                blurb = "RealUI's objective tracker enhancements."},
+        }
+
+        local function AddonExists(name)
+            if _G.C_AddOns.DoesAddOnExist then
+                return _G.C_AddOns.DoesAddOnExist(name)
+            end
+            local ok, info = _G.pcall(_G.C_AddOns.GetAddOnInfo, name)
+            return ok and info ~= nil
+        end
+
+        local componentArgs = {
+            desc = {
+                name = "Each component is a separate addon in the RealUI suite. Turning one off here is the same as unticking it in the AddOn list for this character, and takes effect after a UI reload.",
+                type = "description",
+                fontSize = "medium",
+                order = 0,
+            },
+        }
+        for index, comp in next, componentAddons do
+            if AddonExists(comp.addon) then
+                componentArgs[comp.addon] = {
+                    name = comp.label,
+                    desc = comp.blurb .. "\n\n|cffffcc00Takes effect after a UI reload.|r",
+                    type = "toggle",
+                    width = "full",
+                    order = index * 10,
+                    get = function()
+                        return _G.C_AddOns.GetAddOnEnableState(comp.addon, charName) == _G.Enum.AddOnEnableState.All
+                    end,
+                    set = function(_, value)
+                        if value then
+                            _G.C_AddOns.EnableAddOn(comp.addon, charName)
+                        else
+                            _G.C_AddOns.DisableAddOn(comp.addon, charName)
+                        end
+                        RealUI:ReloadUIDialog()
+                    end,
+                }
+            end
+        end
+
+        components = {
+            name = "Components",
+            desc = "Enable or disable RealUI's optional component addons.",
+            type = "group",
+            order = 60,
+            args = componentArgs,
+        }
+    end
     optArgs.core = {
         name = "Core",
         desc = "Core RealUI modules.",
@@ -721,6 +792,7 @@ do -- RealUI
                 name = "|cffffcc00Core Modules|r\n\n"
                     .. "|cff88ccffInfobar|r: The information and button bar at the top or bottom of the screen. Configure block visibility, labels, icons, background opacity, and per-block settings.\n\n"
                     .. "|cff88ccffScreen Saver|r: Dims the screen when you go AFK, with an optional combat warning sound.\n\n"
+                    .. "|cff88ccffComponents|r: Turn RealUI's optional component addons (Combat Text, Inventory, Nameplates, ...) on or off without visiting the AddOn list.\n\n"
                     .. "|cffffcc00Configuration Layout|r\n\n"
                     .. "|cff88ccffAdvanced Options|r (this window): Detailed configuration for all RealUI modules \226\128\148 Core, Skins, Tooltips, Inventory, CombatText, UI Tweaks, and Systems.\n\n"
                     .. "|cff88ccffHuD Config|r (the slide-down bar at the top of the screen): HuD-related settings including UnitFrames, CastBars, and ClassResource.",
@@ -730,6 +802,7 @@ do -- RealUI
             },
             infobar = infobar,
             screenSaver = screenSaver,
+            components = components,
         },
     }
 end
