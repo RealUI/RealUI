@@ -455,11 +455,20 @@ function RealUI.UpdateUIScale(newScale, fromConfig)
     end
 
     -- Guard against the user re-enabling it via the Settings panel.
-    -- Hook SetCVar to revert any attempt to turn useUiScale back on.
+    -- B55/B21/B51: this was a global hooksecurefunc("SetCVar", …) — a post-
+    -- hook on one of the hottest functions in the client, which marked EVERY
+    -- Blizzard execution that set any CVar as tainted by RealUI_Skins from
+    -- that point on. First clean taint.log (2026-08-21, delve) caught it
+    -- red-handed: ShouldShowMawBuffs' aura read refused mid-tracker-update,
+    -- "tainted by RealUI_Skins", on a chain this addon never touches.
+    -- CVAR_UPDATE delivers the same information in OUR OWN execution instead,
+    -- leaving Blizzard's untouched.
     if not private._uiScaleGuardInstalled then
         private._uiScaleGuardInstalled = true
-        _G.hooksecurefunc("SetCVar", function(cvar, value)
-            if cvar:lower() == "useuiscale" and tostring(value) == "1" then
+        local guard = _G.CreateFrame("Frame")
+        guard:RegisterEvent("CVAR_UPDATE")
+        guard:SetScript("OnEvent", function(_, _, cvar, value)
+            if cvar and cvar:lower() == "useuiscale" and tostring(value) == "1" then
                 _G.C_Timer.After(0, function()
                     _G.SetCVar("useUiScale", 0)
                     RealUI.UpdateUIScale()
@@ -713,20 +722,43 @@ function private.OnLoad()
         [_G.EmbeddedItemTooltip] = true,
         [_G.ShoppingTooltip1] = true,
         [_G.ShoppingTooltip2] = true,
+        -- B55-family (2026-08-21, first clean taint.log): a stripes texture is
+        -- a RealUI_Skins-owned object planted inside the skinned frame, and
+        -- secure layout code that touches it silently taints its whole
+        -- execution — no global-read line in taint.log, just the fallout.
+        -- Two documented victims: the objective tracker (popup block skinned
+        -- via FrameTypeFrame → next dirty-update runs tainted → MawBuffs'
+        -- GetAuraDataByIndex refused mid-delve) and chat config (PanelTab
+        -- stripes → PEW handler writes CURRENT_CHAT_FRAME_ID tainted, which
+        -- then infects every FCF_GetCurrentChatFrame reader for the session).
+        -- Exempt both containers; blocks and tabs are pooled, so the check
+        -- walks the parent chain.
     }
+    if _G.ObjectiveTrackerFrame then
+        stripeExemptFrames[_G.ObjectiveTrackerFrame] = true
+    end
+    if _G.ChatConfigFrame then
+        stripeExemptFrames[_G.ChatConfigFrame] = true
+    end
+    local function IsStripeExempt(frame)
+        while frame do
+            if stripeExemptFrames[frame] then return true end
+            frame = frame.GetParent and frame:GetParent()
+        end
+        return false
+    end
     _G.hooksecurefunc(Skin, "FrameTypeFrame", function(Frame)
         if Frame._stripes then return end
-        local parent = Frame.GetParent and Frame:GetParent()
-        if stripeExemptFrames[Frame] or (parent and stripeExemptFrames[parent]) then
-            return
-        end
+        if IsStripeExempt(Frame) then return end
         RealUI:AddFrameStripes(Frame)
     end)
 
     _G.hooksecurefunc(Skin, "PanelTabButtonTemplate", function(Button)
         if not Button.isTopTab then
             Button:SetButtonColor(Color.frame, frameColor.a, false)
-            RealUI:AddFrameStripes(Button)
+            if not IsStripeExempt(Button) then
+                RealUI:AddFrameStripes(Button)
+            end
         end
     end)
 
