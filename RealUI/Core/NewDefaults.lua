@@ -80,9 +80,10 @@ local items = {
                 return live.anchorTo == anchorTo and live.point == point
                     and live.x == x and live.y == y
             end
-            return at(CastBars.db.profile.player.position, "player", "TOP", 0, -70)
-                and at(CastBars.db.profile.target.position, "target", "TOP", 0, -70)
-                and at(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -38)
+            return at(CastBars.db.profile.player.position, "player", "TOP", -10, -48)
+                and at(CastBars.db.profile.target.position, "target", "TOP", 10, -48)
+                and at(CastBars.db.profile.focus.position, "focus", "TOP", -6, -34)
+                and at(ClassResource.db.class.points.position, "player", "CENTER", -446, -11)
         end,
         apply = function()
             local FramePoint = RealUI:GetModule("FramePoint", true)
@@ -91,12 +92,11 @@ local items = {
 
             -- "Move to the new default position" (Arnvid, 2026-08-21). The DB
             -- defaults are the old SCREEN positions — a pinned default did not
-            -- exist, so the offsets are defined here (FramePoint.ApplyAnchor
-            -- anchors point-to-same-point on the unit frame). Vertical layout
-            -- below the frame bottom: the power value text occupies ~0..-18,
-            -- the class points row sits -25..-38 (BOTTOM -38), and the cast
-            -- bar starts at -42 (TOP -70 = 28px frame + 42) — nothing stacks
-            -- on the status text (first cut at -40/-20 overlapped it).
+            -- exist. These offsets are Arnvid's hand-tuned reference layout,
+            -- measured live via /realdev layoutdump (2026-08-22) and
+            -- symmetrized (player/target x mirrored, y averaged to -48).
+            -- FramePoint.ApplyAnchor anchors point-to-same-point on the unit
+            -- frame; offsets are frame-relative so they hold on both layouts.
             local function pinAt(live, anchorTo, point, x, y)
                 live.anchorTo = anchorTo
                 live.point = point
@@ -104,11 +104,14 @@ local items = {
                 live.y = y
             end
 
-            pinAt(CastBars.db.profile.player.position, "player", "TOP", 0, -70)
-            pinAt(CastBars.db.profile.target.position, "target", "TOP", 0, -70)
+            pinAt(CastBars.db.profile.player.position, "player", "TOP", -10, -48)
+            pinAt(CastBars.db.profile.target.position, "target", "TOP", 10, -48)
+            pinAt(CastBars.db.profile.focus.position, "focus", "TOP", -6, -34)
             FramePoint:RestorePosition(CastBars)
 
-            pinAt(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -38)
+            -- Class points off to the left of the HuD (Arnvid's placement,
+            -- measured 2026-08-22), still riding the player frame.
+            pinAt(ClassResource.db.class.points.position, "player", "CENTER", -446, -11)
             FramePoint:RestorePosition(ClassResource)
         end,
     },
