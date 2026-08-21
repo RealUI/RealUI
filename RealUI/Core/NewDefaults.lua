@@ -76,9 +76,13 @@ local items = {
         isApplied = function()
             local CastBars = RealUI:GetModule("CastBars", true)
             local ClassResource = RealUI:GetModule("ClassResource", true)
+            -- Drag saves keep 0.1 precision (RealUI.Round(x, 1)); the baked
+            -- targets are integers — compare with a 1px tolerance or a real
+            -- placement can never read as "applied".
             local function at(live, anchorTo, point, x, y)
                 return live.anchorTo == anchorTo and live.point == point
-                    and live.x == x and live.y == y
+                    and type(live.x) == "number" and _G.math.abs(live.x - x) < 1
+                    and type(live.y) == "number" and _G.math.abs(live.y - y) < 1
             end
             return at(CastBars.db.profile.player.position, "player", "TOP", -10, -48)
                 and at(CastBars.db.profile.target.position, "target", "TOP", 10, -48)
