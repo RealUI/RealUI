@@ -35,8 +35,22 @@ local function Report(copyFrame)
             scrollArea:GetWidth(), scrollArea:GetHeight(), tostring(scrollArea:IsShown())))
         local child = scrollArea.GetScrollChild and scrollArea:GetScrollChild()
         _G.print(("  scrollChild: %s"):format(child and (child == editBox and "editBox" or child:GetDebugName()) or "nil"))
+        -- A scroll offset past the content height leaves the viewport empty —
+        -- the leading blank-window theory (previous large copies leave their
+        -- scroll position behind).
+        if scrollArea.GetVerticalScroll then
+            _G.print(("  vertical scroll: %.1f (range %.1f)"):format(
+                scrollArea:GetVerticalScroll() or -1,
+                (scrollArea.GetVerticalScrollRange and scrollArea:GetVerticalScrollRange()) or -1))
+        end
     else
         _G.print("  scrollArea: MISSING")
+    end
+    if editBox and copyFrame.GetFrameLevel then
+        _G.print(("  frame levels: frame=%d scrollArea=%s editBox=%d"):format(
+            copyFrame:GetFrameLevel(),
+            scrollArea and scrollArea:GetFrameLevel() or "?",
+            editBox:GetFrameLevel()))
     end
 
     local bg = _G[(copyFrame:GetName() or "") .. "DialogBG"]

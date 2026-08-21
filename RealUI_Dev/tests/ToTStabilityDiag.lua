@@ -285,6 +285,41 @@ function ns.commands:totwatch()
     end)
 end
 
+-- B24 round 5: what do the ToT fill's anchors ACTUALLY look like, and do they
+-- change between two poll ticks? Decides "native engine rewrites anchors every
+-- tick" (ownership war — needs a real fix) vs "FillAnchorsIntact is buggy".
+function ns.commands:fillstate()
+    local frame = GetToT()
+    local fill = frame and frame.Health and frame.Health.fill
+    if not fill then
+        _G.print("|cffff0000[FillState]|r no ToT Health.fill")
+        return
+    end
+
+    local function describe(label)
+        local n = fill:GetNumPoints()
+        local parts = {}
+        for i = 1, n do
+            local point, rel, relPoint, x, y = fill:GetPoint(i)
+            local sx = (x == nil or _G.issecretvalue(x)) and "?" or ("%.1f"):format(x)
+            local sy = (y == nil or _G.issecretvalue(y)) and "?" or ("%.1f"):format(y)
+            parts[#parts + 1] = ("%s->%s@%s(%s,%s)"):format(
+                tostring(point), rel and rel:GetDebugName() or "?", tostring(relPoint), sx, sy)
+        end
+        local w, h = fill:GetSize()
+        local sw = _G.issecretvalue(w) and "?" or ("%.1f"):format(w or -1)
+        local sh = _G.issecretvalue(h) and "?" or ("%.1f"):format(h or -1)
+        _G.print(("|cff00ccff[FillState]|r %s: %d points, size %sx%s"):format(label, n, sw, sh))
+        for _, p in _G.ipairs(parts) do
+            _G.print("    " .. p)
+        end
+    end
+
+    describe("now")
+    _G.C_Timer.After(0.7, function() describe("after 0.7s (1+ poll)") end)
+    _G.C_Timer.After(1.4, function() describe("after 1.4s (2+ polls)") end)
+end
+
 -- B42: stacked label hunt ----------------------------------------------------
 
 local function DumpFontStrings(frame, label)
