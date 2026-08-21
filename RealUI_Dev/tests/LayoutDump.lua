@@ -153,5 +153,24 @@ function ns.commands:layoutdump()
         end
     end
 
+    -- Group-frame anchors (B10 reference layout): screen-anchored holders.
+    -- Printed in several point conventions; the bake picks the natural one.
+    local uiW, uiH = _G.UIParent:GetWidth(), _G.UIParent:GetHeight()
+    for _, holderName in _G.ipairs({"RealUIRaidAnchor", "RealUIPartyAnchor"}) do
+        local holder = _G[holderName]
+        local l, b, w, h = rect(holder)
+        if l then
+            local cx, cy = l + w / 2, b + h / 2
+            _G.print(("  %s: BOTTOMLEFT(%d,%d) | BOTTOM(%d,%d) | LEFT(%d,%d) | TOP(%d,%d)"):format(
+                holderName,
+                l + 0.5, b + 0.5,
+                cx - uiW / 2 + 0.5, b + 0.5,
+                l + 0.5, cy - uiH / 2 + 0.5,
+                cx - uiW / 2 + 0.5, (b + h) - uiH + 0.5))
+        else
+            _G.print(("  %s: not present (Grid2 loaded, or headers not spawned)"):format(holderName))
+        end
+    end
+
     _G.print("|cff00ccff[LayoutDump]|r position everything first (frames visible: set a target/focus that has a target), then paste this output back.")
 end
