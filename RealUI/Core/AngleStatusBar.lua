@@ -528,6 +528,11 @@ function AngleStatusBarMixin:SetReverseFill(isReverseFill)
     -- visible 2Hz flicker on both eventless frames. Idempotent now; the
     -- creation-time anchors (TOP/BOTTOM/LEFT, isReverseFill=false) match the
     -- guard's initial state, so the first real flip still applies.
+    -- (An anchor-verification variant was tried 2026-08-21 and REVERTED the
+    -- same night: its check failed per tick and brought the re-anchor churn
+    -- back. If dark/empty fills on target/focus are seen again after idling,
+    -- run `/realdev fillstate` before and after — that decides whether the
+    -- native engine actually rewrites these anchors.)
     if meta.isReverseFill == isReverseFill then return end
     meta.isReverseFill = isReverseFill
 
