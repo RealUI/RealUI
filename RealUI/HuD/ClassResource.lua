@@ -580,11 +580,22 @@ function ClassResource:OnInitialize()
     self:SetEnabledState(isEnabled)
 end
 
+-- Same wrapper CastBars uses: the DEFAULT LibWindow drag handlers save
+-- SCREEN coordinates into the position config, but ApplyAnchor reads that
+-- config as UNIT-FRAME-relative offsets whenever anchorTo is set — so every
+-- drag of pinned class points made the frame teleport on the next refresh
+-- ("keeps moving", found live 2026-08-22 during the B10 layout session).
+-- FramePoint.OnDragStop converts drags into anchor-relative offsets.
+local function OnDragStop(frame)
+    FramePoint.OnDragStop(frame)
+    _G.LibStub("AceConfigRegistry-3.0"):NotifyChange("HuD")
+end
+
 function ClassResource:OnEnable()
     self:debug("OnEnable")
 
     CombatFader:RegisterModForFade(MODNAME, "class", "combatfade")
-    FramePoint:RegisterMod(self)
+    FramePoint:RegisterMod(self, nil, OnDragStop)
 
     -- Demon Hunter: listen for spec changes so the SoulFragments bar
     -- shows/hides correctly when switching to/from Devourer (spec 3).
