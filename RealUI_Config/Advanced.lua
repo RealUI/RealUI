@@ -3304,6 +3304,40 @@ do -- Auras (RealUI_Auras standalone addon)
     end
 end
 
+do -- Action Bars (RealUI_ActionBars standalone addon) — spec task 8.2
+    debug("Adv ActionBars")
+    -- AceAddon name has no underscore (see ConfigBar's passthrough button).
+    local AB = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
+    if AB and AB.GetConfigOptions then
+        local ok, abOptions = _G.pcall(AB.GetConfigOptions, AB)
+        if ok and type(abOptions) == "table" then
+            -- The standalone window keeps its own title; inside RealUI's tree
+            -- it is just another section, so name/order are set here rather
+            -- than in the addon.
+            abOptions.name = "Action Bars"
+            abOptions.order = 20
+            optArgs.actionbars = abOptions
+        end
+    elseif _G.C_AddOns.IsAddOnLoaded("RealUI_ActionBars") then
+        -- Loaded but disabled (component toggle / BT4 coexistence stand-down).
+        optArgs.actionbars = {
+            name = "Action Bars",
+            type = "group",
+            order = 20,
+            args = {
+                notEnabled = {
+                    name = "RealUI's action bars are not active. This happens when the "
+                        .. "component is switched off (Core > Components) or when Bartender4 "
+                        .. "is installed and driving the bars instead.",
+                    type = "description",
+                    fontSize = "medium",
+                    order = 1,
+                },
+            },
+        }
+    end
+end
+
 --[[
 local core do
     order = order + 1
