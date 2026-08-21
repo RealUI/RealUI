@@ -44,4 +44,5 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="Core\FramePoint.lua"/>
     <Script file="Core\MenuFrame.lua"/>
     <Script file="Core\Currency.lua"/>
+    <Script file="Core\NewDefaults.lua"/>
 </Ui>

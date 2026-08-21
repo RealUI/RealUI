@@ -462,6 +462,13 @@ function RealUI:ChatCommand_Config(input)
             self:SetUpAddonProfile("Platynator", true)
             print("|cff0099ffRealUI|r: Platynator profile updated.")
             return
+        elseif command == "newdefaults" then
+            -- B47: the "apply new defaults" picker (auto-shows once per
+            -- character; this reopens it on demand, listing everything)
+            if RealUI.NewDefaults then
+                RealUI.NewDefaults:Show(false)
+            end
+            return
         elseif command == "devcheck" then
             -- Reports anything left in a non-shipping state: dev A/B toggles,
             -- taint logging, disabled skins, leftover diagnostic keys. Three
