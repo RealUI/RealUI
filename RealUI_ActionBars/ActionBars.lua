@@ -101,6 +101,51 @@ function private.ApplyExtraButtons()
     end
 end
 
+--[[ Task 4.2: vehicle-exit button with independent position/scale.
+
+     `MainMenuBarVehicleLeaveButton` is an EditMode SYSTEM frame (parented to
+     MainActionBar, EditModeVehicleLeaveButtonSystemTemplate), so EditMode
+     re-anchors it on every layout apply — the same stomp that took the
+     Omnium Folio button (B68) and the LFG eye (B29). Cure is the same:
+     re-assert our placement from a hooksecurefunc on the frame's own
+     position updater, plus the layout/login events.
+
+     Visibility stays Blizzard's (UpdateShownState / CanExitVehicle) — we only
+     own where it sits and how big it is. Position/scale come from the
+     `Vehicle` namespace that Defaults.lua has carried unused until now. ]]--
+
+local vehicleHooked = false
+
+function private.ApplyVehicleButton()
+    local button = _G.MainMenuBarVehicleLeaveButton
+    if not button then return end
+
+    local db = AB.dbVehicle and AB.dbVehicle.profile
+    if not db or not db.enabled then return end
+
+    local pos = db.position or {}
+    _G.pcall(function()
+        button:ClearAllPoints()
+        button:SetPoint(pos.point or "TOPRIGHT", _G.UIParent,
+            pos.point or "TOPRIGHT", pos.x or -36, pos.y or -59.5)
+        button:SetScale(db.scale or 0.84)
+    end)
+
+    if not vehicleHooked then
+        vehicleHooked = true
+        -- EditMode calls UpdateSystemSettingFrameposition/UpdateMagnetismRegistration
+        -- on its system frames; hook whichever exists so our anchor wins the
+        -- last write without us fighting the frame every OnUpdate.
+        for _, method in _G.next, {"UpdateSystemSettingFramePosition", "ApplySystemAnchor", "UpdateShownState"} do
+            if type(button[method]) == "function" then
+                _G.hooksecurefunc(button, method, function()
+                    private.QueueSecure(private.ApplyVehicleButton)
+                end)
+            end
+        end
+    end
+end
+
 -- Naga bar (bar 6) toggle — behavior parity with the RealUI /naga command.
 _G.SLASH_REALUIABNAGA1 = "/naga"
 _G.SlashCmdList.REALUIABNAGA = function()

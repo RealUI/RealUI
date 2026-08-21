@@ -208,6 +208,63 @@ local function BuildOptions()
             },
             stance = AuxBarOptions("Stance Bar", 7, function() return AB.dbStanceBar.profile end),
             pet = AuxBarOptions("Pet Bar", 8, function() return AB.dbPetBar.profile end),
+            -- Task 4.2: the vehicle-exit button gets position + scale only.
+            -- Its visibility is Blizzard's (CanExitVehicle), so no visibility
+            -- conditional or fade here — AuxBarOptions would offer both.
+            vehicle = {
+                type = "group", name = "Vehicle Exit Button", order = 9,
+                args = {
+                    enabled = {
+                        type = "toggle", name = "Position the vehicle exit button", order = 1,
+                        width = "full",
+                        desc = "Off = leave it wherever Edit Mode puts it.",
+                        get = function() return AB.dbVehicle.profile.enabled end,
+                        set = function(_, v)
+                            AB.dbVehicle.profile.enabled = v
+                            if v then private.QueueSecure(private.ApplyVehicleButton) end
+                        end,
+                    },
+                    scale = {
+                        type = "range", name = "Scale", min = 0.5, max = 2, step = 0.01, order = 2,
+                        disabled = function() return not AB.dbVehicle.profile.enabled end,
+                        get = function() return AB.dbVehicle.profile.scale end,
+                        set = function(_, v)
+                            AB.dbVehicle.profile.scale = v
+                            private.QueueSecure(private.ApplyVehicleButton)
+                        end,
+                    },
+                    position = {
+                        type = "group", name = "Position", inline = true, order = 3,
+                        disabled = function() return not AB.dbVehicle.profile.enabled end,
+                        args = {
+                            point = {
+                                type = "select", name = "Anchor", values = POINTS, order = 1,
+                                get = function() return AB.dbVehicle.profile.position.point end,
+                                set = function(_, v)
+                                    AB.dbVehicle.profile.position.point = v
+                                    private.QueueSecure(private.ApplyVehicleButton)
+                                end,
+                            },
+                            x = {
+                                type = "range", name = "X", min = -2000, max = 2000, step = 1, order = 2,
+                                get = function() return AB.dbVehicle.profile.position.x end,
+                                set = function(_, v)
+                                    AB.dbVehicle.profile.position.x = v
+                                    private.QueueSecure(private.ApplyVehicleButton)
+                                end,
+                            },
+                            y = {
+                                type = "range", name = "Y", min = -2000, max = 2000, step = 1, order = 3,
+                                get = function() return AB.dbVehicle.profile.position.y end,
+                                set = function(_, v)
+                                    AB.dbVehicle.profile.position.y = v
+                                    private.QueueSecure(private.ApplyVehicleButton)
+                                end,
+                            },
+                        },
+                    },
+                },
+            },
         },
     }
     for id = 1, 6 do

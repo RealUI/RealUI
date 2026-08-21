@@ -74,9 +74,13 @@ function AB:OnEnable()
         private.QueueSecure(private.HideBlizzardBars)
         -- The zone-ability frames get recreated/re-laid-out on zone changes.
         private.QueueSecure(private.ApplyExtraButtons)
+        private.QueueSecure(private.ApplyVehicleButton)
     end)
     self:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED", function()
         private.QueueSecure(private.HideBlizzardBars)
+        -- Task 4.2: EditMode owns the vehicle-exit button's anchor; re-assert
+        -- ours after every layout apply (B68/B29 stomp pattern).
+        private.QueueSecure(private.ApplyVehicleButton)
     end)
     private.BuildBars()
     -- Skins before ApplyAllBars: the button-inset pass needs the skin's
@@ -103,6 +107,7 @@ function AB:OnEnable()
     _G.hash_SlashCmdList["/NAGA"] = "REALUIABNAGA"
     private.QueueSecure(private.BuildStancePetBars)
     private.QueueSecure(private.ApplyExtraButtons)
+    private.QueueSecure(private.ApplyVehicleButton)
     self:RegisterEvent("UPDATE_SHAPESHIFT_FORMS", function()
         private.QueueSecure(private.BuildStanceBar)
     end)
