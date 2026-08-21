@@ -41,6 +41,19 @@ end
 -- chat frame instead of silently losing rows.
 local PROTECTED_LINE = "|cff9f9f9f<protected value - line cannot be copied>|r"
 
+-- B69: Battle.net protected-name sequences (|K...|k — friend online/offline
+-- lines, BNet whispers) pass the secret check (they are accessible strings)
+-- but a plain EditBox cannot display them: SetText with even ONE in the
+-- payload renders the whole box EMPTY. That was the blank copy window —
+-- present exactly when a BNet line sat in the chat backlog. The name is
+-- unreadable outside secure chat anyway, so substitute a placeholder.
+local function StripProtectedNames(line)
+    if line:find("|K", 1, true) then
+        line = line:gsub("|K.-|k", "[BNet]")
+    end
+    return line
+end
+
 local function copyChat(self)
     local chat = _G[self:GetName()]
     local lineCount = chat:GetNumMessages()
@@ -55,7 +68,7 @@ local function copyChat(self)
             -- InsertLine also rejects an empty string; chat frames do hand
             -- those out, and the error aborts the whole copy.
             if safe ~= "" then
-                dump:AddLine(safe)
+                dump:AddLine(StripProtectedNames(safe))
                 added = added + 1
             end
         elseif type(msg) == "string" then
