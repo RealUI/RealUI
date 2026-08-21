@@ -80,9 +80,9 @@ local items = {
                 return live.anchorTo == anchorTo and live.point == point
                     and live.x == x and live.y == y
             end
-            return at(CastBars.db.profile.player.position, "player", "TOP", 0, -40)
-                and at(CastBars.db.profile.target.position, "target", "TOP", 0, -40)
-                and at(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -20)
+            return at(CastBars.db.profile.player.position, "player", "TOP", 0, -70)
+                and at(CastBars.db.profile.target.position, "target", "TOP", 0, -70)
+                and at(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -38)
         end,
         apply = function()
             local FramePoint = RealUI:GetModule("FramePoint", true)
@@ -92,9 +92,11 @@ local items = {
             -- "Move to the new default position" (Arnvid, 2026-08-21). The DB
             -- defaults are the old SCREEN positions — a pinned default did not
             -- exist, so the offsets are defined here (FramePoint.ApplyAnchor
-            -- anchors point-to-same-point on the unit frame): cast bars hang
-            -- centered just below their unit frame; the class resource row
-            -- hangs under the player frame.
+            -- anchors point-to-same-point on the unit frame). Vertical layout
+            -- below the frame bottom: the power value text occupies ~0..-18,
+            -- the class points row sits -25..-38 (BOTTOM -38), and the cast
+            -- bar starts at -42 (TOP -70 = 28px frame + 42) — nothing stacks
+            -- on the status text (first cut at -40/-20 overlapped it).
             local function pinAt(live, anchorTo, point, x, y)
                 live.anchorTo = anchorTo
                 live.point = point
@@ -102,11 +104,11 @@ local items = {
                 live.y = y
             end
 
-            pinAt(CastBars.db.profile.player.position, "player", "TOP", 0, -40)
-            pinAt(CastBars.db.profile.target.position, "target", "TOP", 0, -40)
+            pinAt(CastBars.db.profile.player.position, "player", "TOP", 0, -70)
+            pinAt(CastBars.db.profile.target.position, "target", "TOP", 0, -70)
             FramePoint:RestorePosition(CastBars)
 
-            pinAt(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -20)
+            pinAt(ClassResource.db.class.points.position, "player", "BOTTOM", 0, -38)
             FramePoint:RestorePosition(ClassResource)
         end,
     },
@@ -144,8 +146,11 @@ local items = {
             if not point or _G.issecretvalue(x) or _G.issecretvalue(y) then return nil end
             local layout = RealUI.db.char.layout and RealUI.db.char.layout.current or 1
             local wantY = RealUI.GetChatYOffset(layout)
+            -- FCF saves chat positions as screen RATIOS and recomputes pixels
+            -- at login, so the restored offsets drift a few px from what we
+            -- set (flapped applied/not-applied across reloads at 1px).
             return point == "BOTTOMLEFT" and relPoint == "BOTTOMLEFT"
-                and _G.math.abs((x or 0) - 6) < 1 and _G.math.abs((y or 0) - wantY) < 1
+                and _G.math.abs((x or 0) - 6) < 12 and _G.math.abs((y or 0) - wantY) < 12
         end,
         apply = function()
             local layout = RealUI.db.char.layout and RealUI.db.char.layout.current or 1
