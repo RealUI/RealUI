@@ -519,10 +519,21 @@ function AngleStatusBarMixin:DisableNativeFill()
 end
 
 function AngleStatusBarMixin:SetReverseFill(isReverseFill)
-    bars[self].isReverseFill = isReverseFill
-    -- Re-anchoring the fill below discards the narrow-fill SetPoint tweak;
+    local meta = bars[self]
+    isReverseFill = not not isReverseFill
+
+    -- B24: Health.PreUpdate calls this on EVERY health update — including the
+    -- 0.5s eventless poll (ToT/focustarget) — and the ClearAllPoints +
+    -- re-anchor below tore the fill down and rebuilt it each tick: the
+    -- visible 2Hz flicker on both eventless frames. Idempotent now; the
+    -- creation-time anchors (TOP/BOTTOM/LEFT, isReverseFill=false) match the
+    -- guard's initial state, so the first real flip still applies.
+    if meta.isReverseFill == isReverseFill then return end
+    meta.isReverseFill = isReverseFill
+
+    -- Re-anchoring the fill discards the narrow-fill SetPoint tweak;
     -- invalidate the trapezoid cache so the next value update re-applies it.
-    bars[self].lastVertexOfs = nil
+    meta.lastVertexOfs = nil
     -- Sync native StatusBar state for oUF compatibility (Defect 1.3)
     local nativeSetReverseFill = _G.getmetatable(self).__index.SetReverseFill
     if nativeSetReverseFill then
