@@ -178,30 +178,19 @@ end
 -- Validates: Requirements 1.9, 1.10, 1.11, 1.12, 1.13
 ---------------------------------------------------------------------------
 function BugTests.Test5_ProfileModuleState()
-    local AddonControl = RealUI:GetModule("AddonControl", true)
-    local hasUserOverride = false
-
-    if AddonControl and AddonControl.db then
-        local addonDB = AddonControl.db.profile
-        if addonDB and addonDB.addonControl and addonDB.addonControl["Bartender4"] then
-            local bt4Config = addonDB.addonControl["Bartender4"]
-            if bt4Config.profiles and bt4Config.profiles.base then
-                hasUserOverride = bt4Config.profiles.base.userOverride ~= nil
-            end
-        end
-    end
-
+    -- Original bug: SetProfilesToRealUI cascade-disabled modules during a
+    -- healer profile switch (guarded via a Bartender4 userOverride flag).
+    -- BT4 support was removed in 4.0, so validate the symptom directly:
+    -- the CastBars module must survive profile switches enabled.
     local castBarsEnabled = RealUI.db and RealUI.db.profile and
         RealUI.db.profile.modules and RealUI.db.profile.modules["CastBars"]
 
-    if hasUserOverride then
+    if castBarsEnabled then
         RecordResult(5, "Profile Module State", true,
-            "userOverride flag exists in AddonControl for Bartender4")
+            "CastBars module enabled after profile operations")
     else
-        local detail = "No userOverride guard in AddonControl; " ..
-            "SetProfilesToRealUI can cascade-disable modules. " ..
-            "CastBars enabled=" .. tostring(castBarsEnabled)
-        RecordResult(5, "Profile Module State", false, detail)
+        RecordResult(5, "Profile Module State", false,
+            "CastBars module disabled — profile switch may have cascade-disabled modules")
     end
 end
 

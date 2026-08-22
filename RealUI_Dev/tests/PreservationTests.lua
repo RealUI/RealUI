@@ -230,18 +230,8 @@ function PreserveTests.Test3_ClickTargetingAndBarLayout()
             hasApplyFunc and "ActionBars:ApplyABSettings exists for bar layout"
             or "ActionBars:ApplyABSettings missing")
     else
-        RecordResult(3, "ActionBars module", true,
-            "ActionBars module not yet loaded (loaded on demand with Bartender4)")
-    end
-
-    if _G.Bartender4 then
-        local bt4DB = _G.Bartender4DB
-        if bt4DB and bt4DB.profiles then
-            local hasRealUIProfile = bt4DB.profiles["RealUI"] ~= nil
-                or bt4DB.profiles["realui"] ~= nil
-            RecordResult(3, "Bartender4 RealUI profile", hasRealUIProfile or true,
-                "Bartender4 profiles exist (layout settings preserved)")
-        end
+        RecordResult(3, "ActionBars module", false,
+            "ActionBars module missing (should always load in RealUI 4.0)")
     end
 end
 

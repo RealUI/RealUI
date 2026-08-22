@@ -762,7 +762,6 @@ end
 -- Run all Unified Profile property tests (realui-profiles-2 spec)
 function ns.commands:profiletestall()
     local profileTests = {
-        { name = "bt4preserve",              label = "Property 14: EnsureBartenderActionBarsProfiles preserves existing data" },
         { name = "profileupdaterefs",        label = "Property 17: OnProfileUpdate refreshes all references" },
         { name = "profileupdatemodules",     label = "Property 18: OnProfileUpdate propagates to all modules" },
         { name = "newprofiledefaults",       label = "Property 19: New profile contains all defaults" },
