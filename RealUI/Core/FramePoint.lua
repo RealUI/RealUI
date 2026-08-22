@@ -386,6 +386,16 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
         local point, relativeTo, relativePoint, xOfs, yOfs = frame:GetPoint(1)
         if point and relativeTo then
             dragFrame:SetPoint(point, relativeTo, relativePoint, xOfs or 0, yOfs or 0)
+            -- Remember it: RefreshMod needs somewhere to put the frame back to
+            -- when the profile it is switching INTO has no saved position for
+            -- it. Without this the only fallback is LibWindow's, which centres.
+            dragFrame._framePointDefault = {
+                point = point,
+                relativeTo = relativeTo,
+                relativePoint = relativePoint,
+                x = xOfs or 0,
+                y = yOfs or 0,
+            }
         end
     end
 
@@ -414,11 +424,46 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
     }
 end
 
+--- Re-apply every registered frame's position after a profile switch.
+--
+-- This MUST mirror the placement logic in PositionFrame. It used to call
+-- LibWin.RestorePosition unconditionally, which broke two ways whenever the
+-- incoming profile had not saved a position for a frame:
+--
+--   1. LibWindow's RestorePosition centres a frame when its config has no
+--      x/y ("nothing stored in config yet, smack it in the center" —
+--      LibWindow-1.1.lua:183). Switching to the Healing layout therefore
+--      threw the party/raid anchors into the middle of the screen; a
+--      /reload put them right again, because the spawn path guards for it.
+--   2. ApplyAnchor was never called, so elements pinned to a unit frame
+--      (cast bars, class resource — the "Anchor To" option) lost their pin
+--      on every layout switch and got LibWindow-positioned instead.
+--
+-- Order matters and matches PositionFrame: unit-frame anchoring wins, then
+-- real saved data, then the frame's original default anchor. Never centre.
 function FramePoint:RefreshMod()
     for mod, module in next, modules do
         for frame, meta in next, module.frames do
-            LibWin.RegisterConfig(meta.dragFrame, RealUI.GetOptions(mod.moduleName, meta.optionPath))
-            LibWin.RestorePosition(meta.dragFrame)
+            local dragFrame = meta.dragFrame
+            local config = RealUI.GetOptions(mod.moduleName, meta.optionPath)
+            LibWin.RegisterConfig(dragFrame, config)
+            dragFrame._framePointConfig = config
+
+            if not ApplyAnchor(dragFrame, config) then
+                if config and next(config) ~= nil then
+                    LibWin.RestorePosition(dragFrame)
+                else
+                    -- Unmoved in this profile: return to where the unit file
+                    -- originally put it rather than keeping the outgoing
+                    -- profile's position (or centring).
+                    local default = dragFrame._framePointDefault
+                    if default then
+                        dragFrame:ClearAllPoints()
+                        dragFrame:SetPoint(default.point, default.relativeTo,
+                            default.relativePoint, default.x, default.y)
+                    end
+                end
+            end
         end
     end
 end
