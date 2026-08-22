@@ -70,8 +70,17 @@ function private.ApplyRealUILayout()
     local hudSizeOffsets = RealUI.hudSizeOffsets or {}
     local hudSize = ndb.settings and ndb.settings.hudSize
     local sizeOffsets = (hudSize and hudSizeOffsets[hudSize]) or hudSizeOffsets[2] or hudSizeOffsets[1] or {}
-    local topYOfs = (layoutPositions.HuDY or 0) + (layoutPositions.ActionBarsY or 0)
-        + (sizeOffsets.ActionBarsY or 0)
+    -- A MISSING key is not zero. `positions[layout]` can exist while individual
+    -- keys were never populated — observed 2026-08-22 on RealUI-Healing, where
+    -- /bardumptrace reported `abY=nil hudY=nil`. The old `or 0` silently
+    -- substituted screen origin for the layout's intended baseline: layout 2
+    -- should total -38 + -115.5 + -20 = -173.5 and instead got -20, lifting
+    -- every centre bar 153 units up the screen. Fall back to the layout
+    -- DEFAULTS, which is what an unpopulated profile is supposed to inherit.
+    local defaultLayoutPositions = (RealUI.defaultPositions and RealUI.defaultPositions[cLayout]) or {}
+    local hudY = layoutPositions.HuDY or defaultLayoutPositions.HuDY or 0
+    local abY = layoutPositions.ActionBarsY or defaultLayoutPositions.ActionBarsY or 0
+    local topYOfs = hudY + abY + (sizeOffsets.ActionBarsY or 0)
     -- B11: the HuD "Vertical" slider writes positions[layout].ActionBarsY,
     -- which only top (CENTER-anchored) bars consume via topYOfs — bottom
     -- bars sat at the infobar and ignored it, so the slider was dead on any
@@ -79,11 +88,13 @@ function private.ApplyRealUILayout()
     -- delta: current value minus the computed baseline HuDPositioning keeps
     -- in RealUI.defaultPositions. Untouched slider -> delta 0 -> bottom bars
     -- stay exactly on the infobar, same as always.
-    local defaultLayoutPositions = RealUI.defaultPositions and RealUI.defaultPositions[cLayout]
-    local baselineY = defaultLayoutPositions and defaultLayoutPositions.ActionBarsY
+    -- Uses the same resolved `abY` as topYOfs above: when the profile has no
+    -- saved value it equals the baseline, so the delta is 0 and bottom bars
+    -- sit on the infobar exactly as an untouched slider should leave them.
+    local baselineY = defaultLayoutPositions.ActionBarsY
     local sliderDelta = 0
-    if baselineY and layoutPositions.ActionBarsY then
-        sliderDelta = layoutPositions.ActionBarsY - baselineY
+    if baselineY then
+        sliderDelta = abY - baselineY
     end
     local bottomBase = GetBottomBase() + 14 + sliderDelta
 
