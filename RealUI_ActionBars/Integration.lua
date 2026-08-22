@@ -1,22 +1,30 @@
 local _, private = ...
 local AB = private.AB
 
---[[ RealUI HuD integration (spec task 9): compute the RealUI bar layout from
-     the HuD settings and write it into our own DB — the same geometry
-     RealUI's ActionBars module used to drive INTO Bartender4 (ported from
-     Modules/ActionBars.lua ApplyABSettings; constants: 35px math cells,
-     buttonPadding 1, BT4-semantics bar padding -9, infobar-height bottom
-     base). Standalone (no RealUI) keeps the static defaults.
+--[[ RealUI HuD integration: compute the bar layout from the HuD settings and
+     write it into our own DB. Standalone (no RealUI) keeps the static
+     defaults from Defaults.lua.
+
+     The geometry is expressed in RealUI_ActionBars' own terms — real rendered
+     extents, the B28 box model (visible gap = padding, frame gap = padding +
+     2 borders), per-bar buttonSize/scale read from the user's settings.
+
+     Lineage, since it explains the comments below: this math was ported from
+     RealUI's `Modules/ActionBars.lua` ApplyABSettings, which computed in
+     Bartender4 proportions (35px "math cells", 36px effective button pitch,
+     -9 overlap padding). Those units are NOT ours and every one of them that
+     survived the port has produced a bug — off-centre bars (fixed by
+     switching horizontal centering to real extents) and a 5px-per-row error
+     in vertical stacking (fixed the same way). If a bare numeric constant
+     appears in this file again, check which addon's button size it belongs to.
 
      Trigger: RealUI recomputes on layout/spec/HuD changes through
      ApplyABSettings — we hooksecurefunc it and ride the same web. ]]--
 
-local MATH_BUTTON = 35       -- geometry cell (matches ApplyABSettings' buttonSizes.bars)
-local MATH_PADDING = 1       -- geometry padding (fixedSettings.buttonPadding)
 -- Read-fallbacks only (mirror Defaults.lua) — the geometry reads the user's
 -- per-bar buttonSize/padding/scale and never writes them back.
-local BUTTON_SIZE = 27       -- == BT4's 36 at -9 overlap, without the overlap
-local BUTTON_GAP = 2         -- true visible gap between buttons (B28)
+local BUTTON_SIZE = 27       -- RealUI's button face
+local BUTTON_GAP = 2         -- true visible gap between borders (B28 box model)
 
 local function IsOdd(value)
     return value % 2 == 1
@@ -78,10 +86,61 @@ function private.ApplyRealUILayout()
         sliderDelta = layoutPositions.ActionBarsY - baselineY
     end
     local bottomBase = GetBottomBase() + 14 + sliderDelta
-    local centerPadding = MATH_PADDING / 2
-    local barGap = _G.math.ceil(centerPadding + centerPadding)
 
     local border = private.BUTTON_BORDER or 1
+
+    --[[ Vertical stacking of the centre/bottom bars.
+
+         This used to advance a fixed 36px per row (a 35px "math cell" plus 1)
+         — inherited from ApplyABSettings, where 36 is BARTENDER4's button
+         height. RealUI's own buttons are 27px with the B28 box model, so the
+         correct row pitch is buttonSize + frame gap = 27 + 4 = 31, which is
+         exactly what the shipped static defaults encode (Defaults.lua bars 2
+         and 3 sit 31 apart). The computed layout and the static defaults
+         therefore disagreed by 5px per stacked row, and every stacked bar
+         carried BT4's proportions rather than ours.
+
+         Now the rows stack on the REAL rendered heights, the same correction
+         the horizontal centering already got. Bars may differ in size, so the
+         offset for a row is the cumulative pitch of the rows beneath it.
+
+         Row mapping is hoisted out of the placement loop below (it only
+         depends on id and numTopBars) so the cumulative sums can be built
+         before any bar is positioned. ]]--
+    local rowOf, isTopOf = {}, {}
+    local pitchOf = {}
+    for id = 1, 3 do
+        local db = AB.dbActionBars.profile.actionbars[id]
+        local isTopBar = id <= numTopBars
+        isTopOf[id] = isTopBar
+        if id == 1 then
+            rowOf[id] = (numTopBars > 0) and 1 or (3 - numTopBars)
+        elseif id == 2 then
+            rowOf[id] = 2
+        else
+            rowOf[id] = isTopBar and 3 or 1
+        end
+
+        if db and db.enabled then
+            local buttonSize = db.buttonSize or BUTTON_SIZE
+            local gap = (db.padding or BUTTON_GAP) + border * 2
+            pitchOf[id] = (buttonSize + gap) * (db.scale or 1)
+        else
+            pitchOf[id] = 0
+        end
+    end
+
+    --- Cumulative offset from a group's base to the given row: the summed
+    --- pitch of every enabled bar occupying a lower row in the same group.
+    local function StackOffset(isTopBar, row)
+        local offset = 0
+        for id = 1, 3 do
+            if isTopOf[id] == isTopBar and rowOf[id] < row then
+                offset = offset + pitchOf[id]
+            end
+        end
+        return offset
+    end
 
     local barSizes = {}
     for id = 1, 5 do
@@ -145,25 +204,11 @@ function private.ApplyRealUILayout()
                 x = -(barSizes[id] / 2)
                 if IsOdd(frameExtent) then x = x + 0.5 end
 
-                local barPlace
-                if id == 1 then
-                    barPlace = (numTopBars > 0) and 1 or (3 - numTopBars)
-                elseif id == 2 then
-                    barPlace = 2
-                else
-                    barPlace = isTopBar and 3 or 1
-                end
-
-                if barPlace == 1 then
-                    y = isTopBar and topYOfs or bottomBase
-                elseif barPlace == 2 then
-                    y = isTopBar and (-(MATH_BUTTON + barGap) + topYOfs)
-                        or (bottomBase + MATH_BUTTON + barGap)
-                else
-                    local pad2 = _G.math.ceil(centerPadding * 4)
-                    y = isTopBar and (-((MATH_BUTTON * 2) + pad2) + topYOfs)
-                        or (bottomBase + (MATH_BUTTON * 2) + pad2)
-                end
+                -- Real-height stacking (see StackOffset above): top bars grow
+                -- downward from the HuD offset, bottom bars upward from the
+                -- infobar base.
+                local stack = StackOffset(isTopBar, rowOf[id])
+                y = isTopBar and (topYOfs - stack) or (bottomBase + stack)
 
                 point = isTopBar and "CENTER" or "BOTTOM"
                 db.flyoutDirection = isTopBar and "DOWN" or "UP"

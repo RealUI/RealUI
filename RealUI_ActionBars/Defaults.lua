@@ -1,15 +1,26 @@
 local _, private = ...
 
--- Defaults are a 1:1 port of RealUI's shipped Bartender4 profile
--- (RealUI/Core/AddonData/Bartender4.lua, profile "RealUI"): bar 1 at screen
--- center below the HuD, bars 2/3 stacked bottom-left of center, two fading
--- vertical side bars at the right edge, bar 6 = Naga (off). BT4 buttons are
--- 36px base, padding -9 (borders overlap). Position note: BT4 stores
--- screen-space offsets and divides by scale at apply; scale is 1 everywhere
--- here except the vehicle button, so values port as-is.
+--[[ THE shipped RealUI action bar layout. This is the canonical definition —
+     RealUI_ActionBars is the bar backend as of 4.0.0, and these values are
+     expressed in ITS terms: 27px button faces, `padding` = the true visible
+     gap between neighbouring borders (B28 box model), scale 1, positions in
+     screen space.
 
--- The shipped BT4 profile carried fade strings with custom=false — BT4 never
--- activated them; classic RealUI showed all bars. Fade is opt-in via config.
+     The arrangement: bar 1 centred below the HuD, bars 2/3 stacked above the
+     Infobar, two vertical side bars at the right edge, bar 6 = Naga (off).
+
+     Historical note, not a dependency: this layout began as a port of
+     RealUI's old Bartender4 profile, whose buttons were 36px with -9 padding
+     (overlapping borders). That translation is done and finished — nothing
+     here is derived from BT4 at runtime, and BT4's proportions must not leak
+     back in (they did, in the vertical bar stacking; see Integration.lua).
+     When Bartender4 IS installed it stands in as the backend and RealUI
+     drives it from its own profile — the conversion runs toward BT4, never
+     from it.
+
+     Fade strings ship inert (`fadeoutalpha = 0`, visibility ends in `show`):
+     classic RealUI displayed all bars, and the old BT4 profile's fade data
+     was never activated. Fade is opt-in through config. ]]--
 local HIDE = "[petbattle][overridebar][vehicleui][possessbar,@vehicle,exists]hide;"
 local VIS_SHOW = HIDE .. "show"
 
