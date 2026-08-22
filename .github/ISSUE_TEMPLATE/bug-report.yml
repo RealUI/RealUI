@@ -99,7 +99,7 @@ body:
     description: List any non-RealUI addons that are active. Helps rule out conflicts.
     placeholder: |
       - Masque 10.2.0
-      - Bartender4 4.13.0
+      - Details 12.x
       - WeakAuras 5.x
 
 - type: textarea

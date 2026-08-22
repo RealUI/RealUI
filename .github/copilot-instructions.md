@@ -20,12 +20,12 @@
 - Lua linting uses `.luacheckrc` (Lua 5.1; libs/locale excluded). Follow existing patterns for `_G` usage and globals.
 
 ## Integration points
-- Optional dependencies (Bartender4, Grid2, oUF, Raven, etc.) are listed in `RealUI/RealUI.toc`; guard integration logic accordingly.
+- Optional dependencies (Grid2, Clique, oUF, etc.) are listed in `RealUI/RealUI.toc`; guard integration logic accordingly.
 - `wow-ui-source/` is a reference copy of Blizzard UI code used for API changes/diffs; prefer checking it before reworking Blizzard-facing logic.
 
 ## Repository boundaries (critical)
 - Treat external/vendor repositories in this workspace as **read-only reference** unless explicitly asked otherwise.
-- Do **not** edit files under these folders: `../Bartender4/`, `../Aurora/`, `../oUF/`, `../packager/`, `../Platynator/`.
+- Do **not** edit files under these folders: `../Aurora/`, `../oUF/`, `../packager/`, or any reference addon checkout (Bartender4, Grid2, Platynator, etc.).
 - Implement fixes for integrations from the RealUI side (e.g., `RealUI/`, `RealUI/Core/`, `RealUI/Modules/`, `RealUI_*` add-ons) rather than patching third-party addons.
 - If a bug originates in a reference addon, document the issue and add a defensive compatibility fix in RealUI instead of modifying the dependency.
 
