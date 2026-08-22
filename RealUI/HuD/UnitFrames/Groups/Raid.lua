@@ -17,14 +17,24 @@ local FramePoint = RealUI:GetModule("FramePoint")
 -- centre — the grid grows down/right from there, clear of chat, HuD and bars.
 -- Healing keeps the centre-bottom convention pending a healer-layout session.
 local DEFAULT_POSITIONS = {
-    [1] = { point = "LEFT",   x = 25, y = 17 },   -- DPS/Tank: left edge, mid-height
-    [2] = { point = "BOTTOM", x = 0,  y = 200 },  -- Healing: centre-bottom
+    [1] = { point = "LEFT",   x = 25,   y = 17 },   -- DPS/Tank: left edge, mid-height
+    -- Healing: measured from Arnvid's hand-placement 2026-08-22
+    -- (/realdev layoutdump), sitting in the gap between bars 1 and 2 where a
+    -- healer's eyes already are. Replaces a never-tuned centre-bottom
+    -- placeholder that overlapped the bars.
+    [2] = { point = "BOTTOM", x = -146, y = 241 },
 }
 
--- B31/B10: party shares the raid spot by design — the two headers are
--- mutually exclusive ([group:raid] hides party), so one region serves both.
--- Same for both layouts; each profile remembers its own position once moved.
-local PARTY_DEFAULT_POSITION = { point = "LEFT", x = 25, y = 17 }
+-- B31/B10: party shares the raid REGION by design — the two headers are
+-- mutually exclusive ([group:raid] hides party), so the group block stays in
+-- one place as the group grows. Per-layout since 2026-08-22: healing wants the
+-- block between the bars, and a shared value would have left party on the left
+-- edge while raid sat centre — the same job in two different places depending
+-- on group size. Each profile still remembers its own position once moved.
+local PARTY_DEFAULT_POSITIONS = {
+    [1] = { point = "LEFT",   x = 25, y = 17 },  -- DPS/Tank: matches raid
+    [2] = { point = "BOTTOM", x = -2, y = 240 }, -- Healing: measured 2026-08-22
+}
 
 --[[ RealUI raid/party frames (spec: realui-raidframes).
 
@@ -351,8 +361,9 @@ _G.tinsert(UnitFrames.units, function()
 
     partyAnchor = _G.CreateFrame("Frame", "RealUIPartyAnchor", _G.UIParent)
     partyAnchor:SetSize(rdb.size.x, rdb.size.y)
-    partyAnchor:SetPoint(PARTY_DEFAULT_POSITION.point, _G.UIParent,
-        PARTY_DEFAULT_POSITION.point, PARTY_DEFAULT_POSITION.x, PARTY_DEFAULT_POSITION.y)
+    local partyDefault = PARTY_DEFAULT_POSITIONS[layout] or PARTY_DEFAULT_POSITIONS[1]
+    partyAnchor:SetPoint(partyDefault.point, _G.UIParent,
+        partyDefault.point, partyDefault.x, partyDefault.y)
 
     -- oUF 14: SpawnHeader takes (name, template, ...attribute pairs) — NO
     -- visibility parameter (removed from oUF 13); visibility is driven below
