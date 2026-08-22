@@ -131,6 +131,16 @@ function private.ApplyVehicleButton()
 
     local pos = db.position or {}
     _G.pcall(function()
+        -- REPARENT FIRST, and this is load-bearing: Blizzard declares this
+        -- button as parent="MainActionBar" (Blizzard_ActionBar/Shared/
+        -- VehicleLeaveButton.xml:4), and HideBlizzardBars() parks MainActionBar
+        -- on the hidden blizzHider frame. A child of a hidden frame never
+        -- renders no matter what UpdateShownState() does, so the button was
+        -- unreachable in every vehicle. Anchoring alone was not enough — we
+        -- already point at UIParent, but the PARENT chain is what hides it.
+        if button:GetParent() ~= _G.UIParent then
+            button:SetParent(_G.UIParent)
+        end
         button:ClearAllPoints()
         button:SetPoint(pos.point or "TOPRIGHT", _G.UIParent,
             pos.point or "TOPRIGHT", pos.x or -36, pos.y or -59.5)
