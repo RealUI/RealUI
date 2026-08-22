@@ -14,7 +14,9 @@ The authoritative list of RealUI slash commands, including the diagnostics and t
 | `/installwizard start\|skip\|reset` | Start, skip, or reset the installation wizard |
 | `/charinit setup\|reset\|info` | Character-specific setup (role detection, chat positioning) |
 | `/tutorial` | Open the tutorial |
-| `/realui reset` / `/realui resetchar` | Reset settings (account / character) |
+| `/realui reset` | Ask which scope to reset: this character's setup, or everything (all characters) |
+| `/realui resetchar` | Re-run setup on this character, keeping saved settings — no prompt |
+| `/realui resetall` | Wipe every RealUI setting for every character — no prompt, no undo |
 | `/realui newdefaults` | Open the "new defaults since 3.4.0" picker — tick which changed defaults to apply to your saved settings (auto-shows once per character) |
 | `/rl` | Reload the UI |
 
