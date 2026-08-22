@@ -88,7 +88,7 @@ do
             args = {
                 desc = {
                     name = "|cffffcc00Switch All Linked Scopes|r\n"
-                        .. "Select a profile and click Switch All to change Core, Skins, and Bartender4 "
+                        .. "Select a profile and click Switch All to change Core, Skins, and Action Bars "
                         .. "profiles in one action. Only scopes with their link toggle enabled will participate.",
                     type = "description",
                     fontSize = "medium",
@@ -215,14 +215,14 @@ do
                     order = 1,
                 },
                 bt4Link = {
-                    name = "Link Bartender4 Scope",
-                    desc = "When enabled, Bartender4 profiles will switch alongside Core profiles during coordinated switches.\n\nDefault: enabled (action bars typically change with spec).",
+                    name = "Link Action Bars Scope",
+                    desc = "When enabled, action bar profiles (RealUI_ActionBars) switch alongside Core profiles during coordinated switches.\n\nDefault: enabled (action bars typically change with spec).",
                     type = "toggle",
                     get = function()
-                        return ProfileCoordinator:IsScopeLinked(ProfileCoordinator.SCOPE_BT4)
+                        return ProfileCoordinator:IsScopeLinked(ProfileCoordinator.SCOPE_ACTIONBARS)
                     end,
                     set = function(_, value)
-                        ProfileCoordinator:SetScopeLinked(ProfileCoordinator.SCOPE_BT4, value)
+                        ProfileCoordinator:SetScopeLinked(ProfileCoordinator.SCOPE_ACTIONBARS, value)
                     end,
                     order = 2,
                 },
@@ -428,11 +428,11 @@ do
 end
 
 -- ========================================================================
--- Tab 4: BT4 Profile Scope
+-- Tab 4: Action Bars Profile Scope
 -- ========================================================================
 
-args.bt4Scope = {
-    name = "Bartender4 Profile Scope",
+args.bt4Scope = {  -- args key kept: saved AceConfig state may reference it
+    name = "Action Bars Profile Scope",
     type = "group",
     order = nextOrder(),
     args = {
@@ -445,22 +445,26 @@ args.bt4Scope = {
             order = 0,
         },
         desc = {
-            name = "|cff88ccffBartender4 Profile Scope|r\n\n"
-                .. "Bartender4 manages its own action bar profiles in Bartender4DB. "
-                .. "RealUI ensures matching profile entries exist and can coordinate "
-                .. "BT4 profile switches alongside Core and Skins scopes.\n\n"
-                .. "Click the button below to open Bartender4's native configuration dialog "
-                .. "for detailed action bar profile management.",
+            name = "|cff88ccffAction Bars Profile Scope|r\n\n"
+                .. "RealUI_ActionBars keeps its own profiles in RealUI_ActionBarsDB. "
+                .. "When this scope is linked, the bars profile switches alongside the "
+                .. "Core and Skins scopes on every coordinated switch.\n\n"
+                .. "Click the button below to open the action bar configuration for "
+                .. "per-bar settings.",
             type = "description",
             fontSize = "medium",
             order = 1,
         },
-        openBT4 = {
-            name = "Open Bartender4 Config",
-            desc = "Opens the Bartender4 configuration dialog.",
+        openBars = {
+            name = "Open Action Bar Config",
+            desc = "Opens the RealUI ActionBars configuration.",
             type = "execute",
             func = function()
-                ACD:Open("Bartender4")
+                local AceAddon = _G.LibStub("AceAddon-3.0", true)
+                local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+                if rab and rab.OpenConfig then
+                    rab:OpenConfig()
+                end
             end,
             order = 2,
         },
@@ -512,12 +516,12 @@ args.exportImport = {
             end,
             order = 2,
         },
-        exportBT4 = {
-            name = "Export BT4",
-            desc = "Export the active Bartender4 profile to a copyable text string.",
+        exportBT4 = {  -- args key kept for saved AceConfig state
+            name = "Export Action Bars",
+            desc = "Export the active action bars profile to a copyable text string.",
             type = "execute",
             func = function()
-                local str, err = ProfileExporter:ExportScope(ProfileCoordinator.SCOPE_BT4)
+                local str, err = ProfileExporter:ExportScope(ProfileCoordinator.SCOPE_ACTIONBARS)
                 if str then
                     lastExportString = str
                 else

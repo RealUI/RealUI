@@ -275,21 +275,14 @@ do -- Other
                 type = "group",
                 args = {
                     advanced = {
-                        name = function()
-                            local rab = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
-                            return (rab and rab:IsEnabled()) and "Action Bar Settings" or "Bartender 4"
-                        end,
+                        name = "Action Bar Settings",
                         type = "execute",
                         func = function(info, ...)
-                            -- RealUI_ActionBars owns the bars unless Bartender4
-                            -- is present (coexistence window).
                             local rab = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
-                            if rab and rab:IsEnabled() and rab.OpenConfig then
+                            if rab and rab.OpenConfig then
                                 rab:OpenConfig()
-                            elseif _G.Bartender4 then
-                                ACD:Open("Bartender4")
                             else
-                                _G.print("No action bar addon is active.")
+                                _G.print("RealUI_ActionBars is not loaded.")
                             end
                         end,
                         order = 10,
@@ -307,7 +300,7 @@ do -- Other
                     },
                     enableNagaBar = {
                         name = "Enable Razer Naga Action Bar",
-                        desc = "Enable Bartender4 Bar 2 for use with Razer Naga or similar multi-button mice. This bar appears at the bottom center of the screen.",
+                        desc = "Enable action bar 6 for use with Razer Naga or similar multi-button mice. This bar appears at the bottom center of the screen.",
                         type = "toggle",
                         get = function() return ActionBars.db.profile.enableNagaBar end,
                         set = function(info, value)
@@ -321,24 +314,9 @@ do -- Other
                         type = "header",
                         order = 39,
                     },
-                    controlPosition = {
-                        name = L["Control_Position"],
-                        desc = L["Control_PositionDesc"]:format("Bartender4"),
-                        type = "toggle",
-                        get = function() return RealUI:DoesAddonMove("Bartender4") end,
-                        set = function(info, value)
-                            RealUI:ToggleAddonPositionControl("Bartender4", value)
-                            ActionBars:SetEnabledState(RealUI:GetModuleEnabled("ActionBars") and RealUI:DoesAddonMove("Bartender4"))
-                            if value then
-                                ActionBars:ApplyABSettings()
-                            end
-                        end,
-                        order = 40,
-                    },
                     position = {
                         name = "",
                         type = "group",
-                        disabled = function() return not RealUI:DoesAddonMove("Bartender4") end,
                         inline = true,
                         args = {
                             move = {

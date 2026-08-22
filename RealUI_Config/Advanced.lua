@@ -1237,7 +1237,6 @@ do -- Skins
     --
     -- Addons skinned by default in a standard RealUI installation:
     --   - Grid2           (raid/party frames, included in RealUI suite)
-    --   - Bartender4      (action bars, included in RealUI workspace)
     --   - Masque          (button skinning, optional companion)
     --
     -- The addon skin list below is dynamically generated from
@@ -3327,8 +3326,7 @@ do -- Action Bars (RealUI_ActionBars standalone addon) — spec task 8.2
             args = {
                 notEnabled = {
                     name = "RealUI's action bars are not active. This happens when the "
-                        .. "component is switched off (Core > Components) or when Bartender4 "
-                        .. "is installed and driving the bars instead.",
+                        .. "component is switched off (Core > Components).",
                     type = "description",
                     fontSize = "medium",
                     order = 1,

@@ -279,7 +279,7 @@ local function CreateSystemsConfig()
             redirect = {
                 name = "|cffffcc00Profile management has moved|r\n\n"
                     .. "All profile management is now handled by the Unified Profile Page.\n\n"
-                    .. "Navigate to |cff88ccffAdvanced \226\134\146 Profiles|r to manage Core, Skins, and Bartender4 profiles, "
+                    .. "Navigate to |cff88ccffAdvanced \226\134\146 Profiles|r to manage Core, Skins, and Action Bars profiles, "
                     .. "DualSpec mappings, scope link toggles, and export/import.",
                 type = "description",
                 fontSize = "medium",
