@@ -48,19 +48,26 @@ function AB:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
     self.db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
+
+    -- One-shot Bartender4 conversion. MUST be here rather than in OnEnable:
+    -- Bartender4DB is only in memory while BT4 is installed, and OnEnable
+    -- stands this addon down whenever it is — so init is the single moment an
+    -- upgrading user's layout and keybinds can be captured. No-op after the
+    -- first run (db.global.importedBT4) and when no BT4 data exists.
+    if private.MaybeImportFromBartender4 then
+        _G.pcall(private.MaybeImportFromBartender4)
+    end
 end
 
 function AB:OnEnable()
-    -- Bartender4 coexistence (spec req 10.1): during the transition window BT4
-    -- wins if present; RealUI keeps driving it exactly as before. Import the
-    -- layout NOW — Bartender4DB only exists in memory while BT4 is installed,
-    -- so this handoff is the one moment both addons can see it.
+    -- Bartender4 coexistence stand-down (same pattern as RealUI_Nameplates vs
+    -- Platynator): RealUI 4.0 removed BT4 support entirely, but a user-installed
+    -- BT4 would otherwise double up the bars — so we yield rather than fight.
+    -- RealUI no longer drives BT4 in any way; disable BT4 to get RealUI bars.
     if _G.C_AddOns.IsAddOnLoaded("Bartender4") then
-        -- No automatic import: the layout is computed from RealUI HuD settings
-        -- (Integration.lua) and never depends on Bartender4 having existed.
         -- /rab import remains available for users who want their custom BT4
-        -- tweaks (visibility strings, Naga toggle) carried over manually.
-        _G.print("|cff30d0ffRealUI ActionBars|r: disabled — Bartender4 is handling action bars. (/rab import to copy custom BT4 tweaks.)")
+        -- tweaks (keybinds, visibility strings, Naga toggle) carried over.
+        _G.print("|cff30d0ffRealUI ActionBars|r: disabled — Bartender4 is loaded. RealUI no longer integrates with Bartender4; disable it to use RealUI's bars. (/rab import copies your old BT4 keybinds and tweaks.)")
         self:Disable()
         return
     end

@@ -87,11 +87,16 @@ function private.ImportBartender4Keybinds()
     return imported
 end
 
-function private.ImportFromBartender4(manual)
+--- @param manual boolean     user typed /rab import (chattier on no-ops)
+--- @param deferApply boolean called before the bars exist (OnInitialize) —
+---        write the DB only; the normal build path reads it moments later.
+function private.ImportFromBartender4(manual, deferApply)
     -- Keybinds first: they need no Bartender4 data at all.
     local importedKeys = private.ImportBartender4Keybinds()
     if importedKeys > 0 then
-        private.QueueSecure(private.ApplyBindings)
+        if not deferApply then
+            private.QueueSecure(private.ApplyBindings)
+        end
         _G.print(("|cff30d0ffRealUI ActionBars|r: converted %d Bartender4 keybinds."):format(importedKeys))
     end
 
@@ -125,13 +130,28 @@ function private.ImportFromBartender4(manual)
     end
 
     AB.db.global.importedBT4 = true
-    private.QueueSecure(private.ApplyAllBars)
+    if not deferApply then
+        private.QueueSecure(private.ApplyAllBars)
+    end
     _G.print(("|cff30d0ffRealUI ActionBars|r: imported %d bars from Bartender4 profile %q."):format(imported, profileName))
 end
 
--- Auto-offer: first enable with BT4 data present and no prior import.
+--[[ One-shot automatic conversion, run from OnInitialize.
+
+     Timing is the whole point. `Bartender4DB` only exists in memory while the
+     Bartender4 addon is installed and enabled, and RealUI_ActionBars stands
+     DOWN (disables itself) whenever BT4 is loaded — so OnEnable is far too
+     late: by the time RAB runs for real, the user has removed BT4 and their
+     layout is unreachable. Initialize always runs, before that decision, so
+     this is the one moment both DBs are visible at once.
+
+     Bars do not exist yet at init, hence deferApply: the values land in the
+     DB and the normal build path picks them up moments later.
+
+     `/rab import` stays for manual re-runs (and is registered at file scope,
+     so it still works while RAB is stood down). ]]--
 function private.MaybeImportFromBartender4()
     if AB.db.global.importedBT4 then return end
     if not _G.Bartender4DB then return end
-    private.ImportFromBartender4(false)
+    private.ImportFromBartender4(false, true)
 end
