@@ -25,7 +25,6 @@ local ADDON_COMPATIBILITY = {
         "Plater",
         "OmniCC",
         "Prat-3.0",
-        "Bartender4",
         "Masque",
         "SharedMedia"
     },
@@ -55,6 +54,12 @@ local ADDON_COMPATIBILITY = {
             severity = "medium",
             reason = "Action bar addon that may conflict with RealUI action bars",
             recommendation = "Consider disabling if experiencing action bar issues"
+        },
+        {
+            name = "Bartender4",
+            severity = "medium",
+            reason = "Action bar addon that duplicates RealUI_ActionBars (RealUI 4.0 replaced Bartender4)",
+            recommendation = "Disable Bartender4; use /rab import to convert your old Bartender4 profile"
         },
         {
             name = "MoveAnything",

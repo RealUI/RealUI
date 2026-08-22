@@ -25,8 +25,6 @@ local RealUIAddOns = {
 }
 local RealUIAddOnsOrder = {
     "DBM",
-    "Masque",
-    "Bartender4",
     "Skada",
 }
 
@@ -215,7 +213,6 @@ function AddonControl:CreateOptionsFrame()
 
     local PositionAddOns = {
         ["DBM"] = true,
-        ["Bartender4"] = true,
     }
     local altAddOnTable = {
         ["DBM"] = "DBM-StatusBarTimers",
@@ -389,26 +386,6 @@ function AddonControl:OnInitialize()
                     profiles = {
                         base =          {use = true,    key = "RealUI"},
                         layout =        {use = false,   key = "Healing"},
-                    },
-                    control = {
-                        position = true,
-                        style = false,
-                    },
-                },
-                ["Masque"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI"},
-                        layout =        {use = false,   key = "Healing"},
-                    },
-                    control = {
-                        position = false,
-                        style = false,
-                    },
-                },
-                ["Bartender4"] = {
-                    profiles = {
-                        base =          {use = true,    key = "RealUI", userOverride = false},
-                        layout =        {use = true,    key = "Healing"},
                     },
                     control = {
                         position = true,

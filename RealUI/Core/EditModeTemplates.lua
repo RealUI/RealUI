@@ -87,7 +87,7 @@ end
 Templates.base = {
     -- =====================================================================
     -- System 0: Action Bars (indices 1-8 = bars, 11 = stance, 12 = pet, 13 = possess)
-    -- All hidden — Bartender4 replaces them
+    -- All hidden — RealUI_ActionBars replaces them
     -- =====================================================================
     Entry(SYSTEM_ACTION_BAR, 1,
         Anchor("BOTTOM", "UIParent", "BOTTOM", 0, OFF_SCREEN_Y),

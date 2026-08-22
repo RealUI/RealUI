@@ -224,8 +224,8 @@ end
 
 -- Propagate unified profiles across linked scopes after initial profile setup.
 -- Creates Core profiles ("RealUI" / "RealUI-Healing") based on character specs,
--- assigns them via DualSpecSystem, and ensures matching profiles exist in BT4
--- and Skins scopes when their scope links are enabled.
+-- assigns them via DualSpecSystem, and ensures matching profiles exist in the
+-- action bars and Skins scopes when their scope links are enabled.
 -- Does NOT overwrite existing custom profile assignments in db.char.specProfiles.
 local function PropagateUnifiedProfiles()
     debug("PropagateUnifiedProfiles: starting")
@@ -302,22 +302,17 @@ local function PropagateUnifiedProfiles()
     end
 
     ----------------------------------------------------------------
-    -- 2. BT4 scope: ensure BT4 profiles for built-in names
+    -- 2. Action bars scope. RealUI_ActionBars seeds its built-in profiles
+    -- through AceDB defaults, and ProfileCoordinator's SwitchActionBarsScope
+    -- copy-on-creates any missing profile at first switch — nothing to
+    -- pre-create here since Bartender4 support was removed (2026-08-22).
+    -- The scopeResults key stays "bt4" (wire value; see ProfileCoordinator).
     ----------------------------------------------------------------
-    if PC and PC:IsScopeLinked(PC.SCOPE_BT4) then
-        local bt4Ok, bt4Err = pcall(function()
-            if DualSpec and DualSpec.EnsureBartenderActionBarsProfiles then
-                DualSpec:EnsureBartenderActionBarsProfiles()
-                debug("PropagateUnifiedProfiles: BT4 profiles ensured")
-            end
-        end)
-        scopeResults["bt4"] = bt4Ok
-        if not bt4Ok then
-            scopeErrors["bt4"] = bt4Err
-            debug("PropagateUnifiedProfiles: BT4 scope error:", bt4Err)
-        end
+    if PC and PC:IsScopeLinked(PC.SCOPE_ACTIONBARS) then
+        scopeResults["bt4"] = true
+        debug("PropagateUnifiedProfiles: action bars scope seeds itself (AceDB defaults)")
     else
-        debug("PropagateUnifiedProfiles: BT4 scope not linked, skipping")
+        debug("PropagateUnifiedProfiles: action bars scope not linked, skipping")
     end
 
     ----------------------------------------------------------------
@@ -465,7 +460,7 @@ function InstallWizard:Complete()
         RealUI:SetProfileKeys()
     end
 
-    -- Propagate unified profiles across linked scopes (Core, BT4, Skins)
+    -- Propagate unified profiles across linked scopes (Core, Action Bars, Skins)
     -- Runs for all characters: creates built-in profiles, assigns specs,
     -- and ensures matching profiles in linked scopes.
     PropagateUnifiedProfiles()
@@ -513,44 +508,12 @@ function InstallWizard:Complete()
         RealUI.db.global.qol.repairMountID = repairMountID
     end
 
-    -- Force ActionBars to apply settings and update button layouts
+    -- Apply the bar layout now that installStage is -1. RealUI_ActionBars
+    -- hooks ApplyABSettings and rebuilds its own bars from it; no per-button
+    -- forcing is needed (that was Bartender4 machinery, removed 2026-08-22).
     local ActionBars = RealUI:GetModule("ActionBars", true)
     if ActionBars and ActionBars:IsEnabled() then
-        -- Apply settings now that installStage is -1
         ActionBars:ApplyABSettings()
-
-        -- Force all bars to update their button layouts with multiple attempts
-        local updateAttempts = {0.2, 0.5, 1.0}
-        for _, delay in ipairs(updateAttempts) do
-            _G.C_Timer.After(delay, function()
-                local BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
-                if not BT4 then return end
-
-                local BT4ActionBars = BT4:GetModule("ActionBars", true)
-
-                -- Force all action bars (1-6) button layout update
-                if BT4ActionBars then
-                    for i = 1, 6 do
-                        if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
-                            local bar = BT4ActionBars.actionbars[i]
-                            if bar.UpdateButtonLayout then
-                                bar:UpdateButtonLayout()
-                            end
-                        end
-                    end
-                end
-
-                -- Force pet bar button layout update if it exists
-                if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
-                    _G.BT4BarPetBar:UpdateButtonLayout()
-                end
-
-                -- Force stance bar button layout update if it exists
-                if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
-                    _G.BT4BarStanceBar:UpdateButtonLayout()
-                end
-            end)
-        end
     end
 
     -- Apply EditMode layout for the current role and display preset

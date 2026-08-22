@@ -140,17 +140,23 @@ local function GetScopeProfileData(scope)
         if skinsDB then
             return skinsDB.profile
         end
-    elseif scope == PC.SCOPE_BT4 then
-        local bt4Addon = _G.Bartender4
-        if bt4Addon and bt4Addon.db then
-            return bt4Addon.db.profile
+    elseif scope == PC.SCOPE_ACTIONBARS then
+        -- RealUI_ActionBars root profile: bindings + shared settings. Per-bar
+        -- data lives in AceDB NAMESPACES and is not exported — same depth the
+        -- old Bartender4 branch had (its bar data was namespaced too), so
+        -- imports stay compatible. Namespace export is a possible future
+        -- enhancement, not a regression.
+        local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+        local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+        if rab and rab.db then
+            return rab.db.profile
         end
-        -- Fallback: read from raw saved variable
-        local bt4db = _G.Bartender4DB
-        if type(bt4db) == "table" and type(bt4db.profileKeys) == "table" and RealUI.key then
-            local profileName = bt4db.profileKeys[RealUI.key]
-            if profileName and bt4db.profiles and bt4db.profiles[profileName] then
-                return bt4db.profiles[profileName]
+        -- Fallback: read from the raw saved variable
+        local sv = _G.RealUI_ActionBarsDB
+        if type(sv) == "table" and type(sv.profileKeys) == "table" and RealUI.key then
+            local profileName = sv.profileKeys[RealUI.key]
+            if profileName and sv.profiles and sv.profiles[profileName] then
+                return sv.profiles[profileName]
             end
         end
     end
@@ -217,7 +223,7 @@ end
 ------------------------------------------------------------
 
 --- Export a single scope's active profile data.
---- @param scope string  One of ProfileCoordinator.SCOPE_CORE / SCOPE_SKINS / SCOPE_BT4
+--- @param scope string  One of ProfileCoordinator.SCOPE_CORE / SCOPE_SKINS / SCOPE_ACTIONBARS
 --- @return string|nil  Encoded export string, or nil on failure
 --- @return string|nil  Error message on failure
 function ProfileExporter:ExportScope(scope)
@@ -270,12 +276,13 @@ function ProfileExporter:ExportAllLinked()
         end
     end
 
-    -- BT4 if linked
-    if PC:IsScopeLinked(PC.SCOPE_BT4) then
-        local bt4Data = GetScopeProfileData(PC.SCOPE_BT4)
-        if bt4Data then
-            payload[PC.SCOPE_BT4] = DeepCopy(bt4Data)
-            scopeNames[#scopeNames + 1] = PC.SCOPE_BT4
+    -- Action bars if linked (payload key stays "bt4" — wire value, see
+    -- ProfileCoordinator; older exports import unchanged)
+    if PC:IsScopeLinked(PC.SCOPE_ACTIONBARS) then
+        local barsData = GetScopeProfileData(PC.SCOPE_ACTIONBARS)
+        if barsData then
+            payload[PC.SCOPE_ACTIONBARS] = DeepCopy(barsData)
+            scopeNames[#scopeNames + 1] = PC.SCOPE_ACTIONBARS
         end
     end
 
@@ -430,13 +437,18 @@ function ProfileExporter:Import(encodedString, profileName)
                     end
                     importedScopes[#importedScopes + 1] = scope
                 end
-            elseif scope == PC.SCOPE_BT4 then
-                local bt4Addon = _G.Bartender4
-                if bt4Addon and bt4Addon.db then
-                    local target = profileName or bt4Addon.db:GetCurrentProfile()
-                    bt4Addon.db:SetProfile(target)
+            elseif scope == PC.SCOPE_ACTIONBARS then
+                -- Accepts both new exports and pre-4.0 ones (same "bt4"
+                -- payload key). An old export's BT4 root profile carried no
+                -- meaningful bar data (it was namespaced), so writing its
+                -- keys into RAB's root profile is harmless.
+                local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+                local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+                if rab and rab.db then
+                    local target = profileName or rab.db:GetCurrentProfile()
+                    rab.db:SetProfile(target)
                     for k, v in pairs(scopeData) do
-                        bt4Addon.db.profile[k] = DeepCopy(v)
+                        rab.db.profile[k] = DeepCopy(v)
                     end
                     importedScopes[#importedScopes + 1] = scope
                 end

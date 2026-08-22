@@ -478,7 +478,7 @@ function DiagnosticTools:PrintProfileScaleStatus()
     print(("Current spec: %s [%s]"):format(currentSpecName, currentRole))
     print(("Core profile: %s"):format(currentProfile))
     print(("Skins scope linked: %s"):format(BoolText(scopeLinks and scopeLinks.skins == true)))
-    print(("BT4 scope linked: %s"):format(BoolText(scopeLinks and scopeLinks.bt4 ~= false)))
+    print(("Action Bars scope linked: %s"):format(BoolText(scopeLinks and scopeLinks.bt4 ~= false)))
 
     if RealUI.DualSpecSystem and RealUI.DualSpecSystem.GetDefaultProfileForSpec then
         if currentSpecIndex then

@@ -34,65 +34,23 @@ local layoutToProfile = {
     "RealUI-Healing"
 }
 
-local function EnsureBartenderActionBarsProfiles()
-    local bt4db = _G.Bartender4DB
-    if type(bt4db) ~= "table" then return end
+-- (EnsureBartenderActionBarsProfiles removed with Bartender4 support,
+--  2026-08-22: it seeded bar-enabled flags into Bartender4DB's
+--  ActionBars namespace. RealUI_ActionBars seeds its own profiles
+--  through AceDB defaults + ProfileCoordinator's copy-on-create.)
 
-    local namespaces = bt4db.namespaces
-    if type(namespaces) ~= "table" then return end
-
-    local actionBarsNamespace = namespaces.ActionBars
-    if type(actionBarsNamespace) ~= "table" then return end
-
-    local profiles = actionBarsNamespace.profiles
-    if type(profiles) ~= "table" then
-        profiles = {}
-        actionBarsNamespace.profiles = profiles
+--- Keep RealUI_ActionBars' LibDualSpec mapping in sync with Core's so
+--- spec-triggered switches stay coordinated (the bars DB has its own LDS
+--- integration and would otherwise fight the coordinator).
+local function SyncActionBarsLDS(specIndex, profileName)
+    if not RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_ACTIONBARS) then
+        return
     end
-
-    local defaultEnabled = {
-        [1] = true,
-        [2] = true,
-        [3] = true,
-        [4] = true,
-        [5] = true,
-        [6] = true,
-        [7] = false,
-        [8] = false,
-        [9] = false,
-        [10] = false,
-        [13] = false,
-        [14] = false,
-        [15] = false,
-    }
-
-    local function EnsureProfile(profileName)
-        local profile = profiles[profileName]
-        if type(profile) ~= "table" then
-            profile = {}
-            profiles[profileName] = profile
-        end
-
-        if type(profile.actionbars) ~= "table" then
-            profile.actionbars = {}
-        end
-
-        for barID, enabled in pairs(defaultEnabled) do
-            if profile.actionbars[barID] == nil then
-                profile.actionbars[barID] = { enabled = enabled }
-            end
-        end
-    end
-
-    for _, profileName in ipairs(layoutToProfile) do
-        EnsureProfile(profileName)
-    end
-
-    if type(bt4db.profileKeys) == "table" then
-        local currentProfileName = bt4db.profileKeys[RealUI.key]
-        if type(currentProfileName) == "string" and currentProfileName ~= "" then
-            EnsureProfile(currentProfileName)
-        end
+    local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+    local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+    if rab and rab.db and rab.db.SetDualSpecProfile then
+        debug("Syncing action bars LDS mapping for spec:", specIndex, "->", profileName)
+        rab.db:SetDualSpecProfile(profileName, specIndex)
     end
 end
 
@@ -183,15 +141,7 @@ function DualSpecSystem:SetSpecProfile(specIndex, profileName)
         debug("Updating LibDualSpec profile mapping for spec:", specIndex)
         RealUI.db:SetDualSpecProfile(profileName, specIndex)
 
-        -- Keep BT4's own LibDualSpec mapping in sync so it doesn't fight
-        -- with our coordinator on spec changes (BT4 has its own LDS integration)
-        if RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_BT4) then
-            local bt4Addon = _G.Bartender4
-            if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
-                debug("Syncing BT4 LibDualSpec mapping for spec:", specIndex, "->", profileName)
-                bt4Addon.db:SetDualSpecProfile(profileName, specIndex)
-            end
-        end
+        SyncActionBarsLDS(specIndex, profileName)
     end
 
     debug("Spec profile set successfully:", specIndex, "->", profileName)
@@ -397,7 +347,7 @@ function DualSpecSystem:OnSpecializationChanged(specIndex)
         -- WoW 12's per-spec EditMode tracking may have reset the active layout to
         -- a preset (often "Modern"). Re-activate explicitly. We skip this when
         -- layoutSwitched=true because SwitchToLayout already calls ActivateLayout
-        -- via its RegisterLayoutChangeCallback — calling it twice races with BT4.
+        -- via its RegisterLayoutChangeCallback — calling it twice races the bars recompute.
         if not layoutSwitched and RealUI.EditModeManager and RealUI.EditModeManager:IsInitialized() then
             local role = self:IsHealingSpec(specIndex) and "healing" or "dpstank"
             debug("Same-layout spec swap: re-asserting EditMode layout for role:", role)
@@ -440,11 +390,6 @@ function DualSpecSystem:SetupLibDualSpec()
     -- Enhance database with LibDualSpec support
     LDS:EnhanceDatabase(RealUI.db, "RealUI")
 
-    -- NOTE: EnsureBartenderActionBarsProfiles is called AFTER LDS setup,
-    -- and only fills in missing bar entries without overwriting existing
-    -- fully-populated profile data from private.AddOns.Bartender4().
-    EnsureBartenderActionBarsProfiles()
-
     -- Create healing profile if it doesn't exist
     local profiles = RealUI.db:GetProfiles()
     local hasHealingProfile = false
@@ -463,7 +408,7 @@ function DualSpecSystem:SetupLibDualSpec()
 
     -- Set up dual-spec profiles for all specs
     -- NOTE: We set isLibDualSpecSetup = true BEFORE calling SetSpecProfile
-    -- so that SetSpecProfile's BT4 LDS sync branch is active.
+    -- so that SetSpecProfile's action-bars LDS sync branch is active.
     isLibDualSpecSetup = true
 
     for specIndex = 1, #RealUI.charInfo.specs do
@@ -475,7 +420,7 @@ function DualSpecSystem:SetupLibDualSpec()
         -- Set the dual-spec profile in LibDualSpec (Core)
         RealUI.db:SetDualSpecProfile(profileName, specIndex)
 
-        -- Update our internal mapping (this also syncs BT4's LDS via SetSpecProfile)
+        -- Update our internal mapping (this also syncs the bars DB's LDS via SetSpecProfile)
         self:SetSpecProfile(specIndex, profileName)
     end
 
@@ -495,21 +440,13 @@ function DualSpecSystem:RefreshLibDualSpecProfiles()
 
     debug("Refreshing LibDualSpec profiles")
 
-    -- Re-setup all spec profiles (Core + BT4 if linked)
+    -- Re-setup all spec profiles (Core + action bars if linked)
     for specIndex = 1, #RealUI.charInfo.specs do
         local profileName = self:GetSpecProfile(specIndex)
         if profileName then
             RealUI.db:SetDualSpecProfile(profileName, specIndex)
             debug("Refreshed Core LDS spec profile:", specIndex, "->", profileName)
-
-            -- Keep BT4's LDS in sync
-            if RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_BT4) then
-                local bt4Addon = _G.Bartender4
-                if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
-                    bt4Addon.db:SetDualSpecProfile(profileName, specIndex)
-                    debug("Refreshed BT4 LDS spec profile:", specIndex, "->", profileName)
-                end
-            end
+            SyncActionBarsLDS(specIndex, profileName)
         end
     end
 
@@ -698,11 +635,9 @@ local function UpdateSpec()
     if _G.IsPlayerInitialSpec() then
         debug("Player is in initial spec state, seeding LDS currentSpec only")
         -- Only seed LDS.currentSpec here. Do NOT call CheckDualSpecState on
-        -- all databases — Bartender4's ActionBars namespace may not be fully
-        -- initialized yet, causing .actionbars to be nil on profile switch.
-        -- Bartender4 manages its own LibDualSpec state; RealUI's DB will be
-        -- handled when spec actually fires later.
-        EnsureBartenderActionBarsProfiles()
+        -- all databases during initial spec — other DBs' namespaces may not be
+        -- fully initialized yet; RealUI's DB is handled when the spec
+        -- actually fires later.
         LDS.currentSpec = RealUI.charInfo.specs.current.index
 
         -- Schedule a deferred profile/layout sync once initial spec resolves
@@ -854,14 +789,7 @@ function DualSpecSystem:PostInitialize()
                 -- Update LibDualSpec mapping
                 if isLibDualSpecSetup then
                     RealUI.db:SetDualSpecProfile(defaultProfile, specIndex)
-
-                    -- Keep BT4's LDS in sync
-                    if RealUI.ProfileCoordinator:IsScopeLinked(RealUI.ProfileCoordinator.SCOPE_BT4) then
-                        local bt4Addon = _G.Bartender4
-                        if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
-                            bt4Addon.db:SetDualSpecProfile(defaultProfile, specIndex)
-                        end
-                    end
+                    SyncActionBarsLDS(specIndex, defaultProfile)
                 end
 
                 -- Notify user
@@ -959,11 +887,6 @@ function DualSpecSystem:GetDebugInfo()
 
     debug("Debug info generated")
     return info
-end
-
--- Expose EnsureBartenderActionBarsProfiles for external callers (e.g. setup wizard)
-function DualSpecSystem:EnsureBartenderActionBarsProfiles()
-    EnsureBartenderActionBarsProfiles()
 end
 
 -- Register with RealUI namespace

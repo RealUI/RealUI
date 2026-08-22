@@ -2,7 +2,16 @@ local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- RealUI Profile Coordinator
 -- Orchestrates profile operations across all three AceDB scopes:
--- Core (RealUI_ConfigDB), Skins (RealUI_SkinsDB), Bartender4 (Bartender4DB)
+-- Core (RealUI_ConfigDB), Skins (RealUI_SkinsDB), Action Bars
+-- (RealUI_ActionBarsDB).
+--
+-- Bartender4 support was removed in 4.0.0 (2026-08-22) along with the bundled
+-- addon; RealUI_ActionBars is the only bar backend. The action-bar scope keeps
+-- its ORIGINAL wire value "bt4" on purpose — it is persisted in saved
+-- variables (db.char.scopeLinks.bt4, the "action bars change with spec" flag)
+-- and appears as a key inside exported profile strings that users have
+-- already shared. Renaming the value would silently reset that preference and
+-- break importing older exports; only the constant's name changed.
 
 -- luacheck: globals next type pairs ipairs tostring
 
@@ -16,7 +25,9 @@ RealUI.ProfileCoordinator = ProfileCoordinator
 -- Scope constants
 ProfileCoordinator.SCOPE_CORE = "core"
 ProfileCoordinator.SCOPE_SKINS = "skins"
-ProfileCoordinator.SCOPE_BT4 = "bt4"
+ProfileCoordinator.SCOPE_ACTIONBARS = "bt4"  -- legacy wire value, see header
+-- Deprecated alias, kept so any out-of-tree caller keeps working.
+ProfileCoordinator.SCOPE_BT4 = ProfileCoordinator.SCOPE_ACTIONBARS
 
 -- Internal state
 local switchInProgress = false
@@ -51,38 +62,12 @@ local function ProfileExistsInDB(acedb, profileName)
     return false
 end
 
---- Check whether a profile name exists in Bartender4DB's ActionBars namespace.
-local function ProfileExistsInBT4(profileName)
-    local bt4db = _G.Bartender4DB
-    if type(bt4db) ~= "table" then return false end
-    -- BT4 stores profiles at the top level profileKeys and in namespaces
-    if bt4db.profiles and bt4db.profiles[profileName] then
-        return true
-    end
-    -- Also check ActionBars namespace profiles
-    local ns = bt4db.namespaces
-    if type(ns) == "table" and type(ns.ActionBars) == "table"
-       and type(ns.ActionBars.profiles) == "table"
-       and ns.ActionBars.profiles[profileName] then
-        return true
-    end
-    -- Check profileKeys for any character mapped to this profile
-    if type(bt4db.profileKeys) == "table" then
-        for _, pName in pairs(bt4db.profileKeys) do
-            if pName == profileName then return true end
-        end
-    end
-    return false
-end
-
 ------------------------------------------------------------
--- RealUI_ActionBars scope (4.0.0: replaces bundled Bartender4)
+-- Action bars scope (RealUI_ActionBars)
 --
--- The bars scope is gated by the same SCOPE_BT4 link flag ("action bars
--- change with spec", default true). When Bartender4 is installed it wins
--- (RealUI_ActionBars disables itself); otherwise RealUI_ActionBarsDB is
--- the DB that must follow RealUI/RealUI-Healing so per-layout bar
--- settings apply on layout switches (B44).
+-- Gated by the SCOPE_ACTIONBARS link flag ("action bars change with spec",
+-- default true). RealUI_ActionBarsDB must follow RealUI/RealUI-Healing so
+-- per-layout bar settings apply on layout switches (B44).
 ------------------------------------------------------------
 
 --- Get the RealUI_ActionBars AceAddon (registered as "RealUIActionBars"), or nil.
@@ -152,7 +137,7 @@ end
 ------------------------------------------------------------
 
 --- Check whether a scope is linked for coordinated switching.
---- @param scope string One of SCOPE_SKINS or SCOPE_BT4
+--- @param scope string One of SCOPE_SKINS or SCOPE_ACTIONBARS
 --- @return boolean
 function ProfileCoordinator:IsScopeLinked(scope)
     if not RealUI.db then return false end
@@ -163,7 +148,7 @@ function ProfileCoordinator:IsScopeLinked(scope)
     local links = RealUI.db.char.scopeLinks
     if scope == self.SCOPE_SKINS then
         return (links and links.skins) == true
-    elseif scope == self.SCOPE_BT4 then
+    elseif scope == self.SCOPE_ACTIONBARS then
         return not links or links.bt4 ~= false
     end
     -- Core is always "linked" (it is the primary scope)
@@ -171,7 +156,7 @@ function ProfileCoordinator:IsScopeLinked(scope)
 end
 
 --- Set whether a scope participates in coordinated switching.
---- @param scope string One of SCOPE_SKINS or SCOPE_BT4
+--- @param scope string One of SCOPE_SKINS or SCOPE_ACTIONBARS
 --- @param linked boolean
 function ProfileCoordinator:SetScopeLinked(scope, linked)
     if not RealUI.db then return end
@@ -184,20 +169,21 @@ function ProfileCoordinator:SetScopeLinked(scope, linked)
     if scope == self.SCOPE_SKINS then
         links.skins = linked and true or false
         debug("Skins scope link set to:", links.skins)
-    elseif scope == self.SCOPE_BT4 then
+    elseif scope == self.SCOPE_ACTIONBARS then
+        -- Storage key stays `bt4` (persisted + inside exported strings).
         links.bt4 = linked and true or false
-        debug("BT4 scope link set to:", links.bt4)
+        debug("Action bars scope link set to:", links.bt4)
 
-        -- When BT4 is linked, sync its LibDualSpec mappings to match Core's
-        -- so spec-triggered switches stay coordinated.
+        -- Sync RealUI_ActionBars' LibDualSpec mappings to match Core's so
+        -- spec-triggered switches stay coordinated.
         if linked and RealUI.DualSpecSystem and RealUI.DualSpecSystem:IsLibDualSpecReady() then
-            local bt4Addon = _G.Bartender4
-            if bt4Addon and bt4Addon.db and bt4Addon.db.SetDualSpecProfile then
+            local rab = GetRABAddon()
+            if rab and rab.db.SetDualSpecProfile then
                 for specIndex = 1, #RealUI.charInfo.specs do
                     local profileName = RealUI.DualSpecSystem:GetSpecProfile(specIndex)
                     if profileName then
-                        debug("Syncing BT4 LDS on link enable, spec:", specIndex, "->", profileName)
-                        bt4Addon.db:SetDualSpecProfile(profileName, specIndex)
+                        debug("Syncing action bars LDS on link enable, spec:", specIndex, "->", profileName)
+                        rab.db:SetDualSpecProfile(profileName, specIndex)
                     end
                 end
             end
@@ -210,7 +196,7 @@ end
 function ProfileCoordinator:GetLinkedScopes()
     return {
         skins = self:IsScopeLinked(self.SCOPE_SKINS),
-        bt4   = self:IsScopeLinked(self.SCOPE_BT4),
+        bt4   = self:IsScopeLinked(self.SCOPE_ACTIONBARS),
     }
 end
 
@@ -219,7 +205,7 @@ end
 ------------------------------------------------------------
 
 --- Get the currently active profile name for a given scope.
---- @param scope string One of SCOPE_CORE, SCOPE_SKINS, SCOPE_BT4
+--- @param scope string One of SCOPE_CORE, SCOPE_SKINS, SCOPE_ACTIONBARS
 --- @return string|nil
 function ProfileCoordinator:GetScopeProfile(scope)
     if scope == self.SCOPE_CORE then
@@ -231,10 +217,15 @@ function ProfileCoordinator:GetScopeProfile(scope)
         if skinsDB then
             return skinsDB:GetCurrentProfile()
         end
-    elseif scope == self.SCOPE_BT4 then
-        local bt4db = _G.Bartender4DB
-        if type(bt4db) == "table" and type(bt4db.profileKeys) == "table" and RealUI.key then
-            return bt4db.profileKeys[RealUI.key]
+    elseif scope == self.SCOPE_ACTIONBARS then
+        local rab = GetRABAddon()
+        if rab then
+            return rab.db:GetCurrentProfile()
+        end
+        -- Addon not loaded: fall back to the saved profileKeys mapping.
+        local sv = _G.RealUI_ActionBarsDB
+        if type(sv) == "table" and type(sv.profileKeys) == "table" and RealUI.key then
+            return sv.profileKeys[RealUI.key]
         end
     end
     return nil
@@ -246,7 +237,7 @@ function ProfileCoordinator:GetAllScopeProfiles()
     return {
         core  = self:GetScopeProfile(self.SCOPE_CORE),
         skins = self:GetScopeProfile(self.SCOPE_SKINS),
-        bt4   = self:GetScopeProfile(self.SCOPE_BT4),
+        bt4   = self:GetScopeProfile(self.SCOPE_ACTIONBARS),
     }
 end
 
@@ -315,16 +306,12 @@ function ProfileCoordinator:CoordinatedSwitch(profileName, forceCreate)
 
     -- When forceCreate is true (new profile), snapshot source profile names
     -- so we can CopyProfile after switching to seed the new profile with data.
-    local sourceCoreProfile, sourceSkinsProfile, sourceBT4Profile
+    local sourceCoreProfile, sourceSkinsProfile
     if forceCreate then
         sourceCoreProfile = RealUI.db:GetCurrentProfile()
         local skinsDB = GetSkinsDB()
         if skinsDB then
             sourceSkinsProfile = skinsDB:GetCurrentProfile()
-        end
-        local bt4Addon = _G.Bartender4
-        if bt4Addon and bt4Addon.db then
-            sourceBT4Profile = bt4Addon.db:GetCurrentProfile()
         end
     end
 
@@ -334,43 +321,9 @@ function ProfileCoordinator:CoordinatedSwitch(profileName, forceCreate)
     -- live bar state to reposition bars. If the bars DB is still on the old
     -- profile when the cascade runs, the bars are written/read to the wrong
     -- profile and need a reload to self-correct.
-    -- 4.0.0: RealUI_ActionBars replaced bundled Bartender4. BT4 wins when
-    -- installed (RealUI_ActionBars disables itself in that case); otherwise
-    -- RealUI_ActionBarsDB is the bars scope.
-    if self:IsScopeLinked(self.SCOPE_BT4) then
-        if not _G.Bartender4 and SwitchActionBarsScope(profileName) then
-            switchedScopes[#switchedScopes + 1] = self.SCOPE_BT4
-        end
-        local bt4Addon = _G.Bartender4
-        if bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
-            if forceCreate or ProfileExistsInBT4(profileName) then
-                debug("Switching BT4 scope to:", profileName)
-                bt4Addon.db:SetProfile(profileName)
-                switchedScopes[#switchedScopes + 1] = self.SCOPE_BT4
-
-                -- Copy source data into new BT4 profile
-                if forceCreate and sourceBT4Profile and sourceBT4Profile ~= profileName then
-                    debug("Copying BT4 profile data from:", sourceBT4Profile)
-                    bt4Addon.db:CopyProfile(sourceBT4Profile, true)
-                end
-            else
-                local msg = "Bartender4: profile '" .. profileName .. "' does not exist — skipped."
-                debug(msg)
-                warnings[#warnings + 1] = msg
-            end
-        else
-            -- Fallback: update profileKeys directly (less ideal but functional)
-            local bt4db = _G.Bartender4DB
-            if type(bt4db) == "table" and type(bt4db.profileKeys) == "table" and RealUI.key then
-                if forceCreate or ProfileExistsInBT4(profileName) then
-                    debug("Switching BT4 scope via profileKeys to:", profileName)
-                    bt4db.profileKeys[RealUI.key] = profileName
-                    switchedScopes[#switchedScopes + 1] = self.SCOPE_BT4
-                end
-            else
-                -- BT4 not loaded — silently skip (Req 7.4)
-                debug("Bartender4DB not loaded, skipping BT4 scope")
-            end
+    if self:IsScopeLinked(self.SCOPE_ACTIONBARS) then
+        if SwitchActionBarsScope(profileName) then
+            switchedScopes[#switchedScopes + 1] = self.SCOPE_ACTIONBARS
         end
     end
 
@@ -455,14 +408,14 @@ local function OnCoreProfileChanged(_, _, newProfile)
 
     -- Read link state (stored in db.char, persists across profile switches)
     local linkSkins = ProfileCoordinator:IsScopeLinked(ProfileCoordinator.SCOPE_SKINS)
-    local linkBT4   = ProfileCoordinator:IsScopeLinked(ProfileCoordinator.SCOPE_BT4)
+    local linkActionBars   = ProfileCoordinator:IsScopeLinked(ProfileCoordinator.SCOPE_ACTIONBARS)
 
-    if not linkSkins and not linkBT4 then
+    if not linkSkins and not linkActionBars then
         debug("OnCoreProfileChanged: no scopes linked, nothing to coordinate")
         return
     end
 
-    debug("OnCoreProfileChanged: coordinating linked scopes, skins =", tostring(linkSkins), "bt4 =", tostring(linkBT4))
+    debug("OnCoreProfileChanged: coordinating linked scopes, skins =", tostring(linkSkins), "actionbars =", tostring(linkActionBars))
 
     -- Switch Skins scope
     if linkSkins then
@@ -484,35 +437,12 @@ local function OnCoreProfileChanged(_, _, newProfile)
         end
     end
 
-    -- Switch bars scope (RealUI_ActionBars when BT4 is not installed).
-    -- This callback registers BEFORE RealUI's own OnProfileUpdate, so the
-    -- bars DB is on the new profile before the Core cascade reads it —
-    -- the same bars-before-Core invariant CoordinatedSwitch enforces.
-    if linkBT4 and not _G.Bartender4 then
+    -- Switch the action bars scope. This callback registers BEFORE RealUI's
+    -- own OnProfileUpdate, so the bars DB is on the new profile before the
+    -- Core cascade reads it — the same bars-before-Core invariant
+    -- CoordinatedSwitch enforces.
+    if linkActionBars then
         SwitchActionBarsScope(newProfile)
-    end
-
-    -- Switch BT4 scope
-    if linkBT4 then
-        local bt4Addon = _G.Bartender4
-        if bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
-            local sourceProfile = bt4Addon.db:GetCurrentProfile()
-            local isNew = not ProfileExistsInBT4(newProfile)
-
-            debug("OnCoreProfileChanged: switching BT4 to", newProfile, "isNew:", isNew)
-            bt4Addon.db:SetProfile(newProfile)
-
-            if isNew and sourceProfile and sourceProfile ~= newProfile then
-                debug("OnCoreProfileChanged: copying BT4 data from", sourceProfile)
-                bt4Addon.db:CopyProfile(sourceProfile, true)
-            end
-        else
-            local bt4db = _G.Bartender4DB
-            if type(bt4db) == "table" and type(bt4db.profileKeys) == "table" and RealUI.key then
-                debug("OnCoreProfileChanged: switching BT4 via profileKeys to", newProfile)
-                bt4db.profileKeys[RealUI.key] = newProfile
-            end
-        end
     end
 end
 

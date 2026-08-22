@@ -3,9 +3,6 @@ local _, private = ...
 -- Lua Globals --
 -- luacheck: globals math
 
--- Libs --
-local BT4, BT4DB, BT4Profile
-local BT4ActionBars, BT4AB_EnableBar, BT4Stance, BT4Pet
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -28,57 +25,33 @@ local Textures = {
 }
 
 local Doodads = {}
-local buttonSizes = {
-    bars = 35,
-    petBar = 22,
-    stanceBar = 22,
-}
-local fixedSettings = {
-    bt4Padding = 11,
-    buttonPadding = 1,
-    buttons = 12,
-    petButtons = 10
-}
-local function IsOdd(val)
-    return val % 2 == 1
-end
 
--- Compute the vertical space reserved at the bottom of the screen for the
--- infobar. ActionBars positions bottom-most bars at `bottomBase = N + 14`
--- above screen bottom so they stack above the infobar. The infobar's
--- height is Scale.Value(BAR_HEIGHT=16) which scales with HiDPI. Reading
--- this via the profile's positions table was unreliable across profile
--- switches (removeDefaults/copyDefaults and stale Infobar:OnEnable writes
--- resulted in the key reverting to the raw default of 16 and drifting the
--- bars 29px downward each swap). Compute it live instead.
-local function GetActionBarsBotY(layoutPositions)
-    local infobar = _G.RealUI_Infobar
-    if infobar and infobar.GetHeight then
-        local h = infobar:GetHeight()
-        if h and h > 0 then return h end
-    end
-    if RealUI.Scale and RealUI.Scale.Value then
-        return RealUI.Scale.Value(16)
-    end
-    return (layoutPositions and layoutPositions["ActionBarsBotY"]) or 16
-end
--- FIXMELATER: Refactor to calculate padding based on button size and desired spacing rather than hardcoding values
--- To fix the complexity that we are supressing with luacheck, we would need to refactor the bar position and padding calculations to be more data-driven and less hardcoded. This would involve creating a more flexible system for defining bar layouts and their corresponding padding based on button sizes and desired spacing, rather than using fixed values in the code. This would likely reduce the number of conditional statements and make the code easier to maintain and extend in the future.
-function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
+-- NOTE: the button-size / padding constants, IsOdd and GetActionBarsBotY that
+-- used to live here were only ever inputs to the Bartender4 layout math that
+-- this module no longer performs (RealUI_ActionBars computes its own geometry
+-- from the same HuD settings — see its Integration.lua). They were removed
+-- with BT4 support on 2026-08-22; the equivalents in RealUI_ActionBars are
+-- expressed in ITS units, not BT4's 36px/-9 overlap proportions.
+-- (The long-standing FIXMELATER about refactoring hardcoded padding died with
+-- that math — the data-driven layout it asked for is what RealUI_ActionBars
+-- does now.)
+
+--[[ The canonical action-bar layout signal.
+
+     RealUI computes bar geometry from HuD settings whenever the layout, spec,
+     HuD size or bar arrangement changes. Until 4.0.0 this function WROTE that
+     geometry into Bartender4; BT4 support was removed 2026-08-22, so the
+     write side is gone. RealUI_ActionBars derives its own layout by hooking
+     this function (Integration.lua SetupRealUIIntegration -> hooksecurefunc),
+     which means it must still be CALLED on every one of those triggers even
+     though it no longer drives a backend itself. Do not "optimise" it away.
+
+     It also records the shared /bardumptrace diagnostic, which is how the
+     cLayout+profile combination behind a bad layout gets identified.
+--]]
+function ActionBars:ApplyABSettings(tag)
     if not ndbc then return end
-    if ndbc.init.installStage ~= -1 or not RealUI:DoesAddonMove("Bartender4") then return end
-
-    -- Initialize BT4 if not already done
-    if not BT4 then
-        BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
-        if BT4 then
-            BT4DB = _G.Bartender4DB
-            BT4Profile = BT4DB and BT4DB["profileKeys"] and BT4DB["profileKeys"][RealUI.key]
-            BT4ActionBars = BT4:GetModule("ActionBars", true)
-            BT4Stance = BT4:GetModule("StanceBar", true)
-            BT4Pet = BT4:GetModule("PetBar", true)
-        end
-    end
+    if ndbc.init.installStage ~= -1 then return end
 
     local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
 
@@ -86,29 +59,19 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
     db = self.db.profile
     ndb = RealUI.db.profile
 
-    -- Trace: record every call so we can see which cLayout+prof combo
-    -- wrote the final data. Captures up to the last 10 calls; dump with
-    -- /bardumptrace. Recorded BEFORE the Bartender4 gate below: with
-    -- RealUI_ActionBars as the bar backend (4.0.0) this function is a BT4
-    -- no-op, but RealUI_ActionBars hooksecurefuncs it and re-derives the
-    -- layout from the same values — so the trace stays the shared
-    -- diagnostic for both backends. btCur shows the active bars profile.
+    -- Trace: record every call so we can see which cLayout+prof combo drove
+    -- the final layout. Keeps the last 10 calls; dump with /bardumptrace.
     ActionBars._applyTrace = ActionBars._applyTrace or {}
     do
-        local btCurrent
-        if BT4 and BT4.db then
-            btCurrent = BT4.db:GetCurrentProfile()
-        else
-            local sv = _G.RealUI_ActionBarsDB
-            btCurrent = (type(sv) == "table" and type(sv.profileKeys) == "table"
-                and RealUI.key and ("RAB:" .. _G.tostring(sv.profileKeys[RealUI.key]))) or "(nil)"
-        end
+        local sv = _G.RealUI_ActionBarsDB
+        local barsProfile = (type(sv) == "table" and type(sv.profileKeys) == "table"
+            and RealUI.key and _G.tostring(sv.profileKeys[RealUI.key])) or "(nil)"
         local posLayout = ndb and ndb.positions and ndb.positions[RealUI.cLayout]
         table.insert(ActionBars._applyTrace, {
             t      = _G.GetTime(),
             cL     = RealUI.cLayout,
             prof   = prof,
-            btCur  = btCurrent,
+            btCur  = barsProfile,
             tag    = tag or "(none)",
             abY    = posLayout and posLayout["ActionBarsY"],
             abBotY = posLayout and posLayout["ActionBarsBotY"],
@@ -121,377 +84,10 @@ function ActionBars:ApplyABSettings(tag) -- luacheck: ignore 561
         end
     end
 
-    if not(BT4 and BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
-
-    if BT4ActionBars and BT4ActionBars.actionbars and BT4ActionBars.db and BT4ActionBars.db.profile
-        and BT4ActionBars.db.profile.actionbars and BT4ActionBars.ApplyConfig then
-        BT4ActionBars:ApplyConfig()
-    end
-
-    local barSettings = db[RealUI.cLayout]
-    local numTopBars = barSettings.centerPositions - 1
-    local padding = fixedSettings.buttonPadding
-
-    local sidePositions
-    if barSettings.sidePositions == 1 then
-        sidePositions = {[4] = "RIGHT", [5] = "RIGHT"}
-    elseif barSettings.sidePositions == 2 then
-        sidePositions = {[4] = "RIGHT", [5] = "LEFT"}
-    else
-        sidePositions = {[4] = "LEFT", [5] = "LEFT"}
-    end
-
-
-    -- Guard: BT4ActionBars.actionbars may not be populated yet during early profile switches
-    if not (BT4ActionBars and BT4ActionBars.actionbars) then return end
-
-    local BarSizes = {}
-    local centerPadding = padding / 2
-    local BarPadding = {top = {}, bottom = {}, sides = {}}
-    for id = 1, 5 do
-        ActionBars:debug(id, "Calculate points")
-        local BTBar = BT4ActionBars.actionbars[id]
-        if BTBar and not BTBar.disabled then
-            ----
-            -- Calculate Width/Height of bars and their corresponding Left/Top points
-            ----
-            local isVertBar = id > 3
-            local isRightBar = isVertBar and sidePositions[id] == "RIGHT"
-            local isLeftBar = isVertBar and not(isRightBar)
-            local isTopBar = not(isVertBar) and id <= numTopBars
-            local isBottomBar = not(isVertBar) and not(isTopBar)
-            ActionBars:debug(id, "Stats", isTopBar, isBottomBar, isLeftBar, isRightBar)
-
-            local numButtons = BTBar.numbuttons or BTBar.button_count
-            BarSizes[id] = (buttonSizes.bars * numButtons) + (padding * (numButtons - 1))
-
-            -- Create Padding table
-            if isTopBar then
-                BarPadding.top[id] = padding
-            elseif isBottomBar then
-                BarPadding.bottom[id] = padding
-            else
-                BarPadding.sides[id] = padding
-            end
-
-            ----
-            -- Calculate bars X and Y positions
-            ----
-            local x, y
-
-            -- Side Bars
-            local BarPositions = {}
-            if isVertBar then
-                x = isRightBar and 8 or -8
-
-                if sidePositions[4] == sidePositions[5] then
-                    -- Link Side Bar settings
-                    if id == 4 then
-                        y = BarSizes[4] + BarPadding.sides[4] + 10.5
-                    else
-                        y = 10.5
-                    end
-                else
-                    y = (BarSizes[id] / 2) + 10
-                    if not(IsOdd(BarPadding.sides[id])) or IsOdd(numButtons) then y = y + 0.5 end
-                end
-
-                BarPositions[id] = sidePositions[id]
-
-            -- Top/Bottom Bars
-            else
-                x = -((BarSizes[id] / 2) + 10)
-                -- if IsOdd(numButtons) then x = x + 0.5 end
-
-                -- Extra on X for pixel perfection
-                if isTopBar then
-                    if not(IsOdd(BarPadding.top[id])) or IsOdd(numButtons) then x = x + 1.0 end
-                else
-                    if not(IsOdd(BarPadding.bottom[id])) or IsOdd(numButtons) then x = x + 1.0 end
-                end
-
-                -- Bar Place
-                local barPlace
-                if id == 1 then
-                    if numTopBars > 0 then
-                        barPlace = 1
-                    else
-                        barPlace = 3 - numTopBars   -- Want Bottom Bars stacking Top->Down
-                    end
-
-                elseif id == 2 then
-                    barPlace = 2
-
-                elseif id == 3 then
-                    if isTopBar then
-                        barPlace = 3
-                    else
-                        barPlace = 1
-                    end
-                end
-                ActionBars:debug(id, "barPlace", barPlace)
-
-                -- y Offset
-                local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
-                -- Defensive: if hudSize is nil or out-of-range, fall back to
-                -- size 2 (the default). Mid-session resolution changes can
-                -- leave settings.hudSize pointing at a stale/invalid value.
-                local hudSizeOffsets = RealUI.hudSizeOffsets
-                local hudSize = ndb.settings and ndb.settings.hudSize
-                local sizeOffsets = (hudSize and hudSizeOffsets[hudSize]) or hudSizeOffsets[2] or hudSizeOffsets[1] or {}
-                local topYOfs = layoutPositions["HuDY"] + layoutPositions["ActionBarsY"] + (sizeOffsets["ActionBarsY"] or 0)
-                local bottomBase = GetActionBarsBotY(layoutPositions) + 14
-                local barGap = math.ceil(centerPadding + centerPadding)
-                ActionBars:debug(id, "Y Offset", topYOfs, bottomBase)
-                if barPlace == 1 then
-                    if isTopBar then
-                        y = topYOfs
-                    else
-                        y = bottomBase
-                    end
-                elseif barPlace == 2 then
-                    if isTopBar then
-                        y = -(buttonSizes.bars + barGap) + topYOfs
-                    else
-                        y = bottomBase + buttonSizes.bars + barGap
-                    end
-                else
-                    local pad2 = math.ceil(centerPadding + (centerPadding * 2) + centerPadding)
-                    if isTopBar then
-                        y = -((buttonSizes.bars * 2) + pad2) + topYOfs
-                    else
-                        y = bottomBase + (buttonSizes.bars * 2) + pad2
-                    end
-                end
-
-                BarPositions[id] = isTopBar and "TOP" or "BOTTOM"
-            end
-
-            local profileActionBars = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]
-            local barDB = profileActionBars["actionbars"][id]
-            local bar = BTBar.config
-            if bar then
-                local point
-                if isVertBar then
-                    point = BarPositions[id]
-                    bar["flyoutDirection"] = sidePositions[id] == "LEFT" and "RIGHT" or "LEFT"
-                else
-                    point = BarPositions[id] == "TOP" and "CENTER" or "BOTTOM"
-                    bar["flyoutDirection"] = BarPositions[id] == "TOP" and "DOWN" or "UP"
-                end
-
-                ActionBars:debug(id, "Points", x, y, point)
-                bar["padding"] = fixedSettings.buttonPadding - 10
-                bar["buttons"] = BTBar.numbuttons or BTBar.button_count or 12
-                bar["rows"] = isVertBar and 12 or 1
-                bar["alpha"] = bar["alpha"] or 1  -- Ensure alpha is set
-                bar["buttonOffset"] = bar["buttonOffset"] or 0  -- Ensure buttonOffset is set
-                bar["position"] = {
-                    ["x"] = x,
-                    ["y"] = y,
-                    ["point"] = point,
-                    ["scale"] = 1,
-                    ["growHorizontal"] = isRightBar and "LEFT" or "RIGHT",
-                    ["growVertical"] = "DOWN",
-                }
-
-                -- Persist key values to Bartender profile table
-                if barDB then
-                    barDB["flyoutDirection"] = bar["flyoutDirection"]
-                    barDB["padding"] = bar["padding"]
-                    barDB["buttons"] = bar["buttons"]
-                    barDB["rows"] = bar["rows"]
-                    barDB["alpha"] = bar["alpha"]
-                    barDB["buttonOffset"] = bar["buttonOffset"]
-                    barDB["position"] = bar["position"]
-                end
-
-                -- Apply using the bar's complete live config table to preserve defaults
-                BTBar:ApplyConfig()
-
-                -- Then set buttons
-                BTBar:SetButtons()
-
-                -- Force button layout update after a short delay
-                _G.C_Timer.After(0.1, function()
-                    if not _G.InCombatLockdown() and BTBar.UpdateButtonLayout then
-                        BTBar:UpdateButtonLayout()
-                    end
-                end)
-            else
-                BarSizes[id] = 0
-            end
-        else
-            BarSizes[id] = 0
-        end
-    end
-    if BT4ActionBars then BT4ActionBars:ApplyConfig() end
-
-    ----
-    -- Vehicle Bar
-    ----
-    local vbX, vbY = -36, -59.5
-
-    -- Set Position
-    local profileVehicle = BT4DB["namespaces"]["Vehicle"]["profiles"][prof]
-    if profileVehicle then
-        profileVehicle["position"] = {
-            ["x"] = vbX,
-            ["y"] = vbY,
-            ["point"] = "TOPRIGHT",
-            ["scale"] = 0.84,
-            ["growHorizontal"] = "RIGHT",
-            ["growVertical"] = "DOWN",
-        }
-    end
-    local BT4Vehicle = BT4:GetModule("Vehicle", true)
-    if BT4Vehicle then BT4Vehicle:ApplyConfig() end
-
-    ----
-    -- Pet Bar
-    ----
-    if barSettings.moveBars.pet then
-        -- if RealUI.cLayout == 1 then
-            local numPetBarButtons = 10
-            local pbX, pbY
-            local pbP = fixedSettings.buttonPadding
-            local pbH = (numPetBarButtons * buttonSizes.petBar) + ((numPetBarButtons - 1) * pbP)
-
-            -- Calculate X
-            if (sidePositions[4] == "LEFT") and (sidePositions[5] == "LEFT") then
-                pbX = buttonSizes.bars + math.ceil((BarPadding.sides[4] * 2) + (pbP / 2)) - 9
-            elseif (sidePositions[5] == "LEFT") then
-                pbX = buttonSizes.bars + math.ceil((BarPadding.sides[5] * 2) + (pbP / 2)) - 9
-            else
-                pbX = math.ceil(pbP / 2) - 9
-            end
-
-            -- Calculate Y
-            pbY = (pbH / 2) + 10
-
-            -- Set Position
-            local profilePetBar = BT4DB["namespaces"]["PetBar"]["profiles"][prof]
-            if profilePetBar then
-                profilePetBar["position"] = {
-                    ["x"] = pbX,
-                    ["y"] = pbY,
-                    ["point"] = "LEFT",
-                    ["scale"] = 1,
-                    ["growHorizontal"] = "RIGHT",
-                    ["growVertical"] = "DOWN",
-                }
-                profilePetBar["padding"] = pbP - 8
-            end
-            local BT4PetBar = BT4:GetModule("PetBar", true)
-            if BT4PetBar then
-                BT4PetBar:ApplyConfig()
-
-                -- Force button layout update after a short delay
-                _G.C_Timer.After(0.1, function()
-                    if not _G.InCombatLockdown() and _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
-                        _G.BT4BarPetBar:UpdateButtonLayout()
-                    end
-                end)
-            end
-        -- end
-    end
-
-    ----
-    -- Extra Action Bar
-    ----
-    if barSettings.moveBars.eab then
-        -- Anchor EAB and ZoneAbility to the left of the topmost center bar
-        -- Both stacked vertically, clear of right-side Naga bars
-        local topBar = _G.BT4Bar1
-        if topBar then
-            local pad = 4
-
-            _G.ExtraActionButton1:ClearAllPoints()
-            _G.ExtraActionButton1:SetPoint("BOTTOMRIGHT", topBar, "BOTTOMLEFT", -pad, 0)
-
-            _G.ZoneAbilityFrame.SpellButtonContainer:ClearAllPoints()
-            _G.ZoneAbilityFrame.SpellButtonContainer:SetPoint("TOPRIGHT", _G.ExtraActionButton1, "TOPLEFT", -pad, 0)
-        end
-
-        -- Push BT4's ExtraActionBar container offscreen so it doesn't interfere
-        local profileEAB = BT4DB["namespaces"]["ExtraActionBar"]["profiles"][prof]
-        if profileEAB then
-            profileEAB["position"] = {
-                ["y"] = 200,
-                ["x"] = 0,
-                ["point"] = "BOTTOM",
-                ["scale"] = 0.98,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-        end
-        local BT4EAB = BT4:GetModule("ExtraActionBar", true)
-        if BT4EAB and BT4EAB:IsEnabled() then BT4EAB:ApplyConfig() end
-    end
-
-    -- Stance Bar
-    if barSettings.moveBars.stance then
-        local NumStances = _G.GetNumShapeshiftForms()
-        if NumStances > 0 then
-            if BT4Stance and not(BT4Stance:IsEnabled()) then BT4Stance:Enable() end
-
-            local sbX = -(_G.max(BarSizes[2], BarSizes[3]) / 2 - 4)
-            local sbY = GetActionBarsBotY(ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1])
-
-            -- Set Position
-            local profileStanceBar = BT4DB["namespaces"]["StanceBar"]["profiles"][prof]
-            if profileStanceBar then
-                profileStanceBar["position"] = {
-                    ["x"] = sbX,
-                    ["y"] = sbY,
-                    ["point"] = "BOTTOM",
-                    ["scale"] = 1,
-                    ["growHorizontal"] = "LEFT",
-                    ["growVertical"] = "DOWN"
-                }
-            end
-            if BT4Stance then
-                BT4Stance:ApplyConfig()
-                -- Force button layout update to ensure correct size on first load
-                -- Use a small delay to ensure Bartender4 has processed the config
-                _G.C_Timer.After(0.1, function()
-                    if not _G.InCombatLockdown() and _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
-                        _G.BT4BarStanceBar:UpdateButtonLayout()
-                    end
-                end)
-            end
-        end
-    end
-
-    -- ActionBars
+    -- Doodads are RealUI's own decorations, not a bar-backend concern.
     if RealUI:GetModuleEnabled(MODNAME) then
         self:RefreshDoodads()
     end
-
-    -- Force all bars to update their button layouts after config is applied
-    -- This ensures proper padding and scale on first load after install wizard
-    _G.C_Timer.After(0.2, function()
-        if _G.InCombatLockdown() then return end
-
-        if BT4ActionBars then
-            for i = 1, 6 do
-                if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
-                    local bar = BT4ActionBars.actionbars[i]
-                    if bar.UpdateButtonLayout then
-                        bar:UpdateButtonLayout()
-                    end
-                end
-            end
-        end
-
-        if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
-            _G.BT4BarPetBar:UpdateButtonLayout()
-        end
-
-        if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
-            _G.BT4BarStanceBar:UpdateButtonLayout()
-        end
-    end)
 end
 
 ----
@@ -529,53 +125,61 @@ function ActionBars:UpdateDoodadVisibility(doodadType)
     end
 end
 
+--[[ Doodad placement against RealUI_ActionBars' stance/pet holders.
+
+     The BT4 version reconstructed the bar's extent from its button grid
+     (buttons x rows x a hardcoded button size + BT4's padding) because BT4's
+     bar frame did not represent it. RealUI_ActionBars sizes its holders to
+     the REAL rendered extent (StancePetBar.lua AdoptButtons), so the extent
+     can just be read off the frame — and the grow direction comes from the
+     holder's own live config rather than a BT4 SavedVariables lookup.
+
+     NOT visually verified yet: the doodads have been absent since Bartender4
+     stopped driving the bars, so this restores them rather than adjusting
+     something on screen. Expect a nudge after the first look. ]]--
 function ActionBars:UpdateDoodadPosition(doodadType)
     if not db.showDoodads then return end
     ActionBars:debug("UpdateDoodadPosition", doodadType)
 
-    local barName = doodadType.."Bar"
-    local bar = _G["BT4Bar"..barName]
-    local numbuttons = #bar.buttons
-    local numRows = bar:GetRows()
-    local buttonsPerRow = math.ceil(numbuttons / numRows) -- just a precaution
-    numRows = math.ceil(numbuttons / buttonsPerRow)
-    if numRows > numbuttons then
-        numRows = numbuttons
-        buttonsPerRow = 1
-    end
+    local doodad = Doodads[doodadType]
+    local bar = doodad and doodad.parent
+    if not bar then return end
 
-    local barWidth = buttonsPerRow * buttonSizes.petBar + (buttonsPerRow - 1)
-    local barHeight = numRows * buttonSizes.petBar + (numRows - 1)
-    local barX = RealUI.Round((barWidth + fixedSettings.bt4Padding) / 2) - 0.5
-    local barY = RealUI.Round((barHeight + fixedSettings.bt4Padding) / 2) - 0.5
+    local barWidth, barHeight = bar:GetWidth(), bar:GetHeight()
+    if not barWidth or barWidth <= 0 then return end
 
-    local growH = BT4DB.namespaces[barName].profiles[BT4Profile].position.growHorizontal
-    if growH == "LEFT" then
+    local barX = RealUI.Round(barWidth / 2) - 0.5
+    local barY = RealUI.Round(barHeight / 2) - 0.5
+
+    -- Holders anchor by their grow corner: LEFT growth hangs off the top
+    -- right, and both bars grow downward from that corner.
+    local config = bar._ruiConfig
+    if config and config.growHorizontal == "LEFT" then
         barX = -barX
     end
+    barY = -barY
 
-    local growV = BT4DB.namespaces[barName].profiles[BT4Profile].position.growVertical
-    if growV == "DOWN" then
-        barY = -barY
-    end
-
-    local doodad = Doodads[doodadType]
     doodad:ClearAllPoints()
-    doodad:SetPoint("CENTER", doodad.parent, barX, barY)
+    doodad:SetPoint("CENTER", bar, barX, barY)
 end
 
 ----
 -- Frame Creation
 ----
 function ActionBars:RefreshDoodads(doodadType)
-    if not (RealUI:GetModuleEnabled(MODNAME) and BT4) then return end
+    if not RealUI:GetModuleEnabled(MODNAME) then return end
     ActionBars:debug("RefreshDoodads", doodadType)
     db = self.db.profile
 
-    if (BT4Pet and BT4Pet:IsEnabled()) or doodadType == "Pet" then
+    -- Parent to RealUI_ActionBars' holders. They are created lazily when the
+    -- respective bar is built, so a missing holder simply means "no bar yet";
+    -- the next refresh (UPDATE_SHAPESHIFT_FORMS, pet summon, layout change)
+    -- picks it up.
+    local petBar = _G.RealUI_AB_Pet
+    if petBar and (doodadType == nil or doodadType == "Pet") then
         ActionBars:debug("RefreshPet")
         if not Doodads.Pet then
-            CreateDoodad("Pet", _G.BT4BarPetBar)
+            CreateDoodad("Pet", petBar)
             function Doodads.Pet:ShouldShow()
                 return _G.UnitExists("pet") and not _G.UnitInVehicle("player")
             end
@@ -584,10 +188,11 @@ function ActionBars:RefreshDoodads(doodadType)
         self:UpdateDoodadVisibility("Pet")
     end
 
-    if (BT4Stance and BT4Stance:IsEnabled()) or doodadType == "Stance" then
+    local stanceBar = _G.RealUI_AB_Stance
+    if stanceBar and (doodadType == nil or doodadType == "Stance") then
         ActionBars:debug("RefreshStance")
         if not Doodads.Stance then
-            CreateDoodad("Stance", _G.BT4BarStanceBar)
+            CreateDoodad("Stance", stanceBar)
             function Doodads.Stance:ShouldShow()
                 return not _G.UnitInVehicle("player")
             end
@@ -599,38 +204,16 @@ end
 
 function ActionBars:PLAYER_ENTERING_WORLD()
     self:debug("PLAYER_ENTERING_WORLD")
-    if not BT4 then return end
 
     self:ApplyABSettings()
 
-    -- Delay button layout updates to ensure Bartender4 is fully initialized
-    -- Use multiple attempts with increasing delays to handle first-time setup
-    local updateAttempts = {0.2, 0.5, 1.0}
-    for _, delay in ipairs(updateAttempts) do
+    -- The bars rebuild themselves (RealUI_ActionBars owns button layout); all
+    -- that is needed here is a doodad pass once the holders exist. Staggered
+    -- because the stance/pet holders are built lazily after login.
+    for _, delay in ipairs({0.2, 0.5, 1.0}) do
         _G.C_Timer.After(delay, function()
             if _G.InCombatLockdown() then return end
-
-            -- Force all action bars (1-6) button layout update
-            if BT4ActionBars then
-                for i = 1, 6 do
-                    if BT4ActionBars.actionbars[i] and not BT4ActionBars.actionbars[i].disabled then
-                        local bar = BT4ActionBars.actionbars[i]
-                        if bar.UpdateButtonLayout then
-                            bar:UpdateButtonLayout()
-                        end
-                    end
-                end
-            end
-
-            -- Force pet bar button layout update if it exists
-            if _G.BT4BarPetBar and _G.BT4BarPetBar.UpdateButtonLayout then
-                _G.BT4BarPetBar:UpdateButtonLayout()
-            end
-
-            -- Force stance bar button layout update if it exists
-            if _G.BT4BarStanceBar and _G.BT4BarStanceBar.UpdateButtonLayout then
-                _G.BT4BarStanceBar:UpdateButtonLayout()
-            end
+            self:RefreshDoodads()
         end)
     end
 
@@ -643,28 +226,10 @@ function ActionBars:PLAYER_ENTERING_WORLD()
         self:RefreshDoodads("Stance")
     end)
 
-    ---[[
-    BT4AB_EnableBar = function(BT4AB, id)
-        self:debug("BT4AB_EnableBar", id)
-        id = _G.tonumber(id)
-        if id <= 5 and not _G.InCombatLockdown() then
-            ActionBars:ApplyABSettings(id)
-        end
-    end
-    --_G.hooksecurefunc(BT4ActionBars, "EnableBar", BT4AB_EnableBar)
-    --]]
-    _G.hooksecurefunc(_G.BT4BarStanceBar, "UpdateButtonLayout", function()
-        self:UpdateDoodadVisibility("Stance")
-    end)
-    _G.hooksecurefunc(_G.BT4BarPetBar, "UpdateButtonLayout", function()
-        self:UpdateDoodadVisibility("Pet")
-    end)
-
     EnteredWorld = true
 end
 
 function ActionBars:BarChatCommand()
-    if not (BT4) then return end
     if not _G.InCombatLockdown() then
         RealUI.Debug("Config", "/bt")
         RealUI.LoadConfig("HuD", "other", "actionbars")
@@ -691,21 +256,12 @@ function ActionBars:BarDumpTraceCommand()
 end
 
 -- Diagnostic: dump current actionbar positions for both RealUI profiles.
--- Backend-aware: reads Bartender4DB when BT4 is installed (legacy), else
--- RealUI_ActionBarsDB (4.0.0 default).
 -- Usage: /bardump
 function ActionBars:BarDumpCommand()
-    local dbTable, dbLabel, currentProf
-    if BT4 then
-        dbTable = _G.Bartender4DB
-        dbLabel = "Bartender4DB"
-        currentProf = BT4.db and BT4.db:GetCurrentProfile()
-    else
-        dbTable = _G.RealUI_ActionBarsDB
-        dbLabel = "RealUI_ActionBarsDB"
-        currentProf = dbTable and _G.type(dbTable.profileKeys) == "table"
-            and RealUI.key and dbTable.profileKeys[RealUI.key]
-    end
+    local dbTable = _G.RealUI_ActionBarsDB
+    local dbLabel = "RealUI_ActionBarsDB"
+    local currentProf = dbTable and _G.type(dbTable.profileKeys) == "table"
+        and RealUI.key and dbTable.profileKeys[RealUI.key]
     if not dbTable or not dbTable.namespaces or not dbTable.namespaces.ActionBars then
         _G.print(("[bardump] %s.namespaces.ActionBars missing"):format(dbLabel)); return
     end
@@ -744,71 +300,32 @@ function ActionBars:RefreshMod()
 
     self:RefreshDoodads()
     self:ApplyABSettings()
-    self:UpdateNagaBarState()
+    -- Deliberately NO UpdateNagaBarState here. RealUI_ActionBars owns bar 6
+    -- (its /naga writes barDB.enabled directly); re-asserting the module's
+    -- enableNagaBar (default false) on every profile/spec swap switched a
+    -- user-enabled Naga bar back off — caught live 2026-08-22 ("Razer Naga
+    -- action bar disabled" firing mid spec change). The module's flag is the
+    -- WIZARD's one-time choice, applied via ToggleNagaCommand/ToggleNagaBar.
 end
 
+--[[ Naga bar toggle. RealUI_ActionBars owns bar 6 (its own /naga reclaims the
+     slash command), so this delegates rather than configuring a backend
+     itself. It stays because the install wizard's Naga checkbox writes
+     db.enableNagaBar here and applies it through this path — once, at setup,
+     not per refresh. --]]
 function ActionBars:ToggleNagaBar(enable)
-    if not BT4 then return end
-    if not BT4ActionBars then return end
+    local AB = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
+    if not (AB and AB:IsEnabled() and AB.dbActionBars) then return end
 
-    local prof = RealUI.cLayout == 1 and "RealUI" or "RealUI-Healing"
-    if not(BT4DB and BT4DB["namespaces"]["ActionBars"]["profiles"][prof]) then return end
+    local barDB = AB.dbActionBars.profile.actionbars[6]
+    if not barDB then return end
+    if barDB.enabled == (enable and true or false) then return end
 
-    -- Array index [6] = Bartender Bar 2 (the one we want for Naga)
-    local bar6Config = BT4DB["namespaces"]["ActionBars"]["profiles"][prof]["actionbars"][6]
-    if bar6Config then
-        if enable then
-            -- Configure bar 6 with proper settings before enabling
-            bar6Config.enabled = true
-            bar6Config.alpha = bar6Config.alpha or 1
-            bar6Config.buttons = bar6Config.buttons or 12
-            bar6Config.buttonOffset = bar6Config.buttonOffset or 0
-            bar6Config.rows = 4
-            bar6Config.padding = fixedSettings.buttonPadding - 10
-            bar6Config.showgrid = true
-            bar6Config.version = 3
-            bar6Config.WoW10Layout = true  -- Prevent WoW 10.0 migration from changing our values
-
-            -- Set position: anchor to BOTTOM, bottom row aligned with lowest action bar
-            local layoutPositions = ndb.positions[RealUI.cLayout] or RealUI.defaultPositions[RealUI.cLayout] or RealUI.defaultPositions[1]
-            local bottomBase = GetActionBarsBotY(layoutPositions) + 14
-            -- 4 rows of buttons, grow down from top — offset up by 3 rows worth
-            local nagaY = bottomBase + (buttonSizes.bars * 3) + (3 * fixedSettings.buttonPadding)
-            bar6Config.position = {
-                ["y"] = nagaY,
-                ["x"] = 210,
-                ["point"] = "BOTTOM",
-                ["scale"] = 1,
-                ["growHorizontal"] = "RIGHT",
-                ["growVertical"] = "DOWN",
-            }
-
-            -- Use Bartender4's EnableBar method which handles bar creation and applies
-            -- config via AceDB (which includes proper defaults for skin, elements, etc.)
-            BT4ActionBars:EnableBar(6)
-
-            -- Force position and button layout update
-            local bt4bar = BT4ActionBars.actionbars[6]
-            if bt4bar then
-                bt4bar:ApplyConfig()
-                _G.C_Timer.After(0.1, function()
-                    if bt4bar.UpdateButtonLayout then
-                        bt4bar:UpdateButtonLayout()
-                    end
-                end)
-            end
-        else
-            bar6Config.enabled = false
-
-            -- Disable the bar if it exists
-            local bt4bar = BT4ActionBars.actionbars[6]
-            if bt4bar then
-                BT4ActionBars:DisableBar(6)
-            end
-        end
+    barDB.enabled = enable and true or false
+    if AB.RefreshBar then
+        AB:RefreshBar(6)
     end
-
-    RealUI:Print("Razer Naga Action Bar (Bartender Bar 2)", enable and "enabled" or "disabled")
+    RealUI:Print("Razer Naga action bar", enable and "enabled" or "disabled")
 end
 
 function ActionBars:UpdateNagaBarState()
@@ -823,7 +340,11 @@ function ActionBars:ToggleNagaCommand()
 end
 
 function ActionBars:OnProfileUpdate(...)
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI:DoesAddonMove("Bartender4"))
+    -- Was gated on DoesAddonMove("Bartender4"): with BT4 support removed that
+    -- entry is gone, and keeping the gate would disable this module entirely —
+    -- taking the doodads AND the ApplyABSettings hook RealUI_ActionBars rides
+    -- with it.
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
     if self:IsEnabled() then
         self:RefreshMod()
     end
@@ -869,18 +390,18 @@ function ActionBars:OnInitialize()
     ndb = RealUI.db.profile
     ndbc = RealUI.db.char
 
-    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME) and RealUI:DoesAddonMove("Bartender4"))
+    -- Was gated on DoesAddonMove("Bartender4"): with BT4 support removed that
+    -- entry is gone, and keeping the gate would disable this module entirely —
+    -- taking the doodads AND the ApplyABSettings hook RealUI_ActionBars rides
+    -- with it.
+    self:SetEnabledState(RealUI:GetModuleEnabled(MODNAME))
 end
 
 function ActionBars:OnEnable()
-    BT4 = _G.LibStub("AceAddon-3.0"):GetAddon("Bartender4", true)
-    self:debug("OnEnable", BT4)
+    self:debug("OnEnable")
 
-    -- Diagnostics are backend-agnostic (/bardump reads whichever bars DB is
-    -- active, /bardumptrace records every ApplyABSettings call — which
-    -- RealUI_ActionBars rides via hooksecurefunc). Register them even when
-    -- Bartender4 is absent (the 4.0.0 default), otherwise they silently
-    -- vanish with the BT4-only branch below.
+    -- /bardump reads RealUI_ActionBarsDB, /bardumptrace records every
+    -- ApplyABSettings call (which RealUI_ActionBars rides via hooksecurefunc).
     if not self._diagCommandsRegistered then
         self:RegisterChatCommand("bardump", "BarDumpCommand")
         self:RegisterChatCommand("bardumptrace", "BarDumpTraceCommand")
@@ -890,53 +411,33 @@ function ActionBars:OnEnable()
     if EnteredWorld then
         self:debug("Post EnteredWorld")
         self:RefreshDoodads()
-    elseif BT4 then
+    else
         self:debug("Pre EnteredWorld")
-        BT4DB = _G.Bartender4DB
-        BT4Profile = BT4DB["profileKeys"][RealUI.key]
-
-        BT4Stance = BT4:GetModule("StanceBar", true)
-        BT4Pet = BT4:GetModule("PetBar", true)
-        BT4ActionBars = BT4:GetModule("ActionBars", true)
-
+        -- Registered UNCONDITIONALLY now. This used to live inside an
+        -- `elseif BT4` branch, so once Bartender4 stopped being installed the
+        -- event never registered at all — which is why the doodads silently
+        -- disappeared rather than merely being misplaced.
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-        BT4:UnregisterChatCommand("bar")
-        BT4:UnregisterChatCommand("bt")
-        BT4:UnregisterChatCommand("bt4")
-        BT4:UnregisterChatCommand("bartender")
-        BT4:UnregisterChatCommand("bartender4")
-
+        -- Legacy bar-config aliases kept: users type them out of habit, and
+        -- they now open RealUI's own action bar config.
         self:RegisterChatCommand("bar", "BarChatCommand")
         self:RegisterChatCommand("bt", "BarChatCommand")
-        self:RegisterChatCommand("bt4", "BarChatCommand")
-        self:RegisterChatCommand("bartender", "BarChatCommand")
-        self:RegisterChatCommand("bartender4", "BarChatCommand")
-        self:RegisterChatCommand("naga", "ToggleNagaCommand")
     end
 end
 
 function ActionBars:OnDisable()
     self:debug("OnDisable")
-    self:TogglePetBar()
 
-    if BT4 then
-        if BT4AB_EnableBar then
-            BT4AB_EnableBar = _G.nop
-        end
-
-        self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-
-        self:UnregisterChatCommand("bar")
-        self:UnregisterChatCommand("bt")
-        self:UnregisterChatCommand("bt4")
-        self:UnregisterChatCommand("bartender")
-        self:UnregisterChatCommand("bartender4")
-
-        BT4:RegisterChatCommand("bar", "ChatCommand")
-        BT4:RegisterChatCommand("bt", "ChatCommand")
-        BT4:RegisterChatCommand("bt4", "ChatCommand")
-        BT4:RegisterChatCommand("bartender", "ChatCommand")
-        BT4:RegisterChatCommand("bartender4", "ChatCommand")
+    -- Was `self:TogglePetBar()` — a method that exists nowhere in the code
+    -- base, so disabling this module always threw (spec task 9.1 logged it as
+    -- "the TogglePetBar nil-call"). The doodads are the only thing this module
+    -- owns visually, so hiding them IS the disable behaviour.
+    for _, doodad in next, Doodads do
+        if doodad.Hide then doodad:Hide() end
     end
+
+    self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+    self:UnregisterChatCommand("bar")
+    self:UnregisterChatCommand("bt")
 end

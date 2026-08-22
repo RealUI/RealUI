@@ -333,9 +333,11 @@ function RealUI:ChatCommand_Config(input)
             _G.nibRealUICharacter = nil
             _G.RealUIDB = nil
             _G.RealUICharacter = nil
-            _G.Bartender4DB = nil
-            _G.PLATYNATOR_CONFIG = {}
-            _G.PLATYNATOR_CURRENT_PROFILE = {}
+            -- Our own bars DB resets with the suite. Bartender4DB and
+            -- Platynator's saved variables are NOT wiped any more: support
+            -- for both was removed (2026-08-22), so their data belongs to
+            -- the user's own installs and is not ours to destroy.
+            _G.RealUI_ActionBarsDB = nil
             _G.ReloadUI()
             return
         elseif command == "resetchar" then
@@ -1002,9 +1004,9 @@ function RealUI:OnInitialize()
     end
 
     -- Register ProfileCoordinator's OnProfileChanged hook FIRST so linked
-    -- scopes (BT4, Skins) switch to the new profile BEFORE RealUI's own
-    -- cascade reads them. Modules like ActionBars touch BT4 data during
-    -- the cascade and need BT4 to already be on the right profile.
+    -- scopes (Action Bars, Skins) switch to the new profile BEFORE RealUI's own
+    -- cascade reads them. The bars layout recompute runs during the cascade
+    -- and needs the bars DB to already be on the right profile.
     if self.ProfileCoordinator and self.ProfileCoordinator.RegisterProfileCallback then
         self.ProfileCoordinator:RegisterProfileCallback()
     end
