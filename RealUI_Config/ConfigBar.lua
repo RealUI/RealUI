@@ -45,6 +45,36 @@ local function safePositions()
     return RealUI.db and RealUI.db.profile.positions[layout]
 end
 
+--- Write a HuD position key, honouring the "Link Layouts" toggle.
+--
+-- `positionsLink` used to be a ONE-SHOT copy performed at the moment the
+-- toggle was ticked (see the linkLayout setter): every position slider
+-- afterwards wrote only the layout you happened to be on, so the two layouts
+-- silently drifted apart while the UI still claimed they were linked. A
+-- beta 7 tester hit this from the healer side — with Link Layouts on, the
+-- HuD Vertical slider moved the DPS/Tank HuD and left Healing behind.
+--
+-- Writing through to the other layout keeps the toggle's promise. It matches
+-- the semantics the one-shot copy already established (a full DeepCopy of the
+-- positions table, i.e. the layouts are meant to be identical while linked).
+local function writePosition(key, value)
+    local db = RealUI.db
+    if not db then return end
+
+    local layout = safeLayout()
+    local positions = db.profile.positions
+    if positions[layout] then
+        positions[layout][key] = value
+    end
+
+    if db.profile.positionsLink then
+        local other = layout == 1 and 2 or 1
+        if positions[other] then
+            positions[other][key] = value
+        end
+    end
+end
+
 
 options.HuD = {
     type = "group",
@@ -218,7 +248,7 @@ do -- Other
                         set = function(info, value)
                             local pos = safePositions()
                             if pos then
-                                pos["HuDY"] = value
+                                writePosition("HuDY", value)
                                 RealUI:UpdatePositioners()
                             end
                         end,
@@ -418,7 +448,7 @@ do -- Other
                                 set = function(info, value)
                                     local pos = safePositions()
                                     if pos then
-                                        pos["ActionBarsY"] = value - .5
+                                        writePosition("ActionBarsY", value - .5)
                                         ActionBars:ApplyABSettings()
                                         RealUI:UpdatePositioners()
                                     end
@@ -1532,7 +1562,7 @@ do -- UnitFrames
                 set = function(info, value)
                     local pos = safePositions()
                     if pos then
-                        pos["UFHorizontal"] = value
+                        writePosition("UFHorizontal", value)
                         RealUI:UpdatePositioners()
                     end
                 end,
@@ -1599,7 +1629,7 @@ do -- UnitFrames
                 set = function(info, value)
                     local pos = safePositions()
                     if pos then
-                        pos["BossX"] = value
+                        writePosition("BossX", value)
                         RealUI:UpdatePositioners()
                     end
                 end,
@@ -1620,7 +1650,7 @@ do -- UnitFrames
                 set = function(info, value)
                     local pos = safePositions()
                     if pos then
-                        pos["BossY"] = value
+                        writePosition("BossY", value)
                         RealUI:UpdatePositioners()
                     end
                 end,

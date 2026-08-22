@@ -31,7 +31,13 @@ end
 -- an individual key can legitimately be absent when the config sliders drive
 -- an update. A missing key contributes no offset rather than erroring.
 local function GetKeyAdjust(key)
-    local layout = (ndbc and ndbc.layout and ndbc.layout.current) or RealUI.cLayout or 1
+    -- Precedence MUST match the config panel's `safeLayout()`, which resolves
+    -- RealUI.cLayout first. This read used to prefer the persisted
+    -- db.char.layout.current instead, so whenever the two disagreed — which
+    -- they do transiently around a layout switch, and cLayout is the value the
+    -- profile cascade sets before modules run — the slider wrote one layout's
+    -- table while the positioner read the other's, and the slider looked dead.
+    local layout = RealUI.cLayout or (ndbc and ndbc.layout and ndbc.layout.current) or 1
     local positions = ndb and ndb.positions and ndb.positions[layout]
     local value = positions and positions[key]
     if not value then return 0 end
