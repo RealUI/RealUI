@@ -329,31 +329,21 @@ function RealUI:ChatCommand_Config(input)
             end
             return
         elseif command == "reset" then
-            _G.nibRealUIDB = nil
-            _G.nibRealUICharacter = nil
-            _G.RealUIDB = nil
-            _G.RealUICharacter = nil
-            -- Our own bars DB resets with the suite. Bartender4DB and
-            -- Platynator's saved variables are NOT wiped any more: support
-            -- for both was removed (2026-08-22), so their data belongs to
-            -- the user's own installs and is not ours to destroy.
-            _G.RealUI_ActionBarsDB = nil
-            _G.ReloadUI()
+            -- Ask which scope. This used to wipe every setting for every
+            -- character instantly, with no confirmation at all — the most
+            -- destructive command in the suite was the only one that never
+            -- asked. `/realui resetchar` and `/realui resetall` remain the
+            -- unprompted quick paths.
+            _G.StaticPopup_Show("REALUI_RESET_SCOPE")
             return
         elseif command == "resetchar" then
-            -- Reset only this character's init data so the setup wizard
-            -- will re-run on next load without wiping account-wide settings.
-            if self.db and self.db.char then
-                self.db.char.init = {
-                    installStage = 0,
-                    initialized = false,
-                    needchatmoved = true
-                }
-                print("|cff0099ffRealUI|r: Character setup data reset. Reloading UI...")
-                _G.ReloadUI()
-            else
-                print("|cff0099ffRealUI|r: Database not available.")
-            end
+            -- Quick path, no prompt: re-arm the setup wizard for this
+            -- character without touching account-wide settings.
+            self:ResetCharacter()
+            return
+        elseif command == "resetall" then
+            -- Quick path, no prompt: full wipe, all characters.
+            self:ResetEverything()
             return
         elseif command == "display" then
             if self.DisplayStage then
@@ -702,6 +692,106 @@ function RealUI:OnProfileUpdate(event, database, profile)
         end
     end
 end
+
+---------------------------------------------------------------------------
+-- Reset scopes
+--
+-- What is actually per-character is narrow: AceDB keeps `char` (install
+-- state, current layout, spec->profile mapping, scope links) inside the
+-- account-wide RealUIDB. Everything *visual* — positions, HuD size, module
+-- toggles, bar settings — lives in the PROFILE, and profiles are shared by
+-- every character using them. So "reset this character" can only mean
+-- "re-run setup for this character"; it cannot reset one character's look
+-- in isolation. Profile-level resets belong on the Unified Profile Page,
+-- where the user can see which characters share the profile first.
+---------------------------------------------------------------------------
+
+-- Every RealUI-owned SavedVariable that stores configuration.
+-- Deliberately excludes RealUI_Bugs' RealUI_Storage/RealUI_Debug: those are
+-- the captured error log and debug flags, not UI settings — wiping a
+-- tester's error history as a side effect of a UI reset loses real data.
+local RESET_ALL_SAVED_VARIABLES = {
+    "RealUIDB", "RealUICharacter",
+    "nibRealUIDB", "nibRealUICharacter",
+    "RealUI_ActionBarsDB",
+    "RealUI_AurasDB",
+    "RealUI_ChatDB",
+    "RealUI_CombatTextDB",
+    "RealUI_InventoryDB",
+    "RealUI_NameplatesDB",
+    "RealUI_SkinsDB",
+    "RealUI_TooltipsDB",
+    "RealUI_TrackerDB",
+}
+
+--- Re-arm the install wizard for this character only.
+-- Account-wide settings and every other character are untouched.
+function RealUI:ResetCharacter()
+    if not (self.db and self.db.char) then
+        print("|cff0099ffRealUI|r: Database not available.")
+        return false
+    end
+
+    self.db.char.init = {
+        installStage = 0,
+        initialized = false,
+        needchatmoved = true
+    }
+    print("|cff0099ffRealUI|r: Character setup data reset. Reloading UI...")
+    _G.ReloadUI()
+    return true
+end
+
+--- Wipe every RealUI setting for every character.
+-- Third-party saved variables are never touched: Bartender4, Platynator and
+-- friends belong to the user's own installs (BT4/Platynator support was
+-- removed 2026-08-22), and Grid2/BadBoy are supported optional installs
+-- whose data is not ours to destroy either.
+function RealUI:ResetEverything()
+    for _, name in next, RESET_ALL_SAVED_VARIABLES do
+        _G[name] = nil
+    end
+    print("|cff0099ffRealUI|r: All settings reset for all characters. Reloading UI...")
+    _G.ReloadUI()
+end
+
+_G.StaticPopupDialogs["REALUI_RESET_SCOPE"] = {
+    text = "|cff0099ffRealUI|r Reset\n\n"
+        .. "|cffffcc00This Character|r re-runs the setup wizard here. Your saved\n"
+        .. "settings are kept.\n\n"
+        .. "|cffff4444Everything|r wipes all RealUI settings for |cffff4444every|r character:\n"
+        .. "layouts, positions, skins, bars, nameplates, auras, inventory.\n\n"
+        .. "To reset just one profile's settings, use Advanced \226\134\146 Profiles.",
+    button1 = "This Character",
+    button2 = _G.CANCEL,
+    button3 = "Everything...",
+    OnAccept = function()
+        RealUI:ResetCharacter()
+    end,
+    OnAlt = function()
+        -- Second gate: the full wipe is the one action here nobody can undo.
+        _G.StaticPopup_Show("REALUI_RESET_ALL_CONFIRM")
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    showAlert = true,
+}
+
+_G.StaticPopupDialogs["REALUI_RESET_ALL_CONFIRM"] = {
+    text = "|cffff4444Wipe every RealUI setting?|r\n\n"
+        .. "This affects |cffff4444all characters on this account|r and cannot be\n"
+        .. "undone. The UI will reload and the setup wizard will run again.",
+    button1 = "Wipe Everything",
+    button2 = _G.CANCEL,
+    OnAccept = function()
+        RealUI:ResetEverything()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    showAlert = true,
+}
 
 _G.StaticPopupDialogs["PUDRUIRELOADUI"] = {
     text = L["DoReloadUI"],
