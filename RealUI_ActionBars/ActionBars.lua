@@ -69,6 +69,12 @@ function private.RefreshBar(id)
     end)
 end
 
+--- Public wrapper: RealUI's ActionBars module delegates its wizard-driven
+--- Naga toggle through this (it has no access to `private`).
+function AB:RefreshBar(id)
+    private.RefreshBar(id)
+end
+
 --[[ ExtraActionButton / ZoneAbility: anchored to the left of bar 1, stacked
      outward (parity with the old RealUI arrangement, which anchored them to
      BT4Bar1 — a path that died with Bartender4). The EditMode-managed

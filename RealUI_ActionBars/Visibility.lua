@@ -72,6 +72,15 @@ function private.ApplyVisibility(bar, conditional)
     fadedBars[bar] = nil
     bar:SetAlpha(bar._ruiAlpha or 1)
     if conditional and conditional ~= "" then
+        -- Clear the cached state BEFORE re-registering. The secure state
+        -- driver manager only writes `state-vis` when the evaluated value
+        -- CHANGES, and the cached attribute survives UnregisterStateDriver —
+        -- so a bar that was disabled (manually Hidden) and re-enabled
+        -- evaluated to the same "show" as before, the write was skipped, the
+        -- snippet never fired, and the bar stayed hidden forever (/naga
+        -- re-enable, found live 2026-08-22). Out of combat this SetAttribute
+        -- is legal; in combat ApplyConfig is already QueueSecure-deferred.
+        bar:SetAttribute("state-vis", nil)
         _G.RegisterStateDriver(bar, "vis", conditional)
     else
         bar:Show()
