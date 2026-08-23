@@ -565,11 +565,30 @@ end
 function RealUI:RegisterSkinnedFrame(frame, color)
     skinnedFrames[frame] = color
 end
+-- Stripe alpha with a fallback, matching `defaults.profile.stripeAlpha`.
+--
+-- `private.skinsDB` is only assigned at the END of `private.OnLoad` (and
+-- re-assigned by the profile callbacks), so it can legitimately be nil while
+-- skinning runs — which is how a hover over an Infobar block threw
+-- "attempt to index field 'skinsDB'" from `AddFrameStripes` in beta 9: the
+-- MenuFrame tooltip pool acquires a frame, that gets skinned, and the stripes
+-- hook fires with no DB behind it. Several functions in this file already
+-- guard for exactly this (`if not private.skinsDB then return end`); these two
+-- did not, and they are on the skinning hot path where returning early would
+-- silently drop the stripe instead.
+local DEFAULT_STRIPE_ALPHA = 0.5
+local function GetStripeAlpha()
+    local skinsDB = private.skinsDB
+    return (skinsDB and skinsDB.stripeAlpha) or DEFAULT_STRIPE_ALPHA
+end
+
 function RealUI:UpdateFrameStyle()
+    local skinsDB = private.skinsDB
+    local frameAlpha = skinsDB and skinsDB.frameColor and skinsDB.frameColor.a
     for frame, color in next, skinnedFrames do
         if frame._stripes then
-            Aurora.Base.SetBackdropColor(frame, color, private.skinsDB.frameColor.a)
-            frame._stripes:SetAlpha(private.skinsDB.stripeAlpha)
+            Aurora.Base.SetBackdropColor(frame, color, frameAlpha)
+            frame._stripes:SetAlpha(GetStripeAlpha())
         else
             Aurora.Base.SetBackdropColor(frame, color)
         end
@@ -577,9 +596,10 @@ function RealUI:UpdateFrameStyle()
 end
 function RealUI:AddFrameStripes(Frame)
     local bg = Frame:GetBackdropTexture("bg")
+    if not bg then return end
     local stripes = bg:GetParent():CreateTexture(nil, "BACKGROUND", nil, -6)
     stripes:SetTexture([[Interface\AddOns\RealUI\Media\StripesThin]], true, true)
-    stripes:SetAlpha(private.skinsDB.stripeAlpha)
+    stripes:SetAlpha(GetStripeAlpha())
     stripes:SetAllPoints(bg)
     stripes:SetHorizTile(true)
     stripes:SetVertTile(true)
