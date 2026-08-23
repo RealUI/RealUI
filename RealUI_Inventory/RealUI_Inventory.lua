@@ -21,8 +21,34 @@ local defaults = {
     },
     char = {
         junk = {},
+        -- B06: bag position lock. Per-character by design (the tester's
+        -- reference, cargBags_Nivaya, made it global and slash-only) — an alt
+        -- that never moves its bags should not inherit a main's lock.
+        -- Keyed by bagType so the bank can be locked independently.
+        locked = {
+            main = false,
+            bank = false,
+        },
     }
 }
+
+--[[ B06: bag position lock accessors.
+     Read-guarded because Bags.lua builds the frames during OnInitialize, and
+     the lock button asks for its initial state while `Inventory.db` may still
+     be a frame away. An unreadable DB means "not locked" — the bags stay
+     draggable, which is the safe failure direction. ]]--
+function private.IsBagLocked(bagType)
+    local db = Inventory.db
+    local locked = db and db.char and db.char.locked
+    return (locked and locked[bagType]) and true or false
+end
+
+function private.SetBagLocked(bagType, locked)
+    local db = Inventory.db
+    if not (db and db.char) then return end
+    db.char.locked = db.char.locked or {}
+    db.char.locked[bagType] = locked and true or false
+end
 
 function private.Update()
     Inventory:debug("private.Update")

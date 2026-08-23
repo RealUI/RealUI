@@ -1471,6 +1471,39 @@ local function CreateBag(bagType)
     close:SetPoint("TOPRIGHT", -2, -2)
     Skin.UIPanelCloseButton(close)
     main.close = close
+
+    --[[ B06: per-character position lock.
+         Locking flips SetMovable(false), which is enough on its own: the
+         primary's own drag handler and the categorized bags' forwarded drag
+         (CreateFilterBag, gated on `parent:IsMovable()`) both stop, so the
+         whole cluster freezes without touching either script. ]]--
+    local lock = CreateFeatureButton(main, nil, "unlock", function(dialog)
+        local locked = not private.IsBagLocked(bagType)
+        private.SetBagLocked(bagType, locked)
+        dialog:UpdateLockState()
+    end,
+    function(dialog)
+        _G.GameTooltip:SetOwner(dialog, "ANCHOR_BOTTOMRIGHT")
+        _G.GameTooltip_SetTitle(_G.GameTooltip,
+            private.IsBagLocked(bagType) and "Position Locked" or "Position Unlocked", nil, true)
+        _G.GameTooltip_AddNormalLine(_G.GameTooltip,
+            private.IsBagLocked(bagType)
+                and "Position is locked for this character. Click to unlock."
+                or "Click to lock this position for this character.")
+        _G.GameTooltip:Show()
+    end)
+    lock:SetPoint("RIGHT", close, "LEFT", -2, 0)
+
+    function lock:UpdateLockState()
+        local locked = private.IsBagLocked(bagType)
+        main:SetMovable(not locked)
+        if self.icon then
+            self.icon:SetText(locked and fa["lock"] or fa["unlock"])
+        end
+    end
+
+    main.lock = lock
+    lock:UpdateLockState()
     main.marginTop = main.marginTop + 10
 
     if bagType == "main" then
