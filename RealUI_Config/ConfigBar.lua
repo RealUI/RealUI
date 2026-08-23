@@ -57,6 +57,19 @@ end
 -- Writing through to the other layout keeps the toggle's promise. It matches
 -- the semantics the one-shot copy already established (a full DeepCopy of the
 -- positions table, i.e. the layouts are meant to be identical while linked).
+--- The other layout's positions table, in the PROFILE that layout runs under.
+--
+-- The layouts do not share a profile (layout 1 → "RealUI", layout 2 →
+-- "RealUI-Healing") while `positions` lives on the profile, so mirroring only
+-- inside `db.profile.positions` writes into a table the other layout NEVER
+-- reads. LayoutManager owns the mapping and the store; see the full note on
+-- `GetLayoutPositionsStore`.
+local function otherLayoutPositions(otherLayout)
+    local LayoutManager = RealUI.LayoutManager
+    if not (LayoutManager and LayoutManager.GetLayoutPositionsStore) then return end
+    return LayoutManager:GetLayoutPositionsStore(otherLayout)
+end
+
 local function writePosition(key, value)
     local db = RealUI.db
     if not db then return end
@@ -78,6 +91,13 @@ local function writePosition(key, value)
         local other = layout == 1 and 2 or 1
         positions[other] = positions[other] or {}
         positions[other][key] = value
+
+        -- ...and into the profile that layout runs under, which is the copy it
+        -- will actually read.
+        local otherProfile = otherLayoutPositions(other)
+        if otherProfile then
+            otherProfile[key] = value
+        end
     end
 end
 
@@ -214,14 +234,13 @@ do -- Other
                         type = "toggle",
                         get = function() return RealUI.db.global.positionsLink end,
                         set = function(info, value)
-                            RealUI.db.global.positionsLink = value
-
                             RealUI.cLayout = RealUI.db.char.layout.current
                             RealUI.ncLayout = RealUI.cLayout == 1 and 2 or 1
 
-                            if value then
-                                RealUI.db.profile.positions[RealUI.ncLayout] = RealUI.DeepCopy(RealUI.db.profile.positions[safeLayout()])
-                            end
+                            -- Seeding the other layout (and the profile it
+                            -- actually reads) lives in LayoutManager, shared
+                            -- with the install wizard's Link Layouts option.
+                            RealUI.LayoutManager:SetPositionsLink(value)
                         end,
                         order = 20,
                     },
@@ -253,11 +272,32 @@ do -- Other
                         end,
                         set = function(info, value)
                             local pos = safePositions()
-                            if pos then
-                                writePosition("HuDY", value)
-                                RealUI:UpdatePositioners()
+                            if not pos then return end
+
+                            local previous = pos["HuDY"] or 0
+                            writePosition("HuDY", value)
+                            RealUI:UpdatePositioners()
+
+                            -- Elements the user has dragged are anchored to
+                            -- UIParent, not to a positioner, so UpdatePositioners
+                            -- alone moves nothing for them — the slider looked
+                            -- dead in whichever profile carried saved drag
+                            -- positions. Move them by the same delta.
+                            local delta = value - previous
+                            if delta ~= 0 then
+                                FramePoint:ShiftScreenAnchored(0, delta)
                             end
                         end,
+                    },
+                    -- The tester's own ask: nothing on this panel said what
+                    -- "Link Layouts" covers, so a per-spec Vertical difference
+                    -- read as a bug in the toggle rather than as data it had
+                    -- never been given a chance to copy.
+                    hudVertNote = {
+                        name = L["Layout_LinkNote"],
+                        type = "description",
+                        fontSize = "medium",
+                        order = 41,
                     }
                 }
             },
