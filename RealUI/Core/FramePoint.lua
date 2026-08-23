@@ -288,6 +288,97 @@ function FramePoint:ShiftScreenAnchored(dx, dy)
     end
 end
 
+--- Hand positioner-owned elements back to the HuD sliders (B93).
+--
+-- Once an element has been dragged, LibWindow has saved coordinates for it and
+-- `RestorePosition` anchors its dragFrame to UIParent — the positioner drops
+-- out of the chain permanently. From then on the HuD Vertical and Anchor Width
+-- sliders are decorative for that element: Vertical only nudges it (B87), and
+-- Width does nothing at all, because width is a property of the positioner
+-- frame the element no longer touches.
+--
+-- That is per-profile, and a profile is a spec, which is why a tester saw
+-- `UFHorizontal = 200` in both specs render at different widths while both were
+-- on the same HuD size: in one profile the frames still hung off the positioner,
+-- in the other they carried saved drag coordinates (`player.framePoint =
+-- {point="CENTER", x=-360, y=-148}`).
+--
+-- Clearing the saved coordinates re-attaches them, and the sliders become
+-- authoritative again. Deliberately narrow, same tests as ShiftScreenAnchored:
+-- unit-pinned elements keep their pin, and anything that never belonged to a
+-- positioner (party/raid holders) is left alone.
+-- Undo buffer for the action below. Session-only and deliberately so: this is
+-- a safety net for a mis-click, not a second persistence layer competing with
+-- the profile. Cleared on reload, which the tooltip says.
+local detachedBackup = {}
+
+--- How many hand-placed positions the last re-attach is holding.
+function FramePoint:GetReattachUndoCount()
+    return #detachedBackup
+end
+
+--- Put back what the last re-attach cleared.
+---@return number count restored
+function FramePoint:UndoReattach()
+    local count = 0
+    for _, entry in next, detachedBackup do
+        local config = RealUI.GetOptions(entry.mod.moduleName, entry.optionPath)
+        if config then
+            config.x, config.y = entry.x, entry.y
+            config.point, config.scale = entry.point, entry.scale
+            count = count + 1
+        end
+    end
+    _G.wipe(detachedBackup)
+
+    if count > 0 then
+        self:RefreshMod()
+        if RealUI.UpdatePositioners then
+            RealUI:UpdatePositioners()
+        end
+    end
+    return count
+end
+
+---@return number count of elements re-attached
+function FramePoint:ReattachToPositioners()
+    local count = 0
+    _G.wipe(detachedBackup)
+    for mod, module in next, modules do
+        for _, meta in next, module.frames do
+            local config = RealUI.GetOptions(mod.moduleName, meta.optionPath)
+            if config and config.x
+                and not GetAnchorFrame(config)
+                and WasPositionerAnchored(meta.dragFrame) then
+                -- Remembered BEFORE the wipe: a tester who has spent real time
+                -- hand-placing their HuD should be able to try this and take it
+                -- back, rather than gambling that they prefer the result.
+                detachedBackup[#detachedBackup + 1] = {
+                    mod = mod,
+                    optionPath = meta.optionPath,
+                    x = config.x, y = config.y,
+                    point = config.point, scale = config.scale,
+                }
+                -- The LibWindow keys, and only those: anything else under this
+                -- config belongs to the module, not to the saved position.
+                config.x, config.y = nil, nil
+                config.point, config.scale = nil, nil
+                count = count + 1
+            end
+        end
+    end
+
+    if count > 0 then
+        -- Restores each frame to its `_framePointDefault`, which for these is
+        -- the positioner anchor, then lets the sliders place them.
+        self:RefreshMod()
+        if RealUI.UpdatePositioners then
+            RealUI:UpdatePositioners()
+        end
+    end
+    return count
+end
+
 local function FixCollectionJournal(point, anchor, relPoint, x, y)
     local CollectionsJournal = _G.CollectionsJournal
     local mover = _G.CollectionsJournalMover

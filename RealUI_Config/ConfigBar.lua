@@ -305,6 +305,35 @@ do -- Other
                         type = "description",
                         fontSize = "medium",
                         order = 41,
+                    },
+                    -- B93: dragging an element detaches it from the positioners
+                    -- for good, and after that these sliders cannot place it.
+                    -- Without a way back, a profile that has ever been hand-
+                    -- positioned can never be made to match another one.
+                    reattach = {
+                        name = L["HuD_Reattach"],
+                        desc = L["HuD_ReattachDesc"],
+                        type = "execute",
+                        confirm = true,
+                        confirmText = L["HuD_ReattachConfirm"],
+                        order = 42,
+                        func = function()
+                            local count = FramePoint:ReattachToPositioners()
+                            _G.print(("|cff30d0ffRealUI|r: %d HuD element(s) re-attached to the position sliders."):format(count))
+                        end,
+                    },
+                    undoReattach = {
+                        name = L["HuD_ReattachUndo"],
+                        desc = L["HuD_ReattachUndoDesc"],
+                        type = "execute",
+                        order = 43,
+                        hidden = function()
+                            return FramePoint:GetReattachUndoCount() == 0
+                        end,
+                        func = function()
+                            local count = FramePoint:UndoReattach()
+                            _G.print(("|cff30d0ffRealUI|r: %d hand-placed position(s) restored."):format(count))
+                        end,
                     }
                 }
             },
