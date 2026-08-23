@@ -172,6 +172,80 @@ function LayoutManager:GetLayoutPositions(layoutId)
     return config and config.positions
 end
 
+--- The positions table a layout actually READS, in the profile it runs under.
+--
+-- The two layouts do not share a profile (see `layoutConfigurations`: layout 1
+-- runs on "RealUI", layout 2 on "RealUI-Healing") while `positions` lives on
+-- the profile. So `db.profile.positions[otherLayout]` — the obvious place to
+-- mirror a linked setting into — is a table the other layout never reads: when
+-- you are on layout 2 you are also on the Healing profile, and it is THAT
+-- profile's positions[2] in play. Reported twice by the same tester (B79, then
+-- again in beta 8: "linked is checked but the vertical number differs between
+-- the two specs").
+--
+-- Returns the live table for the current layout, or the raw AceDB store for
+-- the other one (`db.profiles[name]`; defaults are applied when that profile is
+-- next loaded, so writing raw keys into it is safe). Created if absent —
+-- a character that has never used the other layout has no table yet, and that
+-- is exactly the case where linking matters most.
+function LayoutManager:GetLayoutPositionsStore(layoutId)
+    local db = RealUI.db
+    if not (db and self:IsValidLayout(layoutId)) then return end
+
+    local config = self:GetLayoutConfiguration(layoutId)
+    local profileName = config and config.profile
+    if not profileName then return end
+
+    if profileName == db:GetCurrentProfile() then
+        db.profile.positions = db.profile.positions or {}
+        db.profile.positions[layoutId] = db.profile.positions[layoutId] or {}
+        return db.profile.positions[layoutId]
+    end
+
+    if not db.profiles then return end
+    local profile = db.profiles[profileName]
+    if not profile then
+        profile = {}
+        db.profiles[profileName] = profile
+    end
+    profile.positions = profile.positions or {}
+    profile.positions[layoutId] = profile.positions[layoutId] or {}
+    return profile.positions[layoutId]
+end
+
+--- Turn "Link Layouts" on or off.
+--
+-- Account-wide by design (B79: stored per-profile it could read ON in Healing
+-- and OFF in DPS/Tank at once). Turning it ON seeds the other layout from the
+-- current one, so the promise holds from the moment the box is ticked rather
+-- than only for values changed afterwards. Shared by the HuD config toggle and
+-- the install wizard.
+function LayoutManager:SetPositionsLink(enabled)
+    local db = RealUI.db
+    if not db then return end
+
+    db.global.positionsLink = enabled and true or false
+    if not enabled then return end
+
+    local current = RealUI.cLayout or db.char.layout.current or LAYOUT_DPS_TANK
+    local other = (current == LAYOUT_DPS_TANK) and LAYOUT_HEALING or LAYOUT_DPS_TANK
+
+    local source = self:GetLayoutPositionsStore(current)
+    if not source then return end
+
+    -- Both the in-profile copy and the other profile's own copy: the first is
+    -- what a manual layout switch inside one profile reads, the second is what
+    -- the other spec reads.
+    db.profile.positions[other] = RealUI.DeepCopy(source)
+
+    local dest = self:GetLayoutPositionsStore(other)
+    if dest then
+        for key, value in pairs(source) do
+            dest[key] = value
+        end
+    end
+end
+
 function LayoutManager:UpdateLayoutPositions(layoutId, positions)
     if not self:IsValidLayout(layoutId) then
         debug("Invalid layout ID:", layoutId)
