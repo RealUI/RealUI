@@ -215,23 +215,39 @@ do
             registeredChars = {},
             -- HuD positions
             -- NOTE: positionsLink is account-wide (db.global) since 2026-08-23.
-            --[[ DELIBERATELY THE SAME TABLE OBJECT, not a copy.
-                 `RealUI.defaultPositions` doubles as the shared runtime
-                 fallback: HuDPositioning:UpdateRealUIPositions writes its
-                 resolution-scaled calculated values into it and explicitly
-                 does NOT write them into db.profile.positions (that path is
-                 fill-missing-only, because writing there wiped user values on
-                 every layout switch — B44). Those calculated values reach the
-                 profile ONLY through AceDB resolving unsaved keys against this
-                 defaults table.
-                 Deep-copying here (attempted 2026-08-23, reverted same day)
-                 severs that channel: unsaved keys then resolve to the raw
-                 shipped constants instead of the scaled values, which visibly
-                 collapsed the unit frames toward screen centre on HiDPI.
-                 The aliasing is fragile — see B80 — but it is load-bearing.
-                 Do not "fix" it without first giving HuDPositioning a real
-                 write path into the profile. ]]
-            positions = RealUI.defaultPositions,
+            --[[ NO position defaults. This is deliberate — B80/B86, 2026-08-24.
+
+                 `RealUI.defaultPositions` used to be handed to AceDB here, as
+                 the same table object rather than a copy, because it doubles
+                 as the shared runtime fallback: HuDPositioning writes its
+                 resolution-scaled calculated values into it and deliberately
+                 does NOT write them into `db.profile.positions` (that path is
+                 fill-missing-only — writing there wiped user values on every
+                 layout switch, B44).
+
+                 That made AceDB the delivery mechanism for calculated values,
+                 and therefore also the DELETION mechanism for saved ones:
+                 `removeDefaults` strips any saved key equal to the current
+                 default, and the "defaults" here are a live table that the
+                 user's own values get promoted into. Caught in the act
+                 2026-08-24 — a profile went from 11 saved position keys to 3
+                 between two dumps, losing exactly the eight that matched the
+                 defaults table. It is what deleted a linked HuDY write and
+                 left the slider reading 0 (B86).
+
+                 Deep-copying (attempted and reverted 2026-08-23) is NOT the
+                 answer: it severs the channel, unsaved keys fall back to raw
+                 shipped constants instead of scaled ones, and the unit frames
+                 visibly collapse toward centre on HiDPI.
+
+                 Instead the fallback is now explicit, in
+                 `Positioners.GetKeyAdjust`: a missing key reads
+                 `RealUI.defaultPositions[layout][key]` directly. Same value,
+                 same aliasing, same behaviour — AceDB simply is not involved,
+                 so it has nothing to strip. An empty table keeps
+                 `db.profile.positions` a real table for the code that indexes
+                 it without checking. ]]
+            positions = {},
             -- Action Bar settings
             abSettingsLink = false,
             -- Dynamic UI settings

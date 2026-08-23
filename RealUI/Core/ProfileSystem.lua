@@ -87,11 +87,13 @@ function ProfileSystem:GetDatabaseDefaults()
             registeredChars = {},
             -- HuD positions
             -- NOTE: positionsLink is account-wide (db.global) since 2026-08-23.
-            -- Same table object on purpose — see the note at Core.lua's
-            -- defaults table. HuDPositioning's calculated values reach the
-            -- profile only by AceDB resolving unsaved keys against this table,
-            -- so copying it here breaks scaled positioning (B80, reverted).
-            positions = RealUI.defaultPositions,
+            -- NO position defaults here either — see the full note at Core.lua's
+            -- defaults table (B80/B86). Handing AceDB the live defaults table
+            -- made it delete saved positions that matched it; the fallback is
+            -- explicit in `Positioners.GetKeyAdjust` instead. Both registration
+            -- sites must agree, or the one that still supplies defaults brings
+            -- `removeDefaults` straight back.
+            positions = {},
             -- Action Bar settings
             abSettingsLink = false,
             -- Dynamic UI settings

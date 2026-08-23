@@ -73,8 +73,28 @@ local function GetKeyAdjust(key)
          (UFHorizontal is exactly such a key: HuDPositioning never seeds it,
          so the default stays the raw shipped 200 and the offset is owed) and
          leaves every calculated key on the previous zero behaviour. ]]
+    --[[ B80/B86 (2026-08-24): fallback for EVERY key, because AceDB no longer
+         supplies position defaults at all — see the note at Core.lua's
+         `positions = {}`.
+
+         This is deliberately a LIFT-AND-SHIFT of what AceDB used to do
+         implicitly when it resolved an unsaved key against the shared defaults
+         table: read `defaultPositions[layout][key]`, then add the size offset
+         exactly as a saved value would get it. Same value in, same value out,
+         for saved and unsaved keys alike. The only thing that changes is that
+         AceDB no longer holds an opinion about the profile — and so no longer
+         deletes saved keys for matching a default that the user's own values
+         were promoted into.
+
+         `RAW_DEFAULT_KEYS` is kept below for the same reason it was written:
+         it documents which keys hold raw shipped constants versus calculated,
+         already-offset ones. It no longer gates the fallback, because gating
+         it would change behaviour rather than preserve it. Whether adding the
+         offset on top of an already-offset calculated value is right is a real
+         question — see B102 — but it is the behaviour that has been shipping,
+         and changing it belongs in its own change with its own verification,
+         not smuggled into a persistence fix. ]]
     if not value then
-        if not RAW_DEFAULT_KEYS[key] then return 0 end
         local defaults = RealUI.defaultPositions and RealUI.defaultPositions[layout]
         value = defaults and defaults[key]
         if not value then return 0 end
