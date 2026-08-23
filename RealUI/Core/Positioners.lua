@@ -40,7 +40,27 @@ local function GetKeyAdjust(key)
     local layout = RealUI.cLayout or (ndbc and ndbc.layout and ndbc.layout.current) or 1
     local positions = ndb and ndb.positions and ndb.positions[layout]
     local value = positions and positions[key]
-    if not value then return 0 end
+
+    -- A missing key falls back to the SHARED DEFAULT, not to zero.
+    --
+    -- Zero was introduced to stop config sliders erroring on a partly
+    -- populated layout, but zero is a meaningful offset, and for the width
+    -- keys it is catastrophic: the UnitFrames positioner is 80 wide plus
+    -- UFHorizontal, so a missing UFHorizontal collapsed it from 380 to 80 and
+    -- pulled both unit frames into the middle of the screen the moment
+    -- anything called UpdatePositioners (measured 2026-08-23: profile key nil,
+    -- RealUI.defaultPositions still holding 200). Frames looked right at login
+    -- only because their own module placed them before any positioner run.
+    --
+    -- RealUI.defaultPositions is the documented shared fallback source — it
+    -- carries the shipped constants plus HuDPositioning's calculated values
+    -- (see HuDPositioning:UpdateRealUIPositions) — so it is exactly what an
+    -- unset key is supposed to resolve to.
+    if not value then
+        local defaults = RealUI.defaultPositions and RealUI.defaultPositions[layout]
+        value = defaults and defaults[key]
+        if not value then return 0 end
+    end
 
     return value + GetHuDSizeOffset(key)
 end
