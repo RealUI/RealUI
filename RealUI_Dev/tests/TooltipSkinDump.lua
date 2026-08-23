@@ -46,10 +46,28 @@ local function DescribeBackdrop(frame, label)
     if frame.GetAlpha then
         line = line .. (" alpha=%.2f"):format(frame:GetAlpha())
     end
+    if frame.GetEffectiveAlpha then
+        line = line .. (" effAlpha=%.2f"):format(frame:GetEffectiveAlpha())
+    end
     if frame.IsShown then
-        line = line .. (" shown=%s"):format(fmt(frame:IsShown()))
+        line = line .. (" shown=%s vis=%s"):format(fmt(frame:IsShown()), fmt(frame:IsVisible()))
     end
     _G.print(line)
+
+    -- The rect is the field that separates "no backdrop" from "a backdrop on a
+    -- frame with no size". A NineSlice that never got sized to its tooltip
+    -- renders nothing while reporting a perfectly healthy backdrop.
+    if frame.GetRect then
+        local l, b, w, h = frame:GetRect()
+        if l and not _G.issecretvalue(l) then
+            _G.print(("      rect: %.0f,%.0f  %.0fx%.0f  strata=%s level=%d"):format(
+                l, b, w or 0, h or 0,
+                frame.GetFrameStrata and frame:GetFrameStrata() or "?",
+                frame.GetFrameLevel and frame:GetFrameLevel() or -1))
+        else
+            _G.print("      rect: none (never laid out)")
+        end
+    end
 end
 
 local NINE_SLICE_PIECES = {
@@ -80,7 +98,7 @@ local function DescribeTooltip(name)
     DescribeBackdrop(nineSlice, "NineSlice")
 
     -- Blank pieces are the signature of ApplyLayout's else branch.
-    local blank, present, missing = 0, 0, 0
+    local blank, present, missing, hidden = 0, 0, 0, 0
     for _, key in _G.ipairs(NINE_SLICE_PIECES) do
         local piece = nineSlice[key]
         if not piece then
@@ -89,9 +107,24 @@ local function DescribeTooltip(name)
             blank = blank + 1
         else
             present = present + 1
+            if piece.IsShown and not piece:IsShown() then hidden = hidden + 1 end
         end
     end
-    _G.print(("    pieces: %d textured, %d blanked, %d absent"):format(present, blank, missing))
+    _G.print(("    pieces: %d textured (%d of them hidden), %d blanked, %d absent"):format(
+        present, hidden, blank, missing))
+
+    -- Border tint and alpha: this is what separated the shopping tooltips from
+    -- GameTooltip once the backdrop stacking was fixed, and it is invisible in
+    -- every other field here. RealUI_Tooltips re-tints these on
+    -- OnTooltipCleared, but only for tooltips it has hooked.
+    local edge = nineSlice.TopEdge
+    if edge and edge.GetVertexColor then
+        local r, g, b = edge:GetVertexColor()
+        if r and not _G.issecretvalue(r) then
+            _G.print(("    border: tint=%.2f,%.2f,%.2f alpha=%.2f"):format(
+                r, g, b, edge:GetAlpha()))
+        end
+    end
 end
 
 function ns.commands:tooltipdump()
