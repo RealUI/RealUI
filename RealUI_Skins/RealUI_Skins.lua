@@ -740,9 +740,45 @@ function private.OnLoad()
     if _G.ChatConfigFrame then
         stripeExemptFrames[_G.ChatConfigFrame] = true
     end
+
+    -- Exempt by NAME as well, for frames that do not exist yet when this list
+    -- is built. Everything above is load-on-login; a demand-loaded addon's
+    -- frames are not there to reference, so `_G.X` would silently be nil and
+    -- the exemption would never take.
+    --
+    -- B57 (2026-08-23): CommunitiesFrame. Aurora skins it with
+    -- `ButtonFrameTemplateMinimizable` → `PortraitFrameBaseTemplate` →
+    -- `NineSlicePanelTemplate` → a NineSlice layout that calls
+    -- `Skin.FrameTypeFrame`, which lands here and plants a RealUI_Skins-owned
+    -- stripes texture inside `CommunitiesFrame.NineSlice`. Same vector as the
+    -- objective tracker and chat config above, and the only live RealUI_Skins
+    -- object anywhere near the community list — which is what the
+    -- `ADDON_ACTION_BLOCKED ... RealUI_Skins ... SetAvatarTexture()` blame
+    -- string has been pointing at all along.
+    --
+    -- The object-identity entries above have the same weakness whenever their
+    -- frame is not up yet, and the 2026-08-23 taint.log shows at least one of
+    -- them silently failing: `CURRENT_CHAT_FRAME_ID` is STILL being tainted by
+    -- RealUI_Skins at login, through
+    -- `ChatConfig_UpdateChatSettings → UpdateTabDisplay → UpdateSelection`
+    -- (ChatConfigFrame.lua:2425 writes it) — the exact chain the chat-config
+    -- exemption above was added to stop. Listing all three by name makes the
+    -- exemption independent of who loaded first.
+    local stripeExemptNames = {
+        CommunitiesFrame = true,
+        ChatConfigFrame = true,
+        ObjectiveTrackerFrame = true,
+    }
+
     local function IsStripeExempt(frame)
         while frame do
             if stripeExemptFrames[frame] then return true end
+            local name = frame.GetName and frame:GetName()
+            if name and stripeExemptNames[name] then
+                -- Cache the object so later checks skip the name lookup.
+                stripeExemptFrames[frame] = true
+                return true
+            end
             frame = frame.GetParent and frame:GetParent()
         end
         return false
