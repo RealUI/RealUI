@@ -512,11 +512,17 @@ function ClassResource:OnInitialize()
                 gap = 2,
             },
             position = {
-                x = -160,
-                y = -40.5,
+                --[[ B12: class points pinned to the player frame by DEFAULT
+                     (2026-08-23). Arnvid's placement, left-below the player
+                     frame, re-measured 2026-08-22 AFTER the ClassResource
+                     drag-save fix — the earlier readings were LibWindow
+                     screen coords masquerading as frame-relative offsets.
+                     Matches the `/realui newdefaults` "pinned" item. ]]
+                x = -85,
+                y = -25,
                 point = "CENTER",
                 -- "screen" | "player" | "target" | "focus" (FramePoint.ANCHOR_FRAMES)
-                anchorTo = "screen",
+                anchorTo = "player",
             },
         }
 

@@ -562,11 +562,19 @@ function CastBars:OnInitialize()
         profile = {
             player = {
                 position = {
-                    point = "CENTER",
-                    x = -121,
-                    y = -141,
+                    --[[ B12: pinned to the unit frame by DEFAULT (2026-08-23).
+                         Offsets are Arnvid's hand-tuned reference layout,
+                         measured live via /realdev layoutdump 2026-08-22 and
+                         symmetrized against the target bar (x mirrored, y
+                         averaged). Screen anchoring remains available via the
+                         "Anchor To" option; these are the same values the
+                         `/realui newdefaults` "pinned" item applies, so the
+                         shipped defaults and the migration nudge now agree. ]]
+                    point = "TOP",
+                    x = -10,
+                    y = -48,
                     -- "screen" | "player" | "target" | "focus" (FramePoint.ANCHOR_FRAMES)
-                    anchorTo = "screen",
+                    anchorTo = "player",
                 },
                 scale = 1,
                 text = "BOTTOMRIGHT",
@@ -576,10 +584,11 @@ function CastBars:OnInitialize()
             },
             target = {
                 position = {
-                    point = "CENTER",
-                    x = 121,
-                    y = -141,
-                    anchorTo = "screen",
+                    -- B12: pinned by default — see the player bar above.
+                    point = "TOP",
+                    x = 10,
+                    y = -48,
+                    anchorTo = "target",
                 },
                 scale = 1,
                 text = "BOTTOMLEFT",
@@ -588,10 +597,11 @@ function CastBars:OnInitialize()
             },
             focus = {
                 position = {
-                    point = "LEFT",
-                    x = 432,
-                    y = -72.5,
-                    anchorTo = "screen",
+                    -- B12: pinned by default — see the player bar above.
+                    point = "TOP",
+                    x = -6,
+                    y = -34,
+                    anchorTo = "focus",
                 },
                 scale = 1,
                 reverse = true,
