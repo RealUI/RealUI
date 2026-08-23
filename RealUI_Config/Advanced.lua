@@ -315,7 +315,25 @@ do -- RealUI
             if blockInfo.enabled ~= -1 then
                 numBlocks = numBlocks + 1
                 local displayName = block.dataObj.name or name
-                local blockOrder = (block.dataObj.type == "RealUI" and realuiOrder or otherOrder) + index
+
+                --[[ Order comes from a per-category counter ALONE.
+                     It used to be `base + index`, mixing a per-category
+                     counter that steps by 5 with the block's position in the
+                     full ordered list, which steps by 1 and counts the other
+                     category's blocks too. Two entries could then land on the
+                     same order, and AceConfigDialog lays same-order widgets
+                     over each other — which is what a "Show label" checkbox
+                     that is invisible but still clickable, and that steals the
+                     neighbouring row's checkbox when clicked, actually is.
+                     Each block owns a clean band of 5. ]]
+                local blockOrder
+                if block.dataObj.type == "RealUI" then
+                    realuiOrder = realuiOrder + 5
+                    blockOrder = realuiOrder
+                else
+                    otherOrder = otherOrder + 5
+                    blockOrder = otherOrder
+                end
                 infobar.args.blocks.args[name.."Toggle"] = {
                     name = displayName,
                     desc = L["General_EnabledDesc"]:format(displayName),
@@ -362,12 +380,6 @@ do -- RealUI
                     end,
                     order = blockOrder + 2,
                 }
-                if block.dataObj.type == "RealUI" then
-                    realuiOrder = realuiOrder + 5
-                else
-                    otherOrder = otherOrder + 5
-                end
-
                 if blockInfo.enabled then
                     numEnabled = numEnabled + 1
                 end

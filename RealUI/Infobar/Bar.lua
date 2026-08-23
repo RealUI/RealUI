@@ -281,7 +281,17 @@ function BlockMixin:AdjustElements(blockInfo)
         end
     end
 
-    if blockInfo.showLabel then
+    --[[ A third-party data source is free to put its own name in `text`, and
+         some do — SimulationCraft reports `text = "SimulationCraft"` with the
+         same label, so the block rendered "SimulationCraft SimulationCraft".
+         Showing a label that only repeats the value is never what the setting
+         is for, so suppress it in that case; the setting still governs every
+         block whose label adds information. ]]
+    local labelText = self.label and self.label:GetText()
+    local isDuplicateLabel = labelText and labelText ~= ""
+        and labelText == self.text:GetText()
+
+    if blockInfo.showLabel and not isDuplicateLabel then
         if self.icon and blockInfo.showIcon then
             self.label:SetPoint("LEFT", self.icon, "RIGHT", 0, 0)
         else
