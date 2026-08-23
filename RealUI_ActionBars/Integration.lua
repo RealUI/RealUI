@@ -30,17 +30,33 @@ local function IsOdd(value)
     return value % 2 == 1
 end
 
+--[[ Height of the strip the bottom bar row must clear (the Infobar).
+
+     Takes the LARGER of the live frame height and the scaled BAR_HEIGHT
+     constant rather than preferring the live value outright. The old
+     `height > 0` guard accepted any positive number, so an Infobar caught
+     mid-construction — sized but not yet laid out — yielded a too-small base
+     and sat the bottom bar row on top of it. B65 is an unreproduced report of
+     exactly that, and the failure is invisible afterwards because nothing
+     re-runs the layout once the Infobar finishes sizing.
+
+     The raw `16` last resort is deliberately last: it is the UNSCALED
+     constant and is known to put bars ~29px under the Infobar on HiDPI (see
+     the ActionBarsBotY section of the spec-swap steering doc). ]]
 local function GetBottomBase()
+    local RealUI = _G.RealUI
+    local scaled = 16
+    if RealUI and RealUI.Scale and RealUI.Scale.Value then
+        scaled = RealUI.Scale.Value(16) or 16
+    end
+
     local infobar = _G.RealUI_Infobar
     if infobar and infobar.GetHeight then
         local height = infobar:GetHeight()
-        if height and height > 0 then return height end
+        if height and height > scaled then return height end
     end
-    local RealUI = _G.RealUI
-    if RealUI and RealUI.Scale and RealUI.Scale.Value then
-        return RealUI.Scale.Value(16)
-    end
-    return 16
+
+    return scaled
 end
 
 function private.ApplyRealUILayout()
