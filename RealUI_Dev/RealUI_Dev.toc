@@ -64,6 +64,7 @@ tests\PositionerResizeTest.lua
 tests\ToTStabilityDiag.lua
 tests\CopyChatDiag.lua
 tests\LayoutDump.lua
+tests\TooltipSkinDump.lua
 tests\DeprecatedAPIAbsenceTest.lua
 tests\AdvancedFeaturesTest.lua
 tests\ModuleFrameworkTest.lua
