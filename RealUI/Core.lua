@@ -151,6 +151,18 @@ do
             editmode = {
                 migrationVersion = false, -- false = not yet migrated
             },
+            --[[ "Link Layouts": do HuD position edits apply to BOTH layouts?
+                 ACCOUNT-WIDE, because the data it governs is. `positions`
+                 lives in profile scope, and the layout profiles (RealUI /
+                 RealUI-Healing) are shared by every character using them — so
+                 a per-character flag could not protect anything: one character
+                 editing with link on rewrites both profiles for everyone.
+                 It was profile scoped until 2026-08-23 (which let it read ON
+                 in Healing and OFF in DPS/Tank at once), then briefly char
+                 scoped, which had the same mismatch one level up.
+                 Unlike scopeLinks, which IS per-character because it selects
+                 which profile each scope follows and that varies by spec. ]]
+            positionsLink = true,
         },
         char = {
             init = charInit,
@@ -164,6 +176,7 @@ do
                 skins = false,  -- Appearance shared across specs by default
                 bt4 = true      -- Action bars change with spec by default
             },
+
             editmode = {
                 perCharacter = false, -- Use account-wide EditMode layouts by default
             }
@@ -174,7 +187,7 @@ do
             },
             registeredChars = {},
             -- HuD positions
-            positionsLink = true,
+            -- NOTE: positionsLink is account-wide (db.global) since 2026-08-23.
             --[[ DELIBERATELY THE SAME TABLE OBJECT, not a copy.
                  `RealUI.defaultPositions` doubles as the shared runtime
                  fallback: HuDPositioning:UpdateRealUIPositions writes its

@@ -50,6 +50,10 @@ function ProfileSystem:GetDatabaseDefaults()
             currency = {},
             profileVersion = PROFILE_VERSION,
             unifiedProfilesMigrated = false, -- Migration marker for unified profile system
+            -- "Link Layouts" — account-wide; see the note in Core.lua. The
+            -- layout profiles it writes through to are shared by every
+            -- character, so a narrower scope cannot protect anything.
+            positionsLink = true,
             display = {
                 presetId     = false,   -- false = not yet configured
                 customScale  = 1.0,
@@ -74,7 +78,7 @@ function ProfileSystem:GetDatabaseDefaults()
             scopeLinks = {
                 skins = false,  -- Appearance shared across specs by default
                 bt4 = true      -- Action bars change with spec by default
-            }
+            },
         },
         profile = {
             modules = {
@@ -82,7 +86,7 @@ function ProfileSystem:GetDatabaseDefaults()
             },
             registeredChars = {},
             -- HuD positions
-            positionsLink = true,
+            -- NOTE: positionsLink is account-wide (db.global) since 2026-08-23.
             -- Same table object on purpose — see the note at Core.lua's
             -- defaults table. HuDPositioning's calculated values reach the
             -- profile only by AceDB resolving unsaved keys against this table,

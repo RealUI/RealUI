@@ -74,7 +74,7 @@ local function writePosition(key, value)
     positions[layout] = positions[layout] or {}
     positions[layout][key] = value
 
-    if db.profile.positionsLink then
+    if db.global.positionsLink then
         local other = layout == 1 and 2 or 1
         positions[other] = positions[other] or {}
         positions[other][key] = value
@@ -212,9 +212,9 @@ do -- Other
                         name = L["Layout_Link"],
                         desc = L["Layout_LinkDesc"],
                         type = "toggle",
-                        get = function() return RealUI.db.profile.positionsLink end,
+                        get = function() return RealUI.db.global.positionsLink end,
                         set = function(info, value)
-                            RealUI.db.profile.positionsLink = value
+                            RealUI.db.global.positionsLink = value
 
                             RealUI.cLayout = RealUI.db.char.layout.current
                             RealUI.ncLayout = RealUI.cLayout == 1 and 2 or 1
