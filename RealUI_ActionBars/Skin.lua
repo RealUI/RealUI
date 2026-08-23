@@ -131,6 +131,19 @@ local function ApplyStateTextures(button)
         flash:SetAllPoints(button)
     end
 
+    -- B85: the gold "new action" marker. Blizzard's template declares it
+    -- `atlas="UI-HUD-ActionBar-IconFrame-Mouseover" useAtlasSize="true"` on a
+    -- single TOPLEFT anchor, so like Flash above it draws at the 45px-button
+    -- atlas size and hangs off a 27px button into its neighbours. It only
+    -- shows while an action is flagged new (LAB's UpdateNewAction, driven by
+    -- Blizzard's ACTION_HIGHLIGHT_MARKS), which is why it appears in a batch
+    -- right after a spec swap replaces spells on the bars.
+    local newAction = button.NewActionTexture
+    if newAction then
+        newAction:ClearAllPoints()
+        newAction:SetAllPoints(button)
+    end
+
     -- B18: assisted-combat overlays (created lazily by LAB from Blizzard
     -- templates).
     ConstrainAssistOverlay(button, button.AssistedCombatRotationFrame)
