@@ -59,6 +59,21 @@ RealUI.CORE_HUD_MODULES = {
     "CastBars", "UnitFrames", "ClassResource", "SpellAlerts", "Infobar",
 }
 
+--- Report core HuD modules switched off in the ACTIVE profile.
+-- Returns a comma-joined name list, or nil when everything is on.
+function RealUI:GetDisabledCoreModules()
+    local profile = self.db and self.db.profile
+    if not (profile and profile.modules) then return nil end
+
+    local off
+    for _, name in next, RealUI.CORE_HUD_MODULES do
+        if profile.modules[name] == false then
+            off = off and (off .. ", " .. name) or name
+        end
+    end
+    return off
+end
+
 RealUI.defaultPositions = {
     [1] = {
         -- DPS/Tank Layout
@@ -546,11 +561,10 @@ function RealUI:ChatCommand_Config(input)
             -- no error, no message, the element simply is not there. A stale
             -- `false` from the 3.x-era profile-cascade bugs left cast bars off
             -- in a healing profile for months without a single clue on screen.
-            for _, name in next, RealUI.CORE_HUD_MODULES do
-                if RealUI.db.profile.modules[name] == false then
-                    report("Module " .. name .. " (disabled in profile '"
-                        .. tostring(RealUI.db:GetCurrentProfile()) .. "')", false, true)
-                end
+            local offModules = RealUI:GetDisabledCoreModules()
+            if offModules then
+                report("Modules " .. offModules .. " (disabled in profile '"
+                    .. tostring(RealUI.db:GetCurrentProfile()) .. "')", false, true)
             end
 
             if _G.C_AddOns.IsAddOnLoaded("RealUI_Dev") then
@@ -1740,23 +1754,6 @@ function RealUI:OnInitialize()
     -- Display account status information
     _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
 
-    -- B78: name any core HuD module that is switched off in this profile.
-    -- Without this the element is simply absent and reads as a fault; see the
-    -- CORE_HUD_MODULES note. Deliberately a single line, and only when
-    -- something is actually off, so a normal login stays quiet.
-    do
-        local off
-        for _, name in next, RealUI.CORE_HUD_MODULES do
-            if db.modules[name] == false then
-                off = off and (off .. ", " .. name) or name
-            end
-        end
-        if off then
-            _G.print(("|cff0099ffRealUI|r: |cffffcc00%s|r switched off in profile '%s' — that is a setting, not a fault. Re-enable in |cff88ccff/realadv|r.")
-                :format(off, RealUI.db:GetCurrentProfile()))
-        end
-    end
-
     debug("OnInitialize completed successfully")
 end
 
@@ -1995,3 +1992,27 @@ end
 function RealUI:GetNamespace(name)
     return self.namespaces and self.namespaces[name]
 end
+
+--[[ B78: announce core HuD modules that are switched off.
+
+     MUST be deferred, not printed from OnInitialize. LibDualSpec switches the
+     profile after init — a healer logging in is still on "RealUI" at
+     OnInitialize time and only lands on "RealUI-Healing" a moment later. The
+     first attempt printed from OnInitialize and stayed silent for exactly the
+     case it was written for: CastBars disabled in RealUI-Healing, checked
+     against RealUI, reported nothing (verified in game 2026-08-23).
+
+     Same PLAYER_ENTERING_WORLD + 8s pattern the new-defaults popup uses, for
+     the same reason: it is the first point at which the profile cascade,
+     spec detection and module states have all settled. ]]
+local moduleNoticeFrame = _G.CreateFrame("Frame")
+moduleNoticeFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+moduleNoticeFrame:SetScript("OnEvent", function(self)
+    self:UnregisterAllEvents()
+    _G.C_Timer.After(8, function()
+        local off = RealUI:GetDisabledCoreModules()
+        if not off then return end
+        _G.print(("|cff0099ffRealUI|r: |cffffcc00%s|r switched off in profile '%s' — that is a setting, not a fault. Re-enable in |cff88ccff/realadv|r.")
+            :format(off, RealUI.db:GetCurrentProfile()))
+    end)
+end)
