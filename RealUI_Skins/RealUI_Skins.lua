@@ -802,10 +802,33 @@ function private.OnLoad()
 
          A forbidden frame is not ours to skin under any circumstances, so
          treat it as exempt and stop walking. ]]
+    --[[ Never stripe anything in the tooltip family, by TYPE.
+
+         The named entries above (GameTooltip, EmbeddedItemTooltip,
+         ShoppingTooltip1/2) show the list was always trying to say "not
+         tooltips" and could only name the ones somebody had been bitten by.
+         It missed the rest, and the misses are expensive: `AddFrameStripes`
+         does `CreateTexture` on its target, and the objective-tracker doctrine
+         is explicit that an object planted inside a Blizzard update cycle
+         taints it. Tooltips are displayed *from* those cycles.
+
+         Two errors on 2026-08-24 came through this door — a forbidden widget
+         tooltip (B96) and `textHeight = <secret number>` in
+         `GameTooltip_AddWidgetSet` on an AreaPOI tooltip, which is precisely
+         what the taint-safe GameTooltip skin was written to prevent. Both
+         frames were anonymous (`SharedTooltipTemplates.xml:19`), so no name
+         list could ever have caught them.
+
+         `GetObjectType()` catches every tooltip — named, anonymous,
+         demand-loaded or added in a future patch. Checked after the forbidden
+         guard, since it throws on forbidden objects too. ]]
     local function IsStripeExempt(frame)
         while frame do
             if frame.IsForbidden and frame:IsForbidden() then return true end
             if stripeExemptFrames[frame] then return true end
+            if frame.GetObjectType and frame:GetObjectType() == "GameTooltip" then
+                return true
+            end
 
             local name = frame.GetName and frame:GetName()
             if name and stripeExemptNames[name] then
