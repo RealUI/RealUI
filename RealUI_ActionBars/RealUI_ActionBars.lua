@@ -134,7 +134,86 @@ end
 --[[ Blizzard action bar suppression: with Bartender4 out of the picture,
      nothing else parks Blizzard's bars. Reparent the action-button containers
      to a hidden frame (pcall-guarded, reversible on disable); the stance and
-     pet bars stay Blizzard's until our replacements land (milestone 2). ]]--
+     pet bars stay Blizzard's — StancePetBar.lua adopts their buttons.
+
+     B51/B55 — PARKING A BAR IS NOT THE SAME AS SILENCING IT.
+
+     `Suppress` only ever reparented. Every parked bar kept its event
+     registrations, every parked BUTTON kept its own, and nothing was ever
+     Hide()n — they are invisible purely because the hider frame is. So
+     Blizzard's handlers went on running normally, on frames whose parent
+     chain is now addon-owned, and both captured combat errors are exactly
+     those handlers reaching a protected call:
+
+       ActionButton:OnEvent -> OnActionBarSlotChanged -> UpdateAction ->
+         ActionBar:UpdateShownButtons -> MultiBarBottomLeftButton1:SetShown()
+       ActionButton:OnEvent -> ActionButton_UpdateCooldown ->
+         ActionButton_ApplyCooldown -> ...Button4Cooldown:SetCooldown()
+
+     Both are new behaviour dating from the BT4 removal (2026-08-22).
+
+     The other two hypotheses are disproved, not merely unlikely:
+       A. Aurora skinning the parked buttons — its MultiActionBar path is gated
+          `not private.disabled.mainmenubar and private.isClassic`, and
+          RealUI_Skins sets that flag (`RealUI_Skins.lua:666`).
+       C. RealUI_Skins frame stripes — `AddFrameStripes` runs only from the
+          `Skin.FrameTypeFrame` / `PanelTabButtonTemplate` hooks, which never
+          fire for a frame Aurora never skins.
+     RealUI_Skins is named in the blame string as a bystander: taint spreads
+     through the execution, and it is the addon with the widest hook surface. ]]--
+
+--- Make a key on a frame secure again after an insecure write.
+--
+-- Taint is tracked per key, and the bookkeeping only re-evaluates when the
+-- table is written to again — so a key stays marked until something disturbs
+-- it. Poking throwaway numeric keys is the community-standard way to force
+-- that re-evaluation. Bounded, unlike the usual `repeat until` form: a key
+-- that never comes back clean must not hang the client.
+local function ScrubKey(frame, key)
+    frame[key] = nil
+    if _G.issecurevariable(frame, key) then return true end
+
+    for i = 42, 442 do
+        if frame[i] == nil then
+            frame[i] = nil
+        end
+        if _G.issecurevariable(frame, key) then return true end
+    end
+    return false
+end
+
+--- Stop a parked bar from running Blizzard's update code at all.
+local function SilenceFrame(frame, clearEvents)
+    if clearEvents then
+        _G.pcall(frame.UnregisterAllEvents, frame)
+    end
+
+    -- EditMode REPLACES Hide() on the systems it manages, and calling that
+    -- override from insecure code taints the system; HideBase is the original.
+    if frame.HideBase then
+        _G.pcall(frame.HideBase, frame)
+    else
+        _G.pcall(frame.Hide, frame)
+    end
+
+    -- EditMode's "something outside me is showing this" flag. Left set on a
+    -- frame we just parked, it invites the system to show it straight back.
+    if frame.system and frame.isShownExternal ~= nil then
+        ScrubKey(frame, "isShownExternal")
+    end
+end
+
+--- Silence one replaced action button.
+local function SilenceButton(button)
+    if not button then return end
+    _G.pcall(button.UnregisterAllEvents, button)
+    _G.pcall(button.Hide, button)
+    -- Consulted by the secure state drivers before a button is shown again.
+    -- Legal out of combat only, which is what QueueSecure guarantees.
+    _G.pcall(button.SetAttribute, button, "statehidden", true)
+    -- Sever the button -> bar backlink so the bar's own update loops skip it.
+    button.bar = nil
+end
 
 local blizzHider
 local suppressedBars = {}
@@ -159,6 +238,27 @@ local ANCHOR_BUTTONS = {
     "MultiBar5Button1", "MultiBar6Button1", "MultiBar7Button1",
 }
 
+-- Bars RealUI REPLACES outright: silence the container and its 12 buttons
+-- (B51/B55). Deliberately not here:
+--   StanceBar / PetActionBar — StancePetBar.lua adopts their buttons and
+--     depends on Blizzard's own update logic to drive icons and cooldowns.
+--     Unregistering those events would leave the adopted buttons blank.
+--   PossessActionBar, BagsBar, MicroMenuContainer, the status tracking bars —
+--     no button-update path and no reported errors; parking is enough.
+local REPLACED_BARS = {
+    { frame = "MainMenuBar",         buttons = nil,                          clearEvents = false },
+    { frame = "MainActionBar",       buttons = "ActionButton",               clearEvents = false },
+    { frame = "MultiBarBottomLeft",  buttons = "MultiBarBottomLeftButton",   clearEvents = true },
+    { frame = "MultiBarBottomRight", buttons = "MultiBarBottomRightButton",  clearEvents = true },
+    { frame = "MultiBarRight",       buttons = "MultiBarRightButton",        clearEvents = true },
+    { frame = "MultiBarLeft",        buttons = "MultiBarLeftButton",         clearEvents = true },
+    { frame = "MultiBar5",           buttons = "MultiBar5Button",            clearEvents = true },
+    { frame = "MultiBar6",           buttons = "MultiBar6Button",            clearEvents = true },
+    { frame = "MultiBar7",           buttons = "MultiBar7Button",            clearEvents = true },
+}
+-- MainMenuBar (<= 11.2.5) and MainActionBar (>= 11.2.7) are the same bar under
+-- two names across client versions; whichever exists owns ActionButton1..12.
+
 local function Suppress(frame, key)
     if not frame then return end
     local ok, parent = _G.pcall(frame.GetParent, frame)
@@ -170,9 +270,31 @@ local function Suppress(frame, key)
     end
 end
 
+-- Silencing is one-way (events cannot be handed back) so it runs ONCE per
+-- frame, unlike Suppress, which re-runs on every EditMode layout apply.
+local silenced = {}
+local function SilenceReplacedBars()
+    for _, bar in _G.ipairs(REPLACED_BARS) do
+        local frame = _G[bar.frame]
+        if frame and not silenced[bar.frame] then
+            silenced[bar.frame] = true
+            SilenceFrame(frame, bar.clearEvents)
+            if bar.buttons then
+                for i = 1, 12 do
+                    SilenceButton(_G[bar.buttons .. i])
+                end
+            end
+        end
+    end
+end
+
 function private.HideBlizzardBars()
     blizzHider = blizzHider or _G.CreateFrame("Frame", "RealUI_AB_BlizzHider", _G.UIParent)
     blizzHider:Hide()
+
+    -- Before the reparent: a silenced bar has nothing left to run, so the
+    -- parent swap cannot strand a handler mid-flight.
+    SilenceReplacedBars()
 
     for _, name in _G.ipairs(BLIZZARD_BARS) do
         Suppress(_G[name], name)
@@ -192,6 +314,12 @@ function AB:OnDisable()
     for key, info in _G.next, suppressedBars do
         _G.pcall(info.frame.SetParent, info.frame, info.parent)
         suppressedBars[key] = nil
+    end
+    -- Parenting is reversible; silencing is not — UnregisterAllEvents discards
+    -- the registration list, and Blizzard rebuilds it only at load. A session
+    -- that has silenced the bars needs a reload to get them back.
+    if _G.next(silenced) then
+        _G.print("|cff30d0ffRealUI ActionBars|r: reload to restore Blizzard's action bars.")
     end
 end
 
