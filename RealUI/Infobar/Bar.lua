@@ -313,6 +313,22 @@ end
 local function CreateNewBlock(name, dataObj, blockInfo)
     Infobar:debug("CreateNewBlock", name, dataObj)
     local block = _G.Mixin(_G.CreateFrame("Button", nil, Infobar.frame), BlockMixin)
+
+    --[[ B91: drop the placeholder this block is replacing.
+         `LibDataBroker_DataObjectCreated` parks a FAKE block for every
+         disabled data source — a plain table with `isFake`, no frame and no
+         BlockMixin — so it still shows up in the config list. Enabling that
+         block used to append the real one and leave the fake behind, so
+         `orderedBlocks` held both. The fake then had `blockInfo.enabled ==
+         true` alongside it and any consumer that called a mixin method on it
+         got "attempt to call a nil value" — `AdjustElements` from the Infobar
+         config toggles. `blocksByData` was always replaced correctly; only the
+         ordered list leaked. ]]
+    local stale = blocksByData[dataObj]
+    if stale and stale.isFake then
+        _G.tDeleteItem(orderedBlocks, stale)
+    end
+
     blocksByData[dataObj] = block
     block.dataObj = dataObj
     block.name = name

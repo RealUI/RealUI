@@ -256,7 +256,9 @@ do -- RealUI
                                     local blockInfo = Infobar:GetBlockInfo(block.name, block.dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         blockInfo.showLabel = not not value
-                                        if blockInfo.enabled then
+                                        -- Fake blocks (disabled data sources)
+                                        -- are plain tables with no mixin.
+                                        if blockInfo.enabled and block.AdjustElements then
                                             block:AdjustElements(blockInfo)
                                         end
                                     end
@@ -276,7 +278,9 @@ do -- RealUI
                                     local blockInfo = Infobar:GetBlockInfo(block.name, block.dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         blockInfo.showIcon = not not value
-                                        if blockInfo.enabled then
+                                        -- Fake blocks (disabled data sources)
+                                        -- are plain tables with no mixin.
+                                        if blockInfo.enabled and block.AdjustElements then
                                             block:AdjustElements(blockInfo)
                                         end
                                     end
@@ -337,7 +341,9 @@ do -- RealUI
                     set = function(data, value)
                         allLabeled = nil
                         blockInfo.showLabel = value
-                        block:AdjustElements(blockInfo)
+                        if block.AdjustElements then
+                            block:AdjustElements(blockInfo)
+                        end
                     end,
                     order = blockOrder + 1,
                 }
@@ -350,7 +356,9 @@ do -- RealUI
                     set = function(data, value)
                         allIcons = nil
                         blockInfo.showIcon = value
-                        block:AdjustElements(blockInfo)
+                        if block.AdjustElements then
+                            block:AdjustElements(blockInfo)
+                        end
                     end,
                     order = blockOrder + 2,
                 }
