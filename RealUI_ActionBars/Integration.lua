@@ -59,6 +59,34 @@ local function GetBottomBase()
     return scaled
 end
 
+--[[ B65, the other half: taking the larger value stops us BELIEVING a
+     half-built Infobar, but it does not fix the case the comment above
+     admits — "nothing re-runs the layout once the Infobar finishes sizing".
+     A layout computed while the Infobar was still smaller than its final
+     height stays wrong for the rest of the session, which is exactly the
+     shape of an unreproducible overlap report: it depends on load-order
+     timing, and once it has happened nothing disturbs it.
+
+     So watch the Infobar and recompute when its height actually changes.
+     Cheap: OnSizeChanged fires rarely, the layout is only re-driven when the
+     base moves by more than a rounding wobble, and there is no feedback loop
+     because the bar layout never sizes the Infobar. ]]
+local lastBottomBase
+local function OnInfobarResized()
+    local base = GetBottomBase()
+    if lastBottomBase and _G.math.abs(base - lastBottomBase) < 0.5 then return end
+    private.QueueSecure(private.ApplyRealUILayout)
+end
+
+function private.WatchInfobarHeight()
+    local infobar = _G.RealUI_Infobar
+    if not (infobar and infobar.HookScript) or infobar._ruiABHeightWatch then return end
+    infobar._ruiABHeightWatch = true
+    infobar:HookScript("OnSizeChanged", OnInfobarResized)
+    -- The Infobar may already have grown past whatever the first layout used.
+    OnInfobarResized()
+end
+
 function private.ApplyRealUILayout()
     local RealUI = _G.RealUI
     if not (RealUI and RealUI.db and RealUI.db.profile) then return false, "RealUI db not ready" end
@@ -112,7 +140,11 @@ function private.ApplyRealUILayout()
     if baselineY then
         sliderDelta = abY - baselineY
     end
-    local bottomBase = GetBottomBase() + 14 + sliderDelta
+    local rawBottomBase = GetBottomBase()
+    -- Remembered so the Infobar watcher can tell a real height change from
+    -- the float wobble a rescale produces (B65).
+    lastBottomBase = rawBottomBase
+    local bottomBase = rawBottomBase + 14 + sliderDelta
 
     local border = private.BUTTON_BORDER or 1
 
@@ -272,4 +304,8 @@ function private.SetupRealUIIntegration()
     _G.hooksecurefunc(abModule, "ApplyABSettings", function()
         private.QueueSecure(private.ApplyRealUILayout)
     end)
+
+    -- B65: recompute if the Infobar settles at a different height than the
+    -- one the first layout saw.
+    private.WatchInfobarHeight()
 end

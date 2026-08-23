@@ -82,6 +82,9 @@ function AB:OnEnable()
         -- The zone-ability frames get recreated/re-laid-out on zone changes.
         private.QueueSecure(private.ApplyExtraButtons)
         private.QueueSecure(private.ApplyVehicleButton)
+        -- B65: the Infobar can be built after our OnEnable, so the watcher
+        -- may not have had a frame to attach to yet. Idempotent.
+        if private.WatchInfobarHeight then private.WatchInfobarHeight() end
     end)
     self:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED", function()
         private.QueueSecure(private.HideBlizzardBars)
