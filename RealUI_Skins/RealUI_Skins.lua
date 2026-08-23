@@ -790,9 +790,23 @@ function private.OnLoad()
         ObjectiveTrackerFrame = true,
     }
 
+    --[[ The walk has to survive FORBIDDEN frames.
+
+         A table lookup is safe on any object, but `GetName()` and
+         `GetParent()` both throw "Attempt to access forbidden object from code
+         tainted by an AddOn" when the object is forbidden — and this hook runs
+         from Blizzard's own tooltip path, which reaches widget frames that can
+         be exactly that. The name check added for the demand-loaded frames
+         introduced the first `GetName()` call on this path and with it that
+         error, seen on a UIWidget tooltip hide.
+
+         A forbidden frame is not ours to skin under any circumstances, so
+         treat it as exempt and stop walking. ]]
     local function IsStripeExempt(frame)
         while frame do
+            if frame.IsForbidden and frame:IsForbidden() then return true end
             if stripeExemptFrames[frame] then return true end
+
             local name = frame.GetName and frame:GetName()
             if name and stripeExemptNames[name] then
                 -- Cache the object so later checks skip the name lookup.
@@ -804,6 +818,8 @@ function private.OnLoad()
         return false
     end
     _G.hooksecurefunc(Skin, "FrameTypeFrame", function(Frame)
+        if not Frame then return end
+        if Frame.IsForbidden and Frame:IsForbidden() then return end
         if Frame._stripes then return end
         if IsStripeExempt(Frame) then return end
         RealUI:AddFrameStripes(Frame)
