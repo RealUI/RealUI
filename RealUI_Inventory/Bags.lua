@@ -1492,7 +1492,8 @@ local function CreateBag(bagType)
                 or "Click to lock this position for this character.")
         _G.GameTooltip:Show()
     end)
-    lock:SetPoint("RIGHT", close, "LEFT", -2, 0)
+    -- Anchored after the bagType blocks below, once the rest of the chain
+    -- exists (main: restack > cog > close, bank: deposit > restack > close).
 
     function lock:UpdateLockState()
         local locked = private.IsBagLocked(bagType)
@@ -1595,6 +1596,20 @@ local function CreateBag(bagType)
         main.restackButton = restackButton
 
         deposit:SetPoint("TOPRIGHT", restackButton, "TOPLEFT", -5, 0)
+    end
+
+    -- B06: park the lock at the far left of whatever button chain this bag
+    -- actually has, so it can never land on top of an existing control.
+    -- Anchoring it to `close` directly would have collided with the cog, which
+    -- is already anchored there — and the bank has a different chain again.
+    -- Falls back to the close button's BACKDROP, matching how the other
+    -- buttons anchor: the skinned close button's frame is wider than its art.
+    local lockAnchor = main.deposit or main.restackButton or main.settingsButton
+    lock:ClearAllPoints()
+    if lockAnchor then
+        lock:SetPoint("TOPRIGHT", lockAnchor, "TOPLEFT", -5, 0)
+    else
+        lock:SetPoint("TOPRIGHT", close:GetBackdropTexture("bg"), "TOPLEFT", -5, 0)
     end
 
     local searchBox = _G.CreateFrame("EditBox", "$parentSearchBox", main, "BagSearchBoxTemplate")
