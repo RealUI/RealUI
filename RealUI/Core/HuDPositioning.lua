@@ -54,6 +54,34 @@ function HuDPositioning:Initialize()
     -- Load HuD size from database
     self:LoadHuDSize()
 
+    --[[ B92: `hudState.currentSize` is a CACHE of `db.profile.settings.hudSize`,
+         and it used to be filled exactly once, here. Nothing re-read it when
+         the profile changed — and a spec swap changes the profile (layout 1 →
+         "RealUI", layout 2 → "RealUI-Healing"). Two failures followed:
+
+         1. Stale reads. `GetHuDSizeOffset` below keys `RealUI.hudSizeOffsets`
+            off the cache while `Positioners.GetKeyAdjust` reads the LIVE
+            `ndb.settings.hudSize`. After a swap those disagree, so calculated
+            positions and applied positions use different HuD sizes.
+         2. Stale WRITES, which is the damaging half. `SetHuDSize` ends in
+            `SaveHuDSize`, which writes the cache into whatever profile is
+            current — so the resolution optimiser (`ApplyResolutionOptimizations`,
+            which calls SetHuDSize from cache comparisons) could stamp the
+            PREVIOUS profile's size onto the new one. That is how two profiles
+            silently end up on different HuD sizes without the user ever
+            touching the "Use Large HuD" box, which is exactly the beta 9
+            report: identical `UFHorizontal = 200` in both profiles rendering
+            at visibly different widths, because the applied offset is
+            +100 at Large and +0 at Small.
+
+         Re-read on every profile change. ]]
+    local db = RealUI.db
+    if db and db.RegisterCallback then
+        db.RegisterCallback(self, "OnProfileChanged", "OnProfileUpdate")
+        db.RegisterCallback(self, "OnProfileCopied", "OnProfileUpdate")
+        db.RegisterCallback(self, "OnProfileReset", "OnProfileUpdate")
+    end
+
     -- Initialize base positions from RealUI defaults
     self:InitializeBasePositions()
 
@@ -128,6 +156,13 @@ function HuDPositioning:LoadHuDSize()
         hudState.currentSize = 2
         hudState.currentScale = 1.0
     end
+end
+
+--- Re-sync the cached HuD size after a profile switch (B92).
+-- Read-only on purpose: this must never write, or it would push the outgoing
+-- profile's size into the incoming one — the fault it exists to prevent.
+function HuDPositioning:OnProfileUpdate()
+    self:LoadHuDSize()
 end
 
 function HuDPositioning:SaveHuDSize()
