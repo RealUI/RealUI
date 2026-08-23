@@ -175,7 +175,25 @@ do
             registeredChars = {},
             -- HuD positions
             positionsLink = true,
-            positions = RealUI.defaultPositions,
+            --[[ DEEP COPY, and this is load-bearing.
+                 `RealUI.defaultPositions` is not a constant at runtime: it
+                 doubles as the shared live baseline that HuDPositioning
+                 (UpdateRealUIPositions) and ConfigPersistence
+                 (LoadPositionData) write into — the latter copies the user's
+                 OWN saved values straight into it on every load.
+                 Handing that same table object to AceDB as the defaults
+                 destroyed saved positions: AceDB's removeDefaults strips any
+                 saved key whose value equals the current default, so once the
+                 user's values had been promoted into the "defaults" table,
+                 every position key was considered redundant and dropped on
+                 logout or profile switch. Next login restored the shipped
+                 constants instead — and where the timing differed, keys came
+                 back missing entirely (`abY=nil hudY=nil` on RealUI-Healing,
+                 2026-08-22). That produced the healing-layout bar drift, the
+                 dead HuD Vertical slider (B79), and the missing-key family.
+                 A copy keeps AceDB's notion of "default" fixed at the shipped
+                 values while the live table stays available to its readers. ]]
+            positions = RealUI.DeepCopy(RealUI.defaultPositions),
             -- Action Bar settings
             abSettingsLink = false,
             -- Dynamic UI settings

@@ -83,7 +83,12 @@ function ProfileSystem:GetDatabaseDefaults()
             registeredChars = {},
             -- HuD positions
             positionsLink = true,
-            positions = RealUI.defaultPositions,
+            -- DEEP COPY — see the long note at Core.lua's defaults table.
+            -- RealUI.defaultPositions is mutated at runtime (HuDPositioning
+            -- and ConfigPersistence both write into it), so handing the same
+            -- object to AceDB as defaults made it strip the user's saved
+            -- positions as "redundant" on logout and profile switches.
+            positions = RealUI.DeepCopy(RealUI.defaultPositions),
             -- Action Bar settings
             abSettingsLink = false,
             -- Dynamic UI settings
