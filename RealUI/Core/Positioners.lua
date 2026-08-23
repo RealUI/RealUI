@@ -30,6 +30,17 @@ end
 -- missing keys only, HuDPositioning writes the calculated ones at login), so
 -- an individual key can legitimately be absent when the config sliders drive
 -- an update. A missing key contributes no offset rather than erroring.
+-- Keys whose entry in RealUI.defaultPositions is a RAW shipped constant,
+-- because HuDPositioning:UpdateRealUIPositions lists them in its
+-- `runtimeOwnedKeys` set and deliberately never writes calculated values for
+-- them. Only these are safe to fall back to, since GetHuDSizeOffset is still
+-- owed on top. Every other key there holds a calculated, already-offset value.
+-- Keep in sync with runtimeOwnedKeys in HuDPositioning.
+local RAW_DEFAULT_KEYS = {
+    ["UFHorizontal"] = true,
+    ["ActionBarsBotY"] = true,
+}
+
 local function GetKeyAdjust(key)
     -- Precedence MUST match the config panel's `safeLayout()`, which resolves
     -- RealUI.cLayout first. This read used to prefer the persisted
@@ -41,22 +52,29 @@ local function GetKeyAdjust(key)
     local positions = ndb and ndb.positions and ndb.positions[layout]
     local value = positions and positions[key]
 
-    -- A missing key falls back to the SHARED DEFAULT, not to zero.
-    --
-    -- Zero was introduced to stop config sliders erroring on a partly
-    -- populated layout, but zero is a meaningful offset, and for the width
-    -- keys it is catastrophic: the UnitFrames positioner is 80 wide plus
-    -- UFHorizontal, so a missing UFHorizontal collapsed it from 380 to 80 and
-    -- pulled both unit frames into the middle of the screen the moment
-    -- anything called UpdatePositioners (measured 2026-08-23: profile key nil,
-    -- RealUI.defaultPositions still holding 200). Frames looked right at login
-    -- only because their own module placed them before any positioner run.
-    --
-    -- RealUI.defaultPositions is the documented shared fallback source — it
-    -- carries the shipped constants plus HuDPositioning's calculated values
-    -- (see HuDPositioning:UpdateRealUIPositions) — so it is exactly what an
-    -- unset key is supposed to resolve to.
+    --[[ A missing key falls back to the shared default — but ONLY for the
+         keys where that default is a raw constant.
+
+         Zero was the old behaviour and is wrong for width keys: the
+         UnitFrames positioner is 80 wide plus UFHorizontal, so a missing
+         UFHorizontal collapsed it from 380 to 80 and pulled both unit frames
+         into the middle of the screen on any UpdatePositioners run (measured
+         2026-08-23: profile key nil, RealUI.defaultPositions holding 200).
+
+         But RealUI.defaultPositions is a MIX, and falling back to it blindly
+         double-applies the size offset. HuDPositioning writes CALCULATED
+         values there — already scaled and offset — for every key except the
+         `runtimeOwnedKeys` it deliberately skips. So for those calculated
+         keys, `default + GetHuDSizeOffset(key)` counts the offset twice,
+         which is how ActionBarsY / CastBarPlayerY / CastBarTargetY threw the
+         HuD off screen when this fallback was first written unrestricted.
+
+         Restricting to the runtime-owned set keeps the fix where it is needed
+         (UFHorizontal is exactly such a key: HuDPositioning never seeds it,
+         so the default stays the raw shipped 200 and the offset is owed) and
+         leaves every calculated key on the previous zero behaviour. ]]
     if not value then
+        if not RAW_DEFAULT_KEYS[key] then return 0 end
         local defaults = RealUI.defaultPositions and RealUI.defaultPositions[layout]
         value = defaults and defaults[key]
         if not value then return 0 end
