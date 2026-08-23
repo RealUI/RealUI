@@ -486,6 +486,14 @@ end
 function Infobar:RemoveBlock(name, dataObj, blockInfo)
     self:debug("Infobar:RemoveBlock", name, blockInfo.side, blockInfo.index)
     local block = blocksByData[dataObj]
+    -- `AddBlock` already knows a block may not exist yet (it creates one when
+    -- the lookup misses or returns a fake). Removal had no such awareness, so
+    -- disabling a data object that never got a real block passed nil straight
+    -- into `DockMixin:RemoveBlock` → "indexed assignment on local 'block'".
+    -- Hit by the "all blocks" tristate toggle in `/realadv`, which walks every
+    -- registered block including ones that were never built.
+    if not block or block.isFake then return end
+
     if blockInfo.side then
         local dock = Infobar.frame[blockInfo.side]
         dock:RemoveBlock(block)
@@ -700,7 +708,9 @@ function DockMixin:AddBlock(block, position)
 end
 
 function DockMixin:RemoveBlock(block)
-    if block == self.primary or #self.DOCKED_BLOCKS == 1 then return end
+    -- Second line of defence for the same fault: a nil block is "nothing to
+    -- undock", never an error.
+    if not block or block == self.primary or #self.DOCKED_BLOCKS == 1 then return end
 
     self.isDirty = true
     _G.tDeleteItem(self.DOCKED_BLOCKS, block)
