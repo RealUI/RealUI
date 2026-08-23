@@ -191,6 +191,26 @@ The system can automatically switch layouts based on your specialization.
                 self.stageText:SetText(baseText .. extraText)
             end
 
+            -- Link Layouts (owner request, beta 8): the toggle only ever
+            -- existed buried in HuD config, so most users met it after the two
+            -- layouts had already drifted apart. Asking here, while both are
+            -- still at defaults, is the moment where it costs nothing.
+            if not self.linkCheck then
+                local linkCheck = _G.CreateFrame("CheckButton", nil, self.content, "UICheckButtonTemplate")
+                linkCheck:SetSize(26, 26)
+                linkCheck:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 10, 40)
+                linkCheck.text = linkCheck:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+                linkCheck.text:SetPoint("LEFT", linkCheck, "RIGHT", 4, 0)
+                linkCheck.text:SetText("Link layouts (DPS/Tank and Healing share HuD positions)")
+                linkCheck:SetScript("OnClick", function(btn)
+                    if RealUI.InstallWizard then
+                        RealUI.InstallWizard:GetState().stageData.linkLayouts = btn:GetChecked()
+                    end
+                end)
+                self.linkCheck = linkCheck
+            end
+            self.linkCheck:Show()
+
             -- Show Naga checkbox
             if not self.nagaCheck then
                 local nagaCheck = _G.CreateFrame("CheckButton", nil, self.content, "UICheckButtonTemplate")
@@ -214,11 +234,27 @@ The system can automatically switch layouts based on your specialization.
             if RealUI.InstallWizard then
                 local state = RealUI.InstallWizard:GetState()
                 self.nagaCheck:SetChecked(state.stageData.enableNagaBar or false)
+
+                -- Seeded from the live setting, not from `false`: on an
+                -- upgrade run the box must show what the user already has.
+                if state.stageData.linkLayouts == nil then
+                    state.stageData.linkLayouts = RealUI.db and RealUI.db.global.positionsLink or false
+                end
+                self.linkCheck:SetChecked(state.stageData.linkLayouts)
             end
         end,
         onHide = function(self)
             if self.nagaCheck then
                 self.nagaCheck:Hide()
+            end
+            if self.linkCheck then
+                self.linkCheck:Hide()
+            end
+        end,
+        onAdvance = function()
+            local state = RealUI.InstallWizard and RealUI.InstallWizard:GetState()
+            if state and RealUI.LayoutManager then
+                RealUI.LayoutManager:SetPositionsLink(state.stageData.linkLayouts and true or false)
             end
         end
     },
