@@ -47,6 +47,18 @@ end
 RealUI.isConfigMode = false
 
 -- Layout Position Defaults
+--[[ B78: HuD modules whose absence is indistinguishable from a bug.
+     Each of these draws something the user expects to see; switched off, it
+     simply is not there — no error, no message. Cast bars sat disabled in a
+     healing profile for months (a stale `false` written by the 3.x-era
+     profile-cascade faults, which the old force-enable used to mask until
+     that was correctly removed in beta 5) with nothing on screen to say so.
+     Reported at login and by `/realui devcheck`. Disabling any of these is a
+     legitimate choice — the point is to make it a VISIBLE one. ]]
+RealUI.CORE_HUD_MODULES = {
+    "CastBars", "UnitFrames", "ClassResource", "SpellAlerts", "Infobar",
+}
+
 RealUI.defaultPositions = {
     [1] = {
         -- DPS/Tank Layout
@@ -527,6 +539,17 @@ function RealUI:ChatCommand_Config(input)
                     if ac[key] then
                         report("AuroraConfig." .. key .. " (harness removed)", ac[key], "nil")
                     end
+                end
+            end
+
+            -- B78: a switched-off HuD module looks EXACTLY like a broken one —
+            -- no error, no message, the element simply is not there. A stale
+            -- `false` from the 3.x-era profile-cascade bugs left cast bars off
+            -- in a healing profile for months without a single clue on screen.
+            for _, name in next, RealUI.CORE_HUD_MODULES do
+                if RealUI.db.profile.modules[name] == false then
+                    report("Module " .. name .. " (disabled in profile '"
+                        .. tostring(RealUI.db:GetCurrentProfile()) .. "')", false, true)
                 end
             end
 
@@ -1716,6 +1739,23 @@ function RealUI:OnInitialize()
 
     -- Display account status information
     _G.print(("Limited mode is active: %s."):format(_G.tostring(_G.GameLimitedMode_IsActive())))
+
+    -- B78: name any core HuD module that is switched off in this profile.
+    -- Without this the element is simply absent and reads as a fault; see the
+    -- CORE_HUD_MODULES note. Deliberately a single line, and only when
+    -- something is actually off, so a normal login stays quiet.
+    do
+        local off
+        for _, name in next, RealUI.CORE_HUD_MODULES do
+            if db.modules[name] == false then
+                off = off and (off .. ", " .. name) or name
+            end
+        end
+        if off then
+            _G.print(("|cff0099ffRealUI|r: |cffffcc00%s|r switched off in profile '%s' — that is a setting, not a fault. Re-enable in |cff88ccff/realadv|r.")
+                :format(off, RealUI.db:GetCurrentProfile()))
+        end
+    end
 
     debug("OnInitialize completed successfully")
 end
