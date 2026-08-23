@@ -63,15 +63,21 @@ local function writePosition(key, value)
 
     local layout = safeLayout()
     local positions = db.profile.positions
-    if positions[layout] then
-        positions[layout][key] = value
-    end
+    if not positions then return end
+
+    -- CREATE the layout table if it is absent rather than skipping the write.
+    -- These tables are populated lazily and are routinely sparse — the whole
+    -- B79/B80 family came from code that quietly did nothing when a position
+    -- entry was missing. Guarding with `if positions[n] then` meant the mirror
+    -- silently no-opped whenever the OTHER layout had never been written to,
+    -- which is exactly the case where linking matters most.
+    positions[layout] = positions[layout] or {}
+    positions[layout][key] = value
 
     if db.profile.positionsLink then
         local other = layout == 1 and 2 or 1
-        if positions[other] then
-            positions[other][key] = value
-        end
+        positions[other] = positions[other] or {}
+        positions[other][key] = value
     end
 end
 
