@@ -231,6 +231,63 @@ function FramePoint:RestorePosition(mod)
     end
 end
 
+--- Was this frame originally hung off a RealUI positioner frame?
+--
+-- `_framePointDefault` records the anchor the frame's own unit/module file gave
+-- it before FramePoint took over, so it is an exact record of which elements
+-- the HuD position sliders were ever meant to drive. Party/raid holders anchor
+-- to UIParent and must NOT move with HuDY; player/target/boss/cast bars anchor
+-- to RealUIPositioners* and must.
+local function WasPositionerAnchored(dragFrame)
+    local default = dragFrame and dragFrame._framePointDefault
+    local rel = default and default.relativeTo
+    if not rel then return false end
+
+    local name = rel
+    if type(rel) ~= "string" then
+        name = rel.GetName and rel:GetName()
+    end
+    return name and name:find("RealUIPositioners", 1, true) == 1 or false
+end
+
+--- Shift dragged, screen-anchored HuD elements by (dx, dy).
+--
+-- A managed frame follows its positioner only while it has NEVER been dragged.
+-- The moment LibWindow has saved coordinates for it, `RestorePosition` anchors
+-- the dragFrame to UIParent and the positioner drops out of the chain — so
+-- `RealUI:UpdatePositioners()` moves a frame nothing is attached to any more
+-- and the HuD Vertical slider silently does nothing.
+--
+-- That is what a beta 8 tester hit: the slider moved the HuD in one spec and
+-- was dead in the other. It is per-PROFILE, not per-spec — each layout has its
+-- own profile, and their long-lived Healing profile carried saved positions
+-- while the DPS one did not. Neither spec is "dominant"; whichever profile has
+-- saved drag coordinates is the one where the slider had nothing to move.
+--
+-- Skipped: frames pinned to a unit frame (they already ride their anchor) and
+-- frames that never belonged to a positioner in the first place.
+function FramePoint:ShiftScreenAnchored(dx, dy)
+    dx, dy = dx or 0, dy or 0
+    if dx == 0 and dy == 0 then return end
+
+    for mod, module in next, modules do
+        local moved = false
+        for _, meta in next, module.frames do
+            local config = RealUI.GetOptions(mod.moduleName, meta.optionPath)
+            if config and config.x and config.y
+                and not GetAnchorFrame(config)
+                and WasPositionerAnchored(meta.dragFrame) then
+                config.x = config.x + dx
+                config.y = config.y + dy
+                moved = true
+            end
+        end
+        if moved then
+            self:RestorePosition(mod)
+        end
+    end
+end
+
 local function FixCollectionJournal(point, anchor, relPoint, x, y)
     local CollectionsJournal = _G.CollectionsJournal
     local mover = _G.CollectionsJournalMover
