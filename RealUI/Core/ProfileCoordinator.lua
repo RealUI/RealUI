@@ -456,6 +456,52 @@ function ProfileCoordinator:RegisterProfileCallback()
     end
 end
 
+--[[ Bring linked scopes into line with the Core profile at login.
+
+     Every other path here is CHANGE-driven: OnProfileChanged fires, or
+     CoordinatedSwitch is called explicitly. A character that logs in already
+     on the right Core profile fires neither, so nothing ever moved its bars
+     DB off the stock "Default" profile — its bars were laid out from a table
+     nobody had configured. Found on a mage 2026-08-23 (`/bardump` reporting
+     `current profile: Default` while Core was on "RealUI").
+
+     Bartender4 used to be pulled onto the right profile by AddonData's
+     profile forcing and the install wizard's post-setup block; both were
+     removed with BT4 support on 2026-08-22 and nothing replaced them for
+     RealUI_ActionBars. This is that replacement.
+
+     Deliberately NOT offered through `/realui newdefaults`: this is not a
+     changed default the user opts into, it is an unestablished link. The
+     scope-link toggle is what expresses intent — when it is on, the user has
+     asked for bars to follow the profile, so a mismatch is a contract
+     violation rather than a preference. When it is off, nothing happens. ]]
+function ProfileCoordinator:ReconcileScopes()
+    if not (RealUI.db and self:IsScopeLinked(self.SCOPE_ACTIONBARS)) then return end
+
+    local rab = GetRABAddon()
+    if not (rab and rab.db) then return end
+
+    local coreProfile = RealUI.db:GetCurrentProfile()
+    if not coreProfile then return end
+
+    if rab.db:GetCurrentProfile() ~= coreProfile then
+        debug("ReconcileScopes: bars DB on", rab.db:GetCurrentProfile(),
+            "but Core is on", coreProfile, "— correcting")
+        SwitchActionBarsScope(coreProfile)
+    end
+end
+
+-- PLAYER_ENTERING_WORLD is the first point at which RealUI_ActionBars is
+-- loaded and enabled AND the Core profile has resolved. A later LibDualSpec
+-- switch is still covered by OnProfileChanged, so this only has to catch the
+-- no-change-event case.
+local reconcileFrame = _G.CreateFrame("Frame")
+reconcileFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+reconcileFrame:SetScript("OnEvent", function(self)
+    self:UnregisterAllEvents()
+    ProfileCoordinator:ReconcileScopes()
+end)
+
 ------------------------------------------------------------
 -- Register with RealUI namespace
 ------------------------------------------------------------
