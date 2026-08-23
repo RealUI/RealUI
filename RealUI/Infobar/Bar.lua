@@ -255,9 +255,33 @@ function BlockMixin:AdjustElements(blockInfo)
     local space = 2
     local width = space
 
+    --[[ B99: some data sources put their own NAME in `text`.
+
+         SimulationCraft reports `text = "SimulationCraft"` with the same
+         label, so the block drew the name twice — and turning "Show label"
+         off changed nothing, because the surviving copy was the VALUE, which
+         that setting does not govern. The toggle looked broken on exactly the
+         blocks where it mattered.
+
+         When the value is nothing but the block's own name, it IS the label
+         as far as anyone looking at the bar is concerned. So: never draw both,
+         and let "Show label" decide whether it appears at all. A block with a
+         real value is untouched — this only fires when the two strings match.
+
+         `LibDataBroker_AttributeChanged` calls back into here after every
+         value change, so a block that later reports something meaningful gets
+         its text back on the next update. ]]
+    local labelText = self.label and self.label:GetText()
+    local textIsName = labelText and labelText ~= ""
+        and labelText == self.text:GetText()
+    local showText = not (textIsName and not blockInfo.showLabel)
+
+    self.text:SetShown(showText)
     Scale.Point(self.text, "RIGHT", -space, 0)
     self.text:SetFont(font, size, outline)
-    width = Scale.Value(width + space) + self.text:GetStringWidth()
+    if showText then
+        width = Scale.Value(width + space) + self.text:GetStringWidth()
+    end
 
     if self.icon then
         if blockInfo.showIcon then
@@ -281,17 +305,9 @@ function BlockMixin:AdjustElements(blockInfo)
         end
     end
 
-    --[[ A third-party data source is free to put its own name in `text`, and
-         some do — SimulationCraft reports `text = "SimulationCraft"` with the
-         same label, so the block rendered "SimulationCraft SimulationCraft".
-         Showing a label that only repeats the value is never what the setting
-         is for, so suppress it in that case; the setting still governs every
-         block whose label adds information. ]]
-    local labelText = self.label and self.label:GetText()
-    local isDuplicateLabel = labelText and labelText ~= ""
-        and labelText == self.text:GetText()
-
-    if blockInfo.showLabel and not isDuplicateLabel then
+    -- The name-as-value case is carried by `self.text` above, so the label
+    -- itself never draws for those blocks (B99).
+    if blockInfo.showLabel and not textIsName then
         if self.icon and blockInfo.showIcon then
             self.label:SetPoint("LEFT", self.icon, "RIGHT", 0, 0)
         else
