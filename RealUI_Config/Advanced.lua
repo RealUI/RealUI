@@ -220,8 +220,17 @@ do -- RealUI
                             type = "toggle",
                             tristate = true,
                             get = function() return allEnabled end,
+                            -- B91: `IterateBlocks` returns `next, orderedBlocks`
+                            -- — an ARRAY — so it yields (index, block), not
+                            -- (dataObj, block). Binding the index as `dataObj`
+                            -- fed a number into AddBlock, which keyed
+                            -- `blocksByData` by it, built a block whose
+                            -- `.dataObj` was a number, and then blew up in
+                            -- `SortBlocks` on `block1.dataObj.name`. The real
+                            -- data object is on the block.
                             set = function(data, value)
-                                for dataObj, block in Infobar:IterateBlocks() do
+                                for _, block in Infobar:IterateBlocks() do
+                                    local dataObj = block.dataObj
                                     local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         if value then
@@ -241,9 +250,10 @@ do -- RealUI
                             type = "toggle",
                             tristate = true,
                             get = function() return allLabeled end,
+                            -- Same (index, block) correction as the toggle above.
                             set = function(info, value)
-                                for dataObj, block in Infobar:IterateBlocks() do
-                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                for _, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, block.dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         blockInfo.showLabel = not not value
                                         if blockInfo.enabled then
@@ -260,9 +270,10 @@ do -- RealUI
                             type = "toggle",
                             tristate = true,
                             get = function() return allIcons end,
+                            -- Same (index, block) correction as the toggles above.
                             set = function(info, value)
-                                for dataObj, block in Infobar:IterateBlocks() do
-                                    local blockInfo = Infobar:GetBlockInfo(block.name, dataObj)
+                                for _, block in Infobar:IterateBlocks() do
+                                    local blockInfo = Infobar:GetBlockInfo(block.name, block.dataObj)
                                     if blockInfo.enabled ~= -1 then
                                         blockInfo.showIcon = not not value
                                         if blockInfo.enabled then

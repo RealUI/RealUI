@@ -606,6 +606,12 @@ function Infobar:LibDataBroker_AttributeChanged(event, name, attr, value, dataOb
     end
 end
 
+--- Iterate the blocks in display order.
+--
+-- Yields **(index, block)** — `orderedBlocks` is an array. It does NOT yield
+-- the data object; that lives on `block.dataObj`. Three call sites in
+-- RealUI_Config bound the index as `dataObj` and fed a number into
+-- `AddBlock`/`GetBlockInfo` (B91), which is why this now says so out loud.
 function Infobar:IterateBlocks()
     return next, orderedBlocks
 end
