@@ -327,6 +327,11 @@ function RealUI.SetPixelPoint(frame)
 end
 
 local function OnDragStart(frame, button)
+    -- StartMoving() throws "Frame is not movable" outright, so anything that
+    -- flips SetMovable(false) after MakeFrameDraggable ran — the B06 bag
+    -- position lock, for one — would error on every drag attempt without
+    -- this. Silently ignoring the drag is exactly the intent of the flag.
+    if not frame:IsMovable() then return end
     frame:StartMoving()
 end
 local function OnDragStop(frame, button)
