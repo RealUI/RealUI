@@ -188,7 +188,9 @@ end
 -- next loaded, so writing raw keys into it is safe). Created if absent —
 -- a character that has never used the other layout has no table yet, and that
 -- is exactly the case where linking matters most.
-function LayoutManager:GetLayoutPositionsStore(layoutId)
+--- The profile table a layout runs under: the live one when it is current,
+--- otherwise AceDB's raw store (created if this character never used it).
+local function GetLayoutProfileTable(self, layoutId)
     local db = RealUI.db
     if not (db and self:IsValidLayout(layoutId)) then return end
 
@@ -197,9 +199,7 @@ function LayoutManager:GetLayoutPositionsStore(layoutId)
     if not profileName then return end
 
     if profileName == db:GetCurrentProfile() then
-        db.profile.positions = db.profile.positions or {}
-        db.profile.positions[layoutId] = db.profile.positions[layoutId] or {}
-        return db.profile.positions[layoutId]
+        return db.profile
     end
 
     if not db.profiles then return end
@@ -208,9 +208,56 @@ function LayoutManager:GetLayoutPositionsStore(layoutId)
         profile = {}
         db.profiles[profileName] = profile
     end
+    return profile
+end
+
+function LayoutManager:GetLayoutPositionsStore(layoutId)
+    local profile = GetLayoutProfileTable(self, layoutId)
+    if not profile then return end
+
     profile.positions = profile.positions or {}
     profile.positions[layoutId] = profile.positions[layoutId] or {}
     return profile.positions[layoutId]
+end
+
+--- The settings table a layout runs under.
+--
+-- Positions are not screen coordinates — they are INPUTS to a per-profile
+-- transform. `Positioners.GetKeyAdjust` returns `value + GetHuDSizeOffset(key)`,
+-- and `RealUI.hudSizeOffsets` differs sharply between the two HuD sizes:
+-- `UFHorizontal` +100 at Large versus +0 at Small, `ActionBarsY` and both cast
+-- bar Y keys -20 versus 0. `settings.hudSize` is PER-PROFILE, so two profiles
+-- holding identical numbers render in visibly different places whenever the
+-- "Use Large HuD" box differs between them. Linking positions alone can never
+-- produce visual parity; the transform has to be linked too.
+function LayoutManager:GetLayoutSettingsStore(layoutId)
+    local profile = GetLayoutProfileTable(self, layoutId)
+    if not profile then return end
+
+    profile.settings = profile.settings or {}
+    return profile.settings
+end
+
+--- Keys under `db.profile.settings` that change how positions are RENDERED,
+--- and therefore have to travel with them while layouts are linked.
+LayoutManager.LINKED_SETTINGS = { "hudSize" }
+
+--- Mirror the layout-affecting settings into the other layout's profile.
+-- No-op unless Link Layouts is on.
+function LayoutManager:MirrorLinkedSettings()
+    local db = RealUI.db
+    if not (db and db.global.positionsLink) then return end
+
+    local current = RealUI.cLayout or db.char.layout.current or LAYOUT_DPS_TANK
+    local other = (current == LAYOUT_DPS_TANK) and LAYOUT_HEALING or LAYOUT_DPS_TANK
+
+    local source = self:GetLayoutSettingsStore(current)
+    local dest = self:GetLayoutSettingsStore(other)
+    if not (source and dest) or source == dest then return end
+
+    for _, key in pairs(self.LINKED_SETTINGS) do
+        dest[key] = source[key]
+    end
 end
 
 --- Turn "Link Layouts" on or off.
@@ -244,6 +291,12 @@ function LayoutManager:SetPositionsLink(enabled)
             dest[key] = value
         end
     end
+
+    -- Positions alone are not enough: `hudSize` scales how every one of them
+    -- renders (see GetLayoutSettingsStore). Copying numbers into a profile
+    -- with the other HuD size produces matching values in different places,
+    -- which is exactly what the beta 9 report describes.
+    self:MirrorLinkedSettings()
 end
 
 function LayoutManager:UpdateLayoutPositions(layoutId, positions)

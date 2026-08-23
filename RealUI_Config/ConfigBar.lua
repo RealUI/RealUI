@@ -252,6 +252,13 @@ do -- Other
                         get = function() return RealUI.db.profile.settings.hudSize == 2 end,
                         set = function(info, value)
                             RealUI.db.profile.settings.hudSize = value and 2 or 1
+                            -- hudSize is the transform every position value is
+                            -- rendered through (`Positioners.GetKeyAdjust` adds
+                            -- `hudSizeOffsets[hudSize][key]`), so while Link
+                            -- Layouts is on it has to travel with them — else
+                            -- the two layouts hold matching numbers and draw in
+                            -- different places.
+                            RealUI.LayoutManager:MirrorLinkedSettings()
                             _G.StaticPopup_Show("RUI_ChangeHuDSize")
                         end,
                         order = 30,
