@@ -417,7 +417,29 @@ function Tooltips:OnInitialize()
         private.SetupIDTips()
     end
     private.questCache = self.db.global.questCache
-    for _, tooltip in next, {_G.GameTooltip, _G.ItemRefTooltip} do
-        private.HookTooltip(tooltip)
+
+    --[[ B94: the comparison tooltips belong on this list too.
+
+         Aurora's taint-safe tooltip skin alpha-0s the eight NineSlice border
+         pieces; what puts a visible border back is the `OnTooltipCleared`
+         hook below, `NineSlice:SetBorderColor(frameColor…)`, which re-tints
+         them (and restores their alpha) in RealUI's frame colour. That hook
+         only reaches tooltips passed through `HookTooltip`, and this list was
+         GameTooltip and ItemRefTooltip only.
+
+         So the shopping tooltips came out as a bare dark panel with no border
+         while the main tooltip had one — the "better but not quite there"
+         after the skinning half of B94 was fixed. Same list, same look.
+
+         The ItemRef pair can be absent this early (different addon), hence the
+         existence check rather than a bare list. ]]
+    for _, tooltip in next, {
+        _G.GameTooltip, _G.ItemRefTooltip,
+        _G.ShoppingTooltip1, _G.ShoppingTooltip2,
+        _G.ItemRefShoppingTooltip1, _G.ItemRefShoppingTooltip2,
+    } do
+        if tooltip then
+            private.HookTooltip(tooltip)
+        end
     end
 end
