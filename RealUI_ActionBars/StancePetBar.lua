@@ -10,9 +10,13 @@ local AB = private.AB
 
 local stanceBar, petBar
 
-local function AdoptButtons(holder, buttonPrefix, count, size, padding, growH, growV)
+local function AdoptButtons(holder, buttonPrefix, kind, count, size, padding, growH, growV)
     local dirH = (growH == "LEFT") and -1 or 1
     local vertical = (growV ~= nil)
+    -- Same box model as Bar.lua (B28): the skin draws a 1px border OUTSIDE the
+    -- button frame, so db.padding is the visible gap between borders and both
+    -- neighbours' borders sit between the frames.
+    local gap = padding + private.BUTTON_BORDER * 2
     local shown = 0
     for i = 1, count do
         local button = _G[buttonPrefix .. i]
@@ -22,18 +26,26 @@ local function AdoptButtons(holder, buttonPrefix, count, size, padding, growH, g
             button:ClearAllPoints()
             button:SetSize(size, size)
             if vertical then
-                button:SetPoint("TOP", holder, "TOP", 0, -((i - 1) * (size + padding)))
+                button:SetPoint("TOP", holder, "TOP", 0, -((i - 1) * (size + gap)))
             else
                 button:SetPoint(dirH == 1 and "LEFT" or "RIGHT", holder,
                     dirH == 1 and "LEFT" or "RIGHT",
-                    (i - 1) * (size + padding) * dirH, 0)
+                    (i - 1) * (size + gap) * dirH, 0)
+            end
+            -- Blizzard's own buttons: nothing else skins them (see Skin.lua).
+            -- After the resize, so the size-derived resets land on final sizes.
+            if private.SkinAdoptedButton then
+                private.SkinAdoptedButton(button, kind)
             end
         end
     end
     if vertical then
-        holder:SetSize(size, _G.math.max(1, shown * (size + padding) - padding))
+        holder:SetSize(size, _G.math.max(1, shown * (size + gap) - gap))
     else
-        holder:SetSize(_G.math.max(1, shown * (size + padding) - padding), size)
+        holder:SetSize(_G.math.max(1, shown * (size + gap) - gap), size)
+    end
+    if private.ReSkinAdoptedBar then
+        private.ReSkinAdoptedBar(kind)
     end
 end
 
@@ -64,7 +76,7 @@ function private.BuildStanceBar()
         db.position.x, db.position.y)
 
     local numForms = _G.GetNumShapeshiftForms() or 0
-    AdoptButtons(stanceBar, "StanceButton", _G.math.max(numForms, 1),
+    AdoptButtons(stanceBar, "StanceButton", "Stance", _G.math.max(numForms, 1),
         db.buttonSize, db.padding, db.growHorizontal)
 
     if numForms > 0 then
@@ -93,7 +105,7 @@ function private.BuildPetBar()
         db.position.x, db.position.y)
 
     -- Vertical column (the shipped RealUI look: rows = 10).
-    AdoptButtons(petBar, "PetActionButton", 10, db.buttonSize, db.padding, nil, "DOWN")
+    AdoptButtons(petBar, "PetActionButton", "Pet", 10, db.buttonSize, db.padding, nil, "DOWN")
     private.ApplyVisibility(petBar, db.visibility)
 end
 

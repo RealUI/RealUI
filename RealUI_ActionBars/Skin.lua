@@ -204,6 +204,145 @@ local function HookButtonUpdate()
     end)
 end
 
+--[[ Adopted Blizzard buttons — stance and pet.
+
+     StancePetBar.lua adopts Blizzard's own StanceButton/PetActionButton frames
+     instead of reimplementing the secure shapeshift/pet behavior, so those
+     buttons never pass through the LAB path above: SetupSkins only walks bars
+     1-6. Nothing else picked them up either — Aurora's StanceButtonTemplate
+     skin is gated behind `private.isClassic and not private.disabled.mainmenubar`
+     and RealUI_Skins sets that disable flag — so once Bartender4 (which used to
+     own these bars) was out of the picture, the stance and pet bars kept full
+     Blizzard chrome, with or without Masque: no group ever registered them.
+
+     Same look as SkinButton, reached differently. These are Blizzard's
+     SmallActionButtons: their artwork is authored at fixed atlas sizes for a
+     30px button and overhangs ours, and BaseActionButtonMixin:UpdateButtonArt
+     re-asserts the normal/pushed art — so the reset re-applies on a per-button
+     hook of that method as well as on every re-adopt. Only the buttons' own
+     regions are touched: no reparenting, no secure attributes (B51/B55). ]]--
+
+-- Blizzard's small-button overlay FRAMES (the pet autocast ring) carry a fixed
+-- size that can only be corrected by scaling — same trick as the assist art.
+local SMALL_ART_BUTTON_SIZE = 30
+
+-- Chrome with no equivalent in the RealUI look. SetAlpha, not Hide:
+-- UpdateButtonArt Show()s SlotArt/SlotBackground and would undo a Hide.
+local ADOPTED_CHROME = { "SlotArt", "SlotBackground", "Border", "NewActionTexture" }
+
+-- Overlay textures Blizzard gives a fixed size (31.6x30.9, for a 30px button).
+local ADOPTED_FULL_FACE = { "SpellHighlightTexture", "QuickKeybindHighlightTexture" }
+
+local function ApplyAdoptedTextures(button)
+    -- Everything the LAB buttons need is needed here too: normal art hidden,
+    -- state textures full-face, cooldown swipe full-face.
+    ApplyStateTextures(button)
+
+    if button.icon then
+        button.icon:SetAllPoints(button)
+        button.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        -- The rounded-corner mask is what makes a button read as Blizzard's.
+        -- LAB drops it on our own bars (hideElements.border), so drop it here
+        -- too, or the adopted icons keep soft corners inside a square border.
+        if button.IconMask and button.icon.RemoveMaskTexture then
+            button.icon:RemoveMaskTexture(button.IconMask)
+        end
+    end
+
+    for _, key in _G.next, ADOPTED_CHROME do
+        local region = button[key]
+        if region then
+            region:SetAlpha(0)
+        end
+    end
+
+    for _, key in _G.next, ADOPTED_FULL_FACE do
+        local region = button[key]
+        if region then
+            region:ClearAllPoints()
+            region:SetAllPoints(button)
+        end
+    end
+
+    -- Pet autocast ring: a frame sized 31x31 at CENTER (0.5, -0.5) by
+    -- SmallActionButtonMixin, which overhangs a 26px pet button.
+    local autoCast = button.AutoCastOverlay
+    if autoCast then
+        local size = button:GetWidth()
+        if size and size > 0 then
+            local scale = size / SMALL_ART_BUTTON_SIZE
+            if autoCast._ruiAutoCastScale ~= scale then
+                autoCast._ruiAutoCastScale = scale
+                autoCast:SetScale(scale)
+            end
+        end
+    end
+end
+
+local masqueGroups = {}
+local function GetMasqueGroup(kind)
+    local Masque = _G.LibStub("Masque", true)
+    if not Masque then return end
+    if masqueGroups[kind] == nil then
+        masqueGroups[kind] = Masque:Group("RealUI ActionBars", kind .. " Bar") or false
+    end
+    return masqueGroups[kind] or nil
+end
+
+--- Skin one adopted Blizzard button. Idempotent: the one-shot pieces are
+--- guarded, the resets re-run on every call (button size can have changed).
+-- `kind` is both the Masque button type and the group label: "Stance" or "Pet".
+function private.SkinAdoptedButton(button, kind)
+    if button._ruiMasqued then return end
+
+    if not button._ruiAdoptSkinned then
+        local group = GetMasqueGroup(kind)
+        if group then
+            -- The user's Masque skin wins, exactly as it does on the LAB bars.
+            button._ruiMasqued = true
+            group:AddButton(button, nil, kind)
+            return
+        end
+
+        button._ruiAdoptSkinned = true
+
+        -- Hiding the Normal texture removes what filled an empty slot; same
+        -- replacement backdrop the LAB buttons get.
+        local backdrop = button:CreateTexture(nil, "BACKGROUND", nil, -7)
+        backdrop:SetAllPoints(button)
+        backdrop:SetColorTexture(0, 0, 0, 0.5)
+        button._ruiBackdrop = backdrop
+
+        CreateBorder(button)
+
+        -- B20 (one button style): Blizzard's stock hotkey/count faces sitting
+        -- next to the LAB bars' condensed numbers read as two different UIs.
+        -- Same faces and sizes as BuildButtonConfig's text section.
+        local numberFont = private.GetSkinFont and private.GetSkinFont("chat", [[Fonts\ARIALN.TTF]])
+        if numberFont then
+            if button.HotKey then button.HotKey:SetFont(numberFont, 11, "OUTLINE") end
+            if button.Count then button.Count:SetFont(numberFont, 12, "OUTLINE") end
+        end
+
+        if _G.type(button.UpdateButtonArt) == "function" then
+            _G.hooksecurefunc(button, "UpdateButtonArt", ApplyAdoptedTextures)
+        end
+    end
+
+    ApplyAdoptedTextures(button)
+end
+
+--- Re-scale a Masque-owned stance/pet bar after its buttons were resized.
+-- Masque sizes its skin art from the button at skin time, so a buttonSize
+-- change would otherwise keep the old art scale until the next reload. No-op
+-- without Masque (our own skin re-derives size on every SkinAdoptedButton).
+function private.ReSkinAdoptedBar(kind)
+    local group = GetMasqueGroup(kind)
+    if group and group.ReSkin then
+        group:ReSkin(true)
+    end
+end
+
 function private.SetupSkins()
     local Masque = _G.LibStub("Masque", true)
     private.usingMasque = Masque and true or false

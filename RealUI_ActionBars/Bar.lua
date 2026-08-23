@@ -34,6 +34,9 @@ local function GetSkinFont(fontType, fallback)
     end
     return fallback
 end
+-- Skin.lua needs the same faces for the adopted stance/pet buttons, which get
+-- their text from Blizzard rather than from a LAB config.
+private.GetSkinFont = GetSkinFont
 
 local function BuildButtonConfig(barDB, keyBoundTarget)
     local numberFont = GetSkinFont("chat", [[Fonts\ARIALN.TTF]])
