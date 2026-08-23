@@ -593,10 +593,27 @@ function DualSpecSystem:GetCurrentConfiguration()
     -- NOTE: modules are intentionally excluded — module enabled states
     -- are managed solely by db.profile.modules and must not be
     -- overwritten by stale spec-config snapshots.
+    --[[ `positions` and `hudSize` were BOTH removed 2026-08-24 (B86/B103).
+
+         They used to be captured here and restored wholesale in
+         `ApplyConfiguration`. That is the same fault the note there already
+         records for `modules` — a stale snapshot overwriting authoritative
+         profile state — and it was left in place for these two.
+
+         RealUI already has per-spec positions: a spec change switches the
+         AceDB PROFILE (layout 1 → "RealUI", layout 2 → "RealUI-Healing"), and
+         positions live on the profile. Snapshotting them per spec on top of
+         that is not a second feature, it is a second writer racing the first.
+
+         Caught in a dump: a linked HuD write reached
+         `RealUI-Healing.positions[2].HuDY = -220` correctly, and the spec swap
+         put the stale `-52` back over it, in raw storage as well as live.
+
+         `positions` was also captured by REFERENCE, not copied, so the
+         "snapshot" aliased the live table until a profile switch swapped it
+         out — which is its own way of being wrong. ]]
     return {
         timestamp = _G.time(),
-        hudSize = RealUI.db and RealUI.db.profile.settings.hudSize,
-        positions = RealUI.db and RealUI.db.profile.positions,
     }
 end
 
@@ -608,15 +625,19 @@ function DualSpecSystem:ApplyConfiguration(configData)
 
     debug("Applying configuration data")
 
-    -- Apply settings if available
-    if configData.hudSize and RealUI.db and RealUI.db.profile.settings then
-        RealUI.db.profile.settings.hudSize = configData.hudSize
-    end
+    --[[ NOTHING is applied from the snapshot any more (B86/B103, 2026-08-24).
 
-    -- Apply positions if available
-    if configData.positions and RealUI.db and RealUI.db.profile then
-        RealUI.db.profile.positions = configData.positions
-    end
+         `hudSize` and `positions` used to be restored here. Both are profile
+         state, and a spec change already switches the profile — so restoring a
+         per-spec copy on top could only ever overwrite the profile with an
+         older version of itself. It is exactly the fault the `modules` note
+         below describes, and it was killing linked position writes (B86) and
+         is a second, independent way for "Use Large HuD" to differ between
+         specs on its own (B92).
+
+         Kept as a function rather than deleted: `LoadSpecConfiguration` still
+         calls it, older saved variables still hold these fields, and ignoring
+         them is what makes those stale snapshots harmless. ]]
 
     -- NOTE: Do NOT apply configData.modules here. Module enabled states
     -- are authoritative in db.profile.modules and managed by AceDB's
