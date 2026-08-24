@@ -54,7 +54,7 @@ private.defaults = {
             power = { enabled = false, height = 4 },
             auras = {
                 size = 20,
-                myDebuffs    = { enabled = true, max = 8, position = "aboveLeft",  offset = { x = 0, y = 16 } },
+                myDebuffs    = { enabled = true, max = 8, position = "aboveCenter", offset = { x = 0, y = 16 } },
                 crowdControl = { enabled = true, max = 4, position = "right",      offset = { x = 6, y = 0 } },
                 buffs        = { enabled = true, max = 4, position = "aboveRight", offset = { x = 0, y = 16 } },
             },
