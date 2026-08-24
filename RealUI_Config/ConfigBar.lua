@@ -89,14 +89,43 @@ local function writePosition(key, value)
 
     if db.global.positionsLink then
         local other = layout == 1 and 2 or 1
+
+        --[[ B104: link the RESULT, not the raw number.
+
+             Several keys are read as an offset from a PER-LAYOUT baseline in
+             `RealUI.defaultPositions`, not as an absolute. `ActionBarsY` is
+             the clearest: `RealUI_ActionBars/Integration.lua` computes
+             `sliderDelta = abY - defaultPositions[cLayout].ActionBarsY`, and
+             the two baselines ship 46px apart (−161.5 DPS, −115.5 Healing).
+             Copying the number verbatim therefore produces two different
+             offsets — reported as the same setting sitting over the Infobar on
+             DPS and under it on Healing, with bars 2 and 3 across it.
+
+             So translate through the baselines: keep the offset from baseline
+             identical, which is what "these layouts are linked" means to
+             someone looking at the screen. Keys whose baselines match — HuDY
+             among them — are unaffected and still copy verbatim, so B86's
+             verified behaviour is unchanged.
+
+             Same lesson as B89, one level down: linking has to carry the
+             transform, and where the transform cannot be shared it has to be
+             compensated for. ]]
+        local otherValue = value
+        local defaults = RealUI.defaultPositions
+        local baseHere = defaults and defaults[layout] and defaults[layout][key]
+        local baseThere = defaults and defaults[other] and defaults[other][key]
+        if baseHere and baseThere and baseHere ~= baseThere then
+            otherValue = value + (baseThere - baseHere)
+        end
+
         positions[other] = positions[other] or {}
-        positions[other][key] = value
+        positions[other][key] = otherValue
 
         -- ...and into the profile that layout runs under, which is the copy it
         -- will actually read.
         local otherProfile = otherLayoutPositions(other)
         if otherProfile then
-            otherProfile[key] = value
+            otherProfile[key] = otherValue
         end
     end
 end
@@ -525,7 +554,17 @@ do -- Other
                                 order = -1,
                                 get = function(info)
                                     local pos = safePositions()
-                                    return pos and pos["ActionBarsY"] or -161.5
+                                    if pos and pos["ActionBarsY"] then
+                                        return pos["ActionBarsY"]
+                                    end
+                                    -- The fallback used to be a hard-coded
+                                    -- -161.5 — layout 1's baseline, shown on
+                                    -- layout 2 as well, where the baseline is
+                                    -- -115.5 (B104). Read the layout's own.
+                                    local layout = safeLayout()
+                                    local defaults = RealUI.defaultPositions
+                                    local base = defaults and defaults[layout]
+                                    return (base and base.ActionBarsY) or -161.5
                                 end,
                                 set = function(info, value)
                                     local pos = safePositions()
@@ -535,6 +574,18 @@ do -- Other
                                         RealUI:UpdatePositioners()
                                     end
                                 end,
+                            },
+                            -- B104: this slider goes through `writePosition`,
+                            -- so "Link Layouts" governs it — but that toggle
+                            -- lives on HuD → General and nothing here said so.
+                            -- Reported as "the vertical for actionbar is shared
+                            -- between the two even tho there is no linked
+                            -- option there".
+                            verticalNote = {
+                                name = L["Layout_LinkNoteBars"],
+                                type = "description",
+                                fontSize = "medium",
+                                order = -0.5,
                             }
                         }
                     }

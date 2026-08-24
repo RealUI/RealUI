@@ -164,6 +164,7 @@ L["HuD_ReattachDesc"] = "Elements you have dragged by hand stop following the Ve
 L["HuD_ReattachConfirm"] = "Discard hand-placed positions for this layout's HuD elements and return them to the sliders?\n\nYou can undo this until you reload."
 L["HuD_ReattachUndo"] = "Undo re-attach"
 L["HuD_ReattachUndoDesc"] = "Put back the hand-placed positions the last re-attach cleared. Available until you reload or log out."
+L["Layout_LinkNoteBars"] = "|cff808080This slider follows |cffffffffLink Layouts|r|cff808080 (HuD → General). With it on, both the DPS/Tank and Healing layouts move together — the saved numbers differ because each layout measures from its own baseline, but the bars land in the same place.|r"
 L["Layout_LinkNote"] ="|cff808080With |cffffffffLink Layouts|r|cff808080 on, this value is shared by every spec: change it here and the DPS/Tank and Healing layouts both follow. With it off, each layout keeps its own.|r"
 L["Misc_SpellAlertsDesc"] = "Modify the position and size of the Spell Alerts."
 L["Patch_DoApply"] = "A patch has been applied, the UI must be reloaded for the changes to take affect."
