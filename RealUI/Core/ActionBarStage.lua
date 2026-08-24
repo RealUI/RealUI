@@ -174,21 +174,39 @@ local function RefreshSchematic()
         end
     end
 
-    -- Side bars: vertical, hugging their edge
-    for i = 1, side.left do
-        local bar = NextBar()
-        if bar then
-            bar:SetSize(barH, 56)
-            bar:SetPoint("LEFT", schematic, "LEFT", 8 + (i - 1) * (barH + gap), 6)
+    --[[ Side bars: ONE column per edge, bars stacked vertically within it.
+
+         B127, 2026-08-24. This used to step each bar sideways
+         (`8 + (i - 1) * (barH + gap)`), drawing two side bars as two adjacent
+         columns. The layout engine has never done that: `Integration.lua:239-247`
+         gives every side bar the same x (border-flush against the screen edge)
+         and, when both are on the same side, stacks bar 4 above bar 5.
+
+         So the wizard was promising an arrangement that does not exist, and a
+         tester reasonably reported the RESULT as the bug. The engine is right;
+         the picture was wrong.
+
+         Confirmed by the owner 2026-08-24: side bars should stack, not sit
+         side by side. Worth stating because the single-column geometry is also
+         what `TRACKER_X` in EditModeTemplates.lua is derived from (B116) — if
+         this ever does become two columns, that offset has to widen with it. ]]
+    local sideLen = 56
+
+    local function DrawSideColumn(count, edge, xSign)
+        for i = 1, count do
+            local bar = NextBar()
+            if bar then
+                bar:SetSize(barH, sideLen)
+                -- Centre the stack on the single-bar position so the one-bar
+                -- case is unchanged, then step downward for each extra bar.
+                local yOfs = 6 + ((count - 1) / 2 - (i - 1)) * (sideLen + gap)
+                bar:SetPoint(edge, schematic, edge, xSign * 8, yOfs)
+            end
         end
     end
-    for i = 1, side.right do
-        local bar = NextBar()
-        if bar then
-            bar:SetSize(barH, 56)
-            bar:SetPoint("RIGHT", schematic, "RIGHT", -8 - (i - 1) * (barH + gap), 6)
-        end
-    end
+
+    DrawSideColumn(side.left, "LEFT", 1)
+    DrawSideColumn(side.right, "RIGHT", -1)
 end
 
 ---------------------------------------------------------------------------
