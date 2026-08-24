@@ -1,8 +1,11 @@
 # Lib: RangeCheck-3.0
 
-## [1.0.17-13-g5362807](https://github.com/WeakAuras/LibRangeCheck-3.0/tree/53628079a07872e492016108000a58e17f976f90) (2026-07-04)
-[Full Changelog](https://github.com/WeakAuras/LibRangeCheck-3.0/compare/1.0.17...53628079a07872e492016108000a58e17f976f90) [Previous Releases](https://github.com/WeakAuras/LibRangeCheck-3.0/releases)
+## [1.0.17-14-g66370e7](https://github.com/WeakAuras/LibRangeCheck-3.0/tree/66370e7a229395360bd910356be366557e05907f) (2026-08-23)
+[Full Changelog](https://github.com/WeakAuras/LibRangeCheck-3.0/compare/1.0.17...66370e7a229395360bd910356be366557e05907f) [Previous Releases](https://github.com/WeakAuras/LibRangeCheck-3.0/releases)
 
+- Add code for C\_PaperDollInfo.GetInventorySlotInfo  
+    Since GetInventorySlotInfo is deprecated on retail  
+    Fixes: #56  
 - bump minor version  
 - Add mists TOC and add Beacon/Sac for paladins in tbc, mists and retail  
 - Harden GitHub Actions workflows  
