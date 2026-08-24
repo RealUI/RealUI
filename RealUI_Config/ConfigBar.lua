@@ -581,11 +581,20 @@ do -- Other
                             -- Reported as "the vertical for actionbar is shared
                             -- between the two even tho there is no linked
                             -- option there".
+                            --
+                            -- Shown only while linking is ON, so it reports the
+                            -- state the user is actually in rather than
+                            -- describing a feature they may not be using. The
+                            -- panel stays clean for everyone else.
                             verticalNote = {
                                 name = L["Layout_LinkNoteBars"],
                                 type = "description",
                                 fontSize = "medium",
                                 order = -0.5,
+                                hidden = function()
+                                    local db = RealUI.db
+                                    return not (db and db.global and db.global.positionsLink)
+                                end,
                             }
                         }
                     }
