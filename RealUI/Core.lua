@@ -811,20 +811,93 @@ local RESET_ALL_SAVED_VARIABLES = {
     "RealUI_TrackerDB",
 }
 
---- Re-arm the install wizard for this character only.
--- Account-wide settings and every other character are untouched.
+--[[ Wipe every RealUI setting stored against THIS character.
+
+     Rewritten 2026-08-25: it used to reset three keys of `db.char.init` and
+     nothing else, so `layout`, `specProfiles`, `scopeLinks` and `editmode`
+     survived — along with every namespace's character scope (Infobar's
+     progress/currency state, MinimapAdv, AddonListAdv) and the per-character
+     scope of the sibling addon DBs. "Reset character" that leaves most of the
+     character's settings in place is a trap, and it is how a tester hit a
+     ticked Link Layouts box on what they believed was a clean slate.
+
+     Scope is deliberately CHARACTER only:
+
+     - profile data is shared by whichever characters use that profile, so
+       wiping it here would reach other characters;
+     - `db.global` is account-wide by design — `positionsLink` in particular
+       (see the note on it above), which is why `/realui resetchar` still will
+       not clear Link Layouts. That is stated in the option's own tooltip
+       rather than fixed here, because the layout profiles it writes through
+       genuinely are shared.
+
+     Use `/realui resetall` for everything. Third-party saved variables are
+     never touched by either — see ResetEverything below. ]]
+local RESET_CHAR_DATABASES = {
+    "RealUI_ActionBarsDB",
+    "RealUI_AurasDB",
+    "RealUI_ChatDB",
+    "RealUI_CombatTextDB",
+    "RealUI_InventoryDB",
+    "RealUI_NameplatesDB",
+    "RealUI_SkinsDB",
+    "RealUI_TooltipsDB",
+    "RealUI_TrackerDB",
+}
+
 function RealUI:ResetCharacter()
     if not (self.db and self.db.char) then
         print("|cff0099ffRealUI|r: Database not available.")
         return false
     end
 
+    local wiped = 0
+
+    -- RealUI's own character scope, plus every namespace registered under it
+    -- (AceDB keeps those in `db.children`). Wiping the stored table is enough:
+    -- AceDB re-supplies defaults through the metatable on next access.
+    _G.wipe(self.db.char)
+    wiped = wiped + 1
+    for _, namespace in next, (self.db.children or {}) do
+        if namespace.char then
+            _G.wipe(namespace.char)
+            wiped = wiped + 1
+        end
+    end
+
+    -- The sibling addon DBs. Reached through the saved variable rather than
+    -- the live AceDB object so this works whether or not the addon is loaded;
+    -- `char` is keyed by "Name - Realm" and only this character's entry goes.
+    local charKey = _G.UnitName("player") .. " - " .. _G.GetRealmName()
+    for _, svName in next, RESET_CHAR_DATABASES do
+        local sv = _G[svName]
+        if type(sv) == "table" and type(sv.char) == "table" and sv.char[charKey] then
+            sv.char[charKey] = nil
+            wiped = wiped + 1
+        end
+        -- Namespaced character data lives one level deeper.
+        if type(sv) == "table" and type(sv.namespaces) == "table" then
+            for _, ns in next, sv.namespaces do
+                if type(ns) == "table" and type(ns.char) == "table" and ns.char[charKey] then
+                    ns.char[charKey] = nil
+                    wiped = wiped + 1
+                end
+            end
+        end
+    end
+
+    -- SavedVariablesPerCharacter are this character's by definition.
+    _G.RealUICharacter = nil
+    _G.nibRealUICharacter = nil
+
+    -- Re-arm the install wizard. Written last so it survives the wipe above.
     self.db.char.init = {
         installStage = 0,
         initialized = false,
         needchatmoved = true
     }
-    print("|cff0099ffRealUI|r: Character setup data reset. Reloading UI...")
+
+    print(("|cff0099ffRealUI|r: Character settings reset (%d stores). Account-wide settings and other characters are untouched. Reloading UI..."):format(wiped))
     _G.ReloadUI()
     return true
 end
