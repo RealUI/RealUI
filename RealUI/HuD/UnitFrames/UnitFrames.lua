@@ -258,12 +258,27 @@ function UnitFrames.CreateAuraElement(dialog, settings)
     -- the pair of borders that sits between any two neighbours so `spacing`
     -- means the gap the user actually sees, matching the 2px between action
     -- bar icons.
+    --
+    -- B108, second pass (2026-08-24): the spacing has to go inside `layout`.
+    -- `oUF/elements/auras.lua:242-243` reads ONLY `options.layout.elementSpacing`
+    -- (falling back to the element attribute `self.elementSpacing`), and
+    -- Blizzard's `AddAuraGroup` stores `options.layout` and nothing else
+    -- (Blizzard_CustomAuraContainer.lua:312). A top-level `elementSpacing` — which
+    -- is what this passed since the element was written — is silently dropped.
+    --
+    -- So the spacing was never nil-by-accident, it was nil ALWAYS: buttons laid
+    -- out flush, and because each one carries a border 1px outside its own rect,
+    -- neighbouring borders overlapped rather than merely touched. That is exactly
+    -- the "if anything more overlapping" in the beta 10 p3 report, and it means
+    -- the first B108 fix moved a number that nothing read.
     local spacing = (settings.spacing or 0) + AURA_BORDER_PAD
     element._ruiGroupKey = element:AddGroup(settings.filter, {
         maxFrameCount = settings.count,
         size = settings.size,
-        elementSpacing = spacing,
-        lineSpacing = spacing,
+        layout = {
+            elementSpacing = spacing,
+            lineSpacing = spacing,
+        },
         showCount = true,
         -- B19: oUF-owned duration text (button.Time), replacing the cooldown
         -- widget's own countdown numbers which cannot be restyled. Minutes and
