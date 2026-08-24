@@ -233,6 +233,12 @@ local function BuildDialog()
     local anchor = body
     for index, item in ipairs(items) do
         local check = _G.CreateFrame("CheckButton", nil, dialog, "UICheckButtonTemplate")
+        do -- B121 family: the skin exists, it was simply never called.
+            local Skin = _G.Aurora and _G.Aurora.Skin
+            if Skin and Skin.UICheckButtonTemplate then
+                Skin.UICheckButtonTemplate(check)
+            end
+        end
         check:SetSize(24, 24)
         -- Rows 2+ anchor to the previous row's description, which is indented
         -- 28px from the checkbox column — compensate to keep the column flush.
@@ -260,9 +266,29 @@ local function BuildDialog()
         anchor = desc
     end
 
+    --[[ Centred as a pair, and Aurora-skinned.
+
+         The buttons used to hang off the last description's BOTTOMLEFT, which
+         left them flush left under a centred dialog. Centring on that anchor
+         directly would still be ~14px off, because the description column is
+         inset 44px from the dialog's left edge but only 16px from its right.
+
+         So the row spans the dialog (LEFT/RIGHT) and takes its Y from the last
+         row (TOP) — the same mixed-point idiom `body`, `label` and `desc` above
+         already use — and the buttons sit either side of its centre.
+
+         The vertical chain anchor -> row -> apply -> hint has to stay intact:
+         AdjustHeight sizes the dialog by measuring from its top to hint's
+         bottom, so a break here silently collapses the dialog. ]]
+    local row = _G.CreateFrame("Frame", nil, dialog)
+    row:SetHeight(24)
+    row:SetPoint("TOP", anchor, "BOTTOM", 0, -14)
+    row:SetPoint("LEFT", dialog, "LEFT")
+    row:SetPoint("RIGHT", dialog, "RIGHT")
+
     local apply = _G.CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
     apply:SetSize(140, 24)
-    apply:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -28, -14)
+    apply:SetPoint("RIGHT", row, "CENTER", -5, 0)
     apply:SetText("Apply selected")
     apply:SetScript("OnClick", function()
         NewDefaults:ApplySelected()
@@ -271,11 +297,20 @@ local function BuildDialog()
 
     local later = _G.CreateFrame("Button", nil, dialog, "UIPanelButtonTemplate")
     later:SetSize(140, 24)
-    later:SetPoint("LEFT", apply, "RIGHT", 10, 0)
+    later:SetPoint("LEFT", row, "CENTER", 5, 0)
     later:SetText("Keep my settings")
     later:SetScript("OnClick", function()
         dialog:Hide()
     end)
+
+    -- Same omission as B121 in the install wizard: the skins existed and were
+    -- never called, so the one dialog that greets an upgrading user was the one
+    -- window that did not look like RealUI.
+    local Skin = _G.Aurora and _G.Aurora.Skin
+    if Skin and Skin.UIPanelButtonTemplate then
+        Skin.UIPanelButtonTemplate(apply)
+        Skin.UIPanelButtonTemplate(later)
+    end
 
     local hint = dialog:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Small")
     hint:SetPoint("TOPLEFT", apply, "BOTTOMLEFT", 0, -8)

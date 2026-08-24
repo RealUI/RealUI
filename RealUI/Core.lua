@@ -414,8 +414,11 @@ function RealUI:ChatCommand_Config(input)
             _G.StaticPopup_Show("REALUI_RESET_SCOPE")
             return
         elseif command == "resetchar" then
-            -- Quick path, no prompt: re-arm the setup wizard for this
-            -- character without touching account-wide settings.
+            -- Quick path, no prompt (`/realui reset` is the one that asks).
+            -- Wipes EVERY setting stored against this character: RealUI's char
+            -- scope and its namespaces, plus this character's entry in each
+            -- sibling addon DB. Profile and account-wide data are untouched,
+            -- so Link Layouts in particular survives — see ResetCharacter.
             self:ResetCharacter()
             return
         elseif command == "resetall" then
