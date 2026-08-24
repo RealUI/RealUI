@@ -319,15 +319,14 @@ function FinalMigrations:ValidateMigratedData()
 
     -- Validate profile data
     if RealUI.db and RealUI.db.profile then
-        -- Check positions
+        -- Check positions. The per-layout tables are deliberately absent until
+        -- the user actually moves something — B80/B86, 2026-08-24: AceDB no
+        -- longer carries position defaults, and Positioners.GetKeyAdjust falls
+        -- back to RealUI.defaultPositions for any key that is not saved. An
+        -- empty table is the correct state for a fresh profile, so only the
+        -- table itself going missing is an issue.
         if not RealUI.db.profile.positions then
             table.insert(issues, "Missing positions data")
-        else
-            for layoutId = 1, 2 do
-                if not RealUI.db.profile.positions[layoutId] then
-                    table.insert(issues, "Missing layout " .. layoutId .. " positions")
-                end
-            end
         end
 
         -- Check modules
