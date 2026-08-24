@@ -171,7 +171,74 @@ local function AuraPostCreateButton(_, button)
     end
 end
 
+--[[ B112: aura filtering and sorting.
+
+     The engine wants three separate things — a filter STRING, a candidate
+     filter TABLE, and a sort method + direction. Exposing those raw would be
+     several controls per group, so the DB carries one preset key plus an
+     optional duration cutoff, and this resolves them in ONE place. Nothing
+     else builds a filter string by hand; the hardcoded "HARMFUL"/"HELPFUL" at
+     the seven call sites is exactly how the groups came to be unfilterable.
+
+     Token names are the AuraUtil.AuraFilters enum (verified against
+     wow-ui-source Blizzard_FrameXMLUtil/AuraUtil.lua:270-288). This matters:
+     SetFilterString ASSERTS IsValidFilterString, so an invented token is a
+     hard error, not a silently empty row.
+
+     All three are live-mutable (SetAuraGroupFilterString /
+     SetAuraGroupCandidateFilters / SetAuraGroupSortMethod), so unlike button
+     size these take effect without a reload — see RefreshAuraElement. ]]
+UnitFrames.auraFilterPresets = {
+    all         = { order = 1, name = "Everything" },
+    mine        = { order = 2, name = "Cast by me",     token = "PLAYER" },
+    notmine     = { order = 3, name = "Not cast by me", token = "!PLAYER" },
+    dispellable = { order = 4, name = "Dispellable",    token = "DISPELLABLE" },
+    important   = { order = 5, name = "Important",      token = "IMPORTANT" },
+    crowd       = { order = 6, name = "Crowd control",  token = "CROWD_CONTROL" },
+}
+
+UnitFrames.auraSortMethods = {
+    default    = { order = 1, name = "Default",        method = "Default" },
+    expiration = { order = 2, name = "Time remaining", method = "Expiration" },
+    name       = { order = 3, name = "Name",           method = "Name" },
+}
+
+--- Resolve a group's stored aura settings into engine arguments.
+-- @param baseFilter  "HELPFUL" or "HARMFUL" — the group's kind, never user-set
+-- @param groupDB     auraLayout sub-table (may be nil or partly populated)
+-- @return filterString, candidateFilters|nil, sortMethod|nil, sortDirection|nil
+function UnitFrames.ResolveAuraFilter(baseFilter, groupDB)
+    groupDB = groupDB or {}
+
+    local preset = UnitFrames.auraFilterPresets[groupDB.filterPreset or "all"]
+                or UnitFrames.auraFilterPresets.all
+    local filterString = preset.token and (baseFilter .. "|" .. preset.token) or baseFilter
+
+    -- maxDuration implicitly drops permanent auras too (auraData.duration == 0
+    -- is rejected outright — Blizzard_AuraContainerUtil.lua:101-106), which is
+    -- usually the actual intent behind "only show me things that are ticking".
+    local candidates
+    local maxDuration = groupDB.maxDuration
+    if maxDuration and maxDuration > 0 then
+        candidates = { maxDuration = maxDuration }
+    end
+
+    local sortMethod, sortDirection
+    local sort = UnitFrames.auraSortMethods[groupDB.sort or "default"]
+    if sort and sort.method ~= "Default" then
+        local methods = _G.AuraContainerSortMethod
+        local directions = _G.AuraContainerSortDirection
+        if methods and directions then
+            sortMethod = methods[sort.method]
+            sortDirection = groupDB.sortReverse and directions.Reverse or directions.Normal
+        end
+    end
+
+    return filterString, candidates, sortMethod, sortDirection
+end
+
 -- settings = {filter, count, size, spacing, growthX, growthY, maxWidth,
+--             candidates, sortMethod, sortDirection (from ResolveAuraFilter),
 --             cancelButton (RegisterForClicks string, e.g. "RightButtonUp" —
 --             combat-legal cancel; player buffs),
 --             showDebuffBorder (dispel-type coloring from colors.dispel)}
@@ -215,13 +282,26 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         -- CreateAuraElement returns are too late (raid-cell mini icons).
         disableCooldown = settings.disableCooldown,
     })
+
+    -- B112: candidate filters and sort are separate setters, not AddGroup
+    -- options. Wrapped because these are secure-environment frames — a refused
+    -- call must not take the whole element down with it.
+    if settings.candidates then
+        _G.pcall(element.SetAuraGroupCandidateFilters, element, element._ruiGroupKey, settings.candidates)
+    end
+    if settings.sortMethod then
+        _G.pcall(element.SetAuraGroupSortMethod, element, element._ruiGroupKey,
+            settings.sortMethod, settings.sortDirection)
+    end
+
     return element
 end
 
 -- Runtime config refresh. Everything except button size is live-mutable on
--- the intrinsic (SetAuraGroupMaxFrameCount + the SetFlowLayout* family);
--- size is resolved at button creation and needs a /reload to change.
--- opts = {show, count, layout (auraLayout sub-table), defaultAnchor,
+-- the intrinsic (SetAuraGroupMaxFrameCount, the SetFlowLayout* family, and
+-- the B112 filter/candidate/sort setters); size is resolved at button creation
+-- and needs a /reload to change.
+-- opts = {show, count, layout (auraLayout sub-table), baseFilter, defaultAnchor,
 --         defaultGrowthX, defaultGrowthY}; defaultAnchor nil = caller owns
 --         positioning (boss frames).
 function UnitFrames.RefreshAuraElement(element, frame, opts)
@@ -230,6 +310,22 @@ function UnitFrames.RefreshAuraElement(element, frame, opts)
 
     if element._ruiGroupKey then
         element:SetAuraGroupMaxFrameCount(element._ruiGroupKey, opts.count or 16)
+
+        -- B112: re-resolve filter/candidates/sort from the DB. Only when the
+        -- caller declares its base filter — a group that does not pass one
+        -- keeps whatever it was created with, so boss/raid callers that have
+        -- no filter settings yet are unaffected.
+        if opts.baseFilter then
+            local filterString, candidates, sortMethod, sortDirection =
+                UnitFrames.ResolveAuraFilter(opts.baseFilter, opts.layout)
+            _G.pcall(element.SetAuraGroupFilterString, element, element._ruiGroupKey, filterString)
+            -- nil clears a previously set cutoff, so this is passed unconditionally.
+            _G.pcall(element.SetAuraGroupCandidateFilters, element, element._ruiGroupKey, candidates)
+            if sortMethod then
+                _G.pcall(element.SetAuraGroupSortMethod, element, element._ruiGroupKey,
+                    sortMethod, sortDirection)
+            end
+        end
     end
 
     local layout = opts.layout or {}
@@ -452,6 +548,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         show = db.units.target.showTargetDebuffs,
                         count = db.units.target.debuffCount,
                         layout = db.units.target.auraLayout and db.units.target.auraLayout.debuffs,
+                        baseFilter = "HARMFUL",
                         defaultAnchor = "TOPLEFT",
                         defaultGrowthX = "RIGHT",
                         defaultGrowthY = "UP",
@@ -462,6 +559,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         show = db.units.target.showTargetBuffs,
                         count = db.units.target.buffCount,
                         layout = db.units.target.auraLayout and db.units.target.auraLayout.buffs,
+                        baseFilter = "HELPFUL",
                         defaultAnchor = "TOPRIGHT",
                         defaultGrowthX = "LEFT",
                         defaultGrowthY = "UP",
@@ -476,6 +574,7 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                         show = db.units.player.showPlayerBuffs,
                         count = db.units.player.buffCount,
                         layout = db.units.player.auraLayout and db.units.player.auraLayout.buffs,
+                        baseFilter = "HELPFUL",
                         defaultAnchor = "TOPLEFT",
                         defaultGrowthX = "RIGHT",
                         defaultGrowthY = "UP",
@@ -885,6 +984,10 @@ function UnitFrames:OnInitialize()
                             growthX = "RIGHT",
                             growthY = "UP",
                             maxWidth = 0,
+                            filterPreset = "all",
+                            sort = "default",
+                            sortReverse = false,
+                            maxDuration = 0,
                         },
                     },
                     healthBar = {
@@ -914,12 +1017,20 @@ function UnitFrames:OnInitialize()
                             growthX = "RIGHT",
                             growthY = "UP",
                             maxWidth = 0,
+                            filterPreset = "all",
+                            sort = "default",
+                            sortReverse = false,
+                            maxDuration = 0,
                         },
                         buffs = {
                             anchor = "TOPRIGHT",
                             growthX = "LEFT",
                             growthY = "UP",
                             maxWidth = 0,
+                            filterPreset = "all",
+                            sort = "default",
+                            sortReverse = false,
+                            maxDuration = 0,
                         },
                     },
                     healthBar = {
