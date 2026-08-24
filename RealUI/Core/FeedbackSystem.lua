@@ -125,6 +125,40 @@ function FeedbackSystem:ShowError(errorTitle, errorMessage, troubleshootingFunc)
     )
 end
 
+-- Warning messaging
+function FeedbackSystem:ShowWarning(warningTitle, warningMessage, clickFunc)
+    self:ShowFeedback(
+        MessageType.WARNING,
+        warningTitle,
+        warningMessage,
+        clickFunc
+    )
+end
+
+-- Generic notification. The third argument is a MessageType ("info", "warning",
+-- ...) at some call sites and a texture path at others; both spellings exist in
+-- the tree, so accept either.
+function FeedbackSystem:ShowNotification(title, message, typeOrIcon)
+    local messageType, icon = MessageType.INFO, nil
+    if messageIcons[typeOrIcon] then
+        messageType = typeOrIcon
+    elseif typeOrIcon then
+        icon = typeOrIcon
+    end
+
+    self:ShowFeedback(messageType, title, message, nil, icon)
+end
+
+-- Performance warning as routed from the PERFORMANCE_WARNING message bus,
+-- which passes a type and a details string rather than metric/value/threshold.
+function FeedbackSystem:ShowPerformanceWarning(warningType, details)
+    self:ShowFeedback(
+        MessageType.WARNING,
+        "Performance Warning",
+        ("%s: %s"):format(tostring(warningType), tostring(details))
+    )
+end
+
 -- Combat lockdown warning
 function FeedbackSystem:CombatLockdownWarning(action)
     self:ShowFeedback(
