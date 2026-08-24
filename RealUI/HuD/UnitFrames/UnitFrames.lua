@@ -1032,7 +1032,32 @@ function UnitFrames:OnInitialize()
                             growthX = "RIGHT",
                             growthY = "UP",
                             maxWidth = 0,
-                            filterPreset = "all",
+                            --[[ B112 task 5, 2026-08-24: target debuffs default
+                                 to the player's OWN debuffs.
+
+                                 This is the change that actually answers "buffs
+                                 and debuffs are a bit of a mess". The row used
+                                 to show every debuff on the target from every
+                                 source, which on any group target is dozens of
+                                 icons carrying no information the player can
+                                 act on. Their own dots are the thing they need
+                                 to see, and it is what every serious unit frame
+                                 ships as the default.
+
+                                 Only this ONE group changes. Target buffs stay
+                                 unfiltered (a buff cast by someone else is
+                                 exactly what you want to see on a target) and
+                                 player buffs stay unfiltered for the same
+                                 reason. Sort is left alone: oUF already
+                                 defaults to ExpirationOnly
+                                 (oUF/elements/auras.lua:250), so the row is
+                                 sorted by time remaining today.
+
+                                 Existing profiles keep their saved value — the
+                                 `targetDebuffsMine` item in Core/NewDefaults.lua
+                                 offers it, the same B47 treatment every other
+                                 shipped default change has had. ]]
+                            filterPreset = "mine",
                             sort = "default",
                             sortReverse = false,
                             maxDuration = 0,

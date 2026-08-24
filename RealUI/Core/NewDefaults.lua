@@ -44,6 +44,29 @@ local items = {
         end,
     },
     {
+        id = "targetDebuffsMine",
+        label = "Target debuffs show only your own",
+        desc = "The target debuff row used to show every debuff from every source. It now shows the ones you cast, sorted by time remaining. Change it under HuD \226\134\146 Units \226\134\146 Target.",
+        changed = "beta 11",
+        available = function()
+            local UnitFrames = RealUI:GetModule("UnitFrames", true)
+            local units = UnitFrames and UnitFrames.db and UnitFrames.db.profile.units
+            return units and units.target and units.target.auraLayout
+                and units.target.auraLayout.debuffs
+        end,
+        isApplied = function()
+            local units = RealUI:GetModule("UnitFrames", true).db.profile.units
+            return units.target.auraLayout.debuffs.filterPreset == "mine"
+        end,
+        apply = function()
+            local UnitFrames = RealUI:GetModule("UnitFrames", true)
+            UnitFrames.db.profile.units.target.auraLayout.debuffs.filterPreset = "mine"
+            -- Filter is live-mutable on the container, so no reload is needed —
+            -- RefreshUnits re-resolves it through ResolveAuraFilter.
+            UnitFrames:RefreshUnits("NewDefaults")
+        end,
+    },
+    {
         id = "statusText",
         label = "Health and power values shown on bars",
         desc = "Status Text now defaults to \"Both\". The old default rendered blank.",
