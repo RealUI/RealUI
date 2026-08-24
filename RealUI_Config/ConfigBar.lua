@@ -1294,6 +1294,80 @@ do -- UnitFrames
             order = 50,
         }
     end
+    --[[ B112: filter/sort controls for one aura group.
+
+         Built by a factory rather than written out per group — there are three
+         groups already (player buffs, target buffs, target debuffs) and the
+         focus/ToT frames are next, so hand-copying four option blocks each is
+         how they drift apart.
+
+         These four are LIVE: RefreshAuraElement re-applies filter, candidate
+         filters and sort on the running container. The size slider sitting a
+         few rows above is not, so the descriptions say which is which — the
+         inconsistency is real and confuses people who assume one reload rule.
+
+         `getGroup` is a closure, not a resolved table: AceDB hands out a new
+         profile table on every profile switch, so a captured reference would
+         write into the old profile after a spec swap (the B103 shape). ]]
+    local function AddAuraFilterOptions(unit, getGroup, isEnabled, baseOrder, label, refreshEvent)
+        local function refresh()
+            UnitFrames:RefreshUnits(refreshEvent)
+        end
+        local function values(source)
+            local out = {}
+            for key, def in next, source do out[key] = def.name end
+            return out
+        end
+        local function sorting(source)
+            local keys = {}
+            for key in next, source do keys[#keys + 1] = key end
+            table.sort(keys, function(a, b) return source[a].order < source[b].order end)
+            return keys
+        end
+
+        unit.args[label .. "FilterPreset"] = {
+            name = "Show",
+            desc = "Which " .. label .. " appear. Applies immediately — no reload needed.",
+            type = "select",
+            values = function() return values(UnitFrames.auraFilterPresets) end,
+            sorting = function() return sorting(UnitFrames.auraFilterPresets) end,
+            order = baseOrder,
+            disabled = function() return not isEnabled() end,
+            get = function() return getGroup().filterPreset or "all" end,
+            set = function(_, val) getGroup().filterPreset = val; refresh() end,
+        }
+        unit.args[label .. "Sort"] = {
+            name = "Sort by",
+            desc = "Order the icons are laid out in. Applies immediately.",
+            type = "select",
+            values = function() return values(UnitFrames.auraSortMethods) end,
+            sorting = function() return sorting(UnitFrames.auraSortMethods) end,
+            order = baseOrder + 1,
+            disabled = function() return not isEnabled() end,
+            get = function() return getGroup().sort or "default" end,
+            set = function(_, val) getGroup().sort = val; refresh() end,
+        }
+        unit.args[label .. "SortReverse"] = {
+            name = "Reverse order",
+            type = "toggle",
+            order = baseOrder + 2,
+            disabled = function() return not isEnabled() or (getGroup().sort or "default") == "default" end,
+            get = function() return getGroup().sortReverse and true or false end,
+            set = function(_, val) getGroup().sortReverse = val; refresh() end,
+        }
+        unit.args[label .. "MaxDuration"] = {
+            name = "Hide longer than",
+            desc = "Seconds. 0 shows everything. Any other value also hides permanent auras,"
+                .. " which is usually the point — it leaves only what is actually ticking.",
+            type = "range",
+            min = 0, max = 600, step = 5,
+            order = baseOrder + 3,
+            disabled = function() return not isEnabled() end,
+            get = function() return getGroup().maxDuration or 0 end,
+            set = function(_, val) getGroup().maxDuration = val; refresh() end,
+        }
+    end
+
     local units = ufArgs.units.args
     for unitSlug, unit in next, units do
         unit.args.x = {
@@ -1459,6 +1533,10 @@ do -- UnitFrames
                     UnitFrames:RefreshUnits("PlayerAurasLayout")
                 end,
             }
+            AddAuraFilterOptions(unit,
+                function() return UnitFrames.db.profile.units.player.auraLayout.buffs end,
+                function() return UnitFrames.db.profile.units.player.showPlayerBuffs end,
+                43, "buff", "PlayerAurasLayout")
         end
         if unitSlug == "target" then
             unit.args.showTargetDebuffs = {
@@ -1679,6 +1757,14 @@ do -- UnitFrames
                     UnitFrames:RefreshUnits("TargetAurasLayout")
                 end,
             }
+            AddAuraFilterOptions(unit,
+                function() return UnitFrames.db.profile.units.target.auraLayout.debuffs end,
+                function() return UnitFrames.db.profile.units.target.showTargetDebuffs end,
+                51, "debuff", "TargetAurasLayout")
+            AddAuraFilterOptions(unit,
+                function() return UnitFrames.db.profile.units.target.auraLayout.buffs end,
+                function() return UnitFrames.db.profile.units.target.showTargetBuffs end,
+                55, "buff", "TargetAurasLayout")
         end
         -- The anchor-width slider drives the shared UFHorizontal position key
         -- (the gap between the player and target frames), so it only belongs
