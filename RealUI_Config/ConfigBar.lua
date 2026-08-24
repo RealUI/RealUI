@@ -4,9 +4,6 @@ local _, private = ...
 local next = _G.next
 local tostring = _G.tostring
 
--- Libs --
-local ACD = _G.LibStub("AceConfigDialog-3.0")
-
 -- RealUI --
 local RealUI = _G.RealUI
 local L = RealUI.L

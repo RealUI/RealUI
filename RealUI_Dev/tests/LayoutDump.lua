@@ -28,7 +28,7 @@ end
 --   targettarget BOTTOMRIGHT -> target BOTTOMRIGHT
 local function RelativeOffset(frame, anchor, mode)
     local fl, fb, fw, fh = rect(frame)
-    local al, ab, aw, ah = rect(anchor)
+    local al, ab, aw = rect(anchor)
     if not fl or not al then return nil end
 
     if mode == "BOTTOMLEFT" then

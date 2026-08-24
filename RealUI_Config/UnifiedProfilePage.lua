@@ -4,7 +4,6 @@ local _, private = ...
 -- luacheck: globals next pairs ipairs type tostring
 
 -- Libs --
-local ACD = _G.LibStub("AceConfigDialog-3.0")
 local ADBO = _G.LibStub("AceDBOptions-3.0")
 
 -- RealUI --

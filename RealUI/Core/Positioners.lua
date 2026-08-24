@@ -30,16 +30,25 @@ end
 -- missing keys only, HuDPositioning writes the calculated ones at login), so
 -- an individual key can legitimately be absent when the config sliders drive
 -- an update. A missing key contributes no offset rather than erroring.
--- Keys whose entry in RealUI.defaultPositions is a RAW shipped constant,
--- because HuDPositioning:UpdateRealUIPositions lists them in its
--- `runtimeOwnedKeys` set and deliberately never writes calculated values for
--- them. Only these are safe to fall back to, since GetHuDSizeOffset is still
--- owed on top. Every other key there holds a calculated, already-offset value.
--- Keep in sync with runtimeOwnedKeys in HuDPositioning.
-local RAW_DEFAULT_KEYS = {
-    ["UFHorizontal"] = true,
-    ["ActionBarsBotY"] = true,
-}
+--[[ `RealUI.defaultPositions` holds two kinds of value, and the distinction
+     matters when reading it as a fallback below:
+
+       RAW shipped constants — `UFHorizontal` and `ActionBarsBotY`. These are
+         the `runtimeOwnedKeys` that HuDPositioning:UpdateRealUIPositions
+         deliberately never writes calculated values for, so the size offset is
+         still owed on top.
+       CALCULATED, already-offset values — everything else.
+
+     This used to be a `RAW_DEFAULT_KEYS` table that gated the fallback to the
+     raw keys only. It stopped being referenced when the fallback became a
+     lift-and-shift of AceDB's old behaviour (B80), and an unused table that
+     still reads as live logic is precisely the hazard B57 cost half a day to:
+     a dead `Hook.CommunitiesListEntryMixin` was diagnosed as a live cause and
+     "fixed" without effect. So the knowledge stays, the corpse does not.
+
+     Whether the offset should be applied to already-offset values at all is
+     the open question in B102; if that is answered by re-gating the fallback,
+     this list is what to gate on — keep it in sync with `runtimeOwnedKeys`. ]]
 
 local function GetKeyAdjust(key)
     -- Precedence MUST match the config panel's `safeLayout()`, which resolves
@@ -86,14 +95,13 @@ local function GetKeyAdjust(key)
          deletes saved keys for matching a default that the user's own values
          were promoted into.
 
-         `RAW_DEFAULT_KEYS` is kept below for the same reason it was written:
-         it documents which keys hold raw shipped constants versus calculated,
-         already-offset ones. It no longer gates the fallback, because gating
-         it would change behaviour rather than preserve it. Whether adding the
-         offset on top of an already-offset calculated value is right is a real
-         question — see B102 — but it is the behaviour that has been shipping,
-         and changing it belongs in its own change with its own verification,
-         not smuggled into a persistence fix. ]]
+         The raw/calculated split is documented at the top of this file rather
+         than gating this branch, because gating it would change behaviour
+         rather than preserve it. Whether adding the offset on top of an
+         already-offset calculated value is right is a real question — see
+         B102 — but it is the behaviour that has been shipping, and changing it
+         belongs in its own change with its own verification, not smuggled into
+         a persistence fix. ]]
     if not value then
         local defaults = RealUI.defaultPositions and RealUI.defaultPositions[layout]
         value = defaults and defaults[key]

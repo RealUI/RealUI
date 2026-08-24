@@ -339,7 +339,7 @@ local function DumpFontStrings(frame, label)
                 if region and region.GetObjectType and region:GetObjectType() == "FontString" then
                     local text = SafeText(region:GetText())
                     if text and text ~= "" then
-                        local point, rel, relPoint, x, y = region:GetPoint(1)
+                        local point, _, relPoint, x, y = region:GetPoint(1)
                         _G.print(("  \"%s\" on %s [%s] %s->%s (%s, %s) shown=%s"):format(
                             text, f:GetDebugName() or "?", region:GetDrawLayer() or "?",
                             tostring(point), tostring(relPoint), fmtNum(x), fmtNum(y),

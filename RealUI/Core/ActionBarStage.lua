@@ -7,11 +7,6 @@ local _, private = ...
 local RealUI = private.RealUI
 local debug = RealUI.GetDebug("ActionBarStage") -- luacheck: ignore
 
--- Aurora --
-local Aurora = _G.Aurora
-local Base = Aurora and Aurora.Base
-local Color = Aurora and Aurora.Color
-
 --[[ B04: "choose your action bar layout" wizard stage.
 
      The install wizard never offered a bar-layout choice, so every fresh
