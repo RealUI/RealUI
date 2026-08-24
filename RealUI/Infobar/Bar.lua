@@ -1069,6 +1069,10 @@ function Infobar:SettingsUpdate(setting, block)
         if block then
             block:OnEvent("SettingsUpdate")
         end
+    elseif setting == "font" then
+        -- B124: family/size live in the profile now, so a change has to
+        -- re-resolve rather than just repaint.
+        self:RefreshBlockFont()
     elseif setting == "bgAlpha" then
         self.frame:SetBackdropColor(Aurora.Color.frame, db.bgAlpha)
         self.frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
@@ -1093,7 +1097,76 @@ function Infobar:SettingsUpdate(setting, block)
         self.frame:SetBackdropBorderColor(Aurora.Color.frame, db.bgAlpha)
         self.frame._stripes:SetAlpha(db.bgAlpha)
         watch:UpdateColors()
-        blockFont.outline = self:GetFontOutline()
+        -- B124: a profile switch can bring a different font with it, so the
+        -- catch-all branch re-resolves rather than only refreshing the outline.
+        self:RefreshBlockFont()
+    end
+end
+
+--[[ B124: resolve the infobar's font from settings.
+
+     Two axes, both able to fall back to "whatever RealUI is already using", so
+     the shipped look is unchanged unless someone opts out.
+
+     FAMILY — `face = "default"` reads RealUI_Skins' chat font, which is what
+     this always did. Any other value is an LSM font name.
+
+     SIZE — `size = 0` means "match the chat font", read from ChatFrame1 rather
+     than from a stored number, so it tracks the user's own chat settings and
+     the Display -> Font Scale multiplier that rewrites them. It is clamped to
+     the bar: a large chat font would otherwise be cropped by a 16px bar with
+     no indication of why. The old `BAR_HEIGHT * 0.6` remains the last-resort
+     fallback for when the chat frame cannot be read.
+]]
+function Infobar:ResolveBlockFont()
+    local settings = (self.db and self.db.profile and self.db.profile.font) or {}
+    local LSM = _G.LibStub("LibSharedMedia-3.0", true)
+
+    -- Family
+    local fontPath = "Fonts\\FRIZQT__.TTF" -- last resort: default WoW font
+    local face = settings.face
+    if face and face ~= "default" and LSM then
+        fontPath = LSM:Fetch("font", face) or fontPath
+    else
+        -- RealUI_Skins is a separate addon, so this is a guarded read.
+        if _G.C_AddOns.IsAddOnLoaded("RealUI_Skins") then
+            local skinsDB = _G.RealUI_SkinsDB
+            if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.chat then
+                fontPath = skinsDB.profile.fonts.chat.path or fontPath
+            end
+        end
+    end
+
+    -- Size
+    local size = settings.size
+    if not size or size <= 0 then
+        local chatFrame = _G.ChatFrame1
+        local _, chatSize = chatFrame and chatFrame:GetFont()
+        if chatSize and chatSize > 0 then
+            -- Clamp to the bar so an oversized chat font cannot crop the text.
+            size = _G.math.min(chatSize, BAR_HEIGHT - 2)
+        else
+            size = RealUI.Round(BAR_HEIGHT * 0.6)
+        end
+    end
+
+    return {
+        font = fontPath,
+        size = RealUI.Round(size),
+        outline = self:GetFontOutline(),
+    }
+end
+
+--- Re-resolve the font and repaint every block. Called from SettingsUpdate.
+function Infobar:RefreshBlockFont()
+    if not blockFont then return end
+
+    local resolved = self:ResolveBlockFont()
+    blockFont.font = resolved.font
+    blockFont.size = resolved.size
+    blockFont.outline = resolved.outline
+
+    if self.frame then
         self.frame.left:UpdateBlocks(true)
         self.frame.right:UpdateBlocks(true)
     end
@@ -1158,6 +1231,21 @@ function Infobar:OnInitialize()
             HideStatusBarMaxLevel = false,
             combatTips = false,
             blockGap = 3,
+            --[[ B124: the infobar font had no settings at all.
+
+                 The FAMILY already followed RealUI's chat font, but only as a
+                 hardcoded read with no way to override it. The SIZE was
+                 `BAR_HEIGHT * 0.6` — a derivation, not a setting, which also
+                 meant changing the bar height silently changed the font size.
+
+                 `face = "default"` keeps following RealUI's chat font, so
+                 existing profiles are unchanged on that axis. `size = 0` means
+                 "match the chat font", which is what the reporter asked for
+                 and is resolved live in ResolveBlockFont below. ]]
+            font = {
+                face = "default",
+                size = 0,
+            },
             blocks = {
                 others = {
                     ["*"] = {
@@ -1270,22 +1358,7 @@ function Infobar:OnEnable()
         end
     end)
 
-    -- Use a fallback font since RealUI_Skins is a separate addon
-    local fontPath = "Fonts\\FRIZQT__.TTF" -- Default WoW font
-
-    -- Try to get font from RealUI_Skins if it's loaded
-    if _G.C_AddOns.IsAddOnLoaded("RealUI_Skins") then
-        local skinsDB = _G.RealUI_SkinsDB
-        if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.chat then
-            fontPath = skinsDB.profile.fonts.chat.path or fontPath
-        end
-    end
-
-    blockFont = {
-        font = fontPath,
-        size = RealUI.Round(BAR_HEIGHT * 0.6),
-        outline = self:GetFontOutline()
-    }
+    blockFont = self:ResolveBlockFont()
 
     self:CreateBar()
     self:CreateBlocks()

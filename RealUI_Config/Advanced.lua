@@ -208,6 +208,66 @@ do -- RealUI
                     end,
                     order = 52,
                 },
+                --[[ B124: the infobar font had no settings anywhere.
+
+                     The family always followed RealUI's chat font with no way
+                     to override it, and the size was derived from the bar
+                     height — so changing the bar height silently changed the
+                     font size, and nothing in the UI could change it directly.
+                     `Display -> Font Scale` was the nearest thing and it does
+                     not touch the infobar at all (verified 2026-08-24: its
+                     whole implementation covers chat, the tracker's scale, and
+                     GameTooltip). ]]
+                fontGroup = {
+                    name = "Font",
+                    type = "group",
+                    inline = true,
+                    order = 55,
+                    args = {
+                        face = {
+                            name = "Font",
+                            desc = "Which font the infobar text uses."
+                                .. "\n\n|cffffcc00Use RealUI's font|r follows the chat font"
+                                .. " from Skins, which is the shipped behaviour.",
+                            type = "select",
+                            dialogControl = "LSM30_Font",
+                            values = function()
+                                local list = {}
+                                for key, value in next, _G.AceGUIWidgetLSMlists.font do
+                                    list[key] = value
+                                end
+                                list["default"] = "|cff00ff00Use RealUI's font|r"
+                                return list
+                            end,
+                            get = function()
+                                return Infobar.db.profile.font.face or "default"
+                            end,
+                            set = function(_, value)
+                                Infobar.db.profile.font.face = value
+                                Infobar:SettingsUpdate("font")
+                            end,
+                            order = 1,
+                        },
+                        size = {
+                            name = "Font size",
+                            desc = "Text size in points."
+                                .. "\n\n|cffffcc000|r means match the chat font, which tracks"
+                                .. " your chat settings and the Display \226\134\146 Font Scale"
+                                .. " multiplier. Sizes are capped to the bar height so the text"
+                                .. " cannot be cropped.",
+                            type = "range",
+                            min = 0, max = 20, step = 1,
+                            get = function()
+                                return Infobar.db.profile.font.size or 0
+                            end,
+                            set = function(_, value)
+                                Infobar.db.profile.font.size = value
+                                Infobar:SettingsUpdate("font")
+                            end,
+                            order = 2,
+                        },
+                    },
+                },
                 blocks = {
                     name = "Blocks",
                     type = "group",
