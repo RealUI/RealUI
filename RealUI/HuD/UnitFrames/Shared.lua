@@ -369,6 +369,16 @@ local CreateHealthStatus do
     }
 
     local function UpdatePvP(self, event, unit)
+        -- oUF registers this element for three events and TWO of them are
+        -- unitless: `HONOR_LEVEL_UPDATE` and `PLAYER_REGEN_ENABLED` are
+        -- registered with `unitless = true`, so `Path` forwards no unit and
+        -- `UnitIsPVP(nil)` throws "bad argument #1" (x8 on leaving combat,
+        -- 2026-08-24). Same two lines oUF's own `Update` opens with, and the
+        -- same two `UpdatePvPIcon` below already had — this override was the
+        -- one that never got them.
+        if unit and unit ~= self.__unit then return end
+        unit = unit or self.__unit
+
         local PvPIndicator = self.PvPIndicator
 
         -- UnitIsPVP, UnitReaction and UnitIsFriend all return secrets for a
