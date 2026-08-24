@@ -694,7 +694,16 @@ end
 --      icon gap comes from Blizzard's secure layout path. Replaces Aurora's
 --      RefreshLayout childXPadding hook, which tainted the CooldownViewer
 --      and caused mass secret-value errors at raid-end cinematics.
-local MIGRATION_VERSION = 5
+--  6 = Objective tracker X moved from -25 to -36 (B116). The shipped value
+--      sat inside the right-hand action bar column, which ends at -30, so the
+--      tracker overlapped the bars on every install. The number now comes from
+--      TRACKER_X in EditModeTemplates.lua, which RealUI_Tracker's AceDB seed
+--      also reads — previously the two disagreed (-25 vs -50) and only the
+--      EditMode one took effect past first run. Forces a template rebuild so
+--      existing auto-generated layouts pick the new position up; as with
+--      versions 2/3/5 that discards hand edits made inside the auto-generated
+--      RealUI layouts.
+local MIGRATION_VERSION = 6
 
 --- Checks whether migration from pre-EditMode RealUI is needed.
 -- @return boolean  true if migration should run
