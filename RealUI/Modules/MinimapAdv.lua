@@ -186,11 +186,21 @@ function MinimapAdv:UpdateInfoPosition()
         end
 
         ---- Info List
+        -- The info frames take their width from the minimap at CREATION time
+        -- (NewInfoFrame), but the minimap is resized afterwards from
+        -- dbPos.size and can be resized again from the options. Their
+        -- fontstrings fill the frame, so a stale width is invisible while the
+        -- map is anchored LEFT (text is left-justified against the anchored
+        -- edge) and shows up as an offset the moment it is anchored RIGHT,
+        -- where the justify edge is the far one. Re-assert the width here,
+        -- which runs on every position/size change.
+        local mapWidth = _G.Minimap:GetWidth()
         local prevFrame = _G.Minimap
         for i = 1, #infoTexts do
             local info = infoTexts[i]
             local infoText = MMFrames.info[info.type]
             if info.shown then
+                infoText:SetWidth(mapWidth)
                 infoText:ClearAllPoints()
                 if info.type == "Coords" then
                     infoText:SetPoint(Cpoint, _G.Minimap, Cpoint, 0, 0)
@@ -418,6 +428,13 @@ function MinimapAdv:UpdateMinimapPosition()
     else
         _G.ButtonCollectFrame:SetPoint("BOTTOMLEFT", _G.Minimap, "TOPLEFT", -1, 5)
         _G.ButtonCollectFrame:SetPoint("BOTTOMRIGHT", _G.Minimap, "TOPRIGHT", 1, 5)
+    end
+
+    -- The world marker strip hangs off whichever side of the map faces the
+    -- screen interior; it owns the flip, we just tell it which corner we're on.
+    local worldMarker = RealUI:GetModule("WorldMarker", true)
+    if worldMarker and worldMarker.UpdateAnchor then
+        worldMarker:UpdateAnchor(isLeft and true or false)
     end
 
     -- Update the rest of the Minimap

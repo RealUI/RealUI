@@ -79,11 +79,17 @@ local function UpdateSize()
 end
 
 -----------------
+-- The strip lives on whichever side of the minimap faces the screen interior,
+-- so it never runs off the edge: minimap anchored LEFT puts the buttons (and
+-- their labels) to its right, minimap anchored RIGHT flips both to its left.
+-- Driven from MinimapAdv:UpdateMinimapPosition, which owns the anchor.
+local onMapRight = true
+
 local function OnLeave(self)
     self.text:Hide()
     self:SetBackdropOption("offsets", {
-        left = 0,
-        right = (BUTTON_WIDTH - 2),
+        left = onMapRight and 0 or (BUTTON_WIDTH - 2),
+        right = onMapRight and (BUTTON_WIDTH - 2) or 0,
         top = 0,
         bottom = 0,
     })
@@ -130,10 +136,46 @@ local function CreateButton(index, id)
     end
 
     button.text = button:GetFontString()
-    button.text:SetPoint("LEFT", button, "RIGHT", 2, 0)
 
     OnLeave(button)
     return button
+end
+
+-- Re-point the strip and its labels for the current minimap side. Only the
+-- container frame, the label fontstrings and the backdrop offsets move — the
+-- secure buttons keep their own anchors, so this is combat-safe.
+local function ApplyAnchor()
+    local frame = WorldMarker.frame
+    if not frame then return end
+
+    frame:ClearAllPoints()
+    if onMapRight then
+        frame:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 1, 1)
+        frame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMRIGHT", 1, -1)
+    else
+        frame:SetPoint("TOPRIGHT", _G.Minimap, "TOPLEFT", -1, 1)
+        frame:SetPoint("BOTTOMRIGHT", _G.Minimap, "BOTTOMLEFT", -1, -1)
+    end
+
+    for index = 1, #frame do
+        local button = frame[index]
+        button.text:ClearAllPoints()
+        if onMapRight then
+            button.text:SetPoint("LEFT", button, "RIGHT", 2, 0)
+        else
+            button.text:SetPoint("RIGHT", button, "LEFT", -2, 0)
+        end
+        OnLeave(button)
+    end
+end
+
+-- Called by MinimapAdv whenever the minimap's corner changes.
+function WorldMarker:UpdateAnchor(isMinimapOnLeft)
+    local side = isMinimapOnLeft and true or false
+    if side == onMapRight and self.frame then return end
+
+    onMapRight = side
+    ApplyAnchor()
 end
 
 ---------------
@@ -153,8 +195,6 @@ function WorldMarker:OnInitialize()
     end
 
     local frame = _G.CreateFrame("Frame", "RealUI_WorldMarker", _G.Minimap)
-    frame:SetPoint("TOPLEFT", _G.Minimap, "TOPRIGHT", 1, 1)
-    frame:SetPoint("BOTTOMLEFT", _G.Minimap, "BOTTOMRIGHT", 1, -1)
     frame:SetWidth(BUTTON_WIDTH)
     self.frame = frame
 
@@ -173,6 +213,8 @@ function WorldMarker:OnInitialize()
     local button = CreateButton()
     button:SetPoint("TOPLEFT", frame[#frame], "BOTTOMLEFT", 0, 0)
     frame[#frame + 1] = button
+
+    ApplyAnchor()
 
     _G.hooksecurefunc(_G.Minimap, "SetSize", UpdateSize)
     _G.C_Timer.NewTicker(1, UpdateUsed)
