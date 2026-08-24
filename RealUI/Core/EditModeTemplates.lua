@@ -57,6 +57,40 @@ local VISIBILITY_ALWAYS_HIDDEN = 3
 local OFF_SCREEN_Y = -5000
 
 ---------------------------------------------------------------------------
+-- Objective tracker position — the ONE source of truth (B116, 2026-08-24)
+--
+-- This used to be stated twice: here as an EditMode anchor, and again as an
+-- AceDB default in RealUI_Tracker. They drifted (-25 here against -50 there)
+-- and the EditMode value wins for every install past first run, so the
+-- shipped tracker sat under the right-hand action bars. RealUI_Tracker now
+-- seeds from `Templates.trackerDefaultPosition` below instead of restating
+-- the numbers, which is what makes the two agree by construction rather than
+-- by someone remembering to update both.
+--
+-- The X offset is derived, not eyeballed. RealUI_ActionBars/Defaults.lua
+-- ships `buttonSize = 27` with a 1px border drawn OUTSIDE the frame, so a
+-- side-bar column is 27 + 2 = 29px wide; Integration.lua anchors it
+-- border-flush at `x = -border` (RIGHT). The column therefore occupies screen
+-- x [-30, -1], and the tracker's right edge has to clear -30.
+--
+-- Note this tracks the SHIPPED button size. A user who enlarges their buttons
+-- widens the column and can reintroduce the overlap; making the tracker
+-- follow that live would mean recomputing an EditMode anchor from action bar
+-- settings, which is a bigger change than this fix. Deliberately not done.
+local SIDE_BAR_INSET     = 1                                    -- Integration.lua: x = -border
+local SIDE_BAR_COLUMN    = 29                                   -- buttonSize 27 + 2 borders
+local TRACKER_EDGE_GAP   = 6
+local TRACKER_X = -(SIDE_BAR_INSET + SIDE_BAR_COLUMN + TRACKER_EDGE_GAP)  -- -36
+local TRACKER_Y = -210
+
+Templates.trackerDefaultPosition = {
+    anchorFrom = "TOPRIGHT",
+    anchorTo   = "TOPRIGHT",
+    x          = TRACKER_X,
+    y          = TRACKER_Y,
+}
+
+---------------------------------------------------------------------------
 -- Helper: create a system entry
 ---------------------------------------------------------------------------
 local function Entry(system, systemIndex, anchorInfo, settings, isInDefaultPosition)
@@ -426,8 +460,10 @@ Templates.base = {
     -- = nil (Requirement 6.3) so the saved layout never references a frame
     -- name outside EditMode's standard target set.
     -- =====================================================================
+    -- Offsets come from TRACKER_X / TRACKER_Y at the top of this file, which
+    -- RealUI_Tracker's AceDB defaults also read. Do not inline numbers here.
     Entry(SYSTEM_OBJECTIVE_TRACKER, nil,
-        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", -25, -210),
+        Anchor("TOPRIGHT", "UIParent", "TOPRIGHT", TRACKER_X, TRACKER_Y),
         {
             { setting = 0, value = 40 },  -- Height
             { setting = 1, value = 0 },   -- Opacity
@@ -792,8 +828,12 @@ Templates.displayAdjustments = {
     laptop = {
         -- Minimap slightly smaller offset
         ["2_nil"]  = { offsetX = 5, offsetY = 5 },
-        -- Objective tracker closer to edge
-        ["12_nil"] = { offsetX = 5, offsetY = 20 },
+        -- Objective tracker: vertical tightening only. offsetX was +5, which
+        -- pulled it back to -31 against a side-bar column that ends at -30 —
+        -- a 1px gap, and the overlap again on any enlarged button size. The
+        -- bars are the same width on a laptop as anywhere else, so this axis
+        -- has nothing to reclaim (B116, 2026-08-24).
+        ["12_nil"] = { offsetX = 0, offsetY = 20 },
         -- Chat frame tighter to corner
         ["8_nil"]  = { offsetX = -5, offsetY = -5 },
         -- Buffs tighter
