@@ -1368,12 +1368,68 @@ do -- UnitFrames
         }
     end
 
+    --[[ B122/B123: pin a secondary frame to the primary it belongs to.
+
+         Only the SECONDARY frames get this. Anchoring the player frame to the
+         target frame is not a thing anyone wants, and offering it would just
+         invite someone to build a cycle.
+
+         Everything this needs already existed — pet and ToT are registered
+         with `FramePoint:PositionFrame` (Units/Pet.lua:35,
+         Units/TargetTarget.lua:34), `FramePoint.ANCHOR_FRAMES` already
+         resolves player/target/focus, and `SetAnchorTo` already rewrites the
+         offsets between coordinate spaces so the frame does not jump. This is
+         the same control the cast bars and class resource have shipped since
+         B12; the unit panels simply never exposed it. ]]
+    local ANCHORABLE_UNITS = {
+        pet          = "player",
+        targettarget = "target",
+        focustarget  = "focus",
+    }
+
+    --[[ Is FramePoint driving this frame instead of the positioner?
+
+         The condition is `framePoint.x`, NOT `anchorTo`. `RestorePosition`
+         acts on any frame with saved coordinates, so a frame that was merely
+         DRAGGED is just as detached from the positioner as one that was
+         pinned — the documented B93 behaviour, restated in
+         `FramePoint:ShiftScreenAnchored`'s own comment: *"A managed frame
+         follows its positioner only while it has NEVER been dragged."*
+
+         Keying the check on `anchorTo` would re-enable the offset boxes as
+         soon as someone set Anchor To back to Screen, at which point they
+         would look live and still do nothing. ]]
+    local function IsFramePointControlled(unitSlug)
+        local unitDB = UnitFrames.db.profile.units[unitSlug]
+        local fp = unitDB and unitDB.framePoint
+        return (fp and fp.x) ~= nil
+    end
+
     local units = ufArgs.units.args
     for unitSlug, unit in next, units do
+        --[[ The offset inputs below write `db.profile.positions[layout][unit]`,
+             which is the HuD POSITIONER value — a different coordinate system
+             from the FramePoint offsets a pinned frame rides on. Once a frame
+             is pinned, the positioner is out of the chain and typing in these
+             boxes does nothing visible.
+
+             They are disabled rather than hidden while pinned. B59 in the beta
+             feedback is exactly this failure — "options panel offers settings
+             the layout engine overwrites" — and a control that silently does
+             nothing is the same bug wearing a different hat. ]]
+        local function OffsetsDisabled()
+            return IsFramePointControlled(unitSlug)
+        end
+        local offsetPinnedDesc = "\n\n|cffffcc00Disabled because this frame has been moved by"
+            .. " dragging or pinning, which hands it to the frame mover — these offsets no longer"
+            .. " drive it. Drag the frame itself to adjust.|r"
+
         unit.args.x = {
             name = L["General_XOffset"],
+            desc = offsetPinnedDesc,
             type = "input",
             order = 10,
+            disabled = OffsetsDisabled,
             get = function(info) return tostring(UnitFrames.db.profile.positions[safeLayout()][unitSlug].x) end,
             set = function(info, value)
                 value = ValidateOffset(value)
@@ -1383,8 +1439,10 @@ do -- UnitFrames
         }
         unit.args.y = {
             name = L["General_YOffset"],
+            desc = offsetPinnedDesc,
             type = "input",
             order = 20,
+            disabled = OffsetsDisabled,
             get = function(info) return tostring(UnitFrames.db.profile.positions[safeLayout()][unitSlug].y) end,
             set = function(info, value)
                 value = ValidateOffset(value)
@@ -1392,6 +1450,36 @@ do -- UnitFrames
                 UnitFrames:RepositionFrames()
             end,
         }
+        if ANCHORABLE_UNITS[unitSlug] then
+            local suggested = ANCHORABLE_UNITS[unitSlug]
+            unit.args.anchorTo = {
+                name = "Anchor To",
+                desc = ("Pin this frame to a unit frame so it follows that frame, or leave it on the screen.")
+                    .. ("\n\nSuggested: |cff00ff00%s|r."):format(ANCHOR_TO_VALUES[suggested])
+                    .. "\n\nThis frame already starts out positioned relative to "
+                    .. ANCHOR_TO_VALUES[suggested]
+                    .. ", but that link is lost the moment the frame is dragged. Pinning restores it"
+                    .. " permanently — the offset is stored against the anchor, so the frame keeps"
+                    .. " following it however either one moves."
+                    .. "\n\nWhen pinned, the X/Y offsets above stop applying. Drag the frame to"
+                    .. " fine-tune; the drag is saved as an offset from the anchor.",
+                type = "select",
+                values = ANCHOR_TO_VALUES,
+                sorting = ANCHOR_TO_ORDER,
+                order = 5,
+                get = function()
+                    local unitDB = UnitFrames.db.profile.units[unitSlug]
+                    return (unitDB and unitDB.framePoint and unitDB.framePoint.anchorTo) or "screen"
+                end,
+                set = function(_, value)
+                    -- Must go through SetAnchorTo: it captures where the frame
+                    -- currently sits and rewrites x/y into the new coordinate
+                    -- space, so switching modes never teleports the frame.
+                    FramePoint:SetAnchorTo(UnitFrames,
+                        {"profile", "units", unitSlug, "framePoint"}, value)
+                end,
+            }
+        end
         -- reverseFill is generic (GetReverseFill/RefreshUnits key off db.units[unit]
         -- for any unit), so it applies to every frame with a health bar, not just
         -- player/target. Pet and TargetTarget inherit their parent frame's
