@@ -40,8 +40,16 @@ UnitFrames.target = {
         local debuffGrowthX = debuffLayout.growthX or "RIGHT"
         local debuffGrowthY = debuffLayout.growthY or "UP"
 
+        -- B112: filter/candidates/sort come from the group's own settings via
+        -- the shared resolver, never a hardcoded string.
+        local debuffFilter, debuffCandidates, debuffSort, debuffSortDir =
+            UnitFrames.ResolveAuraFilter("HARMFUL", debuffLayout)
+
         local Debuffs = UnitFrames.CreateAuraElement(dialog, {
-            filter = "HARMFUL",
+            filter = debuffFilter,
+            candidates = debuffCandidates,
+            sortMethod = debuffSort,
+            sortDirection = debuffSortDir,
             count = (db.units.target and db.units.target.debuffCount) or 16,
             size = (db.units.target and db.units.target.debuffSize) or 20,
             spacing = 2,
@@ -59,8 +67,14 @@ UnitFrames.target = {
         local buffGrowthX = buffLayout.growthX or "LEFT"
         local buffGrowthY = buffLayout.growthY or "UP"
 
+        local buffFilter, buffCandidates, buffSort, buffSortDir =
+            UnitFrames.ResolveAuraFilter("HELPFUL", buffLayout)
+
         local Buffs = UnitFrames.CreateAuraElement(dialog, {
-            filter = "HELPFUL",
+            filter = buffFilter,
+            candidates = buffCandidates,
+            sortMethod = buffSort,
+            sortDirection = buffSortDir,
             count = (db.units.target and db.units.target.buffCount) or 16,
             size = (db.units.target and db.units.target.buffSize) or 20,
             spacing = 2,
