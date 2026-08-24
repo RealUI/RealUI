@@ -120,6 +120,10 @@ local function GetDurationFormatter()
     return durationFormatter or nil
 end
 
+-- Width of the two 1px icon borders that sit between any two adjacent aura
+-- buttons; see CreateAuraElement.
+local AURA_BORDER_PAD = 2
+
 local function AuraPostCreateButton(_, button)
     if button.Icon then
         _G.Aurora.Base.CropIcon(button.Icon, button)
@@ -180,11 +184,19 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         layoutLimit = frameWidth,
     })
     element.PostCreateButton = AuraPostCreateButton
+    -- Every aura button carries a 1px black border 1px OUTSIDE its own rect
+    -- (Base.CropIcon, in AuraPostCreateButton above), but the flow layout
+    -- spaces the button rects, not the borders. A raw elementSpacing of 2
+    -- therefore renders as a 0px visible gap — the two borders eat it. Pad by
+    -- the pair of borders that sits between any two neighbours so `spacing`
+    -- means the gap the user actually sees, matching the 2px between action
+    -- bar icons.
+    local spacing = (settings.spacing or 0) + AURA_BORDER_PAD
     element._ruiGroupKey = element:AddGroup(settings.filter, {
         maxFrameCount = settings.count,
         size = settings.size,
-        elementSpacing = settings.spacing,
-        lineSpacing = settings.spacing,
+        elementSpacing = spacing,
+        lineSpacing = spacing,
         showCount = true,
         -- B19: oUF-owned duration text (button.Time), replacing the cooldown
         -- widget's own countdown numbers which cannot be restyled. Minutes and
