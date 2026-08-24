@@ -1,15 +1,33 @@
 local ADDON_NAME, private = ...
 local RealUI_Tracker = LibStub("AceAddon-3.0"):NewAddon(ADDON_NAME, "AceEvent-3.0")
 
+--[[ B116, 2026-08-24: the shipped tracker position is stated ONCE, in
+     RealUI/Core/EditModeTemplates.lua, and read here.
+
+     It used to be stated twice — `-25, -210` as the EditMode anchor and
+     `-50, -200` as the AceDB default below — and nothing kept them in step.
+     Since 2.5b EditMode owns the live position and this table is only a
+     one-time seed, so the EditMode value is what every install past first run
+     actually gets: the tracker shipped at -25, under the right-hand action
+     bar column (which ends at -30). Changing only one of the two numbers
+     would have fixed only one of first-run and everyone-else.
+
+     RealUI is a RequiredDep, so the fallback below is for load-order
+     paranoia, not a supported configuration. Keep it equal to the template's
+     derived value if it is ever touched. ]]
+local DEFAULT_POSITION = (_G.RealUI and _G.RealUI.EditModeTemplates
+    and _G.RealUI.EditModeTemplates.trackerDefaultPosition)
+    or { anchorFrom = "TOPRIGHT", anchorTo = "TOPRIGHT", x = -36, y = -210 }
+
 function RealUI_Tracker:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("RealUI_TrackerDB", {
         profile = {
             position = {
                 enabled       = true,
-                anchorTo      = "TOPRIGHT",
-                anchorFrom    = "TOPRIGHT",
-                x             = -50,
-                y             = -200,
+                anchorTo      = DEFAULT_POSITION.anchorTo,
+                anchorFrom    = DEFAULT_POSITION.anchorFrom,
+                x             = DEFAULT_POSITION.x,
+                y             = DEFAULT_POSITION.y,
             },
             context = {
                 enabled = true,
