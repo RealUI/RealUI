@@ -15,7 +15,12 @@ local NP = private.NP
      candidate filters: isStealable, includeDispelTypes ([""] = enrage), etc.
      Button size is creation-time only — size changes need a /reload. ]]--
 
+-- SPACING is the gap the user sees. Each button carries a 1px black border 1px
+-- OUTSIDE its own rect (private.CreateBorder), and the flow layout spaces the
+-- button rects, not the borders — so the engine has to be told SPACING plus the
+-- pair of borders between any two neighbours, or the icons render touching.
 local SPACING = 2
+local ELEMENT_SPACING = SPACING + 2
 
 local GROUP_DEFS = {
     myDebuffs = {
@@ -36,18 +41,27 @@ local GROUP_DEFS = {
 
 -- Anchor presets (config-selectable per group; growth direction rides along so
 -- rows always grow away from the plate).
+--
+-- The centred presets work because CustomAuraContainerFlowLayoutMixin's
+-- OnLayoutComplete resizes the container to the laid-out row (Blizzard_Custom-
+-- AuraContainer.lua:679). Anchoring the container's own BOTTOM/TOP to the plate
+-- therefore centres the whole row on the plate, while the row itself still
+-- flows from its left edge. The width is a secret value, but we never read it —
+-- only the engine and SetPoint do.
 local POSITIONS = {
+    aboveCenter = { point = "BOTTOM",      relPoint = "TOP",         flowAnchor = "BOTTOMLEFT",  growX = 1  },
     aboveLeft  = { point = "BOTTOMLEFT",  relPoint = "TOPLEFT",     flowAnchor = "BOTTOMLEFT",  growX = 1  },
     aboveRight = { point = "BOTTOMRIGHT", relPoint = "TOPRIGHT",    flowAnchor = "BOTTOMRIGHT", growX = -1 },
     left       = { point = "RIGHT",       relPoint = "LEFT",        flowAnchor = "BOTTOMRIGHT", growX = -1 },
     right      = { point = "LEFT",        relPoint = "RIGHT",       flowAnchor = "BOTTOMLEFT",  growX = 1  },
+    belowCenter = { point = "TOP",         relPoint = "BOTTOM",      flowAnchor = "TOPLEFT",     growX = 1  },
     belowLeft  = { point = "TOPLEFT",     relPoint = "BOTTOMLEFT",  flowAnchor = "TOPLEFT",     growX = 1  },
     belowRight = { point = "TOPRIGHT",    relPoint = "BOTTOMRIGHT", flowAnchor = "TOPRIGHT",    growX = -1 },
 }
 private.auraPositionNames = {
-    aboveLeft = "Above, grow right", aboveRight = "Above, grow left",
+    aboveCenter = "Above, centered", aboveLeft = "Above, grow right", aboveRight = "Above, grow left",
     left = "Left side", right = "Right side",
-    belowLeft = "Below, grow right", belowRight = "Below, grow left",
+    belowCenter = "Below, centered", belowLeft = "Below, grow right", belowRight = "Below, grow left",
 }
 
 local Auras = {}
@@ -140,7 +154,7 @@ local function SetupContainer(plate, key, def)
             if group.candidates then
                 container:SetAuraGroupCandidateFilters(groupKey, group.candidates)
             end
-            container:SetAuraGroupLayout(groupKey, { elementSpacing = SPACING, lineSpacing = SPACING })
+            container:SetAuraGroupLayout(groupKey, { elementSpacing = ELEMENT_SPACING, lineSpacing = ELEMENT_SPACING })
         end
     end)
     if not configured then
@@ -174,7 +188,7 @@ local function ConfigureContainer(container, def, groupDB, size)
         for i in _G.ipairs(def.groups) do
             container:SetAuraGroupMaxFrameCount(_G.tostring(i), groupDB.max)
         end
-        container:SetFlowLayoutMaximumLineSize((size + SPACING) * groupDB.max)
+        container:SetFlowLayoutMaximumLineSize((size + ELEMENT_SPACING) * groupDB.max)
     end)
 end
 
