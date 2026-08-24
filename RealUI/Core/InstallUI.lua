@@ -41,8 +41,10 @@ InstallUI:SetFrameStrata("DIALOG")
 InstallUI:Hide()
 
 -- Add backdrop with texture
+-- B121: the border is left at Aurora's own colour. It used to be forced to
+-- opaque white, which is why the wizard was the one RealUI frame with a thick
+-- light border — everything else in the UI carries Aurora's thin dark one.
 Base.SetBackdrop(InstallUI, Color.frame, 0.95)
-InstallUI:SetBackdropBorderColor(1, 1, 1, 1)
 
 -- Title
 local title = InstallUI:CreateFontString(nil, "ARTWORK", "GameFont_Gigantic")
@@ -122,6 +124,22 @@ closeButton:SetScript("OnClick", function()
 end)
 InstallUI.closeButton = closeButton
 
+-- B121: the wizard built stock Blizzard widgets and never skinned them, so the
+-- first thing a new user saw was the one window in the suite that does not look
+-- like RealUI. Aurora already has a skin for each of these templates; they were
+-- simply never called.
+local Skin = Aurora.Skin
+if Skin then
+    if Skin.UIPanelButtonTemplate then
+        Skin.UIPanelButtonTemplate(prevButton)
+        Skin.UIPanelButtonTemplate(nextButton)
+        Skin.UIPanelButtonTemplate(skipButton)
+    end
+    if Skin.UIPanelCloseButton then
+        Skin.UIPanelCloseButton(closeButton)
+    end
+end
+
 -- Stage content definitions
 local stageContent = {
     [RealUI.InstallWizard and RealUI.InstallWizard.STAGE_WELCOME or 0] = {
@@ -197,6 +215,7 @@ The system can automatically switch layouts based on your specialization.
             -- still at defaults, is the moment where it costs nothing.
             if not self.linkCheck then
                 local linkCheck = _G.CreateFrame("CheckButton", nil, self.content, "UICheckButtonTemplate")
+                if Skin and Skin.UICheckButtonTemplate then Skin.UICheckButtonTemplate(linkCheck) end
                 linkCheck:SetSize(26, 26)
                 linkCheck:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 10, 40)
                 linkCheck.text = linkCheck:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -214,6 +233,7 @@ The system can automatically switch layouts based on your specialization.
             -- Show Naga checkbox
             if not self.nagaCheck then
                 local nagaCheck = _G.CreateFrame("CheckButton", nil, self.content, "UICheckButtonTemplate")
+                if Skin and Skin.UICheckButtonTemplate then Skin.UICheckButtonTemplate(nagaCheck) end
                 nagaCheck:SetSize(26, 26)
                 nagaCheck:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 10, 10)
                 nagaCheck:SetChecked(false)
@@ -422,6 +442,56 @@ Configure optional quality of life features:
                         _G.UIDropDownMenu_AddButton(info, level)
                     end
                 end)
+
+                --[[ B121: the dropdown was the last stock widget on this page.
+
+                     Three separate complaints, three separate causes:
+
+                     1. Unskinned. `Skin.UIDropDownMenuTemplate` exists and was
+                        never called. It must run AFTER UIDropDownMenu_SetWidth,
+                        because the skin picks its right-hand offset from the
+                        frame's current width.
+
+                     2. The selected text was centred while the menu entries
+                        below it are left-aligned, so the value appeared to jump
+                        sideways when the menu opened. The fontstring is
+                        `<name>Text`; left-justify it and inset it past the
+                        skin's left edge so it lines up with the entries.
+
+                     3. "Tiny dropdown options". `DropDownList1` is a global
+                        frame parented to UIParent, so it does NOT inherit the
+                        wizard's scale — and the wizard scales itself up to 1.6
+                        on HiDPI (GetWizardDisplayScale). The menu rendered at
+                        UIParent scale next to a control 60% larger. Match the
+                        scale while our menu is open and put it back on hide,
+                        since the list is shared with every other dropdown. ]]
+                if Skin and Skin.UIDropDownMenuTemplate then
+                    Skin.UIDropDownMenuTemplate(dropdown)
+                end
+
+                local dropdownText = _G[dropdown:GetName() .. "Text"]
+                if dropdownText then
+                    dropdownText:SetJustifyH("LEFT")
+                    dropdownText:ClearAllPoints()
+                    dropdownText:SetPoint("LEFT", dropdown, "LEFT", 24, 2)
+                    dropdownText:SetPoint("RIGHT", dropdown, "RIGHT", -24, 2)
+                end
+
+                local list = _G.DropDownList1
+                if list then
+                    local restoreScale = list:GetScale()
+                    list:HookScript("OnShow", function(self)
+                        if _G.UIDROPDOWNMENU_OPEN_MENU == dropdown then
+                            restoreScale = self:GetScale()
+                            self:SetScale(InstallUI:GetScale())
+                        end
+                    end)
+                    list:HookScript("OnHide", function(self)
+                        if self:GetScale() ~= restoreScale then
+                            self:SetScale(restoreScale)
+                        end
+                    end)
+                end
 
                 self.repairMountDropdown = dropdown
 

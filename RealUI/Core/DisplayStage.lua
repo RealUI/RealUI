@@ -11,6 +11,8 @@ local debug = RealUI.GetDebug("DisplayStage") -- luacheck: ignore
 local Aurora = _G.Aurora
 local Base = Aurora.Base
 local Color = Aurora.Color
+-- B121: stock Blizzard widgets in the wizard were never skinned.
+local Skin = Aurora.Skin
 
 -- DisplayStage module
 -- Renders preset cards for the STAGE_DISPLAY wizard step and standalone access.
@@ -222,6 +224,7 @@ local function BuildCardGrid(parent)
     -- ScrollFrame — leave room on the right for the preview frame, and
     -- 30px at the bottom for the HDR checkbox
     scrollFrame = _G.CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
+    if Skin and Skin.UIPanelScrollFrameTemplate then Skin.UIPanelScrollFrameTemplate(scrollFrame) end
     scrollFrame:SetPoint("TOPLEFT", 0, 0)
     scrollFrame:SetPoint("BOTTOMRIGHT", -(PREVIEW_WIDTH + 30), 30)
 
@@ -254,6 +257,7 @@ local function BuildCardGrid(parent)
 
     -- HDR checkbox below the card scroll area
     hdrCheckbox = _G.CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
+    if Skin and Skin.UICheckButtonTemplate then Skin.UICheckButtonTemplate(hdrCheckbox) end
     hdrCheckbox:SetPoint("TOPLEFT", scrollFrame, "BOTTOMLEFT", 0, -8)
     hdrCheckbox.Text:SetText("Enable HDR Colors")
     hdrCheckbox:SetChecked(DisplayStage.hdrEnabled)
@@ -606,6 +610,7 @@ function DisplayStage.Open()
 
     -- Confirm button
     local confirmBtn = _G.CreateFrame("Button", nil, standaloneFrame, "UIPanelButtonTemplate")
+    if Skin and Skin.UIPanelButtonTemplate then Skin.UIPanelButtonTemplate(confirmBtn) end
     confirmBtn:SetSize(120, 25)
     confirmBtn:SetPoint("BOTTOMRIGHT", -20, 14)
     confirmBtn:SetText("Apply")
@@ -620,6 +625,7 @@ function DisplayStage.Open()
 
     -- Cancel button
     local cancelBtn = _G.CreateFrame("Button", nil, standaloneFrame, "UIPanelButtonTemplate")
+    if Skin and Skin.UIPanelButtonTemplate then Skin.UIPanelButtonTemplate(cancelBtn) end
     cancelBtn:SetSize(100, 25)
     cancelBtn:SetPoint("BOTTOMLEFT", 20, 14)
     cancelBtn:SetText("Cancel")
