@@ -879,7 +879,34 @@ function MinimapAdv:UpdatePOIEnabled()
         self:RegisterEvent("QUEST_LOG_UPDATE", "POIUpdate")
         self:RegisterEvent("QUEST_WATCH_LIST_CHANGED", "POIUpdate")
         self:RegisterEvent("SUPER_TRACKING_CHANGED", "POIUpdate")
-        _G.EventRegistry:RegisterCallback("Supertracking.OnChanged", self.POIUpdate, self);
+
+        --[[ B118, 2026-08-24: we do NOT subscribe to
+             `EventRegistry:RegisterCallback("Supertracking.OnChanged", ...)`.
+
+             It was redundant. `Supertracking.OnChanged` is fired from
+             `SuperTrackEventMixin:CacheCurrentSuperTrackInfo`, which Blizzard
+             calls from exactly one live path — the `SUPER_TRACKING_CHANGED`
+             branch of its own OnEvent (Blizzard_QuestSuperTracking.lua:15-27).
+             We already take that game event on the line above, so POIUpdate ran
+             TWICE for every super-track change, and POIUpdate is not cheap: it
+             clears and rebuilds every POI across all zone children.
+
+             The second call was also the dangerous one. Blizzard's
+             `QuestDataProvider` subscribes to the same event, and the dispatch
+             is one execution — so our callback running in it carried taint into
+             `RefreshAllData → AddQuest → AcquirePin → CheckMouseButtonPassthrough`
+             and the protected `SetPassThroughButtons` was refused. Reported
+             against beta 10 with the map CLOSED, which is what distinguishes it
+             from B95.
+
+             POIUpdate reads only `C_Map` APIs and our own state — it never
+             touches the callback arguments or Blizzard's cached mixin fields —
+             so taking the game event directly loses nothing. It also runs in
+             our own execution, where our taint cannot reach Blizzard's pins.
+
+             Bonus: the old registration was never torn down in the `else`
+             branch below, so disabling POI left the callback (and the taint
+             path) live for the rest of the session. ]]
     else
         self:RemoveAllPOIs()
         self:UnregisterEvent("QUEST_POI_UPDATE")
