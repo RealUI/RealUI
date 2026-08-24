@@ -134,8 +134,15 @@ UnitFrames.player = {
         local buffGrowthX = buffLayout.growthX or "RIGHT"
         local buffGrowthY = buffLayout.growthY or "UP"
 
+        -- B112: filter/candidates/sort from the group's settings (shared resolver).
+        local buffFilter, buffCandidates, buffSort, buffSortDir =
+            UnitFrames.ResolveAuraFilter("HELPFUL", buffLayout)
+
         local Buffs = UnitFrames.CreateAuraElement(dialog, {
-            filter = "HELPFUL",
+            filter = buffFilter,
+            candidates = buffCandidates,
+            sortMethod = buffSort,
+            sortDirection = buffSortDir,
             count = (db.units.player and db.units.player.buffCount) or 16,
             size = (db.units.player and db.units.player.buffSize) or 20,
             spacing = 2,
