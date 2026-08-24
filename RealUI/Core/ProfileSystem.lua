@@ -53,7 +53,8 @@ function ProfileSystem:GetDatabaseDefaults()
             -- "Link Layouts" — account-wide; see the note in Core.lua. The
             -- layout profiles it writes through to are shared by every
             -- character, so a narrower scope cannot protect anything.
-            positionsLink = true,
+            -- Default OFF — see the note in Core.lua (2026-08-24).
+            positionsLink = false,
             display = {
                 presetId     = false,   -- false = not yet configured
                 customScale  = 1.0,

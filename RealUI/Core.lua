@@ -189,7 +189,12 @@ do
                  scoped, which had the same mismatch one level up.
                  Unlike scopeLinks, which IS per-character because it selects
                  which profile each scope follows and that varies by spec. ]]
-            positionsLink = true,
+            -- Default OFF (owner decision, 2026-08-24, verifying beta 10 p3).
+            -- Linking is a deliberate choice: it makes every position write hit
+            -- BOTH layouts, which is surprising for anyone who has not asked
+            -- for it and is the mechanism behind the B86/B89/B104 confusion.
+            -- Opt in from HuD > General.
+            positionsLink = false,
         },
         char = {
             init = charInit,
