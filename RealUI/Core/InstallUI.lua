@@ -220,7 +220,16 @@ The system can automatically switch layouts based on your specialization.
                 linkCheck:SetPoint("BOTTOMLEFT", self.content, "BOTTOMLEFT", 10, 40)
                 linkCheck.text = linkCheck:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
                 linkCheck.text:SetPoint("LEFT", linkCheck, "RIGHT", 4, 0)
-                linkCheck.text:SetText("Link layouts (DPS/Tank and Healing share HuD positions)")
+                -- The scope is spelled out because `positionsLink` lives in
+                -- db.global: the layout profiles it writes through are shared
+                -- by every character, so a narrower scope could not protect
+                -- anything (see the note in Core.lua). That also means
+                -- `/realui resetchar` does NOT clear it — ResetCharacter only
+                -- touches db.char.init — which is exactly how a tester hit a
+                -- ticked box on what they expected to be a clean slate.
+                linkCheck.text:SetText("Link layouts (DPS/Tank and Healing share HuD positions)"
+                    .. "\n|cff808080Applies to all characters on this account.|r")
+                linkCheck.text:SetJustifyH("LEFT")
                 linkCheck:SetScript("OnClick", function(btn)
                     if RealUI.InstallWizard then
                         RealUI.InstallWizard:GetState().stageData.linkLayouts = btn:GetChecked()
