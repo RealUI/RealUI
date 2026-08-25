@@ -425,6 +425,38 @@ function RealUI:ChatCommand_Config(input)
             -- Quick path, no prompt: full wipe, all characters.
             self:ResetEverything()
             return
+        elseif command == "editmode" then
+            -- B131: an upgrade that changes the shipped layout rebuilds every
+            -- EditMode entry, discarding whatever the user had moved. The
+            -- rebuild now copies the old layout aside first; this is how it
+            -- comes back.
+            local EMM = self.EditModeManager
+            if not EMM then
+                print("|cff0099ffRealUI|r: EditMode manager not available.")
+                return
+            end
+
+            local sub = input:lower():match("^%S+%s+(%S+)")
+            if sub == "restore" then
+                local ok, msg = EMM:RestoreLayoutBackup()
+                print(("|cff0099ffRealUI|r: %s"):format(msg))
+                if ok then
+                    print("|cff808080  Your own EditMode changes are back. Reload to see them.|r")
+                end
+            else
+                local backups = EMM:GetLayoutBackups()
+                if next(backups) then
+                    print("|cff0099ffRealUI|r: EditMode layout backups available:")
+                    for layoutName, fromVersion in next, backups do
+                        print(("|cffff9900  %s|r |cff808080(your layout as it was at version %d, before it was rebuilt)|r")
+                            :format(layoutName, fromVersion))
+                    end
+                    print("|cff808080  /realui editmode restore|r — put them back")
+                else
+                    print("|cff0099ffRealUI|r: No EditMode layout backup stored.")
+                end
+            end
+            return
         elseif command == "display" then
             if self.DisplayStage then
                 self.DisplayStage.Open()
