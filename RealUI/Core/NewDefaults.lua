@@ -17,8 +17,16 @@ local NewDefaults = {}
 RealUI.NewDefaults = NewDefaults
 
 -- Each item: label, desc, changed (beta tag), needsReload,
--- isApplied() -> true/false/nil (nil = not detectable, always offered),
--- apply() -> nil. Items whose modules/frames are missing are skipped.
+-- isApplied() -> true/false/nil, apply() -> nil. Items whose modules/frames are
+-- missing are skipped.
+--
+-- isApplied's three states are distinct and the dialog renders each differently
+-- (B126): true = already applied, false = off-default and pre-ticked, nil = the
+-- current value could not be read, shown unticked and labelled. nil used to
+-- render as a ticked item, indistinguishable from a real finding.
+--
+-- `installApply = true` marks an item the install wizard applies itself, so a
+-- freshly-wizarded character has nothing left to be nudged about.
 local items = {
     {
         id = "auraSize",
@@ -149,6 +157,15 @@ local items = {
         label = "Bags open bottom-right",
         desc = "The bag cluster now opens above the Infobar at the bottom-right, clear of the minimap.",
         changed = "beta 6",
+        -- B126: the install wizard applies this itself. `InventoryBagMixin:Init`
+        -- (RealUI_Inventory/Bags.lua:406) writes the same anchor at
+        -- OnInitialize, but something later overrides it on upgrading profiles —
+        -- measured on a 3.4.0 character after wizard + reload, the frame sat at
+        -- CENTER 139,-68 with the relativeTo dropped, which is the shape
+        -- `RealUI.SetPixelPoint` leaves behind (Util.lua:326) rather than
+        -- anything Init produces. Applying at wizard completion runs after all
+        -- of that, and `SetUserPlaced(false)` clears the saved placement too.
+        installApply = true,
         available = function()
             return _G.RealUIInventory ~= nil
         end,
@@ -351,6 +368,33 @@ function NewDefaults:ApplySelected()
             RealUI:ReloadUIDialog()
         end
     end
+end
+
+--- B126: apply the defaults the install wizard owns.
+--
+-- Finishing the wizard should leave the character on current defaults, so the
+-- nudge that runs eight seconds later has nothing to offer. Items tagged
+-- `installApply` are the ones no other install-path code reliably lands.
+--
+-- Called from InstallWizard:Complete, which is user-initiated and ends in a
+-- reload — the same contract the rest of that function's writes use. Each apply
+-- is pcall'd: a component that is loaded but not ready must not take the tail of
+-- the wizard down with it.
+-- @return number  how many items were applied
+function NewDefaults:ApplyInstallDefaults()
+    local applied = 0
+    for _, item in ipairs(items) do
+        if item.installApply and item.available() then
+            local ok, err = _G.pcall(item.apply)
+            if ok then
+                applied = applied + 1
+                debug("install-applied default", item.id)
+            else
+                debug("install-apply failed", item.id, err)
+            end
+        end
+    end
+    return applied
 end
 
 --- Show the popup. When `auto` is set, only detectably off-default items make
