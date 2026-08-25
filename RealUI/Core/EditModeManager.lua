@@ -223,6 +223,46 @@ local function snapshotBartender4ProfileCounts()
     return counts
 end
 
+--- B131: stores a copy of a layout about to be destroyed by a forced rebuild.
+--
+-- A `MIGRATION_VERSION` bump rebuilds every entry in the RealUI layouts from
+-- the template, which is the only way to get a corrected default to someone
+-- already installed — but it also discards whatever they had moved in EditMode,
+-- silently and permanently. That reaches real upgrades, not just beta users:
+-- 3.4.0 shipped MIGRATION_VERSION 5, so every 3.4.0 → 4.0 upgrade takes a
+-- forced rebuild.
+--
+-- The copy makes the loss recoverable via `/realui editmode restore`. It is a
+-- plain AceDB write — no C_EditMode call, so it is outside the taint gate
+-- entirely and safe to run on any path.
+--
+-- Only one generation is kept. A second rebuild before the user restores would
+-- otherwise overwrite the good copy with the already-rebuilt one, turning the
+-- backup into a copy of the template; the version stamp is what detects that.
+-- @param layoutName string  Layout being replaced
+-- @param layout table       The live layout, before it is overwritten
+local function BackupLayout(layoutName, layout)
+    local dbg = RealUI.db and RealUI.db.global
+    local Templates = RealUI.EditModeTemplates
+    if not (dbg and Templates and layout) then return end
+
+    dbg.editmode = dbg.editmode or {}
+    local existing = dbg.editmode.backup and dbg.editmode.backup[layoutName]
+    if existing and existing.fromVersion == (dbg.editmode.migrationVersion or 0) then
+        -- Already backed up at this version — a repeat rebuild in the same
+        -- upgrade. Keep the first copy; it is the one with the user's edits.
+        debug("Backup for", layoutName, "already exists at this version, keeping it")
+        return
+    end
+
+    dbg.editmode.backup = dbg.editmode.backup or {}
+    dbg.editmode.backup[layoutName] = {
+        fromVersion = dbg.editmode.migrationVersion or 0,
+        layout = Templates.DeepCopy(layout),
+    }
+    debug("Backed up layout before rebuild:", layoutName)
+end
+
 --- Processes a pending layout action from the queue.
 -- Queued actions are always the tail of a user-initiated flow that hit combat
 -- lockdown, so the write scope is reopened for the replay. `EnsureLayouts` and
@@ -404,8 +444,13 @@ end
 -- (used by InstallWizard to reset layouts to RealUI defaults).
 -- @param displayPresetId string  Display preset identifier
 -- @param forceRebuild boolean|nil  If true, overwrite existing layouts
+-- @param backupExisting boolean|nil  B131: if true, copy each layout aside
+--   before overwriting it. Set by the one-time migration, which destroys the
+--   layout without being asked; NOT set by ResetLayout or the install wizard,
+--   where wiping is what the user requested and where a backup would overwrite
+--   the migration's copy with an already-rebuilt layout.
 -- @return boolean  true if layouts were saved, false if deferred
-function EditModeManager:EnsureLayouts(displayPresetId, forceRebuild)
+function EditModeManager:EnsureLayouts(displayPresetId, forceRebuild, backupExisting)
     if InCombatLockdown() then
         state.pendingLayout = { action = "ensure", displayPresetId = displayPresetId }
         debug("Combat lockdown — queued EnsureLayouts")
@@ -430,6 +475,11 @@ function EditModeManager:EnsureLayouts(displayPresetId, forceRebuild)
             local layout = self:BuildLayout(role, displayPresetId)
             if layout then
                 if existingIndex then
+                    -- B131: this is the destructive branch — the user's own
+                    -- EditMode edits live in the table about to be replaced.
+                    if backupExisting then
+                        BackupLayout(layoutName, data.layouts[existingIndex])
+                    end
                     data.layouts[existingIndex] = layout
                     debug("Rebuilt existing layout:", layoutName, "at index", existingIndex)
                 else
@@ -875,7 +925,10 @@ function EditModeManager:MigrateFromPreEditMode()
     -- the flag is never set and it retries every session. The reload prompt at
     -- the end of this function clears the resulting session taint.
     self:BeginUserWrite()
-    local ensure_ok, ensure_result = pcall(self.EnsureLayouts, self, presetId, forceRebuild)
+    -- B131: back up only when this is actually a destructive rebuild. On a
+    -- fresh install forceRebuild is true but no layout exists to copy, so the
+    -- backup path is never reached and nothing is stored.
+    local ensure_ok, ensure_result = pcall(self.EnsureLayouts, self, presetId, forceRebuild, forceRebuild)
     self:EndUserWrite()
 
     if not ensure_ok then
@@ -886,6 +939,20 @@ function EditModeManager:MigrateFromPreEditMode()
         debug("ERROR: Step 3 EnsureLayouts returned false (BLOCKING — bailing out, will retry next session)")
         return
     end
+
+    -- B131: the flag is set HERE, immediately after the destructive step, not
+    -- at the end of the function. It records "the rebuild ran", and the rebuild
+    -- has now run. Everything below is diagnostic (Step 5) or idempotent
+    -- (ActivateLayout), and none of it is wrapped in pcall — so with the flag
+    -- at the bottom, one error in the snapshot walk left the layout already
+    -- overwritten and the flag unwritten, and the next login overwrote it
+    -- again. That is an unbounded loss: the user can never keep an EditMode
+    -- edit. Setting it here bounds the damage to exactly one rebuild.
+    --
+    -- Trade-off, deliberate: if ActivateLayout below fails, migration will not
+    -- retry it. That is the cheaper failure — activation is recoverable from
+    -- HuD config → General, a discarded layout is not recoverable at all.
+    self:SetMigrationFlag()
 
     -- Step 5 — Defensive key-count snapshot (AFTER) and delta check.
     --
@@ -972,7 +1039,8 @@ function EditModeManager:MigrateFromPreEditMode()
         end
     end
 
-    self:SetMigrationFlag()
+    -- SetMigrationFlag is NOT called here — see B131 above, it runs directly
+    -- after the Step 3 rebuild so a failure in between cannot cause a repeat.
     debug("Migration from pre-EditMode completed")
 
     -- Clear the session taint the layout write just introduced. Without a
@@ -1058,6 +1126,105 @@ end
 function EditModeManager:ResetLayout(displayPresetId)
     local presetId = displayPresetId or state.currentDisplayPreset or "standard"
     self:EnsureLayouts(presetId, true)
+end
+
+---------------------------------------------------------------------------
+-- Layout backup / restore (B131)
+---------------------------------------------------------------------------
+
+--- Reports which layouts have a pre-rebuild backup stored.
+-- @return table  { [layoutName] = fromVersion, ... }
+function EditModeManager:GetLayoutBackups()
+    local found = {}
+    local dbg = RealUI.db and RealUI.db.global
+    local backup = dbg and dbg.editmode and dbg.editmode.backup
+    if not backup then return found end
+    for layoutName, entry in pairs(backup) do
+        if type(entry) == "table" and type(entry.layout) == "table" then
+            found[layoutName] = entry.fromVersion or 0
+        end
+    end
+    return found
+end
+
+--- Restores the RealUI EditMode layouts saved before the last forced rebuild.
+--
+-- User-initiated by definition (it is only reachable from a slash command), so
+-- it opens its own write scope and prompts for the reload that clears the
+-- resulting session taint — the same contract MigrateFromPreEditMode uses.
+--
+-- The backup is kept after a successful restore. Restoring is itself a
+-- destructive act on the current layout, and a user who restores the wrong one
+-- has nothing else to fall back on; the copy costs a few KB.
+-- @return boolean, string  success, message
+function EditModeManager:RestoreLayoutBackup()
+    if InCombatLockdown() then
+        return false, "Can't restore EditMode layouts in combat."
+    end
+
+    local dbg = RealUI.db and RealUI.db.global
+    local backup = dbg and dbg.editmode and dbg.editmode.backup
+    if not backup or not next(backup) then
+        return false, "No layout backup stored — nothing has been rebuilt on this account."
+    end
+
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if not ok or not data then
+        return false, "Could not read EditMode layouts."
+    end
+
+    local Templates = RealUI.EditModeTemplates
+    if not Templates then
+        return false, "EditModeTemplates not available."
+    end
+
+    local restored, missing = {}, {}
+    for _, layoutName in pairs(LAYOUT_NAMES) do
+        local entry = backup[layoutName]
+        if entry and type(entry.layout) == "table" then
+            local index = FindLayoutIndex(data, layoutName, self:GetCurrentLayoutType())
+            if index then
+                local slot = data.layouts[index]
+                local copy = Templates.DeepCopy(entry.layout)
+                -- Keep the slot's own identity. The backup carries the name and
+                -- type it had when captured, and the account/character setting
+                -- can have changed since — restoring the stale pair would put a
+                -- mismatched layoutType into a slot FindLayoutIndex matched on
+                -- the current one.
+                copy.layoutName = slot.layoutName
+                copy.layoutType = slot.layoutType
+                data.layouts[index] = copy
+                restored[#restored + 1] = layoutName
+            else
+                missing[#missing + 1] = layoutName
+            end
+        end
+    end
+
+    if #restored == 0 then
+        if #missing > 0 then
+            return false, "Backup found, but the matching layouts no longer exist in EditMode."
+        end
+        return false, "No RealUI layout backup to restore."
+    end
+
+    self:BeginUserWrite()
+    local wrote = SaveLayouts(data, "RestoreLayoutBackup")
+    self:EndUserWrite()
+
+    if not wrote then
+        return false, "The layout write was refused — try again after a /reload."
+    end
+
+    if RealUI.ReloadUIDialog then
+        RealUI:ReloadUIDialog()
+    end
+
+    if #missing > 0 then
+        return true, ("Restored: %s (no longer in EditMode, skipped: %s)")
+            :format(table.concat(restored, ", "), table.concat(missing, ", "))
+    end
+    return true, ("Restored: %s"):format(table.concat(restored, ", "))
 end
 
 ---------------------------------------------------------------------------
