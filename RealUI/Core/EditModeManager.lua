@@ -364,8 +364,23 @@ function EditModeManager:FindSystemInfo(layout, system, systemIndex)
         return nil
     end
 
+    -- B126: nil and 0 mean the same thing for a system that has no index, and
+    -- both forms exist in the wild. `Templates.base` writes nil
+    -- (`Entry(SYSTEM_CHAT_FRAME, nil, ...)`), and a live dump of saved layout
+    -- data confirms nil survives the C_EditMode round-trip:
+    --
+    --     RealUI            nil  36.2  52.3
+    --     RealUI-Healing    nil  36.2  52.3
+    --
+    -- Callers, however, were written to search for 0 — SetTrackerAnchor still
+    -- does. An exact `==` therefore never matched, and both writers failed
+    -- silently with "entry not found" rather than erroring. Treating the two as
+    -- equivalent here fixes every caller at once instead of at each site.
+    -- Systems that genuinely have indices use 1..n, so collapsing nil and 0
+    -- cannot collide with a real index.
+    local wanted = systemIndex or 0
     for _, sysInfo in ipairs(layout.systems) do
-        if sysInfo.system == system and sysInfo.systemIndex == systemIndex then
+        if sysInfo.system == system and (sysInfo.systemIndex or 0) == wanted then
             return sysInfo
         end
     end
@@ -1182,20 +1197,9 @@ function EditModeManager:SetChatAnchor()
         return false
     end
 
-    -- Match either systemIndex form. `Templates.base` stores **nil** for
-    -- index-less systems (`Entry(SYSTEM_CHAT_FRAME, nil, ...)`), while
-    -- SetTrackerAnchor has always searched for **0** — so one of the two is
-    -- wrong about what round-trips through C_EditMode, and assuming either
-    -- makes this fail silently and return "entry not found". Accepting both
-    -- costs one line and removes the guess.
-    --
-    -- NOTE: SetTrackerAnchor above still searches 0 only. If the saved form is
-    -- nil, that writer has never actually found its entry either, and B116's
-    -- fix landed purely through the template rebuild. Worth checking, but not
-    -- changed here — it needs its own verification, not a drive-by.
-    local layoutData = data.layouts[layoutIdx]
-    local sysInfo = self:FindSystemInfo(layoutData, SYSTEM_CHAT_FRAME, 0)
-        or self:FindSystemInfo(layoutData, SYSTEM_CHAT_FRAME, nil)
+    -- systemIndex 0 and nil are equivalent here — FindSystemInfo collapses them
+    -- (B126). Saved data uses nil; passing 0 matched nothing until that fix.
+    local sysInfo = self:FindSystemInfo(data.layouts[layoutIdx], SYSTEM_CHAT_FRAME, 0)
     if not sysInfo or not sysInfo.anchorInfo then
         debug("SetChatAnchor: system 8 entry not found in active layout")
         return false
