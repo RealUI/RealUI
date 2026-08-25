@@ -83,6 +83,11 @@ local TRACKER_EDGE_GAP   = 6
 local TRACKER_X = -(SIDE_BAR_INSET + SIDE_BAR_COLUMN + TRACKER_EDGE_GAP)  -- -36
 local TRACKER_Y = -210
 
+-- B126: the chat frame's left inset. Shared with CharacterInit:SetupChatFrames
+-- and the `chat` new-defaults item, which both use 6. The matching y is not a
+-- constant — see Templates.ApplyComputedAnchors.
+local CHAT_X = 6
+
 Templates.trackerDefaultPosition = {
     anchorFrom = "TOPRIGHT",
     anchorTo   = "TOPRIGHT",
@@ -408,8 +413,20 @@ Templates.base = {
     -- =====================================================================
     -- System 8: Chat Frame — bottom-left
     -- =====================================================================
+    -- B126: x comes from CHAT_X and y is COMPUTED at BuildLayout time by
+    -- Templates.ApplyComputedAnchors — do not paste an exported number back in
+    -- here. The exported pair used to be 36.2 / 52.3, captured from a hand-moved
+    -- layout, and it silently won every argument: CharacterInit and the
+    -- new-defaults item both place chat at (6, GetChatYOffset), then
+    -- InstallWizard:Complete applies the EditMode layout afterwards and EditMode
+    -- (which owns system 8) put it straight back. Measured on a 3.4.0 profile as
+    -- exactly 36.2 / 52.3 — the template constant, not user drift.
+    --
+    -- y cannot be a constant: GetChatYOffset reads the live Infobar height and
+    -- adds 20 for the healing layout, so the same number means different
+    -- placements at different resolutions. The 0 below is a placeholder.
     Entry(SYSTEM_CHAT_FRAME, nil,
-        Anchor("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", 36.200000762939, 52.299999237061),
+        Anchor("BOTTOMLEFT", "UIParent", "BOTTOMLEFT", CHAT_X, 0),
         {
             { setting = 0, value = 4 },
             { setting = 1, value = 30 },
@@ -938,6 +955,43 @@ function Templates.MergeOverrides(layout, overrides)
         if overrides[key] then
             -- Whole-entry replacement: deep copy the override into the layout
             layout[i] = Templates.DeepCopy(overrides[key])
+        end
+    end
+
+    return layout
+end
+
+---------------------------------------------------------------------------
+-- Utility: ApplyComputedAnchors (B126)
+--
+-- Some anchors cannot be constants in `Templates.base` because they depend on
+-- runtime state. They are written here instead, at BuildLayout time, so the
+-- template stays the single definition and no exported number can quietly
+-- disagree with the code that places the same frame.
+--
+-- Must run BEFORE ApplyDisplayAdjustments — those are deltas added on top, and
+-- computing afterwards would discard them.
+--
+-- Chat (system 8): `RealUI.GetChatYOffset` reads the live Infobar height and
+-- adds 20 for the healing layout, so a fixed y means different placements at
+-- different resolutions and roles. Falls back to leaving the placeholder alone
+-- if the helper is somehow unavailable, which is better than writing a 0 that
+-- would put chat on the screen edge.
+--
+-- @param layout table  Array of system entries (modified in place)
+-- @param role string  "dpstank" or "healing"
+---------------------------------------------------------------------------
+function Templates.ApplyComputedAnchors(layout, role)
+    if not RealUI.GetChatYOffset then return layout end
+
+    local chatY = RealUI.GetChatYOffset(role == "healing" and 2 or 1)
+    if not chatY then return layout end
+
+    for _, entry in ipairs(layout) do
+        if entry.system == SYSTEM_CHAT_FRAME and entry.anchorInfo then
+            entry.anchorInfo.offsetX = CHAT_X
+            entry.anchorInfo.offsetY = chatY
+            break
         end
     end
 
