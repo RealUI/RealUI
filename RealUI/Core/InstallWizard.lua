@@ -548,6 +548,19 @@ function InstallWizard:Complete()
         Tracker:SeedPositionIntoEditMode()
     end
 
+    -- B126: correct the chat anchor in the layout we just applied. Must come
+    -- AFTER ApplyLayout — EditMode owns system 8, so placing the chat frame
+    -- before the layout is applied achieves nothing; the layout puts it back.
+    -- That ordering is exactly what made SetupChatFrames look broken when it was
+    -- running correctly all along. Targeted single-entry write, so the other 49
+    -- entries (and any the user has moved) are untouched.
+    if RealUI.EditModeManager and RealUI.EditModeManager.SetChatAnchor then
+        RealUI.EditModeManager:BeginUserWrite()
+        local wrote = RealUI.EditModeManager:SetChatAnchor()
+        RealUI.EditModeManager:EndUserWrite()
+        debug("Chat anchor corrected in EditMode layout:", wrote)
+    end
+
     -- Hide installation wizard UI
     if RealUI.InstallUI then
         RealUI.InstallUI:Hide()
