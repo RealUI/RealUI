@@ -488,6 +488,16 @@ function InstallWizard:Complete()
         RealUI.SetupSystem:CompleteSetup()
     end
 
+    -- B126: land the defaults no other install-path code reliably applies, so
+    -- the new-defaults nudge eight seconds after the next login has nothing to
+    -- offer a character that just finished the wizard. Measured on a 3.4.0
+    -- profile: the bag frame sat at CENTER 139,-68 after wizard + reload,
+    -- despite Bags.lua:406 writing the correct anchor at OnInitialize.
+    if RealUI.NewDefaults then
+        local applied = RealUI.NewDefaults:ApplyInstallDefaults()
+        debug("Applied install-owned defaults:", applied)
+    end
+
     debug("Installation completed")
 
     -- Apply wizard choices: Naga bar
