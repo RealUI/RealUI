@@ -305,11 +305,41 @@ end
 local function PostCastGlobal(self, unit, spellID, cooldownInfo, duration)
     -- oUF 14 GCD display (player only, gated on showGlobalCooldown). A real
     -- cast always takes precedence over the GCD window.
+    --
+    -- `duration` is a **DurationObject**, not a number of seconds. oUF builds it
+    -- with `C_DurationUtil.CreateDuration()` + `SetTimeFromStart` and hands it
+    -- to the engine's `SetTimerDuration` (oUF/elements/castbar.lua:551-553); the
+    -- callback simply forwards the same object. Reading it as a number threw
+    -- `attempt to compare userdata with number` on *every* GCD once the GCD
+    -- display was switched on — 290 errors in one session.
+    --
+    -- `issecretvalue` did not catch it because it is not a secret value; it is
+    -- ordinary userdata, and the guard only ever protected against the secret
+    -- case. Deliberately unused here, and left in the signature to document what
+    -- oUF actually passes so this is not "fixed" back to the old reading.
+    --
+    -- The numbers we need are in `cooldownInfo`, which is a plain table.
     local state = self._ruiState
     if state.casting or state.channeling then return end
-    if not duration or _G.issecretvalue(duration) or duration <= 0 then return end
-    state.gcdDuration = duration
-    state.gcdEnd = _G.GetTime() + duration
+    if not cooldownInfo then return end
+
+    local gcdDuration = cooldownInfo.duration
+    if not gcdDuration or _G.issecretvalue(gcdDuration) or gcdDuration <= 0 then return end
+
+    -- Time the window from the GCD's own start, not from "now": this callback
+    -- can run a frame or two after the GCD began, and anchoring to GetTime()
+    -- stretches the bar by that much every time.
+    local startTime = cooldownInfo.startTime
+    if startTime and not _G.issecretvalue(startTime) then
+        state.gcdEnd = startTime + gcdDuration
+    else
+        state.gcdEnd = _G.GetTime() + gcdDuration
+    end
+    state.gcdDuration = gcdDuration
+
+    -- `cooldownInfo.modRate` is ignored on purpose. It is 1 for the global
+    -- cooldown in every observed case, and guessing whether it scales the
+    -- duration or only the display rate would trade a loud bug for a quiet one.
 end
 
 
