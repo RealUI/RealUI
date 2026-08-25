@@ -368,15 +368,25 @@ function NewDefaults:Show(auto)
             check.label:SetText(item.label .. " |cff808080(" .. item.changed .. ")|r")
             check.desc:SetText(item.desc)
 
+            -- B126: three states, not two. `isApplied` returns nil when it
+            -- cannot read the current value (frame not positioned yet, secret
+            -- coordinates), and an indeterminate item used to render as a
+            -- ticked one — visually identical to "this is off-default, fix it".
+            -- That is a false positive with consequences: the user applies a
+            -- change they may not have needed, and a nudge that fires with one
+            -- genuine item plus one unreadable one reads as two faults.
+            -- Indeterminate items are now shown unticked and labelled as such.
             local applied = item.isApplied()
             if applied == true then
                 check:SetChecked(false)
                 check.label:SetText(item.label .. " |cff00ff00(already applied)|r")
-            else
+            elseif applied == false then
                 check:SetChecked(true)
-                if applied == false then
-                    anyDetectableOff = true
-                end
+                anyDetectableOff = true
+            else
+                check:SetChecked(false)
+                check.label:SetText(item.label
+                    .. " |cff808080(can't tell — tick to apply anyway)|r")
             end
         else
             check:Show()
