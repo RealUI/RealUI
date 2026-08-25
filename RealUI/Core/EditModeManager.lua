@@ -45,6 +45,13 @@ local LAYOUT_NAMES = {
 -- needs this value must declare its own local copy (see also Container.lua).
 local SYSTEM_OBJECTIVE_TRACKER = 12
 
+-- B126: same deal for the ChatFrame system, plus its left inset. CHAT_X must
+-- match `CHAT_X` in EditModeTemplates.lua and the 6 used by
+-- CharacterInit:SetupChatFrames and the `chat` new-defaults item — those four
+-- disagreeing is the bug this constant exists to stop recurring.
+local SYSTEM_CHAT_FRAME = 8
+local CHAT_X = 6
+
 ---------------------------------------------------------------------------
 -- CooldownViewer
 -- Size, orientation, icon limit, etc. are configured via native EditMode
@@ -414,6 +421,12 @@ function EditModeManager:BuildLayout(role, displayPresetId)
     local roleOverrides = Templates.overrides and Templates.overrides[role]
     if roleOverrides then
         Templates.MergeOverrides(layout, roleOverrides)
+    end
+
+    -- 2b. B126: write the anchors that cannot be constants in the template.
+    -- Before the display deltas, which are added on top of these.
+    if Templates.ApplyComputedAnchors then
+        Templates.ApplyComputedAnchors(layout, role)
     end
 
     -- 3. Apply display adjustments
@@ -1117,6 +1130,89 @@ function EditModeManager:SetTrackerAnchor(point, relativePoint, x, y)
     end
 
     debug("SetTrackerAnchor: wrote", point, "UIParent", relativePoint, x, y)
+end
+
+---------------------------------------------------------------------------
+-- SetChatAnchor (B126)
+---------------------------------------------------------------------------
+
+--- Writes the ChatFrame (system 8) anchor into the active RealUI layout.
+--
+-- Why this exists rather than a template fix alone: the corrected template only
+-- reaches a layout that gets rebuilt, and `ApplyLayout` deliberately preserves
+-- existing layouts. So a character that already has a RealUI layout — i.e.
+-- everyone past first run — would keep the old chat anchor forever, including
+-- across a wizard re-run.
+--
+-- The bug it fixes: `Templates.base` carried an exported `BOTTOMLEFT 36.2, 52.3`
+-- for system 8, while `CharacterInit:SetupChatFrames` and the `chat` new-defaults
+-- item both place chat at `(6, GetChatYOffset(layout))`. InstallWizard:Complete
+-- ran the CharacterInit placement first and applied the EditMode layout second,
+-- so EditMode — which owns system 8 — put chat straight back to the template
+-- value, on the wizard and again on every login. Two sources of truth, and the
+-- silent one won. Same shape as B116.
+--
+-- This is the targeted per-entry write proposed in B131 as the alternative to
+-- blanket `forceRebuild`, used here for the first time: it corrects one entry
+-- without discarding the other 49.
+--
+-- Combat and sole-writer guards match SetTrackerAnchor. Callers must be
+-- user-initiated and end in a reload — InstallWizard:Complete is both.
+-- @return boolean  true if the anchor was written
+function EditModeManager:SetChatAnchor()
+    if InCombatLockdown() then
+        debug("Combat lockdown — skipping SetChatAnchor")
+        return false
+    end
+
+    if not RealUI.GetChatYOffset then return false end
+    local layoutId = (RealUI.cLayout == 2) and 2 or 1
+    local y = RealUI.GetChatYOffset(layoutId)
+    if not y then return false end
+
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if not ok or not data then
+        debug("ERROR: C_EditMode.GetLayouts() failed:", data)
+        return false
+    end
+
+    local layoutIdx = self:GetActiveRealUILayoutIndex(data)
+    if not layoutIdx then
+        debug("SetChatAnchor: active layout is not RealUI-managed, skipping")
+        return false
+    end
+
+    -- Match either systemIndex form. `Templates.base` stores **nil** for
+    -- index-less systems (`Entry(SYSTEM_CHAT_FRAME, nil, ...)`), while
+    -- SetTrackerAnchor has always searched for **0** — so one of the two is
+    -- wrong about what round-trips through C_EditMode, and assuming either
+    -- makes this fail silently and return "entry not found". Accepting both
+    -- costs one line and removes the guess.
+    --
+    -- NOTE: SetTrackerAnchor above still searches 0 only. If the saved form is
+    -- nil, that writer has never actually found its entry either, and B116's
+    -- fix landed purely through the template rebuild. Worth checking, but not
+    -- changed here — it needs its own verification, not a drive-by.
+    local layoutData = data.layouts[layoutIdx]
+    local sysInfo = self:FindSystemInfo(layoutData, SYSTEM_CHAT_FRAME, 0)
+        or self:FindSystemInfo(layoutData, SYSTEM_CHAT_FRAME, nil)
+    if not sysInfo or not sysInfo.anchorInfo then
+        debug("SetChatAnchor: system 8 entry not found in active layout")
+        return false
+    end
+
+    sysInfo.anchorInfo.point         = "BOTTOMLEFT"
+    sysInfo.anchorInfo.relativeTo    = "UIParent"
+    sysInfo.anchorInfo.relativePoint = "BOTTOMLEFT"
+    sysInfo.anchorInfo.offsetX       = CHAT_X
+    sysInfo.anchorInfo.offsetY       = y
+
+    if not SaveLayouts(data, "SetChatAnchor") then
+        return false
+    end
+
+    debug("SetChatAnchor: wrote BOTTOMLEFT UIParent BOTTOMLEFT", CHAT_X, y)
+    return true
 end
 
 --- Resets the RealUI layouts to their template defaults.
