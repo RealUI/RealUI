@@ -470,12 +470,15 @@ function InstallWizard:Complete()
     -- only run character-specific steps (layout, spec mapping, chat positioning)
     if RealUI.CharacterInit then
         if not RealUI.CharacterInit:IsInitialized() then
-            RealUI.CharacterInit:Setup()
+            -- B126: force the chat placement. Finishing the wizard is exactly
+            -- the moment chat should land on the current default, and the
+            -- `needchatmoved` gate reads false for every upgrading character.
+            RealUI.CharacterInit:Setup(true)
         else
             -- Character already initialized — only apply role defaults and chat positioning
             debug("Character already initialized, running character-specific steps only")
             RealUI.CharacterInit:ApplyRoleDefaults()
-            RealUI.CharacterInit:SetupChatFrames()
+            RealUI.CharacterInit:SetupChatFrames(true)
             RealUI.CharacterInit:RegisterCharacter()
         end
     end
