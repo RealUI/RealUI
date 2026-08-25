@@ -201,6 +201,12 @@ local items = {
             return point == "BOTTOMLEFT" and relPoint == "BOTTOMLEFT"
                 and _G.math.abs((x or 0) - 6) < 12 and _G.math.abs((y or 0) - wantY) < 12
         end,
+        -- B126: moving the frame alone does not stick. EditMode owns system 8
+        -- and re-applies its saved anchor on every login, so ticking this item
+        -- used to look like it worked and silently revert next session. The
+        -- EditMode entry has to be corrected too, and that needs a reload to
+        -- take effect — hence needsReload.
+        needsReload = true,
         apply = function()
             local layout = RealUI.db.char.layout and RealUI.db.char.layout.current or 1
             local chatFrame = _G.ChatFrame1
@@ -208,6 +214,13 @@ local items = {
             chatFrame:SetPoint("BOTTOMLEFT", _G.UIParent, "BOTTOMLEFT", 6, RealUI.GetChatYOffset(layout))
             chatFrame:SetUserPlaced(true)
             _G.FCF_SavePositionAndDimensions(chatFrame)
+
+            local EMM = RealUI.EditModeManager
+            if EMM and EMM.SetChatAnchor then
+                EMM:BeginUserWrite()
+                EMM:SetChatAnchor()
+                EMM:EndUserWrite()
+            end
         end,
     },
 }
