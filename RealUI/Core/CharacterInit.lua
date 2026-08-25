@@ -99,8 +99,22 @@ function CharacterInit:ApplyRoleDefaults()
     end
 end
 
--- Setup chat frame positioning
-function CharacterInit:SetupChatFrames()
+-- Setup chat frame positioning.
+-- @param force boolean|nil  B126: place the chat frame regardless of the
+--   `needchatmoved` flag. The install wizard passes this.
+--
+-- `needchatmoved` means "this character has never had its chat placed by ANY
+-- version of RealUI", and `FinalMigrations.lua:125-126` sets it false for every
+-- upgrading character. It was being used as though it meant "this character is
+-- already on the current default", and those stopped being the same thing the
+-- moment the default moved (beta 6, chat clearing the Infobar).
+--
+-- The result: a 3.4.0 character ran the install wizard, the wizard called this,
+-- it returned on the flag, and the chat frame stayed at its 3.4.0 position — so
+-- the new-defaults nudge correctly offered "Chat sits clear of the Infobar"
+-- immediately after a wizard that was supposed to have handled it. Finishing the
+-- wizard IS the moment chat should be placed, unconditionally.
+function CharacterInit:SetupChatFrames(force)
     if not RealUI.db or not RealUI.db.char then
         return
     end
@@ -108,7 +122,10 @@ function CharacterInit:SetupChatFrames()
     local charData = RealUI.db.char
 
     -- Check if chat frames need to be positioned
-    if not charData.init or not charData.init.needchatmoved then
+    if not charData.init then
+        return
+    end
+    if not force and not charData.init.needchatmoved then
         return
     end
 
@@ -235,7 +252,9 @@ function CharacterInit:RegisterCharacter()
 end
 
 -- Perform full character setup
-function CharacterInit:Setup()
+-- @param force boolean|nil  B126: passed through to SetupChatFrames so the
+--   install wizard places chat regardless of the `needchatmoved` flag.
+function CharacterInit:Setup(force)
     -- Initialize character data
     self:Initialize()
 
@@ -246,7 +265,7 @@ function CharacterInit:Setup()
     self:ApplyRoleDefaults()
 
     -- Setup chat frames
-    self:SetupChatFrames()
+    self:SetupChatFrames(force)
 
     -- Register character
     self:RegisterCharacter()
