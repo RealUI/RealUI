@@ -4,7 +4,9 @@ RealUI 4.0.0 completes the de-bundling: the package now contains **only RealUI's
 
 Upgrades are opt-in by design — the "new defaults" picker lists every default that changed since 3.4.0 and applies only what you tick, and when a release updates the shipped Edit Mode layout, yours is backed up first and `/realui editmode restore` puts it back.
 
-Underneath, the WoW 12 hardening campaign continues: secret-value guards across the HuD, auras, nameplates and skins; EditMode layout writes gated to user-initiated scopes; and a taint hunt that closed the injectors behind the delve tracker breakage, the login-time chat taint, and the talent-hover action-bar poisoning. The remaining world-map errors were traced to a confirmed Blizzard engine bug ([WoWUIBugs #453](https://github.com/Stanzilla/WoWUIBugs/issues/453)) and are documented so no one chases them again. Aurora updates to 12.1.0.7.
+Underneath, the WoW 12 hardening campaign continues: secret-value guards across the HuD, auras, nameplates and skins; EditMode layout writes gated to user-initiated scopes; and a taint hunt that closed the injectors behind the delve tracker breakage, the login-time chat taint, and the talent-hover action-bar poisoning. The remaining world-map errors were traced to a confirmed Blizzard engine bug ([WoWUIBugs #453](https://github.com/Stanzilla/WoWUIBugs/issues/453)).
+
+Aurora updates to 12.1.0.7.
 
 ### New AddOns ###
 
