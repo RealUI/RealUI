@@ -1,4 +1,4 @@
-## [4.0.0] - unreleased ##
+## [4.0.0] - 2026-08-26 ##
 ### Summary ###
 RealUI 4.0.0 completes the de-bundling: the package now contains **only RealUI's own addons**, plus the embedded Aurora and the standard embedded libraries (Ace3, oUF, LibActionButton, LibSharedMedia). Three new RealUI-owned components take over from the addons that used to be bundled — **RealUI_Nameplates**, a clean-room rebuild of the classic KUI look on WoW 12's secure aura containers and engine castbars; **built-in party/raid frames** on the same oUF 14 foundation as the rest of the HuD; and **RealUI_ActionBars**, six bars on LibActionButton-1.0 laid out directly from the HuD settings. Grid2, BadBoy and Masque remain supported as optional installs — put one back and RealUI configures it as before while the built-in replacement stands down. Bartender4 and Platynator support is removed; `/rab import` converts old Bartender4 keybinds and bar tweaks, and runs once automatically on first load after upgrading.
 
