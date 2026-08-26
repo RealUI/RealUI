@@ -1140,8 +1140,17 @@ function Infobar:ResolveBlockFont()
     -- Size
     local size = settings.size
     if not size or size <= 0 then
+        -- B124 follow-up: this was `local _, chatSize = chatFrame and
+        -- chatFrame:GetFont()`, and `and` truncates a multiple return to its
+        -- first value — so chatSize was ALWAYS nil and "size 0 follows the
+        -- chat font" silently used the fixed fallback instead. Luacheck's
+        -- "variable 'chatSize' is never set" was a real bug, not noise.
         local chatFrame = _G.ChatFrame1
-        local _, chatSize = chatFrame and chatFrame:GetFont()
+        local chatSize
+        if chatFrame then
+            local _
+            _, chatSize = chatFrame:GetFont()
+        end
         if chatSize and chatSize > 0 then
             -- Clamp to the bar so an oversized chat font cannot crop the text.
             size = _G.math.min(chatSize, BAR_HEIGHT - 2)
