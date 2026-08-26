@@ -174,6 +174,7 @@ Aurora updates to 12.1.0.7.
   * fix: **the optional GCD bar no longer errors on every global cooldown** — oUF 14 hands the callback a duration object rather than a number of seconds, and reading it as a number threw on every global once the bar was enabled; the window is now timed from the cooldown data itself
   * fix: leaving combat no longer prints a burst of `UnitIsPVP` errors — the PvP indicator override tolerates the unitless events oUF registers it for
   * fix: infobar odds and ends — hovering a block no longer errors before the skin database exists, the "all blocks" toggle in `/realadv` works through every state, and the SimulationCraft block no longer draws its own name twice ("Show label" now controls it)
+  * fix: **Infobar font size 0 actually follows the chat font now** — the chat-size read truncated a multiple return, so it always came back empty and size 0 silently used the fixed fallback instead; close enough to the default chat size that it looked right
 
 
 ## [3.4.0] - 2026-08-13 ##
