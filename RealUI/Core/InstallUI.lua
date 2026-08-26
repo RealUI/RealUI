@@ -489,15 +489,15 @@ Configure optional quality of life features:
                 local list = _G.DropDownList1
                 if list then
                     local restoreScale = list:GetScale()
-                    list:HookScript("OnShow", function(self)
+                    list:HookScript("OnShow", function(menu)
                         if _G.UIDROPDOWNMENU_OPEN_MENU == dropdown then
-                            restoreScale = self:GetScale()
-                            self:SetScale(InstallUI:GetScale())
+                            restoreScale = menu:GetScale()
+                            menu:SetScale(InstallUI:GetScale())
                         end
                     end)
-                    list:HookScript("OnHide", function(self)
-                        if self:GetScale() ~= restoreScale then
-                            self:SetScale(restoreScale)
+                    list:HookScript("OnHide", function(menu)
+                        if menu:GetScale() ~= restoreScale then
+                            menu:SetScale(restoreScale)
                         end
                     end)
                 end
