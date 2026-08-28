@@ -27,7 +27,6 @@ local baseFames = {
     ChatConfigFrame = {},
     ColorPickerFrame = {},
     DressUpFrame = {},
-    DelvesCompanionConfigurationFrame = {},
     FriendsFrame = {},
     GameMenuFrame = {},
     GossipFrame = {},
@@ -120,6 +119,10 @@ local addonFrames = {
     },
     --Blizzard_DeathRecap = {},
     --Blizzard_DebugTools = {},
+    Blizzard_DelvesCompanionConfiguration = {
+        DelvesCompanionConfigurationFrame = {},
+        DelvesCompanionAbilityListFrame = {}
+    },
     Blizzard_EncounterJournal = {
         EncounterJournal = {}
     },
