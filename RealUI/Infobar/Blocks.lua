@@ -1629,11 +1629,13 @@ function Infobar:CreateBlocks()
                 end
 
                 local lowDur, lowMin, lowMax, lowSlot = 1, 1, 1
+                local measured = 0
                 for slotID = 1, #itemSlots do
                     local item = itemSlots[slotID]
                     if item.hasDura then
                         local min, max = _G.GetInventoryItemDurability(slotID)
                         if max then
+                            measured = measured + 1
                             item.dura = RealUI.GetSafeVals(min, max)
                             item.min, item.max = min, max
                             if lowDur > item.dura then
@@ -1644,15 +1646,29 @@ function Infobar:CreateBlocks()
                         end
                     end
                 end
-                itemSlots.lowSlot = lowSlot
 
-                if lowDur < 0.1 and not block.alertHidden then
-                    block.alertHidden = not _G.HelpTip:Show(block, block.helpTipInfo)
+                -- B136: a pass that measured nothing is not a pass that measured
+                -- 100%. `lowDur` resets to 1 on every call, but `item.dura` -- what
+                -- the tooltip renders -- persists in `itemSlots` across calls. So
+                -- writing the text unconditionally made the bar read "100%" while
+                -- the tooltip still showed the real durability. Item durability is
+                -- not always readable immediately after a loading screen, and
+                -- nothing recomputes until durability actually changes, so a single
+                -- empty read stuck for the rest of the session. Keep the last true
+                -- value instead; the debug line confirms which event reads empty.
+                if measured > 0 then
+                    itemSlots.lowSlot = lowSlot
+
+                    if lowDur < 0.1 and not block.alertHidden then
+                        block.alertHidden = not _G.HelpTip:Show(block, block.helpTipInfo)
+                    else
+                        _G.HelpTip:Hide(block, block.helpTipInfo.text)
+                    end
+                    block.dataObj.text = round(lowDur * 100) .. "%"
+                    block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax):GetRGB()
                 else
-                    _G.HelpTip:Hide(block, block.helpTipInfo.text)
+                    Infobar:debug("Durability: no slots measured, keeping last value", event)
                 end
-                block.dataObj.text = round(lowDur * 100) .. "%"
-                block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax):GetRGB()
                 block.timer = false
             end,
             events = {
