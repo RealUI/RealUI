@@ -32,6 +32,33 @@ local ADDON_NAME, ns = ... -- luacheck: ignore
 
 local CONTAINER_KEYS = { "myDebuffs", "buffs", "crowdControl" }
 
+-- Mirror of Auras.lua's POSITIONS (a file-local there). Only point/relPoint are needed —
+-- the flow-layout fields are applied through private.Try and are already guarded.
+-- If Auras.lua's table changes, this one has to follow.
+local POSITIONS = {
+    aboveCenter = { point = "BOTTOM",      relPoint = "TOP"         },
+    aboveLeft   = { point = "BOTTOMLEFT",  relPoint = "TOPLEFT"     },
+    aboveRight  = { point = "BOTTOMRIGHT", relPoint = "TOPRIGHT"    },
+    left        = { point = "RIGHT",       relPoint = "LEFT"        },
+    right       = { point = "LEFT",        relPoint = "RIGHT"       },
+    belowCenter = { point = "TOP",         relPoint = "BOTTOM"      },
+    belowLeft   = { point = "TOPLEFT",     relPoint = "BOTTOMLEFT"  },
+    belowRight  = { point = "TOPRIGHT",    relPoint = "BOTTOMRIGHT" },
+}
+
+-- Rebuild what ApplyPosition (Auras.lua:168-177) would anchor this container to.
+local function ResolveAnchor(plate, key)
+    local NP = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+    NP = NP and NP:GetAddon("RealUI_Nameplates", true)
+    local db = NP and NP.db and NP.db.profile and NP.db.profile.enemy
+    local groupDB = db and db.auras and db.auras[key]
+    if not groupDB then return nil end
+
+    local preset = POSITIONS[groupDB.position] or POSITIONS.aboveLeft
+    local offset = groupDB.offset or { x = 0, y = 0 }
+    return preset.point, plate, preset.relPoint, offset.x or 0, offset.y or 0
+end
+
 -- pcall wrapper that reports refusals rather than swallowing them.
 local function Attempt(fn, ...)
     local ok, err = _G.pcall(fn, ...)
@@ -112,10 +139,14 @@ local function ProbeContainer(plate, key, container, tally)
     results[#results + 1] = "SetSize=" .. (ok1 and "ok" or ("|cffff5555" .. r1 .. "|r"))
     if not ok1 then tally.refused = tally.refused + 1 end
 
-    -- Auras.lua:171-172 — only exercised when the current anchor can be read back, so a
-    -- refusal mid-way cannot leave the container unanchored.
-    local okP, point, rel, relPoint, x, y = _G.pcall(container.GetPoint, container, 1)
-    if okP and point then
+    -- Auras.lua:171-172. GetPoint on an AuraContainer is unreadable to us even when auras
+    -- are NOT secret (measured 2026-08-30 — every row reported SKIP on the clean baseline;
+    -- cf. Auras.lua:49, container geometry is secret-capable by design). So the anchor is
+    -- RECONSTRUCTED from the same db + preset ApplyPosition uses, which makes this both a
+    -- faithful test of the real call site and self-repairing: success leaves the container
+    -- anchored exactly where the addon would put it.
+    local point, rel, relPoint, x, y = ResolveAnchor(plate, key)
+    if point then
         local ok2, r2 = Attempt(container.ClearAllPoints, container)
         results[#results + 1] = "ClearAllPoints=" .. (ok2 and "ok" or ("|cffff5555" .. r2 .. "|r"))
         if not ok2 then tally.refused = tally.refused + 1 end
@@ -124,10 +155,10 @@ local function ProbeContainer(plate, key, container, tally)
         results[#results + 1] = "SetPoint=" .. (ok3 and "ok" or ("|cffff5555" .. r3 .. "|r"))
         if not ok3 then
             tally.refused = tally.refused + 1
-            _G.print("|cffff5555[B137]|r  SetPoint refused AFTER ClearAllPoints — container is now unanchored until the next Attach")
+            _G.print("|cffff5555[B137]|r  SetPoint refused after ClearAllPoints — this container is unanchored until the next plate Attach re-runs ApplyPosition")
         end
     else
-        results[#results + 1] = "SetPoint=|cffaaaaaaSKIP (anchor unreadable)|r"
+        results[#results + 1] = "SetPoint=|cffaaaaaaSKIP (no db/preset)|r"
     end
 
     -- Auras.lua:208/211-212 — re-assert whatever it already is.
