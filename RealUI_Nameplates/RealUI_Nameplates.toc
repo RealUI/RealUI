@@ -3,7 +3,7 @@
 ## Category: RealUI_Core
 ## Notes: Clean-room nameplates for RealUI, KUI-style look
 ## Author: Hanshi
-## Version: 4.0.0
+## Version: 4.0.1
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## OptionalDeps: RealUI, RealUI_Skins, Aurora, LibSharedMedia-3.0, LibRangeCheck-3.0
 ## SavedVariables: RealUI_NameplatesDB

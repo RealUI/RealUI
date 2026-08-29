@@ -1,3 +1,25 @@
+## [4.0.1] - 2026-08-29 ##
+### Summary ###
+A maintenance release for the objective tracker and the Delves companion panel. **The objective tracker is skinned again** — it has rendered with Blizzard's styling since 4.0.0 shipped with that skin gated off, because it was aborting tracker layout in LFR and delves. The throw is guarded at its source: Blizzard's own `ShouldShowMawBuffs` reads a player aura without a guard, and under WoW 12's secret-aura rules that read errors rather than coming back empty once addon code is anywhere in the execution. On the Delves side, the companion abilities panel gets the page arrows and skin it was missing, hovering the companion portrait no longer throws, and both Delves companion frames can be dragged. Thanks to Numy for the workaround.
+
+Aurora updates to 12.1.0.8.
+
+### Modified AddOns ###
+
+  * RealUI
+  * Aurora (12.1.0.8)
+
+### Changed ###
+
+  * chg: Aurora updated to 12.1.0.8 — **the objective tracker skin is enabled again**, gated off since 12.1.0.5; a full play session produced no tracker errors. This removes the symptom rather than the cause: the skin still writes to tracker frames in ways the taint-safe rewrite is meant to eliminate, and the gate is one flag away if faults return. The world-event/scenario widget skin stays gated, so those widgets keep Blizzard's styling for now
+
+### Fixed ###
+
+  * fix: **the objective tracker threw "Auras cannot be accessed when secret while tainted by 'RealUI_Skins'" in LFR and delves**, taking the stage block down mid-layout. Blizzard's `ShouldShowMawBuffs` reads `GetAuraDataByIndex("player", 1, "MAW")` unguarded, and all three of its callers sit inside the tracker's own update and layout path. It is wrapped to answer `false` when the client reports auras as secret — the only honest answer at that point, and the Maw/Torghast surface it gates is legacy content
+  * fix: **the Delves companion abilities panel is skinned** — two blank boxes where the page arrows belong, plus a stock close button, role dropdown and portrait ring. The arrows went through a skin function that clears a button's textures, so Blizzard's art was stripped with nothing put back; the panel also inherits a portrait template whose child frames the texture strip never reaches
+  * fix: **hovering the Delves companion portrait no longer errors** with `attempt to perform arithmetic on a secret number value`. Skinning the tooltip hierarchy makes a widget height read back secret, which Blizzard's tooltip code then adds padding to. The guard the skin already carried had never applied — it patched the mixin rather than the frame the game had already copied it onto — and it now sits where the call actually runs, with the tooltip show that the throw used to skip re-asserted
+  * fix: **both Delves companion frames can be dragged.** The abilities list was in no drag list at all, and the configuration frame was registered as an always-loaded frame when it belongs to a load-on-demand addon, so the drag hook ran before the frame existed and never took
+
 ## [4.0.0] - 2026-08-26 ##
 ### Summary ###
 RealUI 4.0.0 completes the de-bundling: the package now contains **only RealUI's own addons**, plus the embedded Aurora and the standard embedded libraries (Ace3, oUF, LibActionButton, LibSharedMedia). Three new RealUI-owned components take over from the addons that used to be bundled — **RealUI_Nameplates**, a clean-room rebuild of the classic KUI look on WoW 12's secure aura containers and engine castbars; **built-in party/raid frames** on the same oUF 14 foundation as the rest of the HuD; and **RealUI_ActionBars**, six bars on LibActionButton-1.0 laid out directly from the HuD settings. Grid2, BadBoy and Masque remain supported as optional installs — put one back and RealUI configures it as before while the built-in replacement stands down. Bartender4 and Platynator support is removed; `/rab import` converts old Bartender4 keybinds and bar tweaks, and runs once automatically on first load after upgrading.
@@ -178,4 +200,5 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[4.0.0]: https://github.com/RealUI/RealUI/compare/3.3.8...3.4.0
+[4.0.1]: https://github.com/RealUI/RealUI/compare/4.0.0...4.0.1
+[4.0.0]: https://github.com/RealUI/RealUI/compare/3.4.0...4.0.0
