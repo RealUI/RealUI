@@ -206,6 +206,37 @@ local function RunSnapshot()
     return tally.refused == 0 and tally.missing == 0
 end
 
+--[[ arm mode — the secret window is short and lands mid-pull, so waiting for a human to
+     type a slash command inside it does not work. This fires the snapshot itself on the
+     first tick where auras are secret AND at least one plate exists, then disarms. ]]--
+
+local armed
+
+local function Disarm()
+    if armed then
+        armed:Cancel()
+        armed = nil
+    end
+end
+
+local function ArmSnapshot()
+    if armed then
+        Disarm()
+        _G.print("|cff00ccff[B137]|r auto-snapshot disarmed")
+        return
+    end
+
+    _G.print("|cff00ccff[B137]|r armed — fires the snapshot automatically when auras go secret with plates up. Run `arm` again to cancel.")
+    armed = _G.C_Timer.NewTicker(0.25, function()
+        if SecrecyState() ~= "true" then return end
+        local plates = EachPlate(function() end)
+        if plates == 0 then return end
+        Disarm()
+        _G.print(("|cffffff00[B137]|r secrecy engaged with %d plate(s) — auto-snapshot:"):format(plates))
+        RunSnapshot()
+    end)
+end
+
 --[[ watch mode — does secrecy actually track combat? ]]--
 
 local watcher, watchFrame
@@ -252,6 +283,8 @@ end
 function ns.commands:aurasecrecy(arg)
     if arg == "watch" then
         return ToggleWatch()
+    elseif arg == "arm" then
+        return ArmSnapshot()
     end
     return RunSnapshot()
 end
