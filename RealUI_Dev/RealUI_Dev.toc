@@ -131,5 +131,6 @@ tests\BugConditionTests.lua
 tests\PreservationTests.lua
 
 tests\RealUI_Grid2_Modernization.lua
+tests\NameplateAuraSecrecyProbe.lua
 
 ../Aurora/dev/test.lua
