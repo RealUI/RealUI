@@ -1340,6 +1340,7 @@ function RealUI:OnInitialize()
     )
 
     -- Register chat commands
+    self:RegisterChatCommand("rui", "ChatCommand_Config")
     self:RegisterChatCommand("real", "ChatCommand_Config")
     self:RegisterChatCommand("realui", "ChatCommand_Config")
     self:RegisterChatCommand(
