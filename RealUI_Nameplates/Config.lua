@@ -130,7 +130,7 @@ local function BuildOptions()
                         args = {
                             healthPercent = {
                                 type = "toggle", name = "Health percent", order = 1,
-                                desc = "Shown whenever the game exposes health values to addons. In instanced combat WoW 12 withholds them (secret values), so the text hides and returns when combat ends — this is a game restriction, not a bug.",
+                                desc = "Shown whenever the game exposes health values to addons. Inside dungeons and raids WoW 12 withholds them (secret values) for most of the run — including out of combat — so the text will be absent there and returns once the game stops withholding. This is a game restriction, not a bug.",
                             },
                             spellName     = { type = "toggle", name = "Cast spell name", order = 2 },
                         },
