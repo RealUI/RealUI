@@ -244,6 +244,9 @@ function Health.OnColorEvent(plate)
 end
 
 Health.OnCombatChanged = Health.OnColorEvent
+-- B58: execute-range colouring reads health values, so it recovers on the secrecy
+-- transition rather than only on a combat edge (see Texts.lua / RefreshSecrecy).
+Health.OnSecrecyChanged = Health.OnColorEvent
 
 private.RegisterUnitEvent("UNIT_HEALTH", "OnHealthEvent")
 private.RegisterUnitEvent("UNIT_MAXHEALTH", "OnHealthEvent")

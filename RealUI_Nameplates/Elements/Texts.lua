@@ -124,13 +124,21 @@ function Texts.OnHealthEvent(plate)
     UpdateHealthPercent(plate)
 end
 
--- Health values stop being secret when combat drops, but no UNIT_HEALTH event
--- fires for that transition — refresh so the % text pops back immediately.
+-- No UNIT_HEALTH event fires when values stop being secret, so the % text needs an
+-- explicit re-check or it stays blank until something unrelated updates health.
+--
+-- B58: this used to hang off the combat edge alone, on the assumption that secrecy ends
+-- when combat ends. Measured 2026-08-30, it does not — secrecy lagged a combat-end edge
+-- by 29 seconds in one dungeon and by 0.6s in another, so the refresh ran while values
+-- were still secret and nothing looked again. OnSecrecyChanged is driven by the real
+-- C_Secrets.ShouldAurasBeSecret transition (RealUI_Nameplates.lua). The combat hook stays
+-- because it is free and still a valid moment to re-check.
 -- (WoW 12 gives tainted code no secret-capable numeric text API at all —
--- NumericFormatter is AllowedWhenUntainted — so combat % text cannot exist.)
+-- NumericFormatter is AllowedWhenUntainted — so % text during secrecy cannot exist.)
 function Texts.OnCombatChanged(plate)
     UpdateHealthPercent(plate)
 end
+Texts.OnSecrecyChanged = Texts.OnCombatChanged
 
 private.RegisterUnitEvent("UNIT_NAME_UPDATE", "OnNameEvent")
 -- UNIT_HEALTH / UNIT_MAXHEALTH are registered by Health.lua; the router calls every
