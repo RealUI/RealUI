@@ -258,6 +258,41 @@ local function UpdateAllAlphas()
     end
 end
 
+--[[ Aura secrecy (B58) — NOT the same thing as combat.
+
+     This used to be driven off PLAYER_REGEN_ENABLED/DISABLED on the assumption that
+     "health values stop being secret when combat drops". Measured 2026-08-30, that is
+     false: in a Timewalking dungeon secrecy stayed on through a combat-end edge and for
+     the next 29 seconds out of combat; in a party instance it lagged combat exit by 0.6s;
+     and it switched ON with no combat edge at all. It also LEADS combat entry by up to
+     2.5s. Outdoors it happens to track combat closely, which is why the wrong trigger
+     shipped — the failure only shows where the feature matters.
+
+     Consequence of the old trigger: OnCombatChanged fired at the combat edge, found the
+     values still secret, and nothing re-checked afterwards — so the health-percent text
+     stayed blank for the rest of the window unless an unrelated UNIT_HEALTH event
+     happened to re-enter it.
+
+     C_Secrets.ShouldAurasBeSecret is the actual query. There is no event for it, so it is
+     polled on the existing slow tick and re-checked on combat edges (free, and catches
+     the tight outdoor case without waiting for the next tick). ]]--
+
+local aurasAreSecret = false
+
+local function RefreshSecrecy()
+    local secret = false
+    if _G.C_Secrets and _G.C_Secrets.ShouldAurasBeSecret then
+        local ok, value = _G.pcall(_G.C_Secrets.ShouldAurasBeSecret)
+        secret = (ok and value) and true or false
+    end
+    if secret == aurasAreSecret then return end
+
+    aurasAreSecret = secret
+    for _, plate in _G.next, activeByUnit do
+        ForEachElement("OnSecrecyChanged", plate)
+    end
+end
+
 --[[ Shared ticker: 0.1s for aura countdowns, every 3rd tick for range/alpha ]]--
 
 local tickCounter = 0
@@ -266,6 +301,7 @@ function NP:StartTicker()
     self.ticker = _G.C_Timer.NewTicker(0.1, function()
         tickCounter = tickCounter + 1
         local doSlow = (tickCounter % 3 == 0)
+        if doSlow then RefreshSecrecy() end
         for _, plate in _G.next, activeByUnit do
             ForEachElement("OnTick", plate, doSlow)
         end
@@ -321,6 +357,10 @@ end
 
 local function CombatChanged()
     UpdateAllAlphas()
+    -- Secrecy usually moves near a combat edge even though it does not track it (see
+    -- RefreshSecrecy): checking here costs nothing and avoids waiting up to 0.3s for the
+    -- next slow tick. It fires OnSecrecyChanged itself only if the value actually moved.
+    RefreshSecrecy()
     for _, plate in _G.next, activeByUnit do
         ForEachElement("OnCombatChanged", plate)
     end
