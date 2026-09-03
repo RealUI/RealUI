@@ -12,9 +12,9 @@ local FramePoint = RealUI:GetModule("FramePoint")
 UnitFrames.targettarget = {
     create = function(dialog)
         dialog.Name = dialog.overlay:CreateFontString(nil, "OVERLAY")
-        -- B42: y shifted down 5px so the name's baseline aligns with the bar
-        -- (mirror of Focus: right-aligned variant, same y offset)
-        dialog.Name:SetPoint("BOTTOMRIGHT", dialog, "BOTTOMLEFT", -5, -3 - UnitFrames.layoutSize)
+        -- B42, second pass: centred on the health bar (see Focus.lua);
+        -- mirror of Focus, name sits to the LEFT of the bar
+        dialog.Name:SetPoint("RIGHT", dialog.Health, "LEFT", -5, 0)
         dialog.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
         dialog:Tag(dialog.Name, "[realui:name]")
     end,
