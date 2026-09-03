@@ -66,37 +66,96 @@ local function GetHoveredButton()
     end
 end
 
+-- Blizzard's canonical chord order is ALT-CTRL-SHIFT-key
+-- (BindingUtil.lua CreateKeyChordStringUsingMetaKeyState). The previous
+-- prepend loop produced SHIFT-CTRL-ALT-key, which the game's own binding set
+-- would not have matched.
 local function ComposeKey(key)
-    local prefix = ""
-    if _G.IsAltKeyDown() then prefix = "ALT-" .. prefix end
-    if _G.IsControlKeyDown() then prefix = "CTRL-" .. prefix end
-    if _G.IsShiftKeyDown() then prefix = "SHIFT-" .. prefix end
-    return prefix .. key
+    local chord = ""
+    if _G.IsAltKeyDown()     then chord = chord .. "ALT-"   end
+    if _G.IsControlKeyDown() then chord = chord .. "CTRL-"  end
+    if _G.IsShiftKeyDown()   then chord = chord .. "SHIFT-" end
+    return chord .. key
 end
 
+local function Say(fmt, ...)
+    _G.print(("|cff30d0ffRealUI ActionBars|r: " .. fmt):format(...))
+end
+
+--[[ Two kinds of button, two binding stores.
+
+     Bars 1 and 3-6 mirror a Blizzard command (`keyBoundTarget`, set in
+     Bar.lua): the key the button DISPLAYS is whatever the game's own binding
+     set holds for that command, and Bar 1 presses via that command too. Our
+     profile table never held those keys, so ESC on such a button printed
+     "cleared" while removing nothing, and the hotkey stayed on the button
+     (post-4.0.1 report). Bind and clear on these go through SetBinding on the
+     command — the same thing LibActionButton's SetKey/ClearBindings do —
+     followed by SaveBindings so the change survives a reload.
+
+     Bar 2 has no Blizzard command; its captures live in the profile and are
+     applied as override bindings by ApplyBindings. ]]--
 local function HandleBind(key)
     local buttonName = GetHoveredButton()
     if not buttonName then return false end
 
+    local button = _G[buttonName]
+    local target = button and button.config and button.config.keyBoundTarget
+    local bindings = AB.db.profile.bindings
+
+    -- SetBinding is refused in combat; bind mode refuses to START in combat,
+    -- but combat can begin while it is on.
+    if target and _G.InCombatLockdown() then
+        Say("cannot change bindings in combat.")
+        return true
+    end
+
     if key == "ESCAPE" then
-        AB.db.profile.bindings[buttonName] = nil
-        local button = _G[buttonName]
-        if button and button.HotKey and not (button.config and button.config.keyBoundTarget) then
+        local cleared = {}
+        if bindings[buttonName] then
+            cleared[#cleared + 1] = _G.GetBindingText(bindings[buttonName], 1)
+            bindings[buttonName] = nil
+        end
+        if target then
+            local keys = { _G.GetBindingKey(target) }
+            for k = 1, #keys do
+                _G.SetBinding(keys[k], nil)
+                cleared[#cleared + 1] = _G.GetBindingText(keys[k], 1)
+            end
+            if #keys > 0 then
+                _G.SaveBindings(_G.GetCurrentBindingSet())
+            end
+        end
+        if button and button.HotKey then
             button.HotKey:SetText("")
         end
-        _G.print(("|cff30d0ffRealUI ActionBars|r: cleared binding on %s."):format(buttonName))
+        if #cleared > 0 then
+            Say("cleared %s on %s.", _G.table.concat(cleared, ", "), buttonName)
+        else
+            Say("nothing was bound on %s.", buttonName)
+        end
     else
         if IGNORED_KEYS[key] then return false end
         local composed = ComposeKey(key)
-        -- One binding per key: drop it from any other button first.
-        for otherName, otherKey in _G.next, AB.db.profile.bindings do
+        -- One binding per key: drop it from any other custom capture first,
+        -- and blank that button's hotkey — ApplyBindings only writes text for
+        -- captures that still exist, so the old label would otherwise stay.
+        for otherName, otherKey in _G.next, bindings do
             if otherKey == composed then
-                AB.db.profile.bindings[otherName] = nil
+                bindings[otherName] = nil
+                local other = _G[otherName]
+                if other and other.HotKey then other.HotKey:SetText("") end
             end
         end
-        AB.db.profile.bindings[buttonName] = composed
-        _G.print(("|cff30d0ffRealUI ActionBars|r: %s bound to %s."):format(
-            _G.GetBindingText(composed, 1), buttonName))
+        if target then
+            -- SetBinding already unbinds the key from whatever Blizzard
+            -- command held it, so no sweep is needed on that side.
+            _G.SetBinding(composed, target)
+            _G.SaveBindings(_G.GetCurrentBindingSet())
+        else
+            bindings[buttonName] = composed
+        end
+        Say("%s bound to %s.", _G.GetBindingText(composed, 1), buttonName)
     end
 
     private.QueueSecure(private.ApplyBindings)
