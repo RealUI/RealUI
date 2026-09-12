@@ -85,6 +85,22 @@ local function GetRoleIsTank()
     return spec and _G.GetSpecializationRole(spec) == "TANK"
 end
 
+-- Matchmade raids with no role requirements auto-flag arbitrarily many main
+-- tanks, so MT/MA assignments carry no signal there. Blizzard hit this in its
+-- own raid frames and suppressed the MT/MA display outright
+-- (12.1.0.69587, CompactRaidFrameContainerMixin:ShouldDisplayMainTankAndAssist);
+-- this mirrors that scope. The assigned-role check keeps applying either way --
+-- a role the player chose stays meaningful where an auto-flag does not.
+-- Guarded for existence: the API landed mid-12.1.0, so older 12.1 clients
+-- return the pre-fix behaviour rather than erroring.
+local function MainTankFlagsAreMeaningful()
+    local LFGInfo = _G.C_LFGInfo
+    if LFGInfo and LFGInfo.IsInMatchmadeRaidWithoutRoleRequirements then
+        return not LFGInfo.IsInMatchmadeRaidWithoutRoleRequirements()
+    end
+    return true
+end
+
 local function ThreatColor(unit, colors)
     if not colors.threat.enabled then return end
     if not _G.UnitAffectingCombat(unit) then return end
@@ -95,9 +111,12 @@ local function ThreatColor(unit, colors)
         if status == 1 then return colors.threat.transition end
         local targetUnit = unit .. "target"
         if _G.UnitExists(targetUnit) and not _G.UnitIsUnit(targetUnit, "player") then
-            if _G.UnitGroupRolesAssigned(targetUnit) == "TANK"
-                or _G.GetPartyAssignment("MAINTANK", targetUnit)
-                or _G.GetPartyAssignment("MAINASSIST", targetUnit) then
+            local heldByTank = _G.UnitGroupRolesAssigned(targetUnit) == "TANK"
+            if not heldByTank and MainTankFlagsAreMeaningful() then
+                heldByTank = _G.GetPartyAssignment("MAINTANK", targetUnit)
+                    or _G.GetPartyAssignment("MAINASSIST", targetUnit)
+            end
+            if heldByTank then
                 return colors.threat.offtank
             end
         end
