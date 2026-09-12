@@ -1,7 +1,7 @@
 local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: the profile cascade restores modules without overriding the user
--- Feature: B54 — cast bars could not be disabled (docs/4.0-Beta-Feedback.md)
+-- Feature: B54 — cast bars could not be disabled (docs/Feedback-Triage.md)
 --
 -- RealUI:OnProfileUpdate snapshots db.profile.modules before pushing profiles to
 -- third-party addons, then restores anything the cascade cleared.  The property

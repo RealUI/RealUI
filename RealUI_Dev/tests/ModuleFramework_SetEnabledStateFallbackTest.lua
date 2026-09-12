@@ -1,7 +1,7 @@
 local ADDON_NAME, ns = ... -- luacheck: ignore
 
 -- Property Test: SetEnabledState honours unregistered modules
--- Feature: B54 — cast bars could not be kept disabled (docs/4.0-Beta-Feedback.md)
+-- Feature: B54 — cast bars could not be kept disabled (docs/Feedback-Triage.md)
 --
 -- RealUI installs a default module prototype (Core/ModuleFramework.lua) whose
 -- SetEnabledState replaces AceAddon's for EVERY module. Its ModuleFramework
