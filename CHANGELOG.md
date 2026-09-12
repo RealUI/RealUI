@@ -1,3 +1,39 @@
+## [4.0.2] - 2026-09-13 ##
+### Summary ###
+A maintenance release. The headline fix is **nameplate health text and execute colouring recovering correctly** — RealUI had been treating "in combat" as the same thing as "auras are secret", and measurement in game proved those are unrelated: secrecy can already be on out of combat, can stay on through a combat-end edge for half a minute, and can switch on with no combat edge at all. The re-check now hangs off `C_Secrets.ShouldAurasBeSecret` instead. The durability infobar block no longer reports a reassuring **100%** when it has actually measured nothing, keybind mode's ESC really does clear the binding it says it cleared, and the tank-taunt threat cue survives matchmade raids.
+
+Two libraries, LibRangeCheck-3.0 and LibDualSpec-1.0, are now fetched at build time instead of being committed to the repo.
+
+Aurora updates to 12.1.0.9.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_ActionBars
+  * RealUI_Dev
+  * RealUI_Nameplates
+  * Aurora (12.1.0.9)
+
+### Added ###
+
+  * add: `/rui` as a third alias for the config command, alongside `/real` and `/realui`
+  * add: `/realdev aurasecrecy` — a developer probe for the aura-secrecy predicate. `watch` logs every `ShouldAurasBeSecret` / `InCombatLockdown` transition with its triggering event, and `arm` auto-fires a snapshot the moment auras go secret with nameplates up, reporting per-plate whether each aura container is forbidden and whether `SetSize`/`ClearAllPoints`/`SetPoint`/`SetShown` are refused. This is what disproved the combat proxy below, and what established that our own container writes are **not** being refused
+
+### Fixed ###
+
+  * fix: **nameplate health percentage and execute-range colouring could stay blank after combat, or blank out with no combat at all.** RealUI recovered these off `PLAYER_REGEN_ENABLED`/`PLAYER_REGEN_DISABLED`, on the stated assumption that health values stop being secret when combat drops. Measured in a Timewalking run, that assumption fails in three separate ways: secrecy was already on out of combat; it stayed on through a combat-end edge and remained on for a 29-second out-of-combat window; and it switched on with no combat edge at all. Combat edges are neither necessary nor sufficient. The re-check is now driven by `C_Secrets.ShouldAurasBeSecret`, carried on the cast bar's existing slow tick. The per-value `Accessible` check was always correct and is unchanged — what was wrong was only *when* we re-ran it, so the text still hides while values are genuinely secret
+  * fix: **the durability infobar block could read 100% while its own tooltip listed 78–82%.** The block recomputed its percentage from scratch on every pass starting at "full", while the per-slot numbers behind the tooltip persisted from the last good read — so a pass where `GetInventoryItemDurability` returned no maximum for any slot wrote a reassuring `100%` over a true lower value. A pass that reads nothing was indistinguishable from a pass that reads everything at full. It now counts the slots it actually measured and keeps the last true value when that count is zero, rather than inventing a number. A durability block that quietly reads high is the one failure mode that costs gear
+  * fix: **keybind mode said "cleared binding" and left the key on the button.** ESC printed a confirmation it had not earned, and captured keys did not display, on any bar mirroring Blizzard's binding set. Both now edit the Blizzard binding set the buttons actually read
+  * fix: **the tank-taunt threat cue disappeared in matchmade raids.** The off-tank colour keys off main tank / main assist assignments, and a matchmade raid with no role requirements auto-flags arbitrarily many main tanks, so those flags carry no signal there. They are now ignored in exactly that case — mirroring what Blizzard does in its own raid frames — while the player's *assigned role* keeps counting, since a role someone chose stays meaningful where an auto-flag does not. Guarded for clients predating the API
+  * fix: **name text on the small unit frames sat below the bar.** Focus, focus target, target of target and pet names are now centred on the health bar itself rather than offset from the frame's bottom edge, so the alignment holds across HuD size, the per-unit size sliders and layout changes
+  * fix: **cast bar pushback text could run back over the spell icon.** The delay number was anchored once at creation and followed the time text around without ever being re-anchored, so it always grew rightward — fine on a left-anchored text block, on top of the icon on a right-anchored one. It now takes its side from the same branch as the time text
+  * fix: the health-percent option description no longer claims the text returns when you leave combat. It does not; in instances secrecy routinely outlasts the fight
+
+### Changed ###
+
+  * chg: **LibRangeCheck-3.0 and LibDualSpec-1.0 are fetched from `.pkgmeta` at build time** instead of being committed to the repository, removing about 5,400 lines of vendored library code. Packaged builds pull the current upstream release of each; a source checkout no longer carries them, and development environments pick them up from the standalone addons `tools/config.yaml` installs. LibActionButton stays vendored — there is no upstream package source tracked for it — and keeps its BSD-3 notice
+  * chg: Aurora updated to 12.1.0.9 — fixes an error at login from the chat edit-box border hook, which read the channel from whichever chat edit box was open rather than from the one being updated, and so indexed a nil whenever nothing was open. It affected any chat window whose default target is a channel, and also coloured those borders from the wrong channel when it did not error
+
 ## [4.0.1] - 2026-08-29 ##
 ### Summary ###
 A maintenance release for the objective tracker and the Delves companion panel. **The objective tracker is skinned again** — it has rendered with Blizzard's styling since 4.0.0 shipped with that skin gated off, because it was aborting tracker layout in LFR and delves. The throw is guarded at its source: Blizzard's own `ShouldShowMawBuffs` reads a player aura without a guard, and under WoW 12's secret-aura rules that read errors rather than coming back empty once addon code is anywhere in the execution. On the Delves side, the companion abilities panel gets the page arrows and skin it was missing, hovering the companion portrait no longer throws, and both Delves companion frames can be dragged. Thanks to Numy for the workaround.
@@ -200,5 +236,6 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
+[4.0.2]: https://github.com/RealUI/RealUI/compare/4.0.1...4.0.2
 [4.0.1]: https://github.com/RealUI/RealUI/compare/4.0.0...4.0.1
 [4.0.0]: https://github.com/RealUI/RealUI/compare/3.4.0...4.0.0
