@@ -150,6 +150,7 @@ function CastBars:UpdateSettings(unit)
         local textX, textY
         local textPoint, textRelPoint
         local timePoint, timeRelPoint
+        local delayPoint, delayRelPoint, delayX
 
         local setOnTop = unitDB.text:find("TOP")
         if setOnTop then
@@ -179,6 +180,7 @@ function CastBars:UpdateSettings(unit)
             textX = 2
             textPoint, textRelPoint = textPoint..horizPoint, textPoint.."RIGHT"
             timePoint, timeRelPoint = timePoint..horizPoint, timePoint.."RIGHT"
+            delayPoint, delayRelPoint, delayX = "BOTTOMLEFT", "BOTTOMRIGHT", 2
         else
             horizPoint = "RIGHT"
 
@@ -188,6 +190,7 @@ function CastBars:UpdateSettings(unit)
             textX = -2
             textPoint, textRelPoint = textPoint..horizPoint, textPoint.."LEFT"
             timePoint, timeRelPoint = timePoint..horizPoint, timePoint.."LEFT"
+            delayPoint, delayRelPoint, delayX = "BOTTOMRIGHT", "BOTTOMLEFT", -2
         end
 
         castbar.Text:SetJustifyH(horizPoint)
@@ -195,10 +198,14 @@ function CastBars:UpdateSettings(unit)
         castbar.Time:ClearAllPoints()
         castbar.Text:ClearAllPoints()
         castbar.Icon:ClearAllPoints()
+        castbar.Delay:ClearAllPoints()
 
         ASB:AttachFrame(castbar.Icon, iconPoint, castbar, iconRelPoint, iconX, iconY)
         castbar.Text:SetPoint(textPoint, castbar.Icon, textRelPoint, textX, textY)
         castbar.Time:SetPoint(timePoint, castbar.Icon, timeRelPoint, textX, textY)
+        -- .Delay trails .Time on whichever side the text block grows, so the
+        -- pushback number stays clear of the icon instead of sitting on it.
+        castbar.Delay:SetPoint(delayPoint, castbar.Time, delayRelPoint, delayX, 0)
     end
 end
 
