@@ -22,7 +22,6 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
 
     <!-- Always loaded libraries -->
     <Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
-    <Script file="LibRangeCheck-3.0\LibRangeCheck-3.0\LibRangeCheck-3.0.lua"/>
 
     <!-- Core Fixes and Enhancements -->
     <Script file="Fixes\BlizzBugsSuck.lua"/>

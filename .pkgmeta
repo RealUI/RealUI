@@ -38,6 +38,9 @@ externals:
         tag: latest
     RealUI/Libs/LibQTip-2.0:
         url: https://github.com/Torhal/LibQTip-2.0.git
+    RealUI/Libs/LibRangeCheck-3.0:
+        url: https://github.com/WeakAuras/LibRangeCheck-3.0.git
+        tag: latest
     RealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
@@ -105,6 +108,9 @@ externals:
         url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
     RealUI_ActionBars/Libs/AceEvent-3.0:
         url: https://github.com/WoWUIDev/Ace3.git/AceEvent-3.0
+    RealUI_ActionBars/Libs/LibDualSpec-1.0:
+        url: https://github.com/AdiAddons/LibDualSpec-1.0.git
+        tag: latest
 
     RealUI_Nameplates/Libs/LibStub:
         url: https://github.com/WoWUIDev/Ace3.git/LibStub

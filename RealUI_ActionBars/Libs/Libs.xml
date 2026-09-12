@@ -6,9 +6,11 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <Script file="AceAddon-3.0\AceAddon-3.0.lua"/>
     <Script file="AceDB-3.0\AceDB-3.0.lua"/>
     <Script file="AceEvent-3.0\AceEvent-3.0.lua"/>
-    @end-non-debug@-->
-    <!-- Committed copies (not pkgmeta externals): pinned so dev and packaged
-         builds run identical library code. LAB is BSD-3 (notice retained). -->
     <Script file="LibDualSpec-1.0\LibDualSpec-1.0.lua"/>
+    @end-non-debug@-->
+    <!-- Committed copy (not a pkgmeta external): LAB has no upstream package
+         source we track, so it is vendored and pinned here. BSD-3 (notice
+         retained). Everything above is fetched at build time; in dev those
+         libraries come from the standalone addons tools/config.yaml installs. -->
     <Script file="LibActionButton-1.0\LibActionButton-1.0.lua"/>
 </Ui>
