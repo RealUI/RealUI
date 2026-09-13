@@ -32,7 +32,7 @@ jobs:
         run: |
           sudo apt-get install pandoc subversion
           curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
-          bash release.sh -L -p 88269
+          bash release.sh -L -p 1658899
         # AURORA_NIGHTLY=yes: prefers Aurora nightly over latest release when newer
 
       - name: Mark as pre-release
