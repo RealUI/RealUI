@@ -37,4 +37,4 @@ jobs:
         rm -f CHANGELOG.md
         sudo apt-get install pandoc subversion
         curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
-        bash release.sh -L -p 88269
+        bash release.sh -L -p 1658899
