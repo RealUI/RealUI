@@ -1,5 +1,8 @@
 package-as: RealUI
 
+embedded-libraries:
+    - aurora
+
 ignore:
     - utils
     - docs
