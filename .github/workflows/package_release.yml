@@ -60,4 +60,4 @@ jobs:
       run: |
         sudo apt-get install pandoc subversion
         curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
-        bash release.sh -L -p 88269 -w 16068
+        bash release.sh -p 1658899 -w 16068
