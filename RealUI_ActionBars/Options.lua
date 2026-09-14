@@ -188,6 +188,25 @@ local function AuxBarOptions(displayName, order, getDB)
     }
 end
 
+-- Readout only: the lock is the game's own setting (see ActionBars.lua), so
+-- the panel shows its state and where to change it rather than duplicating it.
+local MODIFIER_TEXT = { SHIFT = _G.SHIFT_KEY_TEXT, CTRL = _G.CTRL_KEY_TEXT, ALT = _G.ALT_KEY_TEXT }
+local function ButtonLockText()
+    local label = _G.LOCK_ACTIONBAR_TEXT or "Lock Action Bars"
+    local where = "Game Options → Gameplay → Action Bars → \"" .. label .. "\""
+    if private.IsActionBarLocked() then
+        local modifier = _G.GetModifiedClick("PICKUPACTION")
+        local how
+        if modifier == "NONE" then
+            how = "no key is set to pick actions up, so they cannot be moved at all"
+        else
+            how = ("hold %s to move an action"):format(MODIFIER_TEXT[modifier] or modifier)
+        end
+        return ("|cff00ff00Action bars are locked|r — %s. This follows the game setting (%s)."):format(how, where)
+    end
+    return ("|cffff4040Action bars are unlocked|r — actions can be dragged off the bars, in combat too. This follows the game setting (%s)."):format(where)
+end
+
 local function BuildOptions()
     local options = {
         type = "group", name = "RealUI ActionBars", childGroups = "tab",
@@ -196,6 +215,10 @@ local function BuildOptions()
                 type = "execute", name = "Keybind mode", order = 0,
                 desc = "Hover a button and press a key to bind it (ESC clears). Also /rab bind.",
                 func = function() private.ToggleBindMode() end,
+            },
+            buttonLock = {
+                type = "description", order = 0.1, width = "full", fontSize = "medium",
+                name = ButtonLockText,
             },
             moveExtraButton = {
                 type = "toggle", name = "Anchor Extra/Zone ability to bar 1", order = 0.5,

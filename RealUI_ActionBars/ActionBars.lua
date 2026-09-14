@@ -75,6 +75,46 @@ function AB:RefreshBar(id)
     private.RefreshBar(id)
 end
 
+--[[ Button lock: the game's own "Lock Action Bars" setting, mirrored.
+
+     Blizzard buttons check `lockActionBars` on every drag and only let an
+     action leave the bar while the Pick Up Action key (PICKUPACTION, Shift by
+     default) is held. LAB buttons never read that setting — they read a
+     `buttonlock` attribute per button, which Bartender4 used to set from its
+     own profile option. Nothing set it after the BT4 removal, so every RealUI
+     button was permanently unlocked and a stray drag in combat lost the spell.
+
+     No RealUI option of its own: the attribute follows the game setting, so
+     the one checkbox the user can already see is the one that counts, and the
+     modifier is whatever they chose there. The secure drag handler honours
+     the same modifier. Attribute writes are secure state — callers queue. ]]--
+
+function private.IsActionBarLocked()
+    local Settings = _G.Settings
+    if Settings and Settings.GetValue then
+        local ok, value = _G.pcall(Settings.GetValue, "lockActionBars")
+        if ok and value ~= nil then
+            return value and true or false
+        end
+    end
+    return _G.GetCVarBool("lockActionBars") and true or false
+end
+
+function private.ApplyButtonLock()
+    local locked = private.IsActionBarLocked()
+    for id = 1, 6 do
+        local bar = AB.bars[id]
+        if bar then
+            for i = 1, 12 do
+                local button = bar.buttons[i]
+                if button then
+                    button:SetAttribute("buttonlock", locked)
+                end
+            end
+        end
+    end
+end
+
 --[[ ExtraActionButton / ZoneAbility: anchored to the left of bar 1, stacked
      outward (parity with the old RealUI arrangement, which anchored them to
      BT4Bar1 — a path that died with Bartender4). The EditMode-managed

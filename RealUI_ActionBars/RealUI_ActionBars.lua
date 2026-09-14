@@ -125,6 +125,18 @@ function AB:OnEnable()
     self:RegisterEvent("UPDATE_BINDINGS", function()
         private.QueueSecure(private.ApplyBindings)
     end)
+
+    -- Button lock follows the game's "Lock Action Bars" checkbox; re-apply
+    -- when it changes and refresh the readout in our config panel.
+    self:RegisterEvent("CVAR_UPDATE", function(_, cvar)
+        if cvar == "lockActionBars" then
+            private.QueueSecure(private.ApplyButtonLock)
+            local registry = _G.LibStub("AceConfigRegistry-3.0", true)
+            if registry then
+                registry:NotifyChange("RealUI_ActionBars")
+            end
+        end
+    end)
 end
 
 function AB:OnProfileUpdate()

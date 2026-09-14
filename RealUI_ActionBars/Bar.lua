@@ -161,10 +161,12 @@ function barMixin:ApplyConfig()
     self:SetPoint(cornerV .. cornerH, _G.UIParent, db.position.point,
         db.position.x, db.position.y)
 
+    local locked = private.IsActionBarLocked()
     for i = 1, 12 do
         local button = self.buttons[i]
         button.config = BuildButtonConfig(db, button.config and button.config.keyBoundTarget)
         button:UpdateConfig(button.config)
+        button:SetAttribute("buttonlock", locked)
     end
 
     self:Layout()
