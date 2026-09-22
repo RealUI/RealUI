@@ -97,23 +97,28 @@ do
         name = "Tweaks_AutoHoliday",
     })
     local doneHoliday
-    _G.LFDParentFrame:HookScript("OnShow", function()
-        if not InterfaceTweaks.db.global.autoHoliday then return end
+    -- Blizzard_GroupFinder is excluded on WoW Forever: no dungeon finder
+    -- frame, so the tweak is registered but has nothing to hook.
+    local LFDParentFrame = _G.LFDParentFrame
+    if LFDParentFrame then
+        LFDParentFrame:HookScript("OnShow", function()
+            if not InterfaceTweaks.db.global.autoHoliday then return end
 
-        if not doneHoliday then
-            for index = 1, _G.GetNumRandomDungeons() do
-                local dungeonID = _G.GetLFGRandomDungeonInfo(index)
-                local isHoliday = _G.select(15, _G.GetLFGDungeonInfo(dungeonID))
-                if isHoliday then
-                    if _G.GetLFGDungeonRewards(dungeonID) then
-                        doneHoliday = true
-                    else
-                        _G.LFDQueueFrame_SetType(dungeonID)
+            if not doneHoliday then
+                for index = 1, _G.GetNumRandomDungeons() do
+                    local dungeonID = _G.GetLFGRandomDungeonInfo(index)
+                    local isHoliday = _G.select(15, _G.GetLFGDungeonInfo(dungeonID))
+                    if isHoliday then
+                        if _G.GetLFGDungeonRewards(dungeonID) then
+                            doneHoliday = true
+                        else
+                            _G.LFDQueueFrame_SetType(dungeonID)
+                        end
                     end
                 end
             end
-        end
-    end)
+        end)
+    end
 end
 
 
