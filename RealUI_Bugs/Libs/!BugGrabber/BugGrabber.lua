@@ -20,7 +20,13 @@ local bugGrabberParentAddon, parentAddonTable = ...
 local STANDALONE_NAME = "!BugGrabber"
 if bugGrabberParentAddon ~= STANDALONE_NAME then
 	local enabled = C_AddOns.GetAddOnEnableState(STANDALONE_NAME, playerName)
-	if enabled == 2 then return end -- Bail out
+	-- RealUI PATCH (re-apply on every BugGrabber update): on WoW Forever the
+	-- player name is a full name the enable-state lookup does not know, and it
+	-- answers "All" even when the standalone is disabled, so this bailed with
+	-- nobody left to define BugGrabber. The standalone sorts first and loads at
+	-- login, so if it is going to provide BugGrabber it already has (caught at
+	-- the top of this file); only defer when it is actually loaded.
+	if enabled == 2 and C_AddOns.IsAddOnLoaded(STANDALONE_NAME) then return end -- Bail out
 end
 if not parentAddonTable.BugGrabber then parentAddonTable.BugGrabber = {} end
 local addon = parentAddonTable.BugGrabber
