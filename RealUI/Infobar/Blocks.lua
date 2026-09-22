@@ -626,7 +626,10 @@ function Infobar:CreateBlocks()
         local function ToggleUI(this, arg1, arg2, isChecked)
             if _G.InCombatLockdown() then return end
 
-            _G[arg1](arg2)
+            local toggle = _G[arg1]
+            if toggle then
+                toggle(arg2)
+            end
         end
 
         local menuList = {
@@ -710,7 +713,8 @@ function Infobar:CreateBlocks()
                 func = ToggleUI,
                 arg1 = "ToggleEncounterJournal",
             },
-            {text = _G.MicroButtonTooltipText(_G.HOUSING_MICRO_BUTTON, "TOGGLEHOUSINGUI"),
+            {text = _G.MicroButtonTooltipText(_G.HOUSING_MICRO_BUTTON or "", "TOGGLEHOUSINGUI"),
+                requires = "HousingFramesUtil",
                 func =  function()
                     if _G.InCombatLockdown() then return end
                     _G.HousingFramesUtil.ToggleHousingDashboard()
@@ -744,6 +748,18 @@ function Infobar:CreateBlocks()
                 func = function() MenuFrame:CloseAll() end,
             },
         }
+
+        -- Drop entries whose Blizzard side is not there. On WoW Forever
+        -- Blizzard_EncounterJournal, Blizzard_GroupFinder (the vanilla-style
+        -- replacement has no PVEFrame_ToggleFrame) and the Housing addons never
+        -- load, so their toggles are nil. None of these are LoadOnDemand on
+        -- retail, so at this point absence means "not on this client".
+        for i = #menuList, 1, -1 do
+            local entry = menuList[i]
+            if (entry.arg1 and not _G[entry.arg1]) or (entry.requires and not _G[entry.requires]) then
+                _G.tremove(menuList, i)
+            end
+        end
 
         local errors
         local function ShowBugIcon(block, callback, errorObject)
