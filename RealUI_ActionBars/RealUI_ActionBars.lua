@@ -66,10 +66,21 @@ end
 -- `loadstring_untainted` before RestrictedExecution.lua captures it. Every
 -- secure snippet then dies with "attempt to call a nil value"
 -- (RestrictedExecution.lua:79) and LibActionButton cannot build one button.
--- Probe once out of combat; standing down beats eight errors and empty bars.
+-- This cannot be probed quietly from addon code: SecureHandlerExecute only
+-- sets an attribute and the compile fails inside the API frame's attribute
+-- handler (reported to the error handler, invisible to pcall), and the direct
+-- CallRestrictedClosure route needs a writable restricted table, which only
+-- secure code can create (GetManagedEnvironment errors for insecure callers).
+-- So this is a list of Forever builds known to ship the bug. A new build drops
+-- out of the list by itself; if it still errors from LibActionButton-1.0 with
+-- RestrictedExecution.lua:79 "attempt to call a nil value", add it here.
+local BROKEN_SECURE_SNIPPET_BUILDS = {
+    ["69913"] = true, -- 1.60.1, 2026-09-22
+}
 local function SecureSnippetsWork()
-    local probe = _G.CreateFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
-    return _G.pcall(_G.SecureHandlerExecute, probe, "")
+    local _, build, _, interface = _G.GetBuildInfo()
+    local isForever = interface >= 16000 and interface < 20000
+    return not (isForever and BROKEN_SECURE_SNIPPET_BUILDS[build])
 end
 
 function AB:OnEnable()
