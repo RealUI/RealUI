@@ -136,14 +136,21 @@ local ERROR_FORMAT = [[x%d |cFFFFFFFF %s|r
 |cFFFFFFFF%s|r]]
 
 local FormatError do
+    -- RAID_CLASS_COLORS is built from the client's class list, and WoW
+    -- Forever only has the original nine classes, so MONK and DEMONHUNTER are
+    -- absent there. Fall back to Blizzard's own hex for the missing ones.
+    local function classColor(token, fallback)
+        local color = _G.RAID_CLASS_COLORS[token]
+        return "|c" .. (color and color.colorStr or fallback)
+    end
     local c = {
-        ORANGE = "|c".._G.RAID_CLASS_COLORS.DRUID.colorStr,
-        GREEN  = "|c".._G.RAID_CLASS_COLORS.HUNTER.colorStr,
-        MINT   = "|c".._G.RAID_CLASS_COLORS.MONK.colorStr,
-        BLUE   = "|c".._G.RAID_CLASS_COLORS.MAGE.colorStr,
-        PINK   = "|c".._G.RAID_CLASS_COLORS.PALADIN.colorStr,
-        PURPLE = "|c".._G.RAID_CLASS_COLORS.DEMONHUNTER.colorStr,
-        TAN    = "|c".._G.RAID_CLASS_COLORS.WARRIOR.colorStr,
+        ORANGE = classColor("DRUID", "ffff7c0a"),
+        GREEN  = classColor("HUNTER", "ffaad372"),
+        MINT   = classColor("MONK", "ff00ff98"),
+        BLUE   = classColor("MAGE", "ff3fc7eb"),
+        PINK   = classColor("PALADIN", "fff48cba"),
+        PURPLE = classColor("DEMONHUNTER", "ffa330c9"),
+        TAN    = classColor("WARRIOR", "ffc69b6d"),
         GRAY   = _G.GRAY_FONT_COLOR_CODE,
     }
 
@@ -194,8 +201,16 @@ local FormatError do
     end
 end
 
+-- BugGrabber is embedded, but its load bails out when it believes a standalone
+-- !BugGrabber is enabled for this character (it asks with the full player name,
+-- which is what UnitName returns on WoW Forever). Tolerate its absence here
+-- rather than throwing from every error-frame path.
+local function GetErrorDB()
+    return _G.BugGrabber and _G.BugGrabber:GetDB() or {}
+end
+
 function errorFrame:ChangeDisplayedIndex(delta)
-    local errors = _G.BugGrabber:GetDB()
+    local errors = GetErrorDB()
     self.index = _G.Clamp(self.index + delta, 0, #errors)
 
     self:Update()
@@ -210,13 +225,13 @@ function errorFrame:ShowNext()
 end
 
 function errorFrame:ShowError(err)
-    local errors = _G.BugGrabber:GetDB()
+    local errors = GetErrorDB()
     if not err then
         if not self.index then
             self.index = #errors
         end
     elseif _G.type(err) == "string" then
-        local errorObject = _G.BugGrabber:GetErrorByID(err)
+        local errorObject = _G.BugGrabber and _G.BugGrabber:GetErrorByID(err)
 
         if errorObject ~= errors[self.index] then
             for i = 1, #errors do
@@ -245,7 +260,7 @@ local function GetNavigationButtonEnabledStates(count, index)
 end
 
 function errorFrame:Update()
-    local errors = _G.BugGrabber:GetDB()
+    local errors = GetErrorDB()
     local numErrors = #errors
     if not self.index then
         self.index = numErrors
