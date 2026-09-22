@@ -81,7 +81,7 @@ end
      absorb amount), class/threat/reaction color chain on top. ]]--
 
 local function GetRoleIsTank()
-    local spec = _G.GetSpecialization()
+    local spec = _G.C_SpecializationInfo.GetSpecialization()
     return spec and _G.GetSpecializationRole(spec) == "TANK"
 end
 

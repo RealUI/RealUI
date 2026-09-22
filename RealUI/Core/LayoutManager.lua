@@ -1,7 +1,7 @@
 local ADDON_NAME, private = ... -- luacheck: ignore
 
 -- Lua Globals --
--- luacheck: globals next type pairs ipairs table pcall GetSpecialization print _G
+-- luacheck: globals next type pairs ipairs table pcall print _G
 
 -- RealUI Layout Manager
 -- This module handles layout switching between DPS/Tank and Healing configurations
@@ -534,7 +534,7 @@ end
 
 function LayoutManager:GetCurrentSpecialization()
     -- Get current specialization index
-    local currentSpec = _G.GetSpecialization()
+    local currentSpec = _G.C_SpecializationInfo.GetSpecialization()
     if currentSpec and currentSpec > 0 then
         return currentSpec
     end

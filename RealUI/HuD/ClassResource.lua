@@ -398,7 +398,7 @@ function ClassResource:Setup(unitFrame, unit)
 
         -- Let oUF handle visibility; call SwitchDHSpec to pre-hide if not
         -- Devourer (before oUF Enable runs).
-        self:SwitchDHSpec(_G.GetSpecialization() or 1)
+        self:SwitchDHSpec(_G.C_SpecializationInfo.GetSpecialization() or 1)
         return
     end
 
@@ -612,7 +612,7 @@ end
 
 function ClassResource:OnSpecChanged()
     self:debug("OnSpecChanged")
-    self:SwitchDHSpec(_G.GetSpecialization() or 1)
+    self:SwitchDHSpec(_G.C_SpecializationInfo.GetSpecialization() or 1)
 end
 
 function ClassResource:OnDisable()
