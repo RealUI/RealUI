@@ -446,9 +446,14 @@ function EditModeManager:BuildLayout(role, displayPresetId)
     local layout = Templates.DeepCopy(Templates.base)
 
     -- 1b. Blizzard's action bars stay Blizzard's unless RealUI replaces them.
+    -- Written out as Blizzard's Modern defaults, not merely omitted: EditMode
+    -- leaves an omitted system exactly as the previous layout had it.
     if not RealUIActionBarsActive() then
-        debug("RealUI_ActionBars not active; leaving Blizzard action bars at defaults")
+        debug("RealUI_ActionBars not active; action bars take Blizzard's Modern defaults")
         Templates.StripSystem(layout, Templates.SYSTEM_ACTION_BAR)
+        if not Templates.AppendBlizzardDefaults(layout, Templates.SYSTEM_ACTION_BAR) then
+            debug("WARNING: EDIT_MODE_MODERN_SYSTEM_MAP unavailable; action bars left unmanaged")
+        end
     end
 
     -- 2. Apply role overrides

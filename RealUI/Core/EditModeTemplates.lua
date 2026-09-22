@@ -924,15 +924,40 @@ end
 -- Utility: DeepCopy
 -- Recursively clones a table. Handles nested tables.
 ---------------------------------------------------------------------------
---- Removes every entry for one EditMode system from a built layout, so
--- Blizzard keeps that system at its own defaults -- the same way the 12.1
--- systems that have no entry in the template do.
+--- Removes every entry for one EditMode system from a built layout.
 function Templates.StripSystem(layout, system)
     for i = #layout, 1, -1 do
         if layout[i].system == system then
             table.remove(layout, i)
         end
     end
+end
+
+--- Appends Blizzard's own Modern-preset entries for one system, read from
+-- EDIT_MODE_MODERN_SYSTEM_MAP (Blizzard_EditMode; loaded on every
+-- retail-family client including WoW Forever, with per-game constants).
+-- A system merely *omitted* from a layout is not reset by EditMode: it keeps
+-- whatever the previously active layout left it with (seen 2026-09-22 on
+-- Forever, where the main bar stayed hidden after the entries were dropped),
+-- so "leave it to Blizzard" has to be written out explicitly.
+-- @return boolean  true if the map was available and entries were added
+function Templates.AppendBlizzardDefaults(layout, system)
+    local map = _G.EDIT_MODE_MODERN_SYSTEM_MAP
+    local entries = map and map[system]
+    if not entries then
+        return false
+    end
+    for systemIndex, info in pairs(entries) do
+        local settings = {}
+        for setting, value in pairs(info.settings or {}) do
+            settings[#settings + 1] = { setting = setting, value = value }
+        end
+        local a = info.anchorInfo or {}
+        layout[#layout + 1] = Entry(system, systemIndex,
+            Anchor(a.point, a.relativeTo, a.relativePoint, a.offsetX, a.offsetY),
+            settings, true)
+    end
+    return true
 end
 Templates.SYSTEM_ACTION_BAR = SYSTEM_ACTION_BAR
 
