@@ -227,16 +227,22 @@ do -- RealUI
                         face = {
                             name = "Font",
                             desc = "Which font the infobar text uses."
-                                .. "\n\n|cffffcc00Use RealUI's font|r follows the chat font"
+                                .. "\n\n|cffffcc00default|r follows the chat font"
                                 .. " from Skins, which is the shipped behaviour.",
                             type = "select",
                             dialogControl = "LSM30_Font",
                             values = function()
+                                -- The LSM30_Font widget takes name -> font PATH
+                                -- (it renders each entry in that font, and the
+                                -- selected value through SetFont), so the extra
+                                -- entry has to carry a real path too. A label
+                                -- here was passed straight to SetFont and threw
+                                -- "Invalid font asset (Use RealUI's font)".
                                 local list = {}
                                 for key, value in next, _G.AceGUIWidgetLSMlists.font do
                                     list[key] = value
                                 end
-                                list["default"] = "|cff00ff00Use RealUI's font|r"
+                                list["default"] = Infobar:GetDefaultFontPath()
                                 return list
                             end,
                             get = function()

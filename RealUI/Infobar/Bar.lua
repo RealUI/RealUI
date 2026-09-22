@@ -1118,23 +1118,30 @@ end
      no indication of why. The old `BAR_HEIGHT * 0.6` remains the last-resort
      fallback for when the chat frame cannot be read.
 ]]
+--- The font path `face = "default"` stands for: RealUI_Skins' chat font, or
+-- the stock WoW font when Skins is not there. Also used by the config panel,
+-- whose LSM30_Font dropdown renders every entry in the font it maps to.
+function Infobar:GetDefaultFontPath()
+    local fontPath = "Fonts\\FRIZQT__.TTF" -- last resort: default WoW font
+    -- RealUI_Skins is a separate addon, so this is a guarded read.
+    if _G.C_AddOns.IsAddOnLoaded("RealUI_Skins") then
+        local skinsDB = _G.RealUI_SkinsDB
+        if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.chat then
+            fontPath = skinsDB.profile.fonts.chat.path or fontPath
+        end
+    end
+    return fontPath
+end
+
 function Infobar:ResolveBlockFont()
     local settings = (self.db and self.db.profile and self.db.profile.font) or {}
     local LSM = _G.LibStub("LibSharedMedia-3.0", true)
 
     -- Family
-    local fontPath = "Fonts\\FRIZQT__.TTF" -- last resort: default WoW font
+    local fontPath = self:GetDefaultFontPath()
     local face = settings.face
     if face and face ~= "default" and LSM then
         fontPath = LSM:Fetch("font", face) or fontPath
-    else
-        -- RealUI_Skins is a separate addon, so this is a guarded read.
-        if _G.C_AddOns.IsAddOnLoaded("RealUI_Skins") then
-            local skinsDB = _G.RealUI_SkinsDB
-            if skinsDB and skinsDB.profile and skinsDB.profile.fonts and skinsDB.profile.fonts.chat then
-                fontPath = skinsDB.profile.fonts.chat.path or fontPath
-            end
-        end
     end
 
     -- Size
