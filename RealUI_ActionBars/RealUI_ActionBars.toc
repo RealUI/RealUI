@@ -15,6 +15,7 @@ Defaults.lua
 Visibility.lua
 Bar.lua
 ActionBars.lua
+SnippetShim.lua
 StancePetBar.lua
 Bindings.lua
 Import.lua
