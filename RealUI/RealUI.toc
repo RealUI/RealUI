@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 16001
 ## Title: RealUI
 ## Category: RealUI_Core
 ## Notes: The essential core of RealUI - A comprehensive interface suite with modular design
@@ -6,7 +6,8 @@
 ## Version: 4.0.2
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: RealUI_Bugs
-## RequiredDeps: RealUI_Bugs, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
+## RequiredDeps: RealUI_Bugs, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript [AllowLoadGameType standard]
+## RequiredDeps: RealUI_Bugs, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedSpellScript [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
 ## OptionalDeps: Grid2, Clique, LibChatAnims, LibDualSpec-1.0, LibIconFonts, LibQTip-2.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, LibSharedMedia-3.0, AceDB-3.0, LibStub, nibRealUI
 ## SavedVariables: RealUIDB, nibRealUIDB
 ## SavedVariablesPerCharacter: RealUICharacter, nibRealUICharacter

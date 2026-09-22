@@ -1,10 +1,11 @@
-## Interface: 120100
+## Interface: 120100, 16001
 ## Title: !RealUI_Preloads
 ## Category: RealUI_Core
 ## Notes: The preload Blizzard Depencies essential core of RealUI and others
 ## Author: Hanshi
 ## Version: 4.0.2
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
-## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript
+## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript [AllowLoadGameType standard]
+## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedSpellScript [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
 ## LoadWith: Blizzard_CompactRaidFrames
 RealUI_PreLoads.lua
