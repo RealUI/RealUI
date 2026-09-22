@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 16001
 ## Title: RealUI Bugs
 ## Category: RealUI_Core
 ## Notes: Bug catcher

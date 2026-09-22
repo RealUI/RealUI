@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 16001
 ## Title: RealUI Nameplates
 ## Category: RealUI_Core
 ## Notes: Clean-room nameplates for RealUI, KUI-style look
