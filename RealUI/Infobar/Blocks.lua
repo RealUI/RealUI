@@ -793,6 +793,8 @@ function Infobar:CreateBlocks()
             icon = fa["bars"],
             iconFont = iconFont,
             OnEnable = function(block)
+                -- Absent when BugGrabber's own load bailed (see RealUI_Bugs).
+                if not _G.BugGrabber then return end
                 errors = _G.BugGrabber:GetDB()
                 ShowBugIcon(block, "OnEnable", errors[#errors])
 
