@@ -36,13 +36,26 @@ local function Bootstrap()
         return
     end
 
-    -- 1. Profiles (core, skins, action bars) from the export string.
-    if type(cfg.export) == "string" and cfg.export ~= "" then
-        local ok, result = RealUI.ProfileExporter:Import(cfg.export)
-        if ok then
-            Say("imported profile scopes: " .. _G.table.concat(result, ", "))
-        else
-            Say("profile import failed: " .. _G.tostring(result))
+    -- 1. Profiles from the export string(s). `export` is one string or a
+    -- list of them: "Export all linked" only carries the scopes that were
+    -- linked at the time, so an unlinked Skins scope comes as its own export.
+    local exports = cfg.export
+    if type(exports) == "string" then exports = { exports } end
+    for _, raw in _G.ipairs(type(exports) == "table" and exports or {}) do
+        if type(raw) == "string" then
+            -- Long-bracket pastes carry CRs and surrounding blank lines; the
+            -- exporter wants "HEADER\nBODY" with the header on the first line.
+            local export = raw:gsub("\r", ""):gsub("^%s+", ""):gsub("%s+$", "")
+            local ok, result = RealUI.ProfileExporter:Import(export)
+            if ok then
+                Say("imported profile scopes: " .. _G.table.concat(result, ", "))
+            else
+                local header = export:match("^[^\n]*") or ""
+                local body = export:match("\n(.*)$") or ""
+                local bodyLen = #(body:gsub("%s", ""))
+                Say(("profile import failed: %s (header %q, body %d chars)"):format(
+                    _G.tostring(result), header:sub(1, 60), bodyLen))
+            end
         end
     end
 
@@ -59,7 +72,12 @@ local function Bootstrap()
         RealUI.cLayout = cfg.layout
     end
     if cfg.naga ~= nil then
-        RealUI.InstallWizard:SetStageData("enableNagaBar", cfg.naga and true or false)
+        -- Complete() reads this flat off the wizard state, the way the wizard
+        -- UI writes it; SetStageData files it under the current stage instead.
+        local state = RealUI.InstallWizard.GetState and RealUI.InstallWizard:GetState()
+        if state and state.stageData then
+            state.stageData.enableNagaBar = cfg.naga and true or false
+        end
     end
 
     -- 3. Complete the install exactly as the wizard's last page does.
@@ -69,6 +87,17 @@ local function Bootstrap()
     else
         Say("InstallWizard:Complete() failed: " .. _G.tostring(err))
     end
+
+    -- RealUI's login gate already scheduled InstallWizard:Start() on a 1 s
+    -- timer, and Start decides from the isFirstTime snapshot Initialize() took
+    -- before Complete ran. Refresh the snapshot, and hide the frame if the
+    -- timer still shows it.
+    RealUI.InstallWizard:Initialize()
+    _G.C_Timer.After(1.5, function()
+        if RealUI.InstallUI and RealUI.InstallUI:IsShown() then
+            RealUI.InstallUI:Hide()
+        end
+    end)
 end
 
 local frame = _G.CreateFrame("Frame")

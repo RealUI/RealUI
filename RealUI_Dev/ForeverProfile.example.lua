@@ -5,10 +5,12 @@
      addon SavedVariables do not persist.
 
      export        The string from RealUI_Config → Profiles → "Export all
-                   linked" (core + skins + action bars). Paste it verbatim
-                   inside the long brackets; it is many lines long.
-     displayPreset A DisplayPresets id, e.g. "standard", "laptop", "4k_desk".
-                   Leave nil to keep the default.
+                   linked". It only carries the scopes linked at export time;
+                   an unlinked Skins scope has its own "Export Skins" button.
+                   Give one string, or a list of strings: { [==[...]==],
+                   [==[...]==] }. Paste each verbatim inside long brackets.
+     displayPreset One of: "laptop", "standard", "highres", "4k_desk",
+                   "4k_theater", "ultrawide". Leave nil to keep the default.
      layout        1 = RealUI (DPS/Tank), 2 = RealUI-Healing.
      naga          true to enable bar 6 (the Naga bar), false to leave it off,
                    nil to not touch it. ]]--
