@@ -437,7 +437,20 @@ function RealUI:ChatCommand_Config(input)
             end
 
             local sub = input:lower():match("^%S+%s+(%S+)")
-            if sub == "restore" then
+            if sub == "reset" then
+                -- Rebuild both RealUI layouts from the shipped template and
+                -- activate the current one. User-initiated, so it may write.
+                -- This is also how a layout built while RealUI_ActionBars was
+                -- running stops hiding Blizzard's bars once it stands down.
+                local role = (self.cLayout == 2) and "healing" or "dpstank"
+                local display = self.db and self.db.global and self.db.global.display
+                local presetId = (display and display.presetId) or "standard"
+                if EMM:ApplyLayout(role, presetId, true) then
+                    print("|cff0099ffRealUI|r: EditMode layouts rebuilt from the RealUI defaults and re-applied.")
+                else
+                    print("|cff0099ffRealUI|r: EditMode layout rebuild did not complete (in combat, or the write was refused). Try again after a /reload.")
+                end
+            elseif sub == "restore" then
                 local ok, msg = EMM:RestoreLayoutBackup()
                 print(("|cff0099ffRealUI|r: %s"):format(msg))
                 if ok then
