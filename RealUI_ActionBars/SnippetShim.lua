@@ -33,6 +33,13 @@ local BROKEN_SECURE_SNIPPET_BUILDS = {
 }
 
 function private.SecureSnippetsBroken()
+    -- RealUI core keeps the list of record (RealUI.BROKEN_SECURE_SNIPPET_BUILDS,
+    -- Init.lua) so the action bars and the group frames agree; the local list
+    -- only serves a standalone install without RealUI.
+    local RealUI = _G.RealUI
+    if RealUI and RealUI.SecureSnippetsBroken then
+        return RealUI.SecureSnippetsBroken()
+    end
     local _, build, _, interface = _G.GetBuildInfo()
     local isForever = interface >= 16000 and interface < 20000
     return isForever and BROKEN_SECURE_SNIPPET_BUILDS[build] == true

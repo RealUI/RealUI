@@ -52,6 +52,24 @@ RealUI.isBetaBuild = RealUI.isRetail and interfaceVersion == 130000
 -- false there. Gate "the 12.x code path exists" on isTwelveAPI; keep
 -- isMidnight for Midnight content that Forever does not have.
 RealUI.isTwelveAPI = RealUI.isMidnight or RealUI.isForever
+
+-- WoW Forever builds on which no secure handler snippet compiles: the
+-- Blizzard_EnvironmentCleanup TOC's dependency on
+-- Blizzard_RestrictedAddOnEnvironment lacks `camelot`, so the LoadFirst
+-- cleanup nils `loadstring_untainted` before RestrictedExecution.lua captures
+-- it (reported upstream; a one-word fix on Blizzard's side). Everything
+-- snippet-driven stands in or stands down on these builds: RealUI_ActionBars'
+-- SnippetShim, the oUF party/raid headers. Addon code has no quiet way to
+-- probe this at runtime (see the realui-forever tasks file), hence a list.
+-- Add a build when LibActionButton still logs RestrictedExecution.lua:79 on
+-- it; a fixed build drops out by itself.
+RealUI.BROKEN_SECURE_SNIPPET_BUILDS = {
+    ["69913"] = true, -- 1.60.1, 2026-09-22
+}
+function RealUI.SecureSnippetsBroken()
+    local _, build = _G.GetBuildInfo()
+    return RealUI.isForever and RealUI.BROKEN_SECURE_SNIPPET_BUILDS[build] == true
+end
 RealUI.isDragonflight = interfaceVersion >= 100002 or interfaceVersion <= 110000
 
 -- Realm Information Management
