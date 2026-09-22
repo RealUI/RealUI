@@ -627,8 +627,9 @@ function InstallWizard:ApplyAccountCVars()
         ["profanityFilter"] = 0,                   -- Turn off Profanity Filter
     }
 
-    -- Check if RealUI_CombatText is loaded
-    if _G.C_AddOns and _G.C_AddOns.IsAddOnLoaded("RealUI_CombatText") and not RealUI.isMidnight then
+    -- Check if RealUI_CombatText is loaded. On the 12.x code path (Midnight
+    -- and Forever alike) RealUI_CombatText drives this CVar from its own DB.
+    if _G.C_AddOns and _G.C_AddOns.IsAddOnLoaded("RealUI_CombatText") and not RealUI.isTwelveAPI then
         accountCVars["enableFloatingCombatText"] = 0   -- Turn off Combat Text
     end
 
