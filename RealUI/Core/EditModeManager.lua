@@ -422,6 +422,19 @@ end
 -- @param role string  "dpstank" or "healing"
 -- @param displayPresetId string  Display preset identifier (e.g. "standard")
 -- @return table  A complete layout structure ready for C_EditMode.SaveLayouts()
+--- Whether RealUI_ActionBars will actually replace Blizzard's bars. When it
+-- is absent, disabled, or standing down (Bartender4 present, or a WoW Forever
+-- build that cannot run secure snippets), the layout must leave Blizzard's
+-- action bar systems alone: the template's entries hide those bars and park
+-- them off-screen, and an EditMode layout lives server-side, so that would
+-- outlast whatever caused the stand-down and leave the player with no bars.
+local function RealUIActionBarsActive()
+    if not C_AddOns.IsAddOnLoaded("RealUI_ActionBars") then return false end
+    local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+    local AB = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+    return AB ~= nil and AB:IsEnabled()
+end
+
 function EditModeManager:BuildLayout(role, displayPresetId)
     local Templates = RealUI.EditModeTemplates
     if not Templates then
@@ -431,6 +444,12 @@ function EditModeManager:BuildLayout(role, displayPresetId)
 
     -- 1. Deep copy base template
     local layout = Templates.DeepCopy(Templates.base)
+
+    -- 1b. Blizzard's action bars stay Blizzard's unless RealUI replaces them.
+    if not RealUIActionBarsActive() then
+        debug("RealUI_ActionBars not active; leaving Blizzard action bars at defaults")
+        Templates.StripSystem(layout, Templates.SYSTEM_ACTION_BAR)
+    end
 
     -- 2. Apply role overrides
     local roleOverrides = Templates.overrides and Templates.overrides[role]
@@ -665,8 +684,10 @@ end
 -- Used by InstallWizard and DisplayPresets changes.
 -- @param role string  "dpstank" or "healing"
 -- @param displayPresetId string  Display preset identifier
+-- @param forceRebuild boolean|nil  Overwrite existing layouts from the template
+--   (`/realui editmode reset`); the default preserves the user's edits.
 -- @return boolean  true if both operations succeeded
-function EditModeManager:ApplyLayout(role, displayPresetId)
+function EditModeManager:ApplyLayout(role, displayPresetId, forceRebuild)
     if InCombatLockdown() then
         state.pendingLayout = { action = "apply", role = role, displayPresetId = displayPresetId }
         debug("Combat lockdown — queued ApplyLayout:", role, displayPresetId)
@@ -682,7 +703,7 @@ function EditModeManager:ApplyLayout(role, displayPresetId)
     -- it calls EnsureLayouts itself, and that write would otherwise be refused.
     self:BeginUserWrite()
 
-    local ensureOk = self:EnsureLayouts(displayPresetId)
+    local ensureOk = self:EnsureLayouts(displayPresetId, forceRebuild)
     if not ensureOk then
         self:EndUserWrite()
         return false

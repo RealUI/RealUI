@@ -924,6 +924,18 @@ end
 -- Utility: DeepCopy
 -- Recursively clones a table. Handles nested tables.
 ---------------------------------------------------------------------------
+--- Removes every entry for one EditMode system from a built layout, so
+-- Blizzard keeps that system at its own defaults -- the same way the 12.1
+-- systems that have no entry in the template do.
+function Templates.StripSystem(layout, system)
+    for i = #layout, 1, -1 do
+        if layout[i].system == system then
+            table.remove(layout, i)
+        end
+    end
+end
+Templates.SYSTEM_ACTION_BAR = SYSTEM_ACTION_BAR
+
 function Templates.DeepCopy(orig)
     if type(orig) ~= "table" then
         return orig
