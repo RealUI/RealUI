@@ -42,7 +42,11 @@ local ChannelingTicks = {}
 do
     local spellNotFound = "The spell for ID %d no longer exists."
     local function RegisterSpellName(spellID, numticks, isInstant)
-        assert(_G.C_Spell.GetSpellInfo(spellID), spellNotFound:format(spellID))
+        local known = _G.C_Spell.GetSpellInfo(spellID)
+        -- Forever ships the original spell set, so a retail-only ID is not
+        -- a stale entry there, just a channel this client cannot cast.
+        if not known and RealUI.isForever then return end
+        assert(known, spellNotFound:format(spellID))
 
         ChannelingTicks[spellID] = {
             ticks = numticks,
