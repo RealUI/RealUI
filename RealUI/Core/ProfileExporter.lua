@@ -141,15 +141,24 @@ local function GetScopeProfileData(scope)
             return skinsDB.profile
         end
     elseif scope == PC.SCOPE_ACTIONBARS then
-        -- RealUI_ActionBars root profile: bindings + shared settings. Per-bar
-        -- data lives in AceDB NAMESPACES and is not exported — same depth the
-        -- old Bartender4 branch had (its bar data was namespaced too), so
-        -- imports stay compatible. Namespace export is a possible future
-        -- enhancement, not a regression.
+        -- RealUI_ActionBars root profile (bindings + shared settings) plus
+        -- its AceDB NAMESPACES under `__namespaces`: the per-bar layout lives
+        -- there, and without it an import restores keybinds but every bar
+        -- snaps back to its default place (found 2026-09-22 on Forever, where
+        -- a code-held export is the only persistence). Old exports without
+        -- the key still import; the import side just skips the namespaces.
         local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
         local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
         if rab and rab.db then
-            return rab.db.profile
+            local data = {}
+            for k, v in pairs(rab.db.profile) do
+                data[k] = v
+            end
+            data.__namespaces = {}
+            for name, ns in pairs(rab.db.children or {}) do
+                data.__namespaces[name] = ns.profile
+            end
+            return data
         end
         -- Fallback: read from the raw saved variable
         local sv = _G.RealUI_ActionBarsDB
@@ -448,7 +457,27 @@ function ProfileExporter:Import(encodedString, profileName)
                     local target = profileName or rab.db:GetCurrentProfile()
                     rab.db:SetProfile(target)
                     for k, v in pairs(scopeData) do
-                        rab.db.profile[k] = DeepCopy(v)
+                        if k ~= "__namespaces" then
+                            rab.db.profile[k] = DeepCopy(v)
+                        end
+                    end
+                    -- Per-bar layout (see GetScopeProfileData). GetNamespace
+                    -- with `silent` returns nil for a name this build no
+                    -- longer registers, which is the right thing to skip.
+                    if type(scopeData.__namespaces) == "table" then
+                        for name, nsData in pairs(scopeData.__namespaces) do
+                            local ns = rab.db:GetNamespace(name, true)
+                            if ns and type(nsData) == "table" then
+                                for k, v in pairs(nsData) do
+                                    ns.profile[k] = DeepCopy(v)
+                                end
+                            end
+                        end
+                    end
+                    -- The SetProfile callback ran before the data landed;
+                    -- rebuild the bars from what was just written.
+                    if rab.OnProfileUpdate then
+                        rab:OnProfileUpdate()
                     end
                     importedScopes[#importedScopes + 1] = scope
                 end
