@@ -401,15 +401,22 @@ Skin.UIPanelCloseButton(RealUILootFrame.close)
 RealUILootFrame.close:SetPoint("TOPRIGHT", RealUILootFrame, "TOPRIGHT", 8, 20)
 RealUILootFrame.slots = {}
 
+-- Slot types by enum, as Blizzard's own LootFrame checks them. The legacy
+-- LOOT_SLOT_ITEM / LOOT_SLOT_CURRENCY globals are client-provided and WoW
+-- Forever's client does not expose them, so a comparison against them was
+-- nil == number and the tooltip never showed there (found 2026-09-22).
+local SLOT_ITEM = _G.Enum.LootSlotType and _G.Enum.LootSlotType.Item or _G.LOOT_SLOT_ITEM
+local SLOT_CURRENCY = _G.Enum.LootSlotType and _G.Enum.LootSlotType.Currency or _G.LOOT_SLOT_CURRENCY
+
 local function LootOnEnter(self)
     local slot = self:GetID()
     local slotType = _G.GetLootSlotType(slot)
-    if slotType == _G.LOOT_SLOT_ITEM then
+    if slotType == SLOT_ITEM then
         _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         _G.GameTooltip:SetLootItem(slot)
         _G.CursorUpdate(self)
     end
-    if slotType == _G.LOOT_SLOT_CURRENCY then
+    if slotType == SLOT_CURRENCY then
         _G.GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
         _G.GameTooltip:SetLootCurrency(slot);
         _G.CursorUpdate(self);
