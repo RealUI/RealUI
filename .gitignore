@@ -4,6 +4,7 @@
 *.ini
 
 RealUI_Skins/Aurora
+RealUI_Dev/local/
 
 ## IntelliJ ##
 *.iws
