@@ -940,25 +940,48 @@ end
 -- whatever the previously active layout left it with (seen 2026-09-22 on
 -- Forever, where the main bar stayed hidden after the entries were dropped),
 -- so "leave it to Blizzard" has to be written out explicitly.
+-- Map shape: indexed systems nest `[systemIndex] = { settings, anchorInfo }`;
+-- singletons (MicroMenu, Bags) hold `{ settings, anchorInfo }` directly.
 -- @return boolean  true if the map was available and entries were added
+local function AppendPresetEntry(layout, system, systemIndex, info)
+    local settings = {}
+    for setting, value in pairs(info.settings or {}) do
+        settings[#settings + 1] = { setting = setting, value = value }
+    end
+    local a = info.anchorInfo or {}
+    layout[#layout + 1] = Entry(system, systemIndex,
+        Anchor(a.point, a.relativeTo, a.relativePoint, a.offsetX, a.offsetY),
+        settings, true)
+end
 function Templates.AppendBlizzardDefaults(layout, system)
     local map = _G.EDIT_MODE_MODERN_SYSTEM_MAP
     local entries = map and map[system]
     if not entries then
         return false
     end
-    for systemIndex, info in pairs(entries) do
-        local settings = {}
-        for setting, value in pairs(info.settings or {}) do
-            settings[#settings + 1] = { setting = setting, value = value }
+    if entries.anchorInfo or entries.settings then
+        AppendPresetEntry(layout, system, nil, entries)
+    else
+        for systemIndex, info in pairs(entries) do
+            AppendPresetEntry(layout, system, systemIndex, info)
         end
-        local a = info.anchorInfo or {}
-        layout[#layout + 1] = Entry(system, systemIndex,
-            Anchor(a.point, a.relativeTo, a.relativePoint, a.offsetX, a.offsetY),
-            settings, true)
     end
     return true
 end
+
+--- The systems RealUI_ActionBars replaces or parks, and that Blizzard anchors
+-- to one another: on Camelot the main bar hangs off MicroMenuContainer, the
+-- bags off the micro menu, the end caps off the main bar. Handing only the
+-- action bars back to Blizzard leaves them anchored to frames RealUI moved,
+-- which is how the main bar ended up at the top of the screen, mirrored, on
+-- Forever (2026-09-22). The cluster goes back as a whole or not at all.
+Templates.BLIZZARD_BAR_CLUSTER = {
+    SYSTEM_ACTION_BAR,
+    SYSTEM_MICRO_MENU,
+    SYSTEM_BAGS,
+    SYSTEM_STATUS_TRACKING,
+    26, -- MainActionBarEndCap (12.1); no template entry, but the map has one
+}
 Templates.SYSTEM_ACTION_BAR = SYSTEM_ACTION_BAR
 
 function Templates.DeepCopy(orig)

@@ -445,14 +445,18 @@ function EditModeManager:BuildLayout(role, displayPresetId)
     -- 1. Deep copy base template
     local layout = Templates.DeepCopy(Templates.base)
 
-    -- 1b. Blizzard's action bars stay Blizzard's unless RealUI replaces them.
+    -- 1b. Blizzard's bar cluster stays Blizzard's unless RealUI replaces it.
     -- Written out as Blizzard's Modern defaults, not merely omitted: EditMode
-    -- leaves an omitted system exactly as the previous layout had it.
+    -- leaves an omitted system exactly as the previous layout had it. The
+    -- whole cluster (bars, micro menu, bags, status bars, end caps) goes
+    -- together because Blizzard anchors those systems to one another.
     if not RealUIActionBarsActive() then
-        debug("RealUI_ActionBars not active; action bars take Blizzard's Modern defaults")
-        Templates.StripSystem(layout, Templates.SYSTEM_ACTION_BAR)
-        if not Templates.AppendBlizzardDefaults(layout, Templates.SYSTEM_ACTION_BAR) then
-            debug("WARNING: EDIT_MODE_MODERN_SYSTEM_MAP unavailable; action bars left unmanaged")
+        debug("RealUI_ActionBars not active; bar cluster takes Blizzard's Modern defaults")
+        for _, system in ipairs(Templates.BLIZZARD_BAR_CLUSTER) do
+            Templates.StripSystem(layout, system)
+            if not Templates.AppendBlizzardDefaults(layout, system) then
+                debug("WARNING: no Modern preset entry for system", system, "- left unmanaged")
+            end
         end
     end
 
