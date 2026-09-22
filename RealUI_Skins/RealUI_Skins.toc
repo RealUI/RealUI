@@ -1,4 +1,4 @@
-## Interface: 120100
+## Interface: 120100, 16001
 ## Title: RealUI Skins
 ## Category: RealUI_Core
 ## Notes: Blizzard Interface Skin
@@ -11,6 +11,13 @@
 ## SavedVariables: RealUI_SkinsDB
 
 Libs\Libs.xml
+# Aurora's skin manifest per flavor. Forever (1.60.x, game type "camelot")
+# also matches this TOC, so the two are split with load directives instead
+# of separate TOCs; the Exclude on the Forever line is for clients that do
+# not know the camelot token and treat an unknown AllowLoadGameType as a
+# match. Same recipe as Aurora_Mainline.toc.
+Libs\Aurora_Mainline.xml [AllowLoadGameType standard]
+Libs\Aurora_Forever.xml [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
 
 Misc.lua
 Locale.lua

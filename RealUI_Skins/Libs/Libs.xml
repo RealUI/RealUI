@@ -1,13 +1,14 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
-    <!-- Aurora -->
+    <!-- Aurora. The per-flavor skin manifest (AddOns_Mainline.xml or
+         AddOns_Forever.xml) is NOT included here: RealUI_Skins.toc selects
+         Libs\Aurora_Mainline.xml or Libs\Aurora_Forever.xml with a load
+         directive, and directives only work at TOC level. -->
     <!--@non-debug@
     <Include file="..\Aurora\Skin\skin.xml"/>
-    <Include file="..\Aurora\Skin\Interface\AddOns\AddOns_Mainline.xml"/>
     @end-non-debug@-->
     <!--@debug@-->
     <Include file="..\..\Aurora\Skin\skin.xml"/>
-    <Include file="..\..\Aurora\Skin\Interface\AddOns\AddOns_Mainline.xml"/>
     <!--@end-debug@-->
 
 

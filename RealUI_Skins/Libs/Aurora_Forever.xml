@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
+    <!-- Aurora skin manifest for WoW Forever (game type "camelot"). Selected from RealUI_Skins.toc by a
+         load directive; directives do not work inside XML, which is why the
+         manifest include lives in its own file per flavor. The shared part of
+         Aurora (Skin\skin.xml) is included from Libs.xml. -->
+    <!--@non-debug@
+    <Include file="..\Aurora\Skin\Interface\AddOns\AddOns_Forever.xml"/>
+    @end-non-debug@-->
+    <!--@debug@-->
+    <Include file="..\..\Aurora\Skin\Interface\AddOns\AddOns_Forever.xml"/>
+    <!--@end-debug@-->
+</Ui>
