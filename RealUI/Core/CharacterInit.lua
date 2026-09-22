@@ -15,7 +15,7 @@ RealUI.CharacterInit = CharacterInit
 
 -- Get player role based on specialization
 local function GetPlayerRole()
-    local spec = _G.GetSpecialization()
+    local spec = _G.C_SpecializationInfo.GetSpecialization()
     if not spec then
         return "DPS" -- Default to DPS if no spec
     end
@@ -202,8 +202,8 @@ end
 
 -- Get character information
 function CharacterInit:GetCharacterInfo()
-    local name = _G.UnitName("player")
-    local realm = _G.GetRealmName()
+    local name = RealUI.charInfo.name
+    local realm = RealUI.charInfo.realm -- ruleset name on Forever (Init.lua)
     local class = _G.UnitClass("player")
     local role = GetPlayerRole()
     local level = _G.UnitLevel("player")

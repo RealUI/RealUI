@@ -521,8 +521,8 @@ function RealUI:ChatCommand_Config(input)
                 return
             end
             local classID = select(3, UnitClass("player"))
-            local specIndex = GetSpecialization()
-            local presetStr = AurasAddon.Presets and AurasAddon.Presets[classID * 10 + specIndex]
+            local specIndex = _G.C_SpecializationInfo.GetSpecialization()
+            local presetStr = specIndex and AurasAddon.Presets and AurasAddon.Presets[classID * 10 + specIndex]
             if not presetStr then
                 print("|cff0099ffRealUI|r: No cooldown preset found for your specialization.")
                 return
@@ -902,8 +902,9 @@ function RealUI:ResetCharacter()
 
     -- The sibling addon DBs. Reached through the saved variable rather than
     -- the live AceDB object so this works whether or not the addon is loaded;
-    -- `char` is keyed by "Name - Realm" and only this character's entry goes.
-    local charKey = _G.UnitName("player") .. " - " .. _G.GetRealmName()
+    -- `char` is keyed by AceDB's charKey, which RealUI.key mirrors (Init.lua),
+    -- and only this character's entry goes.
+    local charKey = self.key
     for _, svName in next, RESET_CHAR_DATABASES do
         local sv = _G[svName]
         if type(sv) == "table" and type(sv.char) == "table" and sv.char[charKey] then
@@ -1204,8 +1205,7 @@ function RealUI:OnInitialize()
     dbg = self.db.global
     self.media = db.media
 
-    -- Character identification
-    self.key = ("%s - %s"):format(self.charInfo.name, self.charInfo.realm)
+    -- self.key is set in Init.lua alongside charInfo.
     self.cLayout = dbc.layout.current
     self.ncLayout = self.cLayout == 1 and 2 or 1
 

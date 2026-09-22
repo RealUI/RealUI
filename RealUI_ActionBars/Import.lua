@@ -110,8 +110,10 @@ function private.ImportFromBartender4(manual, deferApply)
     end
 
     -- Prefer this character's BT4 profile; fall back to the RealUI defaults.
-    local charKey = _G.UnitName("player") .. " - " .. _G.GetRealmName()
-    local profileName = (bt4db.profileKeys and bt4db.profileKeys[charKey])
+    -- BT4's profileKeys are indexed by AceDB's charKey, which RealUI.key
+    -- mirrors (Forever has no realm name to build one from here).
+    local charKey = _G.RealUI and _G.RealUI.key
+    local profileName = (charKey and bt4db.profileKeys and bt4db.profileKeys[charKey])
         or "RealUI"
     local profiles = bt4db.namespaces.ActionBars.profiles
     local source = profiles and (profiles[profileName] or profiles["RealUI"])

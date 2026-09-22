@@ -60,9 +60,8 @@ function RealUI:SetProfileKeys()
         end
     end
 
-    -- Refresh Key
-    self.key = ("%s - %s"):format(_G.UnitName("player"), _G.GetRealmName())
-
+    -- self.key (Init.lua) mirrors AceDB's charKey, which is what
+    -- `profileKeys` in the sibling addon DBs is indexed by.
     for addon, data in next, RealUIAddOns do
         if db.addonControl[addon].profiles.base.use then
             -- Set Addon profiles

@@ -39,15 +39,49 @@ private.RealUI = _G.LibStub("AceAddon-3.0"):NewAddon(_G.RealUI, ADDON_NAME, "Ace
 local RealUI = private.RealUI
 
 -- Version and Build Detection
-RealUI.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE
-RealUI.isMidnight = RealUI.isRetail and select(4, _G.GetBuildInfo()) >= 120000
-RealUI.isBetaBuild = RealUI.isRetail and select(4, _G.GetBuildInfo()) == 130000
-RealUI.isDragonflight = select(4, _G.GetBuildInfo()) >= 100002 or select(4, _G.GetBuildInfo()) <= 110000
+local interfaceVersion = select(4, _G.GetBuildInfo())
+-- WoW Forever (1.60.x, Blizzard codename Camelot) reports a 1.x interface
+-- number (16000-19999) but runs the Mainline UI architecture: WOW_PROJECT_ID
+-- is WOW_PROJECT_MAINLINE there, so isRetail is true on Forever and is never
+-- a sufficient gate on its own. Gate Forever-specific behaviour on isForever.
+RealUI.isForever = interfaceVersion >= 16000 and interfaceVersion < 20000
+RealUI.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE or RealUI.isForever
+RealUI.isMidnight = RealUI.isRetail and interfaceVersion >= 120000
+RealUI.isBetaBuild = RealUI.isRetail and interfaceVersion == 130000
+-- Forever's UI is 12.1-derived but reports interface 16001, so isMidnight is
+-- false there. Gate "the 12.x code path exists" on isTwelveAPI; keep
+-- isMidnight for Midnight content that Forever does not have.
+RealUI.isTwelveAPI = RealUI.isMidnight or RealUI.isForever
+RealUI.isDragonflight = interfaceVersion >= 100002 or interfaceVersion <= 110000
 
 -- Realm Information Management
+-- Forever has no realms: GetRealmName() returns nothing and
+-- GetNormalizedRealmName() never arrives. AceDB-3.0 substitutes the active
+-- ruleset ("Hardcore", "RP", "PvP", "PvE") for the realm in its character
+-- key there, and RealUI.key is used to index AceDB's own profileKeys/char
+-- tables in the sibling addon DBs, so the realm used here must be
+-- byte-identical to AceDB's. Keep this in step with the
+-- `version > 16000 and version < 20000` block in AceDB-3.0.lua.
+local function GetRealmKey()
+    if not RealUI.isForever then
+        return _G.GetRealmName()
+    end
+
+    local rules = _G.Enum.GameRule
+    local IsGameRuleActive = _G.C_GameRules.IsGameRuleActive
+    if IsGameRuleActive(rules.HardcoreRuleset) then
+        return "Hardcore"
+    elseif IsGameRuleActive(rules.RPRuleset) then
+        return "RP"
+    elseif IsGameRuleActive(rules.PvPRuleset) then
+        return "PvP"
+    end
+    return "PvE"
+end
+
 RealUI.realmInfo = {
-    realm = _G.GetRealmName(),
-    connectedRealms = _G.GetAutoCompleteRealms(),
+    realm = GetRealmKey(),
+    connectedRealms = _G.GetAutoCompleteRealms() or {},
     id = _G.GetRealmID(),
 }
 
@@ -57,7 +91,13 @@ end
 
 -- Realm Normalization Handler
 local function CheckforRealm()
-    RealUI.realmInfo.realmNormalized = _G.GetNormalizedRealmName()
+    if RealUI.isForever then
+        -- The ruleset word has no spaces or punctuation, so it is already
+        -- normalized; the poll below would otherwise never end.
+        RealUI.realmInfo.realmNormalized = RealUI.realmInfo.realm
+    else
+        RealUI.realmInfo.realmNormalized = _G.GetNormalizedRealmName()
+    end
     if RealUI.realmInfo.realmNormalized then
         if not RealUI.realmInfo.isConnected then
             RealUI.realmInfo.connectedRealms[1] = RealUI.realmInfo.realmNormalized
@@ -111,6 +151,12 @@ for specIndex = 1, _G.C_SpecializationInfo.GetNumSpecializationsForClassID(class
         RealUI.charInfo.specs.current = RealUI.charInfo.specs[specIndex]
     end
 end
+
+-- Character key. This is the only place it is built: it must match the
+-- charKey AceDB-3.0 derives for this character (see GetRealmKey above)
+-- because ProfileCoordinator, ProfileExporter, AddonControl and the reset
+-- path all use it to index AceDB's profileKeys/char tables directly.
+RealUI.key = ("%s - %s"):format(RealUI.charInfo.name, RealUI.charInfo.realm)
 
 -- Addon Compatibility Management
 -- Disable cargBags if RealUI_Inventory is enabled
