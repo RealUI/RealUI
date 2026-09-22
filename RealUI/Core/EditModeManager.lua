@@ -132,13 +132,27 @@ end
 -- Internal Helpers
 ---------------------------------------------------------------------------
 
---- Number of built-in preset layouts (Modern, Classic). The
--- C_EditMode.SetActiveLayout(index) API uses an index into the combined
--- list [presets..., saved...], but C_EditMode.GetLayouts() returns the
--- saved layouts only (without presets). So to convert an index inside
--- data.layouts (saved) into the index SetActiveLayout expects, add this
--- offset.
-local NUM_PRESET_LAYOUTS = 2
+--- Number of built-in preset layouts. The C_EditMode.SetActiveLayout(index)
+-- API uses an index into the combined list [presets..., saved...], but
+-- C_EditMode.GetLayouts() returns the saved layouts only (without presets).
+-- So to convert an index inside data.layouts (saved) into the index
+-- SetActiveLayout expects, add this offset.
+--
+-- Read from Blizzard's preset manager, never assumed: retail ships two
+-- (Modern, Classic) but WoW Forever ships a third (Gamepad), and with a
+-- hard-coded 2 every activation there landed one slot early — on the Gamepad
+-- preset, whose system list has no MainActionBar, so EditMode hid the main
+-- bar as "not supported by the active layout" (found 2026-09-22 with a probe;
+-- RealUI's own layout was never actually active on Forever until then).
+local numPresetLayouts
+local function NumPresetLayouts()
+    if not numPresetLayouts then
+        local mgr = _G.EditModePresetLayoutManager
+        local presets = mgr and mgr.GetCopyOfPresetLayouts and mgr:GetCopyOfPresetLayouts()
+        numPresetLayouts = (presets and #presets > 0) and #presets or 2
+    end
+    return numPresetLayouts
+end
 
 --- Finds the array index of a named layout within data.layouts
 -- (saved-only array returned by C_EditMode.GetLayouts()).
@@ -320,7 +334,7 @@ end
 --
 -- data.activeLayout is an index into the combined [presets..., saved...]
 -- list, while data.layouts contains saved layouts only. To map between
--- them, subtract NUM_PRESET_LAYOUTS.
+-- them, subtract the preset count.
 --
 -- @param data table  The data returned by C_EditMode.GetLayouts()
 -- @return number|nil  Index into data.layouts of the active layout if it
@@ -330,7 +344,7 @@ function EditModeManager:GetActiveRealUILayoutIndex(data)
         return nil
     end
 
-    local savedIndex = data.activeLayout - NUM_PRESET_LAYOUTS
+    local savedIndex = data.activeLayout - NumPresetLayouts()
     if savedIndex < 1 then
         -- Active layout is a built-in preset, not a saved layout
         return nil
@@ -672,7 +686,7 @@ function EditModeManager:ActivateLayout(role)
         return false
     end
 
-    local absoluteIndex = NUM_PRESET_LAYOUTS + idx
+    local absoluteIndex = NumPresetLayouts() + idx
     local activateOk, activateErr = pcall(C_EditMode.SetActiveLayout, absoluteIndex)
     if not activateOk then
         debug("ERROR: C_EditMode.SetActiveLayout() failed:", activateErr)
@@ -1080,10 +1094,10 @@ function EditModeManager:MigrateFromPreEditMode()
     local ok, data = pcall(C_EditMode.GetLayouts)
     if ok and data then
         -- data.activeLayout is an index into the combined [presets, saved]
-        -- list, so any value <= NUM_PRESET_LAYOUTS means a preset is active.
-        -- Values > NUM_PRESET_LAYOUTS index into data.layouts (saved-only).
+        -- list, so any value <= the preset count means a preset is active.
+        -- Larger values index into data.layouts (saved-only).
         local activeIdx = data.activeLayout
-        local currentIsBuiltIn = activeIdx and activeIdx <= NUM_PRESET_LAYOUTS
+        local currentIsBuiltIn = activeIdx and activeIdx <= NumPresetLayouts()
 
         if currentIsBuiltIn then
             -- Scope spans this too: ActivateLayout falls back to EnsureLayouts
