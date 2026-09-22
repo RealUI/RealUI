@@ -59,7 +59,26 @@ function AB:OnInitialize()
     end
 end
 
+-- WoW Forever 1.60.1 (69913) ships a Blizzard load-order bug: the
+-- Blizzard_EnvironmentCleanup TOC tags its dependency on
+-- Blizzard_RestrictedAddOnEnvironment `[AllowLoadGameType classic, standard]`,
+-- without camelot, so on Forever the LoadFirst cleanup can nil the client's
+-- `loadstring_untainted` before RestrictedExecution.lua captures it. Every
+-- secure snippet then dies with "attempt to call a nil value"
+-- (RestrictedExecution.lua:79) and LibActionButton cannot build one button.
+-- Probe once out of combat; standing down beats eight errors and empty bars.
+local function SecureSnippetsWork()
+    local probe = _G.CreateFrame("Frame", nil, nil, "SecureHandlerBaseTemplate")
+    return _G.pcall(_G.SecureHandlerExecute, probe, "")
+end
+
 function AB:OnEnable()
+    if not SecureSnippetsWork() then
+        _G.print("|cff30d0ffRealUI ActionBars|r: disabled — this client cannot run secure handler snippets (a Blizzard load-order bug on the WoW Forever beta), so no action bar addon can build buttons. Blizzard's bars are left in place.")
+        self:Disable()
+        return
+    end
+
     -- Bartender4 coexistence stand-down (same pattern as RealUI_Nameplates vs
     -- Platynator): RealUI 4.0 removed BT4 support entirely, but a user-installed
     -- BT4 would otherwise double up the bars — so we yield rather than fight.
