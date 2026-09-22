@@ -2010,6 +2010,24 @@ local function SetUpMinimapFrame()
         end
     end
 
+    -- WoW Forever: Camelot's day/night indicator (Blizzard_Minimap\Camelot\
+    -- Diel.lua) is a plain frame parented to MinimapCluster and anchored by
+    -- CENTER offsets, so once RealUI moves the Minimap it is left behind in
+    -- the screen corner. Re-home it as a small badge on our minimap. Blizzard's
+    -- SetEditModeScale override re-anchors it with a CENTER point on every
+    -- layout apply, which would stack a second point on ours; re-assert after.
+    local dielFrame = _G.MinimapCluster.DielFrame
+    if dielFrame then
+        local function PlaceDielFrame()
+            dielFrame:SetParent(_G.Minimap)
+            dielFrame:SetScale(0.45)
+            dielFrame:ClearAllPoints()
+            dielFrame:SetPoint("TOPLEFT", _G.Minimap, "TOPLEFT", 2, -2)
+        end
+        PlaceDielFrame()
+        _G.hooksecurefunc(_G.MinimapCluster, "SetEditModeScale", PlaceDielFrame)
+    end
+
     local queueStatusButton = _G.QueueStatusButton
     if queueStatusButton then
         MinimapAdv:UpdateQueueStatusPosition()
