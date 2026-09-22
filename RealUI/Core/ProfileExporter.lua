@@ -129,36 +129,71 @@ end
 
 --- Read the active profile data table for a given scope.
 --- Returns the raw profile data table (not a copy).
+--- A database's active profile plus every registered namespace's active
+-- profile under `__namespaces`. Module settings live in namespaces on all
+-- three scopes — 22 RealUI core modules (the bar arrangement among them),
+-- RealUI_ActionBars' per-bar layout, Skins' sub-tables — and an export that
+-- carried only the root profile restored keybinds and colours while every
+-- module went back to defaults (found 2026-09-22 on Forever, where a
+-- code-held export is the only persistence). Old exports without the key
+-- still import; the namespaces are simply not there to apply.
+local function ProfileWithNamespaces(db)
+    local data = {}
+    for k, v in pairs(db.profile) do
+        data[k] = v
+    end
+    if db.children then
+        data.__namespaces = {}
+        for name, ns in pairs(db.children) do
+            data.__namespaces[name] = ns.profile
+        end
+    end
+    return data
+end
+
+--- Inverse of ProfileWithNamespaces onto the database's current profile.
+-- GetNamespace with `silent` returns nil for a name this build no longer
+-- registers, which is the right thing to skip.
+local function ApplyProfileWithNamespaces(db, scopeData)
+    for k, v in pairs(scopeData) do
+        if k ~= "__namespaces" then
+            db.profile[k] = DeepCopy(v)
+        end
+    end
+    if type(scopeData.__namespaces) == "table" then
+        for name, nsData in pairs(scopeData.__namespaces) do
+            local ns = db:GetNamespace(name, true)
+            if ns and type(nsData) == "table" then
+                for k, v in pairs(nsData) do
+                    ns.profile[k] = DeepCopy(v)
+                end
+            end
+        end
+    end
+    -- SetProfile fired the callbacks before the data landed; fire them again
+    -- now so every module rebuilds from what was just written, in the same
+    -- order a real profile switch uses.
+    if db.callbacks and db.callbacks.Fire then
+        db.callbacks:Fire("OnProfileChanged", db, db:GetCurrentProfile())
+    end
+end
+
 local function GetScopeProfileData(scope)
     local PC = RealUI.ProfileCoordinator
     if scope == PC.SCOPE_CORE then
         if RealUI.db then
-            return RealUI.db.profile
+            return ProfileWithNamespaces(RealUI.db)
         end
     elseif scope == PC.SCOPE_SKINS then
         local skinsDB = GetSkinsDB()
         if skinsDB then
-            return skinsDB.profile
+            return ProfileWithNamespaces(skinsDB)
         end
     elseif scope == PC.SCOPE_ACTIONBARS then
-        -- RealUI_ActionBars root profile (bindings + shared settings) plus
-        -- its AceDB NAMESPACES under `__namespaces`: the per-bar layout lives
-        -- there, and without it an import restores keybinds but every bar
-        -- snaps back to its default place (found 2026-09-22 on Forever, where
-        -- a code-held export is the only persistence). Old exports without
-        -- the key still import; the import side just skips the namespaces.
         local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
         local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
         if rab and rab.db then
-            local data = {}
-            for k, v in pairs(rab.db.profile) do
-                data[k] = v
-            end
-            data.__namespaces = {}
-            for name, ns in pairs(rab.db.children or {}) do
-                data.__namespaces[name] = ns.profile
-            end
-            return data
+            return ProfileWithNamespaces(rab.db)
         end
         -- Fallback: read from the raw saved variable
         local sv = _G.RealUI_ActionBarsDB
@@ -430,10 +465,7 @@ function ProfileExporter:Import(encodedString, profileName)
                     -- Switch to target profile (creates it if needed)
                     local target = profileName or RealUI.db:GetCurrentProfile()
                     RealUI.db:SetProfile(target)
-                    -- Overwrite profile data
-                    for k, v in pairs(scopeData) do
-                        RealUI.db.profile[k] = DeepCopy(v)
-                    end
+                    ApplyProfileWithNamespaces(RealUI.db, scopeData)
                     importedScopes[#importedScopes + 1] = scope
                 end
             elseif scope == PC.SCOPE_SKINS then
@@ -441,9 +473,7 @@ function ProfileExporter:Import(encodedString, profileName)
                 if skinsDB then
                     local target = profileName or skinsDB:GetCurrentProfile()
                     skinsDB:SetProfile(target)
-                    for k, v in pairs(scopeData) do
-                        skinsDB.profile[k] = DeepCopy(v)
-                    end
+                    ApplyProfileWithNamespaces(skinsDB, scopeData)
                     importedScopes[#importedScopes + 1] = scope
                 end
             elseif scope == PC.SCOPE_ACTIONBARS then
@@ -456,29 +486,7 @@ function ProfileExporter:Import(encodedString, profileName)
                 if rab and rab.db then
                     local target = profileName or rab.db:GetCurrentProfile()
                     rab.db:SetProfile(target)
-                    for k, v in pairs(scopeData) do
-                        if k ~= "__namespaces" then
-                            rab.db.profile[k] = DeepCopy(v)
-                        end
-                    end
-                    -- Per-bar layout (see GetScopeProfileData). GetNamespace
-                    -- with `silent` returns nil for a name this build no
-                    -- longer registers, which is the right thing to skip.
-                    if type(scopeData.__namespaces) == "table" then
-                        for name, nsData in pairs(scopeData.__namespaces) do
-                            local ns = rab.db:GetNamespace(name, true)
-                            if ns and type(nsData) == "table" then
-                                for k, v in pairs(nsData) do
-                                    ns.profile[k] = DeepCopy(v)
-                                end
-                            end
-                        end
-                    end
-                    -- The SetProfile callback ran before the data landed;
-                    -- rebuild the bars from what was just written.
-                    if rab.OnProfileUpdate then
-                        rab:OnProfileUpdate()
-                    end
+                    ApplyProfileWithNamespaces(rab.db, scopeData)
                     importedScopes[#importedScopes + 1] = scope
                 end
             end
