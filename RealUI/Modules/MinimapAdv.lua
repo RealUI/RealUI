@@ -344,6 +344,10 @@ end
 
 local garrisonTypeSL = _G.Enum.GarrisonType["Type_9_0_Garrison"]
 local function UpdateGarrisonButton(isTop, isLeft)
+    -- Blizzard_ExpansionLandingPage is standard-only; no button on WoW Forever.
+    local button = _G.ExpansionLandingPageMinimapButton
+    if not button then return end
+
     local garrisonType = _G.C_Garrison.GetLandingPageGarrisonType()
 
     local x, y = 2, 2
@@ -365,8 +369,8 @@ local function UpdateGarrisonButton(isTop, isLeft)
         point = point .. "LEFT"
     end
 
-    _G.ExpansionLandingPageMinimapButton:ClearAllPoints()
-    _G.ExpansionLandingPageMinimapButton:SetPoint(point, x, y)
+    button:ClearAllPoints()
+    button:SetPoint(point, x, y)
 end
 
 -- Keep the LFG eye docked to the Minimap's inner corner (the corner facing
