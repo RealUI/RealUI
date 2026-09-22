@@ -2015,9 +2015,13 @@ local function SetUpMinimapFrame()
         MinimapAdv:UpdateQueueStatusPosition()
         -- Blizzard's MicroMenu (EditMode-managed) calls UpdatePosition to pull
         -- the eye back to the micro menu; re-assert our minimap attachment.
-        _G.hooksecurefunc(queueStatusButton, "UpdatePosition", function()
-            MinimapAdv:UpdateQueueStatusPosition()
-        end)
+        -- Camelot's QueueStatusFrameOverrides has no UpdatePosition on the
+        -- button (it moves QueueStatusFrame instead), so only hook when present.
+        if queueStatusButton.UpdatePosition then
+            _G.hooksecurefunc(queueStatusButton, "UpdatePosition", function()
+                MinimapAdv:UpdateQueueStatusPosition()
+            end)
+        end
     end
 
     -- _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
