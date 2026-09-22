@@ -38,30 +38,64 @@ function private.SecureSnippetsBroken()
     return isForever and BROKEN_SECURE_SNIPPET_BUILDS[build] == true
 end
 
--- LAB wraps every button's OnClick with a secure pre-snippet (flyout
--- handling). Here that wrapper fails to compile on every click and aborts it
--- before SecureActionButton_OnClick ever runs — measured 2026-09-22: the
--- attributes were right and a bare SecureActionButtonTemplate cast, but
--- `/click` on a LAB button did nothing. UnwrapScript compiles nothing; taking
--- the wrapper off restores the template's own click. The OnDragStart and
--- OnReceiveDrag wrappers are left in place, so dragging onto the bars stays
--- dead, like flyouts. LAB only re-wraps in NewHeader, which RealUI never
+-- LAB wraps every button's OnClick, OnDragStart and OnReceiveDrag with secure
+-- pre-snippets. Here each wrapper fails to compile on use and aborts the
+-- event before anything else runs — measured 2026-09-22: the attributes were
+-- right and a bare SecureActionButtonTemplate cast, but `/click` on a LAB
+-- button did nothing, and shift-drag moved nothing. UnwrapScript compiles
+-- nothing; taking the wrappers off restores the template's own click. The
+-- drag scripts have nothing underneath (LAB nils them and drives drag purely
+-- from snippets), so plain Lua handlers go in that mirror the snippets' rules
+-- for action-type buttons, which is all RealUI's bars are: pickup honours the
+-- bar lock plus the PICKUPACTION modifier, drop is PlaceAction, both out of
+-- combat only. Left dead: dropping by click (LAB's PostClick runs that through
+-- the header) and flyouts. LAB only re-wraps in NewHeader, which RealUI never
 -- calls after creation, so once per button is enough.
+local function Unwrap(header, button, script)
+    for _ = 1, 4 do
+        local ok, wrapper = _G.pcall(header.UnwrapScript, header, button, script)
+        if not ok or not wrapper then break end
+    end
+end
+
+local function OnDragStart(button)
+    if _G.InCombatLockdown() then return end
+    if button:GetAttribute("buttonlock") and not _G.IsModifiedClick("PICKUPACTION") then return end
+    if button:GetAttribute("LABdisableDragNDrop") then return end
+    if button:GetAttribute("type") ~= "action" then return end
+    local action = button:GetAttribute("action")
+    if action then
+        _G.PickupAction(action)
+    end
+end
+
+local function OnReceiveDrag(button)
+    if _G.InCombatLockdown() then return end
+    if button:GetAttribute("LABdisableDragNDrop") then return end
+    if button:GetAttribute("type") ~= "action" then return end
+    if not _G.GetCursorInfo() then return end
+    local action = button:GetAttribute("action")
+    if action then
+        _G.PlaceAction(action)
+    end
+end
+
 local unwrapped = _G.setmetatable({}, { __mode = "k" })
-local function UnwrapClick(button)
+local function UnwrapButton(button)
     if unwrapped[button] then return end
     local header = button.header
     if not (header and header.UnwrapScript) then return end
-    for _ = 1, 4 do
-        local ok, wrapper = _G.pcall(header.UnwrapScript, header, button, "OnClick")
-        if not ok or not wrapper then break end
-    end
+    Unwrap(header, button, "OnClick")
+    Unwrap(header, button, "OnDragStart")
+    Unwrap(header, button, "OnReceiveDrag")
+    button:SetScript("OnDragStart", OnDragStart)
+    button:SetScript("OnReceiveDrag", OnReceiveDrag)
     unwrapped[button] = true
 end
 
 -- Mirror of LAB's `UpdateState` snippet for one button and state.
 local function ApplyButtonState(button, state)
-    UnwrapClick(button)
+    UnwrapButton(button)
     state = _G.tostring(state)
     button:SetAttribute("state", state)
     local kind = button:GetAttribute("labtype-" .. state) or "empty"
@@ -118,30 +152,40 @@ local function ApplyAll()
     end
 end
 
-local hooked = false
+-- The drivers keep writing `state-page` / `state-vis`, but a HookScript on
+-- OnAttributeChanged never sees it here: the template's own handler runs
+-- first, tries the dead `_onstate-*` snippet, errors, and a post-hook does not
+-- run after the original errors (measured 2026-09-22: bar 6 hidden with
+-- `state-vis` = "show"). So the driver outputs are polled instead. Cheap: two
+-- attribute reads per bar, four times a second, only on the affected builds.
+local lastPage, lastVis = {}, {}
+local ticker
+local function Poll()
+    for id = 1, 6 do
+        local bar = AB.bars[id]
+        if bar then
+            local page = (id == 1) and bar:GetAttribute("state-page") or nil
+            local vis = bar:GetAttribute("state-vis")
+            if page ~= lastPage[bar] then
+                lastPage[bar] = page
+                private.QueueSecure(function() ApplyBar(bar) end)
+            end
+            if vis ~= lastVis[bar] then
+                lastVis[bar] = vis
+                private.QueueSecure(function() ApplyBarVisibility(bar) end)
+            end
+        end
+    end
+end
+
 function private.SetupSnippetShim()
     if not private.SecureSnippetsBroken() then return end
 
     private.QueueSecure(ApplyAll)
 
-    if not hooked then
-        hooked = true
-        _G.print("|cff30d0ffRealUI ActionBars|r: this Forever build cannot run secure handler snippets (a Blizzard load-order bug), so bar paging is applied from plain Lua out of combat. Flyouts do not work until Blizzard fixes it.")
-
-        -- Re-apply whenever a driver flips a bar's page or visibility (out of
-        -- combat: in combat the work is queued and lands on PLAYER_REGEN_ENABLED).
-        for id = 1, 6 do
-            local bar = AB.bars[id]
-            if bar then
-                bar:HookScript("OnAttributeChanged", function(_, name)
-                    if name == "state-page" then
-                        private.QueueSecure(function() ApplyBar(bar) end)
-                    elseif name == "state-vis" then
-                        private.QueueSecure(function() ApplyBarVisibility(bar) end)
-                    end
-                end)
-            end
-        end
+    if not ticker then
+        _G.print("|cff30d0ffRealUI ActionBars|r: this Forever build cannot run secure handler snippets (a Blizzard load-order bug), so bar paging and visibility are applied from plain Lua out of combat. Flyouts do not work until Blizzard fixes it.")
+        ticker = _G.C_Timer.NewTicker(0.25, Poll)
     end
 end
 
