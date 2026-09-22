@@ -14,6 +14,10 @@ local Color = Aurora.Color
 -- do --[[ FrameXML\LFGFrame.xml ]]
 -- end
 
+-- Blizzard_GroupFinder is excluded on WoW Forever, so Aurora's Forever
+-- manifest has no LFGFrame skin and there is no function here to hook.
+if not private.AddOns.LFGFrame then return end
+
 _G.hooksecurefunc(private.AddOns, "LFGFrame", function()
     if _G.C_AddOns.IsAddOnLoaded("DBM-Core") or _G.C_AddOns.IsAddOnLoaded("BigWigs") then return end
 
