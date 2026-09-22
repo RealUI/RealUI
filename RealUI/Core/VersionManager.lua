@@ -104,6 +104,7 @@ function VersionManager:CheckGameCompatibility()
         [120005] = true, -- Midnight 12.0.5
         [120007] = true, -- Midnight 12.0.7
         [120100] = true, -- Midnight 12.1.0 "Curse of Ula'tek"
+        [16001] = true,  -- WoW Forever 1.60.1 (Camelot, Mainline-family)
     }
 
     if not supportedVersions[gameVersion] then
