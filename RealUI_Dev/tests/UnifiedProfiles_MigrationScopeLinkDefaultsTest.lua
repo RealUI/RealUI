@@ -6,7 +6,7 @@ local ADDON_NAME, ns = ... -- luacheck: ignore
 --
 -- For any set of existing Core_Profile_Scope profiles that lack scopeLinks
 -- fields, after the unified-profiles migration runs, every such profile shall
--- have scopeLinks.skins == false and scopeLinks.bt4 == true. Profiles that
+-- have scopeLinks.skins == false and scopeLinks.actionbars == true. Profiles that
 -- already had scopeLinks should be unchanged.
 
 local NUM_ITERATIONS = 100
@@ -56,7 +56,7 @@ local function MigrateScopeLinkDefaults_Replica(profiles)
         if type(profileData) == "table" and not profileData.scopeLinks then
             profileData.scopeLinks = {
                 skins = false,
-                bt4 = true,
+                actionbars = true,
             }
         end
     end
@@ -91,7 +91,7 @@ local function RunMigrationScopeLinkDefaultsTest()
                     -- Pre-existing scopeLinks with random values
                     profileData.scopeLinks = {
                         skins = randomBool(),
-                        bt4 = randomBool(),
+                        actionbars = randomBool(),
                     }
                 end
                 -- else: no scopeLinks — migration should add defaults
@@ -131,11 +131,11 @@ local function RunMigrationScopeLinkDefaultsTest()
                         i, name, _G.tostring(data.scopeLinks.skins)))
                     break
                 end
-                if data.scopeLinks.bt4 ~= true then
+                if data.scopeLinks.actionbars ~= true then
                     failures = failures + 1
                     iterFailed = true
-                    _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' scopeLinks.bt4 expected true, got %s"):format(
-                        i, name, _G.tostring(data.scopeLinks.bt4)))
+                    _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' scopeLinks.actionbars expected true, got %s"):format(
+                        i, name, _G.tostring(data.scopeLinks.actionbars)))
                     break
                 end
             end
@@ -156,10 +156,10 @@ local function RunMigrationScopeLinkDefaultsTest()
                         i, name, _G.tostring(origLinks.skins), _G.tostring(data.scopeLinks.skins)))
                     break
                 end
-                if data.scopeLinks.bt4 ~= origLinks.bt4 then
+                if data.scopeLinks.actionbars ~= origLinks.actionbars then
                     failures = failures + 1
-                    _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' scopeLinks.bt4 changed from %s to %s"):format(
-                        i, name, _G.tostring(origLinks.bt4), _G.tostring(data.scopeLinks.bt4)))
+                    _G.print(("|cffff0000[FAIL]|r iter %d: profile '%s' scopeLinks.actionbars changed from %s to %s"):format(
+                        i, name, _G.tostring(origLinks.actionbars), _G.tostring(data.scopeLinks.actionbars)))
                     break
                 end
             end

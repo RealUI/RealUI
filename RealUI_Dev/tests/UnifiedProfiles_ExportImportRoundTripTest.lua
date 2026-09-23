@@ -262,7 +262,7 @@ end
 ------------------------------------------------------------
 -- Random profile data generators
 ------------------------------------------------------------
-local SCOPE_NAMES = { "core", "skins", "bt4" }
+local SCOPE_NAMES = { "core", "skins", "actionbars" }
 
 local function generateRandomNumber()
     -- Generate a number: integer or float
@@ -309,7 +309,7 @@ local function generateRandomProfileData()
         data[key] = generateRandomValue(0)
     end
     -- Always include some typical profile fields
-    data.scopeLinks = { skins = randomBool(), bt4 = randomBool() }
+    data.scopeLinks = { skins = randomBool(), actionbars = randomBool() }
     if randomBool() then
         data.frameColor = { r = nextRandom(255) / 255, g = nextRandom(255) / 255, b = nextRandom(255) / 255, a = nextRandom(100) / 100 }
     end

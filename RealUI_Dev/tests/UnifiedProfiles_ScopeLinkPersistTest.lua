@@ -34,7 +34,7 @@ end
 -- and ProfileCoordinator:IsScopeLinked using a mock db.
 ------------------------------------------------------------
 local SCOPE_SKINS = "skins"
-local SCOPE_BT4 = "bt4"
+local SCOPE_ACTIONBARS = "actionbars"
 
 local function SetScopeLinked(db, scope, linked)
     if not db.profile.scopeLinks then
@@ -42,8 +42,8 @@ local function SetScopeLinked(db, scope, linked)
     end
     if scope == SCOPE_SKINS then
         db.profile.scopeLinks.skins = linked and true or false
-    elseif scope == SCOPE_BT4 then
-        db.profile.scopeLinks.bt4 = linked and true or false
+    elseif scope == SCOPE_ACTIONBARS then
+        db.profile.scopeLinks.actionbars = linked and true or false
     end
 end
 
@@ -52,8 +52,8 @@ local function IsScopeLinked(db, scope)
     if not links then return false end
     if scope == SCOPE_SKINS then
         return links.skins == true
-    elseif scope == SCOPE_BT4 then
-        return links.bt4 == true
+    elseif scope == SCOPE_ACTIONBARS then
+        return links.actionbars == true
     end
     return false
 end
@@ -77,11 +77,11 @@ local function RunScopeLinkPersistTest()
 
         -- Write
         SetScopeLinked(db, SCOPE_SKINS, skinsValue)
-        SetScopeLinked(db, SCOPE_BT4, bt4Value)
+        SetScopeLinked(db, SCOPE_ACTIONBARS, bt4Value)
 
         -- Read back
         local readSkins = IsScopeLinked(db, SCOPE_SKINS)
-        local readBT4 = IsScopeLinked(db, SCOPE_BT4)
+        local readBT4 = IsScopeLinked(db, SCOPE_ACTIONBARS)
 
         -- Verify round-trip for Skins
         if readSkins ~= skinsValue then
@@ -102,10 +102,10 @@ local function RunScopeLinkPersistTest()
         local bt4Value2 = not bt4Value
 
         SetScopeLinked(db, SCOPE_SKINS, skinsValue2)
-        SetScopeLinked(db, SCOPE_BT4, bt4Value2)
+        SetScopeLinked(db, SCOPE_ACTIONBARS, bt4Value2)
 
         local readSkins2 = IsScopeLinked(db, SCOPE_SKINS)
-        local readBT42 = IsScopeLinked(db, SCOPE_BT4)
+        local readBT42 = IsScopeLinked(db, SCOPE_ACTIONBARS)
 
         if readSkins2 ~= skinsValue2 then
             failures = failures + 1
@@ -122,7 +122,7 @@ local function RunScopeLinkPersistTest()
         -- Verify: writing one scope does not affect the other
         local skinsValue3 = randomBool()
         SetScopeLinked(db, SCOPE_SKINS, skinsValue3)
-        local readBT4After = IsScopeLinked(db, SCOPE_BT4)
+        local readBT4After = IsScopeLinked(db, SCOPE_ACTIONBARS)
         if readBT4After ~= bt4Value2 then
             failures = failures + 1
             _G.print(("|cffff0000[FAIL]|r iter %d: Writing skins changed bt4 from %s to %s"):format(

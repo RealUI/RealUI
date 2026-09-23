@@ -139,7 +139,7 @@ local function MigrateProfiles_Replica(profiles)
             if not profileData.scopeLinks then
                 profileData.scopeLinks = {
                     skins = false,
-                    bt4 = true,
+                    actionbars = true,
                 }
             end
 
@@ -189,7 +189,7 @@ local function RunMigrationPreserveDataTest()
                 if randomBool() then
                     profileData.scopeLinks = {
                         skins = randomBool(),
-                        bt4 = randomBool(),
+                        actionbars = randomBool(),
                     }
                 end
 

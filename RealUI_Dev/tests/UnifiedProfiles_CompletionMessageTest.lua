@@ -141,7 +141,7 @@ local function CoordinatedSwitchWithMessage(coreDB, skinsDB, bt4Addon, bt4db, sc
     end
 
     -- 3. BT4 scope
-    if scopeLinks.bt4 then
+    if scopeLinks.actionbars then
         if type(bt4db) == "table" then
             local bt4Exists = false
             if bt4db.profiles and bt4db.profiles[profileName] then
@@ -157,7 +157,7 @@ local function CoordinatedSwitchWithMessage(coreDB, skinsDB, bt4Addon, bt4db, sc
             end
             if bt4Exists and bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
                 bt4Addon.db:SetProfile(profileName)
-                switchedScopes[#switchedScopes + 1] = "bt4"
+                switchedScopes[#switchedScopes + 1] = "actionbars"
             end
         end
     end
@@ -207,7 +207,7 @@ local function RunCompletionMessageTest()
         -- Generate random scope links
         local scopeLinks = {
             skins = randomBool(),
-            bt4 = randomBool(),
+            actionbars = randomBool(),
         }
 
         -- Generate profiles
@@ -265,7 +265,7 @@ local function RunCompletionMessageTest()
             end
         end
 
-        if scopeLinks.bt4 then
+        if scopeLinks.actionbars then
             local bt4HasTarget = false
             if bt4db.profiles and bt4db.profiles[targetProfile] then
                 bt4HasTarget = true
@@ -279,7 +279,7 @@ local function RunCompletionMessageTest()
                 end
             end
             if bt4HasTarget then
-                expectedScopes[#expectedScopes + 1] = "bt4"
+                expectedScopes[#expectedScopes + 1] = "actionbars"
             end
         end
 
@@ -315,9 +315,9 @@ local function RunCompletionMessageTest()
             failures = failures + 1
             _G.print(("|cffff0000[FAIL]|r iter %d: 'skins' in switchedScopes but skins link disabled"):format(i))
         end
-        if not scopeLinks.bt4 and arrayContains(message.switchedScopes, "bt4") then
+        if not scopeLinks.actionbars and arrayContains(message.switchedScopes, "actionbars") then
             failures = failures + 1
-            _G.print(("|cffff0000[FAIL]|r iter %d: 'bt4' in switchedScopes but bt4 link disabled"):format(i))
+            _G.print(("|cffff0000[FAIL]|r iter %d: 'actionbars' in switchedScopes but actionbars link disabled"):format(i))
         end
     end
 

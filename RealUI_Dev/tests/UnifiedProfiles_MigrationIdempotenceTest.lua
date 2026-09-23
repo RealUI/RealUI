@@ -66,7 +66,7 @@ local function RunMigration_Replica(db, bypassGuard)
             if type(profileData) == "table" and not profileData.scopeLinks then
                 profileData.scopeLinks = {
                     skins = false,
-                    bt4 = true,
+                    actionbars = true,
                 }
             end
         end
@@ -192,7 +192,7 @@ local function generateRandomDB()
             if randomBool() then
                 profileData.scopeLinks = {
                     skins = randomBool(),
-                    bt4 = randomBool(),
+                    actionbars = randomBool(),
                 }
             end
 

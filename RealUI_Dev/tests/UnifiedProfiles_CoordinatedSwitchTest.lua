@@ -165,7 +165,7 @@ local function CoordinatedSwitchReplica(coreDB, skinsDB, bt4Addon, bt4db, scopeL
     end
 
     -- 3. Bartender4 scope (Req 2.4)
-    if scopeLinks.bt4 then
+    if scopeLinks.actionbars then
         if type(bt4db) == "table" then
             -- Check if profile exists in BT4
             local bt4Exists = false
@@ -189,10 +189,10 @@ local function CoordinatedSwitchReplica(coreDB, skinsDB, bt4Addon, bt4db, scopeL
             if bt4Exists then
                 if bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
                     bt4Addon.db:SetProfile(profileName)
-                    switchedScopes[#switchedScopes + 1] = "bt4"
+                    switchedScopes[#switchedScopes + 1] = "actionbars"
                 elseif type(bt4db.profileKeys) == "table" and charKey then
                     bt4db.profileKeys[charKey] = profileName
-                    switchedScopes[#switchedScopes + 1] = "bt4"
+                    switchedScopes[#switchedScopes + 1] = "actionbars"
                 end
             else
                 warnings[#warnings + 1] = "Bartender4: profile '" .. profileName .. "' does not exist — skipped."
@@ -227,7 +227,7 @@ local function RunCoordinatedSwitchTest()
         -- Generate random scope link configuration
         local scopeLinks = {
             skins = randomBool(),
-            bt4 = randomBool(),
+            actionbars = randomBool(),
         }
 
         -- Generate a random set of profile names that exist in each scope
@@ -366,7 +366,7 @@ local function RunCoordinatedSwitchTest()
         end
 
         -- Verify: BT4 scope (Req 2.4, 2.5, 9.4)
-        if not iterFailed and scopeLinks.bt4 then
+        if not iterFailed and scopeLinks.actionbars then
             local postBT4Profile = bt4db.profileKeys[charKey]
             if bt4HasTarget then
                 -- Should have switched
@@ -376,7 +376,7 @@ local function RunCoordinatedSwitchTest()
                     _G.print(("|cffff0000[FAIL]|r iter %d: BT4 linked+exists but not switched to '%s', got '%s'"):format(
                         i, targetProfile, postBT4Profile or "nil"))
                 end
-                if not iterFailed and not arrayContains(switchedScopes, "bt4") then
+                if not iterFailed and not arrayContains(switchedScopes, "actionbars") then
                     failures = failures + 1
                     iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: BT4 switched but 'bt4' not in switchedScopes"):format(i))
@@ -389,7 +389,7 @@ local function RunCoordinatedSwitchTest()
                     _G.print(("|cffff0000[FAIL]|r iter %d: BT4 linked but profile missing — should be unchanged, was '%s' now '%s'"):format(
                         i, preBT4Profile or "nil", postBT4Profile or "nil"))
                 end
-                if not iterFailed and arrayContains(switchedScopes, "bt4") then
+                if not iterFailed and arrayContains(switchedScopes, "actionbars") then
                     failures = failures + 1
                     iterFailed = true
                     _G.print(("|cffff0000[FAIL]|r iter %d: BT4 not switched but 'bt4' in switchedScopes"):format(i))
@@ -398,7 +398,7 @@ local function RunCoordinatedSwitchTest()
         end
 
         -- Verify: BT4 unlinked — should remain unchanged
-        if not iterFailed and not scopeLinks.bt4 then
+        if not iterFailed and not scopeLinks.actionbars then
             local postBT4Profile = bt4db.profileKeys[charKey]
             if postBT4Profile ~= preBT4Profile then
                 failures = failures + 1
@@ -425,7 +425,7 @@ local function RunCoordinatedSwitchTest()
             end
         end
 
-        if not iterFailed and scopeLinks.bt4 and not bt4HasTarget then
+        if not iterFailed and scopeLinks.actionbars and not bt4HasTarget then
             local foundWarning = false
             for _, w in ipairs(warnings) do
                 if w:find("Bartender4", 1, true) and w:find(targetProfile, 1, true) then

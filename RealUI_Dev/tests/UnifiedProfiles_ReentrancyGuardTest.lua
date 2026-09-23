@@ -151,14 +151,14 @@ local function CreateCoordinatedSwitcher()
         end
 
         -- 3. BT4 scope
-        if scopeLinks.bt4 and type(bt4db) == "table" then
+        if scopeLinks.actionbars and type(bt4db) == "table" then
             local bt4Exists = false
             if bt4db.profiles and bt4db.profiles[profileName] then
                 bt4Exists = true
             end
             if bt4Exists and bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
                 bt4Addon.db:SetProfile(profileName)
-                switchedScopes[#switchedScopes + 1] = "bt4"
+                switchedScopes[#switchedScopes + 1] = "actionbars"
             end
         end
 
@@ -193,7 +193,7 @@ local function RunReentrancyGuardTest()
         -- Generate random scope links
         local scopeLinks = {
             skins = randomBool(),
-            bt4 = randomBool(),
+            actionbars = randomBool(),
         }
 
         -- Generate profiles

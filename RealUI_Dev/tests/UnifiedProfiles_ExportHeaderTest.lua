@@ -125,8 +125,8 @@ local HEADER_SCOPE_SEPARATOR = ","
 ------------------------------------------------------------
 local SCOPE_CORE = "core"
 local SCOPE_SKINS = "skins"
-local SCOPE_BT4 = "bt4"
-local ALL_SCOPES = { SCOPE_CORE, SCOPE_SKINS, SCOPE_BT4 }
+local SCOPE_ACTIONBARS = "actionbars"
+local ALL_SCOPES = { SCOPE_CORE, SCOPE_SKINS, SCOPE_ACTIONBARS }
 
 ------------------------------------------------------------
 -- Deep copy utility
@@ -177,7 +177,7 @@ local function generateRandomProfileData()
         local key = randomString(2, 12)
         data[key] = generateRandomValue(0)
     end
-    data.scopeLinks = { skins = randomBool(), bt4 = randomBool() }
+    data.scopeLinks = { skins = randomBool(), actionbars = randomBool() }
     return data
 end
 

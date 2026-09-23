@@ -140,7 +140,7 @@ local function CoordinatedSwitchReplica(coreDB, skinsDB, bt4Addon, bt4db, scopeL
     end
 
     -- 3. Bartender4 scope
-    if scopeLinks.bt4 then
+    if scopeLinks.actionbars then
         if type(bt4db) == "table" then
             local bt4Exists = false
             if bt4db.profiles and bt4db.profiles[profileName] then
@@ -156,7 +156,7 @@ local function CoordinatedSwitchReplica(coreDB, skinsDB, bt4Addon, bt4db, scopeL
             end
             if bt4Exists and bt4Addon and bt4Addon.db and bt4Addon.db.SetProfile then
                 bt4Addon.db:SetProfile(profileName)
-                switchedScopes[#switchedScopes + 1] = "bt4"
+                switchedScopes[#switchedScopes + 1] = "actionbars"
             end
         end
     end
@@ -177,14 +177,14 @@ local function RunDisabledScopeTest()
         -- Generate scope links with at least one scope disabled
         local scopeLinks = {
             skins = randomBool(),
-            bt4 = randomBool(),
+            actionbars = randomBool(),
         }
         -- Ensure at least one is disabled for meaningful testing
-        if scopeLinks.skins and scopeLinks.bt4 then
+        if scopeLinks.skins and scopeLinks.actionbars then
             if randomBool() then
                 scopeLinks.skins = false
             else
-                scopeLinks.bt4 = false
+                scopeLinks.actionbars = false
             end
         end
 
@@ -235,7 +235,7 @@ local function RunDisabledScopeTest()
         end
 
         -- Verify: disabled BT4 scope must remain unchanged
-        if not scopeLinks.bt4 then
+        if not scopeLinks.actionbars then
             local postBT4Profile = bt4db.profileKeys[charKey]
             if postBT4Profile ~= preBT4Profile then
                 failures = failures + 1
