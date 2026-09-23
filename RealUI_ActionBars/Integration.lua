@@ -300,7 +300,7 @@ function private.SetupRealUIIntegration()
     if not abModule then return end
 
     -- Ride RealUI's own recompute triggers (layout swaps, HuD size, spec
-    -- changes): whenever it would have re-driven Bartender4, re-drive us.
+    -- changes): whenever it recomputes the bar layout, re-apply ours.
     _G.hooksecurefunc(abModule, "ApplyABSettings", function()
         private.QueueSecure(private.ApplyRealUILayout)
     end)
