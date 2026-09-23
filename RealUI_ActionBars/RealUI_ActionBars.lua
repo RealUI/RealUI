@@ -126,9 +126,10 @@ function AB:OnEnable()
     end
     _G.pcall(private.SetupRealUIIntegration)
 
-    -- RealUI core's ActionBars module also claims /naga (its handler drives
-    -- Bartender4 — a silent no-op without it). Its AceConsole registration
-    -- lands after our file-scope one, so reclaim the hash mapping here.
+    -- RealUI core's ActionBars module also claims /naga (its handler flips the
+    -- install wizard's enableNagaBar flag, which can disagree with bar 6's
+    -- real state). Its AceConsole registration lands after our file-scope
+    -- one, so reclaim the hash mapping here.
     _G.hash_SlashCmdList["/NAGA"] = "REALUIABNAGA"
     private.QueueSecure(private.BuildStancePetBars)
     private.QueueSecure(private.ApplyExtraButtons)
