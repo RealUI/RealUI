@@ -1,4 +1,4 @@
-package-as: _RealUI_Forever_Beta_Bootstrap
+package-as: RealUI_Forever_Beta_Bootstrap
 
 # Tester-only: built on its own with `python tools/build_local.py forever`.
 # The RealUI .pkgmeta ignores this folder, so no release ever carries it.
