@@ -213,7 +213,7 @@ do
                     end,
                     order = 1,
                 },
-                bt4Link = {
+                actionBarsLink = {
                     name = "Link Action Bars Scope",
                     desc = "When enabled, action bar profiles (RealUI_ActionBars) switch alongside Core profiles during coordinated switches.\n\nDefault: enabled (action bars typically change with spec).",
                     type = "toggle",
@@ -430,7 +430,7 @@ end
 -- Tab 4: Action Bars Profile Scope
 -- ========================================================================
 
-args.bt4Scope = {  -- args key kept: saved AceConfig state may reference it
+args.actionBarsScope = {
     name = "Action Bars Profile Scope",
     type = "group",
     order = nextOrder(),
@@ -515,7 +515,7 @@ args.exportImport = {
             end,
             order = 2,
         },
-        exportBT4 = {  -- args key kept for saved AceConfig state
+        exportActionBars = {
             name = "Export Action Bars",
             desc = "Export the active action bars profile to a copyable text string.",
             type = "execute",
