@@ -14,9 +14,8 @@ local _, private = ...
      (overlapping borders). That translation is done and finished — nothing
      here is derived from BT4 at runtime, and BT4's proportions must not leak
      back in (they did, in the vertical bar stacking; see Integration.lua).
-     When Bartender4 IS installed it stands in as the backend and RealUI
-     drives it from its own profile — the conversion runs toward BT4, never
-     from it.
+     RealUI no longer drives Bartender4 at all: when it is installed, these
+     bars stand down, and `/rab import` is the only path that reads its data.
 
      Fade strings ship inert (`fadeoutalpha = 0`, visibility ends in `show`):
      classic RealUI displayed all bars, and the old BT4 profile's fade data
