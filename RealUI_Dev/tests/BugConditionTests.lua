@@ -118,7 +118,7 @@ end
 
 ---------------------------------------------------------------------------
 -- Bug 3: Unit Attribute Exposure — overlay frame intercepts mouse focus
---         without exposing unit attribute for Bartender4 mouseover cast
+--         without exposing unit attribute for action bar mouseover cast
 -- Validates: Requirements 1.6
 ---------------------------------------------------------------------------
 function BugTests.Test3_UnitAttributeExposure()
@@ -141,7 +141,7 @@ function BugTests.Test3_UnitAttributeExposure()
     if mouseEnabled then
         RecordResult(3, "Unit Attribute Exposure", false,
             "overlay:IsMouseEnabled() = true; overlay intercepts mouse " ..
-            "focus, blocking Bartender4 mouseover cast from detecting unit")
+            "focus, blocking action bar mouseover cast from detecting unit")
     else
         RecordResult(3, "Unit Attribute Exposure", true,
             "overlay:IsMouseEnabled() = false; mouse passes through to unit frame")
