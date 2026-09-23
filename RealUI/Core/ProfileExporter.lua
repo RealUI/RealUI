@@ -320,8 +320,7 @@ function ProfileExporter:ExportAllLinked()
         end
     end
 
-    -- Action bars if linked (payload key stays "bt4" — wire value, see
-    -- ProfileCoordinator; older exports import unchanged)
+    -- Action bars if linked
     if PC:IsScopeLinked(PC.SCOPE_ACTIONBARS) then
         local barsData = GetScopeProfileData(PC.SCOPE_ACTIONBARS)
         if barsData then
@@ -457,8 +456,10 @@ function ProfileExporter:Import(encodedString, profileName)
     local PC = RealUI.ProfileCoordinator
     local importedScopes = {}
 
-    for _, scope in ipairs(headerInfo.scopes) do
-        local scopeData = payload[scope]
+    for _, wireScope in ipairs(headerInfo.scopes) do
+        local scopeData = payload[wireScope]
+        -- Exports made before the rename name the bars scope "bt4".
+        local scope = wireScope == PC.SCOPE_ACTIONBARS_LEGACY and PC.SCOPE_ACTIONBARS or wireScope
         if scopeData and type(scopeData) == "table" then
             if scope == PC.SCOPE_CORE then
                 if RealUI.db then
@@ -477,8 +478,8 @@ function ProfileExporter:Import(encodedString, profileName)
                     importedScopes[#importedScopes + 1] = scope
                 end
             elseif scope == PC.SCOPE_ACTIONBARS then
-                -- Accepts both new exports and pre-4.0 ones (same "bt4"
-                -- payload key). An old export's BT4 root profile carried no
+                -- Also reached by "bt4" exports (see above), including
+                -- pre-4.0 ones: an old export's BT4 root profile carried no
                 -- meaningful bar data (it was namespaced), so writing its
                 -- keys into RAB's root profile is harmless.
                 local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)

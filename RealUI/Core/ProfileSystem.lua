@@ -78,7 +78,7 @@ function ProfileSystem:GetDatabaseDefaults()
             -- unlinked (bars DB never followed layout profiles).
             scopeLinks = {
                 skins = false,  -- Appearance shared across specs by default
-                bt4 = true      -- Action bars change with spec by default
+                actionbars = true  -- Action bars change with spec by default
             },
         },
         profile = {

@@ -168,7 +168,7 @@ function FinalMigrations:RegisterStandardMigrations()
             if not dbc.scopeLinks then
                 dbc.scopeLinks = {
                     skins = false,
-                    bt4 = true,
+                    actionbars = true,
                 }
                 debug("Initialized scopeLinks on db.char")
             end
@@ -182,7 +182,7 @@ function FinalMigrations:RegisterStandardMigrations()
                         -- carry those values to db.char
                         if profileName == db:GetCurrentProfile() then
                             dbc.scopeLinks.skins = profileData.scopeLinks.skins or false
-                            dbc.scopeLinks.bt4 = (profileData.scopeLinks.bt4 ~= false) -- default true
+                            dbc.scopeLinks.actionbars = (profileData.scopeLinks.bt4 ~= false) -- default true; pre-rename key
                             debug("Migrated scopeLinks from active profile to db.char")
                         end
                         profileData.scopeLinks = nil
@@ -196,7 +196,7 @@ function FinalMigrations:RegisterStandardMigrations()
             allSuccess = false
             -- Safe default: ensure db.char has scopeLinks
             if db.char and not db.char.scopeLinks then
-                db.char.scopeLinks = { skins = false, bt4 = true }
+                db.char.scopeLinks = { skins = false, actionbars = true }
             end
         end
 

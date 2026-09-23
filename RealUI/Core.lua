@@ -206,7 +206,7 @@ do
             -- Scope link toggles for coordinated profile switching (per-character, not per-profile)
             scopeLinks = {
                 skins = false,  -- Appearance shared across specs by default
-                bt4 = true      -- Action bars change with spec by default
+                actionbars = true  -- Action bars change with spec by default
             },
 
             editmode = {

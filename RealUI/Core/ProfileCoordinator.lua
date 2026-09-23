@@ -6,12 +6,12 @@ local ADDON_NAME, private = ... -- luacheck: ignore
 -- (RealUI_ActionBarsDB).
 --
 -- Bartender4 support was removed in 4.0.0 (2026-08-22) along with the bundled
--- addon; RealUI_ActionBars is the only bar backend. The action-bar scope keeps
--- its ORIGINAL wire value "bt4" on purpose — it is persisted in saved
--- variables (db.char.scopeLinks.bt4, the "action bars change with spec" flag)
--- and appears as a key inside exported profile strings that users have
--- already shared. Renaming the value would silently reset that preference and
--- break importing older exports; only the constant's name changed.
+-- addon; RealUI_ActionBars is the only bar backend. The action-bar scope was
+-- called "bt4" until 2026-09-23 and is "actionbars" now. The old name is
+-- still read in two places: exports made before the rename carry "bt4" as
+-- their scope/payload key (ProfileExporter imports it as SCOPE_ACTIONBARS),
+-- and db.char.scopeLinks.bt4 is moved to .actionbars the first time the link
+-- state is read, so the "action bars change with spec" choice survives.
 
 -- luacheck: globals next type pairs ipairs tostring
 
@@ -25,9 +25,9 @@ RealUI.ProfileCoordinator = ProfileCoordinator
 -- Scope constants
 ProfileCoordinator.SCOPE_CORE = "core"
 ProfileCoordinator.SCOPE_SKINS = "skins"
-ProfileCoordinator.SCOPE_ACTIONBARS = "bt4"  -- legacy wire value, see header
--- Deprecated alias, kept so any out-of-tree caller keeps working.
-ProfileCoordinator.SCOPE_BT4 = ProfileCoordinator.SCOPE_ACTIONBARS
+ProfileCoordinator.SCOPE_ACTIONBARS = "actionbars"
+-- Pre-rename name of SCOPE_ACTIONBARS, accepted on import only (see header).
+ProfileCoordinator.SCOPE_ACTIONBARS_LEGACY = "bt4"
 
 -- Internal state
 local switchInProgress = false
@@ -133,23 +133,34 @@ end
 
 
 ------------------------------------------------------------
--- Scope Link State (reads/writes from db.profile.scopeLinks)
+-- Scope Link State (reads/writes from db.char.scopeLinks)
 ------------------------------------------------------------
+
+--- db.char.scopeLinks, with the pre-rename `bt4` key carried over to
+--- `actionbars` (see header). May return nil.
+local function GetLinks()
+    local links = RealUI.db.char.scopeLinks
+    if links and links.bt4 ~= nil then
+        links.actionbars = links.bt4
+        links.bt4 = nil
+    end
+    return links
+end
 
 --- Check whether a scope is linked for coordinated switching.
 --- @param scope string One of SCOPE_SKINS or SCOPE_ACTIONBARS
 --- @return boolean
 function ProfileCoordinator:IsScopeLinked(scope)
     if not RealUI.db then return false end
-    -- nil falls back to the documented default (skins unlinked, bt4 linked):
+    -- nil falls back to the documented default (skins unlinked, bars linked):
     -- characters whose saved variables predate char-scoped scopeLinks have no
     -- stored table, and requiring an explicit true silently unlinked the bars
     -- scope for them (same nil-tolerant reading /systemstatus already uses).
-    local links = RealUI.db.char.scopeLinks
+    local links = GetLinks()
     if scope == self.SCOPE_SKINS then
         return (links and links.skins) == true
     elseif scope == self.SCOPE_ACTIONBARS then
-        return not links or links.bt4 ~= false
+        return not links or links.actionbars ~= false
     end
     -- Core is always "linked" (it is the primary scope)
     return false
@@ -160,7 +171,7 @@ end
 --- @param linked boolean
 function ProfileCoordinator:SetScopeLinked(scope, linked)
     if not RealUI.db then return end
-    local links = RealUI.db.char.scopeLinks
+    local links = GetLinks()
     if not links then
         RealUI.db.char.scopeLinks = {}
         links = RealUI.db.char.scopeLinks
@@ -170,9 +181,8 @@ function ProfileCoordinator:SetScopeLinked(scope, linked)
         links.skins = linked and true or false
         debug("Skins scope link set to:", links.skins)
     elseif scope == self.SCOPE_ACTIONBARS then
-        -- Storage key stays `bt4` (persisted + inside exported strings).
-        links.bt4 = linked and true or false
-        debug("Action bars scope link set to:", links.bt4)
+        links.actionbars = linked and true or false
+        debug("Action bars scope link set to:", links.actionbars)
 
         -- Sync RealUI_ActionBars' LibDualSpec mappings to match Core's so
         -- spec-triggered switches stay coordinated.
@@ -192,11 +202,11 @@ function ProfileCoordinator:SetScopeLinked(scope, linked)
 end
 
 --- Return a table of linked scopes (excluding Core, which is always switched).
---- @return table  e.g. { skins = true, bt4 = false }
+--- @return table  e.g. { skins = true, actionbars = false }
 function ProfileCoordinator:GetLinkedScopes()
     return {
         skins = self:IsScopeLinked(self.SCOPE_SKINS),
-        bt4   = self:IsScopeLinked(self.SCOPE_ACTIONBARS),
+        actionbars = self:IsScopeLinked(self.SCOPE_ACTIONBARS),
     }
 end
 
@@ -232,12 +242,12 @@ function ProfileCoordinator:GetScopeProfile(scope)
 end
 
 --- Get the active profile for every scope.
---- @return table  { core = "...", skins = "...", bt4 = "..." }
+--- @return table  { core = "...", skins = "...", actionbars = "..." }
 function ProfileCoordinator:GetAllScopeProfiles()
     return {
-        core  = self:GetScopeProfile(self.SCOPE_CORE),
-        skins = self:GetScopeProfile(self.SCOPE_SKINS),
-        bt4   = self:GetScopeProfile(self.SCOPE_ACTIONBARS),
+        core       = self:GetScopeProfile(self.SCOPE_CORE),
+        skins      = self:GetScopeProfile(self.SCOPE_SKINS),
+        actionbars = self:GetScopeProfile(self.SCOPE_ACTIONBARS),
     }
 end
 
@@ -395,10 +405,10 @@ end
 
 --- Called by AceDB whenever Core's profile changes.
 --- If the switch was NOT initiated by CoordinatedSwitch (i.e. switchInProgress
---- is false), we coordinate Skins and BT4 to follow.
+--- is false), we coordinate Skins and action bars to follow.
 --- This catches LibDualSpec-triggered switches and any other external callers.
 local function OnCoreProfileChanged(_, _, newProfile)
-    -- If CoordinatedSwitch is running, it already handles Skins/BT4
+    -- If CoordinatedSwitch is running, it already handles Skins/action bars
     if switchInProgress then
         debug("OnCoreProfileChanged: switchInProgress, skipping (CoordinatedSwitch handles it)")
         return

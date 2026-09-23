@@ -306,10 +306,9 @@ local function PropagateUnifiedProfiles()
     -- through AceDB defaults, and ProfileCoordinator's SwitchActionBarsScope
     -- copy-on-creates any missing profile at first switch — nothing to
     -- pre-create here since Bartender4 support was removed (2026-08-22).
-    -- The scopeResults key stays "bt4" (wire value; see ProfileCoordinator).
     ----------------------------------------------------------------
     if PC and PC:IsScopeLinked(PC.SCOPE_ACTIONBARS) then
-        scopeResults["bt4"] = true
+        scopeResults[PC.SCOPE_ACTIONBARS] = true
         debug("PropagateUnifiedProfiles: action bars scope seeds itself (AceDB defaults)")
     else
         debug("PropagateUnifiedProfiles: action bars scope not linked, skipping")
