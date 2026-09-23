@@ -79,6 +79,12 @@ local function Bootstrap()
         if state and state.stageData then
             state.stageData.enableNagaBar = cfg.naga and true or false
         end
+        -- Complete() only reaches bar 6 through an enabled RealUI_ActionBars;
+        -- otherwise it skips it silently, so say so here.
+        local AB = _G.LibStub("AceAddon-3.0"):GetAddon("RealUIActionBars", true)
+        if not (AB and AB:IsEnabled()) then
+            Say("RealUI_ActionBars is not enabled; the Naga setting cannot be applied.")
+        end
     end
 
     -- 3. Complete the install exactly as the wizard's last page does.
@@ -105,9 +111,11 @@ local frame = _G.CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:SetScript("OnEvent", function(self)
     self:UnregisterAllEvents()
-    -- RealUI's own login work runs from AceAddon's PLAYER_LOGIN handler. The
-    -- TOC's RequiredDeps: RealUI loads RealUI (and so AceAddon's event frame)
-    -- before this frame registers, so RealUI.db is ready here; its wizard
-    -- start is on a 1 s timer, so completing now wins the race.
-    Bootstrap()
+    -- Run on the next frame, after every PLAYER_LOGIN handler. AceAddon
+    -- enables all addons from its own PLAYER_LOGIN handler, and handler order
+    -- is not ours to rely on: run before it and RealUI.db exists (that is
+    -- OnInitialize) but RealUI_ActionBars is not enabled yet, so the Naga
+    -- choice in Complete() is dropped without a word. RealUI's wizard start
+    -- is on a 1 s timer, so the next frame still wins that race.
+    _G.C_Timer.After(0, Bootstrap)
 end)
