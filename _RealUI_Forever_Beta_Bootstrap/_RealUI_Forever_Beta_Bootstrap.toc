@@ -1,0 +1,13 @@
+## Interface: 16001
+## Title: RealUI Forever Beta Bootstrap
+## Category: RealUI_Core
+## Notes: WoW Forever beta only: skips the RealUI install wizard at every login, because the beta does not keep addon settings. Delete this addon once it does.
+## Version: 4.0.2
+## IconTexture: Interface\AddOns\RealUI\Media\Icon
+## RequiredDeps: RealUI
+
+# Profile.lua is yours: copy Profile.example.lua to Profile.lua and fill it in.
+# It is not in the zip, so updating this addon never overwrites it. Without it
+# the bootstrap completes the install with RealUI's stock settings.
+Profile.lua
+Bootstrap.lua

@@ -8,9 +8,6 @@
 ## RequiredDeps: RealUI_Bugs
 
 RealUI_Dev.lua
-# Forever beta only: replays a code-held config at login (SavedVariables do not persist there).
-local\ForeverProfile.lua
-ForeverBootstrap.lua
 tests\BankLifecycleTest.lua
 tests\BankBagsVisibilityTest.lua
 tests\BankBagUpdateTest.lua
