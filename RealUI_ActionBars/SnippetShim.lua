@@ -30,6 +30,7 @@ local AB = private.AB
 
 local BROKEN_SECURE_SNIPPET_BUILDS = {
     ["69913"] = true, -- 1.60.1, 2026-09-22
+    ["69977"] = true, -- 1.60.1, 2026-09-23
 }
 
 function private.SecureSnippetsBroken()

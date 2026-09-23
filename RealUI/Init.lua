@@ -65,6 +65,7 @@ RealUI.isTwelveAPI = RealUI.isMidnight or RealUI.isForever
 -- it; a fixed build drops out by itself.
 RealUI.BROKEN_SECURE_SNIPPET_BUILDS = {
     ["69913"] = true, -- 1.60.1, 2026-09-22
+    ["69977"] = true, -- 1.60.1, 2026-09-23
 }
 function RealUI.SecureSnippetsBroken()
     local _, build = _G.GetBuildInfo()
