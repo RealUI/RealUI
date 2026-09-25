@@ -179,7 +179,10 @@ RealUI.key = ("%s - %s"):format(RealUI.charInfo.name, RealUI.charInfo.realm)
 
 -- Addon Compatibility Management
 -- Disable cargBags if RealUI_Inventory is enabled
-local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.charInfo.name) == _G.Enum.AddOnEnableState.All;
+-- Per-character enable state keyed by GUID, as Blizzard's AddonList does on
+-- every flavor; Forever's UnitName("player") is not a reliable key.
+RealUI.addonCharacter = _G.UnitGUID("player") or RealUI.charInfo.name
+local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.addonCharacter) == _G.Enum.AddOnEnableState.All;
 if enabled == true then
     _G.C_AddOns.DisableAddOn("cargBags_Nivaya")
 end

@@ -812,7 +812,7 @@ do -- RealUI
     -- instead of the AddOn list. Per-character, same scope as the AddOn list's
     -- default; changes need a /reload (addons cannot unload live).
     local components do
-        local charName = RealUI.charInfo and RealUI.charInfo.name
+        local charName = RealUI.addonCharacter or (RealUI.charInfo and RealUI.charInfo.name)
         local componentAddons = {
             {addon = "RealUI_ActionBars", label = "Action Bars",
                 blurb = "RealUI's action bar system. Disabling it leaves you with Blizzard's default bars."},
