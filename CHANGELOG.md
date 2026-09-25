@@ -1,3 +1,51 @@
+## [Unreleased] ##
+### Summary ###
+RealUI now loads on the **WoW Forever** beta (1.60.x, Battle.net product `wow_classic_beta`, client folder `_classic_beta_`, interface `16001`). Forever runs the retail 12.1 UI architecture with Blizzard's `Camelot` overlay, so this is a flavor of the retail codebase rather than a classic port: every TOC now lists both interface numbers and the existing retail packaging job carries the build. Nothing changes on retail. Forever-only behaviour is gated on `RealUI.isForever`; "the 12.x code path exists" is gated on the new `RealUI.isTwelveAPI`, because `isMidnight` is false on Forever even though the code is 12.1-derived.
+
+Two client facts shape the work and are still open on Blizzard's side: Forever has **no realms**, so `GetRealmName()` returns nothing, and on the current beta **SavedVariables do not persist across a reload**, so only defaults apply there for now.
+
+Aurora's Forever skin pass lands alongside this (see the Aurora entries below).
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_ActionBars
+  * RealUI_Nameplates
+  * RealUI_Skins
+  * !RealUI_Preloads (and every other sub-addon TOC, for the interface line)
+  * Aurora
+
+### Added ###
+
+  * add: **RealUI loads on WoW Forever.** All 15 TOCs declare `## Interface: 120100, 16001`. `RealUI_Skins` picks Aurora's `AddOns_Mainline.xml` or `AddOns_Forever.xml` from its TOC with the same game-type directive pair Aurora uses (`[AllowLoadGameType standard]` / `[AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]`); the include moved out of `Libs\Libs.xml`, where directives cannot work, into `Libs\Aurora_Mainline.xml` and `Libs\Aurora_Forever.xml`, keeping the packager's debug/non-debug path swap. The `RequiredDeps` lines of `RealUI.toc` and `!RealUI_PreLoads.toc` are split per game type because four `Blizzard_Deprecated*` shims (Currency, Item, Pvp, Sound) do not exist on Forever
+  * add: `RealUI.isForever` (interface 16000–19999) and `RealUI.isTwelveAPI` (`isMidnight or isForever`) in `Init.lua`
+  * add: **profile exports now carry module settings.** All three scopes exported only their root profile, while module settings live in AceDB namespaces — 22 RealUI core modules including the bar arrangement, every RealUI_ActionBars bar's position and visibility, Skins' sub-tables — so an import restored keybinds and colours and sent every module back to defaults. The namespaces ride along under `__namespaces`, the import writes them back and fires the profile-changed callbacks so modules rebuild; older exports still import
+  * add: Aurora — **serves retail and Forever from one TOC.** `Aurora_Mainline.toc` lists both interface numbers and selects `AddOns_Mainline.xml` or the generated `AddOns_Forever.xml` per line; `private.isForever` and `AURORA_DEBUG_PROJECT = 60` identify the flavor. Camelot-only skins live under `Blizzard_X\Camelot\`, mirroring Blizzard's paths, and skins that Forever shares with retail were made to tolerate Camelot's trimmed frames (FriendsFrame, InspectUI, TokenUI, MailFrame, ProfessionsBook, TrainerUI among them)
+  * add: Aurora — **Camelot character panel**: mode tabs and side pane, paper doll (ranged and ammo slots, model control bar), reputation, skills, PvP rank, bank and equipment flyout. Bodies shared with retail moved to `Skin\shared\` with thin per-flavor callers
+  * add: Aurora — Camelot collections and pet stable, the Statistics tab, the Legacy system window and swing timers, micro menu bar art, bag bar, token detail side pane, professions book page, spellbook category tabs, and a taint-safe nameplate level badge
+  * add: Aurora — `/aurora skinaudit` lists the skin modules whose `pcall` failed on this login, which is how the Forever pass was verified wave by wave; `Aurora/dev/forever_report.py` regenerates the Camelot-vs-Mainline gap report from the manifests
+
+### Fixed ###
+
+  * fix: **the character key threw at login on Forever.** Six sites built `"Name - Realm"` from `GetRealmName()`, two by direct concatenation, and Forever has no realm. The key is now built once in `Init.lua` and mirrors AceDB's own `charKey` exactly — on Forever that substitutes the active ruleset (`Hardcore`, `RP`, `PvP`, `PvE`) for the realm, the same way AceDB-3.0 does — because `RealUI.key` indexes AceDB's `profileKeys` and `char` tables in the sibling addon DBs. The sibling-DB reset, AddonControl and the Bartender4 layout import all read that one key now; the normalized-realm poll no longer spins forever there, and `GetAutoCompleteRealms()` is guarded
+  * fix: **`GetSpecialization()` was nil on Forever.** The global is supplied by `Blizzard_DeprecatedSpecialization`, which loads only on retail and classic. Six call sites now use `C_SpecializationInfo.GetSpecialization()`, and the cooldown-preset lookup tolerates a nil spec instead of doing arithmetic on it
+  * fix: the Infobar Start menu drops entries whose toggle does not exist on the client — Encounter Journal, Group Finder and Housing on Forever, where those Blizzard addons never load — and the menu dispatcher no longer calls a nil global
+  * fix: the install wizard's combat-text CVar guard and Aurora's WardrobeCustomSets skip now key off the 12.x code path (`isTwelveAPI`), so Forever behaves like Midnight there
+  * fix: **first login on Forever, six load errors.** `RAID_CLASS_COLORS` only holds the original nine classes there, so the error-frame colours fall back to fixed hex for MONK and DEMONHUNTER; `Blizzard_GroupFinder` never loads, so the LFGFrame skin hook and the auto-holiday tweak are skipped when their targets are absent; retail-only channel spell IDs no longer assert in the cast bar tick table; the landing-page minimap button is guarded; and both the Start block and the RealUI_Bugs error frame tolerate a missing BugGrabber
+  * fix: **RealUI's EditMode layout was never actually active on Forever.** `C_EditMode.SetActiveLayout` indexes a combined list of presets followed by saved layouts, and RealUI assumed two presets. Forever ships a third, Gamepad, so every activation landed one slot early on the Gamepad preset — whose system list has no main action bar, which EditMode then hid as "not supported by the active layout". The preset count is now read from Blizzard's preset manager at runtime
+  * fix: RealUI's EditMode layout no longer hides Blizzard's action bars when RealUI_ActionBars is not running (absent, disabled, or yielding to Bartender4): `BuildLayout` writes Blizzard's own Modern-preset entries for the whole bar cluster instead — action bars, micro menu, bags, status bars and end caps together, because Blizzard anchors those to one another (on Camelot the main bar hangs off the micro menu), and omitting them is not enough since EditMode leaves an omitted system as the previous layout had it. New **`/realui editmode reset`** rebuilds both RealUI layouts from the template on demand, inside the user-initiated write scope
+  * fix: loot window tooltips showed nothing on Forever. The mouseover gate compared the slot type against the legacy `LOOT_SLOT_ITEM` globals, which that client does not expose; it now uses `Enum.LootSlotType` as Blizzard's own loot frame does
+  * fix: on Forever, Camelot's day/night indicator no longer sits stranded in the screen corner after RealUI moves the minimap; it rides on the RealUI minimap as a small badge and is re-asserted after Blizzard's scale hook re-anchors it
+  * fix: second Forever login — arena unit frames are not spawned when `CompactArenaFrame` does not exist (oUF indexes it unguarded; Blizzard's own container code guards on it the same way), and the minimap queue-status hook is skipped on Camelot, whose queue button has no `UpdatePosition`
+  * fix: **BugGrabber never installed its handler on Forever.** RealUI_Bugs disables the standalone `!BugGrabber` and relies on its embedded copy, but that copy asks the client whether the standalone is enabled using the full player name, and on Forever the client answers "enabled for all characters" even for a disabled addon — so the embedded copy deferred to a standalone that never loads. The vendored lib now only defers when the standalone is actually loaded (a marked local patch, re-applied on each BugGrabber update). Interface `16001` is also in the VersionManager's supported list, which silences the "Unsupported game version" line at login
+
+### Known Issues ###
+
+  * On the current Forever beta (1.60.1, build 69913), **no secure handler snippet can run**: `Blizzard_EnvironmentCleanup` loads first and nils `loadstring_untainted`, and its TOC dependency on `Blizzard_RestrictedAddOnEnvironment` is tagged `classic, standard` only, so on Forever the restricted environment can load afterwards and capture nil. LibActionButton sets each button's `type` and `action` from such a snippet, so without help the buttons draw but cast nothing on click or keypress. LibActionButton also wraps each button's click with a snippet, which aborted every click before the secure handler ran. On the affected build RealUI_ActionBars now mirrors the state and visibility snippets in plain Lua out of combat and takes the click wrapper off (`SnippetShim.lua`, gated on a list of known-broken builds): keys and clicks cast, bar 1 pages, conditional bars such as the Naga bar show, and spells can be dragged on and off the bars out of combat, but dropping by click, bar fading, **paging cannot change during combat, flyouts are dead, and LibActionButton logs one error per button at login** until Blizzard adds `camelot` to that dependency line. Any addon using secure handlers is affected the same way. RealUI's party and raid frames are oUF headers whose per-member setup is such a snippet, so on those builds they are not spawned and **Blizzard's own party and raid frames stay in place**, with a chat line saying so. A stand-down was tried and withdrawn the same day: it left the player with no bars at all, because RealUI's EditMode layout hides Blizzard's bars while RealUI's own are active
+  * On the current Forever beta, **settings do not persist across `/reload`** — the client discards SavedVariables writes. Only defaults apply, for every addon. Confirmed by the Forever developers; not a RealUI bug
+  * `UnitName("player")` returns the full name on Forever while `UnitName("target")` does not; Blizzard says the final behaviour is not settled
+  * The RealUI surfaces on Forever (unit frames, action bars, nameplates, tracker, infobar, inventory, tooltips, chat) have had a static pass only; the in-game walk-through is still pending
+
 ## [4.0.2] - 2026-09-13 ##
 ### Summary ###
 A maintenance release. The headline fix is **nameplate health text and execute colouring recovering correctly** — RealUI had been treating "in combat" as the same thing as "auras are secret", and measurement in game proved those are unrelated: secrecy can already be on out of combat, can stay on through a combat-end edge for half a minute, and can switch on with no combat edge at all. The re-check now hangs off `C_Secrets.ShouldAurasBeSecret` instead. The durability infobar block no longer reports a reassuring **100%** when it has actually measured nothing, keybind mode's ESC really does clear the binding it says it cleared, and the tank-taunt threat cue survives matchmade raids.
@@ -236,6 +284,7 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.0.2...main
 [4.0.2]: https://github.com/RealUI/RealUI/compare/4.0.1...4.0.2
 [4.0.1]: https://github.com/RealUI/RealUI/compare/4.0.0...4.0.1
 [4.0.0]: https://github.com/RealUI/RealUI/compare/3.4.0...4.0.0

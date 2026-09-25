@@ -320,17 +320,6 @@ _G.tinsert(UnitFrames.units, function()
         return
     end
 
-    -- WoW Forever, build-gated (RealUI.BROKEN_SECURE_SNIPPET_BUILDS): the
-    -- header's initialConfigFunction is a secure snippet and none compile on
-    -- those builds, so members would be created but never configured — and
-    -- SpawnHeader hides Blizzard's party and raid frames on the way. Leave
-    -- Blizzard's group frames in place instead.
-    if RealUI.SecureSnippetsBroken and RealUI.SecureSnippetsBroken() then
-        UnitFrames:debug("Raid: secure snippets broken on this build, skipping spawn")
-        _G.print("|cff0099ffRealUI|r: group frames are Blizzard's on this Forever build — secure snippets are broken there, so RealUI's party and raid frames cannot be configured.")
-        return
-    end
-
     -- B31: extend the registered AceDB defaults with the party sub-table so
     -- every profile activated after this point (switch / new / reset) resolves
     -- units.raid.party.framePoint BEFORE FramePoint:RefreshMod re-reads the

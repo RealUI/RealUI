@@ -59,18 +59,6 @@ function AB:OnInitialize()
     end
 end
 
--- WoW Forever 1.60.1 (69913) ships a Blizzard load-order bug: the
--- Blizzard_EnvironmentCleanup TOC tags its dependency on
--- Blizzard_RestrictedAddOnEnvironment `[AllowLoadGameType classic, standard]`,
--- without camelot, so on Forever the LoadFirst cleanup can nil the client's
--- `loadstring_untainted` before RestrictedExecution.lua captures it. Every
--- secure snippet then dies with "attempt to call a nil value"
--- (RestrictedExecution.lua:79). LibActionButton logs that once per button at
--- login; its flyouts are dead there and, without help, so are its buttons —
--- the `type`/`action` attributes come from a snippet too. SnippetShim.lua
--- mirrors that snippet in plain Lua out of combat on the affected builds.
--- The one-line fix is Blizzard's (add `camelot` to that Dep line).
-
 function AB:OnEnable()
     -- Bartender4 coexistence stand-down (same pattern as RealUI_Nameplates vs
     -- Platynator): RealUI 4.0 removed BT4 support entirely, but a user-installed
@@ -94,7 +82,6 @@ function AB:OnEnable()
         -- The zone-ability frames get recreated/re-laid-out on zone changes.
         private.QueueSecure(private.ApplyExtraButtons)
         private.QueueSecure(private.ApplyVehicleButton)
-        if private.ReapplySnippetShim then private.ReapplySnippetShim() end
         -- B65: the Infobar can be built after our OnEnable, so the watcher
         -- may not have had a frame to attach to yet. Idempotent.
         if private.WatchInfobarHeight then private.WatchInfobarHeight() end
@@ -106,8 +93,6 @@ function AB:OnEnable()
         private.QueueSecure(private.ApplyVehicleButton)
     end)
     private.BuildBars()
-    -- Forever 69913: LAB's state snippets cannot compile; mirror them in Lua.
-    if private.SetupSnippetShim then private.SetupSnippetShim() end
     -- Skins before ApplyAllBars: the button-inset pass needs the skin's
     -- visual-cell frames to exist.
     if private.SetupSkins then private.SetupSkins() end
