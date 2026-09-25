@@ -216,7 +216,9 @@ function DeploymentValidator:ValidateVersionCompatibility()
     local gameVersion = select(4, _G.GetBuildInfo())
     local minVersion = 120000 -- Minimum supported version
 
-    if gameVersion < minVersion then
+    -- WoW Forever is 12.x-derived but reports interface 16001 (see isTwelveAPI
+    -- in Init.lua), so the numeric floor does not apply there.
+    if not RealUI.isForever and gameVersion < minVersion then
         table.insert(issues, {
             type = "game_version",
             severity = "critical",
@@ -356,10 +358,17 @@ function DeploymentValidator:Initialize()
     end
 
     -- Prepare for deployment
-    local success, _ = self:PrepareDeployment()
+    local success, issues = self:PrepareDeployment()
 
     if not success then
         debug("Deployment preparation failed")
+        -- Validation errors were printed above; a critical compatibility or
+        -- version issue was not, and the popup below points at chat.
+        if passed then
+            for _, issue in ipairs(issues or {}) do
+                _G.print("|cFFFF0000RealUI Deployment Error:|r", issue.message)
+            end
+        end
         if RealUI.FeedbackSystem then
             RealUI.FeedbackSystem:ShowError("Deployment Error", "RealUI failed deployment validation. Check chat for details.")
         end
