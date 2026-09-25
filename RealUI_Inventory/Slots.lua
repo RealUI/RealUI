@@ -42,6 +42,13 @@ local function SlotReset(pool, slot)
     end
 
     local bagID, slotIndex = slot:GetBagAndSlot()
+    -- B82: drop the location index entry. Every way a slot leaves the active
+    -- set (Release, ReleaseAll, GetSlot's tainted-slot excision) runs this.
+    local index = bagID and pool.byLocation[bagID]
+    if index and index[slotIndex] == slot then
+        index[slotIndex] = nil
+    end
+
     if Inventory.main.new[bagID] then
         Inventory.main.new[bagID][slotIndex] = nil
     end
@@ -186,6 +193,7 @@ local inventorySlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 inventorySlots.frameTemplate = "ContainerFrameItemButtonTemplate"
 inventorySlots.parent = "RealUIInventory"
 inventorySlots.mixin = InventorySlotMixin
+inventorySlots.byLocation = {} -- [bagID][slotIndex] = active slot, see GetSlot
 
 
 local BankSlotMixin = _G.CreateFromMixins(ItemSlotMixin)
@@ -263,6 +271,7 @@ local bankSlots = _G.CreateUnsecuredObjectPool(SlotFactory, SlotReset)
 bankSlots.frameTemplate = "ContainerFrameItemButtonTemplate"
 bankSlots.parent = "RealUIBank"
 bankSlots.mixin = BankSlotMixin
+bankSlots.byLocation = {}
 
 private.ReleaseAllBankSlots = function()
     bankSlots:ReleaseAll()
@@ -287,25 +296,30 @@ function private.GetSlot(bagID, slotIndex)
     --Inventory:debug("private.GetSlot", bagID, slotIndex)
     local slots = private.GetSlotTypeForBag(bagID)
 
-    for slot in slots:EnumerateActive() do
-        if slot.location:IsEqualToBagAndSlot(bagID, slotIndex) then
-            if slot.location:IsValid() then
-                if slot.isTainted and not _G.InCombatLockdown() then
-                    -- We're out of combat, excise tainted slot and create a new one
-                    slots.activeObjectCount = slots.activeObjectCount - 1
-                    slots.activeObjects[slot] = nil
-                    slots.resetFunc(slots, slot)
-                    break
-                end
-                return slot
+    -- B82: a table read, not a scan. UpdateSlots calls this once per slot, and
+    -- scanning every active slot each time was O(n x m) — enough to hit
+    -- "script ran too long" opening all bags, and the abort left items inert.
+    -- The active set also only grows: excised tainted slots never go back to
+    -- the pool, so the scan got slower all session.
+    local index = slots.byLocation[bagID]
+    local slot = index and index[slotIndex]
+    if slot then
+        if slot.location:IsValid() then
+            if slot.isTainted and not _G.InCombatLockdown() then
+                -- We're out of combat, excise tainted slot and create a new one
+                slots.activeObjectCount = slots.activeObjectCount - 1
+                slots.activeObjects[slot] = nil
+                slots.resetFunc(slots, slot)
             else
-                slots:Release(slot)
-                return
+                return slot
             end
+        else
+            slots:Release(slot)
+            return
         end
     end
 
-    local slot = slots:Acquire()
+    slot = slots:Acquire()
     if slot then
         slot.location:SetBagAndSlot(bagID, slotIndex)
         if slot.location:IsValid() then
@@ -314,6 +328,8 @@ function private.GetSlot(bagID, slotIndex)
                 slot:SetBagID(bagID)
             end
             slot.item = _G.Item:CreateFromItemLocation(slot.location)
+            slots.byLocation[bagID] = index or {}
+            slots.byLocation[bagID][slotIndex] = slot
             return slot
         else
             slots:Release(slot)
