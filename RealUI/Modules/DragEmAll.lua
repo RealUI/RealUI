@@ -138,6 +138,12 @@ local addonFrames = {
     Blizzard_GMSurveyUI = {
         GMSurveyFrame = {}
     },
+    -- Forever's group finder (LoadOnDemand). Since 1.60.1.70009 its three
+    -- panels fill the whole frame with the mouse enabled, so they are the
+    -- drag handles.
+    Blizzard_GroupFinder_VanillaStyle = {
+        LFGParentFrame = {"LFGListingFrame", "LFGBrowseFrame", "LFGWhoListFrame"}
+    },
     Blizzard_GuildBankUI = {
         GuildBankFrame = {"GuildBankEmblemFrame"}
     },
