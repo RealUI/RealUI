@@ -64,6 +64,7 @@ private.defaults = {
                 healthPercent = true,
                 name = { enabled = true, size = 11, maxWidth = 160 },
                 spellName = true,
+                castTarget = true, -- B139: who the cast is aimed at
             },
             markers = {
                 quest = true, raidIcon = true, rare = true,

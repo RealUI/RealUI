@@ -89,9 +89,20 @@ function CastBar.Create(plate)
     Safe(shield.SetAtlas, shield, "nameplates-InterruptShield", false)
     shield:SetAlpha(0)
 
+    -- B139: cast target on the right, spell name in the rest of the line. Two
+    -- strings, not "Spell > Target": either part can be a secret string, and
+    -- only SetText is safe with those. An empty target leaves the spell name
+    -- the full width, centred, exactly as before.
+    local targetText = bar:CreateFontString(nil, "OVERLAY")
+    private.ApplyFont(targetText, 9)
+    targetText:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, -1)
+    targetText:SetJustifyH("RIGHT")
+    targetText:SetWordWrap(false)
+
     local spellText = bar:CreateFontString(nil, "OVERLAY")
     private.ApplyFont(spellText, 9)
-    spellText:SetPoint("TOP", bar, "BOTTOM", 0, -1)
+    spellText:SetPoint("TOPLEFT", bar, "BOTTOMLEFT", 0, -1)
+    spellText:SetPoint("RIGHT", targetText, "LEFT", -4, 0)
     spellText:SetWordWrap(false)
 
     -- Interrupted flash: parented to the plate (survives bar:Hide()), anchored to
@@ -114,8 +125,33 @@ function CastBar.Create(plate)
     plate.CastBar = {
         bar = bar, border = border, icon = icon, shield = shield,
         uninterruptible = uninterruptible, spellText = spellText,
-        flash = flash, ticks = ticks,
+        targetText = targetText, flash = flash, ticks = ticks,
     }
+end
+
+-- B139: no event fires when an NPC changes target mid-cast, so this runs at
+-- cast start and again on the slow tick.
+local function UpdateCastTarget(plate)
+    local cast = plate.CastBar
+    local name
+    if plate.state.casting and NP.db.profile.enemy.texts.castTarget then
+        -- Truth tests on secret strings are legal (see the header).
+        name = Safe(_G.UnitName, plate.unit .. "target")
+    end
+
+    if name then
+        Safe(cast.targetText.SetText, cast.targetText, name)
+        local color = Safe(private.ClassColor, plate.unit .. "target")
+        if color then
+            Safe(cast.targetText.SetTextColor, cast.targetText, color.r, color.g, color.b)
+        else
+            cast.targetText:SetTextColor(1, 1, 1)
+        end
+        cast.spellText:SetJustifyH("LEFT")
+    else
+        cast.targetText:SetText("")
+        cast.spellText:SetJustifyH("CENTER")
+    end
 end
 
 local function HideTicks(cast)
@@ -161,6 +197,7 @@ local function StopCast(plate, interrupted)
     state.casting, state.castChannel, state.castEmpowered = nil, nil, nil
     cast.bar:Hide()
     HideTicks(cast)
+    UpdateCastTarget(plate)
     private.UpdateHealthColor(plate)
 
     if interrupted then
@@ -228,6 +265,7 @@ local function StartCast(plate, isChannel)
     private.Try(cast.uninterruptible.SetAlphaFromBoolean, cast.uninterruptible, notInterruptible, 0.9, 0)
 
     ApplyCastColor(plate)
+    UpdateCastTarget(plate)
     if empowered then
         LayoutEmpowerTicks(plate)
     else
@@ -253,6 +291,7 @@ function CastBar.Detach(plate)
     cast.bar:Hide()
     cast.icon:Hide()
     cast.spellText:Hide()
+    cast.targetText:SetText("")
     cast.flash:Hide()
     HideTicks(cast)
     plate.state.castLinger = nil
@@ -301,6 +340,7 @@ function CastBar.OnTick(plate, doSlow)
     -- color on slow ticks (the uninterruptible overlay masks it when irrelevant).
     if doSlow and plate.state.casting then
         ApplyCastColor(plate)
+        UpdateCastTarget(plate)
     end
 end
 

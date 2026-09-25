@@ -133,6 +133,10 @@ local function BuildOptions()
                                 desc = "Shown whenever the game exposes health values to addons. Inside dungeons and raids WoW 12 withholds them (secret values) for most of the run — including out of combat — so the text will be absent there and returns once the game stops withholding. This is a game restriction, not a bug.",
                             },
                             spellName     = { type = "toggle", name = "Cast spell name", order = 2 },
+                            castTarget    = {
+                                type = "toggle", name = "Cast target name", order = 3,
+                                desc = "Shows who the cast is aimed at, in their class colour, on the right under the cast bar.",
+                            },
                         },
                     },
                     markers = {
