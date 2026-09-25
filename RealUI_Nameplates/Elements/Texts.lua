@@ -73,12 +73,28 @@ local function UpdateName(plate)
     texts.name:Show()
 end
 
+-- B138: "Health values" puts cur - max - pct inside the bar, centred; the
+-- percent-only text keeps its spot right of the bar. Re-anchored only when the
+-- mode changes.
+local function AnchorHealthText(texts, plate, inside)
+    if texts.healthInside == inside then return end
+    texts.healthInside = inside
+    texts.healthPercent:ClearAllPoints()
+    if inside then
+        texts.healthPercent:SetPoint("CENTER", plate, "CENTER", 0, 0)
+    else
+        texts.healthPercent:SetPoint("LEFT", plate, "RIGHT", 4, 0)
+    end
+end
+
 local function UpdateHealthPercent(plate)
     local texts = plate.Texts
-    if plate.design ~= "enemy" or not NP.db.profile.enemy.texts.healthPercent then
+    local textsDB = NP.db.profile.enemy.texts
+    if plate.design ~= "enemy" or not (textsDB.healthPercent or textsDB.healthValues) then
         texts.healthPercent:Hide()
         return
     end
+    AnchorHealthText(texts, plate, textsDB.healthValues)
     -- B58: pre-check with Accessible instead of computing inside a pcall —
     -- the caught throw still logged (623 taint.log entries in 8 minutes).
     -- Same degradation: the percentage text hides while health is secret;
@@ -87,7 +103,12 @@ local function UpdateHealthPercent(plate)
     local max, cur = _G.UnitHealthMax(plate.unit), _G.UnitHealth(plate.unit)
     if private.Accessible(max) and private.Accessible(cur) and max > 0 then
         local percent = _G.math.floor(cur / max * 100 + 0.5)
-        texts.healthPercent:SetFormattedText("%d%%", percent)
+        if textsDB.healthValues then
+            texts.healthPercent:SetFormattedText("%s - %s - %d%%",
+                _G.AbbreviateNumbers(cur), _G.AbbreviateNumbers(max), percent)
+        else
+            texts.healthPercent:SetFormattedText("%d%%", percent)
+        end
         shown = true
     end
     texts.healthPercent:SetShown(shown)
