@@ -15,6 +15,7 @@ Defaults.lua
 Elements\Health.lua
 Elements\CastBar.lua
 Elements\PowerBar.lua
+Elements\ClassPower.lua
 Elements\Auras.lua
 Elements\Texts.lua
 Elements\Markers.lua
