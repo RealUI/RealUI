@@ -285,6 +285,9 @@ function RealUI:SetLowResOptimizations(...)
         dbp[RealUI.ncLayout]["HuDY"] = -5
     end
     db.settings.hudSize = 1
+    if RealUI.LayoutManager then -- B130: the other layout's profile too
+        RealUI.LayoutManager:SetSettingForAllLayouts("hudSize", 1)
+    end
 
     RealUI:UpdateLayout()
 

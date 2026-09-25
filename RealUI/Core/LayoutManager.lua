@@ -238,6 +238,21 @@ function LayoutManager:GetLayoutSettingsStore(layoutId)
     return profile.settings
 end
 
+--- Write one `settings` key into every layout's profile. Returns true when
+--- any profile changed. B130: a resolution-driven setting has to reach both
+--- layouts, or the two specs render the same positions differently.
+function LayoutManager:SetSettingForAllLayouts(key, value)
+    local changed = false
+    for layoutId in next, layoutConfigurations do
+        local settings = self:GetLayoutSettingsStore(layoutId)
+        if settings and settings[key] ~= value then
+            settings[key] = value
+            changed = true
+        end
+    end
+    return changed
+end
+
 --- Keys under `db.profile.settings` that change how positions are RENDERED,
 --- and therefore have to travel with them while layouts are linked.
 LayoutManager.LINKED_SETTINGS = { "hudSize" }

@@ -464,6 +464,12 @@ function HuDPositioning:ApplyLowResolutionOptimizations()
         optimized = true
         debug("Reduced HuD size for low resolution")
     end
+    -- B130: SetHuDSize writes the current profile only. Reach the other
+    -- layout too, as the HuDY adjustment above already does; this runs once
+    -- (resolutionOptimized), so a missed profile kept Large for good.
+    if RealUI.LayoutManager and RealUI.LayoutManager:SetSettingForAllLayouts("hudSize", 1) then
+        optimized = true
+    end
 
     -- Adjust action bar positioning
     for layoutId, positions in pairs(hudState.calculatedPositions) do
