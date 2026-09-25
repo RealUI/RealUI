@@ -44,10 +44,15 @@ local function UpdateUsed()
     for index = 1, #MARKER_COLORS do
         local button = WorldMarker.frame[index]
 
-        if _G.IsRaidMarkerActive(button.id) then
-            button:SetBackdropBorderColor(Color.gray)
-        else
-            button:SetBackdropBorderColor(MARKER_COLORS[index])
+        -- Secret during chat-messaging lockdown (encounters, M+, rated PvP),
+        -- and a secret boolean throws on a truth test. Keep the last colour.
+        local active = _G.IsRaidMarkerActive(button.id)
+        if not _G.issecretvalue(active) then
+            if active then
+                button:SetBackdropBorderColor(Color.gray)
+            else
+                button:SetBackdropBorderColor(MARKER_COLORS[index])
+            end
         end
     end
 end
