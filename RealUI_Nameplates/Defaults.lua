@@ -46,7 +46,9 @@ private.defaults = {
                 colors = {
                     interruptReady = c("BFBFE6"),
                     interruptNotReady = c("FF0000"),
-                    uninterruptible = c("CC4D4D"),
+                    -- B140: purple, so it no longer reads as a second red next
+                    -- to interruptNotReady. Keep in sync with NewDefaults.
+                    uninterruptible = c("8C4DCC"),
                     interrupted = c("CC4D4D"),
                     empowered = c("05C666"),
                 },

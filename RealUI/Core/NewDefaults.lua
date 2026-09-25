@@ -153,6 +153,32 @@ local items = {
         end,
     },
     {
+        id = "castbarUninterruptible",
+        label = "Purple for casts you cannot interrupt",
+        desc = "Nameplate cast bars tinted uninterruptible casts a dull red, next to the bright red for \"interrupt not ready\". Both read as a red bar. Uninterruptible is now purple.",
+        changed = "4.0.3",
+        -- The tint texture takes its colour when each plate's castbar is built.
+        needsReload = true,
+        available = function()
+            local NP = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+            local castbar = NP and NP.db and NP.db.profile.enemy and NP.db.profile.enemy.castbar
+            return castbar and castbar.colors
+        end,
+        isApplied = function()
+            local NP = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+            local color = NP.db.profile.enemy.castbar.colors.uninterruptible
+            local r, g, b = 0x8C / 255, 0x4D / 255, 0xCC / 255
+            return _G.math.abs(color.r - r) < 0.01 and _G.math.abs(color.g - g) < 0.01
+                and _G.math.abs(color.b - b) < 0.01
+        end,
+        apply = function()
+            local NP = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+            NP.db.profile.enemy.castbar.colors.uninterruptible = {
+                r = 0x8C / 255, g = 0x4D / 255, b = 0xCC / 255, a = 1,
+            }
+        end,
+    },
+    {
         id = "bags",
         label = "Bags open bottom-right",
         desc = "The bag cluster now opens above the Infobar at the bottom-right, clear of the minimap.",
