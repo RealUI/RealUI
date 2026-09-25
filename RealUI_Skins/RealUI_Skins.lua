@@ -53,6 +53,10 @@ local auroraConfigDefaults = {
     -- replacement. Aurora owning that global taints it for every secure reader,
     -- which blocks C_ItemUpgrade.UpgradeItem(). Toggle with /auroraInsertFrame.
     devRestoreInsertFrame = false,
+
+    -- DEV: leave Blizzard's ShouldShowMawBuffs alone instead of wrapping it.
+    -- Toggle with /auroraMawBuffs.
+    devRestoreMawBuffs = false,
 }
 
 local auroraCharacterConfigDefaults = {
@@ -669,13 +673,30 @@ function private.OnLoad()
         RealUI:ReloadUIDialog()
     end
 
+    -- Same A/B for the ShouldShowMawBuffs wrapper (`/aurora mawbuffs`).
+    local function ToggleMawBuffs()
+        local profileConfig = EnsureProfileAuroraConfig(private.skinsDB)
+        profileConfig.devRestoreMawBuffs = not profileConfig.devRestoreMawBuffs
+        SyncRuntimeAuroraConfig(private.skinsDB)
+
+        if profileConfig.devRestoreMawBuffs then
+            _G.print("|cff00a0ffAurora:|r ShouldShowMawBuffs — using |cff00ff00Blizzard's original|r (global untainted).")
+            _G.print("  Exercise: an LFR wing and a delve, with the objective tracker visible.")
+        else
+            _G.print("|cff00a0ffAurora:|r ShouldShowMawBuffs — using |cffffcc00Aurora's wrapper|r (global tainted).")
+        end
+        RealUI:ReloadUIDialog()
+    end
+
     if RealUI.RegisterChatCommand then
         RealUI:RegisterChatCommand("auroraInsertFrame", ToggleInsertFrame)
+        RealUI:RegisterChatCommand("auroraMawBuffs", ToggleMawBuffs)
     else
         _G.C_Timer.After(0, function()
             local fullRealUI = _G.RealUI
             if fullRealUI and fullRealUI.RegisterChatCommand then
                 fullRealUI:RegisterChatCommand("auroraInsertFrame", ToggleInsertFrame)
+                fullRealUI:RegisterChatCommand("auroraMawBuffs", ToggleMawBuffs)
             end
         end)
     end
