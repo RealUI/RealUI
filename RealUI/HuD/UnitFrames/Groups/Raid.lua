@@ -157,11 +157,8 @@ local function RaidStyle(self, unit)
     local width = rdb.size.x
 
     self:RegisterForClicks("AnyUp")
-    self:SetScript("OnEnter", function(frame, ...)
-        frame.unit = frame.__unit  -- Blizzard tooltip compat (same as Shared style)
-        return _G.UnitFrame_OnEnter(frame, ...)
-    end)
-    self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
+    self:SetScript("OnEnter", UnitFrames.OnEnter)  -- Shared.lua
+    self:SetScript("OnLeave", UnitFrames.OnLeave)
 
     local bg = self:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(self)
@@ -410,21 +407,34 @@ _G.tinsert(UnitFrames.units, function()
     UnitFrames.partyHeader = party
     UnitFrames.raidHeader = raid
 
-    -- Register the movers AFTER the headers exist (Boss.lua order), then raise
-    -- their strata: header CHILDREN are created later still (roster processing),
-    -- so creation order alone leaves the mover buried under the cells when in
-    -- a group. FramePoint re-anchors our holders onto their dragFrames, so the
-    -- dragFrame is recoverable from the holder's anchor point.
+    -- A secure header can reconfigure its buttons in combat but cannot create
+    -- new ones, so a member joining mid-fight got no frame until combat ended.
+    -- Build every button now (Grid2's ForceFramesCreation trick): a negative
+    -- startingIndex makes the header lay out maxFrames buttons. Restore the
+    -- shown state afterwards instead of hiding — the visibility state driver
+    -- owns it and only re-evaluates on a state change.
+    if not _G.InCombatLockdown() then
+        for _, header in _G.ipairs({ party, raid }) do
+            local maxFrames = (header:GetAttribute("maxColumns") or 1)
+                * (header:GetAttribute("unitsPerColumn") or 5)
+            local startingIndex = header:GetAttribute("startingIndex") or 1
+            local shown = header:IsShown()
+            header:Show()
+            header:SetAttribute("startingIndex", 1 - maxFrames)
+            header:SetAttribute("startingIndex", startingIndex)
+            if not shown then header:Hide() end
+        end
+    end
+
+    -- Register the movers AFTER the headers exist (Boss.lua order). Header
+    -- CHILDREN are created later still, which buried the movers under the
+    -- cells; FramePoint now raises every mover to HIGH itself (B101).
     GetPartyDB()  -- ensure the party.framePoint table exists before FramePoint reads it
     for holder, path in _G.next, {
         [anchorHolder] = {"profile", "units", "raid", "framePoint"},
         [partyAnchor]  = {"profile", "units", "raid", "party", "framePoint"},
     } do
         FramePoint:PositionFrame(UnitFrames, holder, path)
-        local _, dragFrame = holder:GetPoint(1)
-        if dragFrame and dragFrame ~= _G.UIParent then
-            dragFrame:SetFrameStrata("HIGH")
-        end
     end
 
     -- Hand the style token back for anything spawned later.
