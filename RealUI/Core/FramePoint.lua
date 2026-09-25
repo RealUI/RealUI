@@ -494,6 +494,10 @@ function FramePoint:PositionFrame(mod, frame, optionPath)
     local module = modules[mod]
     dragFrame:SetSize(frame:GetSize())
     dragFrame:SetHitRectInsets(-5, -5, -5, -5)
+    -- B101: above the frame it stands in for. Unit frames are mouse-enabled
+    -- secure buttons on the same strata and took the clicks, so the player
+    -- frame barely responded while the cast bar (no mouse) grabbed fine.
+    dragFrame:SetFrameStrata("HIGH")
     dragFrame:SetClampedToScreen(true)
     dragFrame:SetMovable(true)
     dragFrame:EnableMouse(true)
