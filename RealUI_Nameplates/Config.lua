@@ -105,6 +105,16 @@ local function BuildOptions()
                             threshold = { type = "range", name = "Threshold", min = 0.1, max = 0.5, step = 0.05, isPercent = true, order = 2 },
                         },
                     },
+                    classPower = {
+                        type = "group", name = "Combo points / class power", inline = true, order = 25,
+                        args = {
+                            enabled = {
+                                type = "toggle", name = "Enabled", order = 1,
+                                desc = "Your combo points or class resource (holy power, chi, arcane charges, soul shards, essence) as pips along the bottom of your target's health bar.",
+                            },
+                            height = { type = "range", name = "Height", min = 2, max = 8, step = 1, order = 2 },
+                        },
+                    },
                     castbar = {
                         type = "group", name = "Castbar", inline = true, order = 30,
                         args = {
@@ -131,6 +141,10 @@ local function BuildOptions()
                             healthPercent = {
                                 type = "toggle", name = "Health percent", order = 1,
                                 desc = "Shown whenever the game exposes health values to addons. Inside dungeons and raids WoW 12 withholds them (secret values) for most of the run — including out of combat — so the text will be absent there and returns once the game stops withholding. This is a game restriction, not a bug.",
+                            },
+                            healthValues  = {
+                                type = "toggle", name = "Health values", order = 1.5,
+                                desc = "Current and maximum health plus the percent (\"15.2K - 45.5K - 33%\"), inside the health bar. Same limit as the percent: absent while the game withholds health values (secret values) in dungeons and raids.",
                             },
                             spellName     = { type = "toggle", name = "Cast spell name", order = 2 },
                             castTarget    = {

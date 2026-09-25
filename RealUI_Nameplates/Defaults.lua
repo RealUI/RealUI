@@ -54,6 +54,7 @@ private.defaults = {
                 },
             },
             power = { enabled = false, height = 4 },
+            classPower = { enabled = true, height = 3 }, -- B81: pips on the target's plate
             auras = {
                 size = 20,
                 myDebuffs    = { enabled = true, max = 8, position = "aboveCenter", offset = { x = 0, y = 16 } },
@@ -63,6 +64,7 @@ private.defaults = {
             texts = {
                 healthPercent = true,
                 name = { enabled = true, size = 11, maxWidth = 160 },
+                healthValues = false, -- B138: cur - max - pct inside the bar
                 spellName = true,
                 castTarget = true, -- B139: who the cast is aimed at
             },
