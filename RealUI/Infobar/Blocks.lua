@@ -1532,7 +1532,7 @@ function Infobar:CreateBlocks()
             type = "RealUI",
             icon = fa["heartbeat"],
             iconFont = iconFont,
-            text = 1,
+            text = "--", -- B136: neutral until the first pass that measures a slot
             OnEnable = function(block)
                 block.helpTipInfo = {
                     text = _G.TUTORIAL36:match("(.-%p)"),
@@ -1675,6 +1675,7 @@ function Infobar:CreateBlocks()
                 -- empty read stuck for the rest of the session. Keep the last true
                 -- value instead; the debug line confirms which event reads empty.
                 if measured > 0 then
+                    block.duraRetries = nil
                     itemSlots.lowSlot = lowSlot
 
                     if lowDur < 0.1 and not block.alertHidden then
@@ -1686,6 +1687,16 @@ function Infobar:CreateBlocks()
                     block.dataObj.iconR, block.dataObj.iconG, block.dataObj.iconB = RealUI.GetDurabilityColor(lowMin, lowMax):GetRGB()
                 else
                     Infobar:debug("Durability: no slots measured, keeping last value", event)
+                    -- Confirmed at login: nothing re-runs until durability
+                    -- changes, so re-read a few times on our own. Capped, since
+                    -- a character with no durable gear never measures anything.
+                    local retries = block.duraRetries or 0
+                    if retries < 5 then
+                        block.duraRetries = retries + 1
+                        _G.C_Timer.After(2, function()
+                            block:OnEvent("DURABILITY_RETRY")
+                        end)
+                    end
                 end
                 block.timer = false
             end,
