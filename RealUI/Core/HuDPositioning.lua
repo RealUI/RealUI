@@ -268,14 +268,11 @@ function HuDPositioning:CalculatePositionValue(positionKey, baseValue, layoutId)
         calculatedValue = baseValue * hudState.currentScale
     end
 
-    -- Apply HuD size offsets if available
-    if RealUI.hudSizeOffsets and RealUI.hudSizeOffsets[hudState.currentSize] then
-        local offset = RealUI.hudSizeOffsets[hudState.currentSize][positionKey]
-        if offset then
-            calculatedValue = calculatedValue + offset
-            debug("Applied offset", offset, "to", positionKey, "Result:", calculatedValue)
-        end
-    end
+    -- B102: no RealUI.hudSizeOffsets here. Every reader adds the size offset
+    -- at READ time (Positioners.GetKeyAdjust, RealUI_ActionBars Integration's
+    -- topYOfs), so baking it in counted it twice: -40 instead of -20 on
+    -- ActionBarsY and both cast bar Y keys at Large. Calculated values are
+    -- pre-offset now, like the runtime-owned UFHorizontal always was.
 
     -- Apply resolution-specific adjustments
     calculatedValue = self:ApplyResolutionAdjustment(positionKey, calculatedValue, layoutId)
@@ -346,6 +343,9 @@ function HuDPositioning:GetResolutionScale()
     end
 end
 
+-- B102: keys whose calculated values used to carry the HuD size offset twice.
+local B102_KEYS = { ActionBarsY = true, CastBarPlayerY = true, CastBarTargetY = true }
+
 function HuDPositioning:UpdateRealUIPositions()
     debug("Updating RealUI position data with calculated positions")
 
@@ -402,6 +402,12 @@ function HuDPositioning:UpdateRealUIPositions()
             for positionKey, value in pairs(positions) do
                 if not runtimeOwnedKeys[positionKey] and dest[positionKey] == nil then
                     dest[positionKey] = value
+                    -- B102: filled pre-offset, so this profile never needs the
+                    -- abHeightB102 migration in /realui newdefaults.
+                    if B102_KEYS[positionKey] then
+                        db.profile.settings = db.profile.settings or {}
+                        db.profile.settings.b102Migrated = true
+                    end
                 end
             end
         end

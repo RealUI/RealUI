@@ -145,6 +145,15 @@ not reach you automatically. RealUI opens a "new defaults" picker once per
 character listing everything that changed since 3.4.0; tick what you want, or
 reopen it later with `/realui newdefaults`.
 
+**Action bar height at Large HuD (4.0.3).** Since 4.0.0 the HuD size offset was
+counted twice for the action bars and cast bars, so at Large HuD the top action
+bars sat 20px lower than intended. New profiles get the corrected height
+automatically. Existing profiles are offered "Action bar height at Large HuD"
+in the new-defaults picker. It removes the extra 20px once, keeps any height
+you set with the HuD Vertical slider, and leaves bottom bars on the Infobar.
+If you leave it unticked, your top bars stay where they are, but bottom bars
+drop 20px below the Infobar line. Small HuD is not affected.
+
 Troubleshooting/comments/questions?
 ------------------------------------
 

@@ -27,6 +27,10 @@ RealUI.NewDefaults = NewDefaults
 --
 -- `installApply = true` marks an item the install wizard applies itself, so a
 -- freshly-wizarded character has nothing left to be nudged about.
+-- B102: the keys whose calculated defaults used to carry the HuD size offset
+-- twice. See Core/Positioners.lua.
+local B102_KEYS = { "ActionBarsY", "CastBarPlayerY", "CastBarTargetY" }
+
 local items = {
     {
         id = "auraSize",
@@ -176,6 +180,39 @@ local items = {
             NP.db.profile.enemy.castbar.colors.uninterruptible = {
                 r = 0x8C / 255, g = 0x4D / 255, b = 0xCC / 255, a = 1,
             }
+        end,
+    },
+    {
+        id = "abHeightB102",
+        label = "Action bar height at Large HuD",
+        desc = "At Large HuD the top action bars sat 20px lower than intended, because the HuD size offset was counted twice. This removes the extra 20px from both layouts' saved heights. Heights you set with the HuD Vertical slider keep their adjustment, and bottom bars stay on the Infobar. Leaving this unticked makes bottom bars sit 20px lower.",
+        changed = "4.0.3",
+        needsReload = true,
+        available = function()
+            local settings = RealUI.db and RealUI.db.profile.settings
+            return RealUI.LayoutManager and RealUI.defaultPositions
+                and settings and settings.hudSize == 2
+        end,
+        isApplied = function()
+            -- One-shot per profile: the saved values cannot tell us whether
+            -- they still carry the doubled offset, so a flag records it.
+            local settings = RealUI.LayoutManager:GetLayoutSettingsStore(RealUI.cLayout or 1)
+            return settings and settings.b102Migrated == true
+        end,
+        apply = function()
+            local offsets = RealUI.hudSizeOffsets[2]
+            for layoutId in next, RealUI.defaultPositions do
+                local settings = RealUI.LayoutManager:GetLayoutSettingsStore(layoutId)
+                local store = RealUI.LayoutManager:GetLayoutPositionsStore(layoutId)
+                if settings and store and not settings.b102Migrated then
+                    for _, key in ipairs(B102_KEYS) do
+                        if store[key] then
+                            store[key] = store[key] - (offsets[key] or 0)
+                        end
+                    end
+                    settings.b102Migrated = true
+                end
+            end
         end,
     },
     {

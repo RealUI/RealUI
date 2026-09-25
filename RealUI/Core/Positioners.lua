@@ -30,25 +30,16 @@ end
 -- missing keys only, HuDPositioning writes the calculated ones at login), so
 -- an individual key can legitimately be absent when the config sliders drive
 -- an update. A missing key contributes no offset rather than erroring.
---[[ `RealUI.defaultPositions` holds two kinds of value, and the distinction
-     matters when reading it as a fallback below:
+--[[ `RealUI.defaultPositions` and profile positions hold PRE-offset values
+     for every key, and the HuD size offset is added exactly once, here at read
+     time (and in RealUI_ActionBars Integration's topYOfs for ActionBarsY).
 
-       RAW shipped constants — `UFHorizontal` and `ActionBarsBotY`. These are
-         the `runtimeOwnedKeys` that HuDPositioning:UpdateRealUIPositions
-         deliberately never writes calculated values for, so the size offset is
-         still owed on top.
-       CALCULATED, already-offset values — everything else.
-
-     This used to be a `RAW_DEFAULT_KEYS` table that gated the fallback to the
-     raw keys only. It stopped being referenced when the fallback became a
-     lift-and-shift of AceDB's old behaviour (B80), and an unused table that
-     still reads as live logic is precisely the hazard B57 cost half a day to:
-     a dead `Hook.CommunitiesListEntryMixin` was diagnosed as a live cause and
-     "fixed" without effect. So the knowledge stays, the corpse does not.
-
-     Whether the offset should be applied to already-offset values at all is
-     the open question in B102; if that is answered by re-gating the fallback,
-     this list is what to gate on — keep it in sync with `runtimeOwnedKeys`. ]]
+     Until B102 (2026-09-26) that was only true for the `runtimeOwnedKeys`
+     (`UFHorizontal`, `ActionBarsBotY`). HuDPositioning:CalculatePositionValue
+     also baked the offset into the calculated keys, so ActionBarsY and both
+     cast bar Y keys got it twice: -40 instead of -20 at Large. Profiles
+     filled before that fix may still hold a doubled ActionBarsY; the
+     `abHeightB102` entry in /realui newdefaults resets it. ]]
 
 local function GetKeyAdjust(key)
     -- Precedence MUST match the config panel's `safeLayout()`, which resolves
@@ -61,27 +52,11 @@ local function GetKeyAdjust(key)
     local positions = ndb and ndb.positions and ndb.positions[layout]
     local value = positions and positions[key]
 
-    --[[ A missing key falls back to the shared default — but ONLY for the
-         keys where that default is a raw constant.
-
-         Zero was the old behaviour and is wrong for width keys: the
-         UnitFrames positioner is 80 wide plus UFHorizontal, so a missing
-         UFHorizontal collapsed it from 380 to 80 and pulled both unit frames
-         into the middle of the screen on any UpdatePositioners run (measured
-         2026-08-23: profile key nil, RealUI.defaultPositions holding 200).
-
-         But RealUI.defaultPositions is a MIX, and falling back to it blindly
-         double-applies the size offset. HuDPositioning writes CALCULATED
-         values there — already scaled and offset — for every key except the
-         `runtimeOwnedKeys` it deliberately skips. So for those calculated
-         keys, `default + GetHuDSizeOffset(key)` counts the offset twice,
-         which is how ActionBarsY / CastBarPlayerY / CastBarTargetY threw the
-         HuD off screen when this fallback was first written unrestricted.
-
-         Restricting to the runtime-owned set keeps the fix where it is needed
-         (UFHorizontal is exactly such a key: HuDPositioning never seeds it,
-         so the default stays the raw shipped 200 and the offset is owed) and
-         leaves every calculated key on the previous zero behaviour. ]]
+    --[[ A missing key falls back to the shared default. Zero was the old
+         behaviour and is wrong for width keys: the UnitFrames positioner is 80
+         wide plus UFHorizontal, so a missing UFHorizontal collapsed it from
+         380 to 80 and pulled both unit frames into the middle of the screen
+         (measured 2026-08-23: profile key nil, defaultPositions holding 200). ]]
     --[[ B80/B86 (2026-08-24): fallback for EVERY key, because AceDB no longer
          supplies position defaults at all — see the note at Core.lua's
          `positions = {}`.
@@ -95,13 +70,8 @@ local function GetKeyAdjust(key)
          deletes saved keys for matching a default that the user's own values
          were promoted into.
 
-         The raw/calculated split is documented at the top of this file rather
-         than gating this branch, because gating it would change behaviour
-         rather than preserve it. Whether adding the offset on top of an
-         already-offset calculated value is right is a real question — see
-         B102 — but it is the behaviour that has been shipping, and changing it
-         belongs in its own change with its own verification, not smuggled into
-         a persistence fix. ]]
+         Values are pre-offset (B102, see the top of this file), so adding
+         the offset here is the one place it is applied. ]]
     if not value then
         local defaults = RealUI.defaultPositions and RealUI.defaultPositions[layout]
         value = defaults and defaults[key]
