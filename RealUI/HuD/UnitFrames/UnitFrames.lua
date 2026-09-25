@@ -215,7 +215,7 @@ function UnitFrames.ResolveAuraFilter(baseFilter, groupDB)
     local filterString = preset.token and (baseFilter .. "|" .. preset.token) or baseFilter
 
     -- maxDuration implicitly drops permanent auras too (auraData.duration == 0
-    -- is rejected outright — Blizzard_AuraContainerUtil.lua:101-106), which is
+    -- is rejected outright — Blizzard_AuraContainerUtil.lua:113), which is
     -- usually the actual intent behind "only show me things that are ticking".
     local candidates
     local maxDuration = groupDB.maxDuration
