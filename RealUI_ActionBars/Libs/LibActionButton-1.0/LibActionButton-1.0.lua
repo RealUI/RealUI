@@ -1002,8 +1002,10 @@ if UseCustomFlyout then
 		-- 300 is a safe upper limit in 10.0.2, the highest known spell is 229
 		for flyoutID = 1, 300 do
 			local success, _, _, numSlots, isKnown = pcall(GetFlyoutInfo, flyoutID)
-			if success then
-				lib.FlyoutInfo[flyoutID] = { numSlots = numSlots, isKnown = isKnown, slots = {} }
+			-- RealUI patch: WoW Forever 1.60.1.70009 returns nothing for an unused
+			-- flyoutID instead of erroring, so pcall succeeds with a nil numSlots
+			if success and numSlots then
+				lib.FlyoutInfo[flyoutID] ={ numSlots = numSlots, isKnown = isKnown, slots = {} }
 				for slotID = 1, numSlots do
 					local spellID, overrideSpellID, isKnownSlot = GetFlyoutSlotInfo(flyoutID, slotID)
 
@@ -1030,7 +1032,7 @@ if UseCustomFlyout then
 
 		for flyoutID, data in pairs(lib.FlyoutInfo) do
 			local success, _, _, numSlots, isKnown = pcall(GetFlyoutInfo, flyoutID)
-			if success then
+			if success and numSlots then -- RealUI patch, see DiscoverFlyoutSpells
 				data.isKnown = isKnown
 				for slotID = 1, numSlots do
 					local spellID, overrideSpellID, isKnownSlot = GetFlyoutSlotInfo(flyoutID, slotID)
