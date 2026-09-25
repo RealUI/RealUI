@@ -35,6 +35,36 @@ local function SafeShow(frame, show)
     end
 end
 
+-- Unit tooltips. oUF 14 keeps the live (vehicle-aware) unit in __unit and no
+-- longer maintains .unit, which Blizzard's UnitFrame_OnEnter reads. Upstream's
+-- answer (oUF discussion #892) is that layouts own their tooltip handlers;
+-- this mirrors UnitFrame_UpdateTooltip against __unit.
+local function UpdateTooltip(self)
+    local tooltip = _G.GameTooltip
+    if tooltip:IsForbidden() then return end
+
+    _G.GameTooltip_SetDefaultAnchor(tooltip, self)
+    if tooltip:SetUnit(self.__unit, self.hideStatusOnTooltip) then
+        if _G.UNIT_POPUP_RIGHT_CLICK then
+            _G.GameTooltip_AddBlankLineToTooltip(tooltip)
+            _G.GameTooltip_AddInstructionLine(tooltip, _G.UNIT_POPUP_RIGHT_CLICK)
+        end
+        tooltip:Show()
+        self.UpdateTooltip = UpdateTooltip
+    else
+        self.UpdateTooltip = nil
+    end
+end
+function UnitFrames.OnEnter(self)
+    UpdateTooltip(self)
+end
+function UnitFrames.OnLeave(self)
+    self.UpdateTooltip = nil
+    if not _G.GameTooltip:IsForbidden() then
+        _G.GameTooltip:FadeOut()
+    end
+end
+
 -- Power types where the default state is empty
 RealUI.ReversePowers = {
     ["RAGE"] = true,
@@ -740,14 +770,8 @@ local function Shared(self, unit)
     unit = unit:match("(%a+)%d*")
     UnitFrames:debug("Shared", self, unitToken, unit)
 
-    -- Blizzard's UnitFrame_OnEnter/UnitFrame_UpdateTooltip read self.unit,
-    -- which oUF 14 no longer maintains — refresh a compat copy from __unit
-    -- at hover time (oUF itself never touches .unit anymore)
-    self:SetScript("OnEnter", function(frame, ...)
-        frame.unit = frame.__unit
-        return _G.UnitFrame_OnEnter(frame, ...)
-    end)
-    self:SetScript("OnLeave", _G.UnitFrame_OnLeave)
+    self:SetScript("OnEnter", UnitFrames.OnEnter)
+    self:SetScript("OnLeave", UnitFrames.OnLeave)
     self:RegisterForClicks("AnyUp")
 
     local misc = GetMiscDB()
