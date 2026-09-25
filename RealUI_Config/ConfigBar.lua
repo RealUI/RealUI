@@ -2028,7 +2028,7 @@ do -- UnitFrames
                 args.showBossBuffs = {
                     name = "Show Boss Buffs",
                     type = "toggle",
-                    order = 13,
+                    order = 20,
                     get = function() return UnitFrames.db.profile.boss.showBossBuffs end,
                     set = function(_, val)
                         UnitFrames.db.profile.boss.showBossBuffs = val
@@ -2039,7 +2039,7 @@ do -- UnitFrames
                     name = L["UnitFrames_BuffCount"],
                     type = "range",
                     min = 0, max = 40, step = 1,
-                    order = 14,
+                    order = 21,
                     disabled = function() return not UnitFrames.db.profile.boss.showBossBuffs end,
                     get = function() return UnitFrames.db.profile.boss.buffCount end,
                     set = function(_, val)
@@ -2051,12 +2051,43 @@ do -- UnitFrames
                     name = L["UnitFrames_BuffSize"],
                     type = "range",
                     min = 10, max = 60, step = 1,
-                    order = 15,
+                    order = 22,
                     disabled = function() return not UnitFrames.db.profile.boss.showBossBuffs end,
                     get = function() return UnitFrames.db.profile.boss.buffSize end,
                     set = function(_, val)
                         UnitFrames.db.profile.boss.buffSize = val
                         UnitFrames:RefreshUnits("BossAuras")
+                    end,
+                }
+                -- B56: the same filter presets as the target frame
+                AddAuraFilterOptions({args = args},
+                    function() return UnitFrames.db.profile.boss.auraLayout.debuffs end,
+                    function() return UnitFrames.db.profile.boss.showBossDebuffs end,
+                    13, "debuff", "BossAuras")
+                AddAuraFilterOptions({args = args},
+                    function() return UnitFrames.db.profile.boss.auraLayout.buffs end,
+                    function() return UnitFrames.db.profile.boss.showBossBuffs end,
+                    23, "buff", "BossAuras")
+                args.showCastbar = {
+                    name = "Show Cast Bars",
+                    desc = "A cast bar under each boss frame. Tinted dark red while the cast cannot be interrupted.",
+                    type = "toggle",
+                    order = 30,
+                    get = function() return UnitFrames.db.profile.boss.showCastbar ~= false end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.showCastbar = val
+                        UnitFrames:RefreshUnits("BossCastbar")
+                    end,
+                }
+                args.targetHighlight = {
+                    name = "Highlight Current Target",
+                    desc = "Border around the boss frame of whichever boss you are targeting.",
+                    type = "toggle",
+                    order = 31,
+                    get = function() return UnitFrames.db.profile.boss.targetHighlight ~= false end,
+                    set = function(_, val)
+                        UnitFrames.db.profile.boss.targetHighlight = val
+                        UnitFrames:RefreshUnits("BossHighlight")
                     end,
                 }
             end

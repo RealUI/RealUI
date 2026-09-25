@@ -667,21 +667,45 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
             -- oUF 14: boss anchors are fixed (no defaultAnchor = caller-owned
             -- positioning); growth defaults mirror the create site
             -- (B34: debuffs anchor to the frame's left edge and grow LEFT)
+            local bossLayout = db.boss and db.boss.auraLayout or {}
             if frame.Debuffs and db.boss then
                 UnitFrames.RefreshAuraElement(frame.Debuffs, frame, {
                     show = db.boss.showBossDebuffs,
                     count = db.boss.debuffCount,
+                    layout = bossLayout.debuffs,
+                    baseFilter = "HARMFUL",
                     defaultGrowthX = "LEFT",
                     defaultGrowthY = "UP",
                 })
             end
             if frame.Buffs and db.boss then
+                -- B56: left of the debuffs, growing left (see Boss.lua)
                 UnitFrames.RefreshAuraElement(frame.Buffs, frame, {
                     show = db.boss.showBossBuffs,
                     count = db.boss.buffCount,
-                    defaultGrowthX = "RIGHT",
-                    defaultGrowthY = "DOWN",
+                    layout = bossLayout.buffs,
+                    baseFilter = "HELPFUL",
+                    defaultGrowthX = "LEFT",
+                    defaultGrowthY = "UP",
                 })
+            end
+
+            -- B56: cast bar and target highlight toggles, live
+            local castbar = frame._ruiCastbar
+            if castbar and db.boss then
+                local want = db.boss.showCastbar ~= false
+                if want and not frame.Castbar then
+                    frame.Castbar = castbar
+                    frame:EnableElement("Castbar")
+                elseif not want and frame.Castbar then
+                    frame:DisableElement("Castbar")
+                    frame.Castbar = nil
+                    castbar:Hide()
+                end
+            end
+            if frame.TargetHighlight and db.boss then
+                frame.showTargetHighlight = db.boss.targetHighlight ~= false
+                UnitFrames.UpdateBossTargetHighlight(frame)
             end
 
             frame:UpdateAllElements(event)
@@ -1162,7 +1186,9 @@ function UnitFrames:OnInitialize()
                 showPets = true,
             },
             boss = {
-                gap = 3,
+                -- B56: 3px between frames plus room for the 10px cast bar that
+                -- hangs 2px below each one.
+                gap = 15,
                 -- B56: hide the boss power strip unless the encounter provides
                 -- alt power. Default off = current always-visible behaviour.
                 altPowerOnly = false,
@@ -1172,6 +1198,13 @@ function UnitFrames:OnInitialize()
                 buffSize = 20,
                 showBossDebuffs = true,
                 showBossBuffs = true,
+                -- B56
+                showCastbar = true,
+                targetHighlight = true,
+                auraLayout = {
+                    debuffs = { filterPreset = "mine" },
+                    buffs = { filterPreset = "dispellable" },
+                },
             },
             -- TODO: Convert to FramePoint
             -- B47/B12 reference layout: layout 1 measured from Arnvid's
