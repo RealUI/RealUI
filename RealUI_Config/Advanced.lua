@@ -812,7 +812,6 @@ do -- RealUI
     -- instead of the AddOn list. Per-character, same scope as the AddOn list's
     -- default; changes need a /reload (addons cannot unload live).
     local components do
-        local charName = RealUI.addonCharacter or (RealUI.charInfo and RealUI.charInfo.name)
         local componentAddons = {
             {addon = "RealUI_ActionBars", label = "Action Bars",
                 blurb = "RealUI's action bar system. Disabling it leaves you with Blizzard's default bars."},
@@ -857,13 +856,13 @@ do -- RealUI
                     width = "full",
                     order = index * 10,
                     get = function()
-                        return _G.C_AddOns.GetAddOnEnableState(comp.addon, charName) == _G.Enum.AddOnEnableState.All
+                        return _G.C_AddOns.GetAddOnEnableState(comp.addon, RealUI.GetAddonCharacter()) == _G.Enum.AddOnEnableState.All
                     end,
                     set = function(_, value)
                         if value then
-                            _G.C_AddOns.EnableAddOn(comp.addon, charName)
+                            _G.C_AddOns.EnableAddOn(comp.addon, RealUI.GetAddonCharacter())
                         else
-                            _G.C_AddOns.DisableAddOn(comp.addon, charName)
+                            _G.C_AddOns.DisableAddOn(comp.addon, RealUI.GetAddonCharacter())
                         end
                         RealUI:ReloadUIDialog()
                     end,

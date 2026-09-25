@@ -180,9 +180,12 @@ RealUI.key = ("%s - %s"):format(RealUI.charInfo.name, RealUI.charInfo.realm)
 -- Addon Compatibility Management
 -- Disable cargBags if RealUI_Inventory is enabled
 -- Per-character enable state keyed by GUID, as Blizzard's AddonList does on
--- every flavor; Forever's UnitName("player") is not a reliable key.
-RealUI.addonCharacter = _G.UnitGUID("player") or RealUI.charInfo.name
-local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.addonCharacter) == _G.Enum.AddOnEnableState.All;
+-- every flavor; Forever's UnitName("player") is not a reliable key. Resolved
+-- per call: on a cold login the GUID can still be nil while addons load.
+function RealUI.GetAddonCharacter()
+    return _G.UnitGUID("player") or RealUI.charInfo.name
+end
+local enabled = _G.C_AddOns.GetAddOnEnableState("RealUI_Inventory", RealUI.GetAddonCharacter()) == _G.Enum.AddOnEnableState.All;
 if enabled == true then
     _G.C_AddOns.DisableAddOn("cargBags_Nivaya")
 end
