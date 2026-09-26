@@ -140,11 +140,11 @@ local function BuildOptions()
                         args = {
                             healthPercent = {
                                 type = "toggle", name = "Health percent", order = 1,
-                                desc = "Shown whenever the game exposes health values to addons. Inside dungeons and raids WoW 12 withholds them (secret values) for most of the run — including out of combat — so the text will be absent there and returns once the game stops withholding. This is a game restriction, not a bug.",
+                                desc = "Health percent right of the bar. Works in dungeons and raids too: it is read through the game's secret-safe percent API.",
                             },
                             healthValues  = {
                                 type = "toggle", name = "Health values", order = 1.5,
-                                desc = "Current and maximum health plus the percent (\"15.2K - 45.5K - 33%\"), inside the health bar. Same limit as the percent: absent while the game withholds health values (secret values) in dungeons and raids.",
+                                desc = "Current and maximum health plus the percent (\"15.2K - 45.5K - 33%\"), inside the health bar.",
                             },
                             spellName     = { type = "toggle", name = "Cast spell name", order = 2 },
                             castTarget    = {

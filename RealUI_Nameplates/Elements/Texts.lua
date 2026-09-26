@@ -95,12 +95,34 @@ local function UpdateHealthPercent(plate)
         return
     end
     AnchorHealthText(texts, plate, textsDB.healthValues)
-    -- B58: pre-check with Accessible instead of computing inside a pcall —
-    -- the caught throw still logged (623 taint.log entries in 8 minutes).
-    -- Same degradation: the percentage text hides while health is secret;
-    -- the health bar itself keeps updating (secret-capable SetValue).
+    local unit = plate.unit
+
+    -- B138: secret-safe path, the one the HuD's realui:healthPercent and
+    -- realui:healthValue tags ship (HuD/UnitFrames/Tags.lua). The percent comes
+    -- from UnitHealthPercent with the ScaleTo100 curve, so the engine does the
+    -- maths; AbbreviateNumbers and string.format accept secret numbers, and
+    -- SetFormattedText accepts the secret strings they return. So the text now
+    -- shows where health is secret too (instances, and open-world combat on
+    -- Forever), instead of blanking.
+    if _G.UnitHealthPercent and _G.CurveConstants and _G.CurveConstants.ScaleTo100 then
+        local percent = _G.string.format("%d",
+            _G.UnitHealthPercent(unit, true, _G.CurveConstants.ScaleTo100))
+        if textsDB.healthValues then
+            texts.healthPercent:SetFormattedText("%s - %s - %s%%",
+                _G.AbbreviateNumbers(_G.UnitHealth(unit)),
+                _G.AbbreviateNumbers(_G.UnitHealthMax(unit)), percent)
+        else
+            texts.healthPercent:SetFormattedText("%s%%", percent)
+        end
+        texts.healthPercent:Show()
+        return
+    end
+
+    -- Fallback for a client without the curve API. B58: pre-check with
+    -- Accessible instead of computing inside a pcall (the caught throw still
+    -- logged); the text hides while health is secret.
     local shown = false
-    local max, cur = _G.UnitHealthMax(plate.unit), _G.UnitHealth(plate.unit)
+    local max, cur = _G.UnitHealthMax(unit), _G.UnitHealth(unit)
     if private.Accessible(max) and private.Accessible(cur) and max > 0 then
         local percent = _G.math.floor(cur / max * 100 + 0.5)
         if textsDB.healthValues then
@@ -126,6 +148,16 @@ function Texts.Attach(plate, unit)
         texts.name:SetPoint("CENTER", plate, "CENTER", 0, 0)
     else
         texts.name:SetPoint("BOTTOM", plate, "TOP", 0, 3)
+    end
+
+    -- B138: make the health text a region of the health bar, so OVERLAY puts
+    -- it above the fill. As a plate region it drew under the bar (a child
+    -- frame) once "Health values" moved it inside, and a sibling frame at a
+    -- higher level did not hold: reparenting the plate to Blizzard's base
+    -- clamps child levels, which can tie them. Done here, not in Create,
+    -- because element creation order is not fixed.
+    if plate.Health and plate.Health.bar and texts.healthPercent:GetParent() ~= plate.Health.bar then
+        texts.healthPercent:SetParent(plate.Health.bar)
     end
 
     UpdateName(plate)
