@@ -335,7 +335,12 @@ local function InitializeOptions()
             debug("OnEnter", tab.slug)
             if highlight:IsShown() then
                 debug(highlight.hover, highlight.clicked)
-                if highlight.hover ~= dialog.ID then
+                if not highlight.hover then
+                    -- No known start (a click landed while slideAnim ran, and
+                    -- OnEnter bails then): snap instead of sliding from nil.
+                    highlight.hover = i
+                    highlight:SetAllPoints(dialog)
+                elseif highlight.hover ~= dialog.ID then
                     hl:SetOffset(Scale.Value(width) * (dialog.ID - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = i
@@ -357,7 +362,11 @@ local function InitializeOptions()
             debug("OnLeave hudConfig", ...)
             if highlight.clicked then
                 debug(highlight.hover, highlight.clicked)
-                if highlight.hover ~= highlight.clicked then
+                if not highlight.hover then
+                    -- Same nil start as OnEnter: snap back to the clicked tab.
+                    highlight.hover = highlight.clicked
+                    highlight:SetAllPoints(tabs[highlight.clicked].button)
+                elseif highlight.hover ~= highlight.clicked then
                     hl:SetOffset(Scale.Value(width) * (highlight.clicked - highlight.hover), 0)
                     hlAnim:SetScript("OnFinished", function(anim)
                         highlight.hover = highlight.clicked
