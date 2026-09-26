@@ -44,7 +44,6 @@ externals:
         url: https://github.com/Torhal/LibQTip-2.0.git
     RealUI/Libs/LibRangeCheck-3.0:
         url: https://github.com/WeakAuras/LibRangeCheck-3.0.git
-        tag: latest
     RealUI/Libs/LibWindow-1.1:
         url: https://repos.wowace.com/wow/libwindow-1-1/trunk/LibWindow-1.1
         tag: latest
