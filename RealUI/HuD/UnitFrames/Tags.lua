@@ -336,9 +336,32 @@ tags.Events["realui:raidname"] = "UNIT_NAME_UPDATE UNIT_CONNECTION UNIT_FLAGS"
 -- throw on truth tests, deficit math throws on secret health. B58: guarded
 -- with issecretvalue pre-checks instead of pcall — a caught throw still
 -- writes a taint.log entry, and these two sites alone produced ~350 of them
--- in one 8-minute log, swamping other investigations. Display behaviour is
--- unchanged (blank when secret; the cell's health bar is secret-capable and
--- keeps carrying the information).
+-- in one 8-minute log, swamping other investigations. While health is secret
+-- the deficit shows as a missing percent (SecretDeficitText); the status chain
+-- still skips a secret boolean.
+-- B58: missing health as a percent (health remaining 0..1 -> 100..0), for the
+-- secret path of raidtop below. Built lazily: CurveUtil may load after us.
+local missingPercentCurve
+local function SecretDeficitText(unit)
+    local StringUtil = _G.C_StringUtil
+    if not (_G.UnitHealthPercent and _G.C_CurveUtil and StringUtil
+        and StringUtil.TruncateWhenZero and StringUtil.WrapString) then
+        return
+    end
+    if not missingPercentCurve then
+        missingPercentCurve = _G.C_CurveUtil.CreateCurve()
+        missingPercentCurve:SetType(_G.Enum.LuaCurveType.Linear)
+        missingPercentCurve:AddPoint(0, 100)
+        missingPercentCurve:AddPoint(1, 0)
+    end
+    -- The engine evaluates the curve; TruncateWhenZero gives "" at full health
+    -- (or under 1% missing) and WrapString keeps "" empty, so no Lua test on a
+    -- secret is needed. A percent, not the abbreviated value: TruncateWhenZero
+    -- prints whole integers, and a 6-7 digit deficit does not fit a raid cell.
+    return StringUtil.WrapString(
+        StringUtil.TruncateWhenZero(_G.UnitHealthPercent(unit, true, missingPercentCurve)), "-", "%")
+end
+
 tags.Methods["realui:raidtop"] = function(unit)
     if PlainBool(_G.UnitIsCharmed, unit) then return "|cffff33ffCHARMED|r" end
     if PlainBool(_G.UnitIsFeignDeath, unit) then return "|cffcccc33FEIGN|r" end
@@ -348,7 +371,7 @@ tags.Methods["realui:raidtop"] = function(unit)
 
     local max, cur = _G.UnitHealthMax(unit), _G.UnitHealth(unit)
     if _G.issecretvalue and (_G.issecretvalue(max) or _G.issecretvalue(cur)) then
-        return
+        return SecretDeficitText(unit)
     end
     if not (max and cur) then return end
     local missing = max - cur
