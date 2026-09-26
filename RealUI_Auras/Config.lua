@@ -270,7 +270,7 @@ function BuildGroupOptions(groupName, order)
             },
             checkDuration = {
                 name = "Check Duration",
-                desc = "Enable filtering auras by their total duration.",
+                desc = "Enable filtering auras by their total duration. A duration cap also hides auras with no duration (the game's aura engine always drops permanent auras when capping).",
                 type = "toggle",
                 order = 30,
                 get = GetFromDB("checkDuration"),
@@ -293,7 +293,7 @@ function BuildGroupOptions(groupName, order)
             },
             checkTimeLeft = {
                 name = "Check Time Left",
-                desc = "Enable filtering auras by their remaining time.",
+                desc = "Enable filtering auras by their remaining time. The game's aura engine cannot filter on time left, so this group then uses RealUI's own aura scan: fine out of combat, but it can go empty in combat on target, focus and similar units while the game keeps their auras secret. Leave this off to keep the group updating in combat.",
                 type = "toggle",
                 order = 32,
                 get = GetFromDB("checkTimeLeft"),
@@ -363,7 +363,7 @@ function BuildGroupOptions(groupName, order)
             },
             desaturate = {
                 name = "Desaturate",
-                desc = "Desaturate icons for auras not cast by you.",
+                desc = "Desaturate icons for auras not cast by you. Your auras are listed first, then everyone else's.",
                 type = "toggle",
                 order = 50,
                 get = GetFromDB("desaturate"),
@@ -554,6 +554,7 @@ function BuildSpellListOptions(order)
         -- 7.1: Input control for adding spells (name or numeric ID)
         listArgs.addInput = {
             name = "Add Spell (name or ID)",
+            desc = "Stored as a spell ID: aura groups filter on the game's aura engine, which matches IDs only. A name is looked up and converted; one the client cannot resolve is refused.",
             type = "input",
             order = 1,
             width = "double",
@@ -561,12 +562,16 @@ function BuildSpellListOptions(order)
             set = function(_, value)
                 if not value or value == "" then return end
                 local list = AurasAddon.db.global.SpellLists[listName]
-                local numVal = tonumber(value)
-                if numVal then
-                    list[numVal] = true
-                else
-                    list[value] = true
+                local spellID = tonumber(value)
+                if not spellID then
+                    local info = C_Spell.GetSpellInfo(value)
+                    spellID = info and info.spellID
                 end
+                if not spellID then
+                    print(("|cff30d0ffRealUI Auras|r: no spell called %q found. Add it by spell ID instead."):format(value))
+                    return
+                end
+                list[spellID] = true
                 Groups.RefreshAll()
                 -- Rebuild the entire options table so the new entry appears
                 RebuildAurasOptions()

@@ -40,6 +40,9 @@ function AurasAddon:OnEnable()
     Groups = self.Groups
     Icons = self.Icons
 
+    -- Spell lists match by ID on the aura engine (Containers.lua)
+    self.Containers.ConvertSpellListNames()
+
     -- Determine if any aura group is enabled (i.e. the replacement system is active)
     local anyGroupEnabled = false
     for _, group in ipairs(Groups.All()) do
@@ -168,7 +171,8 @@ end
 ---------------------------------------------------------------------------
 function AurasAddon:UNIT_AURA(_, unit)
     for _, group in ipairs(Groups.All()) do
-        if Groups.MonitorsUnit(group, unit) then
+        -- Engine-rendered groups update themselves (Containers.lua).
+        if Groups.MonitorsUnit(group, unit) and not self.Containers.UsesEngine(group) then
             dirtyGroups[group.name] = true
         end
     end

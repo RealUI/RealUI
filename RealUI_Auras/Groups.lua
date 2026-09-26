@@ -178,6 +178,18 @@ function Groups.Redraw(group)
     local Query = AurasAddon.Query
     local state = Groups.GetState(group.name)
 
+    -- Engine-rendered groups (everything without checkTimeLeft) live in
+    -- Containers.lua; the legacy grid stays empty for them.
+    local Containers = AurasAddon.Containers
+    Containers.Refresh(group)
+    if Containers.UsesEngine(group) then
+        if state.container then
+            Icons.ReleaseAll(group)
+            state.container:Hide()
+        end
+        return
+    end
+
     -- Skip if container doesn't exist yet (deferred creation)
     if not state.container then return end
 

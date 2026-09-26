@@ -16,6 +16,7 @@ Defaults.lua
 CooldownViewer.lua
 Presets.lua
 Groups.lua
+Containers.lua
 Query.lua
 Filter.lua
 Icons.lua
