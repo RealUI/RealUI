@@ -50,10 +50,18 @@ local function GetBottomBase()
         scaled = RealUI.Scale.Value(16) or 16
     end
 
+    -- The Infobar is a modded frame with its own scale (ResetScale), so its
+    -- GetHeight is in ITS units, not UIParent's. Convert both candidates,
+    -- or the base is only right when that scale happens to be 1.
     local infobar = _G.RealUI_Infobar
     if infobar and infobar.GetHeight then
+        local infobarScale = infobar:GetScale() or 1
+        scaled = scaled * infobarScale
         local height = infobar:GetHeight()
-        if height and height > scaled then return height end
+        if height then
+            height = height * infobarScale
+            if height > scaled then return height end
+        end
     end
 
     return scaled
@@ -83,6 +91,8 @@ function private.WatchInfobarHeight()
     if not (infobar and infobar.HookScript) or infobar._ruiABHeightWatch then return end
     infobar._ruiABHeightWatch = true
     infobar:HookScript("OnSizeChanged", OnInfobarResized)
+    -- A rescale moves its real height without firing OnSizeChanged.
+    _G.hooksecurefunc(infobar, "SetScale", OnInfobarResized)
     -- The Infobar may already have grown past whatever the first layout used.
     OnInfobarResized()
 end
@@ -144,7 +154,12 @@ function private.ApplyRealUILayout()
     -- Remembered so the Infobar watcher can tell a real height change from
     -- the float wobble a rescale produces (B65).
     lastBottomBase = rawBottomBase
-    local bottomBase = rawBottomBase + 14 + sliderDelta
+    -- Bars anchor by their TOP edge, so each bottom row's own pitch is added
+    -- at placement below. This was `+ 14`, a constant that only matched when
+    -- the unscaled Infobar height overstated the real one by about a row
+    -- (1440p HiDPI); at 0.64 it sank the row into the Infobar, at 4K it left
+    -- a 16-unit gap.
+    local bottomBase = rawBottomBase + sliderDelta
 
     local border = private.BUTTON_BORDER or 1
 
@@ -267,7 +282,7 @@ function private.ApplyRealUILayout()
                 -- downward from the HuD offset, bottom bars upward from the
                 -- infobar base.
                 local stack = StackOffset(isTopBar, rowOf[id])
-                y = isTopBar and (topYOfs - stack) or (bottomBase + stack)
+                y = isTopBar and (topYOfs - stack) or (bottomBase + stack + pitchOf[id])
 
                 point = isTopBar and "CENTER" or "BOTTOM"
                 db.flyoutDirection = isTopBar and "DOWN" or "UP"
