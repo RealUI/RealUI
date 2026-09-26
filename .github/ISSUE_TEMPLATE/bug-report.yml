@@ -45,7 +45,7 @@ body:
 - type: input
   attributes:
     label: Aurora Version
-    description: Found in `Aurora_Mainline.toc`. RealUI embeds Aurora via RealUI_Skins.
+    description: Found in `Aurora.toc`. RealUI embeds Aurora via RealUI_Skins.
     placeholder: "e.g. 9.0.0"
   validations:
     required: true
