@@ -82,7 +82,10 @@ local function ProfileExists(aceDB, profileName)
 end
 
 local function ApplyStartupDisplayOptimization()
-    if RealUI.IsUsingHighResDisplay and RealUI:IsUsingHighResDisplay() then
+    -- 4K only. At 1440p HiDPI doubling shrinks the canvas to 718 units; the
+    -- Desktop High-Res preset picked in the wizard sets the right scale there.
+    local _, screenH = _G.GetPhysicalScreenSize()
+    if screenH >= 2160 then
         local skinsOptions = RealUI.GetOptions and RealUI.GetOptions("Skins")
         local skinsDB = skinsOptions and skinsOptions.profile
 
