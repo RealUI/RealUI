@@ -1,3 +1,16 @@
+## [4.0.3] - 2026-09-27 ##
+### Summary ###
+A hotfix for the 4.0.2 packaging. 4.0.2 began fetching LibRangeCheck-3.0 at build time, pinned to the latest upstream tag — but that tag, 1.0.17, predates upstream's Midnight support, so 4.0.2 zips shipped a range library without the WoW 12 event guard or the secret-safe range caching. Builds now fetch LibRangeCheck-3.0 from its main branch. No RealUI code changes.
+
+### Modified AddOns ###
+
+  * RealUI
+
+### Fixed ###
+
+  * fix: **LibRangeCheck-3.0 is fetched from upstream `main` instead of the latest tag.** The latest tag, 1.0.17 (minor 26), predates upstream's WoW 12 work: registering events only when `C_EventUtils.IsEventValid` accepts them, and dropping range caching that secret values break. Packaged builds now carry the current library (minor 37)
+  * fix: CurseForge uploads use the correct project id (1658899) for releases, betas and nightlies, and declare the bundled Aurora as an embedded library
+
 ## [4.0.2] - 2026-09-13 ##
 ### Summary ###
 A maintenance release. The headline fix is **nameplate health text and execute colouring recovering correctly** — RealUI had been treating "in combat" as the same thing as "auras are secret", and measurement in game proved those are unrelated: secrecy can already be on out of combat, can stay on through a combat-end edge for half a minute, and can switch on with no combat edge at all. The re-check now hangs off `C_Secrets.ShouldAurasBeSecret` instead. The durability infobar block no longer reports a reassuring **100%** when it has actually measured nothing, keybind mode's ESC really does clear the binding it says it cleared, and the tank-taunt threat cue survives matchmade raids.
@@ -236,6 +249,7 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
+[4.0.3]: https://github.com/RealUI/RealUI/compare/4.0.2...4.0.3
 [4.0.2]: https://github.com/RealUI/RealUI/compare/4.0.1...4.0.2
 [4.0.1]: https://github.com/RealUI/RealUI/compare/4.0.0...4.0.1
 [4.0.0]: https://github.com/RealUI/RealUI/compare/3.4.0...4.0.0
