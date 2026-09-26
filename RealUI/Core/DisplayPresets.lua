@@ -44,10 +44,14 @@ local DISPLAY_PRESETS = {
     {
         id              = "highres",
         name            = "Desktop High-Res",
-        description     = "27\" monitor, 1440p. Slightly larger elements.",
-        customScale     = 1,        -- pixel-perfect (recalculated by isPixelScale)
-        isHighRes       = true,     -- HiDPI: engineScale = pixelScale * 2
-        isPixelScale    = true,
+        description     = "27\" monitor, 1440p. Between 1080p and 4K density.",
+        -- Canvas-based, not pixel-based. The layouts are built on the ~1080-unit
+        -- canvas that Desktop Standard and 4K Desk both run; HiDPI doubling at
+        -- 1440p (0.53 * 2) shrank it to 718 units and pushed everything out of
+        -- place. 0.64 = 768/1200: a 1200-unit canvas, slightly denser than 1080p.
+        customScale     = 0.64,
+        isHighRes       = false,
+        isPixelScale    = false,
         gameCursorScale = 1.1,
         fontScale       = 1.0,
         chatFontSize    = 14,
@@ -127,7 +131,7 @@ end
 -- Rules are evaluated in order — first match wins:
 --   1. Width/height ratio > 2.1 → "ultrawide"
 --   2. Height ≥ 2160           → "4k_desk"
---   3. Height ≥ 1440           → "highres"
+--   3. Height ≥ 1440           → "highres" (fixed 1200-unit canvas, no HiDPI)
 --   4. Height ≥ 1080 and effectiveScale > 1.5 → "laptop"
 --   5. Default                 → "standard"
 -- "4k_theater" is never auto-suggested (Req 3.3).
@@ -196,6 +200,18 @@ function DisplayPresets.MigrateSeed()
             if dbg.tags then
                 dbg.tags.skinsScaleRepaired = true
             end
+        end
+    end
+
+    -- One-time: Desktop High-Res used to be HiDPI (0.53 * 2 at 1440p, a
+    -- 718-unit canvas). Re-apply the preset so stored profiles pick up its
+    -- new fixed scale; Apply prompts the reload the engine scale needs.
+    local dbg = RealUI.db.global
+    if display.presetId == "highres" and dbg.tags and not dbg.tags.highresCanvasMigrated then
+        dbg.tags.highresCanvasMigrated = true
+        local skinsProfile = Skins and Skins.db and Skins.db.profile
+        if skinsProfile and skinsProfile.isHighRes then
+            DisplayPresets.Apply("highres", display.hdrEnabled)
         end
     end
 
