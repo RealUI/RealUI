@@ -406,7 +406,12 @@ local function InitializeOptions()
 
         if i == 1 then
             Scale.Point(btn, "TOPLEFT")
-            local check = _G.CreateFrame("CheckButton", nil, btn, "SecureActionButtonTemplate, UICheckButtonTemplate")
+            -- Plain checkbox. It used to inherit SecureActionButtonTemplate too,
+            -- for nothing (no action attributes; OnClick is replaced below),
+            -- which made the whole HuD config bar implicitly protected: moving
+            -- it in combat was ADDON_ACTION_BLOCKED (found with
+            -- /realdev protectedby, 2026-09-26).
+            local check = _G.CreateFrame("CheckButton", nil, btn, "UICheckButtonTemplate")
 
             Skin.UICheckButtonTemplate(check)
             Scale.Point(check, "CENTER", 0, 10)
