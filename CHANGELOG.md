@@ -67,6 +67,7 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
 
 ### Changed ###
 
+  * chg: Aurora updated from 12.1.0.9 to 12.1.0.11. Besides the Forever skins listed under Added, it fixes retail skins that had been failing silently: every bag after the first lost its skin, the pet bar's auto-cast decorations were unskinned (and stopped the rest of that skin), the spellbook category tabs kept Blizzard's gold plate, profession recipe category headers were never skinned, the housing editor's dropdowns and the open-mail divider broke their skins, and side tabs showed a gold border with a glow that kept re-painting itself. Aurora itself now ships one `Aurora.toc` for every client; RealUI embeds Aurora in RealUI_Skins and loads it from there, so that change does not affect RealUI installs
   * chg: uninterruptible nameplate casts are tinted purple instead of a second red, which read the same as "interrupt not ready". Existing profiles are offered it in `/realui newdefaults`
   * chg: the action bars profile scope is named `actionbars` instead of `bt4`; exports made under the old name still import
   * chg: unit frame tooltips use RealUI's own handlers on oUF 14's live unit, as oUF's author recommends, instead of Blizzard's `UnitFrame_OnEnter`
