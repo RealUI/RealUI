@@ -394,7 +394,10 @@ local function ResetScale(frame)
     if private.skinsDB.isHighRes then
         frame:SetScale(private.skinsDB.customScale)
     elseif private.skinsDB.customScale > pixelScale then
-        frame:SetScale(pixelScale)
+        -- SetScale is relative to UIParent (already at customScale), so this
+        -- lands the frame at pixelScale effective. Plain SetScale(pixelScale)
+        -- compounded to customScale * pixelScale and shrank the Infobar/HuD.
+        frame:SetScale(pixelScale / private.skinsDB.customScale)
     end
 end
 local function UpdateModScale()
