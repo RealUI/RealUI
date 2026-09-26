@@ -6,10 +6,15 @@ Two client facts shape the work and are still open on Blizzard's side: Forever h
 
 Aurora's Forever skin pass lands alongside this (see the Aurora entries below).
 
+Alongside the Forever work, this round rebuilds the parts of RealUI that went blank or stale under WoW 12's secret values. **RealUI_Auras groups now render on Blizzard's aura engine**, so they keep updating in combat. Nameplate health text, the execute colour and the raid-cell health deficit read secret health through Blizzard's curve and formatting APIs instead of hiding. Boss frames gain cast bars, a current-target highlight and aura filters. Nameplates can show your combo points or class power, health values, and who a cast is aimed at. Opening all bags on a full inventory no longer runs too long.
+
 ### Modified AddOns ###
 
   * RealUI
   * RealUI_ActionBars
+  * RealUI_Auras
+  * RealUI_Config
+  * RealUI_Inventory
   * RealUI_Nameplates
   * RealUI_Skins
   * !RealUI_Preloads (and every other sub-addon TOC, for the interface line)
@@ -23,6 +28,14 @@ Aurora's Forever skin pass lands alongside this (see the Aurora entries below).
   * add: Aurora — **serves retail and Forever from one TOC.** `Aurora_Mainline.toc` lists both interface numbers and selects `AddOns_Mainline.xml` or the generated `AddOns_Forever.xml` per line; `private.isForever` and `AURORA_DEBUG_PROJECT = 60` identify the flavor. Camelot-only skins live under `Blizzard_X\Camelot\`, mirroring Blizzard's paths, and skins that Forever shares with retail were made to tolerate Camelot's trimmed frames (FriendsFrame, InspectUI, TokenUI, MailFrame, ProfessionsBook, TrainerUI among them)
   * add: Aurora — **Camelot character panel**: mode tabs and side pane, paper doll (ranged and ammo slots, model control bar), reputation, skills, PvP rank, bank and equipment flyout. Bodies shared with retail moved to `Skin\shared\` with thin per-flavor callers
   * add: Aurora — Camelot collections and pet stable, the Statistics tab, the Legacy system window and swing timers, micro menu bar art, bag bar, token detail side pane, professions book page, spellbook category tabs, and a taint-safe nameplate level badge
+  * add: **RealUI_Auras groups render on Blizzard's AuraContainer**, the engine-side aura renderer, so an enabled group keeps updating in combat. The old Lua scan could not read a target's or focus's aura list while the game keeps it secret, so those groups went empty exactly when they mattered. Group options map onto the engine's filters and layout and apply live. Player buffs can be cancelled with a right-click in combat, and tooltips come from the engine. What changes: a duration cap now also hides auras with no duration; spell lists match by spell ID (the editor converts names, and names saved earlier are converted at load); with desaturation on, your auras are listed before everyone else's; and debuff borders use the game's dispel colours rather than the Colours tab. A group with **Check Time Left** on stays on the old renderer, because the engine cannot filter on time remaining
+  * add: **boss frames**: a cast bar under each frame (tinted when the cast cannot be interrupted), a border on the boss you are targeting, and the same aura filter options as the target frame, with debuffs defaulting to "Cast by me" and buffs to "Dispellable". Buffs now sit beside the debuffs instead of hanging into the next boss frame. The default gap between boss frames grows to make room for the cast bar; toggles for the cast bars and the highlight are in Groups → Boss
+  * add: **nameplate combo points and class power**: pips along the bottom of your target's health bar for combo points, holy power, chi, arcane charges, soul shards and essence. On by default, under "Combo points / class power"
+  * add: nameplate **health values**, current and maximum health with the percent (`15.2K - 45.5K - 33%`) inside the health bar. Off by default, under Texts
+  * add: nameplate cast bars name the **target of the cast**, in its class colour, under the bar. On by default, under Texts
+  * add: Forever's group finder can be dragged
+  * add: Aurora — the Forever group finder is skinned after 1.60.1.70009 restyled it: panel chrome, side tabs, close button, result rows, and a first skin for the Who tab
+  * add: Aurora — `/aurora mawbuffs` (and `/auroraMawBuffs` under RealUI) turns off Aurora's `ShouldShowMawBuffs` wrapper for testing, to measure whether it is still needed; it writes a Blizzard global, which taints the objective tracker's aura path
   * add: Aurora — `/aurora skinaudit` lists the skin modules whose `pcall` failed on this login, which is how the Forever pass was verified wave by wave; `Aurora/dev/forever_report.py` regenerates the Camelot-vs-Mainline gap report from the manifests
 
 ### Fixed ###
@@ -38,13 +51,34 @@ Aurora's Forever skin pass lands alongside this (see the Aurora entries below).
   * fix: on Forever, Camelot's day/night indicator no longer sits stranded in the screen corner after RealUI moves the minimap; it rides on the RealUI minimap as a small badge and is re-asserted after Blizzard's scale hook re-anchors it
   * fix: second Forever login — arena unit frames are not spawned when `CompactArenaFrame` does not exist (oUF indexes it unguarded; Blizzard's own container code guards on it the same way), and the minimap queue-status hook is skipped on Camelot, whose queue button has no `UpdatePosition`
   * fix: **BugGrabber never installed its handler on Forever.** RealUI_Bugs disables the standalone `!BugGrabber` and relies on its embedded copy, but that copy asks the client whether the standalone is enabled using the full player name, and on Forever the client answers "enabled for all characters" even for a disabled addon — so the embedded copy deferred to a standalone that never loads. The vendored lib now only defers when the standalone is actually loaded (a marked local patch, re-applied on each BugGrabber update). Interface `16001` is also in the VersionManager's supported list, which silences the "Unsupported game version" line at login
+  * fix: **nameplate health text now shows while health is secret**, in instances and in open-world combat on Forever, by reading the percent through Blizzard's percent curve. The execute colour works the same way, and a raid cell's health deficit shows as a missing percent (`-23%`) while the value is secret. A raid cell also shows CHARMED when the charm state is secret
+  * fix: opening all bags on a full inventory could hit "script ran too long" and leave items that could not be used; slots are now looked up by bag and slot instead of scanning every slot for each one
+  * fix: at Large HuD the action bars sat 20px lower than intended because the HuD size offset was counted twice. New profiles get the intended height; existing profiles are offered "Action bar height at Large HuD" in `/realui newdefaults`, which keeps any height set with the HuD Vertical slider
+  * fix: on a low-resolution display, the switch to Small HuD now reaches both layouts, not only the active one
+  * fix: the durability block shows `--` until it has read your gear and retries when a read comes back empty, instead of showing `1` after login
+  * fix: the player frame is easy to grab when unlocked; every mover now sits above the frame it moves
+  * fix: party and raid members who join during combat get a frame immediately instead of after combat
+  * fix: the world marker bar no longer errors every second during encounters, M+ and rated PvP
+  * fix: the component toggles in Advanced settings and the cargBags check look up addon state by character GUID, as Blizzard does; on Forever a name lookup could miss
+  * fix: the startup deployment check no longer reports a failure on Forever's interface version, and says what failed when something does
+  * fix: action bars no longer error at login on Forever 1.60.1.70009, whose flyout lookup returns nothing for unused IDs (a marked patch in the bundled LibActionButton)
+  * fix: the HuD config bar no longer errors when combat starts while it is open, and its tab highlight no longer errors when a tab is clicked while the bar slides in
+  * fix: RealUI buttons honour the game's Lock Action Bars setting, and the config panel shows its state
+
+### Changed ###
+
+  * chg: uninterruptible nameplate casts are tinted purple instead of a second red, which read the same as "interrupt not ready". Existing profiles are offered it in `/realui newdefaults`
+  * chg: the action bars profile scope is named `actionbars` instead of `bt4`; exports made under the old name still import
+  * chg: unit frame tooltips use RealUI's own handlers on oUF 14's live unit, as oUF's author recommends, instead of Blizzard's `UnitFrame_OnEnter`
+  * chg: **the Forever secure-snippet workaround is removed.** Blizzard fixed the load-order bug in 1.60.1.70009, so RealUI's party and raid frames spawn there and action bar paging and flyouts work in combat
 
 ### Known Issues ###
 
-  * On the current Forever beta (1.60.1, build 69913), **no secure handler snippet can run**: `Blizzard_EnvironmentCleanup` loads first and nils `loadstring_untainted`, and its TOC dependency on `Blizzard_RestrictedAddOnEnvironment` is tagged `classic, standard` only, so on Forever the restricted environment can load afterwards and capture nil. LibActionButton sets each button's `type` and `action` from such a snippet, so without help the buttons draw but cast nothing on click or keypress. LibActionButton also wraps each button's click with a snippet, which aborted every click before the secure handler ran. On the affected build RealUI_ActionBars now mirrors the state and visibility snippets in plain Lua out of combat and takes the click wrapper off (`SnippetShim.lua`, gated on a list of known-broken builds): keys and clicks cast, bar 1 pages, conditional bars such as the Naga bar show, and spells can be dragged on and off the bars out of combat, but dropping by click, bar fading, **paging cannot change during combat, flyouts are dead, and LibActionButton logs one error per button at login** until Blizzard adds `camelot` to that dependency line. Any addon using secure handlers is affected the same way. RealUI's party and raid frames are oUF headers whose per-member setup is such a snippet, so on those builds they are not spawned and **Blizzard's own party and raid frames stay in place**, with a chat line saying so. A stand-down was tried and withdrawn the same day: it left the player with no bars at all, because RealUI's EditMode layout hides Blizzard's bars while RealUI's own are active
+  * RealUI_Auras groups with **Check Time Left** on use the old renderer and can go empty in combat on target, focus and similar units while the game keeps their auras secret
+  * Upgrading a trinket with a long effect text at an item upgrade NPC can be blocked (Aurora owns `GameTooltip_InsertFrame`); investigation in progress
   * On the current Forever beta, **settings do not persist across `/reload`** — the client discards SavedVariables writes. Only defaults apply, for every addon. Confirmed by the Forever developers; not a RealUI bug
   * `UnitName("player")` returns the full name on Forever while `UnitName("target")` does not; Blizzard says the final behaviour is not settled
-  * The RealUI surfaces on Forever (unit frames, action bars, nameplates, tracker, infobar, inventory, tooltips, chat) have had a static pass only; the in-game walk-through is still pending
+  * On Forever, unit frames, group frames, action bars, nameplates, the group finder and the config have been checked in game; the tracker, infobar, inventory, tooltips and chat have had a static pass only
 
 ## [4.0.2] - 2026-09-13 ##
 ### Summary ###
