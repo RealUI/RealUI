@@ -138,26 +138,71 @@ end
 -- Priority: execute → casting → class → tapped → threat → reaction (spec req 3.2).
 -- Threat status, reaction, combat and tapped state can all be secret in combat;
 -- every tier degrades to the next one when its data is inaccessible.
+-- Execute is not a tier here any more: it is the overlay below (B58), which
+-- sits on top of whatever this resolves and so keeps its priority.
 local function ResolveColor(plate, unit)
     local db = NP.db.profile.enemy
     local colors = db.colors
 
-    if db.execute.enabled then
-        -- B58: pre-check with Accessible instead of computing inside a pcall —
-        -- the caught throw still logged (765 taint.log entries in 8 minutes).
-        -- Same degradation: no execute colouring while health is secret.
-        local max, cur = _G.UnitHealthMax(unit), _G.UnitHealth(unit)
-        if private.Accessible(max) and private.Accessible(cur)
-            and max > 0 and (cur / max) <= db.execute.threshold then
-            return private.SafeTest(_G.UnitAffectingCombat, unit) and colors.executeCombat or colors.execute
-        end
-    end
     if plate.state.casting then return colors.cast end
     local classColor = private.ClassColor(unit)
     if classColor then return classColor end
     if private.SafeTest(_G.UnitIsTapDenied, unit) then return colors.tapped end
     return Safe(ThreatColor, unit, colors) or Safe(ReactionColor, unit, colors)
         or colors.reaction.neutral
+end
+
+--[[ B58: execute range, secret-safe. The old tier compared cur/max, which
+     blanks whenever health is secret (instances, and open-world combat on
+     Forever). Now a texture covering the bar's fill takes the execute colour,
+     with its ALPHA from UnitHealthPercent run through a Step curve (1 at or
+     below the threshold, 0 above): the engine evaluates the curve, and
+     SetVertexColor accepts the secret alpha (AllowedWhenTainted). The in-combat
+     colour is picked the same way, by C_CurveUtil.EvaluateColorFromBoolean on
+     the possibly-secret UnitAffectingCombat. No Lua ever compares health. ]]
+local executeCurve, executeCurveThreshold
+local function GetExecuteCurve(threshold)
+    if executeCurve and executeCurveThreshold == threshold then return executeCurve end
+    local curve = _G.C_CurveUtil.CreateCurve()
+    curve:SetType(_G.Enum.LuaCurveType.Step)
+    curve:AddPoint(0, 1)
+    -- Step snaps to the point at or below x, so the 0 sits just past the
+    -- threshold to keep "at or below" inclusive, as the old comparison was.
+    curve:AddPoint(threshold + 0.0001, 0)
+    curve:AddPoint(1, 0)
+    executeCurve, executeCurveThreshold = curve, threshold
+    return curve
+end
+
+-- ColorMixins for EvaluateColorFromBoolean, rebuilt only when the configured
+-- colours change: this runs on every health event of every plate.
+local colorCache = {}
+local function CachedColor(key, c)
+    local cached = colorCache[key]
+    if not cached or cached.r ~= c.r or cached.g ~= c.g or cached.b ~= c.b then
+        cached = _G.CreateColor(c.r, c.g, c.b)
+        colorCache[key] = cached
+    end
+    return cached
+end
+
+local function UpdateExecute(plate)
+    local overlay = plate.Health.execute
+    local db = NP.db.profile.enemy
+    if not (db.execute.enabled and _G.UnitHealthPercent and _G.C_CurveUtil
+        and _G.C_CurveUtil.CreateCurve) then
+        overlay:Hide()
+        return
+    end
+    local ok = private.Try(function()
+        local colors = db.colors
+        local alpha = _G.UnitHealthPercent(plate.unit, true, GetExecuteCurve(db.execute.threshold))
+        local color = _G.C_CurveUtil.EvaluateColorFromBoolean(_G.UnitAffectingCombat(plate.unit),
+            CachedColor("executeCombat", colors.executeCombat),
+            CachedColor("execute", colors.execute))
+        overlay:SetVertexColor(color.r, color.g, color.b, alpha)
+    end)
+    overlay:SetShown(ok)
 end
 
 local Health = {}
@@ -173,6 +218,13 @@ function Health.Create(plate)
     bar:SetAllPoints(plate)
     bar:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
     bar:SetFrameLevel(plate:GetFrameLevel() + 2)
+
+    -- B58: execute overlay over the fill only (see UpdateExecute). ARTWORK
+    -- sublevel above the fill; texts on the bar sit in OVERLAY, above it.
+    local execute = bar:CreateTexture(nil, "ARTWORK", nil, 7)
+    execute:SetAllPoints(bar:GetStatusBarTexture())
+    execute:SetColorTexture(1, 1, 1, 1)
+    execute:Hide()
 
     -- B58: the absorb overlay spans the missing-health region — anchored from
     -- the health fill's edge to the plate's right edge. With min/max set to
@@ -191,6 +243,7 @@ function Health.Create(plate)
         bg = bg,
         absorbBar = absorbBar,
         bar = bar,
+        execute = execute,
         border = private.CreateBorder(plate),
     }
 end
@@ -228,6 +281,7 @@ function private.UpdateHealthColor(plate)
     -- Safe so a future secret-tier change degrades to "bar keeps its colour"
     -- instead of erroring once per plate per update (B58 doctrine).
     Safe(plate.Health.bar.SetStatusBarColor, plate.Health.bar, color.r, color.g, color.b)
+    UpdateExecute(plate)
 end
 
 function Health.Attach(plate, unit)
