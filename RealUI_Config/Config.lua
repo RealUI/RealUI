@@ -230,7 +230,7 @@ local hudConfig, hudToggle do
     slideAnim.slide = slide
 
     -- Highlight frame
-    local highlight = _G.CreateFrame("Frame", "RealUIHuDConfig", hudConfig)
+    local highlight = _G.CreateFrame("Frame", "RealUIHuDConfigHighlight", hudConfig) -- was "RealUIHuDConfig", which overwrote the bar's own global
     Base.SetBackdrop(highlight, Color.highlight)
     highlight:Hide()
     hudConfig.highlight = highlight

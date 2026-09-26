@@ -13,8 +13,8 @@ local ADDON_NAME, ns = ... -- luacheck: ignore
 --   3. explicitly protected frames anywhere in the UI whose anchor chain
 --      (GetPoint relativeTo, followed recursively, regions resolved to their
 --      parent frame) reaches the target or one of its descendants.
--- ":parent" starts from the named frame's parent, for frames whose own global
--- name is shadowed (RealUIHuDConfig is: its highlight child reuses the name).
+-- ":parent" starts from the named frame's parent, for frames with no global
+-- name of their own (RealUIHuDConfig's highlight used to shadow the bar's).
 -- Read-only; run it out of combat.
 
 local MAX_DEPTH = 25
