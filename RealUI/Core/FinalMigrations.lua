@@ -78,6 +78,16 @@ function FinalMigrations:RegisterStandardMigrations()
                     for key, value in pairs(defaults) do
                         if layout[key] == nil then
                             layout[key] = value
+                            -- B102: defaultPositions are pre-offset, so a key
+                            -- filled here must not be offered the
+                            -- abHeightB102 newdefaults migration either (same
+                            -- flag HuDPositioning:UpdateRealUIPositions sets).
+                            -- These migrations re-run whenever the version
+                            -- string changes, i.e. on every stamped build.
+                            if key == "ActionBarsY" or key == "CastBarPlayerY" or key == "CastBarTargetY" then
+                                RealUI.db.profile.settings = RealUI.db.profile.settings or {}
+                                RealUI.db.profile.settings.b102Migrated = true
+                            end
                         end
                     end
                 end
