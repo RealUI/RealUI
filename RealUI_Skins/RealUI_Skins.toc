@@ -15,7 +15,7 @@ Libs\Libs.xml
 # also matches this TOC, so the two are split with load directives instead
 # of separate TOCs; the Exclude on the Forever line is for clients that do
 # not know the camelot token and treat an unknown AllowLoadGameType as a
-# match. Same recipe as Aurora_Mainline.toc.
+# match. Same recipe as Aurora's own TOC (Aurora.toc since 12.1.0.11).
 Libs\Aurora_Mainline.xml [AllowLoadGameType standard]
 Libs\Aurora_Forever.xml [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
 
