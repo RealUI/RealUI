@@ -219,6 +219,35 @@ local function RaidStyle(self, unit)
     topText:SetPoint("TOP", self, "TOP", 0, -2)
     self:Tag(topText, "[realui:raidtop]")
 
+    -- B58: CHARMED while UnitIsCharmed is secret. It is the only status in the
+    -- raidtop chain that can be (SecretWhenUnitPossessionRestricted); the tag
+    -- skips a secret boolean and falls through to the next status or the
+    -- deficit. A second fontstring in the same spot and the top text both take
+    -- their alpha from that one boolean, inverted, so exactly one shows and
+    -- CHARMED keeps its priority. A plain boolean stays with the tag.
+    local charmedText = Health:CreateFontString(nil, "OVERLAY")
+    ApplyCellFont(charmedText)
+    charmedText:SetTextColor(1, 0.2, 1)
+    charmedText:SetText("CHARMED")
+    charmedText:SetPoint("TOP", self, "TOP", 0, -2)
+    charmedText:SetAlpha(0)
+
+    local function UpdateCharmed(frame)
+        local unit = frame.__unit
+        local charmed = unit and _G.UnitIsCharmed(unit)
+        if charmed == nil or not _G.issecretvalue(charmed) then
+            charmedText:SetAlpha(0)
+            topText:SetAlpha(1)
+            return
+        end
+        charmedText:SetAlphaFromBoolean(charmed, 1, 0)
+        topText:SetAlphaFromBoolean(charmed, 0, 1)
+    end
+    self:RegisterEvent("UNIT_FLAGS", UpdateCharmed)
+    self:RegisterEvent("UNIT_FACTION", UpdateCharmed)
+    -- Unit reassignment by the header and every oUF refresh run through here.
+    _G.hooksecurefunc(self, "UpdateAllElements", UpdateCharmed)
+
     local nameText = Health:CreateFontString(nil, "OVERLAY")
     ApplyCellFont(nameText)
     nameText:SetPoint("BOTTOM", self, "BOTTOM", 0, 2)

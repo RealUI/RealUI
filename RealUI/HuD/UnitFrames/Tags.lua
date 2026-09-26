@@ -337,8 +337,9 @@ tags.Events["realui:raidname"] = "UNIT_NAME_UPDATE UNIT_CONNECTION UNIT_FLAGS"
 -- with issecretvalue pre-checks instead of pcall — a caught throw still
 -- writes a taint.log entry, and these two sites alone produced ~350 of them
 -- in one 8-minute log, swamping other investigations. While health is secret
--- the deficit shows as a missing percent (SecretDeficitText); the status chain
--- still skips a secret boolean.
+-- the deficit shows as a missing percent (SecretDeficitText). Of the status
+-- chain only UnitIsCharmed can be secret; that case is a separate CHARMED
+-- fontstring in Groups/Raid.lua, so the skip below is intended.
 -- B58: missing health as a percent (health remaining 0..1 -> 100..0), for the
 -- secret path of raidtop below. Built lazily: CurveUtil may load after us.
 local missingPercentCurve
