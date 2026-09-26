@@ -182,21 +182,45 @@ local hudConfig, hudToggle do
     -- The HuD Config bar
     hudConfig = _G.CreateFrame("Frame", "RealUIHuDConfig", _G.UIParent)
     Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
+    -- The bar can be implicitly protected (something protected ends up
+    -- anchored to it), so moving it in combat is blocked (ADDON_ACTION_BLOCKED
+    -- on ClearAllPoints when combat began mid-slide or on the combat close).
+    -- Move now when allowed, otherwise once combat ends.
+    local pendingShown
+    local function PlaceHuDConfig(shown)
+        if _G.InCombatLockdown() and hudConfig:IsProtected() then
+            pendingShown = shown
+            hudConfig:RegisterEvent("PLAYER_REGEN_ENABLED")
+            -- SetAlpha is not protected: a closing bar vanishes now, and
+            -- moves off screen once combat ends.
+            if not shown then hudConfig:SetAlpha(0) end
+            return
+        end
+        pendingShown = nil
+        hudConfig:SetAlpha(1)
+        hudConfig:ClearAllPoints()
+        if shown then
+            Scale.Point(hudConfig, "TOP", _G.UIParent, "TOP", 0, 0)
+        else
+            Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
+        end
+    end
+
     hudConfig:SetScript("OnEvent", function(dialog, event, ...)
         if event == "PLAYER_REGEN_DISABLED" then
             hudToggle(true)
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            hudConfig:UnregisterEvent("PLAYER_REGEN_ENABLED")
+            if pendingShown ~= nil then
+                PlaceHuDConfig(pendingShown)
+            end
         end
     end)
 
     local slideAnim = hudConfig:CreateAnimationGroup()
     slideAnim:SetScript("OnFinished", function(dialog)
         local _, y = dialog.slide:GetOffset()
-        hudConfig:ClearAllPoints()
-        if y < 0 then
-            Scale.Point(hudConfig, "TOP", _G.UIParent, "TOP", 0, 0)
-        else
-            Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 1)
-        end
+        PlaceHuDConfig(y < 0)
     end)
     hudConfig.slideAnim = slideAnim
 
@@ -233,8 +257,7 @@ local hudConfig, hudToggle do
 
             -- slide out
             if skipAnim then
-                hudConfig:ClearAllPoints()
-                Scale.Point(hudConfig, "BOTTOM", _G.UIParent, "TOP", 0, 0)
+                PlaceHuDConfig(false)
             else
                 slide:SetOffset(0, Scale.Value(height))
                 slideAnim:Play()
@@ -245,8 +268,7 @@ local hudConfig, hudToggle do
         else
             -- slide in
             if skipAnim then
-                hudConfig:ClearAllPoints()
-                Scale.Point(hudConfig, "TOP", _G.UIParent, "TOP", 0, 0)
+                PlaceHuDConfig(true)
             else
                 slide:SetOffset(0, Scale.Value(-height))
                 slideAnim:Play()
