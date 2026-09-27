@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
--- luacheck: globals next type pairs ipairs table pcall CreateFrame InCombatLockdown C_EditMode C_AddOns C_Timer
+-- luacheck: globals next type pairs ipairs table math pcall CreateFrame InCombatLockdown C_EditMode C_AddOns C_Timer
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -1260,6 +1260,107 @@ function EditModeManager:SetChatAnchor()
     end
 
     debug("SetChatAnchor: wrote BOTTOMLEFT UIParent BOTTOMLEFT", CHAT_X, y)
+    return true
+end
+
+---------------------------------------------------------------------------
+-- Per-system template reset (B150)
+---------------------------------------------------------------------------
+
+local function TemplateEntries(layout, system)
+    local entries = {}
+    for _, entry in ipairs(layout.systems) do
+        if entry.system == system then
+            entries[#entries + 1] = entry
+        end
+    end
+    return entries
+end
+
+local function AnchorsMatch(a, b)
+    return a and b and a.point == b.point and a.relativePoint == b.relativePoint
+        and type(a.offsetX) == "number" and math.abs(a.offsetX - (b.offsetX or 0)) < 1
+        and type(a.offsetY) == "number" and math.abs(a.offsetY - (b.offsetY or 0)) < 1
+end
+
+--- Whether the active RealUI layout places every index of `system` where the
+-- template does. Anchors only; settings are the user's to tune.
+-- @param system number  EditMode system enum value
+-- @return boolean|nil  nil when the active layout is not RealUI's or unreadable
+function EditModeManager:IsSystemAtTemplate(system)
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if not ok or not data then return nil end
+
+    local layoutIdx = self:GetActiveRealUILayoutIndex(data)
+    if not layoutIdx then return nil end
+
+    local saved = data.layouts[layoutIdx]
+    local role = (saved.layoutName == LAYOUT_NAMES.healing) and "healing" or "dpstank"
+    local built = self:BuildLayout(role, state.currentDisplayPreset or "standard")
+    if not built then return nil end
+
+    for _, entry in ipairs(TemplateEntries(built, system)) do
+        local sysInfo = self:FindSystemInfo(saved, system, entry.systemIndex)
+        if not (sysInfo and AnchorsMatch(sysInfo.anchorInfo, entry.anchorInfo)) then
+            return false
+        end
+    end
+    return true
+end
+
+--- Rewrites every index of one system in both RealUI layouts from the
+-- template, leaving the other systems untouched. The per-entry counterpart to
+-- `/realui editmode reset`, for a template correction that has to reach
+-- layouts that already exist (EnsureLayouts preserves them).
+--
+-- Callers must be user-initiated and end in a reload, like SetChatAnchor.
+-- @param system number  EditMode system enum value
+-- @return boolean  true if the layouts were written
+function EditModeManager:ResetSystemToTemplate(system)
+    if InCombatLockdown() then
+        debug("Combat lockdown — skipping ResetSystemToTemplate", system)
+        return false
+    end
+
+    local ok, data = pcall(C_EditMode.GetLayouts)
+    if not ok or not data then
+        debug("ERROR: C_EditMode.GetLayouts() failed:", data)
+        return false
+    end
+
+    local Templates = RealUI.EditModeTemplates
+    local targetType = self:GetCurrentLayoutType()
+    local changed = false
+
+    for role, layoutName in pairs(LAYOUT_NAMES) do
+        local index = FindLayoutIndex(data, layoutName, targetType)
+        local built = index and self:BuildLayout(role, state.currentDisplayPreset or "standard")
+        if built then
+            local saved = data.layouts[index]
+            for _, entry in ipairs(TemplateEntries(built, system)) do
+                local sysInfo = self:FindSystemInfo(saved, system, entry.systemIndex)
+                if sysInfo then
+                    sysInfo.anchorInfo = Templates.DeepCopy(entry.anchorInfo)
+                    sysInfo.settings = Templates.DeepCopy(entry.settings)
+                    sysInfo.isInDefaultPosition = entry.isInDefaultPosition
+                else
+                    table.insert(saved.systems, Templates.DeepCopy(entry))
+                end
+                changed = true
+            end
+        end
+    end
+
+    if not changed then
+        debug("ResetSystemToTemplate: no RealUI layout to write for system", system)
+        return false
+    end
+
+    if not SaveLayouts(data, "ResetSystemToTemplate") then
+        return false
+    end
+
+    debug("ResetSystemToTemplate: wrote system", system)
     return true
 end
 
