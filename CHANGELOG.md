@@ -1,5 +1,6 @@
-## [Unreleased] ##
+## [4.1.0] - 2026-09-27 ##
 ### Summary ###
+*Looking for 4.0.4? Error 404: release not found. It was a feature release all along.*
 This release catches RealUI up with WoW 12's secret values, reworks several frames, fixes the layout on 1440p screens, and makes RealUI load on the WoW Forever beta.
 
 **Combat information that WoW 12 hides from addons is back where the game allows it.** RealUI_Auras groups now render on Blizzard's own aura engine, so they keep updating in combat instead of going empty on your target. Nameplate health text, the execute colour and the raid-cell health deficit read secret health through Blizzard's curve and formatting APIs instead of hiding, and raid cells show CHARMED while the charm state is secret. Several things that errored in combat no longer do: the world marker bar in encounters, M+ and rated PvP, and the HuD config bar.
@@ -363,7 +364,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.0.3...main
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.1.0...main
+[4.1.0]: https://github.com/RealUI/RealUI/compare/4.0.3...4.1.0
 [4.0.3]: https://github.com/RealUI/RealUI/compare/4.0.2...4.0.3
 [4.0.2]: https://github.com/RealUI/RealUI/compare/4.0.1...4.0.2
 [4.0.1]: https://github.com/RealUI/RealUI/compare/4.0.0...4.0.1
