@@ -6,13 +6,14 @@ Two client facts shape the work and are still open on Blizzard's side: Forever h
 
 Aurora's Forever skin pass lands alongside this (see the Aurora entries below).
 
-Alongside the Forever work, this round rebuilds the parts of RealUI that went blank or stale under WoW 12's secret values. **RealUI_Auras groups now render on Blizzard's aura engine**, so they keep updating in combat. Nameplate health text, the execute colour and the raid-cell health deficit read secret health through Blizzard's curve and formatting APIs instead of hiding. Boss frames gain cast bars, a current-target highlight and aura filters. Nameplates can show your combo points or class power, health values, and who a cast is aimed at. Opening all bags on a full inventory no longer runs too long.
+Alongside the Forever work, this round rebuilds the parts of RealUI that went blank or stale under WoW 12's secret values. **RealUI_Auras groups now render on Blizzard's aura engine**, so they keep updating in combat. Nameplate health text, the execute colour and the raid-cell health deficit read secret health through Blizzard's curve and formatting APIs instead of hiding. Boss frames gain cast bars, a current-target highlight and aura filters. Nameplates can show your combo points or class power, health values, and who a cast is aimed at. Opening all bags on a full inventory no longer runs too long. At 2560×1440 the Desktop High-Res preset now uses a 1200-unit canvas instead of doubling the UI scale, which had crowded the HuD, action bars and chat together.
 
 ### Modified AddOns ###
 
   * RealUI
   * RealUI_ActionBars
   * RealUI_Auras
+  * RealUI_Bugs
   * RealUI_Config
   * RealUI_Inventory
   * RealUI_Nameplates
@@ -33,6 +34,9 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
   * add: **nameplate combo points and class power**: pips along the bottom of your target's health bar for combo points, holy power, chi, arcane charges, soul shards and essence. On by default, under "Combo points / class power"
   * add: nameplate **health values**, current and maximum health with the percent (`15.2K - 45.5K - 33%`) inside the health bar. Off by default, under Texts
   * add: nameplate cast bars name the **target of the cast**, in its class colour, under the bar. On by default, under Texts
+  * add: on Forever, the target and focus frames show the character's surname after the name, joined the way Blizzard's own frames do. The smaller frames and raid cells keep the first name
+  * add: on Forever, a hunter's pet frame shows the pet's happiness as an icon beside its name (oUF 14.1's Happiness element)
+  * add: on Forever, party and raid cells show a master looter icon in the top-left corner
   * add: Forever's group finder can be dragged
   * add: Aurora — the Forever group finder is skinned after 1.60.1.70009 restyled it: panel chrome, side tabs, close button, result rows, and a first skin for the Who tab
   * add: Aurora — `/aurora mawbuffs` (and `/auroraMawBuffs` under RealUI) turns off Aurora's `ShouldShowMawBuffs` wrapper for testing, to measure whether it is still needed; it writes a Blizzard global, which taints the objective tracker's aura path
@@ -64,6 +68,14 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
   * fix: action bars no longer error at login on Forever 1.60.1.70009, whose flyout lookup returns nothing for unused IDs (a marked patch in the bundled LibActionButton)
   * fix: the HuD config bar no longer errors when combat starts while it is open, and its tab highlight no longer errors when a tab is clicked while the bar slides in
   * fix: RealUI buttons honour the game's Lock Action Bars setting, and the config panel shows its state
+  * fix: **the Desktop High-Res preset at 2560×1440.** It doubled a pixel-perfect 0.53 scale to 1.07, a 1277×718 canvas against layouts built for about 1080 units, so the HuD, action bars, chat and Naga bar were misplaced or overlapping. It now uses a fixed 0.64 scale, a 1200-unit canvas between 1080p and 4K. Profiles already on the old setting are migrated once and ask for a reload. Only 4K is switched to HiDPI before the install wizard now, not 1440p
+  * fix: at a custom scale above pixel-perfect, the Infobar and other RealUI-scaled frames were scaled twice and came out too small
+  * fix: the bottom action bar row sits on the Infobar at any UI scale. It used a fixed offset that was only right at 1440p HiDPI, so it sank into the Infobar at 0.64 and left a gap at 4K. A saved bar height left over from an older calculation can no longer push the row under the Infobar either
+  * fix: while you have not moved it, the Naga bar lines up with the bottom bar row, just right of the centre bars, instead of sitting at a different height on every screen size. Changing its position or growth in the options hands it back to you
+  * fix: chat sits above the Infobar using the Infobar's real height and the edit box's height. Existing layouts pick this up from "Chat sits clear of the Infobar" in `/realui newdefaults`, or a wizard run
+  * fix: a profile name that AceDB rejects (empty, only spaces, or over 50 characters) is refused with a message before any profile switches, instead of erroring with the profiles half switched. Imported and shared profile names are shortened to fit
+  * fix: the player role used for role-based defaults and the nameplate tank colours comes from the specialization only when the client uses specializations, and from the assigned group role otherwise
+  * fix: RealUI_Bugs colours local variable values in error reports whether they are written `name = value` or `name=value`
 
 ### Changed ###
 
@@ -72,12 +84,15 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
   * chg: the action bars profile scope is named `actionbars` instead of `bt4`; exports made under the old name still import
   * chg: unit frame tooltips use RealUI's own handlers on oUF 14's live unit, as oUF's author recommends, instead of Blizzard's `UnitFrame_OnEnter`
   * chg: **the Forever secure-snippet workaround is removed.** Blizzard fixed the load-order bug in 1.60.1.70009, so RealUI's party and raid frames spawn there and action bar paging and flyouts work in combat
+  * chg: the bundled oUF is fetched from upstream at build time and is now 14.1.0, the first oUF release with Forever support. RealUI's arena frames still stay off on Forever, because arena spec information is secret there
+  * chg: translations ship inside the addon, as the 4.0.2 set, while CurseForge localization is unavailable for the project
 
 ### Known Issues ###
 
   * RealUI_Auras groups with **Check Time Left** on use the old renderer and can go empty in combat on target, focus and similar units while the game keeps their auras secret
   * Upgrading a trinket with a long effect text at an item upgrade NPC can be blocked (Aurora owns `GameTooltip_InsertFrame`); investigation in progress
   * On the current Forever beta, **settings do not persist across `/reload`** — the client discards SavedVariables writes. Only defaults apply, for every addon. Confirmed by the Forever developers; not a RealUI bug
+  * Blizzard's Boss Abilities timeline and boss warnings are not placed by RealUI's layouts yet, so the timeline runs down the middle of the screen through the HuD. They can be moved in Edit Mode
   * `UnitName("player")` returns the full name on Forever while `UnitName("target")` does not; Blizzard says the final behaviour is not settled
   * On Forever, unit frames, group frames, action bars, nameplates, the group finder and the config have been checked in game; the tracker, infobar, inventory, tooltips and chat have had a static pass only
 
