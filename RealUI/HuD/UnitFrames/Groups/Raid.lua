@@ -233,8 +233,8 @@ local function RaidStyle(self, unit)
     charmedText:SetAlpha(0)
 
     local function UpdateCharmed(frame)
-        local unit = frame.__unit
-        local charmed = unit and _G.UnitIsCharmed(unit)
+        local frameUnit = frame.__unit
+        local charmed = frameUnit and _G.UnitIsCharmed(frameUnit)
         if charmed == nil or not _G.issecretvalue(charmed) then
             charmedText:SetAlpha(0)
             topText:SetAlpha(1)
