@@ -1375,7 +1375,13 @@ function RealUI:OnInitialize()
     self:RegisterChatCommand(
         "taintLogging",
         function(input)
-            local level = input and input:match("^%s*([012])%s*$")
+            local level = input and input:match("^%s*([0-5])%s*$")
+            -- A typo must not fall through to the on/off toggle: "5" used to
+            -- land on level 1 without saying so.
+            if not level and input and input:match("%S") then
+                _G.print("|cff0099ffRealUI|r: /taintLogging [0-5] — no level toggles between off and 1.")
+                return
+            end
             if self.DiagnosticTools then
                 self.DiagnosticTools:ToggleTaintLogging(level)
             else

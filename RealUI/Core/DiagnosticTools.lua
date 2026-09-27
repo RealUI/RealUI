@@ -29,17 +29,19 @@ function DiagnosticTools:Initialize()
 end
 
 -- Taint Logging Toggle
--- level: optional "0", "1" or "2". Omitted toggles between off and 1.
+-- level: optional "0"-"5". Omitted toggles between off and 1.
 --   1 = log the taint behind blocked actions. Small file, no measurable cost,
 --       so it can be left on for a whole session while chasing an intermittent
 --       ADDON_ACTION_FORBIDDEN (which is the only way to catch one).
 --   2 = also log every taint event. Very large and visibly stuttery; only
 --       worth it when level 1 does not name the culprit.
+--   5 = WoW 12: also names tainted field reads, which level 2 never logs
+--       (known-wow-ui-bugs.md). The level for secret-value and aura taint.
 function DiagnosticTools:ToggleTaintLogging(level)
     local taintLog = _G.GetCVar("taintLog")
 
     local newValue
-    if level == "0" or level == "1" or level == "2" then
+    if level and level:match("^[0-5]$") then
         newValue = level
     else
         newValue = (taintLog ~= "0") and "0" or "1"
