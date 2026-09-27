@@ -156,11 +156,16 @@ local FormatError do
 
     local GRAY = c.GRAY .. "%1|r"
     local IN_C = c.TAN .. "[C]|r" .. c.GRAY .. "|r"
-    local TYPE_BOOLEAN = " = " .. c.PURPLE .. "%1|r"
-    local TYPE_NUMBER  = " = " .. c.ORANGE .. "%1|r"
-    local TYPE_STRING  = " = " .. c.BLUE .. "\"%1\"|r"
-    local TYPE_TABLE   = " = "
-    local TYPE_FUNCTION   = " = " .. c.PINK .. "%1|r"
+    -- debuglocals() has written "name = value"; BugSack 12.1.2 also accepts
+    -- "name=value", so the patterns below take either and print it spaced.
+    -- %1 is the last character of the name (a word character, ")" of
+    -- "(*temporary)" or "]" of "[1]"); requiring it keeps "==" from matching.
+    local LOCAL_NAME = "([%w_%)%]]) ?= ?"
+    local TYPE_BOOLEAN = "%1 = " .. c.PURPLE .. "%2|r"
+    local TYPE_NUMBER  = "%1 = " .. c.ORANGE .. "%2|r"
+    local TYPE_STRING  = "%1 = " .. c.BLUE .. "\"%2\"|r"
+    local TYPE_TABLE   = "%1 = "
+    local TYPE_FUNCTION   = "%1 = " .. c.PINK .. "%2|r"
     local FILE_TEMPLATE   = GRAY .. c.MINT .. "%2|r\\%3:" .. c.GREEN .. "%4|r" .. c.GRAY .. "%5|r%6"
     local STRING_TEMPLATE = c.GRAY .. "%1[string |r" .. c.BLUE .. "\"%2\"|r" .. c.GRAY .. "]|r:" .. c.GREEN .. "%3|r" .. c.GRAY .. "%4|r%5"
     local NAME_TEMPLATE   = c.PINK .. "'%1'|r"
@@ -187,11 +192,11 @@ local FormatError do
         msg = msg:gsub("\n%s", "\n    ")
         msg = msg:gsub("%(%*temporary%)", GRAY)
         msg = msg:gsub("%[C%]:%-?%d?", IN_C)
-        msg = msg:gsub(" = ([ftn][ari][lu]s?e?)", TYPE_BOOLEAN)
-        msg = msg:gsub(" = ([0-9%.%-]+)", TYPE_NUMBER)
-        msg = msg:gsub(" = \"([^\"]+)\"", TYPE_STRING)
-        msg = msg:gsub(" = <(function)> defined", TYPE_FUNCTION)
-        msg = msg:gsub(" = <(table)>", TYPE_TABLE)
+        msg = msg:gsub(LOCAL_NAME .. "([ftn][ari][lu]s?e?)", TYPE_BOOLEAN)
+        msg = msg:gsub(LOCAL_NAME .. "([0-9%.%-]+)", TYPE_NUMBER)
+        msg = msg:gsub(LOCAL_NAME .. "\"([^\"]+)\"", TYPE_STRING)
+        msg = msg:gsub(LOCAL_NAME .. "<(function)> defined", TYPE_FUNCTION)
+        msg = msg:gsub(LOCAL_NAME .. "<table>", TYPE_TABLE)
         msg = msg:gsub("(<[a-z]+>)", GRAY)
         msg = msg:gsub("(<?)([%a!_]+)\\(.-%.[lx][um][al]):(%d+)(>?)(:?)", FILE_TEMPLATE)
         msg = msg:gsub("(<?)%[string \"(.-)\"]:(%d+)(>?)(:?)", STRING_TEMPLATE)
