@@ -26,7 +26,12 @@ jobs:
       # newest Aurora tag instead: its nightly when that is newer than its last
       # release. Only this job's checkout is rewritten.
       - name: Nightly takes the newest Aurora tag
-        run: sed -i '/RealUI_Skins\/Aurora:/,/tag:/ s/tag: .*/tag: latest/' .pkgmeta
+        run: |
+          sed -i '/RealUI_Skins\/Aurora:/,/tag:/ s/tag: .*/tag: latest/' .pkgmeta
+
+      # See package_release.yml: the action cannot detect our svn externals.
+      - name: Install subversion
+        run: sudo apt-get install -yq subversion
 
       # -L skips the CurseForge upload; the nightly is a GitHub pre-release only.
       - name: Create Nightly Package

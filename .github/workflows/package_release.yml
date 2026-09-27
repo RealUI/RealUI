@@ -49,6 +49,12 @@ jobs:
           echo "Warning: Could not extract changelog for version $version"
         fi
 
+    # The action installs subversion only when yq can parse .pkgmeta, and
+    # ours is not strict YAML (an unquoted "*.sublime*" reads as an alias), so
+    # the svn externals on repos.wowace.com need it installed explicitly.
+    - name: Install subversion
+      run: sudo apt-get install -yq subversion
+
     - name: Create Release Package
       uses: BigWigsMods/packager@e50a250f8705041e40f2fa1ddcb280a686d65aa0 # v2.6.1
       with:
