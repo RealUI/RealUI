@@ -77,13 +77,13 @@ local function BarOptions(id)
                 type = "select", name = "Grow (horizontal)", values = GROW_H, order = 8,
                 hidden = layoutOwned,
                 get = function() return db().growHorizontal end,
-                set = function(_, v) db().growHorizontal = v; refresh() end,
+                set = function(_, v) db().growHorizontal = v; db().position.auto = false; refresh() end,
             },
             growVertical = {
                 type = "select", name = "Grow (vertical)", values = GROW_V, order = 9,
                 hidden = layoutOwned,
                 get = function() return db().growVertical end,
-                set = function(_, v) db().growVertical = v; refresh() end,
+                set = function(_, v) db().growVertical = v; db().position.auto = false; refresh() end,
             },
             position = {
                 type = "group", name = "Position", inline = true, order = 10,
@@ -92,17 +92,17 @@ local function BarOptions(id)
                     point = {
                         type = "select", name = "Anchor", values = POINTS, order = 1,
                         get = function() return db().position.point end,
-                        set = function(_, v) db().position.point = v; refresh() end,
+                        set = function(_, v) db().position.point = v; db().position.auto = false; refresh() end,
                     },
                     x = {
                         type = "range", name = "X", min = -2000, max = 2000, step = 1, order = 2,
                         get = function() return db().position.x end,
-                        set = function(_, v) db().position.x = v; refresh() end,
+                        set = function(_, v) db().position.x = v; db().position.auto = false; refresh() end,
                     },
                     y = {
                         type = "range", name = "Y", min = -2000, max = 2000, step = 1, order = 3,
                         get = function() return db().position.y end,
-                        set = function(_, v) db().position.y = v; refresh() end,
+                        set = function(_, v) db().position.y = v; db().position.auto = false; refresh() end,
                     },
                 },
             },
