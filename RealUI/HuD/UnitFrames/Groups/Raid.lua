@@ -285,6 +285,13 @@ local function RaidStyle(self, unit)
     AssistantIndicator:SetPoint("TOPRIGHT", self, "TOPRIGHT", 2, 4)
     self.AssistantIndicator = AssistantIndicator
 
+    -- oUF 14.1 enables this only on Forever, the one client with master loot.
+    -- Mirrors the leader icon on the free top-left corner.
+    local MasterLooterIndicator = Overlay:CreateTexture(nil, "OVERLAY")
+    MasterLooterIndicator:SetSize(10, 10)
+    MasterLooterIndicator:SetPoint("TOPLEFT", self, "TOPLEFT", -2, 4)
+    self.MasterLooterIndicator = MasterLooterIndicator
+
     local ReadyCheckIndicator = Overlay:CreateTexture(nil, "OVERLAY", nil, 2)
     ReadyCheckIndicator:SetSize(16, 16)
     ReadyCheckIndicator:SetPoint("CENTER", self)
