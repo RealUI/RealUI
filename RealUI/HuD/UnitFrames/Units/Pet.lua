@@ -17,6 +17,13 @@ UnitFrames.pet = {
         dialog.Name:SetPoint("LEFT", dialog.Health, "RIGHT", 9, 0)
         dialog.Name:SetFontObject("SystemFont_Shadow_Med1_Outline")
         dialog:Tag(dialog.Name, "[realui:name]")
+
+        -- oUF 14.1 Happiness: enables itself only for a Forever hunter's pet,
+        -- so this texture stays hidden everywhere else.
+        local Happiness = dialog.overlay:CreateTexture(nil, "OVERLAY")
+        Happiness:SetSize(14, 14)
+        Happiness:SetPoint("LEFT", dialog.Name, "RIGHT", 2, 0)
+        dialog.Happiness = Happiness
     end,
     health = {
         leftVertex = 2,
