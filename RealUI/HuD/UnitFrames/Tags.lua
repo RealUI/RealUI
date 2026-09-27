@@ -214,9 +214,27 @@ end
 tags.Events["realui:customPowerColor"] = "UNIT_POWER_FREQUENT UNIT_DISPLAYPOWER"
 
 -- Name
+-- On Forever, UnitName's second return is the Camelot surname, not the realm.
+-- Target and focus show it, joined the way Blizzard's NameUtil does; the
+-- smaller frames and raid cells keep the first name. Truncation below still
+-- applies to the joined string.
+local SURNAME_UNITS = {target = true, focus = true}
+local function AppendSurname(name, surname)
+    if not surname or _G.issecretvalue(name) or _G.issecretvalue(surname) or surname == "" then
+        return name
+    end
+    local consts = _G.Constants.CharacterNameSeparatorConsts
+    local separator = consts and consts.CHARACTERNAME_SURNAME_SEPARATOR or " "
+    return name .. separator .. surname
+end
+
 tags.Methods["realui:name"] = function(unit)
-    local name = _G.UnitName(unit) or ""
+    local name, surname = _G.UnitName(unit)
+    name = name or ""
     local unitTag = unit:match("^(%w-)%d") or unit
+    if RealUI.isForever and SURNAME_UNITS[unitTag] then
+        name = AppendSurname(name, surname)
+    end
     if not _G.issecretvalue(name) then
         local maxLen = UnitFrames[unitTag] and UnitFrames[unitTag].nameLength
         if maxLen and #name > maxLen then
