@@ -19,7 +19,7 @@ This release catches RealUI up with WoW 12's secret values, reworks several fram
 
 **Reliability:** opening all bags on a full inventory no longer runs too long. Party and raid members who join during combat get a frame straight away, and the durability block no longer shows a meaningless value after login.
 
-**WoW Forever.** RealUI loads on the Forever beta (1.60.x, interface `16001`), which runs the retail 12.1 UI with Blizzard's `Camelot` overlay. It therefore ships as part of the retail package, and nothing changes on retail. On Forever the target and focus frames show surnames, hunters get a pet happiness icon, and group cells show the master looter. Two client limits remain on Blizzard's side: Forever has no realms, and on the current beta SavedVariables do not persist across a reload, so only defaults apply there.
+**WoW Forever.** RealUI loads on the Forever beta (1.60.x, interface `16001`), which runs the retail 12.1 UI with Blizzard's `Camelot` overlay. It therefore ships as part of the retail package, and nothing changes on retail. On Forever the target and focus frames show surnames, hunters get a pet happiness icon, and group cells show the master looter. Forever has no realms, so RealUI keys characters by ruleset there, the same way AceDB does. Settings persist on Forever from build 1.60.1.70009.
 
 Aurora goes from 12.1.0.9 to 12.1.0.12, with its Forever skins and a set of retail skin fixes, and the bundled oUF is now 14.1.0.
 
@@ -109,7 +109,6 @@ Aurora goes from 12.1.0.9 to 12.1.0.12, with its Forever skins and a set of reta
 
   * RealUI_Auras groups with **Check Time Left** on use the old renderer and can go empty in combat on target, focus and similar units while the game keeps their auras secret
   * Upgrading a trinket with a long effect text at an item upgrade NPC can be blocked (Aurora owns `GameTooltip_InsertFrame`); investigation in progress
-  * On the current Forever beta, **settings do not persist across `/reload`** — the client discards SavedVariables writes. Only defaults apply, for every addon. Confirmed by the Forever developers; not a RealUI bug
   * Blizzard's Boss Abilities timeline and boss warnings are not placed by RealUI's layouts yet, so the timeline runs down the middle of the screen through the HuD. They can be moved in Edit Mode
   * `UnitName("player")` returns the full name on Forever while `UnitName("target")` does not; Blizzard says the final behaviour is not settled
   * On Forever, unit frames, group frames, action bars, nameplates, the group finder and the config have been checked in game; the tracker, infobar, inventory, tooltips and chat have had a static pass only
