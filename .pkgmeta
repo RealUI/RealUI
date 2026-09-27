@@ -71,6 +71,12 @@ externals:
     RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
         url: https://github.com/alarofrunetotem/LibItemUpgradeInfo.git
         tag: latest
+    # Aurora, embedded in RealUI_Skins. Releases take this pinned tag; bump it
+    # when a RealUI release should ship a newer Aurora. The nightly workflow
+    # rewrites it to "latest" (newest Aurora tag, nightly or release).
+    RealUI_Skins/Aurora:
+        url: https://github.com/RealUI/Aurora.git
+        tag: 12.1.0.11
     RealUI_Skins/Libs/LibSharedMedia-3.0:
         url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
         tag: latest
@@ -143,5 +149,4 @@ move-folders:
     RealUI/RealUI_Tracker: RealUI_Tracker
     RealUI/RealUI_Nameplates: RealUI_Nameplates
     RealUI/RealUI_ActionBars: RealUI_ActionBars
-    Aurora: RealUI_Skins/Aurora
     RealUI/!RealUI_Preloads: "!RealUI_Preloads"
