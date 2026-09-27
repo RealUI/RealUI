@@ -168,10 +168,10 @@ end
 
 local function Configure(container, group, subGroups)
     -- Always set, so turning "Sort by Time" off restores the default order.
-    local sortMethod = group.timeSort and AuraContainerSortMethod.ExpirationOnly
-        or AuraContainerSortMethod.Default
-    local sortDirection = group.reverseSort and AuraContainerSortDirection.Reverse
-        or AuraContainerSortDirection.Normal
+    local sortMethod = group.timeSort and _G.AuraContainerSortMethod.ExpirationOnly
+        or _G.AuraContainerSortMethod.Default
+    local sortDirection = group.reverseSort and _G.AuraContainerSortDirection.Reverse
+        or _G.AuraContainerSortDirection.Normal
     for i, sub in ipairs(subGroups) do
         local key = tostring(i)
         container:SetAuraGroupFilterString(key, sub.filter)
