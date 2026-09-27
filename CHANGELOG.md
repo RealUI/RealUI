@@ -1,12 +1,27 @@
 ## [Unreleased] ##
 ### Summary ###
-RealUI now loads on the **WoW Forever** beta (1.60.x, Battle.net product `wow_classic_beta`, client folder `_classic_beta_`, interface `16001`). Forever runs the retail 12.1 UI architecture with Blizzard's `Camelot` overlay, so this is a flavor of the retail codebase rather than a classic port: every TOC now lists both interface numbers and the existing retail packaging job carries the build. Nothing changes on retail. Forever-only behaviour is gated on `RealUI.isForever`; "the 12.x code path exists" is gated on the new `RealUI.isTwelveAPI`, because `isMidnight` is false on Forever even though the code is 12.1-derived.
+This release catches RealUI up with WoW 12's secret values, reworks several frames, fixes the layout on 1440p screens, and makes RealUI load on the WoW Forever beta.
 
-Two client facts shape the work and are still open on Blizzard's side: Forever has **no realms**, so `GetRealmName()` returns nothing, and on the current beta **SavedVariables do not persist across a reload**, so only defaults apply there for now.
+**Combat information that WoW 12 hides from addons is back where the game allows it.** RealUI_Auras groups now render on Blizzard's own aura engine, so they keep updating in combat instead of going empty on your target. Nameplate health text, the execute colour and the raid-cell health deficit read secret health through Blizzard's curve and formatting APIs instead of hiding, and raid cells show CHARMED while the charm state is secret. Several things that errored in combat no longer do: the world marker bar in encounters, M+ and rated PvP, and the HuD config bar.
 
-Aurora's Forever skin pass lands alongside this (see the Aurora entries below).
+**New features:**
+- Boss frames gain cast bars, a highlight on the boss you are targeting, and the target frame's aura filters.
+- Nameplates can show your combo points or class power, health values, and who a cast is aimed at.
+- Profile exports now carry every module's settings, so an import restores the whole setup rather than only keybinds and colours.
+- `/realui editmode reset` rebuilds RealUI's Edit Mode layouts on demand.
 
-Alongside the Forever work, this round rebuilds the parts of RealUI that went blank or stale under WoW 12's secret values. **RealUI_Auras groups now render on Blizzard's aura engine**, so they keep updating in combat. Nameplate health text, the execute colour and the raid-cell health deficit read secret health through Blizzard's curve and formatting APIs instead of hiding. Boss frames gain cast bars, a current-target highlight and aura filters. Nameplates can show your combo points or class power, health values, and who a cast is aimed at. Opening all bags on a full inventory no longer runs too long. At 2560×1440 the Desktop High-Res preset now uses a 1200-unit canvas instead of doubling the UI scale, which had crowded the HuD, action bars and chat together.
+**Layout and scaling:**
+- At 2560×1440 the Desktop High-Res preset uses a 1200-unit canvas instead of doubling the UI scale, which had crowded the HuD, action bars and chat together.
+- The bottom action bar row and the chat sit on the Infobar at any UI scale.
+- The Naga bar lines up with the bottom bar row until you move it.
+- At Large HuD the action bars no longer sit 20px too low.
+- The player frame and other movers are easy to grab when unlocked.
+
+**Reliability:** opening all bags on a full inventory no longer runs too long. Party and raid members who join during combat get a frame straight away, and the durability block no longer shows a meaningless value after login.
+
+**WoW Forever.** RealUI loads on the Forever beta (1.60.x, interface `16001`), which runs the retail 12.1 UI with Blizzard's `Camelot` overlay. It therefore ships as part of the retail package, and nothing changes on retail. On Forever the target and focus frames show surnames, hunters get a pet happiness icon, and group cells show the master looter. Two client limits remain on Blizzard's side: Forever has no realms, and on the current beta SavedVariables do not persist across a reload, so only defaults apply there.
+
+Aurora goes from 12.1.0.9 to 12.1.0.12, with its Forever skins and a set of retail skin fixes, and the bundled oUF is now 14.1.0.
 
 ### Modified AddOns ###
 
@@ -57,7 +72,7 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
   * fix: **BugGrabber never installed its handler on Forever.** RealUI_Bugs disables the standalone `!BugGrabber` and relies on its embedded copy, but that copy asks the client whether the standalone is enabled using the full player name, and on Forever the client answers "enabled for all characters" even for a disabled addon — so the embedded copy deferred to a standalone that never loads. The vendored lib now only defers when the standalone is actually loaded (a marked local patch, re-applied on each BugGrabber update). Interface `16001` is also in the VersionManager's supported list, which silences the "Unsupported game version" line at login
   * fix: **nameplate health text now shows while health is secret**, in instances and in open-world combat on Forever, by reading the percent through Blizzard's percent curve. The execute colour works the same way, and a raid cell's health deficit shows as a missing percent (`-23%`) while the value is secret. A raid cell also shows CHARMED when the charm state is secret
   * fix: opening all bags on a full inventory could hit "script ran too long" and leave items that could not be used; slots are now looked up by bag and slot instead of scanning every slot for each one
-  * fix: at Large HuD the action bars sat 20px lower than intended because the HuD size offset was counted twice. New profiles get the intended height; existing profiles are offered "Action bar height at Large HuD" in `/realui newdefaults`, which keeps any height set with the HuD Vertical slider
+  * fix: at Large HuD the action bars sat 20px lower than intended because the HuD size offset was counted twice. New profiles get the intended height; existing profiles are offered "Action bar height at Large HuD" in `/realui newdefaults`, which keeps any height set with the HuD Vertical slider. Profiles whose positions were filled in by the positions migration are not offered it, since those values already include the offset
   * fix: on a low-resolution display, the switch to Small HuD now reaches both layouts, not only the active one
   * fix: the durability block shows `--` until it has read your gear and retries when a read comes back empty, instead of showing `1` after login
   * fix: the player frame is easy to grab when unlocked; every mover now sits above the frame it moves
@@ -76,6 +91,7 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
   * fix: a profile name that AceDB rejects (empty, only spaces, or over 50 characters) is refused with a message before any profile switches, instead of erroring with the profiles half switched. Imported and shared profile names are shortened to fit
   * fix: the player role used for role-based defaults and the nameplate tank colours comes from the specialization only when the client uses specializations, and from the assigned group role otherwise
   * fix: RealUI_Bugs colours local variable values in error reports whether they are written `name = value` or `name=value`
+  * fix: choosing the default entry in the Infobar font selector no longer errors with "Invalid font asset". The entry, now named "default", follows the chat font
 
 ### Changed ###
 
@@ -86,6 +102,8 @@ Alongside the Forever work, this round rebuilds the parts of RealUI that went bl
   * chg: **the Forever secure-snippet workaround is removed.** Blizzard fixed the load-order bug in 1.60.1.70009, so RealUI's party and raid frames spawn there and action bar paging and flyouts work in combat
   * chg: the bundled oUF is fetched from upstream at build time and is now 14.1.0, the first oUF release with Forever support. RealUI's arena frames still stay off on Forever, because arena spec information is secret there
   * chg: translations ship inside the addon, as the 4.0.2 set, while CurseForge localization is unavailable for the project
+  * chg: the bundled BugGrabber is updated from v12.0.21 to v12.1.0
+  * chg: the release package is built with the upstream BigWigs packager (v2.6.1) instead of RealUI's own fork, so CurseForge lists the release for Forever (`1.60.1`) as well as retail. Aurora is bundled from its 12.1.0.12 release tag
 
 ### Known Issues ###
 
