@@ -638,32 +638,39 @@ Templates.base = {
         }),
 
     -- =====================================================================
-    -- System 22: Encounter Events (12.0.0) — multiple indices
-    -- Index 1 = Critical Encounter Warnings (Boss Warnings)
-    -- Index 2 = Medium Encounter Warnings
-    -- Index 3 = Minor Encounter Warnings
-    -- Index 4 = Encounter Events 4
+    -- System 22: Encounter Events (12.0.0) — Enum.EditModeEncounterEventsSystemIndices
+    -- Index 1 = Timeline ("Boss Abilities")
+    -- Index 2 = CriticalWarnings, 3 = MediumWarnings, 4 = NormalWarnings
+    --
+    -- B150: these were shifted one index. Index 1 carried the Timeline's
+    -- settings (vertical) on the critical warning's anchor, TOP 0,-40, so the
+    -- timeline hung from the top centre straight down through the HuD, and
+    -- every warning sat one slot (40px) lower than Blizzard's. All four now
+    -- match Blizzard's Modern preset (EditModePresetLayouts.lua): the timeline
+    -- stands left of the HuD with its bottom-right corner at BOTTOM -457,336.
+    -- An owner placement pass may still move it; the `encounterEvents`
+    -- new-defaults item carries these entries to existing layouts.
     -- =====================================================================
     Entry(SYSTEM_ENCOUNTER_EVENTS, 1,
-        Anchor("TOP", "UIParent", "TOP", 0, -40),
+        Anchor("BOTTOMRIGHT", "UIParent", "BOTTOM", -457, 336),
         {
-            { setting = 0, value = 1 },
-            { setting = 1, value = 1 },
-            { setting = 2, value = 0 },
-            { setting = 3, value = 5 },
-            { setting = 4, value = 5 },
-            { setting = 5, value = 0 },
-            { setting = 6, value = 50 },
-            { setting = 7, value = 1 },
-            { setting = 8, value = 2 },
-            { setting = 9, value = 1 },
-            { setting = 10, value = 0 },
-            { setting = 11, value = 0 },
-            { setting = 12, value = 50 },
-            { setting = 13, value = 2 },
+            { setting = 0, value = 1 },    -- Orientation = Vertical
+            { setting = 1, value = 1 },    -- IconDirection = Right
+            { setting = 2, value = 0 },    -- ShowSpellName
+            { setting = 3, value = 5 },    -- IconSize
+            { setting = 4, value = 5 },    -- OverallSize
+            { setting = 5, value = 0 },    -- BackgroundTransparency
+            { setting = 6, value = 50 },   -- Transparency
+            { setting = 7, value = 1 },    -- Visibility = InEncounter
+            { setting = 8, value = 2 },    -- TooltipAnchor = Cursor
+            { setting = 9, value = 1 },    -- ShowTimer
+            { setting = 10, value = 0 },   -- ViewType = Timeline
+            { setting = 11, value = 0 },   -- FlipHorizontally
+            { setting = 12, value = 50 },  -- BarWidth
+            { setting = 13, value = 2 },   -- Padding
         }),
     Entry(SYSTEM_ENCOUNTER_EVENTS, 2,
-        Anchor("TOP", "UIParent", "TOP", 0, -90),
+        Anchor("TOP", "UIParent", "TOP", 0, -40),
         {
             { setting = 3, value = 5 },
             { setting = 4, value = 5 },
@@ -672,7 +679,7 @@ Templates.base = {
             { setting = 8, value = 2 },
         }),
     Entry(SYSTEM_ENCOUNTER_EVENTS, 3,
-        Anchor("TOP", "UIParent", "TOP", 0, -130),
+        Anchor("TOP", "UIParent", "TOP", 0, -90),
         {
             { setting = 3, value = 5 },
             { setting = 4, value = 5 },
@@ -681,7 +688,7 @@ Templates.base = {
             { setting = 8, value = 2 },
         }),
     Entry(SYSTEM_ENCOUNTER_EVENTS, 4,
-        Anchor("TOP", "UIParent", "TOP", 0, -170),
+        Anchor("TOP", "UIParent", "TOP", 0, -130),
         {
             { setting = 3, value = 5 },
             { setting = 4, value = 5 },
@@ -983,6 +990,7 @@ Templates.BLIZZARD_BAR_CLUSTER = {
     26, -- MainActionBarEndCap (12.1); no template entry, but the map has one
 }
 Templates.SYSTEM_ACTION_BAR = SYSTEM_ACTION_BAR
+Templates.SYSTEM_ENCOUNTER_EVENTS = SYSTEM_ENCOUNTER_EVENTS
 
 function Templates.DeepCopy(orig)
     if type(orig) ~= "table" then
