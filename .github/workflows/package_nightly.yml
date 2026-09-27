@@ -22,18 +22,19 @@ jobs:
       - name: Remove Changelog
         run: rm -f CHANGELOG.md
 
+      # Releases bundle the Aurora tag pinned in .pkgmeta. A nightly takes the
+      # newest Aurora tag instead: its nightly when that is newer than its last
+      # release. Only this job's checkout is rewritten.
+      - name: Nightly takes the newest Aurora tag
+        run: sed -i '/RealUI_Skins\/Aurora:/,/tag:/ s/tag: .*/tag: latest/' .pkgmeta
+
+      # -L skips the CurseForge upload; the nightly is a GitHub pre-release only.
       - name: Create Nightly Package
+        uses: BigWigsMods/packager@e50a250f8705041e40f2fa1ddcb280a686d65aa0 # v2.6.1
+        with:
+          args: -L -p 1658899
         env:
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          WAGO_API_KEY: ${{ secrets.WAGO_API_KEY }}
-          WAGO_API_TOKEN: ${{ secrets.WAGO_API_KEY }}
-          BUNDLE_EXTERNAL_ADDONS: "yes"
-          AURORA_NIGHTLY: "yes"
-        run: |
-          sudo apt-get install pandoc subversion
-          curl -s https://raw.githubusercontent.com/RealUI/packager/RealUI/release.sh -o release.sh
-          bash release.sh -L -p 1658899
-        # AURORA_NIGHTLY=yes: prefers Aurora nightly over latest release when newer
 
       - name: Mark as pre-release
         env:
