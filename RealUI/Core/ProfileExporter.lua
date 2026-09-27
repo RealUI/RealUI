@@ -413,6 +413,15 @@ end
 function ProfileExporter:Import(encodedString, profileName)
     debug("Import:", profileName)
 
+    -- A bad target name makes AceDB's SetProfile error after some scopes
+    -- have already been written.
+    if profileName then
+        local nameOk, nameErr = RealUI.ProfileCoordinator.ValidateProfileName(profileName)
+        if not nameOk then
+            return false, nameErr
+        end
+    end
+
     -- Validate first
     local valid, headerOrErr = self:ValidateImportString(encodedString)
     if not valid then

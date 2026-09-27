@@ -195,8 +195,14 @@ function ProfileManager:ImportProfile(encoded, targetProfileName)
         return false, "Invalid profile data structure"
     end
 
-    -- Determine target profile name
-    local newProfileName = targetProfileName or (profileData.profileName .. " (Imported)")
+    -- Determine target profile name. AceDB's SetProfile errors past 50
+    -- characters, so check it before the backup below.
+    local PC = RealUI.ProfileCoordinator
+    local newProfileName = targetProfileName or PC.ClampProfileName(profileData.profileName, " (Imported)")
+    local nameOk, nameErr = PC.ValidateProfileName(newProfileName)
+    if not nameOk then
+        return false, nameErr
+    end
 
     -- Create backup of current profile before importing
     self:CreateBackup("pre-import")
@@ -376,7 +382,7 @@ function ProfileManager:RetrieveSharedProfile(sourceCharacter)
     end
 
     -- Import the shared profile
-    local success, profileName = self:ImportProfile(shared.data, shared.sourceProfile .. " (Shared)")
+    local success, profileName = self:ImportProfile(shared.data, RealUI.ProfileCoordinator.ClampProfileName(shared.sourceProfile, " (Shared)"))
     if not success then
         return nil, profileName
     end

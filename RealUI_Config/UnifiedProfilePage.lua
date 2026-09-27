@@ -132,6 +132,10 @@ do
                     type = "input",
                     width = 1.2,
                     get = function() return "" end,
+                    validate = function(_, value)
+                        local ok, err = ProfileCoordinator.ValidateProfileName(value)
+                        return ok or err
+                    end,
                     set = function(_, value)
                         if not value or value == "" then return end
                         -- forceCreate = true so CoordinatedSwitch creates profiles in all linked scopes

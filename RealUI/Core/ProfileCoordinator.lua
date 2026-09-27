@@ -40,6 +40,45 @@ combatDeferFrame:Hide()
 -- Helpers
 ------------------------------------------------------------
 
+-- AceDB's SetProfile errors on a name that is empty, all spaces or longer
+-- than 50 characters (UTF-8 aware). CoordinatedSwitch calls SetProfile once
+-- per scope, so a bad name has to be caught before the first one, or the
+-- scopes are left half switched.
+local MAX_PROFILE_NAME = 50
+
+--- Check a profile name against AceDB's rule.
+--- @param profileName string|nil
+--- @return boolean, string|nil  true, or false plus a message
+function ProfileCoordinator.ValidateProfileName(profileName)
+    if type(profileName) ~= "string" or profileName == "" or profileName:find("^ +$") then
+        return false, "Profile name cannot be empty."
+    end
+    if _G.strlenutf8(profileName) > MAX_PROFILE_NAME then
+        return false, ("Profile names cannot be longer than %d characters."):format(MAX_PROFILE_NAME)
+    end
+    return true
+end
+
+--- Build "<base><suffix>" within AceDB's limit, trimming base by whole
+--- UTF-8 characters so a multi-byte character is never cut in half.
+--- @param base string
+--- @param suffix string|nil
+--- @return string
+function ProfileCoordinator.ClampProfileName(base, suffix)
+    suffix = suffix or ""
+    local room = MAX_PROFILE_NAME - _G.strlenutf8(suffix)
+    if _G.strlenutf8(base) > room then
+        local count, cut = 0, 0
+        for char in base:gmatch("[%z\1-\127\192-\255][\128-\191]*") do
+            count = count + 1
+            if count > room then break end
+            cut = cut + #char
+        end
+        base = base:sub(1, cut)
+    end
+    return base .. suffix
+end
+
 --- Get the Skins AceDB instance, if available.
 local function GetSkinsDB()
     local skinsModule = RealUI:GetModule("Skins", true)
@@ -282,6 +321,12 @@ end
 --- @return boolean, string[]
 function ProfileCoordinator:CoordinatedSwitch(profileName, forceCreate)
     debug("CoordinatedSwitch requested:", profileName)
+
+    local nameOk, nameErr = ProfileCoordinator.ValidateProfileName(profileName)
+    if not nameOk then
+        debug("Invalid profile name, rejecting:", nameErr)
+        return false, {nameErr}
+    end
 
     -- Reentrancy guard
     if switchInProgress then
