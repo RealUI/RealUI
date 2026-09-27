@@ -159,7 +159,12 @@ function private.ApplyRealUILayout()
     -- the unscaled Infobar height overstated the real one by about a row
     -- (1440p HiDPI); at 0.64 it sank the row into the Infobar, at 4K it left
     -- a 16-unit gap.
-    local bottomBase = rawBottomBase + sliderDelta
+    -- The slider may RAISE the bottom bars, never sink them into the Infobar.
+    -- The delta is only a true slider reading when the saved ActionBarsY was
+    -- written by the slider; profiles also carry values filled from an older
+    -- calculation (HuD size / resolution multipliers), and those read as a
+    -- phantom negative delta — -17 at 1440p, which put the row under the bar.
+    local bottomBase = rawBottomBase + _G.math.max(0, sliderDelta)
 
     local border = private.BUTTON_BORDER or 1
 
@@ -302,6 +307,30 @@ function private.ApplyRealUILayout()
         else
             barSizes[id] = 0
         end
+    end
+
+    -- Naga bar (6): its shipped CENTER -360 anchor sat at a different height
+    -- on every canvas size (60 units higher at 1440p than 1080p). While it
+    -- is untouched, bottom-align it with the lowest bar row, just right of
+    -- the centre bars. Any edit in the options sets `auto = false` and hands
+    -- the position back to the user.
+    local naga = AB.dbActionBars.profile.actionbars[6]
+    local pos = naga and naga.position
+    if pos and pos.auto ~= false and (pos.auto
+        or (pos.point == "CENTER" and pos.x == 210 and pos.y == -360)) then
+        local size = naga.buttonSize or BUTTON_SIZE
+        local gap = (naga.padding or BUTTON_GAP) + border * 2
+        local scale = naga.scale or 1
+        local rows = naga.rows or 4
+        local height = (rows * (size + gap) - gap) * scale
+        local centreWidth = _G.math.max(barSizes[1] or 0, barSizes[2] or 0, barSizes[3] or 0)
+        naga.growHorizontal = "RIGHT"
+        naga.growVertical = "DOWN"
+        pos.auto = true
+        pos.point = "BOTTOM"
+        -- 26 = the shipped gap between the centre bars and the Naga bar.
+        pos.x = (centreWidth / 2 + 26) / scale
+        pos.y = (bottomBase + gap * scale + height) / scale
     end
 
     private.ApplyAllBars()
