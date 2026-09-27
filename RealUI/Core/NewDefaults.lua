@@ -286,6 +286,28 @@ local items = {
             end
         end,
     },
+    {
+        id = "encounterEvents",
+        label = "Boss Abilities timeline clear of the HuD",
+        desc = "RealUI's Edit Mode layouts placed the Boss Abilities timeline at the top centre, so it ran down through the HuD, and the Boss Warnings sat one slot too low. The timeline moves left of the HuD and the warnings back to the top. Your other Edit Mode positions are kept.",
+        changed = "4.1.1",
+        -- EditMode applies the saved layout at login (see the chat item).
+        needsReload = true,
+        available = function()
+            local EMM, Templates = RealUI.EditModeManager, RealUI.EditModeTemplates
+            return EMM and EMM.ResetSystemToTemplate and Templates
+                and Templates.SYSTEM_ENCOUNTER_EVENTS
+        end,
+        isApplied = function()
+            return RealUI.EditModeManager:IsSystemAtTemplate(RealUI.EditModeTemplates.SYSTEM_ENCOUNTER_EVENTS)
+        end,
+        apply = function()
+            local EMM = RealUI.EditModeManager
+            EMM:BeginUserWrite()
+            EMM:ResetSystemToTemplate(RealUI.EditModeTemplates.SYSTEM_ENCOUNTER_EVENTS)
+            EMM:EndUserWrite()
+        end,
+    },
 }
 
 local dialog
