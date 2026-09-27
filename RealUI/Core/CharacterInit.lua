@@ -15,12 +15,20 @@ RealUI.CharacterInit = CharacterInit
 
 -- Get player role based on specialization
 local function GetPlayerRole()
-    local spec = _G.C_SpecializationInfo.GetSpecialization()
-    if not spec then
-        return "DPS" -- Default to DPS if no spec
+    local role
+    -- Spec roles only mean something under the ChrSpecialization system.
+    -- Forever's classic preset uses talent tabs, where spec index 1 is the
+    -- first talent tree and its "role" is not the player's. Fall back to the
+    -- group role there, as PlayerUtil.IsPlayerEffectivelyTank does.
+    if _G.GetSpecializationSystem() == _G.Enum.SpecializationSystem.ChrSpecialization then
+        local spec = _G.C_SpecializationInfo.GetSpecialization()
+        if not spec then
+            return "DPS" -- Default to DPS if no spec
+        end
+        role = _G.GetSpecializationRole(spec)
+    else
+        role = _G.UnitGroupRolesAssigned("player")
     end
-
-    local role = _G.GetSpecializationRole(spec)
 
     if role == "HEALER" then
         return "HEALER"

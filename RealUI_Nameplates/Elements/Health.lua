@@ -80,7 +80,13 @@ end
 --[[ Health bar: absorb bar layered under the health bar (its value runs ahead by the
      absorb amount), class/threat/reaction color chain on top. ]]--
 
+-- Spec roles only mean something under the ChrSpecialization system; under
+-- Forever's talent-tab system use the group role, as
+-- PlayerUtil.IsPlayerEffectivelyTank does.
 local function GetRoleIsTank()
+    if _G.GetSpecializationSystem() ~= _G.Enum.SpecializationSystem.ChrSpecialization then
+        return _G.UnitGroupRolesAssigned("player") == "TANK"
+    end
     local spec = _G.C_SpecializationInfo.GetSpecialization()
     return spec and _G.GetSpecializationRole(spec) == "TANK"
 end
