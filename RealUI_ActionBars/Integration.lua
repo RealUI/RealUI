@@ -97,6 +97,34 @@ function private.WatchInfobarHeight()
     OnInfobarResized()
 end
 
+-- Naga bar (6): its shipped CENTER -360 anchor sat at a different height
+-- on every canvas size (60 units higher at 1440p than 1080p). While it
+-- is untouched, bottom-align it with the lowest bar row, just right of
+-- the centre bars. Any edit in the options sets `auto = false` and hands
+-- the position back to the user. Kept out of ApplyRealUILayout for the
+-- luacheck complexity limit.
+local function PlaceNagaBar(barSizes, bottomBase, border)
+    local naga = AB.dbActionBars.profile.actionbars[6]
+    local pos = naga and naga.position
+    if not (pos and pos.auto ~= false and (pos.auto
+        or (pos.point == "CENTER" and pos.x == 210 and pos.y == -360))) then
+        return
+    end
+    local size = naga.buttonSize or BUTTON_SIZE
+    local gap = (naga.padding or BUTTON_GAP) + border * 2
+    local scale = naga.scale or 1
+    local rows = naga.rows or 4
+    local height = (rows * (size + gap) - gap) * scale
+    local centreWidth = _G.math.max(barSizes[1] or 0, barSizes[2] or 0, barSizes[3] or 0)
+    naga.growHorizontal = "RIGHT"
+    naga.growVertical = "DOWN"
+    pos.auto = true
+    pos.point = "BOTTOM"
+    -- 26 = the shipped gap between the centre bars and the Naga bar.
+    pos.x = (centreWidth / 2 + 26) / scale
+    pos.y = (bottomBase + gap * scale + height) / scale
+end
+
 function private.ApplyRealUILayout()
     local RealUI = _G.RealUI
     if not (RealUI and RealUI.db and RealUI.db.profile) then return false, "RealUI db not ready" end
@@ -309,29 +337,7 @@ function private.ApplyRealUILayout()
         end
     end
 
-    -- Naga bar (6): its shipped CENTER -360 anchor sat at a different height
-    -- on every canvas size (60 units higher at 1440p than 1080p). While it
-    -- is untouched, bottom-align it with the lowest bar row, just right of
-    -- the centre bars. Any edit in the options sets `auto = false` and hands
-    -- the position back to the user.
-    local naga = AB.dbActionBars.profile.actionbars[6]
-    local pos = naga and naga.position
-    if pos and pos.auto ~= false and (pos.auto
-        or (pos.point == "CENTER" and pos.x == 210 and pos.y == -360)) then
-        local size = naga.buttonSize or BUTTON_SIZE
-        local gap = (naga.padding or BUTTON_GAP) + border * 2
-        local scale = naga.scale or 1
-        local rows = naga.rows or 4
-        local height = (rows * (size + gap) - gap) * scale
-        local centreWidth = _G.math.max(barSizes[1] or 0, barSizes[2] or 0, barSizes[3] or 0)
-        naga.growHorizontal = "RIGHT"
-        naga.growVertical = "DOWN"
-        pos.auto = true
-        pos.point = "BOTTOM"
-        -- 26 = the shipped gap between the centre bars and the Naga bar.
-        pos.x = (centreWidth / 2 + 26) / scale
-        pos.y = (bottomBase + gap * scale + height) / scale
-    end
+    PlaceNagaBar(barSizes, bottomBase, border)
 
     private.ApplyAllBars()
     return true
