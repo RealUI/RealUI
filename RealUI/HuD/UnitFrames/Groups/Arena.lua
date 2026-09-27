@@ -156,9 +156,10 @@ UnitFrames.arena = {
 _G.tinsert(UnitFrames.units, function()
     local db = UnitFrames.db.profile
     if not db.arena.enabled then return end
-    -- oUF's DisableBlizzard indexes CompactArenaFrame unguarded, and the frame
-    -- does not exist on WoW Forever (Blizzard's own CompactRaidFrameContainer
-    -- guards on it the same way). No arena frame, no arena units to spawn.
+    -- Forever check: CompactArenaFrame does not exist there. oUF 14.1.0 (#911)
+    -- now guards it in DisableBlizzard, but the return stays: Forever marks
+    -- GetArenaOpponentSpec SecretReturns, and oUF's arena prep (units.lua) and
+    -- the arenaspec/arenacolor tags truth-test it and would throw.
     if not _G.CompactArenaFrame then return end
 
     for i = 1, 5 do
