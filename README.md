@@ -8,8 +8,8 @@ RealUI is a minimalistic UI designed to be functional, yet also efficient and el
 Information
 -----------
 
-* Current branch target is Midnight-era WoW (12.1.x).
-* Current release line is 4.0.0 (the de-bundling release, Aurora 12.1.0.7).
+* Supports retail WoW (Midnight, 12.1.x) and the WoW Forever beta (1.60.x) from the same download.
+* Current release is 4.1.0 (Aurora 12.1.0.12).
 * As of 4.0.0 the package contains **only RealUI's own addons** — no bundled third-party
   addons (standard embedded libraries such as Ace3, oUF, LibActionButton, and
   LibSharedMedia are still included, as in any addon). See "Recommended optional
@@ -17,6 +17,29 @@ Information
 * RealUI includes the modernized setup pipeline, unified profile handling, and display setup stage.
 * User settings are automatically migrated from nibRealUIDB to RealUIDB when needed.
 * Report issues on GitHub or connect with us on Discord.
+
+What's New in 4.1.0
+--------------------
+
+WoW 12 hides some combat information from addons. This release brings back what the game allows, adds
+new frame features, fixes the layout on 1440p screens, and adds WoW Forever support.
+
+* **Auras keep working in combat.** RealUI_Auras groups are drawn by Blizzard's own aura engine, so a
+  group on your target no longer goes empty during a fight. Nameplate health text, the execute colour
+  and the raid-cell health deficit read hidden health through Blizzard's curve functions, and raid cells
+  show CHARMED while the charm state is hidden.
+* **Boss frames** gain a cast bar under each frame, a border on the boss you are targeting, and the
+  target frame's aura filters. Toggles are in Groups → Boss.
+* **Nameplates** can show your combo points or class power on your target, current and maximum health,
+  and who a cast is aimed at.
+* **Profile exports carry every module's settings**, so an import restores the whole setup rather than
+  only keybinds and colours.
+* **1440p layout.** The Desktop High-Res preset uses a fixed 1200-unit canvas instead of doubling the UI
+  scale. The bottom bar row and chat sit on the Infobar at any UI scale, and the Naga bar lines up with
+  the bottom row until you move it.
+* **WoW Forever beta.** RealUI loads on Forever (interface 16001). There, target and focus names show the
+  surname, hunters get a pet happiness icon, and group cells show the master looter.
+* `/realui editmode reset` rebuilds both RealUI Edit Mode layouts from the template.
 
 What's New in 4.0.0
 --------------------
@@ -119,16 +142,17 @@ Installation
 ------------
 
 1. Exit WoW
-2. Move your old `World of Warcraft\Interface` and `World of Warcraft\WTF` folders to a Backup folder
-3. Copy the `Interface` folder from the download in to your `World of Warcraft\` folder.
+2. Move your old `Interface` and `WTF` folders to a backup folder. They are in `World of Warcraft\_retail_\`
+   for retail, or `World of Warcraft\_classic_beta_\` for the WoW Forever beta.
+3. Copy the `Interface` folder from the download into that same folder.
 4. Launch WoW and log in
 
 Update
 ------
 
 1. Exit WoW
-2. Delete all RealUI and nibRealUI folders from your `World of Warcraft\Interface\AddOns` folder
-3. Copy the `Interface` folder from the download in to your `World of Warcraft\` folder.
+2. Delete all RealUI and nibRealUI folders from `Interface\AddOns` (in `_retail_` or `_classic_beta_`)
+3. Copy the `Interface` folder from the download into the same client folder.
 4. Launch WoW and log in
 
 **Upgrading from 3.x to 4.0.0:** earlier versions bundled Bartender4, Grid2,
@@ -145,14 +169,14 @@ not reach you automatically. RealUI opens a "new defaults" picker once per
 character listing everything that changed since 3.4.0; tick what you want, or
 reopen it later with `/realui newdefaults`.
 
-**Action bar height at Large HuD (4.0.3).** Since 4.0.0 the HuD size offset was
+**Action bar height at Large HuD (4.1.0).** Since 4.0.0 the HuD size offset was
 counted twice for the action bars and cast bars, so at Large HuD the top action
 bars sat 20px lower than intended. New profiles get the corrected height
 automatically. Existing profiles are offered "Action bar height at Large HuD"
 in the new-defaults picker. It removes the extra 20px once, keeps any height
 you set with the HuD Vertical slider, and leaves bottom bars on the Infobar.
-If you leave it unticked, your top bars stay where they are, but bottom bars
-drop 20px below the Infobar line. Small HuD is not affected.
+If you leave it unticked, your top bars stay where they are. Bottom bars always sit on the
+Infobar either way. Small HuD is not affected.
 
 Troubleshooting/comments/questions?
 ------------------------------------
@@ -166,6 +190,7 @@ Primary command aliases:
 
 * `/realui`
 * `/real`
+* `/rui`
 * `/realadv`
 
 Default behavior:
@@ -188,6 +213,7 @@ Supported `/realui` subcommands:
   since 3.4.0, each applied only if you tick it. Opens itself once per character.
 * `/realui editmode` - list the Edit Mode layout backup taken before a layout update;
   `/realui editmode restore` puts your saved layout back.
+* `/realui editmode reset` - rebuild both RealUI Edit Mode layouts from the template.
 * `/realui resetall` - wipe every RealUI setting for every character (no prompt).
 
 RealUI_ActionBars:
