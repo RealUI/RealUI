@@ -125,8 +125,7 @@ UnitFrames.boss = {
         -- the frame's LEFT edge and grow LEFT (toward screen center). The
         -- container auto-sizes to content with its RIGHT edge pinned, and
         -- wrapped rows stay vertically centered on the frame.
-        local db = UnitFrames.db.profile
-        local bossDB = db.boss or {}
+        bossDB = bossDB or {}
         local layout = bossDB.auraLayout or {}
 
         -- B56: filter/sort/cutoff from the same presets as the target frame
