@@ -159,7 +159,7 @@ _G.tinsert(UnitFrames.units, function()
     -- Forever check: CompactArenaFrame does not exist there. oUF 14.1.0 (#911)
     -- now guards it in DisableBlizzard, but the return stays: Forever marks
     -- GetArenaOpponentSpec SecretReturns, and oUF's arena prep (units.lua) and
-    -- the arenaspec/arenacolor tags truth-test it and would throw.
+    -- the [arenaspec] and [raidcolor] tags truth-test it and would throw.
     if not _G.CompactArenaFrame then return end
 
     for i = 1, 5 do
