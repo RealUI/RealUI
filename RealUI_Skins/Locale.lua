@@ -27,7 +27,7 @@ elseif locale == "esMX" then
 -- cf-localization: locale="esMX", format="lua_additive_table", handle-unlocalized="comment", namespace="Skins"
 -- Skins
 --[[Translation missing --]]
---[[ L["MailFrame_OpenChecked"] = "Open Checked"--]] 
+--[[ L["MailFrame_OpenChecked"] = "Open Checked"--]]
 -- cf-localization end
 elseif locale == "frFR" then
 
@@ -40,21 +40,21 @@ elseif locale == "itIT" then
 -- cf-localization: locale="itIT", format="lua_additive_table", handle-unlocalized="comment", namespace="Skins"
 -- Skins
 --[[Translation missing --]]
---[[ L["MailFrame_OpenChecked"] = "Open Checked"--]] 
+--[[ L["MailFrame_OpenChecked"] = "Open Checked"--]]
 -- cf-localization end
 elseif locale == "koKR" then
 
 -- cf-localization: locale="koKR", format="lua_additive_table", handle-unlocalized="comment", namespace="Skins"
 -- Skins
 --[[Translation missing --]]
---[[ L["MailFrame_OpenChecked"] = "Open Checked"--]] 
+--[[ L["MailFrame_OpenChecked"] = "Open Checked"--]]
 -- cf-localization end
 elseif locale == "ptBR" then
 
 -- cf-localization: locale="ptBR", format="lua_additive_table", handle-unlocalized="comment", namespace="Skins"
 -- Skins
 --[[Translation missing --]]
---[[ L["MailFrame_OpenChecked"] = "Open Checked"--]] 
+--[[ L["MailFrame_OpenChecked"] = "Open Checked"--]]
 -- cf-localization end
 elseif locale == "ruRU" then
 
@@ -67,13 +67,13 @@ elseif locale == "zhCN" then
 -- cf-localization: locale="zhCN", format="lua_additive_table", handle-unlocalized="comment", namespace="Skins"
 -- Skins
 --[[Translation missing --]]
---[[ L["MailFrame_OpenChecked"] = "Open Checked"--]] 
+--[[ L["MailFrame_OpenChecked"] = "Open Checked"--]]
 -- cf-localization end
 elseif locale == "zhTW" then
 
 -- cf-localization: locale="zhTW", format="lua_additive_table", handle-unlocalized="comment", namespace="Skins"
 -- Skins
 --[[Translation missing --]]
---[[ L["MailFrame_OpenChecked"] = "Open Checked"--]] 
+--[[ L["MailFrame_OpenChecked"] = "Open Checked"--]]
 -- cf-localization end
 end
