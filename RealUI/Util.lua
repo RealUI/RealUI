@@ -353,12 +353,22 @@ end
 -- old numbers are reproduced exactly at scale 1: 16 bar + 16 margin (+20 for
 -- the healing layout's grid frames).
 function RealUI.GetChatYOffset(layout)
+    -- The Infobar is a modded frame with its own scale, so its GetHeight is in
+    -- ITS units; convert to UIParent's. Unconverted, plus a fixed 16 for the
+    -- edit box, only fit at 1440p HiDPI and put the edit box over the Infobar
+    -- anywhere the Infobar scale is not ~0.5.
     local infobar = _G.RealUI_Infobar
     local barHeight = infobar and infobar:GetHeight()
     if not barHeight or barHeight == 0 then
         barHeight = RealUI.Scale and RealUI.Scale.Value(16) or 16
+    else
+        barHeight = barHeight * (infobar:GetScale() or 1)
     end
-    local yOfs = math.ceil(barHeight) + 16
+    -- Room for the edit box, which Blizzard anchors 2 below the chat frame.
+    local editBox = _G.ChatFrame1EditBox
+    local editHeight = editBox and editBox:GetHeight() or 0
+    if editHeight == 0 then editHeight = 32 end
+    local yOfs = math.ceil(barHeight + editHeight + 4)
     if layout == 2 then
         yOfs = yOfs + 20
     end
