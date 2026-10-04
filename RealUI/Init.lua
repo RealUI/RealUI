@@ -41,9 +41,11 @@ local RealUI = private.RealUI
 -- Version and Build Detection
 local interfaceVersion = select(4, _G.GetBuildInfo())
 -- WoW Forever (1.60.x, Blizzard codename Camelot) reports a 1.x interface
--- number (16000-19999) but runs the Mainline UI architecture: WOW_PROJECT_ID
--- is WOW_PROJECT_MAINLINE there, so isRetail is true on Forever and is never
--- a sufficient gate on its own. Gate Forever-specific behaviour on isForever.
+-- number (16000-19999) but runs the Mainline UI architecture. WOW_PROJECT_ID
+-- was WOW_PROJECT_MAINLINE there through beta 70124 and has been
+-- WOW_PROJECT_CAMELOT (18) since 70170, so isRetail holds on Forever only
+-- because isForever is OR'd in, and it is never a sufficient gate on its own.
+-- Gate Forever-specific behaviour on isForever.
 RealUI.isForever = interfaceVersion >= 16000 and interfaceVersion < 20000
 RealUI.isRetail = _G.WOW_PROJECT_ID == _G.WOW_PROJECT_MAINLINE or RealUI.isForever
 RealUI.isMidnight = RealUI.isRetail and interfaceVersion >= 120000
