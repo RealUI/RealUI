@@ -6,6 +6,8 @@ local NP = private.NP
      RealUI_Config or any addon embedding AceConfig-3.0 provides it. ]]--
 
 local function RefreshAll()
+    -- B163: aura containers re-apply their filters when they fall behind this.
+    private.auraConfigGeneration = (private.auraConfigGeneration or 0) + 1
     local health = NP.db.profile.enemy.health
     for _, plate in _G.next, private.activeByUnit do
         -- Live dimensions first (beta feedback: sizes shouldn't need a reload),
@@ -80,6 +82,93 @@ local function AuraGroupOptions(displayName, order, maxCap)
     }
 end
 
+--[[ B163: always-show / never-show spell lists for My debuffs.
+     Spells are added by ID, or by name for anything in the player's spellbook
+     (C_Spell.GetSpellInfo resolves names only for known spells). ]]
+local function SpellLabel(spellID)
+    local name = _G.C_Spell.GetSpellName(spellID) or _G.UNKNOWN
+    local icon = _G.C_Spell.GetSpellTexture(spellID)
+    return (icon and ("|T%s:16:16:0:0:64:64:4:60:4:60|t "):format(icon) or "") .. name .. " (" .. spellID .. ")"
+end
+
+local function ResolveSpellInput(text)
+    text = text and _G.strtrim(text) or ""
+    if text == "" then return end
+    local info = _G.C_Spell.GetSpellInfo(_G.tonumber(text) or text)
+    return info and info.spellID
+end
+
+local function SpellListOptions(listKey, displayName, desc, order)
+    local selected
+    local function List()
+        return NP.db.profile.enemy.auras.myDebuffs[listKey]
+    end
+    return {
+        type = "group", name = displayName, inline = true, order = order,
+        args = {
+            desc = { type = "description", name = desc, order = 0 },
+            add = {
+                type = "input", name = "Add spell", order = 1,
+                desc = "Spell ID, or the name of a spell in your spellbook.",
+                get = function() return "" end,
+                set = function(_, text)
+                    local spellID = ResolveSpellInput(text)
+                    if spellID then
+                        List()[spellID] = true
+                        RefreshAll()
+                    else
+                        _G.print("|cff30d0ffRealUI Nameplates|r: no spell found for \"" .. _G.tostring(text) .. "\".")
+                    end
+                end,
+            },
+            spells = {
+                type = "select", name = "Spells", order = 2,
+                values = function()
+                    local values = {}
+                    for spellID, enabled in _G.next, List() do
+                        if enabled then values[spellID] = SpellLabel(spellID) end
+                    end
+                    return values
+                end,
+                get = function() return selected end,
+                set = function(_, spellID) selected = spellID end,
+            },
+            remove = {
+                type = "execute", name = "Remove", order = 3,
+                disabled = function() return not (selected and List()[selected]) end,
+                func = function()
+                    List()[selected] = nil
+                    selected = nil
+                    RefreshAll()
+                end,
+            },
+        },
+    }
+end
+
+local function MyDebuffOptions(order)
+    local options = AuraGroupOptions("My debuffs", order, 12)
+    local args = options.args
+    args.show = {
+        type = "select", name = "Show", order = 1.5,
+        desc = "Important: the debuffs Blizzard marks as worth tracking for your class, the same list"
+            .. " Blizzard's own nameplates use. Minor procs and secondary effects stay off the plate."
+            .. "\n\nAll mine: every debuff you or your pet cast.",
+        values = { important = "Important to my class", all = "All mine" },
+        sorting = { "important", "all" },
+    }
+    args.sort = {
+        type = "select", name = "Sort by", order = 1.6,
+        desc = "Time remaining puts the debuff closest to running out first.",
+        values = private.auraSortNames,
+    }
+    args.alwaysShow = SpellListOptions("alwaysShow", "Always show",
+        "Shown even when Blizzard does not mark them as important. Only used with Show: Important.", 5)
+    args.neverShow = SpellListOptions("neverShow", "Never show",
+        "Hidden from this row whatever the Show setting. Wins over Always show.", 6)
+    return options
+end
+
 local function BuildOptions()
     return {
         type = "group",
@@ -130,7 +219,7 @@ local function BuildOptions()
                                 desc = "Requires a UI reload (button size is fixed at creation).",
                                 order = 1,
                             },
-                            myDebuffs    = AuraGroupOptions("My debuffs", 2, 12),
+                            myDebuffs    = MyDebuffOptions(2),
                             crowdControl = AuraGroupOptions("Crowd control", 3, 8),
                             buffs        = AuraGroupOptions("Dispellable/enrage buffs", 4, 8),
                         },

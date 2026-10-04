@@ -22,9 +22,17 @@ local NP = private.NP
 local SPACING = 2
 local ELEMENT_SPACING = SPACING + 2
 
+-- B163: My debuffs is two groups whose filter and candidates come from the
+-- profile (ResolveMyDebuffs), so they are set on every config change rather
+-- than once here. Group 1 is the "Show" rule; group 2 is the always-show list.
+-- INCLUDE_NAME_PLATE_ONLY: without it the engine drops auras Blizzard flags
+-- as nameplate-only, which is the one place they are meant to appear.
+local MY_DEBUFF_FILTER = "HARMFUL|PLAYER|INCLUDE_NAME_PLATE_ONLY|!CROWD_CONTROL"
+
 local GROUP_DEFS = {
     myDebuffs = {
-        groups = { { filter = "HARMFUL|PLAYER|!CROWD_CONTROL" } },
+        groups = { { filter = MY_DEBUFF_FILTER }, { filter = MY_DEBUFF_FILTER } },
+        resolve = true,
     },
     buffs = {
         dispelBorder = true,
@@ -35,7 +43,7 @@ local GROUP_DEFS = {
         },
     },
     crowdControl = {
-        groups = { { filter = "HARMFUL|CROWD_CONTROL" } },
+        groups = { { filter = "HARMFUL|INCLUDE_NAME_PLATE_ONLY|CROWD_CONTROL" } },
     },
 }
 
@@ -65,6 +73,52 @@ private.auraPositionNames = {
 }
 
 local Auras = {}
+
+-- B163 sort choices. Values are AuraContainerSortMethod keys.
+private.auraSortNames = { default = "Default", expiration = "Time remaining" }
+local SORT_METHODS = { default = "Default", expiration = "Expiration" }
+
+-- Spell lists are stored as { [spellID] = true }; a removed spell may linger as
+-- false in a saved profile. Returns only the live entries, nil when empty.
+local function CopyList(list)
+    local copy
+    for spellID, enabled in _G.next, list or {} do
+        if enabled then
+            copy = copy or {}
+            copy[spellID] = true
+        end
+    end
+    return copy
+end
+
+--[[ B163: what My debuffs shows.
+
+     "important" is Blizzard's own nameplate rule (Blizzard_NamePlateAuras.lua
+     AddAura): a debuff shows only if its spell carries `nameplateShowPersonal`,
+     the per-class flag Blizzard curates for the debuffs a player should track.
+     "all" is every debuff the player or their pet cast (the 4.1 behaviour).
+
+     The always/never lists are spell-ID ("identity") candidate filters. The
+     engine applies those only to harmful auras on units the player cannot
+     assist (AuraContainerUtil.CanApplyIdentityCandidateFilters), which is every
+     enemy plate — the only design this row attaches to. Group 2 takes the
+     always-show spells that group 1 rejected (nameplateShowPersonal = false),
+     so nothing is shown twice. Never-show wins over always-show. ]]
+local function ResolveMyDebuffs(groupDB)
+    local never = CopyList(groupDB.neverShow)
+    local main = { excludeSpellIDs = never }
+    if groupDB.show ~= "all" then
+        main.nameplateShowPersonal = true
+    end
+    local extra = {
+        -- An empty include list matches nothing, which is what "no always-show
+        -- spells" (or "all" mode, where group 1 already has them) should do.
+        includeSpellIDs = (groupDB.show ~= "all" and CopyList(groupDB.alwaysShow)) or {},
+        excludeSpellIDs = never,
+        nameplateShowPersonal = false,
+    }
+    return { main, extra }
+end
 
 -- B23: the native countdown text overlapped the icon and used the tiny default
 -- font. Move it above the icon and size it to match the nameplate name font.
@@ -183,6 +237,26 @@ function Auras.Create(plate)
     end
 end
 
+-- Bumped by the config on every change; a container re-applies its filters
+-- only when it is behind, not on every plate attach.
+private.auraConfigGeneration = 0
+
+local function ConfigureFilters(container, def, groupDB)
+    if not def.resolve or container.realUIGeneration == private.auraConfigGeneration then return end
+    container.realUIGeneration = private.auraConfigGeneration
+
+    local candidates = ResolveMyDebuffs(groupDB)
+    local methods, directions = _G.AuraContainerSortMethod, _G.AuraContainerSortDirection
+    local sortMethod = methods and methods[SORT_METHODS[groupDB.sort] or "Default"]
+    for i in _G.ipairs(def.groups) do
+        local groupKey = _G.tostring(i)
+        private.Try(container.SetAuraGroupCandidateFilters, container, groupKey, candidates[i])
+        if sortMethod and directions then
+            private.Try(container.SetAuraGroupSortMethod, container, groupKey, sortMethod, directions.Normal)
+        end
+    end
+end
+
 local function ConfigureContainer(container, def, groupDB, size)
     private.Try(function()
         for i in _G.ipairs(def.groups) do
@@ -190,6 +264,7 @@ local function ConfigureContainer(container, def, groupDB, size)
         end
         container:SetFlowLayoutMaximumLineSize((size + ELEMENT_SPACING) * groupDB.max)
     end)
+    ConfigureFilters(container, def, groupDB)
 end
 
 function Auras.Attach(plate, unit)

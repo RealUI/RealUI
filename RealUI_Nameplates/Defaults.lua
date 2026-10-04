@@ -57,7 +57,12 @@ private.defaults = {
             classPower = { enabled = true, height = 3 }, -- B81: pips on the target's plate
             auras = {
                 size = 20,
-                myDebuffs    = { enabled = true, max = 8, position = "aboveCenter", offset = { x = 0, y = 16 } },
+                -- B163: show = "important" (Blizzard's per-class nameplate list)
+                -- or "all" (every debuff you cast). Spell lists are { [spellID] = true }.
+                myDebuffs    = {
+                    enabled = true, max = 8, position = "aboveCenter", offset = { x = 0, y = 16 },
+                    show = "important", sort = "expiration", alwaysShow = {}, neverShow = {},
+                },
                 crowdControl = { enabled = true, max = 4, position = "right",      offset = { x = 6, y = 0 } },
                 buffs        = { enabled = true, max = 4, position = "aboveRight", offset = { x = 0, y = 16 } },
             },
