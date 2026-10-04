@@ -317,10 +317,13 @@ local function PostCastGlobal(self, unit, spellID, cooldownInfo, duration)
     -- oUF 14 GCD display (player only, gated on showGlobalCooldown). A real
     -- cast always takes precedence over the GCD window.
     --
-    -- `duration` is a **DurationObject**, not a number of seconds. oUF builds it
-    -- with `C_DurationUtil.CreateDuration()` + `SetTimeFromStart` and hands it
-    -- to the engine's `SetTimerDuration` (oUF/elements/castbar.lua:551-553); the
-    -- callback simply forwards the same object. Reading it as a number threw
+    -- `duration` is a **DurationObject**, not a number of seconds. Since oUF
+    -- 14.1.1 it is one object per castbar, `element.globalCooldownDuration`,
+    -- created once in Enable (oUF/elements/castbar.lua:674) and re-filled with
+    -- `SetTimeFromStart` on every GCD before going to the engine's
+    -- `SetTimerDuration` (:551-554); the callback simply forwards that object.
+    -- Never keep a reference to it: the next GCD overwrites it in place.
+    -- Reading it as a number threw
     -- `attempt to compare userdata with number` on *every* GCD once the GCD
     -- display was switched on — 290 errors in one session.
     --
