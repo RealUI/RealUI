@@ -233,6 +233,8 @@ end
 
 local blizzHider
 local suppressedBars = {}
+-- Frames currently parked under blizzHider (frame -> true).
+local parkedFrames = {}
 -- Known container names, plus the bags bar and micro menu (BT4's HideBlizzard
 -- used to park those for RealUI).
 local BLIZZARD_BARS = {
@@ -279,10 +281,19 @@ local function Suppress(frame, key)
     if not frame then return end
     local ok, parent = _G.pcall(frame.GetParent, frame)
     if not ok or parent == blizzHider or frame == blizzHider then return end
+    -- A child of a frame we already parked is hidden with it. Reparenting it
+    -- too breaks code that reaches through its parent: on Forever the status
+    -- bar containers are children of StatusTrackingBarManager, and their
+    -- UpdateShownState calls GetParent():CheckForLayoutChange() (nil on the
+    -- hider) on every Edit Mode enter/exit. Retail parents them to UIParent.
+    if parent and parkedFrames[parent] then return end
     -- EditMode can reparent bars back when it applies layouts; remember the
     -- ORIGINAL parent once, re-suppress every time.
-    if _G.pcall(frame.SetParent, frame, blizzHider) and not suppressedBars[key] then
-        suppressedBars[key] = { frame = frame, parent = parent or _G.UIParent }
+    if _G.pcall(frame.SetParent, frame, blizzHider) then
+        parkedFrames[frame] = true
+        if not suppressedBars[key] then
+            suppressedBars[key] = { frame = frame, parent = parent or _G.UIParent }
+        end
     end
 end
 
@@ -331,6 +342,7 @@ function AB:OnDisable()
         _G.pcall(info.frame.SetParent, info.frame, info.parent)
         suppressedBars[key] = nil
     end
+    _G.wipe(parkedFrames)
     -- Parenting is reversible; silencing is not — UnregisterAllEvents discards
     -- the registration list, and Blizzard rebuilds it only at load. A session
     -- that has silenced the bars needs a reload to get them back.
