@@ -40,7 +40,9 @@ local type, error, tostring, tonumber, assert, select = type, error, tostring, t
 local setmetatable, wipe, unpack, pairs, next = setmetatable, wipe, unpack, pairs, next
 local str_match, format = string.match, format
 
-local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+-- RealUI patch: WoW Forever reported WOW_PROJECT_MAINLINE until 1.60.1.70124; since 70170
+-- it reports WOW_PROJECT_CAMELOT (18). It runs the retail UI and API, so keep it on the retail paths
+local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE) or (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 local WoWBCC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
