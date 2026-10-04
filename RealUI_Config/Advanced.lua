@@ -1453,7 +1453,8 @@ do -- Skins
                     return SkinsDB.profile.frameColor.r, SkinsDB.profile.frameColor.g, SkinsDB.profile.frameColor.b, SkinsDB.profile.frameColor.a
                 end,
                 set = function(info, r, g, b, a)
-                    Color.frame:SetRGBA(r, g, b, Color.frame.a)
+                    -- B164: a changed picker pins its colour above the colour mode.
+                    Color.SetTokenOverride("frame", Color.Create(r, g, b))
                     SkinsDB.profile.frameColor.r = r
                     SkinsDB.profile.frameColor.g = g
                     SkinsDB.profile.frameColor.b = b
@@ -1470,7 +1471,7 @@ do -- Skins
                     return SkinsDB.profile.buttonColor.r, SkinsDB.profile.buttonColor.g, SkinsDB.profile.buttonColor.b
                 end,
                 set = function(info, r, g, b)
-                    Color.button:SetRGBA(r, g, b)
+                    Color.SetTokenOverride("button", Color.Create(r, g, b))
                     SkinsDB.profile.buttonColor.r = r
                     SkinsDB.profile.buttonColor.g = g
                     SkinsDB.profile.buttonColor.b = b

@@ -662,20 +662,31 @@ function private.OnLoad()
     local Skin = Aurora.Skin
     local Color, Util = Aurora.Color, Aurora.Util
 
-    -- Initialize custom colors
+    --[[ Custom colours (owner decision 2026-10-04, B164 option A): the colour
+         mode supplies the palette, and a Skins picker pins its colour on top
+         only once it has been changed. Both pickers are seeded with Normal's
+         colours on first run, so a stored value equal to Normal's counts as
+         untouched. ]]
+    local normal = Color.Modes.Normal.tokens
+    local function IsChanged(stored, default)
+        return _G.math.abs(stored.r - default.r) > 0.005
+            or _G.math.abs(stored.g - default.g) > 0.005
+            or _G.math.abs(stored.b - default.b) > 0.005
+    end
+
     local frameColor = private.skinsDB.frameColor
     if not frameColor.r then
-        frameColor.r, frameColor.g, frameColor.b = Color.frame:GetRGB()
-    else
-        Color.frame:SetRGBA(frameColor.r, frameColor.g, frameColor.b, Color.frame.a)
+        frameColor.r, frameColor.g, frameColor.b = normal.frame:GetRGB()
+    elseif IsChanged(frameColor, normal.frame) then
+        Color.SetTokenOverride("frame", frameColor)
     end
     Util.SetFrameAlpha(frameColor.a)
 
     local buttonColor = private.skinsDB.buttonColor
     if not buttonColor.r then
-        buttonColor.r, buttonColor.g, buttonColor.b = Color.button:GetRGB()
-    else
-        Color.button:SetRGB(buttonColor.r, buttonColor.g, buttonColor.b)
+        buttonColor.r, buttonColor.g, buttonColor.b = normal.button:GetRGB()
+    elseif IsChanged(buttonColor, normal.button) then
+        Color.SetTokenOverride("button", buttonColor)
     end
 
     local classColors = private.skinsDB.classColors
@@ -683,6 +694,19 @@ function private.OnLoad()
         private.classColorsReset(classColors, _G.RAID_CLASS_COLORS)
     end
     private.setColorCache(classColors)
+
+    --[[ B164: the colour mode goes on BEFORE anything is skinned. Aurora runs
+         every skin straight after this OnLoad; RealUI used to apply the mode at
+         PLAYER_ENTERING_WORLD (DisplayPresets.ApplyStored), after the skins, so
+         under HDR only the registered frame backdrops ever changed and buttons,
+         panel fills and borders stayed Normal even after a reload. After the
+         class colour cache, as in standalone Aurora: SetMode refreshes the
+         highlight colour. The picker overrides above survive it. ]]
+    local storedMode = RealUI.DisplayPresets and RealUI.DisplayPresets.GetStoredColorMode
+        and RealUI.DisplayPresets.GetStoredColorMode()
+    if storedMode then
+        Color.SetMode(storedMode)
+    end
 
     -- Set overrides and hooks
     local C = Aurora[2]

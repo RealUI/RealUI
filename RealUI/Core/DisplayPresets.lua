@@ -420,6 +420,16 @@ end
 -- Does NOT write to SkinsDB — Apply() already saved those values and
 -- they persist across sessions. Writing here would trigger a spurious
 -- reload dialog from UpdateUIScale.
+--- B164: the colour mode the stored display settings ask for, or nil when no
+--- preset is configured (ApplyStored leaves the mode alone then too).
+--- RealUI_Skins applies it before Aurora skins anything; ApplyStored's own
+--- SetMode at PLAYER_ENTERING_WORLD is then a no-op.
+function DisplayPresets.GetStoredColorMode()
+    local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+    if not display or display.presetId == false then return nil end
+    return display.hdrEnabled and "HDR" or "Normal"
+end
+
 function DisplayPresets.ApplyStored()
     local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
     if not display then return end
