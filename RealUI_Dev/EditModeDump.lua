@@ -32,9 +32,10 @@ local SYSTEM_NAMES = {
     [21] = "PersonalResourceDisplay",
     [22] = "EncounterEvents",
     [23] = "DamageMeter",
-    -- New systems added in 12.0.x (not yet in wiki)
-    [24] = "BossWarnings",
-    [25] = "ExternalDefensives",
+    -- 12.1 additions (Enum.EditModeSystem)
+    [24] = "RaidWarning",
+    [25] = "TotemActionBar",
+    [26] = "LossOfControl",
 }
 
 local function DumpLayout(layoutName)
@@ -126,7 +127,7 @@ local function DumpLayout(layoutName)
     end
 
     Output("")
-    Output("=== Systems NOT in our template (system > 23 or unexpected indices) ===")
+    Output("=== Systems NOT in our template (system > 24 or unexpected indices) ===")
 
     -- Our template covers these keys:
     local templateKeys = {
@@ -181,6 +182,9 @@ local function DumpLayout(layoutName)
         ["22_1"]=true, ["22_2"]=true, ["22_3"]=true, ["22_4"]=true,
         -- DamageMeter
         ["23_nil"]=true,
+        -- RaidWarning (TotemActionBar 25 / LossOfControl 26 stay at
+        -- Blizzard defaults by design, so they still list as missing)
+        ["24_nil"]=true,
     }
 
     local missing = {}
