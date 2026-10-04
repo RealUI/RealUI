@@ -25,6 +25,9 @@ end
 --- secret tokens natively — the route the HuD unit frames already take
 --- (`HuD/UnitFrames/Shared.lua` GetClassColor).
 function private.ClassColor(unit)
+    -- Identity secret: UnitIsPlayer would come back secret and fail the test
+    -- below anyway; asking first skips the reads.
+    if private.IsIdentitySecret(unit) then return nil end
     if not private.SafeTest(_G.UnitIsPlayer, unit) then return nil end
 
     local _, class = _G.UnitClass(unit)
@@ -107,16 +110,21 @@ local function MainTankFlagsAreMeaningful()
     return true
 end
 
+-- The C_Secrets predicates gate each read, so a secret threat state falls
+-- through to the reaction colour without throwing inside ResolveColor's pcall.
 local function ThreatColor(unit, colors)
     if not colors.threat.enabled then return end
-    if not _G.UnitAffectingCombat(unit) then return end
+    if private.SafeBool(_G.UnitAffectingCombat(unit)) ~= true then return end
+    if private.IsThreatSecret(unit) then return end
 
     local status = _G.UnitThreatSituation("player", unit)
     if GetRoleIsTank() then
         if status and status >= 2 then return colors.threat.safe end
         if status == 1 then return colors.threat.transition end
         local targetUnit = unit .. "target"
-        if _G.UnitExists(targetUnit) and not _G.UnitIsUnit(targetUnit, "player") then
+        if _G.UnitExists(targetUnit) and private.IsSameUnit(targetUnit, "player") == false then
+            -- Who holds it is unknowable: no threat colour rather than a guess.
+            if private.IsIdentitySecret(targetUnit) then return end
             local heldByTank = _G.UnitGroupRolesAssigned(targetUnit) == "TANK"
             if not heldByTank and MainTankFlagsAreMeaningful() then
                 heldByTank = _G.GetPartyAssignment("MAINTANK", targetUnit)
@@ -134,7 +142,8 @@ local function ThreatColor(unit, colors)
 end
 
 local function ReactionColor(unit, colors)
-    local reaction = _G.UnitReaction(unit, "player") or 4
+    local reaction = _G.UnitReaction(unit, "player")
+    if not private.Accessible(reaction) then reaction = 4 end
     if reaction <= 2 then return colors.reaction.hostile end
     if reaction == 3 then return colors.reaction.unfriendly end
     if reaction == 4 then return colors.reaction.neutral end

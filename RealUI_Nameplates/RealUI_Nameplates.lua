@@ -47,6 +47,39 @@ function private.Accessible(value)
     return true -- pre-secret client: nothing is secret
 end
 
+--[[ C_Secrets predicates — the API family RealUI_Tooltips and Aurora already use.
+     They answer "would this read come back secret?" BEFORE the read, so the
+     plain path or the fallback is chosen up front: no throw, no pcall, and no
+     taint.log entry (a pcall-caught secret throw still writes one, B58). Each
+     returns a plain boolean. A client without the API has no secrets. ]]--
+local C_Secrets = _G.C_Secrets
+
+function private.IsIdentitySecret(unit)
+    return C_Secrets and C_Secrets.ShouldUnitIdentityBeSecret
+        and C_Secrets.ShouldUnitIdentityBeSecret(unit) or false
+end
+
+function private.IsThreatSecret(unit)
+    return C_Secrets and C_Secrets.ShouldUnitThreatStateBeSecret
+        and C_Secrets.ShouldUnitThreatStateBeSecret("player", unit) or false
+end
+
+-- UnitIsUnit behind CanCompareUnitTokens, as RealUI_Tooltips does. Returns
+-- true/false, or nil when the game will not say (comparison not permitted, or
+-- the answer is secret) — callers decide what "unknown" means for them.
+function private.IsSameUnit(unit1, unit2)
+    if C_Secrets and C_Secrets.CanCompareUnitTokens
+        and not C_Secrets.CanCompareUnitTokens(unit1, unit2) then
+        return nil
+    end
+    return private.SafeBool(_G.UnitIsUnit(unit1, unit2))
+end
+
+-- True only when there is a target and this unit is known to be it.
+function private.IsTarget(unit)
+    return _G.UnitExists("target") and private.IsSameUnit(unit, "target") == true
+end
+
 -- Resolve a possibly-secret boolean to plain true/false, or nil if inaccessible.
 function private.SafeBool(value)
     if value == nil then return nil end
@@ -150,7 +183,7 @@ end
 
 local function AttachPlate(unit)
     if activeByUnit[unit] then return end
-    if _G.UnitIsUnit(unit, "player") then return end  -- personal resource display: out of scope
+    if private.IsSameUnit(unit, "player") then return end  -- personal resource display: out of scope
 
     local base = _G.C_NamePlate.GetNamePlateForUnit(unit)
     if not private.IsAccessible(base) then return end
@@ -239,7 +272,11 @@ function NP:UpdatePlateAlpha(plate)
 
     -- The current target is always full alpha — no combat/range/target dimming
     -- (beta feedback: target plates stayed dimmed until combat started).
-    if _G.UnitExists("target") and _G.UnitIsUnit(unit, "target") then
+    -- nil = the game will not say whether this is the target; such a plate is
+    -- neither promoted nor dimmed for it.
+    local hasTarget = _G.UnitExists("target")
+    local isTarget = hasTarget and private.IsSameUnit(unit, "target")
+    if isTarget then
         plate:SetAlpha(1)
         return
     end
@@ -255,11 +292,12 @@ function NP:UpdatePlateAlpha(plate)
             alpha = alpha * db.outOfRange
         end
     end
-    if _G.UnitExists("target") and not _G.UnitIsUnit(unit, "target") then
+    if hasTarget and isTarget == false then
         alpha = alpha * db.notTarget
     end
     if plate.state.casting then
-        alpha = _G.math.max(alpha, db.casting * (_G.UnitExists("target") and _G.UnitIsUnit(unit, "target") and 1 or db.notTarget))
+        -- Reaching here means this plate is not known to be the target.
+        alpha = _G.math.max(alpha, db.casting * (isTarget == false and db.notTarget or 1))
     end
 
     plate:SetAlpha(alpha)

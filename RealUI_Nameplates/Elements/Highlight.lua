@@ -15,7 +15,7 @@ function Highlight.Create(plate)
 end
 
 local function Update(plate)
-    local isTarget = _G.UnitExists("target") and _G.UnitIsUnit(plate.unit, "target")
+    local isTarget = private.IsTarget(plate.unit)
     local color = NP.db.profile.target.highlight
 
     if plate.design == "enemy" then

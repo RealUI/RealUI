@@ -59,7 +59,7 @@ end
 local function FindTargetPlate()
     if not _G.UnitExists("target") then return end
     for unit, plate in _G.next, private.activeByUnit do
-        if plate.design == "enemy" and _G.UnitIsUnit(unit, "target") then
+        if plate.design == "enemy" and private.IsSameUnit(unit, "target") then
             return plate
         end
     end

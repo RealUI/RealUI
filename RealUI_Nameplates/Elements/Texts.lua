@@ -30,6 +30,9 @@ local function FriendlyNameColor(unit)
     local db = NP.db.profile.friendly.name
     -- Role and class are both secret-capable in a battleground; indexing a
     -- plain table with either throws (see private.ClassColor in Health.lua).
+    if private.IsIdentitySecret(unit) then
+        return NP.db.profile.enemy.colors.reaction.friendly
+    end
     local role = _G.UnitGroupRolesAssigned(unit)
     if private.Accessible(role) and db.roleColors[role] then
         return db.roleColors[role]
