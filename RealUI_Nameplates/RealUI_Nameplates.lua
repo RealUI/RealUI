@@ -155,6 +155,19 @@ local function AttachPlate(unit)
     local base = _G.C_NamePlate.GetNamePlateForUnit(unit)
     if not private.IsAccessible(base) then return end
 
+    -- Widgets-only units (clickable objects with a charge or progress bar):
+    -- Blizzard's plate is nothing but the WidgetContainer, which lives on the
+    -- UnitFrame, so suppressing it hid the bar and left only our name. Leave
+    -- the plate to Blizzard. A base recycled from a suppressed unit stays
+    -- hidden until shown, and the Show hook only re-hides bases we own.
+    if _G.UnitNameplateShowsWidgetsOnly
+        and private.SafeTest(_G.UnitNameplateShowsWidgetsOnly, unit) then
+        if private.IsAccessible(base.UnitFrame) then
+            base.UnitFrame:Show()
+        end
+        return
+    end
+
     SuppressUnitFrame(base)
 
     local design = SelectDesign(unit)
