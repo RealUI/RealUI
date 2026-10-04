@@ -581,6 +581,11 @@ function RealUI:ChatCommand_Config(input)
                 RealUI.NewDefaults:Show(false)
             end
             return
+        elseif command == "grid" then
+            -- Screen alignment grid for placing frames: `/realui grid [spacing]`
+            -- (Core/AlignGrid.lua).
+            self:ToggleAlignGrid(input:match("^%S+%s+(%S+)"))
+            return
         elseif command == "devcheck" then
             -- Reports anything left in a non-shipping state: dev A/B toggles,
             -- taint logging, disabled skins, leftover diagnostic keys. Three
