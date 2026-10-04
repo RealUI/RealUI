@@ -109,6 +109,11 @@ private.defaults = {
     profile = {
         bindings = {},  -- [buttonName] = key (custom, beyond the bar-1 ACTIONBUTTON mirror)
         moveExtraButton = true,  -- anchor ExtraAction/ZoneAbility left of bar 1
+        -- B151: which action page each bar shows (Bar.lua PAGE_LAYOUTS).
+        -- "bartender" = bar N on page N (every 4.x profile and BT4 import);
+        -- "blizzard" = Blizzard's Action Bars 1-6 pages. Not `layout`: that
+        -- word already means the HuD geometry everywhere in this addon.
+        pageLayout = "bartender",
     },
     global = {
         importedBT4 = false,

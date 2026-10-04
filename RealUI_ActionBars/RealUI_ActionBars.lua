@@ -359,6 +359,11 @@ _G.SlashCmdList.REALUIACTIONBARS = function(input)
     if input == "bind" then
         if private.ToggleBindMode then private.ToggleBindMode() end
     elseif input == "dump" then
+        -- B151: the page each bar shows under the profile's numbering.
+        local pages = {}
+        for id = 1, 6 do pages[id] = private.GetBarPage(id) end
+        _G.print(("page numbering: %s (bars 1-6 -> pages %s)"):format(
+            private.GetPageLayout(), _G.table.concat(pages, ",")))
         for id = 1, 6 do
             local bar = AB.bars[id]
             local db = AB.dbActionBars.profile.actionbars[id]

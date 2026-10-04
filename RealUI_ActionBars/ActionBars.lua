@@ -209,5 +209,7 @@ _G.SlashCmdList.REALUIABNAGA = function()
     if not db then return end
     db.enabled = not db.enabled
     private.RefreshBar(6)
-    _G.print(("|cff30d0ffRealUI ActionBars|r: Naga bar %s."):format(db.enabled and "enabled" or "disabled"))
+    -- B151: "Naga" is bar 6's Bartender-numbering name (see Options.lua).
+    local label = (private.GetPageLayout() == "bartender") and "Naga bar" or "Bar 6"
+    _G.print(("|cff30d0ffRealUI ActionBars|r: %s %s."):format(label, db.enabled and "enabled" or "disabled"))
 end

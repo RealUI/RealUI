@@ -16,23 +16,20 @@ function private.ApplyBindings()
     _G.ClearOverrideBindings(bindingOwner)
 
     -- Blizzard binding mirrors: keys bound through the standard Blizzard
-    -- commands press our equivalent buttons. Bar 1 = ACTIONBUTTON; bars 3-6
-    -- occupy the same action pages as Blizzard's multibars, so their
-    -- MULTIACTIONBAR bindings map straight across (bar 2 = page 2 has no
-    -- Blizzard binding set; it pages via bar 1).
-    local BLIZZARD_MIRRORS = {
-        [1] = "ACTIONBUTTON%d",
-        [3] = "MULTIACTIONBAR3BUTTON%d",  -- page 3 / MultiBarRight
-        [4] = "MULTIACTIONBAR4BUTTON%d",  -- page 4 / MultiBarLeft
-        [5] = "MULTIACTIONBAR2BUTTON%d",  -- page 5 / MultiBarBottomRight
-        [6] = "MULTIACTIONBAR1BUTTON%d",  -- page 6 / MultiBarBottomLeft
-    }
-    for barID, commandFormat in _G.next, BLIZZARD_MIRRORS do
-        for i = 1, 12 do
-            local buttonName = ("RealUI_AB_Bar%dB%d"):format(barID, i)
-            local keys = { _G.GetBindingKey(commandFormat:format(i)) }
-            for k = 1, #keys do
-                _G.SetOverrideBindingClick(bindingOwner, false, keys[k], buttonName, "LeftButton")
+    -- commands press our equivalent buttons. Keyed by the PAGE a bar shows
+    -- (B151, Bar.lua PAGE_BINDINGS): bar 1 = ACTIONBUTTON, and a bar on a
+    -- Blizzard multibar's page takes that multibar's MULTIACTIONBAR command.
+    -- Bartender mode: bars 3-6 mirror, bar 2 (page 2, no Blizzard binding
+    -- set) is capture-only. Blizzard mode: bars 2-6 mirror Blizzard bars 2-6.
+    for barID = 1, 6 do
+        local commandFormat = private.GetBindingFormat(barID)
+        if commandFormat then
+            for i = 1, 12 do
+                local buttonName = ("RealUI_AB_Bar%dB%d"):format(barID, i)
+                local keys = { _G.GetBindingKey(commandFormat:format(i)) }
+                for k = 1, #keys do
+                    _G.SetOverrideBindingClick(bindingOwner, false, keys[k], buttonName, "LeftButton")
+                end
             end
         end
     end
@@ -84,8 +81,8 @@ end
 
 --[[ Two kinds of button, two binding stores.
 
-     Bars 1 and 3-6 mirror a Blizzard command (`keyBoundTarget`, set in
-     Bar.lua): the key the button DISPLAYS is whatever the game's own binding
+     Bars 1 and 3-6 (2-6 with Blizzard page numbering, B151) mirror a
+     Blizzard command (`keyBoundTarget`, set in Bar.lua): the key the button DISPLAYS is whatever the game's own binding
      set holds for that command, and Bar 1 presses via that command too. Our
      profile table never held those keys, so ESC on such a button printed
      "cleared" while removing nothing, and the hotkey stayed on the button
@@ -93,8 +90,8 @@ end
      command — the same thing LibActionButton's SetKey/ClearBindings do —
      followed by SaveBindings so the change survives a reload.
 
-     Bar 2 has no Blizzard command; its captures live in the profile and are
-     applied as override bindings by ApplyBindings. ]]--
+     Bar 2 in Bartender mode has no Blizzard command; its captures live in
+     the profile and are applied as override bindings by ApplyBindings. ]]--
 local function HandleBind(key)
     local buttonName = GetHoveredButton()
     if not buttonName then return false end

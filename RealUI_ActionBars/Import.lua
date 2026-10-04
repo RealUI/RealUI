@@ -87,6 +87,19 @@ function private.ImportBartender4Keybinds()
     return imported
 end
 
+--[[ B151: everything this file imports assumes Bartender page numbering —
+     BT4 bar N held its spells on page N, ImportBar copies BT4 bar N's
+     geometry onto RealUI bar N, and the keybind conversion targets RealUI bar
+     ceil(slot / 12). Under Blizzard numbering those bars show other pages, so
+     the import would land the keys and layout on the wrong spells. An import
+     is an explicit "make it like my BT4 setup", so it switches the profile
+     back to Bartender numbering (and says so) rather than only warning. ]]--
+local function UseBartenderNumbering(deferApply)
+    if private.GetPageLayout() == "bartender" then return end
+    private.SetPageLayout("bartender", deferApply)
+    _G.print("|cff30d0ffRealUI ActionBars|r: page numbering switched to Bartender4 — imported Bartender4 bars and keybinds use its numbering.")
+end
+
 --- @param manual boolean     user typed /rab import (chattier on no-ops)
 --- @param deferApply boolean called before the bars exist (OnInitialize) —
 ---        write the DB only; the normal build path reads it moments later.
@@ -94,6 +107,7 @@ function private.ImportFromBartender4(manual, deferApply)
     -- Keybinds first: they need no Bartender4 data at all.
     local importedKeys = private.ImportBartender4Keybinds()
     if importedKeys > 0 then
+        UseBartenderNumbering(deferApply)
         if not deferApply then
             private.QueueSecure(private.ApplyBindings)
         end
@@ -132,6 +146,9 @@ function private.ImportFromBartender4(manual, deferApply)
     end
 
     AB.db.global.importedBT4 = true
+    if imported > 0 then
+        UseBartenderNumbering(deferApply)
+    end
     if not deferApply then
         private.QueueSecure(private.ApplyAllBars)
     end

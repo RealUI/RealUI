@@ -99,6 +99,88 @@ local function BuildButtonConfig(barDB, keyBoundTarget)
     }
 end
 
+--[[ B151: page numbering. Which action page each bar shows is a per-profile
+     choice (`AB.db.profile.pageLayout`):
+
+       bartender — bar N shows page N. Bartender4's numbering, which RealUI
+                   inherited with the layout; every 4.x profile and every BT4
+                   import has its spells in these slots, so it stays default.
+       blizzard  — bars 1-6 show the pages of Blizzard's Action Bars 1-6
+                   (Blizzard_ActionBar/Shared/MultiActionBars.xml `actionpage`:
+                   MultiBarBottomLeft 6, BottomRight 5, Right 3, Left 4,
+                   MultiBar5 13).
+
+     Bar 1 is page 1 plus the bonusbar pages under either layout; its paging
+     driver (ActionBars.lua) does not change. Switching moves no spells — it
+     changes which slots each bar shows. Bars 7/8 (pages 14/15) do not exist
+     yet; PAGE_BINDINGS already covers them. ]]--
+local PAGE_LAYOUTS = {
+    bartender = { 1, 2, 3, 4, 5, 6 },
+    blizzard  = { 1, 6, 5, 3, 4, 13 },
+}
+local DEFAULT_PAGE_LAYOUT = "bartender"
+
+-- Blizzard binding command per action PAGE, not per bar: a bar mirrors the
+-- command of whichever Blizzard bar shows the same page. In Bartender mode
+-- this gives exactly the old per-bar table (1, 3-6 mirrored, bar 2 = page 2
+-- capture-only), because bar and page coincide on bars 1 and 3-6.
+local PAGE_BINDINGS = {
+    [1]  = "ACTIONBUTTON%d",
+    [6]  = "MULTIACTIONBAR1BUTTON%d",  -- MultiBarBottomLeft  (Blizzard bar 2)
+    [5]  = "MULTIACTIONBAR2BUTTON%d",  -- MultiBarBottomRight (Blizzard bar 3)
+    [3]  = "MULTIACTIONBAR3BUTTON%d",  -- MultiBarRight       (Blizzard bar 4)
+    [4]  = "MULTIACTIONBAR4BUTTON%d",  -- MultiBarLeft        (Blizzard bar 5)
+    [13] = "MULTIACTIONBAR5BUTTON%d",  -- MultiBar5           (Blizzard bar 6)
+    [14] = "MULTIACTIONBAR6BUTTON%d",  -- MultiBar6           (Blizzard bar 7)
+    [15] = "MULTIACTIONBAR7BUTTON%d",  -- MultiBar7           (Blizzard bar 8)
+}
+
+--- The active page layout name; anything unknown reads as the default.
+function private.GetPageLayout()
+    local layout = AB.db and AB.db.profile.pageLayout
+    if PAGE_LAYOUTS[layout] then return layout end
+    return DEFAULT_PAGE_LAYOUT
+end
+
+--- Action page shown by bar `id` (layout optional: defaults to the profile's).
+function private.GetBarPage(id, layout)
+    local pages = PAGE_LAYOUTS[layout or private.GetPageLayout()] or PAGE_LAYOUTS[DEFAULT_PAGE_LAYOUT]
+    return pages[id] or id
+end
+
+--- Blizzard binding command format mirrored by bar `id`, or nil (capture-only).
+function private.GetBindingFormat(id, layout)
+    return PAGE_BINDINGS[private.GetBarPage(id, layout)]
+end
+
+local function GetKeyBoundTarget(id, i)
+    local commandFormat = private.GetBindingFormat(id)
+    return commandFormat and commandFormat:format(i) or nil
+end
+
+--- Switch the profile's page layout and re-apply slots + bindings. SetState
+--- writes secure attributes, so the re-apply goes through QueueSecure: live
+--- out of combat, deferred to PLAYER_REGEN_ENABLED in it. `noApply` = DB write
+--- only (called before the bars exist).
+function private.SetPageLayout(layout, noApply)
+    if not PAGE_LAYOUTS[layout] then return false end
+    AB.db.profile.pageLayout = layout
+    if noApply then return true end
+    if _G.InCombatLockdown() then
+        _G.print("|cff30d0ffRealUI ActionBars|r: page numbering changes when combat ends.")
+    end
+    private.QueueSecure(function()
+        private.ApplyAllBars()
+        private.ApplyBindings()
+    end)
+    return true
+end
+
+-- Public: read-only accessors for RealUI_Dev's page-layout test.
+function AB:GetPageLayout() return private.GetPageLayout() end
+function AB:GetBarPage(id, layout) return private.GetBarPage(id, layout) end
+function AB:GetBindingFormat(id, layout) return private.GetBindingFormat(id, layout) end
+
 local barMixin = {}
 
 function barMixin:GetDB()
@@ -142,8 +224,29 @@ function barMixin:Layout()
     end
 end
 
+-- B151: point bars 2-6 at their layout page. Idempotent — SetState runs only
+-- when the slot actually differs, so the frequent ApplyConfig callers (HuD
+-- recompute, option sliders) cost nothing, and Bartender mode never touches
+-- a button after CreateBar. Secure attributes: out of combat only (callers
+-- of ApplyConfig already queue). Bar 1 is paged and the same in both layouts.
+function barMixin:ApplySlots()
+    if self.id == 1 then return end
+    local base = (private.GetBarPage(self.id) - 1) * 12
+    for i = 1, 12 do
+        local button = self.buttons[i]
+        local kind, action = button:GetAction(0)
+        if kind ~= "action" or action ~= base + i then
+            button:SetState(0, "action", base + i)
+        end
+    end
+end
+
 function barMixin:ApplyConfig()
     local db = self:GetDB()
+
+    -- Slots before the config pass: UpdateConfig refreshes the button from
+    -- whatever action it holds.
+    self:ApplySlots()
 
     self._ruiConfig = db
     self._ruiAlpha = db.alpha or 1
@@ -164,7 +267,8 @@ function barMixin:ApplyConfig()
     local locked = private.IsActionBarLocked()
     for i = 1, 12 do
         local button = self.buttons[i]
-        button.config = BuildButtonConfig(db, button.config and button.config.keyBoundTarget)
+        -- Recomputed rather than carried over: the page layout decides it.
+        button.config = BuildButtonConfig(db, GetKeyBoundTarget(self.id, i))
         button:UpdateConfig(button.config)
         button:SetAttribute("buttonlock", locked)
     end
@@ -214,23 +318,15 @@ function private.CreateBar(id)
 
     private.SetupVisibility(bar)
 
-    -- Bars occupying Blizzard action pages mirror the matching Blizzard
-    -- binding commands — pressed via override bindings (Bindings.lua) and
-    -- displayed via LAB's keyBoundTarget. Bar 2 (page 2) has no Blizzard
-    -- binding set; it uses custom captures only.
-    local KEYBOUND_TARGETS = {
-        [1] = "ACTIONBUTTON%d",
-        [3] = "MULTIACTIONBAR3BUTTON%d",
-        [4] = "MULTIACTIONBAR4BUTTON%d",
-        [5] = "MULTIACTIONBAR2BUTTON%d",
-        [6] = "MULTIACTIONBAR1BUTTON%d",
-    }
-
+    -- Bars showing a Blizzard bar's action page mirror that bar's binding
+    -- commands — pressed via override bindings (Bindings.lua) and displayed
+    -- via LAB's keyBoundTarget. A bar on page 2 (bar 2 in Bartender mode) has
+    -- no Blizzard binding set; it uses custom captures only. PAGE_BINDINGS.
     local db = AB.dbActionBars.profile.actionbars[id]
+    local base = (private.GetBarPage(id) - 1) * 12
     for i = 1, 12 do
-        local keyBoundTarget = KEYBOUND_TARGETS[id] and KEYBOUND_TARGETS[id]:format(i) or nil
         local button = LAB:CreateButton(i, bar:GetName() .. "B" .. i, bar,
-            BuildButtonConfig(db, keyBoundTarget))
+            BuildButtonConfig(db, GetKeyBoundTarget(id, i)))
         -- Instance override beats LAB's Generic:GetHotkey (metatable) — this
         -- is the only hook point LAB offers for hotkey text; UpdateHotkeys
         -- always routes through self:GetHotkey().
@@ -244,7 +340,9 @@ function private.CreateBar(id)
             end
             button:SetState(0, "action", i)
         else
-            button:SetState(0, "action", (id - 1) * 12 + i)
+            -- B151: the layout's page, not `id` (barMixin:ApplySlots re-runs
+            -- this on a layout switch).
+            button:SetState(0, "action", base + i)
         end
 
         bar.buttons[i] = button

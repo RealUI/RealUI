@@ -29,8 +29,18 @@ local function BarOptions(id)
     -- Same boundary the buttonSize/padding/scale carve-out established.
     local layoutOwned = id <= 5
 
+    -- "Naga" names bar 6 under Bartender numbering (page 6, shipped off for
+    -- multi-button mice). Under Blizzard numbering it is Blizzard's bar 6
+    -- (page 13), so it gets the plain name (B151).
+    local function barName()
+        if id == 6 and private.GetPageLayout() == "bartender" then
+            return "Bar 6 (Naga)"
+        end
+        return "Bar " .. id
+    end
+
     return {
-        type = "group", name = (id == 6) and "Bar 6 (Naga)" or ("Bar " .. id), order = id,
+        type = "group", name = barName, order = id,
         args = {
             enabled = {
                 type = "toggle", name = "Enabled", order = 1,
@@ -207,6 +217,13 @@ local function ButtonLockText()
     return ("|cffff4040Action bars are unlocked|r — actions can be dragged off the bars, in combat too. This follows the game setting (%s)."):format(where)
 end
 
+-- B151: page numbering choice (Bar.lua PAGE_LAYOUTS).
+local PAGE_LAYOUT_NAMES = {
+    bartender = "Bartender4 (RealUI default)",
+    blizzard = "Blizzard",
+}
+local PAGE_LAYOUT_HELP = "Which action slots each bar shows. |cffffcc00Bartender4|r: bar N shows page N — the numbering every RealUI profile and Bartender4 import uses. |cffffcc00Blizzard|r: bars 1-6 show the same slots as Blizzard's Action Bars 1-6, and use their keybinds — for players arriving from the default UI.\n\nSwitching does not move any spells; it changes which slots each bar shows, so on an existing profile your bars will look shuffled. Switching back restores them. /rab import switches to Bartender4."
+
 local function BuildOptions()
     local options = {
         type = "group", name = "RealUI ActionBars", childGroups = "tab",
@@ -219,6 +236,28 @@ local function BuildOptions()
             buttonLock = {
                 type = "description", order = 0.1, width = "full", fontSize = "medium",
                 name = ButtonLockText,
+            },
+            pageLayout = {
+                type = "select", name = "Page numbering", order = 0.2,
+                values = PAGE_LAYOUT_NAMES, sorting = { "bartender", "blizzard" },
+                desc = PAGE_LAYOUT_HELP,
+                confirm = function(_, value)
+                    if value == private.GetPageLayout() then return false end
+                    return "Switch bar page numbering to " .. PAGE_LAYOUT_NAMES[value]
+                        .. "?\n\nNo spells move, but each bar will show different slots, so your bars will look shuffled until you switch back."
+                end,
+                get = function() return private.GetPageLayout() end,
+                set = function(_, value)
+                    private.SetPageLayout(value)
+                    local registry = _G.LibStub("AceConfigRegistry-3.0", true)
+                    if registry then
+                        registry:NotifyChange("RealUI_ActionBars")
+                    end
+                end,
+            },
+            pageLayoutNote = {
+                type = "description", order = 0.3, width = "full",
+                name = "Page numbering decides which action slots each bar shows. Switching does not move spells — on an existing profile the bars will look shuffled.",
             },
             moveExtraButton = {
                 type = "toggle", name = "Anchor Extra/Zone ability to bar 1", order = 0.5,
