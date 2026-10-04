@@ -1,4 +1,6 @@
 ## Interface: 120100, 16001
+## AllowLoadGameType: standard, camelot
+## ExcludeLoadGameType: classic
 ## Title: RealUI Action Bars
 ## Category: RealUI_Core
 ## Notes: Action bars for RealUI, built on LibActionButton-1.0

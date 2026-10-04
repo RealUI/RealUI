@@ -1,4 +1,6 @@
 ## Interface: 120100, 16001
+## AllowLoadGameType: standard, camelot
+## ExcludeLoadGameType: classic
 ## Title: nibRealUI (Migration Stub)
 ## Notes: Loads legacy SavedVariables for migration to RealUI 3.0
 ## Author: Nibelheim, Gethe, Hanshi

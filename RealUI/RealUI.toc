@@ -1,4 +1,6 @@
 ## Interface: 120100, 16001
+## AllowLoadGameType: standard, camelot
+## ExcludeLoadGameType: classic
 ## Title: RealUI
 ## Category: RealUI_Core
 ## Notes: The essential core of RealUI - A comprehensive interface suite with modular design

@@ -1,4 +1,6 @@
 ## Interface: 120100, 16001
+## AllowLoadGameType: standard, camelot
+## ExcludeLoadGameType: classic
 ## Title: RealUI Config
 ## Category: RealUI_Core
 ## Notes: Graphical configuration for RealUI

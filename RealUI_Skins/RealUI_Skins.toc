@@ -1,4 +1,6 @@
 ## Interface: 120100, 16001
+## AllowLoadGameType: standard, camelot
+## ExcludeLoadGameType: classic
 ## Title: RealUI Skins
 ## Category: RealUI_Core
 ## Notes: Blizzard Interface Skin
