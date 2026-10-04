@@ -608,11 +608,6 @@ function RealUI:ChatCommand_Config(input)
 
             local ac = _G.AuroraConfig
             if ac then
-                -- Dev A/B toggles: anything true here is a test flag.
-                if ac.devRestoreInsertFrame then
-                    report("AuroraConfig.devRestoreInsertFrame", true, false)
-                end
-
                 -- Skin toggles that default ON. A disabled skin is a valid user
                 -- choice, but it also silently changes what is being tested.
                 -- Only keys whose shipping default is true; mainmenubar
