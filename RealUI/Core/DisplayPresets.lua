@@ -321,8 +321,9 @@ function DisplayPresets.Apply(id, hdrEnabled)
     local preset = DisplayPresets.GetById(id)
     if not preset then return end
 
-    -- Derive color mode from the independent HDR toggle
-    local colorMode = hdrEnabled and "HDR" or "Normal"
+    -- Derive color mode from the independent HDR toggle (unticking HDR keeps
+    -- a colour-blind mode chosen on the Skins page)
+    local colorMode = DisplayPresets.ResolveColorMode(hdrEnabled)
 
     -- Write to global storage
     local display = RealUI.db.global.display
@@ -343,6 +344,7 @@ function DisplayPresets.Apply(id, hdrEnabled)
     display.isPixelScale = preset.isPixelScale
     display.fontScale    = preset.fontScale
     display.hdrEnabled   = hdrEnabled
+    display.colorMode    = colorMode
 
     -- Write scale settings to SkinsDB.profile — this is the "reset to
     -- optimized defaults" action. The Skins module reads these on reload.
@@ -420,13 +422,60 @@ end
 -- Does NOT write to SkinsDB — Apply() already saved those values and
 -- they persist across sessions. Writing here would trigger a spurious
 -- reload dialog from UpdateUIScale.
---- B164: the colour mode the stored display settings ask for, or nil when no
---- preset is configured (ApplyStored leaves the mode alone then too).
---- RealUI_Skins applies it before Aurora skins anything; ApplyStored's own
---- SetMode at PLAYER_ENTERING_WORLD is then a no-op.
+--[[ Colour modes (B164). Aurora has five; RealUI used to reach only two of
+     them through the Display Setup HDR checkbox. `display.colorMode` is the
+     stored choice (account-wide, like the rest of `display`), set from the
+     Skins page or Display Setup. `hdrEnabled` is kept in step for the wizard's
+     checkbox and older code. A profile from before colorMode existed has
+     only hdrEnabled, which still resolves. ]]
+DisplayPresets.colorModes = {
+    {key = "Normal",       name = "Normal"},
+    {key = "HDR",          name = "HDR"},
+    {key = "Deuteranopia", name = "Deuteranopia (red-green)"},
+    {key = "Protanopia",   name = "Protanopia (red-weak)"},
+    {key = "Tritanopia",   name = "Tritanopia (blue-yellow)"},
+}
+
+--- The stored colour mode, for display in the config.
+function DisplayPresets.GetColorMode()
+    local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+    if not display then return "Normal" end
+    return display.colorMode or (display.hdrEnabled and "HDR" or "Normal")
+end
+
+--- The mode an HDR checkbox state means: HDR when ticked; otherwise the
+--- stored non-HDR mode, so unticking HDR does not drop a colour-blind mode.
+function DisplayPresets.ResolveColorMode(hdrEnabled)
+    if hdrEnabled then return "HDR" end
+    local current = DisplayPresets.GetColorMode()
+    return current ~= "HDR" and current or "Normal"
+end
+
+--- Store and apply a colour mode, then offer the reload that re-skins
+--- everything in it (a live switch only repaints frame backdrops).
+function DisplayPresets.SetColorMode(mode)
+    local display = RealUI.db.global.display
+    if mode == DisplayPresets.GetColorMode() then return end
+    display.colorMode = mode
+    display.hdrEnabled = mode == "HDR"
+
+    local Aurora = _G.Aurora
+    if Aurora and Aurora.Color and Aurora.Color.SetMode then
+        Aurora.Color.SetMode(mode)
+    end
+    RealUI:ReloadUIDialog()
+end
+
+--- B164: the colour mode to apply at load, or nil when there is nothing to
+--- apply: no explicit choice and no display preset (ApplyStored leaves the
+--- mode alone then too). RealUI_Skins applies it before Aurora skins
+--- anything; ApplyStored's own SetMode at PLAYER_ENTERING_WORLD is then a
+--- no-op.
 function DisplayPresets.GetStoredColorMode()
     local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
-    if not display or display.presetId == false then return nil end
+    if not display then return nil end
+    if display.colorMode then return display.colorMode end
+    if display.presetId == false then return nil end
     return display.hdrEnabled and "HDR" or "Normal"
 end
 
@@ -472,7 +521,7 @@ function DisplayPresets.ApplyStored()
     end
 
     -- Apply HDR / color mode via Aurora (guarded — Integration may not be ready)
-    local colorMode = display.hdrEnabled and "HDR" or "Normal"
+    local colorMode = DisplayPresets.GetStoredColorMode() or "Normal"
     local Aurora = _G.Aurora
     if Aurora and Aurora.Color and Aurora.Color.SetMode then
         Aurora.Color.SetMode(colorMode)

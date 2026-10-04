@@ -433,8 +433,9 @@ function DisplayStage.PreviewPreset(presetId)
     -- 1. Set preview frame scale
     previewFrame:SetScale((preset.customScale or 1.0) * BASE_PREVIEW_SCALE)
 
-    -- 2. Derive color mode from the independent HDR toggle
-    local colorMode = DisplayStage.hdrEnabled and "HDR" or "Normal"
+    -- 2. Derive color mode from the independent HDR toggle (B164: unticked
+    -- keeps a colour-blind mode chosen on the Skins page)
+    local colorMode = RealUI.DisplayPresets.ResolveColorMode(DisplayStage.hdrEnabled)
     if Color and Color.PreviewMode then
         Color.PreviewMode(colorMode)
     end

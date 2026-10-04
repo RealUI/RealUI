@@ -580,6 +580,17 @@ local function GetStripeAlpha()
     return (skinsDB and skinsDB.stripeAlpha) or DEFAULT_STRIPE_ALPHA
 end
 
+--- B164: has a Skins picker been changed from the Normal colour it is seeded
+--- with on first run? Unchanged pickers follow the colour mode.
+--- `token` is "frame" or "button"; `stored` the profile's {r, g, b}.
+function RealUI.IsSkinColorChanged(token, stored)
+    local default = Aurora.Color.Modes.Normal.tokens[token]
+    if not (stored and stored.r and default) then return false end
+    return _G.math.abs(stored.r - default.r) > 0.005
+        or _G.math.abs(stored.g - default.g) > 0.005
+        or _G.math.abs(stored.b - default.b) > 0.005
+end
+
 function RealUI:UpdateFrameStyle()
     local skinsDB = private.skinsDB
     local frameAlpha = skinsDB and skinsDB.frameColor and skinsDB.frameColor.a
@@ -668,16 +679,10 @@ function private.OnLoad()
          colours on first run, so a stored value equal to Normal's counts as
          untouched. ]]
     local normal = Color.Modes.Normal.tokens
-    local function IsChanged(stored, default)
-        return _G.math.abs(stored.r - default.r) > 0.005
-            or _G.math.abs(stored.g - default.g) > 0.005
-            or _G.math.abs(stored.b - default.b) > 0.005
-    end
-
     local frameColor = private.skinsDB.frameColor
     if not frameColor.r then
         frameColor.r, frameColor.g, frameColor.b = normal.frame:GetRGB()
-    elseif IsChanged(frameColor, normal.frame) then
+    elseif RealUI.IsSkinColorChanged("frame", frameColor) then
         Color.SetTokenOverride("frame", frameColor)
     end
     Util.SetFrameAlpha(frameColor.a)
@@ -685,7 +690,7 @@ function private.OnLoad()
     local buttonColor = private.skinsDB.buttonColor
     if not buttonColor.r then
         buttonColor.r, buttonColor.g, buttonColor.b = normal.button:GetRGB()
-    elseif IsChanged(buttonColor, normal.button) then
+    elseif RealUI.IsSkinColorChanged("button", buttonColor) then
         Color.SetTokenOverride("button", buttonColor)
     end
 

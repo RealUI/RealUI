@@ -1443,9 +1443,36 @@ do -- Skins
             -- Style → Frame Opacity), which controls Aurora's skinned element opacity.
             -- Both are intentionally exposed as separate controls.
             -- See design: Duplication Resolution Matrix — Frame Alpha.
+            colorMode = {
+                name = "Color Mode",
+                desc = "The palette for every skinned window. HDR deepens blacks and brightens edges and"
+                    .. " class colors. The three color-blind modes shift highlight colors to stay distinct"
+                    .. " for red-green, red-weak and blue-yellow color vision."
+                    .. "\n\nAlso set by the HDR checkbox in Display Setup. Applies to everything after a reload.",
+                type = "select",
+                values = function()
+                    local values = {}
+                    for _, mode in _G.ipairs(RealUI.DisplayPresets.colorModes) do
+                        values[mode.key] = mode.name
+                    end
+                    return values
+                end,
+                sorting = function()
+                    local keys = {}
+                    for i, mode in _G.ipairs(RealUI.DisplayPresets.colorModes) do
+                        keys[i] = mode.key
+                    end
+                    return keys
+                end,
+                get = function() return RealUI.DisplayPresets.GetColorMode() end,
+                set = function(info, value) RealUI.DisplayPresets.SetColorMode(value) end,
+                order = 0.5,
+            },
             frameColor = {
                 name = L.Appearance_FrameColor,
                 desc = "RealUI's frame backdrop color and alpha. The alpha channel here controls the backdrop opacity of RealUI frames."
+                    .. "\n\nLeft at its default, the color follows the Color Mode. Once changed, it is kept in every"
+                    .. " mode until you press Reset. Applies to everything after a reload."
                     .. "\n\n|cffffcc00Note:|r This is separate from the Skin Style \226\134\146 Frame Opacity setting, which controls the opacity of skinned UI elements.",
                 type = "color",
                 hasAlpha = true,
@@ -1464,8 +1491,25 @@ do -- Skins
                 end,
                 order = 1,
             },
+            frameColorReset = {
+                name = _G.RESET,
+                desc = "Let the Color Mode decide the frame color again.",
+                type = "execute",
+                width = "half",
+                disabled = function() return not RealUI.IsSkinColorChanged("frame", SkinsDB.profile.frameColor) end,
+                func = function()
+                    local default = Color.Modes.Normal.tokens.frame
+                    SkinsDB.profile.frameColor.r, SkinsDB.profile.frameColor.g, SkinsDB.profile.frameColor.b = default:GetRGB()
+                    Color.SetTokenOverride("frame", nil)
+                    RealUI:UpdateFrameStyle()
+                    RealUI:ReloadUIDialog()
+                end,
+                order = 1.5,
+            },
             buttonColor = {
                 name = L.Appearance_ButtonColor,
+                desc = "Left at its default, the button color follows the Color Mode. Once changed, it is kept in"
+                    .. " every mode until you press Reset. Applies to everything after a reload.",
                 type = "color",
                 get = function(info)
                     return SkinsDB.profile.buttonColor.r, SkinsDB.profile.buttonColor.g, SkinsDB.profile.buttonColor.b
@@ -1478,6 +1522,21 @@ do -- Skins
                     RealUI:UpdateFrameStyle()
                 end,
                 order = 2,
+            },
+            buttonColorReset = {
+                name = _G.RESET,
+                desc = "Let the Color Mode decide the button color again.",
+                type = "execute",
+                width = "half",
+                disabled = function() return not RealUI.IsSkinColorChanged("button", SkinsDB.profile.buttonColor) end,
+                func = function()
+                    local default = Color.Modes.Normal.tokens.button
+                    SkinsDB.profile.buttonColor.r, SkinsDB.profile.buttonColor.g, SkinsDB.profile.buttonColor.b = default:GetRGB()
+                    Color.SetTokenOverride("button", nil)
+                    RealUI:UpdateFrameStyle()
+                    RealUI:ReloadUIDialog()
+                end,
+                order = 2.5,
             },
             stripeAlpha = {
                 name = L.Appearance_StripeOpacity,

@@ -398,9 +398,9 @@ local function CreateSystemsConfig()
                             if display and display.presetId then
                                 local preset = RealUI.DisplayPresets and RealUI.DisplayPresets.GetById(display.presetId)
                                 local presetName = preset and preset.name or display.presetId
-                                local hdrStatus = display.hdrEnabled and "On" or "Off"
-                                return ("Screen: %dx%d\nPreset: %s\nHDR: %s\nScale: %.2g  |  Font: %.2g"):format(
-                                    width, height, presetName, hdrStatus,
+                                local colorMode = RealUI.DisplayPresets.GetColorMode()
+                                return ("Screen: %dx%d\nPreset: %s\nColor mode: %s\nScale: %.2g  |  Font: %.2g"):format(
+                                    width, height, presetName, colorMode,
                                     display.customScale or 1.0, display.fontScale or 1.0
                                 )
                             else
