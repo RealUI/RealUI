@@ -1527,6 +1527,40 @@ function Infobar:CreateBlocks()
             {slot = "SecondaryHand", hasDura = true},
         }
 
+        -- profile.infobar has no registered defaults anywhere; the whole table
+        -- is created lazily, so the auto-repair settings are seeded on first use.
+        local function GetAutoRepairConfig()
+            local infobar = RealUI.db.profile.infobar
+            if not infobar then
+                infobar = {}
+                RealUI.db.profile.infobar = infobar
+            end
+            if not infobar.autoRepair then
+                infobar.autoRepair = { enabled = true, useGuildFunds = false }
+            end
+            return infobar.autoRepair
+        end
+
+        --[[ B165: what a repair would cost right now, away from a merchant.
+             GetRepairAllCost only answers at a repair vendor; the per-slot
+             tooltip data carries `repairCost` everywhere (Blizzard shows it
+             only in repair mode, TooltipDataRules.lua). The player's own gear
+             is never secret, but a non-number is skipped all the same. ]]
+        local function EstimateRepairCost()
+            if not (_G.C_TooltipInfo and _G.C_TooltipInfo.GetInventoryItem) then return end
+            local total = 0
+            for slotID = 1, #itemSlots do
+                if itemSlots[slotID].hasDura then
+                    local data = _G.C_TooltipInfo.GetInventoryItem("player", slotID)
+                    local cost = data and data.repairCost
+                    if type(cost) == "number" and cost > 0 then
+                        total = total + cost
+                    end
+                end
+            end
+            return total
+        end
+
         LDB:NewDataObject("durability", {
             name = _G.DURABILITY,
             type = "RealUI",
@@ -1549,7 +1583,18 @@ function Infobar:CreateBlocks()
                 local button = ...
                 Infobar:debug("Durability: OnClick", block.side, button, ...)
 
-                if button == "RightButton" then
+                if button == "LeftButton" and _G.IsShiftKeyDown() then
+                    -- B165: toggle auto-repair from the bar itself.
+                    local cfg = GetAutoRepairConfig()
+                    cfg.enabled = not cfg.enabled
+                    RealUI:Print(cfg.enabled and "Auto-repair is on." or "Auto-repair is off.")
+                    if block.tooltip then
+                        -- Redraw so the status line follows the click.
+                        qTip:Release(block.tooltip)
+                        block.tooltip = nil
+                        block.dataObj.OnEnter(block)
+                    end
+                elseif button == "RightButton" then
                     -- Get configured repair mount or use default
                     if not RealUI.db.profile.infobar then
                         RealUI.db.profile.infobar = {}
@@ -1595,9 +1640,32 @@ function Infobar:CreateBlocks()
                     end
                 end
 
+                -- B165: auto-repair status, what the next repair costs, and the
+                -- last one this session.
+                local cfg = GetAutoRepairConfig()
+                tooltip:AddRow(" ")
+                local status
+                if not cfg.enabled then
+                    status = "|cff999999Off|r"
+                elseif cfg.useGuildFunds then
+                    status = "|cff33cc33On|r, guild funds first"
+                else
+                    status = "|cff33cc33On|r"
+                end
+                tooltip:AddRow("Auto-repair", status)
+                local estimate = EstimateRepairCost()
+                if estimate then
+                    tooltip:AddRow("Repair cost", estimate > 0
+                        and _G.C_CurrencyInfo.GetCoinTextureString(estimate) or "|cff999999None|r")
+                end
+                if block.lastRepair then
+                    tooltip:AddRow("Last repair", block.lastRepair)
+                end
+
                 -- Add click hints
                 tooltip:AddRow(" ")
                 tooltip:AddRow("|cffFFFFFFLeft Click:|r Open Character Panel")
+                tooltip:AddRow("|cffFFFFFFShift + Left Click:|r Toggle Auto-repair")
                 tooltip:AddRow("|cffFFFFFFRight Click:|r Summon Repair Mount")
 
                 tooltip:Show()
@@ -1608,16 +1676,7 @@ function Infobar:CreateBlocks()
                 -- Auto-repair. Lives here because this block already owns the
                 -- repair UX (repair-mount summon on right-click).
                 if event == "MERCHANT_SHOW" then
-                    if not RealUI.db.profile.infobar then
-                        RealUI.db.profile.infobar = {}
-                    end
-                    -- profile.infobar has no registered defaults anywhere; the
-                    -- whole table is created lazily, so seed ours on first use.
-                    local cfg = RealUI.db.profile.infobar.autoRepair
-                    if not cfg then
-                        cfg = { enabled = true, useGuildFunds = false }
-                        RealUI.db.profile.infobar.autoRepair = cfg
-                    end
+                    local cfg = GetAutoRepairConfig()
 
                     if cfg.enabled and not block.repairedThisVisit
                     and _G.CanMerchantRepair() then
@@ -1632,9 +1691,11 @@ function Infobar:CreateBlocks()
                             and (guildLimit == -1 or guildLimit >= cost) then
                                 _G.RepairAllItems(true)
                                 RealUI:Print(("Repaired for %s (guild funds)."):format(coins))
+                                block.lastRepair = coins .. " (guild)"
                             elseif _G.GetMoney() >= cost then
                                 _G.RepairAllItems()
                                 RealUI:Print(("Repaired for %s."):format(coins))
+                                block.lastRepair = coins
                             else
                                 RealUI:Print(("Not enough money to repair (%s needed)."):format(coins))
                             end
