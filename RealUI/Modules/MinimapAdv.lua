@@ -1949,6 +1949,15 @@ local function SetUpMinimapFrame()
    -- -- Make it square
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
 
+    -- Inside a house Blizzard shows a static round picture on MinimapBackdrop
+    -- (UpdateStaticOverlayTexture, atlas ui-hud-minimap-housing-indoor-static-bg),
+    -- drawn for its round minimap, so the square map looked round again.
+    -- Blizzard only toggles it with SetShown/SetAtlas, so alpha 0 sticks.
+    local staticOverlay = _G.MinimapBackdrop and _G.MinimapBackdrop.StaticOverlayTexture
+    if staticOverlay then
+        staticOverlay:SetAlpha(0)
+    end
+
     -- -- Create New Border
     local top = _G.Minimap:CreateTexture(nil, "BACKGROUND")
     top:SetPoint("TOPLEFT", -1, 1)
