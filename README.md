@@ -9,7 +9,7 @@ Information
 -----------
 
 * Supports retail WoW (Midnight, 12.1.x) and the WoW Forever beta (1.60.x) from the same download.
-* Current release is 4.1.0 (Aurora 12.1.0.12).
+* Current release is 4.1.1 (Aurora 12.1.0.13).
 * As of 4.0.0 the package contains **only RealUI's own addons** — no bundled third-party
   addons (standard embedded libraries such as Ace3, oUF, LibActionButton, and
   LibSharedMedia are still included, as in any addon). See "Recommended optional
@@ -17,6 +17,21 @@ Information
 * RealUI includes the modernized setup pipeline, unified profile handling, and display setup stage.
 * User settings are automatically migrated from nibRealUIDB to RealUIDB when needed.
 * Report issues on GitHub or connect with us on Discord.
+
+What's New in 4.1.1
+--------------------
+
+A maintenance release. **If you upgraded from an earlier version, run `/realui newdefaults`**: the boss
+timeline fix is applied through it.
+
+* The Boss Abilities timeline and boss warnings sit where Blizzard's layout puts them, clear of the HuD.
+* Trinkets and other items with a long effect description can be upgraded again.
+* The LFR, dungeon and battleground ready popups, the ready check, role checks and group invites are
+  skinned.
+* Objects whose nameplate is only a progress bar show that bar with RealUI's nameplates on, and the
+  minimap stays square inside a house.
+* WoW Forever: action bars work on client builds from 1.60.1.70170 on, and Edit Mode no longer errors.
+* `/realui grid` draws an alignment grid for placing frames by hand.
 
 What's New in 4.1.0
 --------------------
