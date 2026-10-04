@@ -1,3 +1,66 @@
+## [4.1.1] - 2026-10-04 ##
+### Summary ###
+A maintenance release. It fixes the boss timeline running through the HuD, action bars on the current WoW Forever client, trinket upgrades, and several popups that never got RealUI's skin.
+
+**If you upgraded from an earlier version, run `/realui newdefaults`.** The boss timeline fix is applied through it, and the window only opens by itself once per character.
+
+**Fixes:**
+- The Boss Abilities timeline and the boss warnings sit where Blizzard's own layout puts them, instead of running down the middle of the screen through the HuD.
+- Items with a long effect description, such as trinkets with a wordy proc, can be upgraded again. The upgrade had been refused, either silently or with an error blaming RealUI.
+- The LFR and dungeon "group has been formed" popup, the ready check board, role checks, group invites, and the battleground and rated PvP ready popups are skinned.
+- Objects whose nameplate is only a progress bar, such as a charge bar you click, show that bar again with RealUI's nameplates on.
+- Inside a house the minimap stays square.
+- On WoW Forever: action bar cooldowns, range and usable tinting work on client builds from 1.60.1.70170 on, and opening or closing Edit Mode no longer errors.
+
+Aurora goes from 12.1.0.12 to 12.1.0.13.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_ActionBars
+  * RealUI_Nameplates
+  * RealUI_Skins
+  * Every sub-addon TOC (load directives)
+  * Aurora
+
+### Added ###
+
+  * add: `/realui grid [spacing]` draws an alignment grid over the screen for placing frames by hand. It was a developer-only command before
+  * add: a `/realui newdefaults` item, "Boss Abilities timeline clear of the HuD", that moves the encounter timeline and boss warnings in RealUI's Edit Mode layouts to the new positions and leaves every other Edit Mode position alone
+
+### Fixed ###
+
+  * fix: **the Boss Abilities timeline ran down the middle of the screen.** RealUI's Edit Mode templates placed the four encounter-event frames one index off, so the vertical timeline sat on the critical warning's top-centre anchor and the warnings sat one slot too low. All four now match Blizzard's preset; existing layouts are corrected through `/realui newdefaults`
+  * fix: **WoW Forever action bars.** Build 1.60.1.70170 changed `WOW_PROJECT_ID` to its own project, and the embedded LibActionButton fell back to its classic code there: no secret-safe cooldowns in combat, no loss-of-control display, no spellcast events. LibActionButton is refreshed to upstream (MINOR 168), which detects Forever by interface number. Both of RealUI's local patches are now upstream. The refresh also brings upstream's event-driven range and usable updates on retail
+  * fix: **widget-only nameplates.** RealUI's nameplates hid Blizzard's whole nameplate frame, and for objects whose nameplate is only a progress bar the bar lives in that frame. Those units are now left to Blizzard
+  * fix: **the minimap inside a house.** Blizzard shows a round picture over the minimap indoors, drawn for its round map. RealUI hides it on the square one
+  * fix: **WoW Forever: opening or closing Edit Mode errored** in the status tracking bar code. RealUI parked the XP and reputation bar containers separately from their manager, and on Forever they call that manager. They now stay under it, hidden with it
+  * fix: the countdown bar on the LFG ready popup (shown when neither DBM nor BigWigs is loaded) hooks the right Aurora skin function, so it appears
+  * fix: in `/realui newdefaults`, an item that does not apply to your setup says why (for example "only applies to Large HuD") instead of "component not loaded", and rows are clickable again when the window is reopened
+  * fix: `/taintLogging` accepts levels 0 to 5 and rejects anything else, instead of toggling on a typo
+  * fix: Aurora — **upgrading an item with a long effect description works again.** Aurora no longer replaces `GameTooltip_InsertFrame`, whose replacement tainted the upgrade preview tooltip and got `UpgradeItem()` refused
+  * fix: Aurora — the loot history no longer taints its own roll tooltips, and its window has Aurora's title bar, close button and resize handle
+  * fix: Aurora — **the LFG, battleground and rated PvP ready popups, the ready check board, role checks and invites are skinned again.** Their skins had been registered under keys that never ran. Enter and Leave use taint-safe buttons; the leader crown and the minimize buttons are fixed
+  * fix: Aurora — the role poll popup keeps Aurora's role icons
+  * fix: Aurora — housing blueprint dialogs are darker, their code boxes are flat, and House Settings and the house list get Aurora's close button
+  * fix: Aurora — the text field in Blizzard popups (such as "type DELETE") and the Add Friend dialog are skinned properly
+  * fix: Aurora — the Trading Post panels no longer print "Report: No NineSlice for nil"
+  * fix: Aurora — on Forever, the character title pane's gold border is hidden and the group finder's new playstyle dropdown is skinned
+
+### Changed ###
+
+  * chg: every RealUI TOC loads only on retail and WoW Forever (`AllowLoadGameType: standard, camelot`, `ExcludeLoadGameType: classic`), so classic clients no longer try to load it
+  * chg: the `/auroraInsertFrame` and `/auroraMawBuffs` test toggles are removed, and `/realui devcheck` no longer reports them. The InsertFrame workaround is no longer needed
+  * chg: LibActionButton-1.0 is upstream's copy, unmodified
+  * chg: Aurora is bundled from its 12.1.0.13 release
+
+### Known Issues ###
+
+  * RealUI_Auras groups with **Check Time Left** on use the old renderer and can go empty in combat on target, focus and similar units while the game keeps their auras secret
+  * Joining a battleground can log `C_PvP.GetHonorRewardInfo` errors from the scoreboard; under investigation
+  * `UnitName("player")` returns the full name on Forever while `UnitName("target")` does not; Blizzard says the final behaviour is not settled
+  * On Forever, unit frames, group frames, action bars, nameplates, the group finder and the config have been checked in game; the tracker, infobar, inventory, tooltips and chat have had a static pass only
+
 ## [4.1.0] - 2026-09-27 ##
 ### Summary ###
 *Looking for 4.0.4? Error 404: release not found. It was a feature release all along.*
@@ -364,7 +427,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.1.0...main
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.1.1...develop
+[4.1.1]: https://github.com/RealUI/RealUI/compare/4.1.0...4.1.1
 [4.1.0]: https://github.com/RealUI/RealUI/compare/4.0.3...4.1.0
 [4.0.3]: https://github.com/RealUI/RealUI/compare/4.0.2...4.0.3
 [4.0.2]: https://github.com/RealUI/RealUI/compare/4.0.1...4.0.2
