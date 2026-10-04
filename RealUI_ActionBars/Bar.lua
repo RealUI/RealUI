@@ -176,8 +176,10 @@ function private.SetPageLayout(layout, noApply)
     return true
 end
 
--- Public: read-only accessors for RealUI_Dev's page-layout test.
+-- Public: accessors for RealUI_Dev's page-layout test, and the setter the
+-- install wizard's Action Bar Layout step uses (RealUI/Core/ActionBarStage.lua).
 function AB:GetPageLayout() return private.GetPageLayout() end
+function AB:SetPageLayout(layout) return private.SetPageLayout(layout) end
 function AB:GetBarPage(id, layout) return private.GetBarPage(id, layout) end
 function AB:GetBindingFormat(id, layout) return private.GetBindingFormat(id, layout) end
 

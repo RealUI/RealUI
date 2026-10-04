@@ -21,7 +21,12 @@ local debug = RealUI.GetDebug("ActionBarStage") -- luacheck: ignore
      isn't in the data, so this stage offers one row of choices per axis and
      a live schematic showing the result — the DisplayStage card idioms
      (selection highlight, recommended badge) without pretending the two
-     axes are one. ]]--
+     axes are one.
+
+     B151: a third, separate choice, which action PAGES the bars show
+     (RealUI_ActionBars `pageLayout`: Bartender4's numbering or Blizzard's).
+     It is not geometry, so it sits under the preview instead of driving it,
+     and it only appears when RealUI_ActionBars is the active bar addon. ]]--
 
 local ActionBarStage = {}
 RealUI.ActionBarStage = ActionBarStage
@@ -31,11 +36,14 @@ RealUI.ActionBarStage = ActionBarStage
 ---------------------------------------------------------------------------
 ActionBarStage.centerPositions = 2  -- shipped default: 1 center, 2 bottom
 ActionBarStage.sidePositions = 1    -- shipped default: 0 left, 2 right
+ActionBarStage.pageLayout = "bartender"
 
 local container          -- the frame holding everything (built lazily)
 local schematic          -- the preview box
 local centerButtons = {}
 local sideButtons = {}
+local pageButtons = {}
+local pageRow            -- label + buttons, hidden without RealUI_ActionBars
 
 ---------------------------------------------------------------------------
 -- Constants
@@ -46,8 +54,9 @@ local HOVER_BG  = {r = 0.2, g = 0.2, b = 0.2, a = 0.9}
 
 -- The wizard's content frame is only 510x240 (InstallUI: 550x500 window,
 -- content inset TOPLEFT 20,-200 / BOTTOMRIGHT -20,60), so everything here is
--- budgeted against that: a 262px left column of single-line options and a
--- 230px schematic beside it, totalling ~220px of height.
+-- budgeted against that: a 262px left column of single-line options (~220px
+-- tall) and a 230px column beside it, the schematic (140px, from -30) above
+-- the page-numbering row (label + one row of buttons, down to ~-222).
 local LEFT_WIDTH = 262
 local OPTION_HEIGHT = 26
 local OPTION_GAP = 4
@@ -55,7 +64,8 @@ local SIDE_OPTION_WIDTH = 82
 local SIDE_OPTION_GAP = 8
 
 local SCHEMATIC_WIDTH = 230
-local SCHEMATIC_HEIGHT = 180
+local SCHEMATIC_HEIGHT = 140
+local PAGE_OPTION_WIDTH = 111   -- two buttons + SIDE_OPTION_GAP = SCHEMATIC_WIDTH
 
 -- (centerPositions) -> centre bars above the HuD, bars along the bottom
 local CENTER_OPTIONS = {
@@ -74,9 +84,28 @@ local SIDE_OPTIONS = {
 local DEFAULT_CENTER = 2
 local DEFAULT_SIDE = 1
 
+-- (pageLayout) -> RealUI_ActionBars page numbering (B151)
+local PAGE_OPTIONS = {
+    {value = "bartender", label = "Bartender4",
+     tip = "RealUI's numbering since the move from Bartender4: bar 2 shows action page 2. Keeps the spells of any existing RealUI or Bartender4 setup where they are."},
+    {value = "blizzard", label = "Blizzard",
+     tip = "Each bar shows the same spells as the matching Blizzard action bar, and takes over its keybinds. Pick this if you are coming from the default UI."},
+}
+local DEFAULT_PAGE = "bartender"
+
 ---------------------------------------------------------------------------
 -- Helpers
 ---------------------------------------------------------------------------
+
+--- RealUI_ActionBars, when it is the active bar addon (it stands down for
+--- Bartender4). nil otherwise; the page row is hidden then.
+local function GetRAB()
+    local AceAddon = _G.LibStub and _G.LibStub("AceAddon-3.0", true)
+    local rab = AceAddon and AceAddon:GetAddon("RealUIActionBars", true)
+    if rab and rab.db and rab.GetPageLayout and rab.SetPageLayout then
+        return rab
+    end
+end
 
 local function GetOption(list, value)
     for _, option in ipairs(list) do
@@ -213,30 +242,27 @@ end
 -- Option buttons
 ---------------------------------------------------------------------------
 
+-- Which stage field each option row edits.
+local AXIS_FIELDS = { center = "centerPositions", side = "sidePositions", page = "pageLayout" }
+
+local function IsSelected(btn)
+    return btn.value == ActionBarStage[AXIS_FIELDS[btn.axis]]
+end
+
 local function RefreshHighlights()
-    for _, btn in ipairs(centerButtons) do
-        local selected = btn.value == ActionBarStage.centerPositions
-        btn.bg:SetColorTexture(
-            selected and SELECTED_COLOR.r or NORMAL_BG.r,
-            selected and SELECTED_COLOR.g or NORMAL_BG.g,
-            selected and SELECTED_COLOR.b or NORMAL_BG.b,
-            selected and 0.35 or NORMAL_BG.a)
-        btn.border:SetColorTexture(
-            selected and SELECTED_COLOR.r or 0.3,
-            selected and SELECTED_COLOR.g or 0.3,
-            selected and SELECTED_COLOR.b or 0.3, 1)
-    end
-    for _, btn in ipairs(sideButtons) do
-        local selected = btn.value == ActionBarStage.sidePositions
-        btn.bg:SetColorTexture(
-            selected and SELECTED_COLOR.r or NORMAL_BG.r,
-            selected and SELECTED_COLOR.g or NORMAL_BG.g,
-            selected and SELECTED_COLOR.b or NORMAL_BG.b,
-            selected and 0.35 or NORMAL_BG.a)
-        btn.border:SetColorTexture(
-            selected and SELECTED_COLOR.r or 0.3,
-            selected and SELECTED_COLOR.g or 0.3,
-            selected and SELECTED_COLOR.b or 0.3, 1)
+    for _, buttons in ipairs({centerButtons, sideButtons, pageButtons}) do
+        for _, btn in ipairs(buttons) do
+            local selected = IsSelected(btn)
+            btn.bg:SetColorTexture(
+                selected and SELECTED_COLOR.r or NORMAL_BG.r,
+                selected and SELECTED_COLOR.g or NORMAL_BG.g,
+                selected and SELECTED_COLOR.b or NORMAL_BG.b,
+                selected and 0.35 or NORMAL_BG.a)
+            btn.border:SetColorTexture(
+                selected and SELECTED_COLOR.r or 0.3,
+                selected and SELECTED_COLOR.g or 0.3,
+                selected and SELECTED_COLOR.b or 0.3, 1)
+        end
     end
 end
 
@@ -272,12 +298,17 @@ local function CreateOptionButton(parent, width, labelText, value, isDefault, on
     end
 
     btn:SetScript("OnEnter", function(self)
-        if self.value ~= (self.axis == "center" and ActionBarStage.centerPositions
-            or ActionBarStage.sidePositions) then
+        if not IsSelected(self) then
             self.bg:SetColorTexture(HOVER_BG.r, HOVER_BG.g, HOVER_BG.b, HOVER_BG.a)
         end
+        if self.tip then
+            _G.GameTooltip:SetOwner(self, "ANCHOR_TOP")
+            _G.GameTooltip:SetText(self.tip, nil, nil, nil, nil, true)
+            _G.GameTooltip:Show()
+        end
     end)
-    btn:SetScript("OnLeave", function()
+    btn:SetScript("OnLeave", function(self)
+        if self.tip then _G.GameTooltip:Hide() end
         RefreshHighlights()
     end)
     btn:SetScript("OnClick", function(self)
@@ -346,6 +377,30 @@ local function Build(parent)
         end
         sideButtons[i] = btn
     end
+
+    -- B151 page numbering: under the preview, in the right-hand column
+    pageRow = _G.CreateFrame("Frame", nil, container)
+    pageRow:SetPoint("TOPLEFT", schematic, "BOTTOMLEFT", 0, -8)
+    pageRow:SetPoint("TOPRIGHT", schematic, "BOTTOMRIGHT", 0, -8)
+    pageRow:SetHeight(42)
+
+    local pageLabel = pageRow:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    pageLabel:SetPoint("TOPLEFT", 0, 0)
+    pageLabel:SetText("Bar page numbering")
+
+    for i, option in ipairs(PAGE_OPTIONS) do
+        local btn = CreateOptionButton(pageRow, PAGE_OPTION_WIDTH, option.label,
+            option.value, option.value == DEFAULT_PAGE,
+            function(value) ActionBarStage.pageLayout = value end)
+        btn.axis = "page"
+        btn.tip = option.tip
+        if i == 1 then
+            btn:SetPoint("TOPLEFT", pageLabel, "BOTTOMLEFT", 0, -4)
+        else
+            btn:SetPoint("LEFT", pageButtons[i - 1], "RIGHT", SIDE_OPTION_GAP, 0)
+        end
+        pageButtons[i] = btn
+    end
 end
 
 ---------------------------------------------------------------------------
@@ -372,6 +427,10 @@ function ActionBarStage.Show(parentFrame)
     local settings = abModule and abModule.db and abModule.db.profile[layout]
     ActionBarStage.centerPositions = (settings and settings.centerPositions) or DEFAULT_CENTER
     ActionBarStage.sidePositions = (settings and settings.sidePositions) or DEFAULT_SIDE
+
+    local rab = GetRAB()
+    ActionBarStage.pageLayout = (rab and rab:GetPageLayout()) or DEFAULT_PAGE
+    pageRow:SetShown(rab ~= nil)
 
     RefreshHighlights()
     RefreshSchematic()
@@ -411,8 +470,15 @@ function ActionBarStage.Apply()
         _G.pcall(RealUI.UpdatePositioners, RealUI)
     end
 
+    -- B151: only on a real change. Switching re-points every bar's slots, so
+    -- re-running the wizard on a configured character must not do it for nothing.
+    local rab = GetRAB()
+    if rab and rab:GetPageLayout() ~= ActionBarStage.pageLayout then
+        _G.pcall(rab.SetPageLayout, rab, ActionBarStage.pageLayout)
+    end
+
     debug("Applied centerPositions", ActionBarStage.centerPositions,
-        "sidePositions", ActionBarStage.sidePositions)
+        "sidePositions", ActionBarStage.sidePositions, "pageLayout", ActionBarStage.pageLayout)
     return true
 end
 
