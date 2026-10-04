@@ -69,10 +69,11 @@ function FrameMovementTest:TestFrameListStructure(FrameMover)
         return false
     end
 
-    -- Verify the 6 expected UI frame entries exist
+    -- Verify the 4 expected UI frame entries exist. raidmessages left in
+    -- 12.1 (RaidWarningFrame is an Edit Mode system); playerpowerbaralt went
+    -- the same way earlier.
     local expectedFrames = {
-        "zonetext", "raidmessages", "ticketstatus",
-        "worldstate", "errorframe", "playerpowerbaralt",
+        "zonetext", "ticketstatus", "worldstate", "errorframe",
     }
 
     for _, slug in ipairs(expectedFrames) do
@@ -91,7 +92,7 @@ function FrameMovementTest:TestFrameListStructure(FrameMover)
     end
 
     -- Verify removed entries are gone
-    local removedEntries = { "vsi", "raven", "durabilityframe" }
+    local removedEntries = { "vsi", "raven", "durabilityframe", "raidmessages", "playerpowerbaralt" }
     for _, slug in ipairs(removedEntries) do
         if FrameList.uiframes[slug] then
             print("ERROR: Removed entry still present in uiframes:", slug)
