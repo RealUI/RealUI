@@ -58,10 +58,13 @@ local items = {
         end,
     },
     {
-        id = "targetDebuffsMine",
-        label = "Target debuffs show only your own",
-        desc = "The target debuff row used to show every debuff from every source. It now shows the ones you cast, sorted by time remaining. Change it under HuD \226\134\146 Units \226\134\146 Target.",
-        changed = "beta 11",
+        -- beta 11 narrowed this row from everything to "Cast by me"; 4.2.0
+        -- (B163) narrows it again to the debuffs Blizzard flags as important
+        -- for your class, the same rule the nameplates use.
+        id = "targetDebuffsImportant",
+        label = "Target debuffs show only your important ones",
+        desc = "The target debuff row showed every debuff you cast, minor procs included. It now shows the ones Blizzard marks as important for your class, sorted by time remaining. \"Cast by me\" is still there under HuD \226\134\146 Units \226\134\146 Target.",
+        changed = "4.2.0",
         available = function()
             local UnitFrames = RealUI:GetModule("UnitFrames", true)
             local units = UnitFrames and UnitFrames.db and UnitFrames.db.profile.units
@@ -70,11 +73,11 @@ local items = {
         end,
         isApplied = function()
             local units = RealUI:GetModule("UnitFrames", true).db.profile.units
-            return units.target.auraLayout.debuffs.filterPreset == "mine"
+            return units.target.auraLayout.debuffs.filterPreset == "classImportant"
         end,
         apply = function()
             local UnitFrames = RealUI:GetModule("UnitFrames", true)
-            UnitFrames.db.profile.units.target.auraLayout.debuffs.filterPreset = "mine"
+            UnitFrames.db.profile.units.target.auraLayout.debuffs.filterPreset = "classImportant"
             -- Filter is live-mutable on the container, so no reload is needed —
             -- RefreshUnits re-resolves it through ResolveAuraFilter.
             UnitFrames:RefreshUnits("NewDefaults")

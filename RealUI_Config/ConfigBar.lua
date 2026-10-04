@@ -1327,7 +1327,9 @@ do -- UnitFrames
 
         unit.args[label .. "FilterPreset"] = {
             name = "Show",
-            desc = "Which " .. label .. " appear. Applies immediately — no reload needed.",
+            desc = "Which " .. label .. " appear. \"Mine, important to my class\" keeps the spells"
+                .. " Blizzard marks as worth tracking for your class and drops minor procs."
+                .. " Applies immediately — no reload needed.",
             type = "select",
             values = function() return values(UnitFrames.auraFilterPresets) end,
             sorting = function() return sorting(UnitFrames.auraFilterPresets) end,

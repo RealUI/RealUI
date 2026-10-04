@@ -188,13 +188,21 @@ end
      All three are live-mutable (SetAuraGroupFilterString /
      SetAuraGroupCandidateFilters / SetAuraGroupSortMethod), so unlike button
      size these take effect without a reload — see RefreshAuraElement. ]]
+--
+-- B163: `candidates` on a preset are merged with the group's own candidate
+-- settings. classImportant is Blizzard's nameplate rule (Blizzard_NamePlate-
+-- Auras.lua AddAura): only the spells Blizzard flags `nameplateShowPersonal`
+-- for the player's class, which drops the minor procs and secondary debuffs
+-- "Cast by me" lets through. Not an identity filter, so it works on any unit.
 UnitFrames.auraFilterPresets = {
-    all         = { order = 1, name = "Everything" },
-    mine        = { order = 2, name = "Cast by me",     token = "PLAYER" },
-    notmine     = { order = 3, name = "Not cast by me", token = "!PLAYER" },
-    dispellable = { order = 4, name = "Dispellable",    token = "DISPELLABLE" },
-    important   = { order = 5, name = "Important",      token = "IMPORTANT" },
-    crowd       = { order = 6, name = "Crowd control",  token = "CROWD_CONTROL" },
+    all            = { order = 1, name = "Everything" },
+    classImportant = { order = 2, name = "Mine, important to my class", token = "PLAYER",
+                       candidates = { nameplateShowPersonal = true } },
+    mine           = { order = 3, name = "Cast by me",     token = "PLAYER" },
+    notmine        = { order = 4, name = "Not cast by me", token = "!PLAYER" },
+    dispellable    = { order = 5, name = "Dispellable",    token = "DISPELLABLE" },
+    important      = { order = 6, name = "Important",      token = "IMPORTANT" },
+    crowd          = { order = 7, name = "Crowd control",  token = "CROWD_CONTROL" },
 }
 
 UnitFrames.auraSortMethods = {
@@ -217,10 +225,19 @@ function UnitFrames.ResolveAuraFilter(baseFilter, groupDB)
     -- maxDuration implicitly drops permanent auras too (auraData.duration == 0
     -- is rejected outright — Blizzard_AuraContainerUtil.lua:113), which is
     -- usually the actual intent behind "only show me things that are ticking".
+    -- A fresh table every time: the engine keeps the reference it is handed,
+    -- and the preset's own table must never pick up a group's maxDuration.
     local candidates
+    if preset.candidates then
+        candidates = {}
+        for key, value in _G.next, preset.candidates do
+            candidates[key] = value
+        end
+    end
     local maxDuration = groupDB.maxDuration
     if maxDuration and maxDuration > 0 then
-        candidates = { maxDuration = maxDuration }
+        candidates = candidates or {}
+        candidates.maxDuration = maxDuration
     end
 
     local sortMethod, sortDirection
@@ -1077,11 +1094,16 @@ function UnitFrames:OnInitialize()
                                  (oUF/elements/auras.lua:250), so the row is
                                  sorted by time remaining today.
 
+                                 B163, 2026-10-04: narrowed again to
+                                 classImportant, the same rule as the nameplate
+                                 debuff row. "Cast by me" still showed every
+                                 minor proc and secondary debuff.
+
                                  Existing profiles keep their saved value — the
-                                 `targetDebuffsMine` item in Core/NewDefaults.lua
+                                 `targetDebuffsImportant` item in Core/NewDefaults.lua
                                  offers it, the same B47 treatment every other
                                  shipped default change has had. ]]
-                            filterPreset = "mine",
+                            filterPreset = "classImportant",
                             sort = "default",
                             sortReverse = false,
                             maxDuration = 0,
