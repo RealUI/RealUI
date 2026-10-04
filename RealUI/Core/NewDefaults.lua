@@ -16,9 +16,11 @@ local debug = RealUI.GetDebug("NewDefaults")
 local NewDefaults = {}
 RealUI.NewDefaults = NewDefaults
 
--- Each item: label, desc, changed (beta tag), needsReload,
+-- Each item: label, desc, changed (beta tag), needsReload, available(),
 -- isApplied() -> true/false/nil, apply() -> nil. Items whose modules/frames are
--- missing are skipped.
+-- missing are shown disabled. available() may return false plus a reason
+-- string when the component is there but the item does not apply to this
+-- setup; the dialog shows the reason instead of "component not loaded".
 --
 -- isApplied's three states are distinct and the dialog renders each differently
 -- (B126): true = already applied, false = off-default and pre-ticked, nil = the
@@ -190,8 +192,10 @@ local items = {
         needsReload = true,
         available = function()
             local settings = RealUI.db and RealUI.db.profile.settings
-            return RealUI.LayoutManager and RealUI.defaultPositions
-                and settings and settings.hudSize == 2
+            if not (RealUI.LayoutManager and RealUI.defaultPositions and settings) then
+                return false
+            end
+            return settings.hudSize == 2, "only applies to Large HuD"
         end,
         isApplied = function()
             -- One-shot per profile: the saved values cannot tell us whether
@@ -505,8 +509,12 @@ function NewDefaults:Show(auto)
     local anyDetectableOff = false
     for index, check in ipairs(dialog.rows) do
         local item = check.item
-        if item.available() then
+        local available, reason = item.available()
+        if available then
             check:Show()
+            -- Rows are reused across opens; one disabled last time (say, before
+            -- a switch to Large HuD) must come back live.
+            check:Enable()
             check.label:SetText(item.label .. " |cff808080(" .. item.changed .. ")|r")
             check.desc:SetText(item.desc)
 
@@ -534,7 +542,7 @@ function NewDefaults:Show(auto)
             check:Show()
             check:SetChecked(false)
             check:Disable()
-            check.label:SetText(item.label .. " |cff808080(component not loaded)|r")
+            check.label:SetText(item.label .. " |cff808080(" .. (reason or "component not loaded") .. ")|r")
             check.desc:SetText(item.desc)
         end
     end
