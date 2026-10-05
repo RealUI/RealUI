@@ -27,21 +27,10 @@ function RealUI_Tracker:MigrateFromObjectivesAdv()
         db.position.y               = op.position.y          or db.position.y
     end
 
-    -- Context hide/collapse
+    -- Context hide. The old collapse / collapseframe settings are not carried
+    -- over: the per-instance collapse was dropped (tracker-widget-taint-rewrite D2).
     if op.hidden then
         for k, v in pairs(op.hidden.hide     or {}) do db.context.hide[k]     = v end
-        for k, v in pairs(op.hidden.collapse or {}) do db.context.collapse[k] = v end
-
-        if op.hidden.collapseframe then
-            local cf = op.hidden.collapseframe
-            db.context.collapseModules.quest       = cf.quest
-            db.context.collapseModules.campaign    = cf.campaign
-            db.context.collapseModules.adventure   = cf.adventure
-            -- 8.2: Fix the "proffesion" → "professions" typo during migration
-            db.context.collapseModules.professions = cf.proffesion
-            db.context.collapseModules.bonus       = cf.bonus
-            db.context.collapseModules.world       = cf.world
-        end
 
         -- Combat fade
         if op.hidden.combatfade then
@@ -59,6 +48,26 @@ function RealUI_Tracker:MigrateFromObjectivesAdv()
 
     -- 8.3: Mark migration done so it only runs once
     self.db.global.migratedFromObjectivesAdv = true
+end
+
+-- tracker-widget-taint-rewrite D2, 2026-10-05: the per-instance module
+-- collapse is gone. It called SetCollapsed on the tracker modules from RealUI
+-- code, which writes Blizzard's `isCollapsed` and schedules the tracker's
+-- layout under RealUI taint; there is no clean version of it. Remove the
+-- saved settings from every profile (the defaults no longer carry them). The
+-- per-instance hide settings stay and run in the default Faded mode.
+function RealUI_Tracker:DropContextCollapse()
+    local profiles = self.db.sv and self.db.sv.profiles
+    if not profiles then return end
+    for _, profile in pairs(profiles) do
+        local ctx = profile.context
+        if ctx then
+            ctx.collapse = nil
+            ctx.collapseModules = nil
+            -- The opt-in Hidden mode was dropped the next day (D1).
+            ctx.hideMode = nil
+        end
+    end
 end
 
 ---------------------------------------------------------
@@ -104,7 +113,7 @@ local function BuildTrackerOptions()
     local contextArgs = {
         enabled = {
             name = "Enabled",
-            desc = "Enable automatic hide/collapse based on instance type.",
+            desc = "Hide the tracker automatically in the instance types chosen below.",
             type = "toggle",
             width = "full",
             get = function() return db.context.enabled end,
@@ -114,8 +123,14 @@ local function BuildTrackerOptions()
             end,
             order = 1,
         },
+        hideNote = {
+            name = "The tracker fades out completely in these instance types and comes back when you "
+                .. "leave. It stays clickable where it sits, quest item buttons included.",
+            type = "description",
+            order = 5,
+        },
         hideHeader = {
-            name = "Hide tracker completely in:",
+            name = "Hide tracker in:",
             type = "description",
             order = 9,
         },
@@ -158,114 +173,6 @@ local function BuildTrackerOptions()
             set = function(_, value) db.context.hide.scenario = value; RealUI_Tracker:UpdateState() end,
             disabled = function() return not db.context.enabled end,
             order = 14,
-        },
-        collapseGap = {
-            name = " ",
-            type = "description",
-            order = 19,
-        },
-        collapseHeader = {
-            name = "Collapse tracker modules in:",
-            type = "description",
-            order = 20,
-        },
-        collapseArena = {
-            name = "Arena",
-            type = "toggle",
-            get = function() return db.context.collapse.arena end,
-            set = function(_, value) db.context.collapse.arena = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 21,
-        },
-        collapseRaid = {
-            name = "Raids",
-            type = "toggle",
-            get = function() return db.context.collapse.raid end,
-            set = function(_, value) db.context.collapse.raid = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 22,
-        },
-        collapsePvp = {
-            name = "Battlegrounds",
-            type = "toggle",
-            get = function() return db.context.collapse.pvp end,
-            set = function(_, value) db.context.collapse.pvp = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 23,
-        },
-        collapseParty = {
-            name = "Dungeons",
-            type = "toggle",
-            get = function() return db.context.collapse.party end,
-            set = function(_, value) db.context.collapse.party = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 24,
-        },
-        collapseScenario = {
-            name = "Scenarios",
-            type = "toggle",
-            get = function() return db.context.collapse.scenario end,
-            set = function(_, value) db.context.collapse.scenario = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 25,
-        },
-        modulesGap = {
-            name = " ",
-            type = "description",
-            order = 29,
-        },
-        modulesHeader = {
-            name = "Modules to collapse:",
-            type = "description",
-            order = 30,
-        },
-        collapseQuest = {
-            name = "Quests",
-            type = "toggle",
-            get = function() return db.context.collapseModules.quest end,
-            set = function(_, value) db.context.collapseModules.quest = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 31,
-        },
-        collapseCampaign = {
-            name = "Campaign",
-            type = "toggle",
-            get = function() return db.context.collapseModules.campaign end,
-            set = function(_, value) db.context.collapseModules.campaign = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 32,
-        },
-        collapseAdventure = {
-            name = "Adventures",
-            type = "toggle",
-            get = function() return db.context.collapseModules.adventure end,
-            set = function(_, value) db.context.collapseModules.adventure = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 33,
-        },
-        collapseProfessions = {
-            name = "Professions",
-            type = "toggle",
-            get = function() return db.context.collapseModules.professions end,
-            set = function(_, value) db.context.collapseModules.professions = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 34,
-        },
-        collapseBonus = {
-            name = "Bonus Objectives",
-            type = "toggle",
-            get = function() return db.context.collapseModules.bonus end,
-            set = function(_, value) db.context.collapseModules.bonus = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 35,
-        },
-        collapseWorld = {
-            name = "World Quests",
-            type = "toggle",
-            get = function() return db.context.collapseModules.world end,
-            set = function(_, value) db.context.collapseModules.world = value; RealUI_Tracker:UpdateState() end,
-            disabled = function() return not db.context.enabled end,
-            order = 36,
         },
     }
 
@@ -360,7 +267,7 @@ local function BuildTrackerOptions()
                 order = 0,
             },
             desc = {
-                name = "Enhanced objective tracker with context-aware hide/collapse, combat fading, and display improvements.",
+                name = "Enhanced objective tracker with per-instance hiding, combat fading, and display improvements.",
                 type = "description",
                 fontSize = "medium",
                 order = 1,

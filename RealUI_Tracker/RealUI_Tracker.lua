@@ -31,6 +31,8 @@ function RealUI_Tracker:OnInitialize()
             },
             context = {
                 enabled = true,
+                -- D1 (tracker-widget-taint-rewrite): the hide is an alpha fade
+                -- (Context.lua); there is no real-hide mode.
                 hide = {
                     arena    = true,
                     raid     = true,
@@ -38,21 +40,9 @@ function RealUI_Tracker:OnInitialize()
                     party    = false,
                     scenario = false,
                 },
-                collapse = {
-                    pvp      = true,
-                    party    = true,
-                    arena    = false,
-                    scenario = false,
-                    raid     = false,
-                },
-                collapseModules = {
-                    quest       = true,
-                    campaign    = true,
-                    adventure   = true,
-                    professions = true,
-                    bonus       = true,
-                    world       = true,
-                },
+                -- D2: the per-instance module collapse (collapse /
+                -- collapseModules) is dropped; DropContextCollapse cleans it
+                -- out of saved profiles.
             },
             combatFade = {
                 enabled  = true,
@@ -77,6 +67,9 @@ function RealUI_Tracker:OnInitialize()
 
     -- Task 8.4: Run ObjectivesAdv migration after AceDB:New() has populated defaults
     self:MigrateFromObjectivesAdv()
+
+    -- tracker-widget-taint-rewrite D2: remove the dropped collapse settings
+    self:DropContextCollapse()
 end
 
 function RealUI_Tracker:OnEnable()
@@ -92,10 +85,10 @@ function RealUI_Tracker:PLAYER_LOGIN()
         return
     end
 
-    -- Set up the container wrapper (Task 2)
-    self:SetupContainer()
+    -- Task 2's container wrapper is gone (tracker-widget-taint-rewrite 5.1):
+    -- Edit Mode owns the tracker's position. See Container.lua.
 
-    -- 5.4: Set up context hide/collapse — registers PLAYER_ENTERING_WORLD
+    -- 5.4: Set up context hide — registers PLAYER_ENTERING_WORLD
     self:SetupContext()
 
     -- 10.3 / 11.3 / 12.1: Set up display hooks (templates, quest count, difficulty color)
@@ -165,5 +158,4 @@ function RealUI_Tracker:OnDisable()
     self:CleanupCombatFader()
     self:CleanupDisplay()
     self:CleanupContext()
-    self:CleanupContainer()
 end
