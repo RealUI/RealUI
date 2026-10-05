@@ -24,7 +24,7 @@ local _, ns = ... -- luacheck: ignore
 
 local MAX_FRAME_DEPTH = 10   -- tracker: container > module > contents > block > line > bar ...
 local MAX_TABLE_DEPTH = 2    -- plain tables hanging off a frame (usedBlocks[template][id], ...)
-local LIST_LIMIT = 40        -- summary mode prints at most this many grouped keys
+local EXAMPLE_LIMIT = 5      -- summary mode prints one example path for this many keys per owner
 
 -- design.md D4
 local WIDGET_CONTAINERS = {
@@ -90,7 +90,10 @@ local function ScanTable(result, seen, tbl, label, depth)
                 if not isSecure then
                     result.fields[#result.fields + 1] = { key = key, label = label, owner = owner or "?" }
                 end
-                if depth < MAX_TABLE_DEPTH and type(value) == "table" and not IsFrame(value)
+                -- Only descend into tables Blizzard put there. An addon-owned field
+                -- holding a table (backdropInfo, _returnColor) is one finding; its
+                -- contents are necessarily addon-written and would only inflate the count.
+                if isSecure and depth < MAX_TABLE_DEPTH and type(value) == "table" and not IsFrame(value)
                     and not seen[value] then
                     seen[value] = true
                     ScanTable(result, seen, value, label .. "." .. key, depth + 1)
@@ -244,29 +247,46 @@ local function PrintResult(result, full)
         return
     end
 
-    -- Grouped by key: a poisoned subsystem repeats the same layout fields on
-    -- every module and block, so counts per key read better than 300 lines.
-    local byKey, order = {}, {}
+    -- Grouped by owner, then key: a poisoned subsystem repeats the same layout
+    -- fields on every module and block, so counts per key read better than 300
+    -- lines. Every key is listed; `full` gives the paths.
+    local owners, ownerOrder = {}, {}
     for _, field in ipairs(result.fields) do
-        local id = field.key .. "\0" .. field.owner
-        local entry = byKey[id]
+        local owner = owners[field.owner]
+        if not owner then
+            owner = { name = field.owner, total = 0, keys = {}, keyOrder = {} }
+            owners[field.owner] = owner
+            ownerOrder[#ownerOrder + 1] = owner
+        end
+        owner.total = owner.total + 1
+        local entry = owner.keys[field.key]
         if not entry then
-            entry = { key = field.key, owner = field.owner, count = 0, example = field.label }
-            byKey[id] = entry
-            order[#order + 1] = entry
+            entry = { key = field.key, count = 0, example = field.label }
+            owner.keys[field.key] = entry
+            owner.keyOrder[#owner.keyOrder + 1] = entry
         end
         entry.count = entry.count + 1
     end
-    table.sort(order, function(a, b)
-        if a.count == b.count then return a.key < b.key end
-        return a.count > b.count
-    end)
-    for i = 1, math.min(#order, LIST_LIMIT) do
-        local entry = order[i]
-        print(("    |cffff8000%s|r x%d <- |cffff0000%s|r  (e.g. %s)"):format(entry.key, entry.count, entry.owner, entry.example))
-    end
-    if #order > LIST_LIMIT then
-        print(("    ... %d more keys: /realdev trackerscan full"):format(#order - LIST_LIMIT))
+    table.sort(ownerOrder, function(x, y) return x.total > y.total end)
+    for _, owner in ipairs(ownerOrder) do
+        table.sort(owner.keyOrder, function(x, y)
+            if x.count == y.count then return x.key < y.key end
+            return x.count > y.count
+        end)
+        print(("    |cffff0000%s|r: %d fields, %d keys"):format(owner.name, owner.total, #owner.keyOrder))
+        local line = {}
+        for i, entry in ipairs(owner.keyOrder) do
+            line[#line + 1] = ("%s x%d"):format(entry.key, entry.count)
+            if #line == 8 or i == #owner.keyOrder then
+                print("      |cffff8000" .. table.concat(line, ", ") .. "|r")
+                line = {}
+            end
+        end
+        -- One example path per key for the first few, so the source can be found.
+        for i = 1, math.min(#owner.keyOrder, EXAMPLE_LIMIT) do
+            local entry = owner.keyOrder[i]
+            print(("      e.g. |cffffff00%s|r.%s"):format(entry.example, entry.key))
+        end
     end
 end
 
