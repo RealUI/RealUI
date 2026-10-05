@@ -335,6 +335,8 @@ local function Capture(kind, owner)
     traces[#traces + 1] = {
         kind = kind, owner = owner or "?", stack = stack,
         time = _G.GetTime(), instance = instanceType or "?",
+        -- wall clock, to find the moment in taint.log
+        clock = _G.date("%H:%M:%S"),
     }
 end
 
@@ -469,7 +471,7 @@ local function ReportTrace(full)
     end
     print(("|cff8080FFTainted updates:|r %d path(s) kept (limit %d)"):format(#traces, TRACE_LIMIT))
     for i, t in ipairs(traces) do
-        print(("|cffffff00%d. %s|r <- |cffff0000%s|r (t=%.1f, %s)"):format(i, t.kind, t.owner, t.time, t.instance))
+        print(("|cffffff00%d. %s|r <- |cffff0000%s|r (%s, t=%.1f, %s)"):format(i, t.kind, t.owner, t.clock, t.time, t.instance))
         PrintStack(t.stack, full)
     end
     if not full then print("  (/realdev trackerscan tracefull for whole stacks)") end
