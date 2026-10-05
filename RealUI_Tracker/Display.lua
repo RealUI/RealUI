@@ -53,6 +53,16 @@ local function GetModuleCount(module)
 end
 
 -- UpdateModuleHeader — appends (N) to header text when db.display.questCount is true
+--
+-- tracker-widget-taint-rewrite 5.4, 2026-10-05: reviewed against doctrine R3
+-- and kept. It is a feature (the count), not a cosmetic rename, and the text
+-- change stays in place: the module header is a fixed 260x26 frame and Text a
+-- fixed-width (200), one-line FontString, so nothing Blizzard lays out is
+-- resized, and no tracker code reads the header text back. The SetText is
+-- AutoScalingFontStringMixin's (SecureUtil.lua:55-58), which calls
+-- SetTextScale to fit; its one Lua write, `baseLineHeight`, is made once by
+-- Blizzard's own SetHeader in the module's OnLoad, before this hook can run.
+-- The hook only reads `usedBlocks` and `headerText`.
 local function UpdateModuleHeader(module)
     if not RealUI_Tracker.db.profile.display.questCount then return end
     local header = module.Header
@@ -77,6 +87,11 @@ end
 -- RealUI_Tracker loads after Aurora (OptionalDep), our hook runs AFTER
 -- Aurora's hooks. Our difficulty color overrides Aurora's header color,
 -- which is the correct behavior per requirement 7.4.
+--
+-- tracker-widget-taint-rewrite 5.4: SetTextColor on the block's existing
+-- HeaderText is an in-place restyle (doctrine R3), kept. On WoW Forever the
+-- client colours quest titles by difficulty natively, so this overlaps
+-- Blizzard's own colour there (not checked against the Forever source).
 local QUEST_MODULES = {
     _G.QuestObjectiveTracker,
     _G.CampaignQuestObjectiveTracker,
