@@ -58,7 +58,9 @@ local MODULES = {
     "ProfessionsRecipeTracker", "UIWidgetObjectiveTracker", "InitiativeTasksObjectiveTracker",
     "MonthlyActivitiesObjectiveTracker", "ScenarioObjectiveTracker",
 }
-local HOOKED_MODULE_KEYS = { "GetBlock", "GetProgressBar" }
+-- After the rewrite (task 3): GetProgressBar/GetTimerBar on the content modules,
+-- GetBlock on Quest and Campaign only, so "absent" entries are expected.
+local HOOKED_MODULE_KEYS = { "GetBlock", "GetProgressBar", "GetTimerBar" }
 
 -- Blizzard globals an addon may have replaced (the B97 wrapper).
 local GLOBALS = { "ShouldShowMawBuffs" }
