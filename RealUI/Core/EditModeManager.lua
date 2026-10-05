@@ -687,6 +687,21 @@ function EditModeManager:ActivateLayout(role)
     end
 
     local absoluteIndex = NumPresetLayouts() + idx
+
+    -- tracker-widget-taint-rewrite 5.9: skip when the layout is already
+    -- active. SetActiveLayout from addon code makes Edit Mode re-apply every
+    -- system under RealUI taint, the objective tracker (system 12) included,
+    -- so its layout state is written tainted for the session. The login spec
+    -- check (DualSpecSystem:ForceSpecializationUpdate) re-asserts the layout
+    -- one second after every login, almost always when it is already active.
+    -- The case the re-assert exists for (WoW resetting a spec to a preset)
+    -- still activates: the active index differs then.
+    if data.activeLayout == absoluteIndex then
+        state.currentRole = role
+        debug("Layout already active:", layoutName)
+        return true
+    end
+
     local activateOk, activateErr = pcall(C_EditMode.SetActiveLayout, absoluteIndex)
     if not activateOk then
         debug("ERROR: C_EditMode.SetActiveLayout() failed:", activateErr)
