@@ -6,7 +6,8 @@ local _, ns = ... -- luacheck: ignore
      Usage: /realdev trackerscan          summary, PASS/FAIL, fields grouped by key
             /realdev trackerscan full     every addon-owned field, one per line
             /realdev trackerscan hooks    the spike (task 1.3) on its own
-            /realdev trackerscan trace    call stacks of tainted tracker updates since load
+            /realdev trackerscan trace    tainted tracker updates since load, one line each
+            /realdev trackerscan tracefull   the same with whole stacks
 
      Walks Blizzard's objective tracker (container, modules, their children and
      regions) and the allow-listed widget containers (design.md D4), and reports
@@ -420,39 +421,65 @@ else
     end)
 end
 
-local function ReportTrace()
+-- One line per stack by default: the innermost frame (what was called) and the
+-- outermost (where the execution came from). `trace full` prints whole stacks.
+local function StackLines(stack)
+    local lines = {}
+    for line in stack:gmatch("[^\n]+") do
+        if not line:find("^%s*%[C%]") and not line:find("tail call") then
+            lines[#lines + 1] = line:gsub("^%s+", ""):gsub("Interface/AddOns/", "")
+        end
+    end
+    return lines
+end
+
+local function PrintStack(stack, full)
+    local lines = StackLines(stack)
+    if full then
+        for _, line in ipairs(lines) do print("    " .. line) end
+    elseif #lines > 0 then
+        print("    " .. lines[1])
+        if #lines > 1 then print("    ... " .. lines[#lines]) end
+    end
+end
+
+local function ReportTrace(full)
     if not traces.installed then
         print("|cff8080FFTrace:|r not installed (ObjectiveTrackerFrame was never seen).")
         return
     end
-    print(("|cff8080FFTrace:|r %d tainted tracker update path(s) since load (first %d kept)"):format(#traces, TRACE_LIMIT))
     if traces.first then
         for method, info in next, traces.first do
             print(("|cff8080FFFirst %s|r (t=%.1f): %s %s"):format(method, info.time, info.field,
                 info.secure and "|cff22dd22secure|r" or ("|cffff0000<- " .. (info.owner or "?") .. "|r")))
-            for line in info.stack:gmatch("[^\n]+") do
-                print("    " .. line)
-            end
+            PrintStack(info.stack, full)
         end
     end
     if traces.init then
-        print("|cff8080FFInit order|r (SetModuleContainer, parentContainer write): " .. table.concat(traces.init, ", "))
-    else
-        print("|cff8080FFInit order:|r not observed (Init ran before the hook, or modules were added another way).")
-    end
-    for i, t in ipairs(traces) do
-        print(("|cffffff00%d. %s|r <- |cffff0000%s|r  (t=%.1f, %s)"):format(i, t.kind, t.owner, t.time, t.instance))
-        for line in t.stack:gmatch("[^\n]+") do
-            print("    " .. line)
+        local tainted = {}
+        for _, entry in ipairs(traces.init) do
+            if not entry:find(" secure$") then tainted[#tainted + 1] = entry end
         end
+        print(("|cff8080FFInit order:|r %d modules, %s"):format(#traces.init,
+            #tainted == 0 and "all secure" or ("tainted: " .. table.concat(tainted, ", "))))
+    else
+        print("|cff8080FFInit order:|r not observed.")
     end
+    print(("|cff8080FFTainted updates:|r %d path(s) kept (limit %d)"):format(#traces, TRACE_LIMIT))
+    for i, t in ipairs(traces) do
+        print(("|cffffff00%d. %s|r <- |cffff0000%s|r (t=%.1f, %s)"):format(i, t.kind, t.owner, t.time, t.instance))
+        PrintStack(t.stack, full)
+    end
+    if not full then print("  (/realdev trackerscan tracefull for whole stacks)") end
 end
 
 function ns.commands:trackerscan(arg)
     if arg == "hooks" then
         return ReportHooks()
     elseif arg == "trace" then
-        return ReportTrace()
+        return ReportTrace(false)
+    elseif arg == "tracefull" then
+        return ReportTrace(true)
     end
 
     local full = arg == "full"
