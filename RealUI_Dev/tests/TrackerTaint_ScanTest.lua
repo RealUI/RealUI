@@ -179,6 +179,21 @@ local function ScanMixins()
     return result
 end
 
+-- Shared Blizzard tables the tracker's own dispatch reads: EventRegistry's
+-- callback tables (Manager.lua:230 runs Init through EventUtil, i.e. EventRegistry)
+-- and the tracker manager itself. A RealUI-written entry here taints Blizzard's
+-- dispatch before any tracker code runs.
+local function ScanShared()
+    local result = NewResult("Shared")
+    for _, name in ipairs({ "EventRegistry", "ObjectiveTrackerManager" }) do
+        local tbl = _G[name]
+        if type(tbl) == "table" then
+            ScanTable(result, {}, tbl, name, 0)
+        end
+    end
+    return result
+end
+
 local function ScanGlobals()
     local result = NewResult("Globals")
     for _, name in ipairs(GLOBALS) do
@@ -309,7 +324,8 @@ local traces, traceSeen = {}, {}
 
 local function Capture(kind, owner)
     if #traces >= TRACE_LIMIT then return end
-    local stack = _G.debugstack(3) or "?"
+    -- 60 lines: the default (12 top) cut off the frames below EventRegistry's dispatch.
+    local stack = _G.debugstack(3, 60, 0) or "?"
     if traceSeen[stack] then return end
     traceSeen[stack] = true
     local _, instanceType = _G.GetInstanceInfo()
@@ -344,6 +360,22 @@ local function InstallTrace()
             end)
         end
     end
+
+    -- Inside ObjectiveTrackerManager:Init (Manager.lua:190), before its UpdateAll:
+    -- SetModuleContainer → module:SetContainer writes module.parentContainer. Log
+    -- secure/insecure for each, in order. All insecure = the taint arrived with the
+    -- PLAYER_ENTERING_WORLD dispatch itself; turning insecure partway = something
+    -- read in between.
+    local manager = _G.ObjectiveTrackerManager
+    if type(manager) == "table" and manager.SetModuleContainer then
+        _G.hooksecurefunc(manager, "SetModuleContainer", function(_, module)
+            local isSecure, owner = _G.issecurevariable(module, "parentContainer")
+            local name = DebugName(module, "?")
+            traces.init = traces.init or {}
+            traces.init[#traces.init + 1] = isSecure and (name .. " secure") or (name .. " <- " .. (owner or "?"))
+            if not isSecure then Capture("Manager SetModuleContainer (" .. name .. ")", owner) end
+        end)
+    end
 end
 
 if _G.ObjectiveTrackerFrame then
@@ -365,6 +397,11 @@ local function ReportTrace()
         return
     end
     print(("|cff8080FFTrace:|r %d tainted tracker update path(s) since load (first %d kept)"):format(#traces, TRACE_LIMIT))
+    if traces.init then
+        print("|cff8080FFInit order|r (SetModuleContainer, parentContainer write): " .. table.concat(traces.init, ", "))
+    else
+        print("|cff8080FFInit order:|r not observed (Init ran before the hook, or modules were added another way).")
+    end
     for i, t in ipairs(traces) do
         print(("|cffffff00%d. %s|r <- |cffff0000%s|r  (t=%.1f, %s)"):format(i, t.kind, t.owner, t.time, t.instance))
         for line in t.stack:gmatch("[^\n]+") do
@@ -385,7 +422,7 @@ function ns.commands:trackerscan(arg)
     print(("|cff8080FFTracker taint scan|r (%s, instance: %s)"):format(_G.date("%Y-%m-%d %H:%M"), instanceType or "?"))
 
     local total = 0
-    for _, scan in ipairs({ ScanTracker, ScanWidgets, ScanMixins, ScanGlobals }) do
+    for _, scan in ipairs({ ScanTracker, ScanWidgets, ScanMixins, ScanShared, ScanGlobals }) do
         local result = scan()
         total = total + #result.fields
         PrintResult(result, full)
