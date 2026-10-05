@@ -26,23 +26,78 @@ local function isPowerRested(token)
     end
 end
 
+-- Frames whose alpha CombatFader leaves alone (CombatFader:SetFrameHidden).
+-- Weak keys, so nothing is ever written onto a frame.
+local hiddenFrames = _G.setmetatable({}, {__mode = "k"})
+
+--[[ tracker-widget-taint-rewrite 5.3: CombatFader runs its own alpha tween.
+     Blizzard's UIFrameFadeIn/Out write `fadeInfo` onto the frame and call
+     frame:Show() (Blizzard_SharedXMLBase/FrameUtil.lua:331-333). On a Blizzard
+     frame (RealUI_Tracker registers ObjectiveTrackerFrame) that is a plant,
+     and the Show() runs the frame's OnShow inside RealUI's execution, which
+     for the tracker is Blizzard's layout. This tween only ever calls SetAlpha,
+     and it never shows a hidden frame (the old fade-in did, which is why
+     ClassResource needed its `realUIHidden` flag). ]]
+local fades = _G.setmetatable({}, {__mode = "k"}) -- frame -> {from, to, elapsed}
+local fadeDriver = _G.CreateFrame("Frame")
+local function FadeDriver_OnUpdate(driver, elapsed)
+    local active = false
+    for frame, fade in next, fades do
+        fade.elapsed = fade.elapsed + elapsed
+        if fade.elapsed >= FADE_TIME then
+            frame:SetAlpha(fade.to)
+            fades[frame] = nil
+        else
+            frame:SetAlpha(fade.from + (fade.to - fade.from) * (fade.elapsed / FADE_TIME))
+            active = true
+        end
+    end
+    if not active then
+        driver:SetScript("OnUpdate", nil)
+    end
+end
+
 -- Fade frame
 local function FadeIt(self, newOpacity, instant)
     CombatFader:debug("FadeIt", newOpacity, instant)
-    if self.realUIHidden then return end
+    -- realUIHidden is still honoured on RealUI's own frames (ClassResource).
+    if hiddenFrames[self] or self.realUIHidden then return end
 
-    local currentOpacity = 100
-    if not RealUI.isSecret(self:GetAlpha()) then
-        currentOpacity = self:GetAlpha()
+    local currentOpacity = 1
+    local alpha = self:GetAlpha()
+    if not RealUI.isSecret(alpha) then
+        currentOpacity = alpha
     end
-    local fadeTime = instant and 0 or FADE_TIME
-    if newOpacity > currentOpacity then
-        _G.UIFrameFadeIn(self, fadeTime, currentOpacity, newOpacity)
-    elseif newOpacity < currentOpacity and self:IsShown() then
-        _G.UIFrameFadeOut(self, fadeTime, currentOpacity, newOpacity)
+    if newOpacity == currentOpacity then
+        fades[self] = nil
+        return
     end
+    -- As before: a hidden frame is not faded out (it will be faded when shown).
+    if newOpacity < currentOpacity and not self:IsShown() then return end
+
+    if instant then
+        fades[self] = nil
+        self:SetAlpha(newOpacity)
+        return
+    end
+    fades[self] = { from = currentOpacity, to = newOpacity, elapsed = 0 }
+    fadeDriver:SetScript("OnUpdate", FadeDriver_OnUpdate)
 end
 CombatFader.FadeIt = FadeIt
+
+--- Stop (hidden = true) or resume (false) fading one frame. While a frame is
+--- hidden, CombatFader leaves its alpha alone, so its owner can hold it at 0
+--- (RealUI_Tracker's per-instance fade). Replaces writing `realUIHidden` onto
+--- Blizzard frames, which was a plant (tracker taint doctrine R1).
+function CombatFader:SetFrameHidden(frame, hidden)
+    if hidden then
+        hiddenFrames[frame] = true
+        fades[frame] = nil
+    else
+        hiddenFrames[frame] = nil
+        self:RefreshMod()
+    end
+end
 
 -- Determine new opacity values for frames
 function CombatFader:FadeFrames()
