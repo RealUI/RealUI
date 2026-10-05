@@ -6,6 +6,7 @@ local _, ns = ... -- luacheck: ignore
      Usage: /realdev trackerscan          summary, PASS/FAIL, fields grouped by key
             /realdev trackerscan full     every addon-owned field, one per line
             /realdev trackerscan hooks    the spike (task 1.3) on its own
+            /realdev trackerscan trace    call stacks of tainted tracker updates since load
 
      Walks Blizzard's objective tracker (container, modules, their children and
      regions) and the allow-listed widget containers (design.md D4), and reports
@@ -290,9 +291,93 @@ local function PrintResult(result, full)
     end
 end
 
+--[[ Trace (task 5.8). A scan says WHICH fields went tainted, not WHO started the
+     execution. These post-hooks, installed when this file loads (before login
+     runs any RealUI code), check right after Blizzard's own write whether that
+     write was insecure, and keep the debugstack the first time each call path
+     shows up:
+       - container MarkDirty: writes self.dirty (MixinUtil.lua DirtiableMixin);
+         a tainted MarkDirty also schedules a tainted RunNextFrame update, so the
+         stack here shows the code that set it off (OnSizeChanged, Show, ...).
+       - container Update and module Update: Update writes the modules' `state`
+         (ObjectiveTrackerModuleMixin:Update), which covers direct calls too
+         (Edit Mode's UpdateSystem, SetCollapsed).
+     The spike showed hooksecurefunc on these instances keeps the keys secure.
+     Read only apart from the hooks themselves. ]]
+local TRACE_LIMIT = 8
+local traces, traceSeen = {}, {}
+
+local function Capture(kind, owner)
+    if #traces >= TRACE_LIMIT then return end
+    local stack = _G.debugstack(3) or "?"
+    if traceSeen[stack] then return end
+    traceSeen[stack] = true
+    local _, instanceType = _G.GetInstanceInfo()
+    traces[#traces + 1] = {
+        kind = kind, owner = owner or "?", stack = stack,
+        time = _G.GetTime(), instance = instanceType or "?",
+    }
+end
+
+local function InstallTrace()
+    local OTF = _G.ObjectiveTrackerFrame
+    if not OTF or traces.installed then return end
+    traces.installed = true
+
+    _G.hooksecurefunc(OTF, "MarkDirty", function(self)
+        local isSecure, owner = _G.issecurevariable(self, "dirty")
+        if not isSecure then Capture("container MarkDirty", owner) end
+    end)
+    _G.hooksecurefunc(OTF, "Update", function(self)
+        local module = self.modules and self.modules[1]
+        if module then
+            local isSecure, owner = _G.issecurevariable(module, "state")
+            if not isSecure then Capture("container Update", owner) end
+        end
+    end)
+    for _, name in ipairs(MODULES) do
+        local module = _G[name]
+        if IsFrame(module) and module.Update then
+            _G.hooksecurefunc(module, "Update", function(self)
+                local isSecure, owner = _G.issecurevariable(self, "state")
+                if not isSecure then Capture(name .. " Update", owner) end
+            end)
+        end
+    end
+end
+
+if _G.ObjectiveTrackerFrame then
+    InstallTrace()
+else
+    local loader = _G.CreateFrame("Frame")
+    loader:RegisterEvent("ADDON_LOADED")
+    loader:SetScript("OnEvent", function(self, _, name)
+        if name == "Blizzard_ObjectiveTracker" then
+            self:UnregisterEvent("ADDON_LOADED")
+            InstallTrace()
+        end
+    end)
+end
+
+local function ReportTrace()
+    if not traces.installed then
+        print("|cff8080FFTrace:|r not installed (ObjectiveTrackerFrame was never seen).")
+        return
+    end
+    print(("|cff8080FFTrace:|r %d tainted tracker update path(s) since load (first %d kept)"):format(#traces, TRACE_LIMIT))
+    for i, t in ipairs(traces) do
+        print(("|cffffff00%d. %s|r <- |cffff0000%s|r  (t=%.1f, %s)"):format(i, t.kind, t.owner, t.time, t.instance))
+        for line in t.stack:gmatch("[^\n]+") do
+            print("    " .. line)
+        end
+    end
+end
+
 function ns.commands:trackerscan(arg)
     if arg == "hooks" then
         return ReportHooks()
+    elseif arg == "trace" then
+        return ReportTrace()
     end
 
     local full = arg == "full"
