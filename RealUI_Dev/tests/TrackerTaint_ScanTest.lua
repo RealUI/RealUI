@@ -367,6 +367,35 @@ local function InstallTrace()
     -- PLAYER_ENTERING_WORLD dispatch itself; turning insecure partway = something
     -- read in between.
     local manager = _G.ObjectiveTrackerManager
+
+    -- First calls (task 5.8, 2026-10-05 scan): the manager creates its core
+    -- tables lazily on the FIRST call (Manager.lua:62-64 AcquireFrame:
+    -- poolCollection/templateTypes; :164-166 CanShowPOIs: questPOIEnabled/
+    -- questPOIEnabledModules; :144 UpdatePOIEnabled). Whatever execution makes
+    -- that first call owns those tables for the session. Keep the stack of the
+    -- first call to each, secure or not.
+    if type(manager) == "table" then
+        traces.first = {}
+        for method, field in next, {
+            AcquireFrame = "poolCollection",
+            CanShowPOIs = "questPOIEnabled",
+            UpdatePOIEnabled = "questPOIEnabled",
+            SetTextSize = "poolCollection",
+            SetOpacity = "poolCollection",
+        } do
+            if manager[method] then
+                _G.hooksecurefunc(manager, method, function(self)
+                    if traces.first[method] then return end
+                    local isSecure, owner = _G.issecurevariable(self, field)
+                    traces.first[method] = {
+                        field = field, secure = isSecure, owner = owner,
+                        time = _G.GetTime(), stack = _G.debugstack(2, 60, 0) or "?",
+                    }
+                end)
+            end
+        end
+    end
+
     if type(manager) == "table" and manager.SetModuleContainer then
         _G.hooksecurefunc(manager, "SetModuleContainer", function(_, module)
             local isSecure, owner = _G.issecurevariable(module, "parentContainer")
@@ -397,6 +426,15 @@ local function ReportTrace()
         return
     end
     print(("|cff8080FFTrace:|r %d tainted tracker update path(s) since load (first %d kept)"):format(#traces, TRACE_LIMIT))
+    if traces.first then
+        for method, info in next, traces.first do
+            print(("|cff8080FFFirst %s|r (t=%.1f): %s %s"):format(method, info.time, info.field,
+                info.secure and "|cff22dd22secure|r" or ("|cffff0000<- " .. (info.owner or "?") .. "|r")))
+            for line in info.stack:gmatch("[^\n]+") do
+                print("    " .. line)
+            end
+        end
+    end
     if traces.init then
         print("|cff8080FFInit order|r (SetModuleContainer, parentContainer write): " .. table.concat(traces.init, ", "))
     else
