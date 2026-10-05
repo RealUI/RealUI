@@ -1976,7 +1976,7 @@ do -- Display
         args = {
             fontScale = {
                 name = "Font Scale",
-                desc = "Multiplier applied to chat frame, tooltip, and Objective Tracker font sizes."
+                desc = "Multiplier applied to chat frame and tooltip font sizes."
                     .. "\n\nThis is independent of UI Scale and can be adjusted after choosing a display preset.",
                 type = "range",
                 width = "full",

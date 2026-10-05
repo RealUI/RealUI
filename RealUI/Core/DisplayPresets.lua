@@ -240,11 +240,38 @@ end
 
 ---------------------------------------------------------------------------
 -- Font Scale (Task 6.2)
--- Apply fontScale multiplier to chat frames, Objective Tracker, and
--- tooltip body font size.
+-- Apply fontScale multiplier to chat frames and the tooltip font objects.
 ---------------------------------------------------------------------------
 
---- Apply font scale multiplier to chat frames, Objective Tracker, and tooltips.
+--[[ B166, 2026-10-05: no state on Blizzard frames (tracker taint doctrine R1).
+     The previous scale used to live in `_realuiFontScale` fields written onto
+     ChatFrameN and onto every GameTooltipTextLeft/RightN, and tooltip text was
+     scaled with SetFont on each of those lines, which tooltip layout measures
+     (R3) and which missed every line past 30. Now:
+     - chat: same FCF_SetChatWindowFontSize call, previous scale kept in a
+       RealUI-owned weak-keyed table;
+     - tooltips: the three tooltip font objects are scaled from the size they
+       had the first time this ran (after Aurora's font setup), so repeated
+       calls do not compound and every line that uses them follows.
+
+     tracker-widget-taint-rewrite 5.7: the ObjectiveTrackerFrame:SetScale(scale)
+     that was here is removed. A scale change fires the tracker container's
+     OnSizeChanged -> MarkDirty, so the tracker laid itself out under RealUI
+     taint at every preset change (and at login when the font scale was not
+     1.0). The tracker text no longer follows the font scale. If it should, the
+     clean route is Edit Mode's tracker TextSize setting
+     (Enum.EditModeObjectiveTrackerSetting.TextSize) in RealUI's Edit Mode
+     layout, under that path's own taint rules (EditModeManager.lua:68-78);
+     not built. ]]
+
+local chatFontScale = _G.setmetatable({}, {__mode = "k"}) -- chatFrame -> last scale applied
+
+-- Font objects every GameTooltip line inherits from
+-- (Blizzard_Fonts_Shared/Shared/FontStyles.xml:314-322).
+local TOOLTIP_FONTS = {"GameTooltipHeaderText", "GameTooltipText", "GameTooltipTextSmall"}
+local tooltipBaseSize = {} -- font object name -> size before any RealUI scale
+
+--- Apply font scale multiplier to chat frames and tooltips.
 -- @param scale number  The font scale multiplier (e.g. 1.0, 1.1, 1.3)
 function DisplayPresets.RefreshFontScale(scale)
     if not scale then return end
@@ -256,49 +283,26 @@ function DisplayPresets.RefreshFontScale(scale)
             local _, size = chatFrame:GetFont()
             if size then
                 -- Undo previous fontScale before applying new one
-                local prevScale = chatFrame._realuiFontScale or 1
+                local prevScale = chatFontScale[chatFrame] or 1
                 local baseSize = size / prevScale
                 _G.FCF_SetChatWindowFontSize(nil, chatFrame, baseSize * scale)
-                chatFrame._realuiFontScale = scale
+                chatFontScale[chatFrame] = scale
             end
         end
     end
 
-    -- Objective Tracker: scale the whole frame
-    --
-    -- Trigger classification (Req 7.9 candidate b — periodic SetScale): RULED OUT.
-    -- This SetScale is one-shot per preset change. RefreshFontScale is invoked from
-    -- Apply (line ~358) on explicit preset switch and from ApplyStored (line ~434),
-    -- where ApplyStored runs on PLAYER_ENTERING_WORLD via the eventFrame that
-    -- unregisters PLAYER_ENTERING_WORLD on first fire (see line ~458). There is no
-    -- timer, OnUpdate, or recurring event driving this code path. SetScale also
-    -- chains no SetPoint call — only the frame's effective scale is updated, the
-    -- tracker's anchor is untouched. Therefore this call cannot be the source of
-    -- the periodic-disappearance behavior described in Req 7.9.
-    if _G.ObjectiveTrackerFrame then
-        _G.ObjectiveTrackerFrame:SetScale(scale)
-    end
-
-    -- Tooltip body font size: adjust GameTooltip font objects
-    for i = 1, 30 do
-        local fontString = _G["GameTooltipTextLeft" .. i]
-        if fontString then
-            local fontFile, fontSize, fontFlags = fontString:GetFont()
+    -- Tooltips: scale the font objects, from their stored base size
+    for _, fontName in ipairs(TOOLTIP_FONTS) do
+        local fontObject = _G[fontName]
+        if fontObject then
+            local fontFile, fontSize, fontFlags = fontObject:GetFont()
             if fontFile and fontSize then
-                local prevScale = fontString._realuiFontScale or 1
-                local baseSize = fontSize / prevScale
-                fontString:SetFont(fontFile, baseSize * scale, fontFlags)
-                fontString._realuiFontScale = scale
-            end
-        end
-        local fontStringRight = _G["GameTooltipTextRight" .. i]
-        if fontStringRight then
-            local fontFile, fontSize, fontFlags = fontStringRight:GetFont()
-            if fontFile and fontSize then
-                local prevScale = fontStringRight._realuiFontScale or 1
-                local baseSize = fontSize / prevScale
-                fontStringRight:SetFont(fontFile, baseSize * scale, fontFlags)
-                fontStringRight._realuiFontScale = scale
+                local baseSize = tooltipBaseSize[fontName]
+                if not baseSize then
+                    baseSize = fontSize
+                    tooltipBaseSize[fontName] = baseSize
+                end
+                fontObject:SetFont(fontFile, baseSize * scale, fontFlags)
             end
         end
     end
