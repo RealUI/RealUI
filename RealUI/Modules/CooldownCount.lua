@@ -191,6 +191,9 @@ local function CreateTimer(cd)
 end
 
 local ignore = {}
+-- cooldown -> timer. Weak-keyed, not a `_timer` field: this hook sees every
+-- Cooldown, Blizzard's pet and aura buttons included (doctrine R1).
+local timers = _G.setmetatable({}, {__mode = "k"})
 local function ShouldHaveTimer(cd)
     if ignore[cd] then return end
 
@@ -272,10 +275,12 @@ function CooldownCount:OnEnable()
             if cd.SetHideCountdownNumbers then
                 cd:SetHideCountdownNumbers(true)
             end
-            if not cd._timer then
-                cd._timer = CreateTimer(cd)
+            local timer = timers[cd]
+            if not timer then
+                timer = CreateTimer(cd)
+                timers[cd] = timer
             end
-            cd._timer:Start(start, duration, modRate)
+            timer:Start(start, duration, modRate)
         end
     end)
     _G.SetCVar("countdownForCooldowns", 1)
