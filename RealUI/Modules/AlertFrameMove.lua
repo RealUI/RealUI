@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- Lua Globals --
-local next, ipairs = _G.next, _G.ipairs
+local ipairs = _G.ipairs
 
 -- RealUI --
 local RealUI = private.RealUI
@@ -14,59 +14,30 @@ AlertFrameHolder:SetWidth(180)
 AlertFrameHolder:SetHeight(20)
 AlertFrameHolder:SetPoint("TOP", _G.UIParent, "TOP", 0, -18)
 
-local alertBlacklist
-local ReplaceAnchors do
-    local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
-    local function QueueAdjustAnchors(self, relativeAlert)
-        for alertFrame in self.alertFramePool:EnumerateActive() do
-            AlertFrameMove:debug("Queue", alertFrame, alertPoint, relativeAlert:GetName() or relativeAlert, alertRelPoint, alertYofs)
-            alertFrame:ClearAllPoints()
-            alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
-            relativeAlert = alertFrame
-        end
-        return relativeAlert
-    end
-    local function SimpleAdjustAnchors(self, relativeAlert)
-        if self.alertFrame:IsShown() then
-            AlertFrameMove:debug("Simple", self.alertFrame:GetName(), alertPoint, relativeAlert:GetName(), alertRelPoint, alertYofs)
-            self.alertFrame:ClearAllPoints()
-            self.alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
-            return self.alertFrame
-        end
-        return relativeAlert
-    end
-    local function AnchorAdjustAnchors(self, relativeAlert)
-        if self.anchorFrame:IsShown() then
-            AlertFrameMove:debug("Anchor:AdjustAnchors", relativeAlert:GetName())
-            return self.anchorFrame;
-        end
-        return relativeAlert
-    end
+--[[ Alerts drop down from AlertFrameHolder (top centre) instead of rising
+     from Blizzard's AlertFrame.
 
-    function ReplaceAnchors(alertFrameSubSystem)
-        if alertFrameSubSystem.alertFramePool then
-            local frame = alertFrameSubSystem.alertFramePool:GetNextActive()
-            AlertFrameMove:debug("Queue system", frame and frame:GetName())
-            if alertBlacklist[alertFrameSubSystem.alertFramePool.frameTemplate] then
-                return alertFrameSubSystem.alertFramePool.frameTemplate, true
-            else
-                alertFrameSubSystem.AdjustAnchors = QueueAdjustAnchors
-            end
-        elseif alertFrameSubSystem.alertFrame then
-            local frame = alertFrameSubSystem.alertFrame
-            AlertFrameMove:debug("Simple system", frame:GetName())
-            if alertBlacklist[frame:GetName()] then
-                return frame:GetName(), true
-            else
-                alertFrameSubSystem.AdjustAnchors = SimpleAdjustAnchors
-            end
-        elseif alertFrameSubSystem.anchorFrame then
-            local frame = alertFrameSubSystem.anchorFrame
-            AlertFrameMove:debug("Anchor system", frame:GetName())
-            if alertBlacklist[frame:GetName()] then
-                return frame:GetName(), true
-            else
-                alertFrameSubSystem.AdjustAnchors = AnchorAdjustAnchors
+     This used to replace `AdjustAnchors` on every alert subsystem and
+     table.remove the talking head / group loot subsystems from
+     AlertFrame.alertFrameSubSystems: replaced methods and rewritten array
+     slots that every Blizzard UpdateAnchors read, so every alert
+     (ShowAlert -> AddAlertFrame -> UpdateAnchors) ran under RealUI taint
+     (tracker taint doctrine R1). Now one post-hook on AlertFrame:UpdateAnchors
+     re-anchors the active alert frames after Blizzard has placed them. Nothing
+     is written onto Blizzard objects, and Blizzard's execution continues
+     secure after the hook returns. Externally anchored subsystems (talking
+     head, group loot) are simply not chained, as the old blacklist did. ]]
+local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
+local function UpdateAnchors(container)
+    AlertFrameMove:debug("UpdateAnchors")
+    local relativeAlert = AlertFrameHolder
+    for _, alertFrameSubSystem in ipairs(container.alertFrameSubSystems) do
+        local pool = alertFrameSubSystem.alertFramePool
+        if pool then
+            for alertFrame in pool:EnumerateActive() do
+                alertFrame:ClearAllPoints()
+                alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
+                relativeAlert = alertFrame
             end
         end
     end
@@ -74,39 +45,7 @@ end
 
 local function SetUpAlert()
     AlertFrameMove:debug("SetUpAlert")
-    _G.hooksecurefunc(_G.AlertFrame, "UpdateAnchors", function(dialog)
-        AlertFrameMove:debug("UpdateAnchors")
-        dialog:ClearAllPoints()
-        dialog:SetAllPoints(AlertFrameHolder)
-    end)
-    _G.hooksecurefunc(_G.AlertFrame, "AddAlertFrameSubSystem", function(dialog, alertFrameSubSystem)
-        AlertFrameMove:debug("AddAlertFrameSubSystem")
-        local _, isBlacklisted = ReplaceAnchors(alertFrameSubSystem)
-
-        if isBlacklisted then
-            for i, alertSubSystem in ipairs(_G.AlertFrame.alertFrameSubSystems) do
-                AlertFrameMove:debug("iterate SubSystems", i)
-                if alertFrameSubSystem == alertSubSystem then
-                    return _G.table.remove(_G.AlertFrame.alertFrameSubSystems, i)
-                end
-            end
-        end
-    end)
-
-    local remove = {}
-    for i, alertFrameSubSystem in ipairs(_G.AlertFrame.alertFrameSubSystems) do
-        AlertFrameMove:debug("iterate SubSystems", i)
-        local name, isBlacklisted = ReplaceAnchors(alertFrameSubSystem)
-
-        if isBlacklisted then
-            remove[i] = name
-        end
-    end
-
-    for i, name in next, remove do
-        AlertFrameMove:debug("iterate remove", i, name)
-        _G.table.remove(_G.AlertFrame.alertFrameSubSystems, i)
-    end
+    _G.hooksecurefunc(_G.AlertFrame, "UpdateAnchors", UpdateAnchors)
 end
 ----------
 function AlertFrameMove:OnInitialize()
@@ -115,10 +54,5 @@ function AlertFrameMove:OnInitialize()
 end
 
 function AlertFrameMove:OnEnable()
-    alertBlacklist = {
-        GroupLootContainer = RealUI:GetModuleEnabled("Loot"),
-        TalkingHeadFrame = true,
-    }
-
     SetUpAlert()
 end
