@@ -55,112 +55,12 @@ do
     end)
 end
 
--- Blizzard PrivateAuras race workaround:
--- HandleUpdateInfo() can receive updatedAuraInstanceIDs where the aura data is
--- already gone. Blizzard then dereferences newAura.isPrivate and errors.
---
--- Extension: PrivateAuraAnchorContainerMixin:CheckExistingDispelHasCorrectType()
--- can fire assertsafe() with a nil error handler when an aura update arrives
--- with aura.dispelName=nil but the instance is already stored under a dispel
--- type (e.g. "Disease"). assertsafe() then attempts to call a nil value from
--- ErrorUtil.lua:18. Patch the check to bail early on partial aura data.
-do
-    local function PatchPrivateAurasWatcher()
-        local privateAuras = _G["PrivateAuras"]
-        local privateAurasAPI = _G["C_UnitAurasPrivate"]
-        local watcher = privateAuras and privateAuras.PrivateAuraUnitWatcher
-        if type(watcher) ~= "table" or watcher._realuiPrivateAuraPatched then
-            return
-        end
-        if type(privateAurasAPI) ~= "table" then
-            return
-        end
-
-        local originalHandleUpdateInfo = watcher.HandleUpdateInfo
-        if type(originalHandleUpdateInfo) ~= "function" then
-            return
-        end
-
-        watcher.HandleUpdateInfo = function(self, privateAuraSource, updateInfo)
-            if type(updateInfo) == "table" and not updateInfo.isFullUpdate and type(updateInfo.updatedAuraInstanceIDs) == "table" and type(self) == "table" and self.auras and self.unit then
-                local filteredIDs
-                local removedAny = false
-
-                for i = 1, #updateInfo.updatedAuraInstanceIDs do
-                    local auraInstanceID = updateInfo.updatedAuraInstanceIDs[i]
-                    local keepID = true
-
-                    if self.auras[auraInstanceID] ~= nil then
-                        local newAura = privateAurasAPI.GetAuraDataByAuraInstanceIDPrivate(self.unit, auraInstanceID)
-                        if newAura == nil then
-                            keepID = false
-                            removedAny = true
-                        end
-                    end
-
-                    if keepID then
-                        if not filteredIDs then
-                            filteredIDs = {}
-                        end
-                        filteredIDs[#filteredIDs + 1] = auraInstanceID
-                    end
-                end
-
-                if removedAny then
-                    local safeUpdateInfo = {}
-                    for k, v in _G.pairs(updateInfo) do
-                        safeUpdateInfo[k] = v
-                    end
-                    safeUpdateInfo.updatedAuraInstanceIDs = filteredIDs or {}
-                    updateInfo = safeUpdateInfo
-                end
-            end
-
-            return originalHandleUpdateInfo(self, privateAuraSource, updateInfo)
-        end
-
-        watcher._realuiPrivateAuraPatched = true
-    end
-
-    local function PatchPrivateAurasContainerMixin()
-        local mixin = _G["PrivateAuraAnchorContainerMixin"]
-        if type(mixin) ~= "table" or mixin._realuiContainerMixinPatched then
-            return
-        end
-
-        local originalCheck = mixin.CheckExistingDispelHasCorrectType
-        if type(originalCheck) ~= "function" then
-            return
-        end
-
-        -- When an aura update arrives with nil dispelName the mixin's
-        -- assertsafe fires and tries to call a nil error handler, producing
-        -- "attempt to call a nil value" from ErrorUtil.lua:18. Bail early
-        -- for partial aura data; the aura will be re-classified on the next
-        -- full update.
-        mixin.CheckExistingDispelHasCorrectType = function(self, aura, auraInstanceID)
-            if aura and aura.dispelName == nil then
-                return
-            end
-            return originalCheck(self, aura, auraInstanceID)
-        end
-
-        mixin._realuiContainerMixinPatched = true
-    end
-
-    local f = _G.CreateFrame("Frame")
-    f:RegisterEvent("ADDON_LOADED")
-    f:SetScript("OnEvent", function(self, _, addon)
-        if addon == "Blizzard_PrivateAurasUI" then
-            PatchPrivateAurasWatcher()
-            PatchPrivateAurasContainerMixin()
-            self:UnregisterEvent("ADDON_LOADED")
-        end
-    end)
-
-    if _G.C_AddOns.IsAddOnLoaded("Blizzard_PrivateAurasUI") then
-        PatchPrivateAurasWatcher()
-        PatchPrivateAurasContainerMixin()
-        f:UnregisterEvent("ADDON_LOADED")
-    end
-end
+-- The Blizzard PrivateAuras workarounds that were here are removed (2026-10-06).
+-- They replaced PrivateAuras.PrivateAuraUnitWatcher.HandleUpdateInfo and
+-- PrivateAuraAnchorContainerMixin.CheckExistingDispelHasCorrectType with RealUI
+-- closures, so every private aura update ran under RealUI taint (tracker taint
+-- doctrine: never replace a Blizzard function to guard a Blizzard bug). Both
+-- bugs are fixed in 12.1 (the watcher checks `newAura`, assertsafe checks
+-- geterrorhandler()), and the dispel wrapper no longer matched 12.1's
+-- (privateSource, aura, auraInstanceID) signature: it indexed the boolean
+-- privateSource as the aura.
