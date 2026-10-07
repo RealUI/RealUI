@@ -28,15 +28,17 @@ local TooltipTypes = {
 }
 
 local formatString = "%s ID: %d"
+-- Per-tooltip state from RealUI_Tooltips.lua (weak tables, not tooltip fields)
+local tipUnit, tipQuest, tipID = private.tipUnit, private.tipQuest, private.tipID
 --local formatStringGray = Color.gray:WrapTextInColorCode(formatString)
 local function AddToTooltip(tooltip, tooltipType, tooltipID)
     if RealUI.isSecret(tooltip) or RealUI.isSecret(tooltipType) or RealUI.isSecret(tooltipID) then
         return
     end
-    if not tooltip._id then
+    if not tipID[tooltip] then
         local tooltipText = formatString:format(tooltipType, tooltipID)
         _G.GameTooltip_AddColoredLine(tooltip, tooltipText , Color.gray)
-        tooltip._id = tooltipID
+        tipID[tooltip] = tooltipID
     end
 end
 
@@ -73,12 +75,12 @@ local function SetupQuestTooltips()
             if not IsSafeTooltipData(tooltip, lineData) then
                 return
             end
-            if tooltip._unitToken then
-                tooltip._questID = lineData.id
+            if tipUnit[tooltip] then
+                tipQuest[tooltip] = lineData.id
             end
 
-            if tooltip._questID then
-                lineData.rightText = formatString:format(TooltipTypes.quest, tooltip._questID)
+            if tipQuest[tooltip] then
+                lineData.rightText = formatString:format(TooltipTypes.quest, tipQuest[tooltip])
                 lineData.rightColor = Color.gray
             end
         end)

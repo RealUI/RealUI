@@ -14,7 +14,7 @@ local progressFormat = "%s |cFFFFFFFF(+%s%%)|r"
 local challengeData = {}
 
 local function AddObjectiveProgressImpl(tooltip, lineData)
-    local unitToken = tooltip._unitToken
+    local unitToken = private.tipUnit[tooltip]
     if _G.C_Secrets and _G.C_Secrets.ShouldUnitIdentityBeSecret and _G.C_Secrets.ShouldUnitIdentityBeSecret(unitToken) then
         return
     end
@@ -50,7 +50,7 @@ local function AddObjectiveProgressImpl(tooltip, lineData)
             weight = LOP:GetNPCWeightByMap(instanceMapID, npcID, isTeeming, isAlternate)
         end
     else
-        local questID = tooltip._questID
+        local questID = private.tipQuest[tooltip]
         weight = LOP:GetNPCWeightByQuest(questID, npcID)
         if not weight then
             local questCache = private.questCache

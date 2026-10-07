@@ -41,6 +41,18 @@ local classificationTypes = {
     worldboss = (" |cffFF0000%s|r"):format(_G.BOSS)
 }
 
+--[[ Per-tooltip state, in weak-keyed tables owned by RealUI. These used to be
+     `_unitToken`, `_questID`, `_id` and `factionIcon` fields written onto
+     GameTooltip (and every tooltip TooltipDataProcessor hands us) in the
+     middle of Blizzard's tooltip processing: plants on Blizzard frames
+     (tracker taint doctrine R1). Shared with ObjectID.lua and
+     ObjectiveProgress.lua, which load after this file. ]]
+local tipUnit = _G.setmetatable({}, {__mode = "k"})  -- tooltip -> unit token
+local tipQuest = _G.setmetatable({}, {__mode = "k"}) -- tooltip -> quest ID
+local tipID = _G.setmetatable({}, {__mode = "k"})    -- tooltip -> ID line already added
+local factionIcons = _G.setmetatable({}, {__mode = "k"}) -- tooltip -> faction icon texture
+private.tipUnit, private.tipQuest, private.tipID = tipUnit, tipQuest, tipID
+
 local function IsSafeUnitToken(unit)
     return type(unit) == "string" and not RealUI.isSecret(unit) and unit ~= ""
 end
@@ -262,15 +274,15 @@ if _G.issecure and _G.issecure() then
         if not IsSafeTooltipData(tooltip, lineData) then
             return
         end
-        if tooltip._unitToken then
-            tooltip._questID = lineData.id
+        if tipUnit[tooltip] then
+            tipQuest[tooltip] = lineData.id
         end
     end)
     _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.QuestObjective, function(tooltip, lineData)
         if not IsSafeTooltipData(tooltip, lineData) then
             return
         end
-        if tooltip._unitToken and tooltip._questID then
+        if tipUnit[tooltip] and tipQuest[tooltip] then
             private.AddObjectiveProgress(tooltip, lineData)
         end
     end)
@@ -283,9 +295,9 @@ if _G.issecure and _G.issecure() then
             lineData.leftText = GetUnitName(unitToken)
             lineData.leftColor = GetUnitColor(unitToken)
 
-            tooltip._unitToken = unitToken
+            tipUnit[tooltip] = unitToken
         else
-            tooltip._unitToken = nil
+            tipUnit[tooltip] = nil
         end
     end)
     _G.TooltipDataProcessor.AddLinePreCall(LineTypeEnums.None, function(tooltip, lineData)
@@ -293,8 +305,8 @@ if _G.issecure and _G.issecure() then
             return
         end
         --PrintDataArgs("AddLinePreCall:None", lineData)
-        if tooltip._unitToken then
-            local unitToken = tooltip._unitToken
+        if tipUnit[tooltip] then
+            local unitToken = tipUnit[tooltip]
             if tooltip:NumLines() == 1 then
                 if IsNonSecretTrue(_G.UnitIsPlayer(unitToken)) then
                     local unitGuild, unitRank = _G.GetGuildInfo(unitToken)
@@ -316,14 +328,16 @@ if _G.issecure and _G.issecure() then
         if RealUI.isSecret(tooltip) or RealUI.isSecret(tooltipData) then
             return
         end
-        if not tooltip.factionIcon then
-            tooltip.factionIcon = tooltip:CreateTexture(nil, "BORDER")
-            tooltip.factionIcon:SetPoint("CENTER", tooltip, "LEFT", 0, 0)
+        local icon = factionIcons[tooltip]
+        if not icon then
+            icon = tooltip:CreateTexture(nil, "BORDER")
+            icon:SetPoint("CENTER", tooltip, "LEFT", 0, 0)
+            factionIcons[tooltip] = icon
         end
 
-        local unitToken = tooltip._unitToken
+        local unitToken = tipUnit[tooltip]
         if not IsSafeUnitToken(unitToken) then
-            tooltip.factionIcon:Hide()
+            icon:Hide()
             return
         end
 
@@ -332,12 +346,12 @@ if _G.issecure and _G.issecure() then
             if not IsNonSecretString(unitFactionGroup) then
                 unitFactionGroup = "Neutral"
             end
-            local icon = factionIcon[unitFactionGroup] or factionIcon.Neutral
-            tooltip.factionIcon:SetAtlas(icon.texture)
-            tooltip.factionIcon:SetSize(icon.width, icon.height)
-            tooltip.factionIcon:Show()
+            local iconInfo = factionIcon[unitFactionGroup] or factionIcon.Neutral
+            icon:SetAtlas(iconInfo.texture)
+            icon:SetSize(iconInfo.width, iconInfo.height)
+            icon:Show()
         else
-            tooltip.factionIcon:Hide()
+            icon:Hide()
         end
 
         local unitTarget = unitToken.."target"
@@ -400,14 +414,14 @@ end
 
 local frameColor = Aurora.Color.frame
 private.AddHook("OnTooltipCleared", function(tooltip)
-    tooltip._unitToken = nil
-    tooltip._questID = nil
-    if tooltip.factionIcon then
-        tooltip.factionIcon:Hide()
+    tipUnit[tooltip] = nil
+    tipQuest[tooltip] = nil
+    if factionIcons[tooltip] then
+        factionIcons[tooltip]:Hide()
     end
 
     --ClearDynamicInfo()
-    tooltip._id = nil
+    tipID[tooltip] = nil
     tooltip.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end, true)
 
