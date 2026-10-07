@@ -28,7 +28,7 @@ _G.hooksecurefunc(private.FrameXML, "LFGFrame", function()
     timerBar:SetPoint("BOTTOM", 0, 8)
     timerBar:SetSize(242, 12)
     timerBar:SetStatusBarColor(Color.yellow:GetRGB())
-    LFGDungeonReadyDialog.timerBar = timerBar
+    -- No `timerBar` field on the Blizzard dialog (R1 plant; nothing read it)
 
     local duration, remaining = 40
     timerBar:SetMinMaxValues(0, duration)
