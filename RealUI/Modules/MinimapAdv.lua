@@ -76,15 +76,24 @@ local function ZoomMinimapOut()
     _G.Minimap:SetZoom(0)
 end
 
+-- RealUI.FadeAlpha, not UIFrameFadeIn/Out: the landing page button is
+-- Blizzard's, and UIFrameFade wrote `fadeInfo` onto it, called its Show()
+-- (unhiding a button Blizzard had hidden) and queued it in Blizzard's shared
+-- FADEFRAMES list.
 local function fadeIn(frame)
     --print("fadeIn")
     if _G.InCombatLockdown() then return end
-    _G.UIFrameFadeIn(frame, 0.1, frame:GetAlpha(), 1)
+    RealUI.FadeAlpha(frame, 0.1, 1)
 end
 local function fadeOut(frame)
     --print("fadeOut")
-    _G.UIFrameFadeOut(frame, 0.5, frame:GetAlpha(), 0)
+    RealUI.FadeAlpha(frame, 0.5, 0)
 end
+
+-- Hover / pulse state for Blizzard's Minimap and landing page button. Module
+-- locals, never fields on those frames (tracker taint doctrine R1).
+local minimapMouseover = false
+local landingMouseover, landingShouldShow = false, false
 
 ---------------------------
 -- MINIMAP FRAME UPDATES --
@@ -1205,7 +1214,7 @@ function MinimapAdv:FadeButtons()
     local scale = mapPoints.scale
 
     if _G.Minimap:IsVisible() then
-        if _G.Minimap.mouseover or MenuFrame:IsMenuOpen(MMFrames.tracking) or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
+        if minimapMouseover or MenuFrame:IsMenuOpen(MMFrames.tracking) or MMFrames.toggle.mouseover or MMFrames.config.mouseover or MMFrames.tracking.mouseover or MMFrames.farm.mouseover then
             local numButtons = 2
 
             if (not isInFarmMode) or (isInFarmMode and db.expand.extras.showtracking) then
@@ -1238,7 +1247,7 @@ function MinimapAdv:FadeButtons()
             MMFrames.farm:Hide()
 
             local landingButton = _G.ExpansionLandingPageMinimapButton
-            if landingButton and not landingButton.shouldShow and not landingButton.mouseover then
+            if landingButton and not landingShouldShow and not landingMouseover then
                 fadeOut(landingButton)
             end
         end
@@ -1417,16 +1426,12 @@ end
 --[[ Garrison ]]--
 -- GarrisonLandingPageMinimapButton.MinimapLoopPulseAnim:Play()
 -- ShowGarrisonPulse(GarrisonLandingPageMinimapButton)
-local function HideCommandBar(...)
-    MinimapAdv:debug("HideCommandBar", ...)
-    _G.OrderHallCommandBar:Hide()
-end
 
 local function ShowGarrisonPulse(self)
     local isPlaying = self.MinimapLoopPulseAnim:IsPlaying()
     MinimapAdv:debug("ShowGarrisonPulse", isPlaying)
     self.MinimapLoopPulseAnim:Stop()
-    self.shouldShow = true
+    landingShouldShow = true
     fadeIn(self)
     if isPlaying then
         _G.C_Timer.After(0.2, function()
@@ -1476,7 +1481,7 @@ local function Garrison_OnEvent(self, event, ...)
             fadeIn(self)
         else
             MinimapAdv:debug("notLandingPage")
-            self.shouldShow = self.MinimapLoopPulseAnim:IsPlaying()
+            landingShouldShow = self.MinimapLoopPulseAnim:IsPlaying()
         end
 
         local mapPoints = GetPositionData()
@@ -1487,16 +1492,16 @@ local function Garrison_OnEvent(self, event, ...)
 end
 local function Garrison_OnLeave(self)
     MinimapAdv:debug("Garrison_OnLeave")
-    self.mouseover = false
+    landingMouseover = false
     -- Only fade out if the minimap itself is also no longer hovered and no pulse is active.
-    if not _G.Minimap.mouseover and not self.shouldShow then
+    if not minimapMouseover and not landingShouldShow then
         fadeOut(self)
     end
 end
 local function Garrison_OnEnter(self)
     MinimapAdv:debug("Garrison_OnEnter")
     if not self.title then return end
-    self.mouseover = true
+    landingMouseover = true
     local isLeft = (dbPos and dbPos.anchorto or "TOPLEFT"):find("LEFT")
     _G.GameTooltip:SetOwner(self, "ANCHOR_" .. (isLeft and "RIGHT" or "LEFT"))
     _G.GameTooltip:SetText(self.title, 1, 1, 1)
@@ -1520,12 +1525,12 @@ end
 
 ---- Minimap
 local function Minimap_OnEnter()
-    _G.Minimap.mouseover = true
+    minimapMouseover = true
     MinimapAdv:FadeButtons()
 end
 
 local function Minimap_OnLeave()
-    _G.Minimap.mouseover = false
+    minimapMouseover = false
     MinimapAdv:FadeButtons()
 end
 
@@ -1595,14 +1600,26 @@ function MinimapAdv:MINIMAP_UPDATE_ZOOM(event, ...)
     self:UnregisterEvent("MINIMAP_UPDATE_ZOOM")
 end
 
+-- Keep a Blizzard frame hidden with an OnShow post-hook, installed once.
+-- Replaces `frame.Show = function() end` / `frame.SetShown = ...`: a method
+-- shadow is a Lua field on a Blizzard frame (tracker taint doctrine R1) that
+-- runs RealUI code inside every Blizzard caller (TimeManager_FireAlarm calls
+-- TimeManagerClockButton:Show()).
+local keptHidden = _G.setmetatable({}, {__mode = "k"})
+local function KeepHidden(frame)
+    if not frame then return end
+    if not keptHidden[frame] then
+        keptHidden[frame] = true
+        frame:HookScript("OnShow", frame.Hide)
+    end
+    frame:Hide()
+end
+
 function MinimapAdv:PLAYER_ENTERING_WORLD(event, ...)
     self:debug(event, ...)
     -- Hide persistent Minimap elements
-    _G.GameTimeFrame:Hide()
-    _G.GameTimeFrame.Show = function() end
-
-    _G.TimeManagerClockButton:Hide()
-    _G.TimeManagerClockButton.Show = function() end
+    KeepHidden(_G.GameTimeFrame)
+    KeepHidden(_G.TimeManagerClockButton)
 
     -- Update Minimap position and visible state
     self:UpdateShownState() -- Will also call MinimapAdv:Update
@@ -1615,13 +1632,10 @@ function MinimapAdv:ADDON_LOADED(event, ...)
     self:debug(event, ...)
     local addon = ...
     if addon == "Blizzard_TimeManager" then
-        _G.TimeManagerClockButton:HookScript("OnShow", function()
-            _G.TimeManagerClockButton:Hide()
-        end)
-        _G.TimeManagerClockButton:Hide()
+        KeepHidden(_G.TimeManagerClockButton)
     elseif addon == "Blizzard_OrderHallUI" then
-        _G.C_Timer.After(0.1, HideCommandBar)
-        _G.OrderHallCommandBar.SetShown = HideCommandBar
+        -- OrderHallCommandBar no longer exists in 12.x (this used to index nil).
+        KeepHidden(_G.OrderHallCommandBar)
     elseif addon == "Blizzard_HybridMinimap" then
         SetupHybridMinimap()
     end
@@ -2001,9 +2015,10 @@ local function SetUpMinimapFrame()
         landingButton:SetScale(.3)
         landingButton:HookScript("OnEvent", Garrison_OnEvent)
         landingButton:HookScript("OnLeave", Garrison_OnLeave)
-        landingButton:SetScript("OnEnter", Garrison_OnEnter)
-        landingButton.shouldShow = false
-        landingButton.mouseover = false
+        -- HookScript, not SetScript (R6): Blizzard's OnEnter tooltip runs
+        -- first, Garrison_OnEnter then re-owns the tooltip with RealUI's.
+        landingButton:HookScript("OnEnter", Garrison_OnEnter)
+        landingShouldShow, landingMouseover = false, false
 
         -- Midnight: RefreshButton/UpdateIcon runs SetLandingPageIconOffset,
         -- which re-anchors the button to Blizzard's TOPLEFT offsets (the

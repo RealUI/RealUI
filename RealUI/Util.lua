@@ -446,3 +446,38 @@ end
 function RealUI.isSecret(value)
     return _G.issecrettable(value) or _G.issecretvalue(value)
 end
+
+--[[ Alpha tween that only ever calls SetAlpha (same approach as CombatFader).
+     Blizzard's UIFrameFadeIn/Out write `fadeInfo` onto the frame, call its
+     Show(), and queue it in the shared FADEFRAMES list that Blizzard's own
+     fades run through (FrameUtil.lua:308-341), so calling them from RealUI
+     plants a field and taints that shared fade. This never shows a hidden
+     frame. ]]
+local alphaFades = _G.setmetatable({}, {__mode = "k"}) -- frame -> {from, to, time, elapsed}
+local alphaFadeDriver = _G.CreateFrame("Frame")
+local function AlphaFade_OnUpdate(driver, elapsed)
+    local active = false
+    for frame, fade in next, alphaFades do
+        fade.elapsed = fade.elapsed + elapsed
+        if fade.elapsed >= fade.time then
+            frame:SetAlpha(fade.to)
+            alphaFades[frame] = nil
+        else
+            frame:SetAlpha(fade.from + (fade.to - fade.from) * (fade.elapsed / fade.time))
+            active = true
+        end
+    end
+    if not active then
+        driver:SetScript("OnUpdate", nil)
+    end
+end
+function RealUI.FadeAlpha(frame, time, toAlpha)
+    local fromAlpha = frame:GetAlpha()
+    if RealUI.isSecret(fromAlpha) or time <= 0 or fromAlpha == toAlpha then
+        alphaFades[frame] = nil
+        frame:SetAlpha(toAlpha)
+        return
+    end
+    alphaFades[frame] = {from = fromAlpha, to = toAlpha, time = time, elapsed = 0}
+    alphaFadeDriver:SetScript("OnUpdate", AlphaFade_OnUpdate)
+end

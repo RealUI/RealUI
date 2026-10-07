@@ -339,7 +339,9 @@ end
 function RealUI:HideTutorial()
     RealUITutorial_HelpPlate_AnimateOut()
     _G.RealUITutorialButtonClose:Hide()
-    _G.UIFrameFadeOut(_G.RealUITutorialBG, 0.3, 0.5, 0)
+    -- RealUI.FadeAlpha: UIFrameFadeOut queues the frame in Blizzard's shared FADEFRAMES
+    _G.RealUITutorialBG:SetAlpha(0.5)
+    RealUI.FadeAlpha(_G.RealUITutorialBG, 0.3, 0)
     _G.RealUITutorialLogo:Hide()
     RealUI.Debug("Config", "HideTutorial")
     RealUI.LoadConfig("HuD")
