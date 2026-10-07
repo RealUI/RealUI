@@ -99,6 +99,12 @@ function CombatFader:SetFrameHidden(frame, hidden)
     end
 end
 
+--- Whether SetFrameHidden currently holds this frame, so a second owner
+--- (HuD test mode) can restore the hold it found instead of releasing it.
+function CombatFader:IsFrameHidden(frame)
+    return hiddenFrames[frame] == true
+end
+
 -- Determine new opacity values for frames
 function CombatFader:FadeFrames()
     self:debug("FadeFrames")

@@ -88,6 +88,9 @@ function RealUI:ToggleGridTestMode(show)
     return _G.RealUIGridConfiguring
 end
 
+-- Tracker alpha / CombatFader hold found on entering HuD test mode.
+local trackerTestHold
+
 function RealUI:HuDTestMode(isConfigMode)
     FramePoint:ToggleAll(not isConfigMode)
 
@@ -102,8 +105,31 @@ function RealUI:HuDTestMode(isConfigMode)
     -- Module ToggleConfigMode calls route through FramePoint:ToggleAll
     -- above (the old configModeModules table was never populated)
 
-    if not _G.ObjectiveTrackerFrame.collapsed then
-        _G.ObjectiveTrackerFrame:SetShown(not isConfigMode)
+    --[[ Objective tracker: faded, not hidden. SetShown from RealUI ran the
+         tracker's OnShow/OnHide (managed-container layout, UpdateHeight)
+         under RealUI taint (tracker taint doctrine R3). SetAlpha runs no
+         Blizzard layout; CombatFader is told to leave the alpha alone
+         meanwhile, as RealUI_Tracker's instance fade does (Context.lua). ]]
+    local tracker = _G.ObjectiveTrackerFrame
+    local CombatFader = RealUI:GetModule("CombatFader", true)
+    if isConfigMode and not trackerTestHold then
+        local alpha = tracker:GetAlpha()
+        trackerTestHold = {
+            alpha = RealUI.isSecret(alpha) and 1 or alpha,
+            faderHeld = CombatFader and CombatFader.IsFrameHidden and CombatFader:IsFrameHidden(tracker),
+        }
+        if CombatFader and CombatFader.SetFrameHidden then
+            CombatFader:SetFrameHidden(tracker, true)
+        end
+        tracker:SetAlpha(0)
+    elseif not isConfigMode and trackerTestHold then
+        tracker:SetAlpha(trackerTestHold.alpha)
+        -- Release CombatFader only if test mode took the hold (RealUI_Tracker's
+        -- instance fade may hold it too).
+        if not trackerTestHold.faderHeld and CombatFader and CombatFader.SetFrameHidden then
+            CombatFader:SetFrameHidden(tracker, false)
+        end
+        trackerTestHold = nil
     end
 
     -- Arena/Boss Frames
