@@ -433,12 +433,9 @@ local function LootOnClick(self)
         _G.HandleModifiedItemClick(_G.GetLootSlotLink(self:GetID()))
     else
         _G.StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")
-        _G.LootFrame.selectedLootButton = self
-        _G.LootFrame.selectedSlot = self:GetID()
-        _G.LootFrame.selectedQuality = self.quality
-        _G.LootFrame.selectedItemName = self.name:GetText()
-        _G.LootFrame.selectedTexture = self.icon:GetTexture()
-
+        -- The old master-loot `selected*` fields written onto Blizzard's
+        -- LootFrame are gone: nothing reads them in 12.x, and they were
+        -- plants on a Blizzard frame (tracker taint doctrine R1).
         _G.LootSlot(self:GetID())
     end
 end
