@@ -270,6 +270,7 @@ local chatFontScale = _G.setmetatable({}, {__mode = "k"}) -- chatFrame -> last s
 -- (Blizzard_Fonts_Shared/Shared/FontStyles.xml:314-322).
 local TOOLTIP_FONTS = {"GameTooltipHeaderText", "GameTooltipText", "GameTooltipTextSmall"}
 local tooltipBaseSize = {} -- font object name -> size before any RealUI scale
+local RefreshTooltipFontScale
 
 --- Apply font scale multiplier to chat frames and tooltips.
 -- @param scale number  The font scale multiplier (e.g. 1.0, 1.1, 1.3)
@@ -291,7 +292,11 @@ function DisplayPresets.RefreshFontScale(scale)
         end
     end
 
-    -- Tooltips: scale the font objects, from their stored base size
+    RefreshTooltipFontScale(scale)
+end
+
+-- Tooltips: scale the font objects, from their stored base size
+RefreshTooltipFontScale = function(scale)
     for _, fontName in ipairs(TOOLTIP_FONTS) do
         local fontObject = _G[fontName]
         if fontObject then
@@ -385,6 +390,8 @@ function DisplayPresets.Apply(id, hdrEnabled)
             local chatFrame = _G["ChatFrame" .. i]
             if chatFrame then
                 _G.FCF_SetChatWindowFontSize(nil, chatFrame, preset.chatFontSize)
+                -- Unscaled now, so RefreshFontScale below scales from it
+                chatFontScale[chatFrame] = 1
             end
         end
     end
@@ -499,29 +506,43 @@ function DisplayPresets.ApplyStored()
     end
 
     -- Apply cursor scale CVar
+    local chatFontSize
     if display.presetId then
         local preset = DisplayPresets.GetById(display.presetId)
         if preset then
             if preset.gameCursorScale then
                 _G.SetCVar("gameCursorScale", preset.gameCursorScale)
             end
-            -- Apply chat font size
-            if preset.chatFontSize then
-                _G.C_Timer.After(1, function()
-                    for i = 1, _G.NUM_CHAT_WINDOWS do
-                        local chatFrame = _G["ChatFrame" .. i]
-                        if chatFrame then
-                            _G.FCF_SetChatWindowFontSize(nil, chatFrame, preset.chatFontSize)
-                        end
-                    end
-                end)
-            end
+            chatFontSize = preset.chatFontSize
         end
     end
 
-    -- Apply stored font scale
-    if DisplayPresets.RefreshFontScale and display.fontScale and display.fontScale ~= 1.0 then
-        DisplayPresets.RefreshFontScale(display.fontScale)
+    --[[ Chat font at login, in one pass. This used to scale the chat windows
+         straight away (RefreshFontScale) and then, a second later, reset them
+         to the preset's unscaled size, so the scale was lost on chat and the
+         remembered scale no longer matched (the next slider change shrank the
+         font). Without a preset size it compounded instead: the scaled size is
+         saved by FCF_SetChatWindowFontSize (SetChatWindowSize), and every login
+         scaled the saved size again. Now: the preset size times the scale, or
+         the saved size left as it is, with the scale it carries remembered. ]]
+    local fontScale = display.fontScale or 1.0
+    if chatFontSize or fontScale ~= 1.0 then
+        _G.C_Timer.After(1, function()
+            for i = 1, _G.NUM_CHAT_WINDOWS do
+                local chatFrame = _G["ChatFrame" .. i]
+                if chatFrame then
+                    if chatFontSize then
+                        _G.FCF_SetChatWindowFontSize(nil, chatFrame, chatFontSize * fontScale)
+                    end
+                    chatFontScale[chatFrame] = fontScale
+                end
+            end
+        end)
+    end
+
+    -- Apply stored font scale to the tooltip fonts (not saved by the client)
+    if fontScale ~= 1.0 then
+        RefreshTooltipFontScale(fontScale)
     end
 
     -- Apply HDR / color mode via Aurora (guarded — Integration may not be ready)
