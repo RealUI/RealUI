@@ -62,6 +62,11 @@ end
 
 -- Standard quests against the cap, as the quest log counts them: no headers,
 -- hidden quests, world quests and bonus objectives (tasks) or emissaries.
+-- Recurring (daily/weekly) quests are left out too: a field log held 31 other
+-- quests plus 10 recurring, 41 against a cap of 35, so they cannot count.
+local classes = _G.Enum.QuestClassification
+-- -1 where the enum is missing, so a nil classification is not mistaken for it
+local RECURRING = classes and classes.Recurring or -1
 local function GetQuestCapacity()
     local getMax = _G.C_QuestLog.GetMaxNumQuestsCanAccept
     local max = getMax and getMax()
@@ -70,7 +75,8 @@ local function GetQuestCapacity()
     local count = 0
     for i = 1, _G.C_QuestLog.GetNumQuestLogEntries() do
         local info = _G.C_QuestLog.GetInfo(i)
-        if info and not info.isHeader and not info.isHidden and not info.isTask and not info.isBounty then
+        if info and not info.isHeader and not info.isHidden and not info.isTask and not info.isBounty
+            and info.questClassification ~= RECURRING then
             count = count + 1
         end
     end
