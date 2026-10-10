@@ -315,9 +315,26 @@ local function SilenceReplacedBars()
     end
 end
 
+-- Entering a vehicle, OverrideActionBar:UpdateMicroButtons reparents MicroMenu
+-- out of its parked container into the vehicle bar. While the container is
+-- parked, hand the menu straight back (SetParent only, no field writes);
+-- leaving the vehicle runs ResetMicroMenuPosition, which restores the layout.
+local microHooked
+local function KeepMicroMenuParked()
+    local container, menu = _G.MicroMenuContainer, _G.MicroMenu
+    if parkedFrames[container] and menu:GetParent() ~= container then
+        menu:SetParent(container)
+    end
+end
+
 function private.HideBlizzardBars()
     blizzHider = blizzHider or _G.CreateFrame("Frame", "RealUI_AB_BlizzHider", _G.UIParent)
     blizzHider:Hide()
+
+    if not microHooked and _G.OverrideActionBar and _G.MicroMenu then
+        microHooked = true
+        _G.hooksecurefunc(_G.OverrideActionBar, "UpdateMicroButtons", KeepMicroMenuParked)
+    end
 
     -- Before the reparent: a silenced bar has nothing left to run, so the
     -- parent swap cannot strand a handler mid-flight.
