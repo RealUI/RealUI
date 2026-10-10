@@ -23,8 +23,8 @@ local COMPETING_ADDONS = {
 
 function RealUI_Tracker:CheckForConflicts()
     for _, entry in ipairs(COMPETING_ADDONS) do
-        if C_AddOns.IsAddOnLoaded(entry.name) then
-            print("|cffff6600RealUI Tracker:|r disabled — conflicts with "
+        if _G.C_AddOns.IsAddOnLoaded(entry.name) then
+            _G.print("|cffff6600RealUI Tracker:|r disabled — conflicts with "
                 .. entry.display .. ". Uninstall it to use RealUI Tracker.")
             self:SetEnabledState(false)
             return true

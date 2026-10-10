@@ -411,18 +411,18 @@ function RealUI_Tracker:SetupConfig()
     if not RealUI_Core then return end
 
     -- If RealUI_Config is already loaded, inject on next frame
-    if C_AddOns.IsAddOnLoaded("RealUI_Config") then
-        C_Timer.After(0, InjectTrackerOptions)
+    if _G.C_AddOns.IsAddOnLoaded("RealUI_Config") then
+        _G.C_Timer.After(0, InjectTrackerOptions)
         return
     end
 
     -- Otherwise wait for RealUI_Config to load
-    local frame = CreateFrame("Frame")
+    local frame = _G.CreateFrame("Frame")
     frame:RegisterEvent("ADDON_LOADED")
     frame:SetScript("OnEvent", function(f, _, addonName)
         if addonName == "RealUI_Config" then
             f:UnregisterEvent("ADDON_LOADED")
-            C_Timer.After(0, InjectTrackerOptions)
+            _G.C_Timer.After(0, InjectTrackerOptions)
         end
     end)
 end
