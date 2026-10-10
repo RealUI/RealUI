@@ -1398,7 +1398,8 @@ function Infobar:CreateBlocks()
                             name = _G.UNKNOWN
                         end
 
-                        if characterName then
+                        -- App-only friends come back as "", which would print an empty "()"
+                        if characterName and characterName ~= "" then
                             if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
                                 name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
                             else
