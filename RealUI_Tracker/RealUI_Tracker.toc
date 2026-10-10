@@ -14,7 +14,6 @@
 Libs\Libs.xml
 
 RealUI_Tracker.lua
-Templates.xml
 Container.lua
 Context.lua
 Display.lua

@@ -2,26 +2,6 @@ local ADDON_NAME, private = ...
 local RealUI_Tracker = LibStub("AceAddon-3.0"):GetAddon(ADDON_NAME)
 
 ---------------------------------------------------------
--- Template assignment (Task 10)
----------------------------------------------------------
-
--- Each Blizzard tracker module uses its own specialized block/line templates
--- with required mixins (e.g. QuestObjectiveTracker uses
--- ObjectiveTrackerQuestPOIBlockTemplate which provides SetPOIInfo).
--- Overriding these with a generic base template breaks the mixin chain and
--- causes nil-call errors. Instead, visual tweaks are applied via post-hooks
--- on the existing templates. The custom XML templates (Templates.xml) are
--- defined but not assigned — they serve as a future extension point if
--- Aurora provides compatible template overrides.
-
-local function AssignTemplates()
-    -- Intentional no-op: template assignment is deferred until Aurora
-    -- provides RealUI-compatible tracker templates that inherit from
-    -- the correct per-module base templates (ObjectiveTrackerQuestPOIBlockTemplate,
-    -- ObjectiveTrackerAnimLineTemplate, QuestObjectiveLineTemplate, etc.).
-end
-
----------------------------------------------------------
 -- Quest count in module headers (Task 11)
 ---------------------------------------------------------
 
@@ -77,50 +57,13 @@ local function UpdateModuleHeader(module)
 end
 
 ---------------------------------------------------------
--- Quest difficulty coloring (Task 12)
----------------------------------------------------------
-
--- Hook LayoutBlock on quest modules to color headers by difficulty.
--- LayoutBlock is called after the block is fully populated (SetHeader,
--- AddObjective, SetPOIInfo have all run), so the HeaderText is set.
--- Because hooksecurefunc chains later hooks after earlier ones, and
--- RealUI_Tracker loads after Aurora (OptionalDep), our hook runs AFTER
--- Aurora's hooks. Our difficulty color overrides Aurora's header color,
--- which is the correct behavior per requirement 7.4.
---
--- tracker-widget-taint-rewrite 5.4: SetTextColor on the block's existing
--- HeaderText is an in-place restyle (doctrine R3), kept. On WoW Forever the
--- client colours quest titles by difficulty natively, so this overlaps
--- Blizzard's own colour there (not checked against the Forever source).
-local QUEST_MODULES = {
-    _G.QuestObjectiveTracker,
-    _G.CampaignQuestObjectiveTracker,
-}
-
-local function HookDifficultyColoring()
-    for _, module in ipairs(QUEST_MODULES) do
-        hooksecurefunc(module, "LayoutBlock", function(self, block)
-            if not RealUI_Tracker.db.profile.display.difficultyColor then return end
-            local questID = tonumber(block.id)
-            if not questID then return end
-            local level = C_QuestLog.GetQuestDifficultyLevel(questID)
-            if not level or level == 0 then return end
-            local color = GetQuestDifficultyColor(level)
-            if block.HeaderText and color then
-                block.HeaderText:SetTextColor(color.r, color.g, color.b)
-            end
-        end)
-    end
-end
-
----------------------------------------------------------
 -- Setup / Cleanup (called from RealUI_Tracker.lua)
 ---------------------------------------------------------
 
+-- 2026-10-10: the template assignment (a no-op, its XML templates never
+-- used) and the difficulty colour (retail scales most quests to the
+-- player's level; Forever colours titles natively) are gone.
 function RealUI_Tracker:SetupDisplay()
-    -- Template assignment is a no-op for now (see comment above)
-    AssignTemplates()
-
     -- Hook each module's Update method to inject quest counts into headers.
     -- These hooks fire whenever the tracker refreshes (quest add/remove/complete),
     -- so counts update live without additional event registration.
@@ -129,9 +72,6 @@ function RealUI_Tracker:SetupDisplay()
             UpdateModuleHeader(moduleSelf)
         end)
     end
-
-    -- Hook LayoutBlock on quest modules for difficulty coloring
-    HookDifficultyColoring()
 
     private.displaySetUp = true
 end

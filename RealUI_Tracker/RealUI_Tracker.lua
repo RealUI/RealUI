@@ -41,7 +41,7 @@ function RealUI_Tracker:OnInitialize()
                     scenario = false,
                 },
                 -- D2: the per-instance module collapse (collapse /
-                -- collapseModules) is dropped; DropContextCollapse cleans it
+                -- collapseModules) is dropped; DropRemovedSettings cleans it
                 -- out of saved profiles.
             },
             combatFade = {
@@ -55,9 +55,7 @@ function RealUI_Tracker:OnInitialize()
                 },
             },
             display = {
-                questCount      = true,
-                difficultyColor = true,
-                wrapText        = false,
+                questCount = true,
             },
         },
         global = {
@@ -68,8 +66,8 @@ function RealUI_Tracker:OnInitialize()
     -- Task 8.4: Run ObjectivesAdv migration after AceDB:New() has populated defaults
     self:MigrateFromObjectivesAdv()
 
-    -- tracker-widget-taint-rewrite D2: remove the dropped collapse settings
-    self:DropContextCollapse()
+    -- Remove settings whose features are gone (collapse D2, display trim)
+    self:DropRemovedSettings()
 end
 
 function RealUI_Tracker:OnEnable()
@@ -91,14 +89,11 @@ function RealUI_Tracker:PLAYER_LOGIN()
     -- 5.4: Set up context hide — registers PLAYER_ENTERING_WORLD
     self:SetupContext()
 
-    -- 10.3 / 11.3 / 12.1: Set up display hooks (templates, quest count, difficulty color)
+    -- 11.3: Set up the quest count hooks
     self:SetupDisplay()
 
     -- 6.1–6.3: Set up CombatFader integration
     self:SetupCombatFader()
-
-    -- 5.5: Disable the deprecated ObjectivesAdv module
-    self:DisableObjectivesAdv()
 
     -- 14.2: Set up config panel (inject into RealUI options tree)
     self:SetupConfig()
@@ -133,20 +128,6 @@ function RealUI_Tracker:CleanupCombatFader()
         RealUI_Core.modules["RealUI_Tracker"] = nil
     end
     private.combatFaderSetUp = false
-end
-
----------------------------------------------------------
--- ObjectivesAdv deprecation (Task 5.5)
----------------------------------------------------------
-
-function RealUI_Tracker:DisableObjectivesAdv()
-    local RealUI_Core = _G.RealUI
-    if not RealUI_Core then return end
-    local ObjectivesAdv = RealUI_Core:GetModule("Objectives Adv.", true)
-    if ObjectivesAdv then
-        ObjectivesAdv:SetEnabledState(false)
-        ObjectivesAdv:OnDisable()
-    end
 end
 
 ---------------------------------------------------------

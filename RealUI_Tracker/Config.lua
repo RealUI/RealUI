@@ -50,13 +50,17 @@ function RealUI_Tracker:MigrateFromObjectivesAdv()
     self.db.global.migratedFromObjectivesAdv = true
 end
 
--- tracker-widget-taint-rewrite D2, 2026-10-05: the per-instance module
--- collapse is gone. It called SetCollapsed on the tracker modules from RealUI
--- code, which writes Blizzard's `isCollapsed` and schedules the tracker's
--- layout under RealUI taint; there is no clean version of it. Remove the
--- saved settings from every profile (the defaults no longer carry them). The
--- per-instance hide settings stay and run in the default Faded mode.
-function RealUI_Tracker:DropContextCollapse()
+-- Remove saved settings whose features are gone, from every profile (the
+-- defaults no longer carry them).
+--  * tracker-widget-taint-rewrite D2, 2026-10-05: the per-instance module
+--    collapse. It called SetCollapsed on the tracker modules from RealUI
+--    code, which writes Blizzard's `isCollapsed` and schedules the tracker's
+--    layout under RealUI taint; there is no clean version of it. The
+--    per-instance hide settings stay and run as a fade.
+--  * 2026-10-10: difficulty colour (retail scales most quests to the
+--    player's level, and Forever colours titles natively) and Wrap Text,
+--    which nothing ever read.
+function RealUI_Tracker:DropRemovedSettings()
     local profiles = self.db.sv and self.db.sv.profiles
     if not profiles then return end
     for _, profile in pairs(profiles) do
@@ -66,6 +70,11 @@ function RealUI_Tracker:DropContextCollapse()
             ctx.collapseModules = nil
             -- The opt-in Hidden mode was dropped the next day (D1).
             ctx.hideMode = nil
+        end
+        local display = profile.display
+        if display then
+            display.difficultyColor = nil
+            display.wrapText = nil
         end
     end
 end
@@ -234,22 +243,6 @@ local function BuildTrackerOptions()
             set = function(_, value) db.display.questCount = value end,
             order = 1,
         },
-        difficultyColor = {
-            name = "Difficulty Color",
-            desc = "Color quest headers by quest difficulty level.",
-            type = "toggle",
-            get = function() return db.display.difficultyColor end,
-            set = function(_, value) db.display.difficultyColor = value end,
-            order = 2,
-        },
-        wrapText = {
-            name = "Wrap Text",
-            desc = "Allow objective text to wrap to multiple lines.",
-            type = "toggle",
-            get = function() return db.display.wrapText end,
-            set = function(_, value) db.display.wrapText = value end,
-            order = 3,
-        },
     }
 
     ---------------------------------------------------------------------------
@@ -267,7 +260,7 @@ local function BuildTrackerOptions()
                 order = 0,
             },
             desc = {
-                name = "Enhanced objective tracker with per-instance hiding, combat fading, and display improvements.",
+                name = "Fades Blizzard's objective tracker in combat and in chosen instance types, and counts what each section tracks.",
                 type = "description",
                 fontSize = "medium",
                 order = 1,
