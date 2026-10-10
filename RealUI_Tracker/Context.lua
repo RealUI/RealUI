@@ -61,10 +61,10 @@ end
 -- Whether the current instance asks for the fade.
 local function InstanceWanted(ctx)
     if not ctx.enabled then return false end
-    local _, instanceType = GetInstanceInfo()
+    local _, instanceType = _G.GetInstanceInfo()
     if instanceType == "none" or not ctx.hide[instanceType] then return false end
     -- 4.7: Garrison maps always bypass the hide
-    if C_Garrison.IsOnGarrisonMap() then return false end
+    if _G.C_Garrison.IsOnGarrisonMap() then return false end
     return true
 end
 
@@ -115,7 +115,7 @@ end
 
 -- A RealUI-owned driver reads whether the mouse is over the tracker. Nothing
 -- is hooked on the tracker itself (doctrine rules 1 and 6).
-local driver = CreateFrame("Frame")
+local driver = _G.CreateFrame("Frame")
 local sinceLastPoll, lastOver = 0, 0
 
 local function Driver_OnUpdate(_, elapsed)
@@ -123,7 +123,7 @@ local function Driver_OnUpdate(_, elapsed)
     if sinceLastPoll < POLL_INTERVAL then return end
     sinceLastPoll = 0
 
-    local now = GetTime()
+    local now = _G.GetTime()
     local tracker = _G.ObjectiveTrackerFrame
     if tracker:IsShown() and tracker:IsMouseOver() then
         lastOver = now
@@ -155,7 +155,7 @@ end
 
 function RealUI_Tracker:PLAYER_ENTERING_WORLD()
     inEncounter = _G.IsEncounterInProgress() and true or false
-    inCombat = InCombatLockdown() and true or false
+    inCombat = _G.InCombatLockdown() and true or false
     self:UpdateState()
 end
 

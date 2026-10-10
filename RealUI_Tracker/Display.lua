@@ -63,13 +63,13 @@ end
 -- Standard quests against the cap, as the quest log counts them: no headers,
 -- hidden quests, world quests and bonus objectives (tasks) or emissaries.
 local function GetQuestCapacity()
-    local getMax = C_QuestLog.GetMaxNumQuestsCanAccept
+    local getMax = _G.C_QuestLog.GetMaxNumQuestsCanAccept
     local max = getMax and getMax()
     if not max or max <= 0 then return end
 
     local count = 0
-    for i = 1, C_QuestLog.GetNumQuestLogEntries() do
-        local info = C_QuestLog.GetInfo(i)
+    for i = 1, _G.C_QuestLog.GetNumQuestLogEntries() do
+        local info = _G.C_QuestLog.GetInfo(i)
         if info and not info.isHeader and not info.isHidden and not info.isTask and not info.isBounty then
             count = count + 1
         end
@@ -134,7 +134,7 @@ local function ColorBlockHeader(block)
     if not text then return end
     local questID = tonumber(block.id)
     local ready = questID and RealUI_Tracker.db.profile.display.turnInColor
-        and C_QuestLog.IsComplete(questID)
+        and _G.C_QuestLog.IsComplete(questID)
     -- Hovered: Blizzard's highlight colour wins.
     local color = (ready and not block.isHighlighted) and TURN_IN_COLOR or text.colorStyle
     if color then
@@ -168,25 +168,25 @@ function RealUI_Tracker:SetupDisplay()
     -- These hooks fire whenever the tracker refreshes (quest add/remove/complete),
     -- so counts update live without additional event registration.
     for _, module in ipairs(HEADER_MODULES) do
-        hooksecurefunc(module, "Update", function(moduleSelf)
+        _G.hooksecurefunc(module, "Update", function(moduleSelf)
             UpdateModuleHeader(moduleSelf)
         end)
     end
 
     -- Capacity: after every container update, and on quest log changes that
     -- do not touch the tracker (accepting or abandoning an untracked quest).
-    hooksecurefunc(_G.ObjectiveTrackerFrame, "Update", UpdateContainerHeader)
-    local events = CreateFrame("Frame")
+    _G.hooksecurefunc(_G.ObjectiveTrackerFrame, "Update", UpdateContainerHeader)
+    local events = _G.CreateFrame("Frame")
     events:RegisterEvent("QUEST_LOG_UPDATE")
     events:SetScript("OnEvent", UpdateContainerHeader)
 
     -- Turn-in colour: after each block is laid out (cached blocks included),
     -- and after the hover highlight ends.
     for _, module in ipairs(QUEST_MODULES) do
-        hooksecurefunc(module, "LayoutBlock", function(_, block)
+        _G.hooksecurefunc(module, "LayoutBlock", function(_, block)
             ColorBlockHeader(block)
         end)
-        hooksecurefunc(module, "OnBlockHeaderLeave", function(_, block)
+        _G.hooksecurefunc(module, "OnBlockHeaderLeave", function(_, block)
             ColorBlockHeader(block)
         end)
     end

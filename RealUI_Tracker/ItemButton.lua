@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME = ...
 local RealUI_Tracker = LibStub("AceAddon-3.0"):GetAddon(ADDON_NAME)
 
 --[[ Quest item button (2026-10-10).
@@ -35,11 +35,11 @@ local pending = false
 
 -- The quest's usable item, if it should be offered now.
 local function GetQuestItem(questID)
-    local logIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+    local logIndex = _G.C_QuestLog.GetLogIndexForQuestID(questID)
     if not logIndex then return end
     local link, _, _, showWhenComplete = _G.GetQuestLogSpecialItemInfo(logIndex)
     if not link then return end
-    if C_QuestLog.IsComplete(questID) and not showWhenComplete then return end
+    if _G.C_QuestLog.IsComplete(questID) and not showWhenComplete then return end
     return link
 end
 
@@ -47,19 +47,19 @@ end
 -- continent. The whole log is searched, so bonus objectives and world quests
 -- the player is on count too.
 local function FindItem()
-    local superID = C_SuperTrack.GetSuperTrackedQuestID()
+    local superID = _G.C_SuperTrack.GetSuperTrackedQuestID()
     if superID and superID ~= 0 then
         local link = GetQuestItem(superID)
         if link then return link end
     end
 
     local bestLink, bestDist
-    for i = 1, C_QuestLog.GetNumQuestLogEntries() do
-        local info = C_QuestLog.GetInfo(i)
+    for i = 1, _G.C_QuestLog.GetNumQuestLogEntries() do
+        local info = _G.C_QuestLog.GetInfo(i)
         if info and not info.isHeader and info.questID then
             local link = GetQuestItem(info.questID)
             if link then
-                local distSq, onContinent = C_QuestLog.GetDistanceSqToQuest(info.questID)
+                local distSq, onContinent = _G.C_QuestLog.GetDistanceSqToQuest(info.questID)
                 if onContinent and distSq and (not bestDist or distSq < bestDist) then
                     bestLink, bestDist = link, distSq
                 end
@@ -83,7 +83,7 @@ end
 
 local function UpdateCooldown()
     if not (button and button.itemID) then return end
-    local start, duration, enable = C_Container.GetItemCooldown(button.itemID)
+    local start, duration, enable = _G.C_Container.GetItemCooldown(button.itemID)
     if IsReadable(start, duration, enable) then
         _G.CooldownFrame_Set(button.cooldown, start, duration, enable)
     end
@@ -91,7 +91,7 @@ end
 
 local function UpdateCount()
     if not (button and button.itemID) then return end
-    local count = C_Item.GetItemCount(button.itemID)
+    local count = _G.C_Item.GetItemCount(button.itemID)
     button.count:SetText((count and count > 1) and count or "")
 end
 
@@ -119,7 +119,7 @@ end
 
 local function Update()
     if not button then return end
-    if InCombatLockdown() then
+    if _G.InCombatLockdown() then
         pending = true
         return
     end
@@ -130,10 +130,10 @@ local function Update()
     currentLink = link
 
     if link then
-        local itemID = C_Item.GetItemInfoInstant(link)
+        local itemID = _G.C_Item.GetItemInfoInstant(link)
         button.itemID = itemID
         button:SetAttribute("item", "item:" .. itemID)
-        button.icon:SetTexture(C_Item.GetItemIconByID(itemID))
+        button.icon:SetTexture(_G.C_Item.GetItemIconByID(itemID))
         UpdateCooldown()
         UpdateCount()
         button:Show()
@@ -149,7 +149,7 @@ local queued = false
 local function QueueUpdate()
     if queued then return end
     queued = true
-    C_Timer.After(0.2, function()
+    _G.C_Timer.After(0.2, function()
         queued = false
         Update()
     end)
@@ -159,7 +159,7 @@ end
 function RealUI_Tracker:RefreshItemButton()
     if not button then return end
     currentLink = false -- force a re-apply
-    if not InCombatLockdown() then
+    if not _G.InCombatLockdown() then
         ApplyPosition()
     end
     Update()
@@ -187,7 +187,7 @@ local function OnLeave()
 end
 
 local function OnDragStart(self)
-    if InCombatLockdown() then return end
+    if _G.InCombatLockdown() then return end
     self:StartMoving()
 end
 
@@ -199,7 +199,7 @@ local function OnDragStop(self)
 end
 
 local function CreateButton()
-    button = CreateFrame("Button", BUTTON_NAME, _G.UIParent, "SecureActionButtonTemplate")
+    button = _G.CreateFrame("Button", BUTTON_NAME, _G.UIParent, "SecureActionButtonTemplate")
     button:SetSize(BUTTON_SIZE, BUTTON_SIZE)
     button:SetFrameStrata("MEDIUM")
     button:SetClampedToScreen(true)
@@ -222,7 +222,7 @@ local function CreateButton()
     icon:SetAllPoints()
     button.icon = icon
 
-    local cooldown = CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
+    local cooldown = _G.CreateFrame("Cooldown", nil, button, "CooldownFrameTemplate")
     cooldown:SetAllPoints()
     button.cooldown = cooldown
 
@@ -280,12 +280,12 @@ function RealUI_Tracker:SetupItemButton()
     CreateButton()
     UpdateHotkey()
 
-    local events = CreateFrame("Frame")
+    local events = _G.CreateFrame("Frame")
     for _, event in ipairs(EVENTS) do
         events:RegisterEvent(event)
     end
     events:SetScript("OnEvent", OnEvent)
 
-    C_Timer.NewTicker(UPDATE_INTERVAL, Update)
+    _G.C_Timer.NewTicker(UPDATE_INTERVAL, Update)
     Update()
 end

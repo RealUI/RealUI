@@ -1,4 +1,4 @@
-local ADDON_NAME, private = ...
+local ADDON_NAME = ...
 local RealUI_Tracker = LibStub("AceAddon-3.0"):GetAddon(ADDON_NAME)
 
 --[[ Wowhead link in the quest right-click menus (2026-10-10).
@@ -28,7 +28,7 @@ local function CreateDialog()
     -- without it.
     local Aurora = _G.Aurora
     local hasAurora = Aurora and Aurora.Base
-    dialog = CreateFrame("Frame", nil, _G.UIParent, not hasAurora and "BackdropTemplate" or nil)
+    dialog = _G.CreateFrame("Frame", nil, _G.UIParent, not hasAurora and "BackdropTemplate" or nil)
     dialog:SetSize(380, 86)
     dialog:SetPoint("CENTER", 0, 200)
     dialog:SetFrameStrata("DIALOG")
@@ -48,13 +48,13 @@ local function CreateDialog()
     title:SetWordWrap(false)
     dialog.title = title
 
-    local close = CreateFrame("Button", nil, dialog, "UIPanelCloseButton")
+    local close = _G.CreateFrame("Button", nil, dialog, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", 0, 0)
     if Aurora and Aurora.Skin and Aurora.Skin.UIPanelCloseButton then
         Aurora.Skin.UIPanelCloseButton(close)
     end
 
-    local editBox = CreateFrame("EditBox", nil, dialog, "InputBoxTemplate")
+    local editBox = _G.CreateFrame("EditBox", nil, dialog, "InputBoxTemplate")
     editBox:SetPoint("TOPLEFT", 16, -32)
     editBox:SetPoint("TOPRIGHT", -12, -32)
     editBox:SetHeight(20)
@@ -81,7 +81,7 @@ end
 local function ShowURL(questID)
     if not dialog then CreateDialog() end
     dialog.url = URL_FORMAT:format(questID)
-    dialog.title:SetText(C_QuestLog.GetTitleForQuestID(questID) or ("Quest " .. questID))
+    dialog.title:SetText(_G.C_QuestLog.GetTitleForQuestID(questID) or ("Quest " .. questID))
     dialog:Show()
     dialog.editBox:SetText(dialog.url)
     dialog.editBox:SetFocus()
@@ -95,7 +95,7 @@ end
 -- A quest ID the client knows, or nil.
 local function ValidQuestID(id)
     id = tonumber(id)
-    if id and id > 0 and C_QuestLog.GetTitleForQuestID(id) then
+    if id and id > 0 and _G.C_QuestLog.GetTitleForQuestID(id) then
         return id
     end
 end
