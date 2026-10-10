@@ -17,4 +17,6 @@ RealUI_Tracker.lua
 Container.lua
 Context.lua
 Display.lua
+ItemButton.lua
+Wowhead.lua
 Config.lua

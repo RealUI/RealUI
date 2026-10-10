@@ -138,6 +138,42 @@ local function BuildTrackerOptions()
             type = "description",
             order = 5,
         },
+        bossFade = {
+            name = "Fade during boss fights",
+            desc = "Fade the tracker out from the pull until the encounter ends, in any instance or in the "
+                .. "open world. Not during a Mythic+ keystone, where the tracker holds the timer.",
+            type = "toggle",
+            width = "full",
+            get = function() return db.context.bossFade end,
+            set = function(_, value) db.context.bossFade = value; RealUI_Tracker:UpdateState() end,
+            order = 30,
+        },
+        mouseover = {
+            name = "Mouseover reveal",
+            type = "group",
+            inline = true,
+            order = 40,
+            args = {
+                enabled = {
+                    name = "Enabled",
+                    desc = "Out of combat, keep the tracker faded until the mouse is over it.",
+                    type = "toggle",
+                    get = function() return db.mouseover.enabled end,
+                    set = function(_, value) db.mouseover.enabled = value; RealUI_Tracker:UpdateMouseover() end,
+                    order = 1,
+                },
+                alpha = {
+                    name = "Faded opacity",
+                    type = "range",
+                    isPercent = true,
+                    min = 0, max = 1, step = 0.05,
+                    get = function() return db.mouseover.alpha end,
+                    set = function(_, value) db.mouseover.alpha = value; RealUI_Tracker:UpdateMouseover() end,
+                    disabled = function() return not db.mouseover.enabled end,
+                    order = 2,
+                },
+            },
+        },
         hideHeader = {
             name = "Hide tracker in:",
             type = "description",
@@ -243,6 +279,68 @@ local function BuildTrackerOptions()
             set = function(_, value) db.display.questCount = value end,
             order = 1,
         },
+        questCapacity = {
+            name = "Quest Log Capacity",
+            desc = "Show how full the quest log is in the tracker's top header, e.g. 12/35. "
+                .. "Orange within three of the limit, red when full.",
+            type = "toggle",
+            get = function() return db.display.questCapacity end,
+            set = function(_, value)
+                db.display.questCapacity = value
+                RealUI_Tracker.UpdateContainerHeader()
+            end,
+            order = 2,
+        },
+        turnInColor = {
+            name = "Turn-in Color",
+            desc = "Show the titles of quests that are ready to turn in in green.",
+            type = "toggle",
+            get = function() return db.display.turnInColor end,
+            set = function(_, value)
+                db.display.turnInColor = value
+                RealUI_Tracker:RefreshTurnInColor()
+            end,
+            order = 3,
+        },
+        wowheadLink = {
+            name = "Wowhead Link",
+            desc = "Add \"Wowhead link\" to the quest right-click menu in the tracker and the quest log.",
+            type = "toggle",
+            get = function() return db.display.wowheadLink end,
+            set = function(_, value) db.display.wowheadLink = value end,
+            order = 4,
+        },
+    }
+
+    ---------------------------------------------------------------------------
+    -- Item Button section
+    ---------------------------------------------------------------------------
+    local itemButtonArgs = {
+        enabled = {
+            name = "Enabled",
+            desc = "Show a button for the usable item of the nearest quest, or of the super-tracked quest when it has one.",
+            type = "toggle",
+            width = "full",
+            get = function() return db.itemButton.enabled end,
+            set = function(_, value)
+                db.itemButton.enabled = value
+                RealUI_Tracker:RefreshItemButton()
+            end,
+            order = 1,
+        },
+        note = {
+            name = "Left-click or the key binding uses the item. Right-drag moves the button. Set the key "
+                .. "under Key Bindings > AddOns > RealUI Tracker. Changes made in combat apply when combat ends.",
+            type = "description",
+            order = 2,
+        },
+        reset = {
+            name = "Reset position",
+            type = "execute",
+            func = function() RealUI_Tracker:ResetItemButtonPosition() end,
+            disabled = function() return not db.itemButton.enabled end,
+            order = 3,
+        },
     }
 
     ---------------------------------------------------------------------------
@@ -260,7 +358,7 @@ local function BuildTrackerOptions()
                 order = 0,
             },
             desc = {
-                name = "Fades Blizzard's objective tracker in combat and in chosen instance types, and counts what each section tracks.",
+                name = "Fades Blizzard's objective tracker in combat, boss fights and chosen instance types, adds a quest item button, and shows quest counts, quest log capacity and quests ready to turn in.",
                 type = "description",
                 fontSize = "medium",
                 order = 1,
@@ -282,6 +380,12 @@ local function BuildTrackerOptions()
                 type = "group",
                 order = 40,
                 args = displayArgs,
+            },
+            itemButton = {
+                name = "Item Button",
+                type = "group",
+                order = 50,
+                args = itemButtonArgs,
             },
         },
     }

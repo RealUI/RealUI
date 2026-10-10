@@ -43,6 +43,15 @@ function RealUI_Tracker:OnInitialize()
                 -- D2: the per-instance module collapse (collapse /
                 -- collapseModules) is dropped; DropRemovedSettings cleans it
                 -- out of saved profiles.
+                -- Fade during boss encounters, in or out of instances, except
+                -- in a running keystone (the tracker holds its timer).
+                bossFade = true,
+            },
+            -- Out of combat, hold the tracker at `alpha` until the mouse is
+            -- over it.
+            mouseover = {
+                enabled = false,
+                alpha   = 0.25,
             },
             combatFade = {
                 enabled  = true,
@@ -55,7 +64,15 @@ function RealUI_Tracker:OnInitialize()
                 },
             },
             display = {
-                questCount = true,
+                questCount    = true,
+                questCapacity = true,
+                turnInColor   = true,
+                wowheadLink   = true,
+            },
+            itemButton = {
+                enabled = true,
+                -- Relative to UIParent; nil until the player moves it.
+                point = nil,
             },
         },
         global = {
@@ -89,8 +106,12 @@ function RealUI_Tracker:PLAYER_LOGIN()
     -- 5.4: Set up context hide — registers PLAYER_ENTERING_WORLD
     self:SetupContext()
 
-    -- 11.3: Set up the quest count hooks
+    -- 11.3: Set up the header hooks (quest count, capacity, turn-in colour)
     self:SetupDisplay()
+
+    -- Quest item button (ItemButton.lua) and the Wowhead menu entry (Wowhead.lua)
+    self:SetupItemButton()
+    self:SetupWowhead()
 
     -- 6.1–6.3: Set up CombatFader integration
     self:SetupCombatFader()
