@@ -26,8 +26,15 @@ AlertFrameHolder:SetPoint("TOP", _G.UIParent, "TOP", 0, -18)
      re-anchors the active alert frames after Blizzard has placed them. Nothing
      is written onto Blizzard objects, and Blizzard's execution continues
      secure after the hook returns. Externally anchored subsystems (talking
-     head, group loot) are simply not chained, as the old blacklist did. ]]
-local alertPoint, alertRelPoint, alertYofs = "TOP", "BOTTOM", -10
+     head, group loot) are simply not chained, as the old blacklist did.
+
+     Only the BOTTOM point is used. Blizzard's AdjustAnchors re-chains with
+     SetPoint("BOTTOM", ...) and no ClearAllPoints, so a TOP point left by
+     this hook survived its next pass; with the pool's pairs() order changed,
+     the stale TOP and the new BOTTOM formed a loop ("Cannot anchor to a
+     region dependent on it", many alerts at once). A single BOTTOM point is
+     replaced outright by Blizzard's, so its pass always starts clean. ]]
+local alertGap = 10
 local function UpdateAnchors(container)
     AlertFrameMove:debug("UpdateAnchors")
     local relativeAlert = AlertFrameHolder
@@ -35,8 +42,9 @@ local function UpdateAnchors(container)
         local pool = alertFrameSubSystem.alertFramePool
         if pool then
             for alertFrame in pool:EnumerateActive() do
+                -- Top edge alertGap below the previous bottom edge.
                 alertFrame:ClearAllPoints()
-                alertFrame:SetPoint(alertPoint, relativeAlert, alertRelPoint, 0, alertYofs)
+                alertFrame:SetPoint("BOTTOM", relativeAlert, "BOTTOM", 0, -(alertGap + alertFrame:GetHeight()))
                 relativeAlert = alertFrame
             end
         end
