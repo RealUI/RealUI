@@ -75,7 +75,7 @@ externals:
     # rewrites it to "latest" (newest Aurora tag, nightly or release).
     RealUI_Skins/Aurora:
         url: https://github.com/RealUI/Aurora.git
-        tag: 12.1.0.13
+        tag: 12.1.0.14
     RealUI_Skins/Libs/LibSharedMedia-3.0:
         url: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
         tag: latest
