@@ -9,7 +9,7 @@ Information
 -----------
 
 * Supports retail WoW (Midnight, 12.1.x) and the WoW Forever beta (1.60.x) from the same download.
-* Current release is 4.1.1 (Aurora 12.1.0.13).
+* Current release is 4.2.0 (Aurora 12.1.0.14).
 * As of 4.0.0 the package contains **only RealUI's own addons** — no bundled third-party
   addons (standard embedded libraries such as Ace3, oUF, LibActionButton, and
   LibSharedMedia are still included, as in any addon). See "Recommended optional
@@ -17,6 +17,32 @@ Information
 * RealUI includes the modernized setup pipeline, unified profile handling, and display setup stage.
 * User settings are automatically migrated from nibRealUIDB to RealUIDB when needed.
 * Report issues on GitHub or connect with us on Discord.
+
+What's New in 4.2.0
+--------------------
+
+**If you upgraded from an earlier version, run `/realui newdefaults`**: profiles that saved "Cast by me"
+for target debuffs are offered the new default there.
+
+* **Nameplate debuffs show the ones that matter to your class**, the rule Blizzard's own nameplates use,
+  so the rows are shorter on purpose. "All mine" brings the old rows back; Always show and Never show
+  lists take spell IDs or spellbook names. The HuD target frame's debuffs default to the same rule.
+* **Action bar page numbering:** each profile can number its pages like Bartender4 (the default) or
+  like Blizzard. The install wizard's Action Bar Layout step offers the choice.
+* **Auto-repair on the Durability block:** the tooltip shows the auto-repair setting, the estimated
+  cost and the last repair; Shift + Left Click on the block toggles auto-repair.
+* **Objective tracker** (`/realadv` → Tracker): a quest item button with a key binding, a fade during
+  boss fights (not in a Mythic+ keystone), quest log capacity in the top header, green titles for quests
+  ready to turn in, a "Wowhead link" entry in the quest right-click menus, and an optional mouseover
+  reveal.
+* **No more tracker taint.** The `GetAuraDataByIndex()` error in delves and LFR came from addon code
+  tainting the tracker; the sources in RealUI and Aurora are removed, and the tracker and world-event
+  bars are skinned again, restyled in place. A few frames keep Blizzard's look, or a plainer one, on
+  purpose.
+* **Colour modes:** all five of Aurora's colour modes, including the colour-blind ones, are in
+  `/realadv` → Skins → Appearance, and the Skins colour pickers follow the mode until you change them.
+* **The inspect window closes when you change target,** as Blizzard's does. The old bundled InspectFix
+  is removed; on WoW Forever it blocked Inspect Talents.
 
 What's New in 4.1.1
 --------------------
@@ -145,6 +171,7 @@ After first login, these are the most useful commands:
 * `/realui setup` - rerun setup flow.
 * `/realui display` - open display preset setup.
 * `/realui newdefaults` - review defaults that changed since 3.4.0 (upgrades only).
+* `/realadv` → Tracker - objective tracker fades, quest item button and display options.
 * `/rab` - action bar settings; `/rab bind` - hover keybind mode; `/naga` - toggle the Naga bar.
 * `/rnp` - nameplate settings (also in `/realui` → Nameplates).
 * `/realui setupauras` - apply RealUI_Auras cooldown presets for your current spec.
@@ -229,6 +256,7 @@ Supported `/realui` subcommands:
 * `/realui editmode` - list the Edit Mode layout backup taken before a layout update;
   `/realui editmode restore` puts your saved layout back.
 * `/realui editmode reset` - rebuild both RealUI Edit Mode layouts from the template.
+* `/realui grid [spacing]` - toggle a screen alignment grid for placing frames by hand.
 * `/realui resetall` - wipe every RealUI setting for every character (no prompt).
 
 RealUI_ActionBars:
@@ -271,6 +299,10 @@ Things that are easy to miss:
   layout, so adjust the one you are currently in.
 * **Display Setup** (`/realui display`) sets UI scale, font size, and element scaling from a
   preset matched to your resolution. Re-run it if you change monitors or resolution.
+* **Quest item button.** Bind a key to "Use nearest quest item" under Key Bindings → AddOns →
+  RealUI Tracker. The button uses the super-tracked quest's item first, otherwise the nearest one;
+  right-drag moves it.
+* **Durability block:** Shift + Left Click toggles auto-repair.
 
 Packaged AddOns
 ---------------
