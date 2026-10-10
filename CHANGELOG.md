@@ -78,7 +78,7 @@ Aurora goes from 12.1.0.13 to 12.1.0.14.
   * RealUI_Auras groups with **Check Time Left** on use the old renderer and can go empty in combat on target, focus and similar units while the game keeps their auras secret
   * Joining a battleground can log `C_PvP.GetHonorRewardInfo` errors from the scoreboard; under investigation
   * `UnitName("player")` returns the full name on Forever while `UnitName("target")` does not; Blizzard says the final behaviour is not settled
-  * On Forever, unit frames, group frames, action bars, nameplates, the group finder and the config have been checked in game; the tracker, infobar, inventory, tooltips and chat have had a static pass only
+  * On Forever, unit frames, group frames, action bars, nameplates, the objective tracker, the group finder and the config have been checked in game; the infobar, inventory, tooltips and chat have had a static pass only
 
 ## [4.1.1] - 2026-10-04 ##
 ### Summary ###
