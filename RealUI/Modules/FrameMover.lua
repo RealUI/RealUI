@@ -100,7 +100,9 @@ function FrameMover:OnInitialize()
                 },
                 zonetext = {
                     frames = {
-                        [1] = {name = "ZoneTextFrame", parent = "UIParent", point = "TOP", rpoint = "TOP", x = 0, y = -85},
+                        -- Below TimerTracker's bars (TOP -155, +24 each); at -85 the
+                        -- centred zone/subzone text sat right on the PvP start timer
+                        [1] = {name = "ZoneTextFrame", parent = "UIParent", point = "TOP", rpoint = "TOP", x = 0, y = -160},
                     },
                 },
                 errorframe = {
