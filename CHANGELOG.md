@@ -1,4 +1,4 @@
-## [4.2.0] - 2026-10-10 ##
+## [4.2.0] - 2026-10-11 ##
 ### Summary ###
 A feature release. Nameplate debuffs show the ones that matter to your class, action bars can number their pages the way Blizzard's do, the Durability block shows your auto-repair setting, the objective tracker gets a quest item button and several smaller additions, and the tracker and world-event bars are skinned again without tainting the tracker.
 
@@ -17,7 +17,7 @@ A feature release. Nameplate debuffs show the ones that matter to your class, ac
 
 **The inspect window now closes when you change target,** as Blizzard's does. The old bundled InspectFix, which kept it open, is removed: it replaced Blizzard's inspect functions, and on WoW Forever it blocked Inspect Talents.
 
-Aurora goes from 12.1.0.13 to 12.1.0.14.
+Aurora goes from 12.1.0.13 to 12.1.0.15.
 
 ### Modified AddOns ###
 
