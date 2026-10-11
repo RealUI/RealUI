@@ -9,7 +9,7 @@ Information
 -----------
 
 * Supports retail WoW (Midnight, 12.1.x) and the WoW Forever beta (1.60.x) from the same download.
-* Current release is 4.2.0 (Aurora 12.1.0.14).
+* Current release is 4.2.0 (Aurora 12.1.0.15).
 * As of 4.0.0 the package contains **only RealUI's own addons** — no bundled third-party
   addons (standard embedded libraries such as Ace3, oUF, LibActionButton, and
   LibSharedMedia are still included, as in any addon). See "Recommended optional
@@ -43,6 +43,10 @@ for target debuffs are offered the new default there.
   `/realadv` → Skins → Appearance, and the Skins colour pickers follow the mode until you change them.
 * **The inspect window closes when you change target,** as Blizzard's does. The old bundled InspectFix
   is removed; on WoW Forever it blocked Inspect Talents.
+* **Tracker options that changed:** a per-instance hide now fades the tracker out, and it stays
+  clickable. The "collapse modules in" instance option, Difficulty Color and Wrap Text are removed.
+* The micro menu stays hidden in a vehicle, the vehicle pitch controls are skinned, and the default zone
+  text no longer sits on the PvP start timer.
 
 What's New in 4.1.1
 --------------------
@@ -263,7 +267,8 @@ RealUI_ActionBars:
 
 * `/rab` - open action bar settings (also on the Action Bars HuD config page).
 * `/rab bind` - hover keybind mode: point at a button and press a key; ESC clears.
-* `/rab import` - copy custom tweaks from an existing Bartender4 profile (optional).
+* `/rab import` - copy custom tweaks from an existing Bartender4 profile (optional). It also
+  sets the profile's page numbering back to Bartender4's, which imported layouts use.
 * `/naga` - toggle the Naga side-button bar (bar 6).
 
 RealUI_Nameplates:
