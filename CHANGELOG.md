@@ -1,12 +1,10 @@
 ## [4.2.0] - 2026-10-11 ##
 ### Summary ###
-A feature release. Nameplate debuffs show the ones that matter to your class, action bars can number their pages the way Blizzard's do, the Durability block shows your auto-repair setting, the objective tracker gets a quest item button and several smaller additions, and the tracker and world-event bars are skinned again without tainting the tracker.
-
-**Nameplate and target debuff rows are shorter on purpose.** By default they show only your debuffs that Blizzard marks as important for your class, the rule Blizzard's own nameplates use, instead of every debuff you or your pet applied. Set Show to "All mine" for the old rows.
+A feature release. The objective tracker is no longer tainted, which ends the `GetAuraDataByIndex()` error in delves and LFR, and the tracker and world-event bars are skinned again. Nameplate debuffs show the ones that matter to your class, action bars can number their pages the way Blizzard's do, all five colour modes can be chosen in RealUI, the Durability block shows your auto-repair setting, and the tracker gets a quest item button and several smaller additions.
 
 **If you upgraded from an earlier version, run `/realui newdefaults`.** Profiles that saved "Cast by me" for target debuffs are offered the new default there.
 
-**The objective tracker.** Since August the tracker's own layout state was being written under addon taint, blamed on RealUI or RealUI_Skins. That is what produced the `GetAuraDataByIndex()` error in delves and LFR. The sources are found and removed, in RealUI and in Aurora, and Aurora's tracker skin is rewritten to restyle Blizzard's frames in place. A few frames on the tracker, the map, tooltips and toasts now keep Blizzard's look, or a plainer one, on purpose; they are listed under Changed.
+**The objective tracker.** Since August the tracker's own layout state was being written under addon taint, blamed on RealUI or RealUI_Skins. That is what produced the `GetAuraDataByIndex()` error. The sources are found and removed, in RealUI and in Aurora, and Aurora's tracker skin is rewritten to restyle Blizzard's frames in place. A few frames on the tracker, the map, tooltips and toasts now keep Blizzard's look, or a plainer one, on purpose; they are listed under Changed. RealUI_Tracker's per-instance hide is now a fade, and its instance collapse, Difficulty Color and Wrap Text options are removed.
 
 **Objective tracker additions** (`/realadv` → Tracker):
 - A quest item button for the nearest quest's usable item, with a key binding under Key Bindings > AddOns > RealUI Tracker.
@@ -14,6 +12,8 @@ A feature release. Nameplate debuffs show the ones that matter to your class, ac
 - The top header shows how full the quest log is, and quests ready to turn in have green titles.
 - A "Wowhead link" entry in the quest right-click menus.
 - An optional mouseover reveal, off by default.
+
+**Nameplate and target debuff rows are shorter on purpose.** By default they show only your debuffs that Blizzard marks as important for your class, the rule Blizzard's own nameplates use, instead of every debuff you or your pet applied. Set Show to "All mine" for the old rows.
 
 **The inspect window now closes when you change target,** as Blizzard's does. The old bundled InspectFix, which kept it open, is removed: it replaced Blizzard's inspect functions, and on WoW Forever it blocked Inspect Talents.
 
@@ -34,36 +34,41 @@ Aurora goes from 12.1.0.13 to 12.1.0.15.
 
 ### Added ###
 
-  * add: **nameplate debuff filtering.** My debuffs has a Show setting, "Important to my class" (the default) or "All mine"; Always show and Never show spell lists, added by spell ID or spellbook name; and Sort by, time remaining by default. Changes apply without a reload
-  * add: the HuD target frame's debuff filter has a "Mine, important to my class" preset, and target debuffs default to it. A `/realui newdefaults` item offers it to profiles that saved "Cast by me"
-  * add: **action bar page numbering.** Each profile can number its bars' pages like Bartender4 (the default, unchanged) or like Blizzard, where RealUI bar 2 shows Blizzard's Action Bar 2 and so on. Spells do not move; the bars change which slots they show. A switch applies without a reload, or when combat ends. The install wizard's Action Bar Layout step offers the choice, and `/rab import` sets the profile back to Bartender4 numbering, which imported layouts use
-  * add: **auto-repair on the Durability block.** The tooltip shows whether auto-repair is on, and whether guild funds go first, the estimated repair cost, and the last repair this session. Shift + Left Click on the block toggles auto-repair
-  * add: `/realadv` → Skins → Appearance has a Color Mode select with all five of Aurora's colour modes; the colour-blind modes could not be chosen from RealUI before. Display Setup's HDR checkbox keeps a colour-blind choice when unticked
-  * add: each Skins colour picker has a Reset button that returns it to following the colour mode
   * add: **a quest item button.** One button shows the usable item of the nearest quest, or of the super-tracked quest when it has one, with its cooldown, count and key. Left-click or a key binding (Key Bindings > AddOns > RealUI Tracker) uses it; right-drag moves it. On by default; `/realadv` → Tracker → Item Button
   * add: the objective tracker fades out during boss fights and comes back when the encounter ends, except in a Mythic+ keystone, where it holds the timer. On by default
   * add: the tracker's top header shows how full the quest log is, for example 12/35: orange within three of the limit, red when full. On by default
   * add: titles of quests that are ready to turn in are green in the tracker. On by default
   * add: optional mouseover reveal: out of combat the tracker stays faded until the mouse is over it. Off by default; `/realadv` → Tracker → Context
   * add: the quest right-click menus in the tracker and the quest log have a "Wowhead link" entry that opens the quest's Wowhead address, ready to copy
+  * add: **nameplate debuff filtering.** My debuffs has a Show setting, "Important to my class" (the default) or "All mine"; Always show and Never show spell lists, added by spell ID or spellbook name; and Sort by, time remaining by default. Changes apply without a reload
+  * add: the HuD target frame's debuff filter has a "Mine, important to my class" preset, and target debuffs default to it. A `/realui newdefaults` item offers it to profiles that saved "Cast by me"
+  * add: **action bar page numbering.** Each profile can number its bars' pages like Bartender4 (the default, unchanged) or like Blizzard, where RealUI bar 2 shows Blizzard's Action Bar 2 and so on. Spells do not move; the bars change which slots they show. A switch applies without a reload, or when combat ends. The install wizard's Action Bar Layout step offers the choice, and `/rab import` sets the profile back to Bartender4 numbering, which imported layouts use
+  * add: `/realadv` → Skins → Appearance has a Color Mode select with all five of Aurora's colour modes; the colour-blind modes could not be chosen from RealUI before. Display Setup's HDR checkbox keeps a colour-blind choice when unticked
+  * add: each Skins colour picker has a Reset button that returns it to following the colour mode
+  * add: **auto-repair on the Durability block.** The tooltip shows whether auto-repair is on, and whether guild funds go first, the estimated repair cost, and the last repair this session. Shift + Left Click on the block toggles auto-repair
+  * add: Aurora — the vehicle pitch controls are skinned
   * add: `/realdev trackerscan` (developer tool) reports fields on the objective tracker and the skinned widget containers that were written under addon taint; `trace` records the first tainted tracker update and when it happened. `/realdev abpagelayout` tests the page numbering
 
 ### Fixed ###
 
   * fix: **the objective tracker was tainted from login.** One second after every login RealUI re-activated its Edit Mode layout even when it was already active, which made Edit Mode re-apply every system, the tracker included, under RealUI's name. It now activates a layout only when a different one is active, for example after the game resets a spec to a preset layout
   * fix: **RealUI_Tracker** no longer moves the tracker into a frame of its own or replaces its `SetParent`, and stores nothing on Blizzard's tracker frames. Edit Mode alone positions the tracker
+  * fix: HuD config test mode fades the objective tracker out instead of hiding it from addon code, and restores it on exit
   * fix: combat fading uses RealUI's own alpha fade. Blizzard's fade helper, used before, also showed the faded frame and stored its fade state on it
+  * fix: the tracker's quest log count leaves out daily and weekly quests, which do not count against the limit. A log with recurring quests could read over the cap, for example 41/35
   * fix: the font scale no longer stores state on chat frames and tooltip lines, tooltip text scales through the tooltip fonts instead of line by line, and the objective tracker is no longer rescaled with it
-  * fix: **nameplates ask the game before reading values it may hide.** Target and player checks (alpha, highlight, class power, the personal plate, the tank threat check), class and role colours and threat colours check the `C_Secrets` predicates first, and the reaction colour falls back without a caught error. Expect fewer taint log entries in instances, not a visible change
   * fix: **moved alerts no longer run Blizzard's alert code under RealUI's name.** The alert mover replaced each alert system's anchoring function and removed entries from Blizzard's list; it now re-anchors the shown alerts from one post-hook. Alerts still drop down from the top
   * fix: minimap button fades use RealUI's own fade instead of Blizzard's fade helper, which also showed the frame and stored its state on it. The clock and calendar buttons are kept hidden with an on-show hook instead of replaced methods
-  * fix: HuD config test mode fades the objective tracker out instead of hiding it from addon code, and restores it on exit
-  * fix: **the chat font scale survives a login.** One second after login the chat font was reset to the unscaled preset size, and on characters without a preset size the scale compounded at every login
-  * fix: RealUI_Bugs no longer replaces two private aura functions; Blizzard guards both crashes itself in 12.1
   * fix: tooltip, cooldown count, loot and dungeon-ready state is kept in RealUI's own tables instead of on Blizzard's frames
+  * fix: RealUI_Bugs no longer replaces two private aura functions; Blizzard guards both crashes itself in 12.1
+  * fix: **nameplates ask the game before reading values it may hide.** Target and player checks (alpha, highlight, class power, the personal plate, the tank threat check), class and role colours and threat colours check the `C_Secrets` predicates first, and the reaction colour falls back without a caught error. Expect fewer taint log entries in instances, not a visible change
   * fix: **InspectFix is removed.** This old bundled fix replaced Blizzard's inspect functions, so every inspect ran RealUI code, and on Forever it blocked the unit menu's Inspect Talents ("InspectFix blocked a conflicting inspect request from unknown"). The inspect window now behaves as Blizzard's: it closes when you change target, and `/inspectfix` is gone
   * fix: the colour mode is applied before Aurora skins anything. It used to be applied at login, after skinning, so HDR never fully applied, even after a reload
   * fix: the Skins colour pickers override the colour mode only once you change them, and a mode switch keeps a colour you picked
+  * fix: **the chat font scale survives a login.** One second after login the chat font was reset to the unscaled preset size, and on characters without a preset size the scale compounded at every login
+  * fix: the micro menu stays hidden in a vehicle. Entering one, Blizzard's vehicle bar took the menu out of the container RealUI keeps hidden and showed it; RealUI now hands it straight back
+  * fix: the default zone text position sits below the PvP start timer bar instead of on it. Zone text you moved yourself keeps its position
+  * fix: the friends tooltip no longer shows an empty "()" after Battle.net friends who are only in the app
   * fix: Aurora — **the objective tracker is skinned without tainting it.** Aurora's `ShouldShowMawBuffs` wrapper, added to hide the `GetAuraDataByIndex()` error, was itself what tainted the tracker at login, and it is removed. The tracker skin is rewritten to restyle in place: a flat band behind each header, white titles and triangle collapse arrows; Aurora's bar texture on quest, bonus, world quest, timer and Mythic+ timer bars; and the "Quest Discovered!" popup
   * fix: Aurora — **world-event bars are skinned again.** Status-bar widgets at the top centre of the screen, below the minimap, on the encounter power bar and in the delve difficulty picker are restyled in place and keep Blizzard's fill colour
   * fix: Aurora — opening the world map and hovering a quest title in the quest log no longer taint the quest data the tracker reads. Help tips are left as Blizzard's, and Aurora no longer replaces `QuestMapLogTitleButton_OnEnter`
@@ -73,15 +78,15 @@ Aurora goes from 12.1.0.13 to 12.1.0.15.
 
 ### Changed ###
 
-  * chg: nameplate and target debuff rows are shorter by default (see Added); "All mine" restores the old rows
   * chg: **RealUI_Tracker's per-instance hide fades the tracker out** instead of hiding it, and brings it back when you leave. It stays clickable where it sits, quest item buttons included. A hidden tracker came back on the next tracker update anyway. Profiles with an instance hide keep it as a fade
   * chg: RealUI_Tracker's "collapse modules in" instance option is removed: collapsing from addon code ran the tracker's layout under RealUI's name. The tracker's own collapse buttons work as before
   * chg: RealUI_Tracker's Difficulty Color and Wrap Text options are removed. Retail scales most quests to your level, so the colour rarely differed, and Forever colours quest titles itself; Wrap Text never did anything
+  * chg: nameplate and target debuff rows are shorter by default (see Added); "All mine" restores the old rows
   * chg: Aurora — after a colour-mode switch in Aurora's own options, Aurora asks for a reload, because some buttons, tabs, checkboxes and bars keep the old colours until then
   * chg: Aurora — **kept as Blizzard's on purpose:** help tips; the scenario and delve section of the tracker below its header (stage block, criteria bars, Maw buffs, delve traits); quest POI, item and find-group buttons; widgets outside the four places above, including tooltips, nameplates and the tracker; the status bar under the main tooltip; the queue status role icons
   * chg: Aurora — **plainer, on purpose:** quest log headers have a flat coloured band, and campaign headers lose their faint emblem; secondary tooltips (item links from chat, reward items inside quest and world quest tooltips, comparison, contribution and garrison tooltips) match the main tooltip, borderless with the RealUI background; quest rewards have square icons, a flat name strip and Blizzard's quality border; scenario, invasion and dungeon completion toasts, and every other toast and alert, have a flat strip instead of a bordered box and Blizzard's glow; PvP results loot and the item belt show a square icon with Blizzard's quality ring or no border
   * chg: Aurora — the Main Menu Bar option is off by default on Forever, as on every other client. It was on while the Forever client discarded settings; now that they persist, turn it on in Aurora's options. Installs that already saved it keep their setting
-  * chg: Aurora is bundled from its 12.1.0.14 release
+  * chg: Aurora is bundled from its 12.1.0.15 release
 
 ### Known Issues ###
 
