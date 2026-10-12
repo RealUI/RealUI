@@ -1,3 +1,25 @@
+## [4.2.1] - 2026-10-13 ##
+### Summary ###
+A hotfix for auto-repair. In 12.1, Blizzard sometimes prices an item's repair at tens of thousands of gold after a death, first seen on the Chestguard of Corroded Scales, until you `/reload`, and repairing really charges that amount. Auto-repair, which is on by default, paid those bills without asking. It now asks first when a bill looks bugged or is over a gold limit you set.
+
+**If you saw an unexpectedly large repair:** the gold is spent on Blizzard's side; RealUI cannot refund it.
+
+Aurora stays at 12.1.0.15.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Config
+
+### Added ###
+
+  * add: auto-repair asks before repairing when the bill is over a gold limit, 10,000 gold by default. Set it in `/realadv` → Infobar → Durability Settings → "Ask above (gold)"; 0 asks only when a bill looks bugged
+
+### Fixed ###
+
+  * fix: **auto-repair no longer pays a repair bill that looks bugged.** Repair cost is lost durability times a per-item rate, so after a death every slot should cost about the same per durability point. When one slot costs over ten times the median, an undamaged slot has a repair cost, or the total is over ten times what the equipped gear accounts for, a Yes/No popup names the slot and suggests `/reload` instead of repairing. No leaves your gold alone and the Durability tooltip shows "declined"; closing the merchant closes the popup
+  * fix: the Durability block's tooltip marks a slot whose repair cost looks bugged
+
 ## [4.2.0] - 2026-10-11 ##
 ### Summary ###
 A feature release. The objective tracker is no longer tainted, which ends the `GetAuraDataByIndex()` error in delves and LFR, and the tracker and world-event bars are skinned again. Nameplate debuffs show the ones that matter to your class, action bars can number their pages the way Blizzard's do, all five colour modes can be chosen in RealUI, the Durability block shows your auto-repair setting, and the tracker gets a quest item button and several smaller additions.
