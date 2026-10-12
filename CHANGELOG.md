@@ -546,8 +546,9 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.1.1...develop
-[4.1.1]: https://github.com/RealUI/RealUI/compare/4.1.0...4.1.1
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.1...develop
+[4.2.1]: https://github.com/RealUI/RealUI/compare/4.2.0...4.2.1
+[4.2.0]: https://github.com/RealUI/RealUI/compare/4.1.1...4.2.0
 [4.1.0]: https://github.com/RealUI/RealUI/compare/4.0.3...4.1.0
 [4.0.3]: https://github.com/RealUI/RealUI/compare/4.0.2...4.0.3
 [4.0.2]: https://github.com/RealUI/RealUI/compare/4.0.1...4.0.2
