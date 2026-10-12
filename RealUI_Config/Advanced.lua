@@ -703,6 +703,30 @@ do -- RealUI
                         RealUI.db.profile.infobar.autoRepair = cfg
                     end,
                 },
+                autoRepairConfirm = {
+                    name = "Ask above (gold)",
+                    desc = "Ask before repairing when the bill is over this many gold. 0 never asks for size alone; a bill that looks bugged always asks.",
+                    type = "range",
+                    min = 0, max = 1000000,
+                    softMin = 0, softMax = 50000,
+                    step = 1, bigStep = 500,
+                    order = 0.4,
+                    disabled = function()
+                        local cfg = RealUI.db.profile.infobar and RealUI.db.profile.infobar.autoRepair
+                        return not (cfg == nil or cfg.enabled == true)
+                    end,
+                    get = function()
+                        local cfg = RealUI.db.profile.infobar and RealUI.db.profile.infobar.autoRepair
+                        return cfg and cfg.confirmAbove or 10000 -- CONFIRM_ABOVE_DEFAULT in Infobar/Blocks.lua
+                    end,
+                    set = function(info, value)
+                        RealUI.db.profile.infobar = RealUI.db.profile.infobar or {}
+                        -- Seed enabled like GetAutoRepairConfig, or a first touch here turns auto-repair off.
+                        local cfg = RealUI.db.profile.infobar.autoRepair or { enabled = true }
+                        cfg.confirmAbove = value
+                        RealUI.db.profile.infobar.autoRepair = cfg
+                    end,
+                },
                 header = {
                     name = "Repair Mount",
                     type = "header",

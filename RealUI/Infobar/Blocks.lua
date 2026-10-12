@@ -1547,20 +1547,87 @@ function Infobar:CreateBlocks()
              tooltip data carries `repairCost` everywhere (Blizzard shows it
              only in repair mode, TooltipDataRules.lua). The player's own gear
              is never secret, but a non-number is skipped all the same. ]]
+        --[[ B185: 12.1 repair-cost bug — after a death some items (first seen
+             on Chestguard of Corroded Scales) price their repair at tens of
+             thousands of gold until /reload, and RepairAllItems really charges
+             it. Repair cost is lost durability times a per-item rate, so after
+             a death every slot should carry a similar copper-per-point rate.
+             A slot pricing far above the rest, or a repair on an undamaged
+             slot, marks the estimate as not sane and names that slot. ]]
+        local SANE_RATE_FACTOR = 10
         local function EstimateRepairCost()
             if not (_G.C_TooltipInfo and _G.C_TooltipInfo.GetInventoryItem) then return end
-            local total = 0
+            local total, rates, suspect = 0, {}, nil
             for slotID = 1, #itemSlots do
                 if itemSlots[slotID].hasDura then
                     local data = _G.C_TooltipInfo.GetInventoryItem("player", slotID)
                     local cost = data and data.repairCost
                     if type(cost) == "number" and cost > 0 then
                         total = total + cost
+                        local cur, max = _G.GetInventoryItemDurability(slotID)
+                        if cur and max then
+                            if cur >= max then
+                                suspect = suspect or itemSlots[slotID].slot
+                            else
+                                rates[#rates + 1] = {slot = itemSlots[slotID].slot, rate = cost / (max - cur)}
+                            end
+                        end
                     end
                 end
             end
-            return total
+
+            if not suspect and #rates >= 2 then
+                _G.table.sort(rates, function(a, b) return a.rate < b.rate end)
+                local median = rates[_G.math.ceil(#rates / 2)].rate
+                local worst = rates[#rates]
+                if worst.rate > median * SANE_RATE_FACTOR then
+                    suspect = worst.slot
+                end
+            end
+            return total, suspect
         end
+
+        -- Pays the bill: guild funds when allowed and covered, else own money.
+        local function RepairNow(block, cfg)
+            local cost, canRepair = _G.GetRepairAllCost()
+            if not (canRepair and cost > 0) then return end
+            local coins = _G.C_CurrencyInfo.GetCoinTextureString(cost)
+            local guildLimit = _G.GetGuildBankWithdrawMoney()
+            if cfg.useGuildFunds and _G.CanGuildBankRepair()
+            and (guildLimit == -1 or guildLimit >= cost) then
+                _G.RepairAllItems(true)
+                RealUI:Print(("Repaired for %s (guild funds)."):format(coins))
+                block.lastRepair = coins .. " (guild)"
+            elseif _G.GetMoney() >= cost then
+                _G.RepairAllItems()
+                RealUI:Print(("Repaired for %s."):format(coins))
+                block.lastRepair = coins
+            else
+                RealUI:Print(("Not enough money to repair (%s needed)."):format(coins))
+            end
+        end
+
+        -- B185: a bill over the threshold, or one that looks bugged, asks first.
+        -- confirmAbove is in gold; 0 never asks for size alone. Advanced.lua
+        -- repeats the default.
+        local CONFIRM_ABOVE_DEFAULT = 10000
+        _G.StaticPopupDialogs["REALUI_REPAIR_CONFIRM"] = {
+            text = "%s",
+            button1 = _G.YES,
+            button2 = _G.NO,
+            OnAccept = function(dialog, data)
+                if _G.CanMerchantRepair() then
+                    RepairNow(data.block, GetAutoRepairConfig())
+                end
+            end,
+            OnCancel = function(dialog, data)
+                data.block.lastRepair = "|cffff3333declined|r"
+            end,
+            timeout = 0,
+            whileDead = false,
+            hideOnEscape = true,
+            preferredIndex = 3,
+        }
 
         LDB:NewDataObject("durability", {
             name = _G.DURABILITY,
@@ -1654,10 +1721,13 @@ function Infobar:CreateBlocks()
                     status = "|cff33cc33On|r"
                 end
                 tooltip:AddRow("Auto-repair", status)
-                local estimate = EstimateRepairCost()
+                local estimate, suspect = EstimateRepairCost()
                 if estimate then
                     tooltip:AddRow("Repair cost", estimate > 0
                         and _G.C_CurrencyInfo.GetCoinTextureString(estimate) or "|cff999999None|r")
+                    if suspect then
+                        tooltip:AddRow(("|cffff3333%s cost looks bugged|r"):format(suspect), "|cffff3333/reload|r")
+                    end
                 end
                 if block.lastRepair then
                     tooltip:AddRow("Last repair", block.lastRepair)
@@ -1686,25 +1756,36 @@ function Infobar:CreateBlocks()
                         local cost, canRepair = _G.GetRepairAllCost()
                         if canRepair and cost > 0 then
                             local coins = _G.C_CurrencyInfo.GetCoinTextureString(cost)
-                            local guildLimit = _G.GetGuildBankWithdrawMoney()
+                            local estimate, suspect = EstimateRepairCost()
+                            -- B185: the equipped slots should account for most of
+                            -- the bill; bags can add some, not ten times as much.
+                            local totalSuspect = not suspect and estimate and estimate > 0
+                                and cost > estimate * SANE_RATE_FACTOR
+                            local askAbove = (cfg.confirmAbove or CONFIRM_ABOVE_DEFAULT) * _G.COPPER_PER_GOLD
 
-                            if cfg.useGuildFunds and _G.CanGuildBankRepair()
-                            and (guildLimit == -1 or guildLimit >= cost) then
-                                _G.RepairAllItems(true)
-                                RealUI:Print(("Repaired for %s (guild funds)."):format(coins))
-                                block.lastRepair = coins .. " (guild)"
-                            elseif _G.GetMoney() >= cost then
-                                _G.RepairAllItems()
-                                RealUI:Print(("Repaired for %s."):format(coins))
-                                block.lastRepair = coins
+                            local question
+                            if suspect then
+                                question = ("|cffff3333This repair cost looks bugged.|r\n\nYour %s costs far more to repair than the rest of your gear. This is a known Blizzard bug after a death; /reload resets it.\n\nRepair all items for %s anyway?")
+                                    :format(suspect, coins)
+                            elseif totalSuspect then
+                                question = ("|cffff3333This repair cost looks bugged.|r\n\nThe total is far more than your equipped gear accounts for. This is a known Blizzard bug after a death; /reload resets it.\n\nRepair all items for %s anyway?")
+                                    :format(coins)
+                            elseif askAbove > 0 and cost > askAbove then
+                                question = ("Repair all items for %s?\n\nAuto-repair asks above %s.")
+                                    :format(coins, _G.C_CurrencyInfo.GetCoinTextureString(askAbove))
+                            end
+
+                            if question then
+                                _G.StaticPopup_Show("REALUI_REPAIR_CONFIRM", question, nil, { block = block })
                             else
-                                RealUI:Print(("Not enough money to repair (%s needed)."):format(coins))
+                                RepairNow(block, cfg)
                             end
                         end
                     end
                     return
                 elseif event == "MERCHANT_CLOSED" then
                     block.repairedThisVisit = nil
+                    _G.StaticPopup_Hide("REALUI_REPAIR_CONFIRM")
                     return
                 end
 
