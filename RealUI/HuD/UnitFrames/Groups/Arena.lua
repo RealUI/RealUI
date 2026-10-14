@@ -23,6 +23,10 @@ end
 
 local function UpdateCC(self, event, unit)
     local spellID, startTime, duration = _G.C_PvP.GetArenaCrowdControlInfo(unit)
+    -- SecretWhenLossOfControlInfoRestricted: no timer when we cannot read it
+    if _G.issecretvalue(spellID) or _G.issecretvalue(startTime) or _G.issecretvalue(duration) then
+        return
+    end
     if spellID then
         if startTime ~= 0 and duration ~= 0 then
             self.Trinket:SetCooldown(startTime / 1000.0, duration / 1000.0)
@@ -164,6 +168,11 @@ _G.tinsert(UnitFrames.units, function()
 
     for i = 1, 5 do
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
+        -- Retail 12.1.5 marks GetArenaOpponentSpec SecretReturns too, and
+        -- oUF 14.2.0's arena prep (units.lua updateArenaPreparation) truth-
+        -- tests it. oUF's documented opt-out: the frames show when the gates
+        -- open instead of during prep. Drop once oUF#895 is fixed upstream.
+        arena:SetAttribute("oUF-enableArenaPrep", false)
         if i == 1 then
             arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
         else
