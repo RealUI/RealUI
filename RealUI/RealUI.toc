@@ -8,7 +8,7 @@
 ## Version: 4.2.1
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## LoadWith: RealUI_Bugs
-## RequiredDeps: RealUI_Bugs, Blizzard_WorldMap, Blizzard_Deprecated, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedSpellScript
+## RequiredDeps: RealUI_Bugs, Blizzard_WorldMap
 ## OptionalDeps: Grid2, Clique, LibDualSpec-1.0, LibIconFonts, LibQTip-2.0, LibRangeCheck-3.0, LibWindow-1.1, oUF, LibSharedMedia-3.0, AceDB-3.0, LibStub, nibRealUI
 ## SavedVariables: RealUIDB, nibRealUIDB
 ## SavedVariablesPerCharacter: RealUICharacter, nibRealUICharacter
