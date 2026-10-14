@@ -1169,7 +1169,7 @@ function Infobar:CreateBlocks()
                 local gname = _G.GetGuildInfo("player")
                 tooltip:AddHeadingRow(gname)
 
-                local motd = _G.GetGuildRosterMOTD()
+                local motd = _G.C_GuildInfo.GetMOTD()
                 if motd ~= "" then
                     local row = tooltip:AddRow()
                     row:GetCell(1):SetJustifyH("LEFT"):SetMaxWidth(tableWidth):SetText(motd)
