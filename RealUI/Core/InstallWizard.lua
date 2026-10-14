@@ -614,7 +614,6 @@ function InstallWizard:ApplyAccountCVars()
         -- taint path by hand (aurora-121-surfaces task 4.2).
         ["worldMapShowPlayerCoords"] = 1,          -- Show player map coordinates
         ["worldMapShowCursorCoords"] = 1,          -- Show cursor map coordinates
-        ["coordsByTenths"] = 1,                    -- 12.1.5: map coordinates with one decimal, as the old overlay had
 
         -- Names
         ["UnitNameNPC"] = 1,                       -- Turn on NPC Names

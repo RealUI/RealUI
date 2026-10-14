@@ -315,25 +315,6 @@ local items = {
             EMM:EndUserWrite()
         end,
     },
-    {
-        -- B189: 12.1.5 rounds Blizzard's map coordinates to whole numbers
-        -- unless coordsByTenths is on. RealUI's minimap readout keeps its own
-        -- format; this is the world map's player and cursor coordinates.
-        -- The install wizard sets the CVar with the other map CVars.
-        id = "coordsByTenths",
-        label = "Map coordinates with one decimal",
-        desc = "Since 12.1.5 the world map shows whole-number coordinates unless Blizzard's coordinates-by-tenths setting is on. This turns it on, as RealUI's old map overlay showed them.",
-        changed = "4.2.2",
-        available = function()
-            return _G.C_CVar.GetCVar("coordsByTenths") ~= nil
-        end,
-        isApplied = function()
-            return _G.C_CVar.GetCVarBool("coordsByTenths")
-        end,
-        apply = function()
-            _G.C_CVar.SetCVar("coordsByTenths", 1)
-        end,
-    },
 }
 
 local dialog
