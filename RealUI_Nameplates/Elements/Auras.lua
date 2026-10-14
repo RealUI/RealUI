@@ -103,21 +103,28 @@ end
      assist (AuraContainerUtil.CanApplyIdentityCandidateFilters), which is every
      enemy plate — the only design this row attaches to. Group 2 takes the
      always-show spells that group 1 rejected (nameplateShowPersonal = false),
-     so nothing is shown twice. Never-show wins over always-show. ]]
+     so nothing is shown twice. Never-show wins over always-show.
+
+     Second return: whether each group is enabled. Since 12.1.5 any spell-ID
+     list makes the container register UNIT_FLAGS and UNIT_FACTION for the
+     player and the unit, and each one forces a full aura rebuild
+     (AuraContainerUtil.AppendCandidateFilterUnitEvents). Disabled groups
+     register nothing, so group 2 is off when there is nothing to always show. ]]
 local function ResolveMyDebuffs(groupDB)
     local never = CopyList(groupDB.neverShow)
     local main = { excludeSpellIDs = never }
     if groupDB.show ~= "all" then
         main.nameplateShowPersonal = true
     end
+    local always = groupDB.show ~= "all" and CopyList(groupDB.alwaysShow) or nil
     local extra = {
         -- An empty include list matches nothing, which is what "no always-show
         -- spells" (or "all" mode, where group 1 already has them) should do.
-        includeSpellIDs = (groupDB.show ~= "all" and CopyList(groupDB.alwaysShow)) or {},
+        includeSpellIDs = always or {},
         excludeSpellIDs = never,
         nameplateShowPersonal = false,
     }
-    return { main, extra }
+    return { main, extra }, { true, always ~= nil }
 end
 
 -- B23: the native countdown text overlapped the icon and used the tiny default
@@ -245,12 +252,15 @@ local function ConfigureFilters(container, def, groupDB)
     if not def.resolve or container.realUIGeneration == private.auraConfigGeneration then return end
     container.realUIGeneration = private.auraConfigGeneration
 
-    local candidates = ResolveMyDebuffs(groupDB)
+    local candidates, enabled = ResolveMyDebuffs(groupDB)
     local methods, directions = _G.AuraContainerSortMethod, _G.AuraContainerSortDirection
     local sortMethod = methods and methods[SORT_METHODS[groupDB.sort] or "Default"]
     for i in _G.ipairs(def.groups) do
         local groupKey = _G.tostring(i)
         private.Try(container.SetAuraGroupCandidateFilters, container, groupKey, candidates[i])
+        if container.SetAuraGroupEnabled then
+            private.Try(container.SetAuraGroupEnabled, container, groupKey, enabled[i] == true)
+        end
         if sortMethod and directions then
             private.Try(container.SetAuraGroupSortMethod, container, groupKey, sortMethod, directions.Normal)
         end
