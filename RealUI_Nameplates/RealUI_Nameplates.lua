@@ -28,6 +28,18 @@ function private.Try(fn, ...)
     return (_G.pcall(fn, ...))
 end
 
+-- B195: engine pixel rounding for a frame, its regions and its children, the
+-- way 12.1.5's own nameplates do it (in place of PixelUtil.Set*). Keeps the
+-- 1px borders on whole pixels as the plate follows its base. The setter is a
+-- protected function: harmless on our own plates, guarded for the aura
+-- engine's buttons.
+function private.RoundToPixels(frame)
+    local PixelUtil = _G.PixelUtil
+    if frame and frame.SetRoundLayoutToNearestPixel and PixelUtil and PixelUtil.SetRoundLayoutToNearestPixelRecursively then
+        private.Try(PixelUtil.SetRoundLayoutToNearestPixelRecursively, frame, true)
+    end
+end
+
 -- Truth-test fn's result without throwing. Secret BOOLEANS throw on truth
 -- tests (unlike secret strings/numbers), so any condition built on combat-API
 -- booleans goes through here. B58: the result is resolved via SafeBool
@@ -126,6 +138,7 @@ local function CreatePlate()
     plate.elements = {}
     plate.state = {}
     ForEachElement("Create", plate)
+    private.RoundToPixels(plate)
     return plate
 end
 
