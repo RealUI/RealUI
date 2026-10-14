@@ -22,15 +22,6 @@ function Chat:OnInitialize()
                 ["**"] = {
                     enabled = true,
                 },
-                tabs = {
-                    colors = {
-                        classcolorhighlight = true,
-                        ["normal"] = {1, 1, 1},
-                        ["highlight"] = {1, 1, 1},
-                        ["flash"] = {1, 1, 0},
-                    },
-                },
-                opacity = {},
                 strings = {},
                 history = {
                     [RealUI.charInfo.realm] = {history = {}},
