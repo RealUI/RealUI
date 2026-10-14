@@ -438,10 +438,32 @@ local CreateHealthStatus do
     -- C_PvP.GetHonorRewardInfo (upstream guards UnitIsPVP but missed this one;
     -- logged in docs/oUF-Backlog.md). Our non-angled indicators have no Badge,
     -- so honor data is irrelevant — icon-only override with guarded reads.
+    --
+    -- B192: where Blizzard's secure delegate exists (12.1.5 and Forever) it
+    -- does the work. It reads the unit and applies the shown state from secure
+    -- code, so a unit whose PvP state is secret to us still shows its icon
+    -- (the guarded reads below can only hide it). The delegate shows the
+    -- prestige portrait instead of the icon for players with an honor reward,
+    -- so both slots get the same plain textures: plain paths, not atlases, so
+    -- the 16px size and the crop set at creation stay.
+    local PVP_TEXTURES = {
+        pvpIconFreeForAll = [[Interface\TargetingFrame\UI-PVP-FFA]],
+        pvpIconHorde = [[Interface\TargetingFrame\UI-PVP-Horde]],
+        pvpIconAlliance = [[Interface\TargetingFrame\UI-PVP-Alliance]],
+        prestigePortraitNeutral = [[Interface\TargetingFrame\UI-PVP-FFA]],
+        prestigePortraitHorde = [[Interface\TargetingFrame\UI-PVP-Horde]],
+        prestigePortraitAlliance = [[Interface\TargetingFrame\UI-PVP-Alliance]],
+    }
     local function UpdatePvPIcon(self, event, unit)
         if unit and unit ~= self.__unit then return end
         unit = unit or self.__unit
         local element = self.PvPIndicator
+
+        local UnitFrameUtil = _G.UnitFrameUtil
+        if element.realUIElements and UnitFrameUtil and UnitFrameUtil.UpdateUnitPvPIndicator then
+            UnitFrameUtil.UpdateUnitPvPIndicator(element.realUIElements, unit, true, PVP_TEXTURES)
+            return
+        end
 
         local status
         local ffa = _G.UnitIsPVPFreeForAll(unit)
@@ -491,7 +513,15 @@ local CreateHealthStatus do
             PvPIndicator = parent.overlay:CreateTexture(nil, 'ARTWORK', nil, 1)
             PvPIndicator:SetSize(16, 16)
             PvPIndicator:SetPoint('RIGHT', parent.overlay, 'LEFT')
+            PvPIndicator:SetTexCoord(0, 0.65625, 0, 0.65625)
             PvPIndicator.Override = UpdatePvPIcon
+
+            -- B192: the prestige slot for the delegate, same spot and crop
+            local prestige = parent.overlay:CreateTexture(nil, 'ARTWORK', nil, 1)
+            prestige:SetAllPoints(PvPIndicator)
+            prestige:SetTexCoord(0, 0.65625, 0, 0.65625)
+            prestige:Hide()
+            PvPIndicator.realUIElements = { pvpIcon = PvPIndicator, prestigePortrait = prestige }
         end
         parent.PvPIndicator = PvPIndicator
     end
