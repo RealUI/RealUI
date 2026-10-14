@@ -7,7 +7,6 @@
 ## Author: Hanshi
 ## Version: 4.2.1
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
-## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedCurrencyScript, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedItemScript, Blizzard_DeprecatedPvpScript, Blizzard_DeprecatedSoundScript, Blizzard_DeprecatedSpellScript [AllowLoadGameType standard]
-## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedSpellScript [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
+## RequiredDeps: Blizzard_Deprecated, Blizzard_DeprecatedGuildScript, Blizzard_DeprecatedSpellScript
 ## LoadWith: Blizzard_CompactRaidFrames
 RealUI_PreLoads.lua
