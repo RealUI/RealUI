@@ -33,6 +33,7 @@ local GROUP_DEFS = {
     myDebuffs = {
         groups = { { filter = MY_DEBUFF_FILTER }, { filter = MY_DEBUFF_FILTER } },
         resolve = true,
+        pandemic = true, -- B193
     },
     buffs = {
         dispelBorder = true,
@@ -161,7 +162,7 @@ local function StyleTimerText(cooldown)
     end
 end
 
-local function InitializeButton(dispelBorder, button)
+local function InitializeButton(dispelBorder, button, pandemic)
     local size = NP.db.profile.enemy.auras.size
     button:SetSize(size, size)
     button:EnableMouse(false)
@@ -198,6 +199,19 @@ local function InitializeButton(dispelBorder, button)
         })
     end
 
+    -- B193: pandemic cue. A white fill 1px outside the button, above the black
+    -- border and below the icon: while the debuff is inside its pandemic window
+    -- (the part a refresh carries over) the border turns white. The engine
+    -- owns the shown state.
+    if pandemic and button.AddPandemicRegion then
+        local pandemicBorder = button:CreateTexture(nil, "BACKGROUND", nil, -7)
+        pandemicBorder:SetColorTexture(1, 1, 1, 1)
+        pandemicBorder:SetPoint("TOPLEFT", button, "TOPLEFT", -1, 1)
+        pandemicBorder:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 1, -1)
+        pandemicBorder:Hide()
+        private.Try(button.AddPandemicRegion, button, pandemicBorder)
+    end
+
     -- B195: the engine creates aura buttons after the plate, so the plate's
     -- recursive call never reaches them.
     private.RoundToPixels(button)
@@ -211,7 +225,7 @@ local function SetupContainer(plate, key, def)
     container:SetSize(1, 1)
 
     local configured = private.Try(function()
-        local initializer = function(button) InitializeButton(def.dispelBorder, button) end
+        local initializer = function(button) InitializeButton(def.dispelBorder, button, def.pandemic) end
         for i, group in _G.ipairs(def.groups) do
             local groupKey = _G.tostring(i)
             container:AddAuraGroup(groupKey, "", { initializeFrame = initializer })
