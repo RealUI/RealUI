@@ -30,9 +30,6 @@ externals:
     RealUI/Libs/HereBeDragons:
         url: https://github.com/Nevcairiel/HereBeDragons.git
         tag: latest
-    RealUI/Libs/LibChatAnims:
-        url: https://repos.wowace.com/wow/libchatanims/trunk/LibChatAnims
-        tag: latest
     RealUI/Libs/LibDualSpec-1.0:
         url: https://github.com/AdiAddons/LibDualSpec-1.0.git
         tag: latest
