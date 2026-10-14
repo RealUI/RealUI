@@ -454,6 +454,11 @@ function Tooltips:OnInitialize()
     } do
         if tooltip then
             private.HookTooltip(tooltip)
+            -- The OnTooltipCleared hook only runs from the first clear on, so
+            -- the first tooltip after login had no border. Same call, once now.
+            if tooltip.NineSlice then
+                tooltip.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
+            end
         end
     end
 end
