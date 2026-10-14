@@ -9,7 +9,7 @@ Information
 -----------
 
 * Supports retail WoW (Midnight, 12.1.x) and the WoW Forever beta (1.60.x) from the same download.
-* Current release is 4.2.1 (Aurora 12.1.0.15).
+* Current release is 4.2.2 (Aurora 12.1.5.0).
 * As of 4.0.0 the package contains **only RealUI's own addons** — no bundled third-party
   addons (standard embedded libraries such as Ace3, oUF, LibActionButton, and
   LibSharedMedia are still included, as in any addon). See "Recommended optional
