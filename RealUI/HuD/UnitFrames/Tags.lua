@@ -249,7 +249,13 @@ tags.Methods["realui:name"] = function(unit)
         if nameColorSetting then
             nameColor = ("|cff%02x%02x%02x"):format(nameColorSetting[1] * 255, nameColorSetting[2] * 255, nameColorSetting[3] * 255)
         elseif UnitFrames.db.profile.overlay.classColorNames then
-            nameColor = tags.Methods.raidcolor(unit) or nameColor
+            -- Only units with a class: for a classless arenaN (arena prep)
+            -- oUF's raidcolor falls back to GetArenaOpponentSpec, which 12.1.5
+            -- returns as a secret, and truth-tests it.
+            local _, class = _G.UnitClass(unit)
+            if class ~= nil then
+                nameColor = tags.Methods.raidcolor(unit) or nameColor
+            end
         end
     end
     return ("%s%s|r"):format(nameColor, name)
