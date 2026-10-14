@@ -314,7 +314,6 @@ Packaged AddOns
 
 These folders are included in release packages:
 
-* `!RealUI_Preloads`
 * `RealUI`
 * `nibRealUI`
 * `RealUI_Config`
