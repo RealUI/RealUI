@@ -57,6 +57,7 @@ UnitFrames.target = {
             growthY = debuffGrowthY,
             maxWidth = debuffLayout.maxWidth or 0,
             showDebuffBorder = true, -- dispel-type coloring (oUF 14)
+            pandemic = true, -- B193: border turns white when a refresh would carry over
         })
         UnitFrames.SetAuraPosition(Debuffs, dialog, debuffLayout.anchor or "TOPLEFT",
             UnitFrames.GetInitialAnchor(debuffGrowthX, debuffGrowthY))

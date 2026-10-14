@@ -124,7 +124,7 @@ end
 -- buttons; see CreateAuraElement.
 local AURA_BORDER_PAD = 2
 
-local function AuraPostCreateButton(_, button)
+local function AuraPostCreateButton(element, button)
     if button.Icon then
         _G.Aurora.Base.CropIcon(button.Icon, button)
     end
@@ -154,6 +154,19 @@ local function AuraPostCreateButton(_, button)
     end
     if button.Count then
         button.Count:SetFontObject("NumberFont_Outline_Med")
+    end
+
+    -- B193: pandemic cue. A white fill in the dispel border's geometry, one
+    -- sublevel above it: while the debuff is inside its pandemic window (the
+    -- part of it a refresh carries over, C_UnitAuras.GetRefreshCarryOverDuration)
+    -- the 1px border turns white. The engine owns the shown state.
+    if element._ruiPandemic and button.AddPandemicRegion and button.Icon then
+        local pandemic = button:CreateTexture(nil, "BACKGROUND", nil, 2)
+        pandemic:SetColorTexture(1, 1, 1)
+        pandemic:SetPoint("TOPLEFT", button.Icon, -1, 1)
+        pandemic:SetPoint("BOTTOMRIGHT", button.Icon, 1, -1)
+        pandemic:Hide()
+        _G.pcall(button.AddPandemicRegion, button, pandemic)
     end
 
     -- Blizzard's countdown numbers on the cooldown spiral: unstylable from here
@@ -258,7 +271,8 @@ end
 --             candidates, sortMethod, sortDirection (from ResolveAuraFilter),
 --             cancelButton (RegisterForClicks string, e.g. "RightButtonUp" —
 --             combat-legal cancel; player buffs),
---             showDebuffBorder (dispel-type coloring from colors.dispel)}
+--             showDebuffBorder (dispel-type coloring from colors.dispel),
+--             pandemic (B193: border turns white in the pandemic window)}
 function UnitFrames.CreateAuraElement(dialog, settings)
     local frameWidth = (settings.maxWidth and settings.maxWidth > 0 and settings.maxWidth) or dialog:GetWidth()
     local element = dialog:CreateAuras({
@@ -268,6 +282,9 @@ function UnitFrames.CreateAuraElement(dialog, settings)
         layoutLimit = frameWidth,
     })
     element.PostCreateButton = AuraPostCreateButton
+    -- B193: read by AuraPostCreateButton, which AddGroup's pre-created pool
+    -- already runs, so it is set before AddGroup below.
+    element._ruiPandemic = settings.pandemic
     -- Every aura button carries a 1px black border 1px OUTSIDE its own rect
     -- (Base.CropIcon, in AuraPostCreateButton above), but the flow layout
     -- spaces the button rects, not the borders. A raw elementSpacing of 2
