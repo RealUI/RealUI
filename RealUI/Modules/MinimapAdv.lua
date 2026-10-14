@@ -1899,6 +1899,14 @@ local function CreateFrames()
     MMFrames.info.SQueue = NewInfoFrame("SQueue", _G.Minimap, "|c%sS:|r %s")
 
     -- Coordinates
+    -- Blizzard's own readout (12.1.5 / Forever, opt-in via minimapShowPlayerCoords)
+    -- anchors to Minimap BOTTOM, i.e. into this info stack, and would duplicate
+    -- ours. Hide only: Blizzard never shows it again, it only clears its text.
+    local minimapContainer = _G.MinimapCluster and _G.MinimapCluster.MinimapContainer
+    if minimapContainer and minimapContainer.PlayerCoords then
+        minimapContainer.PlayerCoords:Hide()
+    end
+
     local lastUpdate, threshold = 0, 0.5
     MMFrames.info.Coords = NewInfoFrame("Coords", _G.Minimap)
     MMFrames.info.Coords:SetAlpha(0.75)
