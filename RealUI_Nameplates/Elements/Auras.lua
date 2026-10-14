@@ -197,6 +197,10 @@ local function InitializeButton(dispelBorder, button)
             showWhenHelpful = true,
         })
     end
+
+    -- B195: the engine creates aura buttons after the plate, so the plate's
+    -- recursive call never reaches them.
+    private.RoundToPixels(button)
 end
 
 local function SetupContainer(plate, key, def)
