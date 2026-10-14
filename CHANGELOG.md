@@ -1,3 +1,46 @@
+## [4.2.2] - 2026-10-15 ##
+### Summary ###
+A compatibility release for WoW 12.1.5. RealUI 4.2.1 and Aurora 12.1.0.15 list four `Blizzard_Deprecated` addons as required dependencies, 12.1.5 deletes them, and WoW does not load an addon whose required dependency is missing. Both now load on 12.1.5. Arena frames no longer error in arena preparation, Blizzard's new minimap coordinates no longer show under RealUI's own, and nameplates do less work on every enemy plate.
+
+**Arena frames now appear when the gates open,** not during preparation. 12.1.5 hides the opponents' specs during preparation, and the unit frame library RealUI uses reads them there.
+
+The `!RealUI_Preloads` folder is no longer part of RealUI. If you install by hand, you can delete it from your AddOns folder.
+
+Aurora goes from 12.1.0.15 to 12.1.5.0.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Nameplates
+  * RealUI_Dev
+  * Aurora
+
+### Added ###
+
+  * add: `/realdev cdscan` lists which of RealUI's cooldown frames are protected. 12.1.5 makes the cooldown functions protected, which matters only on protected frames; none were found, out of combat or in combat
+  * add: Aurora — the quest log's story and campaign tooltips, the end-of-match celebration screen, and the Trading Post's model preview toggles and rotate buttons are skinned
+
+### Fixed ###
+
+  * fix: **RealUI loads on 12.1.5.** Its required dependencies no longer list `Blizzard_Deprecated` addons, which never decided load order and could only stop RealUI loading. The 12.1.5 game version also no longer prints "Unsupported game version" at login
+  * fix: **arena frames no longer error in arena preparation.** 12.1.5 returns the opponents' specs as secret values, and the unit frame library's arena preparation tested them. RealUI turns that preparation off, the name tag only class-colours units whose class it can read, and the crowd-control trinket timer skips values it cannot read
+  * fix: Blizzard's new minimap coordinates, an option in Blizzard's settings, are hidden under RealUI's minimap, where they sat on top of RealUI's own coordinates
+  * fix: nameplates no longer rebuild every enemy plate's auras on faction and flag changes when no always-show debuffs are set. 12.1.5 does that for any aura group with a spell list, and the always-show group always had one
+  * fix: the guild block's tooltip reads the message of the day without the deprecated `GetGuildRosterMOTD`, which errored when Blizzard's deprecation fallbacks are off
+  * fix: Aurora — **Aurora loads on 12.1.5**, for the same required-dependency reason as RealUI
+  * fix: Aurora — opening the PvP window and hovering a group finder listing no longer error on 12.1.5
+  * fix: Aurora — renown and unlock toasts: the backdrop spans the faction name and reward text, and the top border and glow line stay hidden
+  * fix: Aurora — reputation category headers on Forever lose Blizzard's bar art under Aurora's backdrop
+
+### Changed ###
+
+  * chg: every TOC declares Interface 120105 for 12.1.5
+  * chg: `!RealUI_Preloads` is removed; its only remaining effect was a chat line at every login
+  * chg: LibChatAnims is no longer bundled. Since its v12.1.0 it does nothing on retail or Forever, and no RealUI code called it
+  * chg: the unused chat tab colour and opacity modules are removed; they never ran on any supported client
+  * chg: Aurora is bundled from its 12.1.5.0 release
+
+
 ## [4.2.1] - 2026-10-13 ##
 ### Summary ###
 A hotfix for auto-repair. In 12.1, Blizzard sometimes prices an item's repair at tens of thousands of gold after a death, first seen on the Chestguard of Corroded Scales, until you `/reload`, and repairing really charges that amount. Auto-repair, which is on by default, paid those bills without asking. It now asks first when a bill looks bugged or is over a gold limit you set.
@@ -546,7 +589,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.1...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.2...develop
+[4.2.2]: https://github.com/RealUI/RealUI/compare/4.2.1...4.2.2
 [4.2.1]: https://github.com/RealUI/RealUI/compare/4.2.0...4.2.1
 [4.2.0]: https://github.com/RealUI/RealUI/compare/4.1.1...4.2.0
 [4.1.0]: https://github.com/RealUI/RealUI/compare/4.0.3...4.1.0
