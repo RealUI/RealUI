@@ -1,3 +1,46 @@
+## [4.2.3] - 2026-10-15 ##
+### Summary ###
+A maintenance release. **Arena frames are back:** since 4.1.0 RealUI showed no arena frames at all, on retail or WoW Forever. Debuffs you cast now show when a refresh would carry over their remaining duration, PvP icons show for players whose PvP state the game hides from addons, and nameplates stay on whole pixels as they move.
+
+**Arena frames appear when the gates open,** not during preparation, as since 4.2.2.
+
+LibItemUpgradeInfo is no longer bundled; the character sheet reads item upgrade levels from the game.
+
+Aurora goes from 12.1.5.0 to 12.1.5.1.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Auras
+  * RealUI_Nameplates
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * RealUI_Dev
+  * Aurora
+
+### Added ###
+
+  * add: **a pandemic cue on debuffs.** On the HuD target frame and on nameplates, the border of a debuff you cast turns white once refreshing it would carry its remaining duration over, and goes back when you refresh
+  * add: Aurora — the Trading Post is skinned throughout: the cart and ensemble lists, the product rows' cart button, the cart's buttons and the remove-item X
+
+### Fixed ###
+
+  * fix: **arena frames appear again.** A check for Blizzard's own arena frame, added for WoW Forever in 4.1.0, stopped RealUI's arena frames on every client: Blizzard only creates that frame once an arena needs it, so at login it never exists
+  * fix: PvP icons on the HuD show for players whose PvP state the game hides from addons, and the PvP indicator updates when you flag yourself for PvP, not only when you unflag
+  * fix: the first tooltip after logging in has RealUI's border, like every one after it
+  * fix: the arena trinket announcement skips accounts whose chat is restricted by age verification; their messages were suppressed with a notice each time
+  * fix: Aurora — the PvP window's activity buttons (Quick Match, Rated, Training Grounds) lose Blizzard's button art, and queueing from them still works
+  * fix: Aurora — group finder applicants on your own listing, renown and unlock toasts, and buttons with Blizzard's three-part red art (the AddOn list, the Barbershop) are skinned properly
+
+### Changed ###
+
+  * chg: nameplates and their aura icons stay on whole pixels as plates move, as Blizzard's own nameplates do since 12.1.5
+  * chg: RealUI_Auras groups switch their parts on and off when you change their options instead of rebuilding themselves
+  * chg: the character sheet's upgrade pips read the item's upgrade track from the game (`C_Item.GetItemUpgradeInfo`); LibItemUpgradeInfo is no longer bundled. Its item table was out of date, and part of it stopped working in 12.1.5
+  * chg: Aurora — the quest log's story and campaign tooltips have a solid background
+  * chg: Aurora is bundled from its 12.1.5.1 release
+
+
 ## [4.2.2] - 2026-10-15 ##
 ### Summary ###
 A compatibility release for WoW 12.1.5. RealUI 4.2.1 and Aurora 12.1.0.15 list four `Blizzard_Deprecated` addons as required dependencies, 12.1.5 deletes them, and WoW does not load an addon whose required dependency is missing. Both now load on 12.1.5. Arena frames no longer error in arena preparation, Blizzard's new minimap coordinates no longer show under RealUI's own, and nameplates do less work on every enemy plate.
@@ -589,7 +632,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.2...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.3...develop
+[4.2.3]: https://github.com/RealUI/RealUI/compare/4.2.2...4.2.3
 [4.2.2]: https://github.com/RealUI/RealUI/compare/4.2.1...4.2.2
 [4.2.1]: https://github.com/RealUI/RealUI/compare/4.2.0...4.2.1
 [4.2.0]: https://github.com/RealUI/RealUI/compare/4.1.1...4.2.0
