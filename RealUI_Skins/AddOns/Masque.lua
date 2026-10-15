@@ -22,7 +22,7 @@ function private.AddOns.Masque()
     MSQ:AddSkin("RealUI", {
         Template = "Blizzard Modern",
         Shape = "Square",
-        API_VERSION = 110210,
+        API_VERSION = 120001,
 
         Author = "Gethe/Arnvid",
         Version = skinVersion,
