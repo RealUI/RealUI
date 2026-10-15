@@ -9,7 +9,6 @@ local Base = Aurora.Base
 local Hook, Skin = Aurora.Hook, Aurora.Skin
 
 local RealUI = _G.RealUI
-local LIU = _G.LibStub("LibItemUpgradeInfo-1.0")
 
 do --[[ FrameXML\PaperDollFrame.lua ]]
     local ShouldHaveEnchant, GetNumSockets do
@@ -97,7 +96,14 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                 self.ilvl:SetText(itemLevel)
                 self.ilvl:Show()
 
-                local cur, max = LIU:GetItemUpgradeInfo(itemLink)
+                -- Native upgrade track (12.x and Forever); replaced
+                -- LibItemUpgradeInfo, whose static bonus-ID table went stale and
+                -- whose cached GetItemInfo is nil since 12.1.5.
+                local upgrade = _G.C_Item.GetItemUpgradeInfo(itemLink)
+                local cur, max
+                if upgrade and upgrade.maxLevel and upgrade.maxLevel > 0 then
+                    cur, max = upgrade.currentLevel, upgrade.maxLevel
+                end
                 for i, tex in next, self.upgrades do
                     if cur then
                         if i == "bg" then

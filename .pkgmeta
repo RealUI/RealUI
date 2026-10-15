@@ -64,9 +64,6 @@ externals:
 
     RealUI_Skins/Libs/AceDB-3.0:
         url: https://github.com/WoWUIDev/Ace3.git/AceDB-3.0
-    RealUI_Skins/Libs/LibItemUpgradeInfo-1.0:
-        url: https://github.com/alarofrunetotem/LibItemUpgradeInfo.git
-        tag: latest
     # Aurora, embedded in RealUI_Skins. Releases take this pinned tag; bump it
     # when a RealUI release should ship a newer Aurora. The nightly workflow
     # rewrites it to "latest" (newest Aurora tag, nightly or release).

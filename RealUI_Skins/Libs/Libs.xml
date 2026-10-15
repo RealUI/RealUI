@@ -15,7 +15,6 @@ https://raw.githubusercontent.com/Meorawr/wow-ui-schema/main/UI.xsd">
     <!-- Libraries -->
     <!--@non-debug@
     <Include file="LibSharedMedia-3.0\lib.xml"/>
-    <Script file="LibItemUpgradeInfo-1.0\Core.lua"/>
     <Script file="AceDB-3.0\AceDB-3.0.lua"/>
     @end-non-debug@-->
 </Ui>
