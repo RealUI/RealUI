@@ -32,7 +32,12 @@ local function UpdateCC(self, event, unit)
             self.Trinket:SetCooldown(startTime / 1000.0, duration / 1000.0)
             if not self.hasAnnounced then
                 local arenaDB = UnitFrames.db.profile.arena
-                if arenaDB.announceUse then
+                -- 12.1.5 age verification: a restricted account's chat is
+                -- suppressed, and each send prints Blizzard's restriction notice.
+                local restrictions = _G.C_SocialRestrictions
+                local restricted = restrictions and restrictions.IsAgeVerificationRestricted
+                    and restrictions.IsAgeVerificationRestricted()
+                if arenaDB.announceUse and not restricted then
                     local chat = arenaDB.announceChat
                     if chat == "GROUP" then
                         chat = "INSTANCE_CHAT"
