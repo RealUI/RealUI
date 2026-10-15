@@ -406,6 +406,10 @@ local CreateHealthStatus do
         -- 2026-08-24). Same two lines oUF's own `Update` opens with, and the
         -- same two `UpdatePvPIcon` below already had — this override was the
         -- one that never got them.
+        -- oUF 14.2.0 also registers `PLAYER_PVP_FLAG_CHANGED` unitless, and
+        -- forwards its isPvpFlagged boolean in the unit slot: `true` read as
+        -- another unit, so flagging on never updated. Only a string is a unit.
+        if _G.type(unit) ~= "string" then unit = nil end
         if unit and unit ~= self.__unit then return end
         unit = unit or self.__unit
 
@@ -455,6 +459,7 @@ local CreateHealthStatus do
         prestigePortraitAlliance = [[Interface\TargetingFrame\UI-PVP-Alliance]],
     }
     local function UpdatePvPIcon(self, event, unit)
+        if _G.type(unit) ~= "string" then unit = nil end -- see UpdatePvP
         if unit and unit ~= self.__unit then return end
         unit = unit or self.__unit
         local element = self.PvPIndicator
