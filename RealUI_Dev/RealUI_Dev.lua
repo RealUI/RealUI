@@ -185,7 +185,6 @@ local taintCheck = {
 }
 local eventWhitelist = {
     ADDONS_UNLOADING = true,
-    ARENA_PREP_OPPONENT_SPECIALIZATIONS = true,
 }
 _G.C_Timer.NewTicker(1, function()
     -- Use securecallfunction so the taint check itself does not
