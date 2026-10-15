@@ -160,18 +160,19 @@ UnitFrames.arena = {
 _G.tinsert(UnitFrames.units, function()
     local db = UnitFrames.db.profile
     if not db.arena.enabled then return end
-    -- Forever check: CompactArenaFrame does not exist there. oUF 14.1.0 (#911)
-    -- now guards it in DisableBlizzard, but the return stays: Forever marks
-    -- GetArenaOpponentSpec SecretReturns, and oUF's arena prep (units.lua) and
-    -- the [arenaspec] and [raidcolor] tags truth-test it and would throw.
-    if not _G.CompactArenaFrame then return end
+    -- No CompactArenaFrame check here any more. Blizzard creates that frame on
+    -- demand (CompactArenaFrame_Generate, from the raid frame container) on
+    -- retail and Forever alike, so it is nil at login on both, and the old
+    -- "Forever check" kept arena frames off everywhere (2026-09-22 to 4.2.2).
+    -- Its reasons are gone: oUF 14.1.0 (#911) guards the missing frame in
+    -- DisableBlizzard, and arena prep is switched off below.
 
     for i = 1, 5 do
         local arena = oUF:Spawn("arena" .. i, "RealUIArenaFrame" .. i)
-        -- Retail 12.1.5 marks GetArenaOpponentSpec SecretReturns too, and
-        -- oUF 14.2.0's arena prep (units.lua updateArenaPreparation) truth-
-        -- tests it. oUF's documented opt-out: the frames show when the gates
-        -- open instead of during prep. Drop once oUF#895 is fixed upstream.
+        -- Retail 12.1.5 and Forever mark GetArenaOpponentSpec SecretReturns,
+        -- and oUF 14.2.0's arena prep (units.lua updateArenaPreparation)
+        -- truth-tests it. oUF's documented opt-out: the frames show when the
+        -- gates open instead of during prep. Drop once oUF#895 is fixed upstream.
         arena:SetAttribute("oUF-enableArenaPrep", false)
         if i == 1 then
             arena:SetPoint("RIGHT", "RealUIPositionersBossFrames", "LEFT", db.positions[UnitFrames.layoutSize].boss.x, db.positions[UnitFrames.layoutSize].boss.y)
