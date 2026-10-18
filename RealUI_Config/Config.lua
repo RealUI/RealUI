@@ -150,9 +150,13 @@ function RealUI:HuDTestMode(isConfigMode)
         _G.SpellActivationOverlayFrame:HideOverlays(_G.SpellActivationOverlayFrame, sAlert.id);
     end
 
-    -- Extra Action Button
+    -- Extra Action Button (none on WoW Forever: Camelot's
+    -- IsExtraActionButtonDisabled returns true since 70450)
     local EABFrame = _G.ExtraActionBarFrame
-    if not _G.HasExtraActionBar() then
+    local ActionButtonUtil = _G.ActionButtonUtil
+    local eabDisabled = ActionButtonUtil and ActionButtonUtil.IsExtraActionButtonDisabled
+        and ActionButtonUtil.IsExtraActionButtonDisabled()
+    if not eabDisabled and not _G.HasExtraActionBar() then
         if isConfigMode then
             EABFrame.button:Show()
             EABFrame:Show()
