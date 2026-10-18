@@ -862,6 +862,11 @@ function private.OnLoad()
         BarberShopFrame.AcceptButton:SetPoint("BOTTOMRIGHT", CharCustomizeFrame, -30, 15)
         -- BarberShopFrame.PriceFrame - Anchored to AcceptButton
 
+        -- WoW Forever 70450: Camelot's Options is a scroll child of an
+        -- OptionsScrollBox anchored below Categories; hanging Categories off
+        -- Options would be an anchor loop. Keep Blizzard's layout there.
+        if RealUI.isForever then return end
+
         CharCustomizeFrame.Categories:ClearAllPoints()
         CharCustomizeFrame.Categories:SetPoint("RIGHT", -21, 0)
         CharCustomizeFrame.Categories:SetPoint("BOTTOM", CharCustomizeFrame.Options, "TOP", 0, 40)
