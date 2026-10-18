@@ -5,7 +5,7 @@
 ## Category: RealUI_Core
 ## Notes: Buff and debuff tracking for RealUI
 ## Author: Hanshi
-## Version: 4.2.3
+## Version: 4.2.4
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
 ## RequiredDeps: RealUI
 ## OptionalDeps: Masque
