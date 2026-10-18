@@ -1061,7 +1061,7 @@ do -- CombatText
                         get = function() return CombatText.db.global.blizzardFCT.floatingCombatTextCombatDamage end,
                         set = function(_, value)
                             CombatText.db.global.blizzardFCT.floatingCombatTextCombatDamage = value
-                            _G.SetCVar("floatingCombatTextCombatDamage", value and "1" or "0")
+                            CombatText:SetBlizzardFCTCVar("floatingCombatTextCombatDamage", value)
                         end,
                         order = 2,
                     },
@@ -1072,7 +1072,7 @@ do -- CombatText
                         get = function() return CombatText.db.global.blizzardFCT.floatingCombatTextCombatHealing end,
                         set = function(_, value)
                             CombatText.db.global.blizzardFCT.floatingCombatTextCombatHealing = value
-                            _G.SetCVar("floatingCombatTextCombatHealing", value and "1" or "0")
+                            CombatText:SetBlizzardFCTCVar("floatingCombatTextCombatHealing", value)
                         end,
                         order = 3,
                     },

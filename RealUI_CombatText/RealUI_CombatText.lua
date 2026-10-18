@@ -111,6 +111,17 @@ function CombatText:UNIT_EXITING_VEHICLE(event, unit)
     end
 end
 
+-- WoW Forever 70450 drives "Text on target" damage and healing through
+-- `_v2` CVars; write that twin too wherever the client defines it.
+function CombatText:SetBlizzardFCTCVar(name, enabled)
+    local value = enabled and "1" or "0"
+    _G.SetCVar(name, value)
+    local twin = name .. "_v2"
+    if _G.C_CVar.GetCVarInfo(twin) then
+        _G.SetCVar(twin, value)
+    end
+end
+
 function CombatText:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_CombatTextDB", defaults, true)
     FramePoint:RegisterMod(self)
@@ -126,8 +137,8 @@ function CombatText:OnInitialize()
     -- Apply Blizzard FCT CVar settings
     local fct = self.db.global.blizzardFCT
     _G.SetCVar("enableFloatingCombatText", fct.enableFloatingCombatText and "1" or "0")
-    _G.SetCVar("floatingCombatTextCombatDamage", fct.floatingCombatTextCombatDamage and "1" or "0")
-    _G.SetCVar("floatingCombatTextCombatHealing", fct.floatingCombatTextCombatHealing and "1" or "0")
+    self:SetBlizzardFCTCVar("floatingCombatTextCombatDamage", fct.floatingCombatTextCombatDamage)
+    self:SetBlizzardFCTCVar("floatingCombatTextCombatHealing", fct.floatingCombatTextCombatHealing)
     _G.SetCVar("nameplateShowDamage", fct.nameplateShowDamage and "1" or "0")
 
     local LibSink = _G.LibStub("LibSink-2.0", true)
