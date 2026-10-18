@@ -1,3 +1,38 @@
+## [4.2.4] - 2026-10-18 ##
+### Summary ###
+A compatibility release for WoW Forever 1.60.1 build 70450. **The minimap works again on Forever:** the build rebuilt Blizzard's minimap header, and RealUI's minimap module stopped at login, leaving no info lines and no button collection. The barber shop keeps its layout, and RealUI's combat text options reach Forever's new damage and healing text settings. On retail, the only visible change is Aurora's skin for the new-character tutorial buttons.
+
+Aurora goes from 12.1.5.1 to 12.1.5.2.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_CombatText
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora
+
+### Added ###
+
+  * add: Aurora — the guild Preferred Play tab (locale and datacenter) on WoW Forever is skinned
+  * add: Aurora — the new-character keyboard and mouse intro's OK and Skip Tutorial buttons are skinned
+
+### Fixed ###
+
+  * fix: **the minimap module loads on WoW Forever 70450.** Two frames it hides at login, the header border and the instance difficulty icon, no longer exist there; it now skips whichever is missing, on retail too
+  * fix: the addon compartment button stays where RealUI places it after an Edit Mode change; Forever 70450 moves it back next to Blizzard's calendar button on every minimap layout update
+  * fix: Blizzard's new event button sits on the left edge of RealUI's square minimap instead of floating at Blizzard's round-map spot
+  * fix: turning on Rotate Minimap on WoW Forever no longer brings back the round mask and compass ring
+  * fix: the barber shop on WoW Forever keeps Blizzard's options layout; Forever 70450 put the options in a scroll box, which RealUI's re-anchoring conflicted with
+  * fix: the "Outgoing Damage Numbers" and "Outgoing Healing Numbers" options also set the `_v2` settings that WoW Forever 70450 uses
+  * fix: config mode no longer shows a placeholder extra action button on WoW Forever, which has no extra action bar
+  * fix: Aurora — on WoW Forever, pet battle tooltips stay skinned, the redesigned hunter stable is skinned, progress bars (skills, reputation, professions, pet experience) line up with their backdrop, and close and maximize buttons keep their size
+
+### Changed ###
+
+  * chg: Aurora is bundled from its 12.1.5.2 release
+
+
 ## [4.2.3] - 2026-10-15 ##
 ### Summary ###
 A maintenance release. **Arena frames are back:** since 4.1.0 RealUI showed no arena frames at all, on retail or WoW Forever. Debuffs you cast now show when a refresh would carry over their remaining duration, PvP icons show for players whose PvP state the game hides from addons, and nameplates stay on whole pixels as they move.
