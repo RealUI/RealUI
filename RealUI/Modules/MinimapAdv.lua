@@ -1753,6 +1753,20 @@ local function CreateButton(Name, Texture, index)
     return NewButton
 end
 
+local function PlaceAddonCompartment()
+    if not MMFrames.info.Coords then return end
+
+    -- FIXLATER to make configurable
+    local anchorto = dbPos and dbPos.anchorto or "TOPLEFT"
+    local isTop = anchorto:find("TOP")
+    local isLeft = anchorto:find("LEFT")
+    -- Set position relative to anchorto
+    local CompartmentFramePosition = _G.format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
+
+    _G.AddonCompartmentFrame:ClearAllPoints()
+    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition, MMFrames.info.Coords, CompartmentFramePosition, 0, 20)
+end
+
 local function CreateFrames()
     -- Set up Frame table
     MinimapAdv.Frames = {
@@ -1937,27 +1951,20 @@ local function CreateFrames()
     MMFrames.info.zoneIndicator.bg:SetTexture(Textures.ZoneIndicator)
     MMFrames.info.zoneIndicator.bg:SetVertexColor(0.5, 0.5, 0.5)
     MMFrames.info.zoneIndicator.bg:SetAllPoints(MMFrames.info.zoneIndicator)
-    local isTop
-    local isLeft
-    -- FIXLATER to make configurable
-    local anchorto = dbPos and dbPos.anchorto or "TOPLEFT"
-    if isInFarmMode then
-        isTop = anchorto:find("TOP")
-        isLeft = anchorto:find("LEFT")
-    else
-        isTop = anchorto:find("TOP")
-        isLeft = anchorto:find("LEFT")
-    end
-    -- Set position relative to anchorto
-    local CompartmentFramePosition = _G.format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
 
     Skin.DropdownButton(_G.AddonCompartmentFrame)
     _G.AddonCompartmentFrame:SetParent(_G.UIParent)
     _G.AddonCompartmentFrame:SetFrameLevel(10)
-    _G.AddonCompartmentFrame:ClearAllPoints()
-    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition,MMFrames.info.Coords,CompartmentFramePosition,0,20)
+    PlaceAddonCompartment()
     _G.AddonCompartmentFrame:SetScale(0.7)
     _G.AddonCompartmentFrame:Hide()
+
+    -- SetHeaderUnderneath (run on every Edit Mode minimap apply) re-anchors
+    -- the compartment next to GameTimeFrame since Forever 70450; Mainline
+    -- has the same code for retail to pick up. Re-assert our anchor after.
+    if _G.MinimapCluster.SetHeaderUnderneath then
+        _G.hooksecurefunc(_G.MinimapCluster, "SetHeaderUnderneath", PlaceAddonCompartment)
+    end
 end
 
 -------------------
@@ -1970,6 +1977,18 @@ local function SetUpMinimapFrame()
     _G.Minimap:HookScript("OnLeave", Minimap_OnLeave)
    -- -- Make it square
     _G.Minimap:SetMaskTexture(Textures.SquareMask)
+
+    -- WoW Forever: toggling the rotateMinimap CVar runs Camelot's
+    -- UpdateMinimapConfig, which puts the round mask back and shows the
+    -- compass underlay. Mainline's is an empty stub.
+    if _G.MinimapCluster.UpdateMinimapConfig then
+        _G.hooksecurefunc(_G.MinimapCluster, "UpdateMinimapConfig", function()
+            _G.Minimap:SetMaskTexture(Textures.SquareMask)
+            if _G.MinimapCompassTextureUnderlay then
+                _G.MinimapCompassTextureUnderlay:Hide()
+            end
+        end)
+    end
 
     -- Inside a house Blizzard shows a static round picture on MinimapBackdrop
     -- (UpdateStaticOverlayTexture, atlas ui-hud-minimap-housing-indoor-static-bg),
@@ -2009,7 +2028,10 @@ local function SetUpMinimapFrame()
 
     -- -- Disable MinimapCluster area
     _G.MinimapCluster:EnableMouse(false)
-    _G.MinimapCluster.BorderTop:Hide()
+    -- Forever 70450 moved BorderTop into ZoneTextButton (Camelot drops it).
+    if _G.MinimapCluster.BorderTop then
+        _G.MinimapCluster.BorderTop:Hide()
+    end
     _G.MinimapCluster.Tracking.Button:Hide()
     _G.MinimapCluster.Tracking.Background:Hide()
     _G.MinimapCluster.ZoneTextButton:Hide()
@@ -2043,9 +2065,9 @@ local function SetUpMinimapFrame()
     end
 
     -- WoW Forever: Camelot's day/night indicator (Blizzard_Minimap\Camelot\
-    -- Diel.lua) is a plain frame parented to MinimapCluster and anchored by
-    -- CENTER offsets, so once RealUI moves the Minimap it is left behind in
-    -- the screen corner. Re-home it as a small badge on our minimap. Blizzard's
+    -- Diel.lua) is a plain frame parented to MinimapCluster.MinimapContainer
+    -- and anchored by CENTER offsets, so once RealUI moves the Minimap it is
+    -- left behind in the screen corner. Re-home it as a small badge on our minimap. Blizzard's
     -- SetEditModeScale override re-anchors it with a CENTER point on every
     -- layout apply, which would stack a second point on ours; re-assert after.
     local dielFrame = _G.MinimapCluster.DielFrame
@@ -2058,6 +2080,23 @@ local function SetUpMinimapFrame()
         end
         PlaceDielFrame()
         _G.hooksecurefunc(_G.MinimapCluster, "SetEditModeScale", PlaceDielFrame)
+    end
+
+    -- Forever 70450 (Mainline code, so retail later): the external event
+    -- button sits on MinimapBackdrop at fixed offsets for the round map, and
+    -- has no name, so the button collector never sees it. Dock it on the
+    -- left edge, the one side no other RealUI badge uses.
+    local eventButton = _G.MinimapBackdrop and _G.MinimapBackdrop.ExternalEventURLButton
+    if eventButton then
+        local function PlaceEventButton()
+            eventButton:SetScale(0.6)
+            eventButton:ClearAllPoints()
+            eventButton:SetPoint("LEFT", _G.Minimap, "LEFT", 2, 0)
+        end
+        PlaceEventButton()
+        if _G.MinimapCluster.ApplyExternalEventURLButtonAnchor then
+            _G.hooksecurefunc(_G.MinimapCluster, "ApplyExternalEventURLButtonAnchor", PlaceEventButton)
+        end
     end
 
     local queueStatusButton = _G.QueueStatusButton
@@ -2077,7 +2116,11 @@ local function SetUpMinimapFrame()
     -- _G.MinimapCluster.IndicatorFrame:SetPoint("TOPRIGHT",_G.Minimap,"TOPRIGHT",-1,-20) -- this is mail icon
     -- _G.MinimapCluster.IndicatorFrame:SetScale(0.7)
     _G.MinimapCluster.IndicatorFrame:Hide() -- disable the mail icon -- FIXLATER to make configurable
-    _G.MinimapCluster.InstanceDifficulty:Hide()  -- disable the Instance Difficulty icon
+    -- disable the Instance Difficulty icon; built in code since Forever
+    -- 70450, and Camelot never creates it
+    if _G.MinimapCluster.InstanceDifficulty then
+        _G.MinimapCluster.InstanceDifficulty:Hide()
+    end
 end
 
 ----------
