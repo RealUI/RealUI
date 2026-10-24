@@ -154,7 +154,8 @@ end
 ---------------------------------------------------------
 
 function RealUI_Tracker:PLAYER_ENTERING_WORLD()
-    inEncounter = _G.IsEncounterInProgress() and true or false
+    -- C_ API: the global is a deprecation shim, nil when loadDeprecationFallbacks is off
+    inEncounter = _G.C_InstanceEncounter.IsEncounterInProgress() and true or false
     inCombat = _G.InCombatLockdown() and true or false
     self:UpdateState()
 end
