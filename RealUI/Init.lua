@@ -84,7 +84,8 @@ end
 
 RealUI.realmInfo = {
     realm = GetRealmKey(),
-    connectedRealms = _G.GetAutoCompleteRealms() or {},
+    -- The global is a Blizzard_Deprecated shim, nil when loadDeprecationFallbacks is off
+    connectedRealms = _G.C_AutoComplete.GetAutoCompleteRealms() or {},
     id = _G.GetRealmID(),
 }
 
