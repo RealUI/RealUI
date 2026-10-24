@@ -156,7 +156,7 @@ function RealUI:HuDTestMode(isConfigMode)
     local ActionButtonUtil = _G.ActionButtonUtil
     local eabDisabled = ActionButtonUtil and ActionButtonUtil.IsExtraActionButtonDisabled
         and ActionButtonUtil.IsExtraActionButtonDisabled()
-    if not eabDisabled and not _G.HasExtraActionBar() then
+    if not eabDisabled and not _G.C_ActionBar.HasExtraActionBar() then
         if isConfigMode then
             EABFrame.button:Show()
             EABFrame:Show()
