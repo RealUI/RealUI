@@ -12,14 +12,19 @@ local RealUI = _G.RealUI
 
 do --[[ FrameXML\PaperDollFrame.lua ]]
     local ShouldHaveEnchant, GetNumSockets do
+        -- true: enchantable on every client; an expansion level: only there.
+        -- The armor slots were gated on 8 (Shadowlands), so on Midnight they
+        -- never flagged a missing enchant. Midnight enchants head, shoulders,
+        -- chest, legs and feet; bracers, cloak and gloves no longer take one.
+        local MIDNIGHT = _G.LE_EXPANSION_MIDNIGHT
         local enchantSlots = {
-            [5] = 8, -- Chest
-            [8] = 8, -- Boots
-            [9] = 8, -- Bracers
-            [10] = 8, -- Gloves
+            [1] = MIDNIGHT, -- Head
+            [3] = MIDNIGHT, -- Shoulder
+            [5] = MIDNIGHT, -- Chest
+            [7] = MIDNIGHT, -- Legs
+            [8] = MIDNIGHT, -- Boots
             [11] = true, -- Ring 1
             [12] = true, -- Ring 2
-            [15] = 8,  -- Cloak
             [16] = true, -- Main Hand
             [17] = true, -- Off Hand
         }
@@ -293,6 +298,41 @@ do --[[ FrameXML\PaperDollFrame.xml ]]
     end
 end
 
+-- Enchanting or socketing an equipped item changes its link without a
+-- PLAYER_EQUIPMENT_CHANGED for the slot, so Blizzard never re-runs the slot
+-- update and the enchant and gem markers stay stale until the sheet reopens.
+-- Refresh only RealUI's own regions; Blizzard's update is left alone. The
+-- refresh is deferred and batched: the events arrive in bursts, and the new
+-- link can land a moment after the spell or socket result.
+local slotNames = {
+    "Head", "Neck", "Shoulder", "Back", "Chest", "Shirt", "Tabard", "Wrist",
+    "Hands", "Waist", "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1",
+    "MainHand", "SecondaryHand",
+}
+local refreshPending = false
+local function RefreshSlotInfo()
+    refreshPending = false
+    if not _G.PaperDollFrame:IsVisible() then return end
+    for _, slotName in next, slotNames do
+        local button = _G["Character"..slotName.."Slot"]
+        if button then
+            Hook.PaperDollItemSlotButton_Update(button)
+        end
+    end
+end
+local function QueueRefresh()
+    if refreshPending or not _G.PaperDollFrame:IsVisible() then return end
+    refreshPending = true
+    _G.C_Timer.After(0.2, RefreshSlotInfo)
+end
+
 _G.hooksecurefunc(private.FrameXML, "PaperDollFrame", function()
     _G.hooksecurefunc("PaperDollItemSlotButton_Update", Hook.PaperDollItemSlotButton_Update)
+
+    local inventoryWatcher = _G.CreateFrame("Frame")
+    inventoryWatcher:SetScript("OnEvent", QueueRefresh)
+    inventoryWatcher:RegisterUnitEvent("UNIT_INVENTORY_CHANGED", "player")
+    inventoryWatcher:RegisterEvent("ENCHANT_SPELL_COMPLETED")
+    inventoryWatcher:RegisterEvent("SOCKET_INFO_SUCCESS")
+    inventoryWatcher:RegisterEvent("SOCKET_INFO_UPDATE")
 end)
