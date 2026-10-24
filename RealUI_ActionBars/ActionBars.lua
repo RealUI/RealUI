@@ -14,11 +14,13 @@ local AB = private.AB
 -- the real special pages — vehicle/possess 12, override 14, temp-shapeshift
 -- 17 (skyriding is bonusbar 5 -> page 11). Wrong numbers here leave the bar
 -- stuck on page 1 with empty special slots (the "flight bar doesn't swap"
--- symptom).
+-- symptom). Read from C_ActionBar: the bare globals are Blizzard_Deprecated
+-- shims, nil when loadDeprecationFallbacks is off.
 local function BuildCommonMap()
-    local vehicle = (_G.GetVehicleBarIndex and _G.GetVehicleBarIndex()) or 12
-    local override = (_G.GetOverrideBarIndex and _G.GetOverrideBarIndex()) or 14
-    local tempShapeshift = (_G.GetTempShapeshiftBarIndex and _G.GetTempShapeshiftBarIndex()) or 17
+    local ActionBar = _G.C_ActionBar
+    local vehicle = ActionBar.GetVehicleBarIndex() or 12
+    local override = ActionBar.GetOverrideBarIndex() or 14
+    local tempShapeshift = ActionBar.GetTempShapeshiftBarIndex() or 17
     return ("[overridebar]%d;[possessbar]%d;[vehicleui]%d;[shapeshift]%d;"):format(
             override, vehicle, vehicle, tempShapeshift)
         .. "[bonusbar:5]11;[bonusbar:1]7;[bonusbar:2]8;[bonusbar:3]9;[bonusbar:4]10;"
