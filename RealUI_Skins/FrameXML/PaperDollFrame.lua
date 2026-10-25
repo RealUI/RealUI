@@ -1,7 +1,7 @@
 local _, private = ...
 
 -- [[ Lua Globals ]]
--- luacheck: globals next tonumber max type
+-- luacheck: globals next tonumber min type
 
 -- [[ Core ]]
 local Aurora = private.Aurora
@@ -11,7 +11,7 @@ local Hook, Skin = Aurora.Hook, Aurora.Skin
 local RealUI = _G.RealUI
 
 do --[[ FrameXML\PaperDollFrame.lua ]]
-    local ShouldHaveEnchant, GetNumSockets do
+    local ShouldHaveEnchant do
         -- true: enchantable on every client; an expansion level: only there.
         -- The armor slots were gated on 8 (Shadowlands), so on Midnight they
         -- never flagged a missing enchant. Midnight enchants head, shoulders,
@@ -34,37 +34,6 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                 canEnchant = _G.GetClientDisplayExpansionLevel() == canEnchant
             end
             return canEnchant and quality ~= _G.Enum.ItemQuality.Artifact
-        end
-
-        local scanningTooltip = _G.RealUIScanningTooltip
-        if not scanningTooltip then
-            scanningTooltip = _G.CreateFrame("GameTooltip", "RealUIScanningTooltip", _G.UIParent, "GameTooltipTemplate")
-            scanningTooltip:SetOwner(_G.UIParent, "ANCHOR_NONE")
-        end
-
-        function GetNumSockets(itemLink)
-            scanningTooltip:ClearLines()
-            local success = _G.pcall(scanningTooltip.SetHyperlink, scanningTooltip, itemLink)
-            if not success then
-                return 0
-            end
-
-            local numSockets, hasMeta = 0, false
-            for i = 5, 20 do
-                local l = _G["RealUIScanningTooltipTextLeft"..i]
-                if l then
-                    local text = l:GetText()
-                    if text then
-                        if text:find(_G.EMPTY_SOCKET_META) then
-                            numSockets = numSockets + 1
-                            hasMeta = true
-                        elseif text:find(_G.EMPTY_SOCKET_PRISMATIC) then
-                            numSockets = numSockets + 1
-                        end
-                    end
-                end
-            end
-            return numSockets, hasMeta
         end
     end
 
@@ -150,27 +119,26 @@ do --[[ FrameXML\PaperDollFrame.lua ]]
                         end
                     end
 
-                    local gems = {tonumber(gem1), tonumber(gem2), tonumber(gem3), tonumber(gem4)}
-                    local numSockets, hasMeta = GetNumSockets(itemLink)
+                    -- Filled sockets come from the link's gem fields; the rest
+                    -- of the item's sockets are empty. The socket count used
+                    -- to come from a hidden scanning tooltip whose lines never
+                    -- matched EMPTY_SOCKET_PRISMATIC, so empty sockets never
+                    -- showed.
+                    local gemIDs = {gem1, gem2, gem3, gem4}
                     local socketIdx = 0
-                    if #gems > 0 then
-                        for i, gem in next, gems do
-                            self.gems[i]:SetTexture(_G.C_Item.GetItemIconByID(gem))
-                            self.gems[i]:Show()
-                            socketIdx = i
+                    for i = 1, 4 do
+                        local gemID = tonumber(gemIDs[i])
+                        if gemID then
+                            socketIdx = socketIdx + 1
+                            self.gems[socketIdx]:SetTexture(_G.C_Item.GetItemIconByID(gemID))
+                            self.gems[socketIdx]:Show()
                         end
                     end
-                    if numSockets > 0 then
-                        for i = socketIdx + 1, socketIdx + numSockets do
-                            if hasMeta then
-                                self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Meta]])
-                                hasMeta = false
-                            else
-                                self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Prismatic]])
-                            end
-                            self.gems[i]:Show()
-                            socketIdx = i
-                        end
+                    local numSockets = _G.C_Item.GetItemNumSockets(itemLink) or 0
+                    for i = socketIdx + 1, min(numSockets, 4) do
+                        self.gems[i]:SetTexture([[Interface\ItemSocketingFrame\UI-EmptySocket-Prismatic]])
+                        self.gems[i]:Show()
+                        socketIdx = i
                     end
                     self.gems:Hide(socketIdx + 1)
                 else
