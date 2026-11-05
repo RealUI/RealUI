@@ -1,3 +1,44 @@
+## [4.2.5] - 2026-11-05 ##
+### Summary ###
+A maintenance release and the WoW Forever launch update, for live build 1.60.1.70790. **Forever's new PvP scoreboard and match results are skinned,** and item icons stay cropped in bags, at vendors and in quest rewards.
+
+**Keybind mode now shows a warning box for as long as it is on,** with an exit button. A key already in use asks before it rebinds, and combat ends the mode. The Friends, Guild and Currency tooltips no longer cut off columns, and the character sheet shows empty sockets.
+
+Aurora goes from 12.1.5.2 to 12.1.5.3.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_ActionBars
+  * RealUI_Bugs
+  * RealUI_Config
+  * RealUI_Skins
+  * RealUI_Tracker
+  * Aurora
+
+### Added ###
+
+  * add: **keybind mode shows a warning box while it is on,** with an Exit button. It stays up when the options window closes, which leaves the mode on; `/rab bind` still turns it off too
+
+### Fixed ###
+
+  * fix: **keybind mode no longer overwrites a key without asking.** A key that already does something else, such as W or Enter, keeps working and the box asks whether to bind it to the button. ESC on a button asks before it clears the button's keys
+  * fix: combat start ends keybind mode, with a chat line. Left on in combat, the mode could swallow the keyboard for the whole fight
+  * fix: the Friends, Guild and Currency tooltips size their columns to their content, so Status and Note are no longer cut off
+  * fix: the character sheet shows empty sockets; the count comes from `C_Item.GetItemNumSockets` instead of a tooltip scan
+  * fix: the character sheet's enchant and gem markers refresh when you enchant or socket an item, and the missing-enchant check covers the Midnight slots
+  * fix: RealUI works with Blizzard's deprecation fallbacks turned off (`loadDeprecationFallbacks`). Connected realms, encounter state, the extra action bar check and the vehicle, override and temporary shapeshift bar pages all read current APIs
+  * fix: Aurora — on WoW Forever, the PvP scoreboard and match results are skinned on their new layouts, including the Leave button
+  * fix: Aurora — item icons keep their crop on WoW Forever, on bags, vendors, quest rewards and other item buttons. The 12.1.7 PTR has the same change, so retail is covered ahead of that patch
+  * fix: Aurora — on WoW Forever, empty combined bag slots draw the bag's icon inside the slot, profession cards lose their gold icon border, swing timer art stays hidden, and reward track cards light up their border on hover
+  * fix: Aurora — the minimize button on the ready popups fits its box again
+
+### Changed ###
+
+  * chg: Aurora is bundled from its 12.1.5.3 release
+  * chg: BugGrabber is updated from v12.1.0 to v12.1.1
+
+
 ## [4.2.4] - 2026-10-18 ##
 ### Summary ###
 A compatibility release for WoW Forever 1.60.1 build 70450. **The minimap works again on Forever:** the build rebuilt Blizzard's minimap header, and RealUI's minimap module stopped at login, leaving no info lines and no button collection. The barber shop keeps its layout, and RealUI's combat text options reach Forever's new damage and healing text settings. On retail, the only visible change is Aurora's skin for the new-character tutorial buttons.
@@ -667,7 +708,9 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.3...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.5...develop
+[4.2.5]: https://github.com/RealUI/RealUI/compare/4.2.4...4.2.5
+[4.2.4]: https://github.com/RealUI/RealUI/compare/4.2.3...4.2.4
 [4.2.3]: https://github.com/RealUI/RealUI/compare/4.2.2...4.2.3
 [4.2.2]: https://github.com/RealUI/RealUI/compare/4.2.1...4.2.2
 [4.2.1]: https://github.com/RealUI/RealUI/compare/4.2.0...4.2.1
