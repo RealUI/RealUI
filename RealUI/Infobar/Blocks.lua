@@ -84,9 +84,22 @@ local function SetupTextTable()
         relative to the font-driven blocks (B36). ]]
     local MAX_ROWS = 15
     local ROW_HEIGHT = 15
-    local TABLE_WIDTH = 320
+    local TABLE_WIDTH = 320 -- Minimum; the table grows to fit its columns
+    local COLUMN_GAP = 2
+    local MAX_TEXT_COLUMN = 150 -- Longer text truncates and shows on hover
     local numTables = 0
     local extData = {}
+
+    local function GetColumnContentWidth(data, col)
+        testCell:SetFontObject("SystemFont_Shadow_Med1")
+        testCell:SetText(data.header.info[col])
+        local width = testCell:GetStringWidth()
+        for i = 1, #data do
+            testCell:SetText(data[i].info[col] or "")
+            width = max(width, testCell:GetStringWidth())
+        end
+        return width
+    end
 
     local GTT_FrameLevel
     local function Cell_OnEnter(self)
@@ -360,10 +373,11 @@ local function SetupTextTable()
         extData[data] = extData[data] or {}
         textTable.data = data
 
-        local flex, filler = {}
-        local remainingWidth = width
+        local filler
         local headerRow, headerData = textTable.header, data.header
-        for col = 1, #headerData.info do
+        local numColumns = #headerData.info
+        local totalWidth = COLUMN_GAP * (numColumns - 1)
+        for col = 1, numColumns do
             local header = headerRow[col]
             if not header then
                 header = _G.CreateFrame("Button", nil, headerRow)
@@ -373,7 +387,7 @@ local function SetupTextTable()
                 if col == 1 then
                     header:SetPoint("LEFT")
                 else
-                    header:SetPoint("LEFT", headerRow[col-1], "RIGHT", 2, 0)
+                    header:SetPoint("LEFT", headerRow[col-1], "RIGHT", COLUMN_GAP, 0)
                 end
 
                 header.text = header:CreateFontString(nil, "ARTWORK")
@@ -405,36 +419,28 @@ local function SetupTextTable()
             header.text:SetText(headerData.info[col])
             header.text:SetJustifyH(headerData.justify[col])
 
+            -- "FIT" and "FILL" columns take their full content. A number is the
+            -- column's minimum share of the table, and its text is capped.
             local size = headerData.size[col]
+            local columnWidth = GetColumnContentWidth(data, col)
             if size == "FILL" then
                 filler = header
-                size = "FIT"
+            elseif size ~= "FIT" then
+                columnWidth = max(width * size, min(columnWidth, MAX_TEXT_COLUMN))
             end
 
-            if size == "FIT" then
-                local cellWidth = header.text:GetStringWidth()
-                testCell:SetFontObject("SystemFont_Shadow_Med1")
-                for i = 1, #data do
-                    testCell:SetText(data[i].info[col])
-                    local newWidth = testCell:GetStringWidth()
-                    if newWidth > cellWidth then cellWidth = newWidth end
-                end
-                header:SetWidth(cellWidth)
-                if filler ~= header then
-                    remainingWidth = remainingWidth - cellWidth
-                end
-            else
-                flex[header] = size
-            end
-            Infobar:debug("Width", col, remainingWidth)
+            header:SetWidth(columnWidth)
+            totalWidth = totalWidth + columnWidth
+            Infobar:debug("Width", col, columnWidth, totalWidth)
         end
-        for header, size in next, flex do
-            local headerWidth = max(width * size, header.text:GetStringWidth())
-            remainingWidth = remainingWidth - headerWidth
-            header:SetWidth(headerWidth)
-            Infobar:debug("Width", headerWidth, remainingWidth)
+
+        -- data.width is a minimum. Report the real total, because the tooltip
+        -- clips anything past the width this cell gives it.
+        if totalWidth < width then
+            filler:SetWidth(filler:GetWidth() + width - totalWidth)
+        else
+            width = totalWidth
         end
-        filler:SetWidth(max(remainingWidth, filler:GetWidth()))
 
         Infobar:debug("Sort", extData[data].sortColumn, extData[data].sortInverted)
         if extData[data].sortColumn then
