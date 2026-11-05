@@ -129,6 +129,7 @@ tests\CooldownViewer_SetLayoutTest.lua
 tests\CooldownViewer_MergeTest.lua
 
 tests\ActionBars_PageLayoutTest.lua
+tests\ActionBars_KeybindWarningTest.lua
 
 EditModeDump.lua
 
