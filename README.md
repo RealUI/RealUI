@@ -8,8 +8,8 @@ RealUI is a minimalistic UI designed to be functional, yet also efficient and el
 Information
 -----------
 
-* Supports retail WoW (Midnight, 12.1.x) and the WoW Forever beta (1.60.x) from the same download.
-* Current release is 4.2.4 (Aurora 12.1.5.2).
+* Supports retail WoW (Midnight, 12.1.x) and WoW Forever (1.60.x) from the same download.
+* Current release is 4.2.5 (Aurora 12.1.5.3).
 * As of 4.0.0 the package contains **only RealUI's own addons** — no bundled third-party
   addons (standard embedded libraries such as Ace3, oUF, LibActionButton, and
   LibSharedMedia are still included, as in any addon). See "Recommended optional
@@ -82,7 +82,7 @@ new frame features, fixes the layout on 1440p screens, and adds WoW Forever supp
 * **1440p layout.** The Desktop High-Res preset uses a fixed 1200-unit canvas instead of doubling the UI
   scale. The bottom bar row and chat sit on the Infobar at any UI scale, and the Naga bar lines up with
   the bottom row until you move it.
-* **WoW Forever beta.** RealUI loads on Forever (interface 16001). There, target and focus names show the
+* **WoW Forever.** RealUI loads on Forever (interface 16001). There, target and focus names show the
   surname, hunters get a pet happiness icon, and group cells show the master looter.
 * `/realui editmode reset` rebuilds both RealUI Edit Mode layouts from the template.
 
@@ -189,7 +189,7 @@ Installation
 
 1. Exit WoW
 2. Move your old `Interface` and `WTF` folders to a backup folder. They are in `World of Warcraft\_retail_\`
-   for retail, or `World of Warcraft\_classic_beta_\` for the WoW Forever beta.
+   for retail, or `World of Warcraft\_forever_\` for WoW Forever.
 3. Copy the `Interface` folder from the download into that same folder.
 4. Launch WoW and log in
 
@@ -197,7 +197,7 @@ Update
 ------
 
 1. Exit WoW
-2. Delete all RealUI and nibRealUI folders from `Interface\AddOns` (in `_retail_` or `_classic_beta_`)
+2. Delete all RealUI and nibRealUI folders from `Interface\AddOns` (in `_retail_` or `_forever_`)
 3. Copy the `Interface` folder from the download into the same client folder.
 4. Launch WoW and log in
 
