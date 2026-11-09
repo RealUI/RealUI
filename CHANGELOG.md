@@ -1,3 +1,31 @@
+## [4.2.6] - 2026-11-09 ##
+### Summary ###
+A hotfix for WoW Forever dungeons. Inside a dungeon, Forever keeps unit GUIDs secret, and the range library RealUI bundles (LibRangeCheck-3.0) used the GUID as a table key there, so the HuD target frame's range display raised an error on every update. Upstream fixed it on 2026-11-07, two days after 4.2.5 was packaged; this release carries the fixed library.
+
+It also fixes the DBM options window, which errored in every options area, and four Aurora skins from the first Forever screenshots.
+
+Aurora goes from 12.1.5.3 to 12.1.5.4.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Skins
+  * Aurora
+
+### Fixed ###
+
+  * fix: **the target range display no longer errors in WoW Forever dungeons.** LibRangeCheck-3.0 goes from minor 38 to 39, which checks for a secret GUID on every client, not only on retail, and caches by unit instead
+  * fix: **the DBM options window no longer errors in every options area.** The DBM-GUI skin is rewritten for DBM-GUI 12.1.20: the window, tabs, category list, search and every panel's controls. Timer bars and warnings keep DBM's own styles
+  * fix: Aurora — guild and community roster names are no longer dimmed by the member list's backdrop
+  * fix: Aurora — trainer list rows are skinned, so they no longer show Blizzard's dark row plate; WoW Forever's category headers get a flat backdrop
+  * fix: Aurora — the divider above an open letter's attachments is hidden
+  * fix: Aurora — on WoW Forever, the profession window's Create and Create All buttons lose Blizzard's red plate and end caps
+
+### Changed ###
+
+  * chg: Aurora is bundled from its 12.1.5.4 release
+
+
 ## [4.2.5] - 2026-11-05 ##
 ### Summary ###
 A maintenance release and the WoW Forever launch update, for live build 1.60.1.70790. **Forever's new PvP scoreboard and match results are skinned,** and item icons stay cropped in bags, at vendors and in quest rewards.
@@ -708,7 +736,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.5...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.6...develop
+[4.2.6]: https://github.com/RealUI/RealUI/compare/4.2.5...4.2.6
 [4.2.5]: https://github.com/RealUI/RealUI/compare/4.2.4...4.2.5
 [4.2.4]: https://github.com/RealUI/RealUI/compare/4.2.3...4.2.4
 [4.2.3]: https://github.com/RealUI/RealUI/compare/4.2.2...4.2.3
