@@ -507,6 +507,11 @@ function RealUI:ChatCommand_Config(input)
         elseif command == "resetinventory" then
             local invMod = self:GetModule("Inventory", true)
             if invMod then
+                -- B212: the bags restore a saved drag position at login; clear it too.
+                if invMod.db and invMod.db.char then
+                    invMod.db.char.position = {}
+                end
+
                 local inv = invMod.main
                 if inv then
                     inv:ClearAllPoints()
@@ -1011,6 +1016,15 @@ _G.StaticPopupDialogs["PUDRUIRELOADUI"] = {
     button2 = "No",
     OnAccept = function()
         _G.ReloadUI()
+    end,
+    -- B213: Blizzard shows every popup at DIALOG strata, but the config
+    -- windows that ask for a reload (AceConfigDialog's frames) sit at
+    -- FULLSCREEN_DIALOG, so the prompt opened behind them. Lift this one
+    -- dialog above them; StaticPopup_Show sets DIALOG again on the next show,
+    -- so other popups that reuse the frame are unaffected.
+    OnShow = function(dialog)
+        dialog:SetFrameStrata("FULLSCREEN_DIALOG")
+        dialog:Raise()
     end,
     timeout = 0,
     whileDead = true,
