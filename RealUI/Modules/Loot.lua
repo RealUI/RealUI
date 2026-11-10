@@ -79,7 +79,7 @@ local RealUIGroupLootFrame
 
 local function GroupLootOnEvent(self, event, ...)
     if event == "START_LOOT_ROLL" then
-        local rollId = ...
+        local rollId, rollTime = ...
         local _, name, _, _, _, canNeed, canGreed, canDisenchant, _, _, _, _, canTransmog = _G.GetLootRollItemInfo(rollId)
         local rollLink = _G.GetLootRollItemLink(rollId)
         GroupLootDebug(
@@ -92,7 +92,7 @@ local function GroupLootOnEvent(self, event, ...)
             "transmog=".._G.tostring(canTransmog),
             "linkType=".._G.tostring(type(rollLink) == "string" and rollLink:match("|H([^:|]+):") or nil)
         )
-        _G.tinsert(grouplootlist, {rollId = rollId})
+        _G.tinsert(grouplootlist, {rollId = rollId, rollTime = rollTime})
         Loot:UpdateGroupLoot()
     elseif event == "CONFIRM_LOOT_ROLL" then
         -- Server requires confirmation before the roll registers (e.g. housing decors,
@@ -187,6 +187,14 @@ local function GroupLootButtonOnClick(self, button)
     _G.StaticPopup_Hide("CONFIRM_LOOT_ROLL", rollId)
     frame.rollId = nil
     Loot:UpdateGroupLoot()
+end
+
+-- B215: the roll timer, as Blizzard's GroupLootFrame drives its own Timer bar.
+local function GroupLootTimerOnUpdate(bar)
+    local rollId = bar:GetParent().rollId
+    if rollId then
+        bar:SetValue(_G.GetLootRollTimeLeft(rollId) or 0)
+    end
 end
 
 local function GroupLootSortFunc(a, b)
@@ -313,6 +321,16 @@ function Loot:UpdateGroupLoot()
             Base.CropIcon(icon, iconFrame)
             frame.icon = icon
 
+            -- B215: time left on the roll, a thin bar along the bottom edge.
+            local timer = _G.CreateFrame("StatusBar", nil, frame)
+            timer:SetPoint("BOTTOMLEFT", 1, 1)
+            timer:SetPoint("BOTTOMRIGHT", -1, 1)
+            timer:SetHeight(3)
+            timer:SetStatusBarTexture(RealUI.textures.plain)
+            timer:SetStatusBarColor(Color.highlight:GetRGB())
+            timer:SetScript("OnUpdate", GroupLootTimerOnUpdate)
+            frame.timer = timer
+
             _G.tinsert(grouplootframes, frame)
         end
 
@@ -326,6 +344,13 @@ function Loot:UpdateGroupLoot()
 
         frame.rollId = value.rollId
         frame.rollLink = rollLink
+
+        -- A roll already running at login has no START_LOOT_ROLL time; the
+        -- time left is the best maximum we have.
+        local timeLeft = _G.GetLootRollTimeLeft(value.rollId) or 0
+        value.rollTime = value.rollTime or timeLeft
+        frame.timer:SetMinMaxValues(0, _G.math.max(value.rollTime, 1))
+        frame.timer:SetValue(timeLeft)
 
         if Needable then frame.need:Enable() else frame.need:Disable() end
 
