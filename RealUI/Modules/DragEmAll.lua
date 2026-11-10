@@ -209,7 +209,10 @@ local addonFrames = {
     Blizzard_Soulbinds = {
         SoulbindViewer = {}
     },
-    --Blizzard_SocialUI = {},
+    -- 12.1 Social UI: Forever opens it in place of FriendsFrame.
+    Blizzard_SocialUI = {
+        SocialUIFrame = {}
+    },
     --Blizzard_StoreUI = {},
     Blizzard_TalentUI = {
         PlayerTalentFrame = {}
@@ -240,6 +243,16 @@ local addonFrames = {
 
 local frames = {}
 
+-- UI panels the panel manager may already have shown (ShowUIPanel sets secure
+-- attributes, so IsProtected() is true) by the time we hook them. Same case as
+-- PlayerSpellsFrame below; HookFrame's force path wraps the calls in pcall.
+-- B223/B220: on Forever the Social UI and the professions window were skipped
+-- this way and could not be dragged.
+local forceHook = {
+    ProfessionsFrame = true,
+    SocialUIFrame = true,
+}
+
 local function CanHookFrame(frame)
     if not frame then
         return false
@@ -258,7 +271,7 @@ end
 
 function DragEmAll:HookFrames(list)
     for frameName, children in next, list do
-        self:HookFrame(frameName, children)
+        self:HookFrame(frameName, children, forceHook[frameName])
     end
 end
 
