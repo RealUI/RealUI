@@ -441,9 +441,6 @@ function BankBagMixin:OnShow()
     MainBagMixin.OnShow(self)
     _G.PlaySound(_G.SOUNDKIT.IG_MAINMENU_OPEN)
 
-    -- Let WoW remember the user's last drag position across sessions.
-    -- The Init anchor is only used on the very first open.
-
     if self.bankTypeSwitcher then
         self.bankTypeSwitcher:Refresh()
     end
@@ -1323,6 +1320,7 @@ function private.CreateFilterBag(main, filter)
     bag:SetScript("OnDragStop", function(this)
         this.parent:StopMovingOrSizing()
         RealUI.SetPixelPoint(this.parent)
+        private.SaveBagPosition(this.parent)
     end)
 
     if tag == "new" then
@@ -1379,6 +1377,12 @@ local function CreateBag(bagType)
     main.bagType = bagType
     main.bagIDs = info.bagIDs
     Inventory[bagType] = main
+
+    -- B212: Init set the default anchor; a saved drag position wins. The
+    -- shared OnDragStop (MakeFrameDraggable) only snaps to pixels, so save
+    -- after it.
+    private.RestoreBagPosition(main)
+    main:HookScript("OnDragStop", private.SaveBagPosition)
     tinsert(_G.UISpecialFrames, info.name)
     local showBagsLabel = bagType ~= "bank" and _G.BAGSLOTTEXT or nil
     local showBags = CreateFeatureButton(main, showBagsLabel, "shopping-bag",

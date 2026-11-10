@@ -29,6 +29,9 @@ local defaults = {
             main = false,
             bank = false,
         },
+        -- B212: dragged position, keyed by bagType like `locked`. Empty means
+        -- the default anchor set in each bag's Init.
+        position = {},
     }
 }
 
@@ -48,6 +51,34 @@ function private.SetBagLocked(bagType, locked)
     if not (db and db.char) then return end
     db.char.locked = db.char.locked or {}
     db.char.locked[bagType] = locked and true or false
+end
+
+--[[ B212: bag position, saved per character and bagType.
+     The bags used to rely on WoW's layout cache, but each bag's Init re-anchors
+     to its default and calls SetUserPlaced(false), so a dragged position never
+     survived a reload. RealUI owns the position now: the drag stop saves it,
+     and CreateBag restores it once the bag knows its bagType. ]]--
+function private.SaveBagPosition(main)
+    local db = Inventory.db
+    if not (db and db.char and main.bagType) then return end
+
+    local point, _, relPoint, x, y = main:GetPoint()
+    if not point then return end
+
+    db.char.position = db.char.position or {}
+    db.char.position[main.bagType] = {point, relPoint, x, y}
+
+    -- Keep WoW's layout cache out of it, or it may restore a second position.
+    main:SetUserPlaced(false)
+end
+
+function private.RestoreBagPosition(main)
+    local db = Inventory.db
+    local saved = db and db.char and db.char.position and db.char.position[main.bagType]
+    if not (saved and saved[1]) then return end
+
+    main:ClearAllPoints()
+    main:SetPoint(saved[1], _G.UIParent, saved[2], saved[3], saved[4])
 end
 
 function private.Update()

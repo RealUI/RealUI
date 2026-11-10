@@ -250,6 +250,13 @@ local items = {
             main:ClearAllPoints()
             main:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT", -50, 100)
             main:SetUserPlaced(false)
+
+            -- B212: drop the saved drag position, or the next login restores it.
+            local invMod = RealUI:GetModule("Inventory", true)
+            local position = invMod and invMod.db and invMod.db.char and invMod.db.char.position
+            if position then
+                position.main = nil
+            end
         end,
     },
     {
