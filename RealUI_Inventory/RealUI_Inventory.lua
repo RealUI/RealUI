@@ -72,6 +72,24 @@ function private.SaveBagPosition(main)
     main:SetUserPlaced(false)
 end
 
+--- B212: back to the default anchors, forgetting any saved drag position.
+--- Used by `/realui resetinventory`; returns how many bags it moved.
+function Inventory:ResetPositions()
+    if self.db and self.db.char then
+        self.db.char.position = {}
+    end
+
+    local moved = 0
+    for _, bagType in ipairs({"main", "bank"}) do
+        local bag = self[bagType]
+        if bag and bag.SetDefaultPoint then
+            bag:SetDefaultPoint()
+            moved = moved + 1
+        end
+    end
+    return moved
+end
+
 function private.RestoreBagPosition(main)
     local db = Inventory.db
     local saved = db and db.char and db.char.position and db.char.position[main.bagType]

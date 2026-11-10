@@ -506,27 +506,12 @@ function RealUI:ChatCommand_Config(input)
             return
         elseif command == "resetinventory" then
             local invMod = self:GetModule("Inventory", true)
-            if invMod then
-                -- B212: the bags restore a saved drag position at login; clear it too.
-                if invMod.db and invMod.db.char then
-                    invMod.db.char.position = {}
-                end
-
-                local inv = invMod.main
-                if inv then
-                    inv:ClearAllPoints()
-                    inv:SetPoint("CENTER", _G.UIParent, "CENTER", -200, 0)
-                    inv:SetUserPlaced(false)
-                end
-
-                local bank = invMod.bank
-                if bank then
-                    bank:ClearAllPoints()
-                    bank:SetPoint("CENTER", _G.UIParent, "CENTER", 200, 0)
-                    bank:SetUserPlaced(false)
-                end
-
-                print("|cff0099ffRealUI|r: Inventory and Bank positions have been reset.")
+            if invMod and invMod.ResetPositions then
+                -- B212: the module owns the default anchors and the saved
+                -- drag position, so it does the reset (bags bottom-right,
+                -- bank right of centre, as on a fresh install).
+                local moved = invMod:ResetPositions()
+                print(("|cff0099ffRealUI|r: Inventory and Bank positions have been reset (%d moved)."):format(moved))
             else
                 print("|cff0099ffRealUI|r: Inventory module not loaded.")
             end

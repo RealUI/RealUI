@@ -399,15 +399,19 @@ function InventoryBagMixin:Init()
     }
 
     self.new = {}
+    self:SetDefaultPoint()
+    self:RegisterEvent("QUEST_ACCEPTED")
+    self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+    self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
+end
+-- B212: also the target of Inventory:ResetPositions.
+function InventoryBagMixin:SetDefaultPoint()
     self:ClearAllPoints()
     -- B62: TOPLEFT 100,-100 sat on top of RealUI's minimap. Bottom-right is
     -- where the 3.x bags lived and keeps the default clear of the minimap,
     -- HuD and Infobar; the offset clears the Infobar strip.
     self:SetPoint("BOTTOMRIGHT", _G.UIParent, "BOTTOMRIGHT", -50, 100)
     self:SetUserPlaced(false)
-    self:RegisterEvent("QUEST_ACCEPTED")
-    self:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
-    self:RegisterEvent("BAG_NEW_ITEMS_UPDATED")
 end
 function InventoryBagMixin:OnShow()
     MainBagMixin.OnShow(self)
@@ -430,6 +434,10 @@ function BankBagMixin:Init()
         "PLAYER_MONEY",
     }
 
+    self:SetDefaultPoint()
+end
+-- B212: also the target of Inventory:ResetPositions.
+function BankBagMixin:SetDefaultPoint()
     self:ClearAllPoints()
     self:SetUserPlaced(false)
     -- Position the bank frame to the right of center, vertically centered.
