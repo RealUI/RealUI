@@ -74,6 +74,17 @@ function AB:OnEnable()
 
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
 
+    -- LAB only refreshes action-button cooldowns on ACTIONBAR_UPDATE_COOLDOWN.
+    -- An item cooldown that starts around a loading screen (hearthstone)
+    -- can miss it, leaving the bar blank until the next spell cast while the
+    -- bags (BAG_UPDATE_COOLDOWN) already show it. Replay LAB's handler then.
+    local LAB = _G.LibStub("LibActionButton-1.0")
+    local function RefreshCooldowns()
+        local onEvent = LAB.eventFrame:GetScript("OnEvent")
+        if onEvent then onEvent(LAB.eventFrame, "ACTIONBAR_UPDATE_COOLDOWN") end
+    end
+    self:RegisterEvent("BAG_UPDATE_COOLDOWN", RefreshCooldowns)
+
     private.QueueSecure(private.HideBlizzardBars)
     -- EditMode re-applies its layout after login/zoning and can resurrect the
     -- Blizzard bars; re-suppress each time.
@@ -85,6 +96,8 @@ function AB:OnEnable()
         -- B65: the Infobar can be built after our OnEnable, so the watcher
         -- may not have had a frame to attach to yet. Idempotent.
         if private.WatchInfobarHeight then private.WatchInfobarHeight() end
+        -- Cooldown data can lag the loading screen; re-read it once settled.
+        _G.C_Timer.After(1, RefreshCooldowns)
     end)
     self:RegisterEvent("EDIT_MODE_LAYOUTS_UPDATED", function()
         private.QueueSecure(private.HideBlizzardBars)
