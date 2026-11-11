@@ -555,8 +555,11 @@ do -- ButtonCollectFrame
     function MinimapAdv:UpdateButtonCollection()
         if not db.information or not db.information.minimapbuttons then return end
         CollectLibDBIconButtons()
+        -- HereBeDragons parents every minimap pin (HandyNotes, TomTom, ...)
+        -- to the Minimap; named ones would otherwise be swept into the box.
+        local hbdPins = HBDP and HBDP.minimapPins
         for i, child in next, {_G.Minimap:GetChildren()} do
-            if child:GetName() then
+            if child:GetName() and not (hbdPins and hbdPins[child]) then
                 if not(ignoreList[child:GetName()]) and not child.questID then
                     if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
                         setupButton(child)
