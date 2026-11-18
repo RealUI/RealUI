@@ -81,7 +81,13 @@ function ItemSlotMixin:Update()
     _G.SetItemButtonCount(self, itemInfo.stackCount)
     _G.SetItemButtonDesaturated(self, item:IsItemLocked())
 
-    if self:GetItemType() == "equipment" then
+    -- Stackable equipment (Forever's arrows, bullets and thrown weapons) keeps
+    -- its stack count; the item level only replaces the count on gear that
+    -- cannot stack.
+    -- C_Item.GetItemMaxStackCount does not exist on Forever; the stack size is
+    -- GetItemInfo's 8th return.
+    local maxStack = _G.select(8, _G.C_Item.GetItemInfo(itemInfo.itemID))
+    if self:GetItemType() == "equipment" and (maxStack or 1) <= 1 then
         self.Count:SetText(self.item:GetCurrentItemLevel())
         if quality and quality > _G.Enum.ItemQuality.Poor then
             self.Count:SetTextColor(_G.BAG_ITEM_QUALITY_COLORS[quality]:GetRGB())
