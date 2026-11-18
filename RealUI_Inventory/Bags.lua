@@ -618,6 +618,10 @@ function BankBagMixin:OnEvent(event, ...)
             self:UpdateMoneyButtonLockState()
         end
         return
+    elseif (event == "PLAYERBANKSLOTS_CHANGED" or event == "BAG_CONTAINER_UPDATE")
+        and RealUI.isForever and self.tabSidebar and self.activeBankType then
+        -- A bank bag moved in or out of a Forever bag tab: redraw its icon.
+        self.tabSidebar:Refresh(self.activeBankType)
     end
 
     -- Delegate to parent for all other events and for matching BAG_UPDATE
@@ -929,6 +933,46 @@ _G.StaticPopupDialogs["REALUI_BANK_SORT_CONFIRM"] = {
 local TAB_BUTTON_SIZE = 37
 local TAB_BUTTON_SPACING = 5
 
+-- Forever's (Camelot) bank has no retail tabs: tab 1 is the bank itself and
+-- every later tab is a bank bag, the item in slot N of the Characterbanktab
+-- (or Accountbanktab) container, as Camelot/BankFrame.lua's bag buttons read
+-- it. Returns that container and slot for a bag tab, nil for anything else.
+local function GetBankBagSlot(bankType, tabID)
+    if not RealUI.isForever then return end
+    local BagIndex = _G.Enum.BagIndex
+    local first, container
+    if bankType == _G.Enum.BankType.Character then
+        first, container = BagIndex.CharacterBankTab_1, BagIndex.Characterbanktab
+    elseif bankType == _G.Enum.BankType.Account then
+        first, container = BagIndex.AccountBankTab_1, BagIndex.Accountbanktab
+    end
+    if not (first and container) then return end
+    local slot = tabID - first + 1
+    if slot >= 2 then
+        return container, slot
+    end
+end
+local function GetTabIcon(bankType, tabData)
+    local container, slot = GetBankBagSlot(bankType, tabData.ID)
+    if container then
+        local location = _G.ItemLocation:CreateFromBagAndSlot(container, slot)
+        if _G.C_Item.DoesItemExist(location) then
+            return _G.C_Item.GetItemIcon(location)
+        end
+        return [[Interface\PaperDoll\UI-PaperDoll-Slot-Bag]]
+    elseif RealUI.isForever and not tabData.icon then
+        return [[Interface\Buttons\Button-Backpack-Up]]
+    end
+    return tabData.icon or _G.QUESTION_MARK_ICON
+end
+local function PickupBankBag(btn)
+    local container, slot = GetBankBagSlot(btn.bankType, btn.tabData.ID)
+    if container then
+        _G.C_Container.PickupContainerItem(container, slot)
+        return true
+    end
+end
+
 local TabSidebarMixin = {}
 function TabSidebarMixin:Init(bankFrame)
     self.bankFrame = bankFrame
@@ -1013,7 +1057,15 @@ function TabSidebarMixin:Refresh(bankType)
             btn.tabIcon = icon
 
             btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+            btn:RegisterForDrag("LeftButton")
+            -- Forever bag tabs: drag a bag off, or drop one on, like the
+            -- bag slots in Blizzard's bank.
+            btn:SetScript("OnDragStart", PickupBankBag)
+            btn:SetScript("OnReceiveDrag", PickupBankBag)
             btn:SetScript("OnClick", function(b, button)
+                if button == "LeftButton" and _G.CursorHasItem() and PickupBankBag(b) then
+                    return
+                end
                 if button == "RightButton" and b.tabData then
                     -- Right-click opens tab settings (task 9)
                     if self.bankFrame.OnTabSettingsRequested then
@@ -1026,7 +1078,10 @@ function TabSidebarMixin:Refresh(bankType)
             btn:SetScript("OnEnter", function(b)
                 if not b.tabData then return end
                 _G.GameTooltip:SetOwner(b, "ANCHOR_LEFT")
-                _G.GameTooltip_SetTitle(_G.GameTooltip, b.tabData.name, nil, true)
+                local container, slot = GetBankBagSlot(b.bankType, b.tabData.ID)
+                if not (container and _G.GameTooltip:SetBagItem(container, slot)) then
+                    _G.GameTooltip_SetTitle(_G.GameTooltip, container and _G.BANK_BAG or b.tabData.name, nil, true)
+                end
                 _G.GameTooltip:Show()
             end)
             btn:SetScript("OnLeave", _G.GameTooltip_Hide)
@@ -1035,7 +1090,8 @@ function TabSidebarMixin:Refresh(bankType)
         end
 
         btn.tabData = tabData
-        btn.tabIcon:SetTexture(tabData.icon or _G.QUESTION_MARK_ICON)
+        btn.bankType = bankType
+        btn.tabIcon:SetTexture(GetTabIcon(bankType, tabData))
         Base.CropIcon(btn.tabIcon)
 
         if not lastButton then
