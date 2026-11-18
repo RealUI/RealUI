@@ -670,7 +670,7 @@ local function CreateIconPickerPopup(menu)
     popup:SetFrameStrata("DIALOG")
     popup:SetToplevel(true)
     popup:EnableMouse(true)
-    Base.SetBackdrop(popup, Color.frame)
+    Skin.FrameTypeFrame(popup)  -- same opacity as the bags
 
     popup.buttons = {}
     for i, iconID in ipairs(BANK_TAB_ICONS) do
@@ -709,7 +709,7 @@ local function CreateTabSettingsMenu(bankFrame)
     menu:SetFrameStrata("DIALOG")
     menu:SetToplevel(true)
     menu:EnableMouse(true)
-    Base.SetBackdrop(menu, Color.frame)
+    Skin.FrameTypeFrame(menu)  -- same opacity as the bags; Base.SetBackdrop alone was near see-through
 
     -- Title
     local title = menu:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -960,7 +960,10 @@ local function GetTabIcon(bankType, tabData)
             return _G.C_Item.GetItemIcon(location)
         end
         return [[Interface\PaperDoll\UI-PaperDoll-Slot-Bag]]
-    elseif RealUI.isForever and not tabData.icon then
+    elseif RealUI.isForever and (not tabData.icon or tabData.icon == 134400
+        or tabData.icon == _G.QUESTION_MARK_ICON) then
+        -- Forever's tab 1 (the bank itself) reports the question-mark icon
+        -- (fileID 134400), not nil.
         return [[Interface\Buttons\Button-Backpack-Up]]
     end
     return tabData.icon or _G.QUESTION_MARK_ICON
