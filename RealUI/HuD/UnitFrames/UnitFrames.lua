@@ -41,7 +41,7 @@ function UnitFrames.SetAuraPosition(auraFrame, parent, posAnchor, initialAnchor)
 end
 
 -- oUF 14: aura containers are AuraContainer intrinsics built via
--- frame:CreateAuras() + AddGroup, replacing the old widget-based
+-- frame:CreateAurasElement() (CreateAuras before oUF 14.3) + AddGroup, replacing the old widget-based
 -- Buffs/Debuffs element. One element per legacy container; positioning on
 -- the parent stays the caller's job (Player/Target use SetAuraPosition,
 -- Boss anchors directly).
@@ -275,7 +275,7 @@ end
 --             pandemic (B193: border turns white in the pandemic window)}
 function UnitFrames.CreateAuraElement(dialog, settings)
     local frameWidth = (settings.maxWidth and settings.maxWidth > 0 and settings.maxWidth) or dialog:GetWidth()
-    local element = dialog:CreateAuras({
+    local element = dialog:CreateAurasElement({
         initialAnchor = UnitFrames.GetInitialAnchor(settings.growthX, settings.growthY),
         growthX = settings.growthX,
         growthY = settings.growthY,
