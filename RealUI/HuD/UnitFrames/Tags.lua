@@ -416,3 +416,4 @@ if tags.Methods["realui:healthValue"] then
 else
     _G.print("|cffff0000[RealUI Tags] ERROR: tags.Methods['realui:healthValue'] is nil after registration|r")
 end
+
