@@ -205,7 +205,7 @@ local function GetUnitClassification(unit)
             diff = _G.QuestDifficultyColors.header
         end
     else
-        diff = _G.GetCreatureDifficultyColor(level)
+        diff = RealUI.GetCreatureDifficultyColor(level)
     end
 
     if IsNonSecretTrue(_G.UnitIsDeadOrGhost(unit)) then

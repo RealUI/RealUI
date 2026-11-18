@@ -268,7 +268,7 @@ tags.Methods["realui:level"] = function(unit, realUnit)
     if level == "??" then
         return ("|cff%02x%02x%02x%s|r"):format(255, 0, 0, level)
     end
-    local color = _G.GetCreatureDifficultyColor(level)
+    local color = RealUI.GetCreatureDifficultyColor(level)
     return ("|cff%02x%02x%02x%s|r"):format(color.r * 255, color.g * 255, color.b * 255, level)
 end
 tags.Events["realui:level"] = "UNIT_LEVEL PLAYER_LEVEL_UP"
@@ -393,6 +393,8 @@ tags.Methods["realui:raidtop"] = function(unit)
     if PlainBool(_G.UnitIsConnected, unit) == false then return "|cff8f8f8fOFFLINE|r" end
     if PlainBool(_G.UnitIsDeadOrGhost, unit) then return "|cff8f8f8fDEAD|r" end
     if _G.UnitInVehicle and PlainBool(_G.UnitInVehicle, unit) then return "|cff33ccffVEHICLE|r" end
+    -- AFK was a Grid2 status (yellow); it went with the de-bundling.
+    if PlainBool(_G.UnitIsAFK, unit) then return "|cffffff00AFK|r" end
 
     local max, cur = _G.UnitHealthMax(unit), _G.UnitHealth(unit)
     if _G.issecretvalue and (_G.issecretvalue(max) or _G.issecretvalue(cur)) then

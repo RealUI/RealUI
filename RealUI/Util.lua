@@ -68,6 +68,40 @@ function RealUI.GetColorString(red, green, blue)
     return hexColor:format(red * 255, green * 255, blue * 255)
 end
 
+-- Forever levels like classic: grey ("no XP") starts much further below the
+-- player than retail's UnitQuestTrivialLevelRange says, and yellow covers only
+-- +/-2. Blizzard's GetCreatureDifficultyColor on Forever is the Mainline one,
+-- so on Forever we use the classic grey-level formula instead.
+local function GetClassicGrayLevel(playerLevel)
+    if playerLevel <= 5 then
+        return 0
+    elseif playerLevel < 40 then
+        return playerLevel - _G.floor(playerLevel / 10) - 5
+    elseif playerLevel < 60 then
+        return playerLevel - _G.floor(playerLevel / 5) - 1
+    end
+    return playerLevel - 9
+end
+function RealUI.GetCreatureDifficultyColor(level)
+    if not RealUI.isForever then
+        return _G.GetCreatureDifficultyColor(level)
+    end
+
+    local playerLevel = _G.UnitEffectiveLevel("player")
+    local levelDiff = level - playerLevel
+    local colors = _G.QuestDifficultyColors
+    if levelDiff >= 5 then
+        return colors.impossible
+    elseif levelDiff >= 3 then
+        return colors.verydifficult
+    elseif levelDiff >= -2 then
+        return colors.difficult
+    elseif level > GetClassicGrayLevel(playerLevel) then
+        return colors.standard
+    end
+    return colors.trivial
+end
+
 function RealUI.ColorGradient(percent, colors)
     local num = #colors
 
