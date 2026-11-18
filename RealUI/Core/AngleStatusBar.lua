@@ -303,7 +303,14 @@ end
 local AngleFrameMixin = _G.Mixin({}, BaseAngleMixin)
 function AngleFrameMixin:SetBackgroundColor(r, g, b, a)
     if type(r) == "table" then
-        r, g, b, a = r[1], r[2], r[3], r[4]
+        -- Colour objects (oUF 13+ colors, Aurora) have no array part: reading
+        -- [1]..[4] off them gave nils and the paint was silently skipped,
+        -- which is how the PvP stripe lost its flagged colour.
+        if r.GetRGBA then
+            r, g, b, a = r:GetRGBA()
+        else
+            r, g, b, a = r[1], r[2], r[3], r[4]
+        end
     end
     local color = bars[self].bgColor
     color.r, color.g, color.b, color.a = r, g, b, a
