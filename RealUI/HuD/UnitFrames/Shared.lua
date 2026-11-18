@@ -427,7 +427,7 @@ local CreateHealthStatus do
         end
 
         if color then
-            PvPIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            PvPIndicator:SetBackgroundColor(color)
         else
             PvPIndicator:SetBackgroundColor(_G.Aurora.Color.frame:GetRGBA())
         end
@@ -659,7 +659,7 @@ local CreatePowerStatus do
 
         if self.LeaderIndicator.status then
             local color = status[self.LeaderIndicator.status]
-            self.LeaderIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.LeaderIndicator:SetBackgroundColor(color)
             SafeShow(self.LeaderIndicator, true)
         else
             SafeShow(self.LeaderIndicator, false)
@@ -678,7 +678,7 @@ local CreatePowerStatus do
             SafeShow(self.CombatIndicator, true)
         elseif self.CombatIndicator.status then
             local color = status[self.CombatIndicator.status]
-            self.CombatIndicator:SetBackgroundColor(color[1], color[2], color[3], color[4])
+            self.CombatIndicator:SetBackgroundColor(color)
             SafeShow(self.CombatIndicator, true)
         else
             SafeShow(self.CombatIndicator, false)

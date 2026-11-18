@@ -202,6 +202,12 @@ local function BuildOptions()
                                 desc = "Your combo points or class resource (holy power, chi, arcane charges, soul shards, essence) as pips along the bottom of your target's health bar.",
                             },
                             height = { type = "range", name = "Height", min = 2, max = 8, step = 1, order = 2 },
+                            position = {
+                                type = "select", name = "Position", order = 3,
+                                desc = "Inside the bottom edge of the health bar, or below it. Below moves the castbar and power bar down on every enemy plate to make room.",
+                                values = { inside = "Inside health bar", below = "Below health bar" },
+                                sorting = { "inside", "below" },
+                            },
                         },
                     },
                     castbar = {

@@ -7,7 +7,8 @@ local NP = private.NP
      per plate: combo points conventionally belong to the target only, and one row
      means one set of events. It sits inside the bottom edge of the health bar, the
      one spot that never collides with the name and auras above, the castbar below,
-     or the percent text and markers beside it.
+     or the percent text and markers beside it. B236 added a "below" position, which
+     moves the castbar and power bar down to make room (see ClassPowerBelowOffset).
 
      The data is the player's own power, which is readable in combat (the HuD class
      points use it too), but every read still goes through Accessible. Player power
@@ -74,16 +75,35 @@ local function ReadPower()
     return cur, _G.math.min(max, MAX_PIPS)
 end
 
+-- B236: "below" puts the row under the health bar instead of inside its bottom
+-- edge. The space is reserved on every enemy plate (not just the target's), so
+-- the castbar and power bar under it never jump when the target changes; they
+-- read this offset. Nothing is reserved for a class with no resource.
+function private.ClassPowerBelowOffset()
+    local db = NP.db.profile.enemy.classPower
+    if resource and db.enabled and db.position == "below" then
+        return db.height + 1
+    end
+    return 0
+end
+
 local function Layout(plate, max)
     local db = NP.db.profile.enemy.classPower
     row:SetParent(plate)
     row:SetFrameLevel(plate:GetFrameLevel() + 10)
     row:ClearAllPoints()
-    row:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 1, 1)
-    row:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -1, 1)
+    local inset = 1
+    if db.position == "below" then
+        inset = 0
+        row:SetPoint("TOPLEFT", plate, "BOTTOMLEFT", 0, -1)
+        row:SetPoint("TOPRIGHT", plate, "BOTTOMRIGHT", 0, -1)
+    else
+        row:SetPoint("BOTTOMLEFT", plate, "BOTTOMLEFT", 1, 1)
+        row:SetPoint("BOTTOMRIGHT", plate, "BOTTOMRIGHT", -1, 1)
+    end
     row:SetHeight(db.height)
 
-    local width = (plate:GetWidth() - 2 - PIP_GAP * (max - 1)) / max
+    local width = (plate:GetWidth() - 2 * inset - PIP_GAP * (max - 1)) / max
     for i = 1, MAX_PIPS do
         local pip = row.pips[i]
         pip:ClearAllPoints()

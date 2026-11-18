@@ -54,6 +54,14 @@ function PowerBar.Attach(plate, unit)
         return token and _G.PowerBarColor[token]
     end) or _G.PowerBarColor["MANA"]
     bar:SetStatusBarColor(color.r, color.g, color.b)
+    -- B236: below class power pips when they sit under the health bar.
+    local offset = private.ClassPowerBelowOffset and private.ClassPowerBelowOffset() or 0
+    if bar.offset ~= offset then
+        bar.offset = offset
+        bar:ClearAllPoints()
+        bar:SetPoint("TOPLEFT", plate, "BOTTOMLEFT", 30, -1 - offset)
+        bar:SetPoint("TOPRIGHT", plate, "BOTTOMRIGHT", -30, -1 - offset)
+    end
     UpdatePower(plate)
     bar:Show()
 end

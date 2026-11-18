@@ -53,6 +53,24 @@ end
 local CastBar = {}
 local MAX_STAGE_TICKS = 4
 
+-- B236: with class power pips below the health bar the castbar moves down by
+-- their height, and the icon (which spans health bar to castbar) grows by the
+-- same. Re-run on every cast start, so a spec or option change reaches pooled
+-- plates too; the cache keeps that to a compare.
+local function AnchorCastBar(plate, force)
+    local cast = plate.CastBar
+    local offset = private.ClassPowerBelowOffset and private.ClassPowerBelowOffset() or 0
+    if not force and cast.offset == offset then return end
+    cast.offset = offset
+
+    local db = NP.db.profile.enemy
+    cast.bar:ClearAllPoints()
+    cast.bar:SetPoint("TOPLEFT", plate, "BOTTOMLEFT", 0, -3 - offset)
+    cast.bar:SetPoint("TOPRIGHT", plate, "BOTTOMRIGHT", 0, -3 - offset)
+    local iconSize = db.castbar.height + db.health.height + 3 + offset
+    cast.icon:SetSize(iconSize, iconSize)
+end
+
 function CastBar.Create(plate)
     local db = NP.db.profile.enemy.castbar
 
@@ -127,6 +145,7 @@ function CastBar.Create(plate)
         uninterruptible = uninterruptible, spellText = spellText,
         targetText = targetText, flash = flash, ticks = ticks,
     }
+    AnchorCastBar(plate, true)
 end
 
 -- B139: no event fires when an NPC changes target mid-cast, so this runs at
@@ -271,6 +290,7 @@ local function StartCast(plate, isChannel)
     else
         HideTicks(cast)
     end
+    AnchorCastBar(plate)
     cast.bar:Show()
     private.UpdateHealthColor(plate)
 end
@@ -349,8 +369,7 @@ function CastBar.OnDimensionsChanged(plate)
     local db = NP.db.profile.enemy
     local cast = plate.CastBar
     cast.bar:SetHeight(db.castbar.height)
-    local iconSize = db.castbar.height + db.health.height + 3
-    cast.icon:SetSize(iconSize, iconSize)
+    AnchorCastBar(plate, true)
     for i = 1, MAX_STAGE_TICKS do
         cast.ticks[i]:SetHeight(db.castbar.height)
     end
