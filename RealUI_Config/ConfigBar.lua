@@ -541,6 +541,20 @@ do -- Other
                                 end,
                                 order = 30,
                             },
+                            reverseOrder = {
+                                name = "Reverse Bar Order",
+                                desc = "Stack the main bars 3-2-1 from the top, with bar 1 lowest, instead of 1-2-3.",
+                                type = "toggle",
+                                get = function(info)
+                                    return ActionBars.db.profile[safeLayout()].reverseCenterOrder
+                                end,
+                                set = function(info, value)
+                                    ActionBars.db.profile[safeLayout()].reverseCenterOrder = value
+                                    ActionBars:ApplyABSettings()
+                                    RealUI:UpdatePositioners()
+                                end,
+                                order = 35,
+                            },
                             vertical = {
                                 name = L["HuD_Vertical"],
                                 desc = L["HuD_VerticalActionBarDesc"],

@@ -368,6 +368,7 @@ function ActionBars:OnInitialize()
             enableNagaBar = false,  -- Razer Naga action bar (Bar 2)
             [1] = {     -- DPS/Tank
                 centerPositions = 2,    -- 1 top, 2 bottom
+                reverseCenterOrder = false, -- true: bars 3-2-1 from the top (bar 1 lowest)
                 sidePositions = 1,      -- 2 Right, 0 Left
                 moveBars = {
                     stance = true,
@@ -377,6 +378,7 @@ function ActionBars:OnInitialize()
             },
             [2] = {     -- Healing
                 centerPositions = 2,    -- 1 top, 2 bottom
+                reverseCenterOrder = false, -- true: bars 3-2-1 from the top (bar 1 lowest)
                 sidePositions = 1,      -- 2 Right, 0 Left
                 moveBars = {
                     stance = true,

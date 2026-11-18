@@ -26,7 +26,11 @@ local debug = RealUI.GetDebug("ActionBarStage") -- luacheck: ignore
      B151: a third, separate choice, which action PAGES the bars show
      (RealUI_ActionBars `pageLayout`: Bartender4's numbering or Blizzard's).
      It is not geometry, so it sits under the preview instead of driving it,
-     and it only appears when RealUI_ActionBars is the active bar addon. ]]--
+     and it only appears when RealUI_ActionBars is the active bar addon.
+
+     B240: the order of the three main bars (`reverseCenterOrder`): 1-2-3 from
+     the top, or 3-2-1 with bar 1 lowest. It does change the geometry, so the
+     preview numbers its main bars. ]]--
 
 local ActionBarStage = {}
 RealUI.ActionBarStage = ActionBarStage
@@ -37,12 +41,14 @@ RealUI.ActionBarStage = ActionBarStage
 ActionBarStage.centerPositions = 2  -- shipped default: 1 center, 2 bottom
 ActionBarStage.sidePositions = 1    -- shipped default: 0 left, 2 right
 ActionBarStage.pageLayout = "bartender"
+ActionBarStage.reverseOrder = false
 
 local container          -- the frame holding everything (built lazily)
 local schematic          -- the preview box
 local centerButtons = {}
 local sideButtons = {}
 local pageButtons = {}
+local orderButtons = {}
 local pageRow            -- label + buttons, hidden without RealUI_ActionBars
 
 ---------------------------------------------------------------------------
@@ -55,8 +61,9 @@ local HOVER_BG  = {r = 0.2, g = 0.2, b = 0.2, a = 0.9}
 -- The wizard's content frame is only 510x240 (InstallUI: 550x500 window,
 -- content inset TOPLEFT 20,-200 / BOTTOMRIGHT -20,60), so everything here is
 -- budgeted against that: a 262px left column of single-line options (~220px
--- tall) and a 230px column beside it, the schematic (140px, from -30) above
--- the page-numbering row (label + one row of buttons, down to ~-222).
+-- tall) and a 230px column beside it: the schematic (120px, from -30), the
+-- bar-order buttons under it (-156 to -182), then the page-numbering row
+-- (label + one row of buttons, down to ~-232).
 local LEFT_WIDTH = 262
 local OPTION_HEIGHT = 26
 local OPTION_GAP = 4
@@ -64,7 +71,7 @@ local SIDE_OPTION_WIDTH = 82
 local SIDE_OPTION_GAP = 8
 
 local SCHEMATIC_WIDTH = 230
-local SCHEMATIC_HEIGHT = 140
+local SCHEMATIC_HEIGHT = 120
 local PAGE_OPTION_WIDTH = 111   -- two buttons + SIDE_OPTION_GAP = SCHEMATIC_WIDTH
 
 -- (centerPositions) -> centre bars above the HuD, bars along the bottom
@@ -92,6 +99,15 @@ local PAGE_OPTIONS = {
      tip = "Each bar shows the same spells as the matching Blizzard action bar, and takes over its keybinds. Pick this if you are coming from the default UI."},
 }
 local DEFAULT_PAGE = "bartender"
+
+-- (reverseCenterOrder) -> main bar order, top to bottom (B240)
+local ORDER_OPTIONS = {
+    {value = false, label = "Bars 1-2-3",
+     tip = "Bar 1 on top, then bars 2 and 3 below it."},
+    {value = true, label = "Bars 3-2-1",
+     tip = "Bar 3 on top and bar 1 lowest, the way Blizzard's bars stack."},
+}
+local DEFAULT_ORDER = false
 
 ---------------------------------------------------------------------------
 -- Helpers
@@ -158,6 +174,16 @@ local function BuildSchematic(parent)
         bar:Hide()
         schematic.bars[i] = bar
     end
+
+    -- Main bar numbers, so the bar order shows (B240)
+    schematic.numbers = {}
+    for i = 1, 3 do
+        local number = schematic:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        local font = number:GetFont()
+        number:SetFont(font, 8, "")
+        number:Hide()
+        schematic.numbers[i] = number
+    end
 end
 
 --- Draw the currently selected arrangement into the schematic.
@@ -169,6 +195,19 @@ local function RefreshSchematic()
 
     for _, bar in ipairs(schematic.bars) do
         bar:Hide()
+    end
+    for _, number in ipairs(schematic.numbers) do
+        number:Hide()
+    end
+
+    -- Screen slot (1-3 from the top) -> bar number, as Integration.lua maps it
+    local function NumberBar(bar, slot)
+        local id = ActionBarStage.reverseOrder and (4 - slot) or slot
+        local number = schematic.numbers[id]
+        number:ClearAllPoints()
+        number:SetPoint("RIGHT", bar, "LEFT", -3, 0)
+        number:SetText(id)
+        number:Show()
     end
 
     local index = 0
@@ -183,23 +222,25 @@ local function RefreshSchematic()
     end
 
     local barW, barH = 78, 6
-    local gap = 3
+    local gap = 4
 
-    -- Centre bars: stacked upward from just under the HuD dot
+    -- Centre bars: stacked downward from just under the HuD dot (slot i)
     for i = 1, center.top do
         local bar = NextBar()
         if bar then
             bar:SetSize(barW, barH)
             bar:SetPoint("CENTER", schematic, "CENTER", 0, -8 - (i - 1) * (barH + gap))
+            NumberBar(bar, i)
         end
     end
 
-    -- Bottom bars: stacked upward from the bottom edge
+    -- Bottom bars: stacked upward from the bottom edge (the lowest is slot 3)
     for i = 1, center.bottom do
         local bar = NextBar()
         if bar then
             bar:SetSize(barW, barH)
             bar:SetPoint("BOTTOM", schematic, "BOTTOM", 0, 8 + (i - 1) * (barH + gap))
+            NumberBar(bar, 4 - i)
         end
     end
 
@@ -219,7 +260,7 @@ local function RefreshSchematic()
          side by side. Worth stating because the single-column geometry is also
          what `TRACKER_X` in EditModeTemplates.lua is derived from (B116) — if
          this ever does become two columns, that offset has to widen with it. ]]
-    local sideLen = 56
+    local sideLen = 48  -- two stacked fit the 120px preview
 
     local function DrawSideColumn(count, edge, xSign)
         for i = 1, count do
@@ -243,14 +284,16 @@ end
 ---------------------------------------------------------------------------
 
 -- Which stage field each option row edits.
-local AXIS_FIELDS = { center = "centerPositions", side = "sidePositions", page = "pageLayout" }
+local AXIS_FIELDS = {
+    center = "centerPositions", side = "sidePositions", page = "pageLayout", order = "reverseOrder",
+}
 
 local function IsSelected(btn)
     return btn.value == ActionBarStage[AXIS_FIELDS[btn.axis]]
 end
 
 local function RefreshHighlights()
-    for _, buttons in ipairs({centerButtons, sideButtons, pageButtons}) do
+    for _, buttons in ipairs({centerButtons, sideButtons, pageButtons, orderButtons}) do
         for _, btn in ipairs(buttons) do
             local selected = IsSelected(btn)
             btn.bg:SetColorTexture(
@@ -378,10 +421,26 @@ local function Build(parent)
         sideButtons[i] = btn
     end
 
-    -- B151 page numbering: under the preview, in the right-hand column
+    -- B240 bar order: right under the preview, next to the numbers it
+    -- changes. The button labels say what they are; no heading fits.
+    for i, option in ipairs(ORDER_OPTIONS) do
+        local btn = CreateOptionButton(container, PAGE_OPTION_WIDTH, option.label,
+            option.value, option.value == DEFAULT_ORDER,
+            function(value) ActionBarStage.reverseOrder = value end)
+        btn.axis = "order"
+        btn.tip = option.tip
+        if i == 1 then
+            btn:SetPoint("TOPLEFT", schematic, "BOTTOMLEFT", 0, -6)
+        else
+            btn:SetPoint("LEFT", orderButtons[i - 1], "RIGHT", SIDE_OPTION_GAP, 0)
+        end
+        orderButtons[i] = btn
+    end
+
+    -- B151 page numbering: under the bar order, in the right-hand column
     pageRow = _G.CreateFrame("Frame", nil, container)
-    pageRow:SetPoint("TOPLEFT", schematic, "BOTTOMLEFT", 0, -8)
-    pageRow:SetPoint("TOPRIGHT", schematic, "BOTTOMRIGHT", 0, -8)
+    pageRow:SetPoint("TOPLEFT", orderButtons[1], "BOTTOMLEFT", 0, -8)
+    pageRow:SetPoint("RIGHT", schematic, "RIGHT", 0, 0)
     pageRow:SetHeight(42)
 
     local pageLabel = pageRow:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
@@ -427,6 +486,7 @@ function ActionBarStage.Show(parentFrame)
     local settings = abModule and abModule.db and abModule.db.profile[layout]
     ActionBarStage.centerPositions = (settings and settings.centerPositions) or DEFAULT_CENTER
     ActionBarStage.sidePositions = (settings and settings.sidePositions) or DEFAULT_SIDE
+    ActionBarStage.reverseOrder = (settings and settings.reverseCenterOrder) or DEFAULT_ORDER
 
     local rab = GetRAB()
     ActionBarStage.pageLayout = (rab and rab:GetPageLayout()) or DEFAULT_PAGE
@@ -459,6 +519,7 @@ function ActionBarStage.Apply()
         if settings then
             settings.centerPositions = ActionBarStage.centerPositions
             settings.sidePositions = ActionBarStage.sidePositions
+            settings.reverseCenterOrder = ActionBarStage.reverseOrder
         end
     end
 
@@ -478,7 +539,8 @@ function ActionBarStage.Apply()
     end
 
     debug("Applied centerPositions", ActionBarStage.centerPositions,
-        "sidePositions", ActionBarStage.sidePositions, "pageLayout", ActionBarStage.pageLayout)
+        "sidePositions", ActionBarStage.sidePositions, "pageLayout", ActionBarStage.pageLayout,
+        "reverseOrder", ActionBarStage.reverseOrder)
     return true
 end
 

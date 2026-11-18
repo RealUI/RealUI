@@ -214,19 +214,21 @@ function private.ApplyRealUILayout()
          Row mapping is hoisted out of the placement loop below (it only
          depends on id and numTopBars) so the cumulative sums can be built
          before any bar is positioned. ]]--
+    --[[ Each centre bar takes a screen slot, 1 to 3 from the top: bar N in
+         slot N normally, bar 1 lowest when the order is reversed
+         (`reverseCenterOrder`, 3-2-1 from the top, as Blizzard's bars stack).
+         The first numTopBars slots are the centre group, whose rows count
+         downward from the HuD; the rest are the bottom group, whose rows
+         count upward from the infobar (row 1 = the lowest bar). ]]--
+    local reverseOrder = barSettings.reverseCenterOrder
     local rowOf, isTopOf = {}, {}
     local pitchOf = {}
     for id = 1, 3 do
         local db = AB.dbActionBars.profile.actionbars[id]
-        local isTopBar = id <= numTopBars
+        local slot = reverseOrder and (4 - id) or id
+        local isTopBar = slot <= numTopBars
         isTopOf[id] = isTopBar
-        if id == 1 then
-            rowOf[id] = (numTopBars > 0) and 1 or (3 - numTopBars)
-        elseif id == 2 then
-            rowOf[id] = 2
-        else
-            rowOf[id] = isTopBar and 3 or 1
-        end
+        rowOf[id] = isTopBar and slot or (4 - slot)
 
         if db and db.enabled then
             local buttonSize = db.buttonSize or BUTTON_SIZE
@@ -274,7 +276,7 @@ function private.ApplyRealUILayout()
 
             local isVertBar = id > 3
             local isRightBar = isVertBar and sidePositions[id] == "RIGHT"
-            local isTopBar = not isVertBar and id <= numTopBars
+            local isTopBar = not isVertBar and isTopOf[id]
 
             local x, y, point
             if isVertBar then
