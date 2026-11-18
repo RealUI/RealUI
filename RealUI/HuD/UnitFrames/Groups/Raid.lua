@@ -474,11 +474,18 @@ end)
      them). Toggled by RealUI:HuDTestMode. ]]--
 
 local testFrame
-local TEST_CLASSES = {
+-- Only classes the client has a colour for: Forever has no Monk, Death
+-- Knight, Demon Hunter or Evoker, and RAID_CLASS_COLORS has no entry for them.
+local TEST_CLASSES = {}
+for _, class in _G.ipairs({
     "SHAMAN", "MAGE", "DRUID", "PALADIN", "WARRIOR",
     "PRIEST", "HUNTER", "WARLOCK", "ROGUE", "MONK",
     "DEATHKNIGHT", "DEMONHUNTER", "EVOKER",
-}
+}) do
+    if _G.RAID_CLASS_COLORS[class] then
+        TEST_CLASSES[#TEST_CLASSES + 1] = class
+    end
+end
 local TEST_GROUPS, TEST_PER_GROUP = 4, 5  -- 20-man preview, like Grid2's test mode
 
 -- B31: party preview — 5 cells on the party anchor, re-flowed on every show so
