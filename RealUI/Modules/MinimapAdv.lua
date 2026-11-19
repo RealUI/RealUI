@@ -417,6 +417,23 @@ function MinimapAdv:DocksQueueEye()
     end
     return mode == "minimap"
 end
+-- WoW Forever's day/night badge (MinimapCluster.DielFrame, see
+-- SetUpMinimapFrame). It sat in the anchor corner, under RealUI's own
+-- buttons (toggle, config, tracking, farm), which start there and grow along
+-- the same edge. It now takes the far corner of that edge. The expansion
+-- button uses that corner on retail, but retail has no day/night badge.
+function MinimapAdv:UpdateDielPosition()
+    local dielFrame = _G.MinimapCluster.DielFrame
+    if not dielFrame then return end
+
+    local mapPoints = GetPositionData()
+    local point = (mapPoints.isTop and "TOP" or "BOTTOM") .. (mapPoints.isLeft and "RIGHT" or "LEFT")
+    dielFrame:SetParent(_G.Minimap)
+    dielFrame:SetScale(0.45)
+    dielFrame:ClearAllPoints()
+    dielFrame:SetPoint(point, _G.Minimap, point, mapPoints.isLeft and -2 or 2, mapPoints.isTop and -2 or 2)
+end
+
 local updatingQueueStatus = false
 function MinimapAdv:UpdateQueueStatusPosition()
     local queueStatusButton = _G.QueueStatusButton
@@ -463,6 +480,8 @@ function MinimapAdv:UpdateMinimapPosition()
 
     -- LFG eye follows the configured corner
     self:UpdateQueueStatusPosition()
+    -- and the Forever day/night badge the far corner of the button edge
+    self:UpdateDielPosition()
 
     _G.ButtonCollectFrame:ClearAllPoints()
     if isTop then
@@ -2103,16 +2122,11 @@ local function SetUpMinimapFrame()
     -- left behind in the screen corner. Re-home it as a small badge on our minimap. Blizzard's
     -- SetEditModeScale override re-anchors it with a CENTER point on every
     -- layout apply, which would stack a second point on ours; re-assert after.
-    local dielFrame = _G.MinimapCluster.DielFrame
-    if dielFrame then
-        local function PlaceDielFrame()
-            dielFrame:SetParent(_G.Minimap)
-            dielFrame:SetScale(0.45)
-            dielFrame:ClearAllPoints()
-            dielFrame:SetPoint("TOPLEFT", _G.Minimap, "TOPLEFT", 2, -2)
-        end
-        PlaceDielFrame()
-        _G.hooksecurefunc(_G.MinimapCluster, "SetEditModeScale", PlaceDielFrame)
+    if _G.MinimapCluster.DielFrame then
+        MinimapAdv:UpdateDielPosition()
+        _G.hooksecurefunc(_G.MinimapCluster, "SetEditModeScale", function()
+            MinimapAdv:UpdateDielPosition()
+        end)
     end
 
     -- Forever 70450 (Mainline code, so retail later): the external event
