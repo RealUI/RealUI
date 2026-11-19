@@ -7,7 +7,7 @@
 ## Author: Hanshi
 ## Version: 4.2.6
 ## IconTexture: Interface\AddOns\RealUI\Media\Icon
-## OptionalDeps: RealUI, RealUI_Skins, Aurora, LibSharedMedia-3.0, LibRangeCheck-3.0
+## OptionalDeps: RealUI, RealUI_Skins, Aurora, LibSharedMedia-3.0, LibRangeCheck-3.0, Platynator, Plater, Kui_Nameplates, TidyPlates_ThreatPlates
 ## SavedVariables: RealUI_NameplatesDB
 
 Libs\Libs.xml

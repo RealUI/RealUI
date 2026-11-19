@@ -436,12 +436,23 @@ function NP:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_NameplatesDB", private.defaults, true)
 end
 
+-- Never fight another nameplate addon over the plates: stand down when one is
+-- loaded (Platynator since 2026-08; B246 added the rest on tester request).
+-- Folder names; they are OptionalDeps in the TOC so they load first.
+local OTHER_NAMEPLATE_ADDONS = {
+    { addon = "Platynator", title = "Platynator" },
+    { addon = "Plater", title = "Plater" },
+    { addon = "Kui_Nameplates", title = "KuiNameplates" },
+    { addon = "TidyPlates_ThreatPlates", title = "Threat Plates" },
+}
+
 function NP:OnEnable()
-    -- Platynator coexistence: never fight another nameplate addon over the plates.
-    if _G.C_AddOns.IsAddOnLoaded("Platynator") then
-        _G.print("|cff30d0ffRealUI Nameplates|r: disabled — Platynator is handling nameplates.")
-        self:Disable()
-        return
+    for _, other in _G.ipairs(OTHER_NAMEPLATE_ADDONS) do
+        if _G.C_AddOns.IsAddOnLoaded(other.addon) then
+            _G.print(("|cff30d0ffRealUI Nameplates|r: disabled — %s is handling nameplates."):format(other.title))
+            self:Disable()
+            return
+        end
     end
 
     UpdateRangeChecker()
