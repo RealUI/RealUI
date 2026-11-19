@@ -188,6 +188,29 @@ local items = {
         end,
     },
     {
+        -- B236: "below" became the default the same day the option arrived;
+        -- untouched profiles follow it, this catches an explicit "inside".
+        id = "nameplatePipsBelow",
+        label = "Combo points below the nameplate health bar",
+        desc = "Your combo points or class resource on the target's nameplate sat on the bottom edge of its health bar. They now sit just below it, and the castbar moves down to make room. \"Inside health bar\" is still there under Nameplates \226\134\146 Combo points / class power.",
+        changed = "4.2.7",
+        -- Live plates re-anchor on their next cast or target change; a reload
+        -- applies it everywhere at once.
+        needsReload = true,
+        available = function()
+            local NP = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+            return NP and NP.db and NP.db.profile.enemy and NP.db.profile.enemy.classPower
+        end,
+        isApplied = function()
+            local NP = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+            return NP.db.profile.enemy.classPower.position == "below"
+        end,
+        apply = function()
+            local NP = _G.LibStub("AceAddon-3.0"):GetAddon("RealUI_Nameplates", true)
+            NP.db.profile.enemy.classPower.position = "below"
+        end,
+    },
+    {
         id = "abHeightB102",
         label = "Action bar height at Large HuD",
         desc = "At Large HuD the top action bars sat 20px lower than intended, because the HuD size offset was counted twice. This removes the extra 20px from both layouts' saved heights. Heights you set with the HuD Vertical slider keep their adjustment, and bottom bars stay on the Infobar. Leaving this unticked makes bottom bars sit 20px lower.",

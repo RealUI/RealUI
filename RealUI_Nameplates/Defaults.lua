@@ -54,7 +54,7 @@ private.defaults = {
                 },
             },
             power = { enabled = false, height = 4 },
-            classPower = { enabled = true, height = 3, position = "inside" }, -- B81: pips on the target's plate; B236: "inside" the health bar or "below" it
+            classPower = { enabled = true, height = 3, position = "below" }, -- B81: pips on the target's plate; B236: "below" the health bar (default since 2026-11-19, owner) or "inside" it
             auras = {
                 size = 20,
                 -- B163: show = "important" (Blizzard's per-class nameplate list)
