@@ -613,7 +613,11 @@ do -- ButtonCollectFrame
         local hbdPins = HBDP and HBDP.minimapPins
         for i, child in next, {_G.Minimap:GetChildren()} do
             if child:GetName() and not (hbdPins and hbdPins[child]) then
-                if not(ignoreList[child:GetName()]) and not child.questID then
+                -- B253: map pins from addons that do not use HereBeDragons
+                -- (quest "!", mailbox and node icons) are named buttons too and
+                -- filled the box with rows of them. Minimap buttons are about
+                -- 31px; pins 12-16px, so anything under 20px is left alone.
+                if not(ignoreList[child:GetName()]) and not child.questID and (child:GetWidth() or 0) >= 20 then
                     if (child:GetObjectType() == "Button") and child:GetNumRegions() >= 3 then
                         setupButton(child)
                     end
