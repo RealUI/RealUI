@@ -124,7 +124,6 @@ end
 -- filters, sort, desaturation, anchors, spell lists, cast-by)
 ---------------------------------------------------------------------------
 function BuildGroupOptions(groupName, order)
-    local Icons = AurasAddon.Icons
 
     -- Helper: standard setter that writes to db and redraws the group
     local function SetAndRedraw(key)
@@ -167,17 +166,11 @@ function BuildGroupOptions(groupName, order)
                 set = function(_, value)
                     local group = AurasAddon.db.profile.groups[groupName]
                     group.disabled = not value
-                    if group.disabled then
-                        -- Disabling: release icons and hide container
-                        Icons.ReleaseAll(group)
-                        local state = Groups.GetState(groupName)
-                        if state.container then
-                            state.container:Hide()
-                        end
-                    else
-                        -- Enabling: redraw the group
-                        Groups.Redraw(group)
-                    end
+                    -- B249: Redraw both ways. Disabling used to hide only the
+                    -- legacy grid; the engine container (Containers.Refresh,
+                    -- which Redraw calls and which retires a disabled group)
+                    -- stayed on screen until the unit changed.
+                    Groups.Redraw(group)
                     NotifyChange()
                 end,
             },
