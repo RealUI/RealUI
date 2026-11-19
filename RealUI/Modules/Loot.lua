@@ -306,6 +306,9 @@ function Loot:UpdateGroupLoot()
 
             frame.text = frame:CreateFontString(nil, "OVERLAY", "SystemFont_Shadow_Med1")
             frame.text:SetJustifyH("LEFT")
+            -- B254: one line, truncated; a long name wrapped to a second line
+            -- that ran out of the 24px frame
+            frame.text:SetWordWrap(false)
             frame.text:SetPoint("LEFT", 2, 0)
             frame.text:SetPoint("RIGHT", frame.need, "LEFT")
 
@@ -321,10 +324,12 @@ function Loot:UpdateGroupLoot()
             Base.CropIcon(icon, iconFrame)
             frame.icon = icon
 
-            -- B215: time left on the roll, a thin bar along the bottom edge.
+            -- B215: time left on the roll, a thin bar. B254: under the frame,
+            -- not along its bottom edge, where it ran through the item name;
+            -- roll frames stack 35px apart for a 24px frame, so it fits.
             local timer = _G.CreateFrame("StatusBar", nil, frame)
-            timer:SetPoint("BOTTOMLEFT", 1, 1)
-            timer:SetPoint("BOTTOMRIGHT", -1, 1)
+            timer:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, -1)
+            timer:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -1)
             timer:SetHeight(3)
             timer:SetStatusBarTexture(RealUI.textures.plain)
             timer:SetStatusBarColor(Color.highlight:GetRGB())
