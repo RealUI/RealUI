@@ -135,15 +135,9 @@ local function UpdateQuest(plate)
 end
 
 function Markers.Attach(plate, unit)
-    local markers = plate.Markers
-    -- B32: the classification (rare/elite) icon used to sit at the plate's left
-    -- edge, where it overlapped the castbar icon. Anchor it in front of the name
-    -- text instead — the name row sits above the plate, the castbar icon spans
-    -- downward from the plate's top-left, so the two can no longer collide.
-    -- (The name box is fixed-width because a secret name's string width is
-    -- itself secret, so "in front of the name" means the box's left edge.)
-    -- B244: anchoring is private.AnchorNameMarkers, after the rare icon's
-    -- shown state is known.
+    -- B32: the rare/elite and quest icons sit in front of the name, clear of
+    -- the castbar icon below the plate's top-left. B244: the anchoring is
+    -- private.AnchorNameMarkers, run once the rare icon's shown state is known.
     UpdateRaidIcon(plate)
     UpdateRare(plate)
     UpdateQuest(plate)
