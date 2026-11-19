@@ -246,9 +246,22 @@ function BlockMixin:RestorePosition()
     dock:AddBlock(self, blockInfo.index)
 end
 
-local function AdjustElementsDeferred(block, info)
-    block:AdjustElements(info)
-end
+-- B251: blocks whose resize waits for combat to end, one entry per block.
+-- This went through RealUI.TryInCombat, whose queue is keyed by function: all
+-- blocks share one function, so each deferral overwrote the last and only one
+-- block was resized after combat. The rest kept a width too small for values
+-- that grew in combat (a longer %, a two-digit bag count) and ran into the
+-- next block. Own frame: the Infobar module's PLAYER_REGEN_ENABLED belongs to
+-- DockMixin:UpdateBlocks, and AceEvent keeps one handler per event.
+local pendingAdjust = {}
+local adjustFrame = _G.CreateFrame("Frame")
+adjustFrame:SetScript("OnEvent", function(frame)
+    frame:UnregisterEvent("PLAYER_REGEN_ENABLED")
+    for block, info in next, pendingAdjust do
+        pendingAdjust[block] = nil
+        block:AdjustElements(info)
+    end
+end)
 
 function BlockMixin:AdjustElements(blockInfo)
     local font, size, outline = blockFont.font, Scale.Value(blockFont.size), blockFont.outline
@@ -323,7 +336,8 @@ function BlockMixin:AdjustElements(blockInfo)
     end
 
     if _G.InCombatLockdown and _G.InCombatLockdown() then
-        RealUI.TryInCombat(AdjustElementsDeferred, false, self, blockInfo)
+        pendingAdjust[self] = blockInfo
+        adjustFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
         return
     end
 
