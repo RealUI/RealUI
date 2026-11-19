@@ -97,6 +97,10 @@ local function UpdateName(plate)
         texts.name:SetWidth(enemyDB.maxWidth)
     end
     texts.name:Show()
+    -- B244: pull the rare and quest icons in to the drawn name
+    if private.AnchorNameMarkers then
+        private.AnchorNameMarkers(plate)
+    end
 end
 
 -- B138: "Health values" puts cur - max - pct inside the bar, centred; the

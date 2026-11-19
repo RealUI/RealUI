@@ -34,6 +34,43 @@ function Markers.Create(plate)
     plate.Markers = { raidIcon = raidIcon, rare = rare, quest = quest, questDirty = false }
 end
 
+--[[ B244: the rare and quest icons sit right in front of the name text.
+     B32 anchored them to the name BOX, which is a fixed 160px with the name
+     centred in it (a secret name's width is secret too, so the box cannot
+     shrink to fit), so a short name left both icons far out, and the quest
+     icon stayed a rare icon's width further out when no rare icon showed.
+     When the drawn width is readable, the icons move in to the text's edge;
+     when it is secret they stay at the box edge, as before. The quest icon
+     takes the rare icon's place when that is hidden. Re-run whenever the name
+     text or the rare icon changes (Texts.lua calls it after setting the name). ]]--
+function private.AnchorNameMarkers(plate)
+    local markers, texts = plate.Markers, plate.Texts
+    if not (markers and texts) then return end
+    local name = texts.name
+
+    local inset = 0
+    local textWidth = name:GetStringWidth()
+    if private.Accessible(textWidth) then
+        local boxWidth = name:GetWidth()
+        if boxWidth > textWidth then
+            inset = (boxWidth - textWidth) / 2
+        end
+    end
+
+    local rareShown = markers.rare:IsShown()
+    if markers.nameInset == inset and markers.rareWasShown == rareShown then return end
+    markers.nameInset, markers.rareWasShown = inset, rareShown
+
+    markers.rare:ClearAllPoints()
+    markers.rare:SetPoint("RIGHT", name, "LEFT", inset - 2, 0)
+    markers.quest:ClearAllPoints()
+    if rareShown then
+        markers.quest:SetPoint("RIGHT", markers.rare, "LEFT", -2, 0)
+    else
+        markers.quest:SetPoint("RIGHT", name, "LEFT", inset - 2, 0)
+    end
+end
+
 local function UpdateRaidIcon(plate)
     local markers = plate.Markers
     if not NP.db.profile.enemy.markers.raidIcon then
@@ -105,15 +142,12 @@ function Markers.Attach(plate, unit)
     -- downward from the plate's top-left, so the two can no longer collide.
     -- (The name box is fixed-width because a secret name's string width is
     -- itself secret, so "in front of the name" means the box's left edge.)
-    -- The quest icon is anchored to the rare icon and rides along.
-    if plate.Texts and not markers.rareAnchoredToName then
-        markers.rare:ClearAllPoints()
-        markers.rare:SetPoint("RIGHT", plate.Texts.name, "LEFT", -2, 0)
-        markers.rareAnchoredToName = true
-    end
+    -- B244: anchoring is private.AnchorNameMarkers, after the rare icon's
+    -- shown state is known.
     UpdateRaidIcon(plate)
     UpdateRare(plate)
     UpdateQuest(plate)
+    private.AnchorNameMarkers(plate)
 end
 
 function Markers.Detach(plate)
