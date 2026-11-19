@@ -210,6 +210,51 @@ function CastBars:UpdateSettings(unit)
         -- .Delay trails .Time on whichever side the text block grows, so the
         -- pushback number stays clear of the icon instead of sitting on it.
         castbar.Delay:SetPoint(delayPoint, castbar.Time, delayRelPoint, delayX, 0)
+
+        -- B241: swing bars go on the side away from the icon and text
+        CastBars.AnchorSwingBars(castbar, not setOnTop)
+    end
+end
+
+--[[ B241: Forever swing timer, from oUF 14.3's Swing meta element (player
+     only, Forever only, off by default). Thin plain bars stacked outward from
+     the cast bar, main hand first, then ranged for Hunters. oUF's Enable sets
+     the showSwingTimer CVar to 0, hiding Blizzard's own swing timer; the
+     config toggle gives it back when switched off. ]]--
+local SWING_HEIGHT, SWING_GAP = 3, 2
+function CastBars.AnchorSwingBars(castbar, above)
+    if not castbar.swingBars then return end
+    local prev = castbar
+    for _, swing in _G.ipairs(castbar.swingBars) do
+        swing:ClearAllPoints()
+        swing:SetHeight(SWING_HEIGHT)
+        if above then
+            swing:SetPoint("BOTTOMLEFT", prev, "TOPLEFT", 0, SWING_GAP)
+            swing:SetPoint("BOTTOMRIGHT", prev, "TOPRIGHT", 0, SWING_GAP)
+        else
+            swing:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -SWING_GAP)
+            swing:SetPoint("TOPRIGHT", prev, "BOTTOMRIGHT", 0, -SWING_GAP)
+        end
+        prev = swing
+    end
+end
+local function CreateSwingBars(unitFrame, castbar)
+    local SwingType = _G.Enum.PlayerSwingType
+    local types = { SwingType.MainHand }
+    local _, class = _G.UnitClass("player")
+    if class == "HUNTER" then
+        types[2] = SwingType.Ranged
+    end
+
+    castbar.swingBars = {}
+    for i, swingType in _G.ipairs(types) do
+        local swing = unitFrame:CreateSwingElement(swingType)
+        swing:SetStatusBarTexture([[Interface\Buttons\WHITE8x8]])
+        swing:SetStatusBarColor(Color.highlight:GetRGB())
+        local bg = swing:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(0, 0, 0, 0.6)
+        castbar.swingBars[i] = swing
     end
 end
 
@@ -431,6 +476,11 @@ function CastBars:CreateCastBars(unitFrame, unit, unitData)
         Castbar.PostCastGlobal = PostCastGlobal
     end
 
+    -- B241: swing timer (Forever only; needs oUF 14.3's Swing element)
+    if unit == "player" and unitDB.showSwing and RealUI.isForever and unitFrame.CreateSwingElement then
+        CreateSwingBars(unitFrame, Castbar)
+    end
+
     -- Custom OnUpdate that syncs the native timer to AngleStatusBar fill.
     -- oUF checks element.OnUpdate before falling back to its default onUpdate,
     -- so setting this property ensures oUF uses our function.
@@ -624,6 +674,7 @@ function CastBars:OnInitialize()
                 text = "BOTTOMRIGHT",
                 reverse = true,
                 showGCD = false, -- oUF 14 showGlobalCooldown (player only)
+                showSwing = false, -- B241: Forever swing timer (oUF 14.3 Swing)
                 debug = false
             },
             target = {

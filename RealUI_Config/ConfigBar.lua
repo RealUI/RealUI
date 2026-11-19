@@ -2157,6 +2157,22 @@ do -- CastBars
                     end,
                     order = 1.5,
                 },
+                showSwing = {
+                    name = "Show Swing Timer",
+                    desc = "Show your melee swing timer (and ranged, for Hunters) as thin bars beside the cast bar. Replaces Blizzard's swing timer while on. Requires /reload.",
+                    type = "toggle",
+                    hidden = unit ~= "player" or not RealUI.isForever,
+                    get = function() return CastBars.db.profile[unit].showSwing end,
+                    set = function(info, value)
+                        CastBars.db.profile[unit].showSwing = value
+                        -- oUF turned Blizzard's swing timer off when ours
+                        -- enabled; give it back when ours goes.
+                        if not value then
+                            _G.C_CVar.SetCVar("showSwingTimer", 1)
+                        end
+                    end,
+                    order = 1.6,
+                },
                 text = {
                     name = _G.LOCALE_TEXT_LABEL,
                     type = "select",
