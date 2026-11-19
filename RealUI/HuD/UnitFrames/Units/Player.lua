@@ -45,6 +45,20 @@ local function CreateTotems(parent)
         Totems[index] = totem
     end
 
+    -- B247: oUF shows a slot when GetTotemInfo's haveTotem is true. On WoW
+    -- Forever (classic totems) that means "you have a totem for this slot",
+    -- not "one is down", so empty slots showed with stale "3m" timers.
+    -- Blizzard's TotemFrame also requires duration > 0; do the same when both
+    -- values are readable (both can be secret; oUF's alpha stays otherwise).
+    function Totems:PostUpdate(slot, haveTotem)
+        local _, _, _, duration = _G.GetTotemInfo(slot)
+        if _G.issecretvalue(haveTotem) or _G.issecretvalue(duration) then return end
+        local totem = self[_G.SHAMAN_TOTEM_PRIORITIES[slot]]
+        if totem then
+            totem:SetAlpha((haveTotem and duration and duration > 0) and 1 or 0)
+        end
+    end
+
     parent.Totems = Totems
 end
 
