@@ -482,6 +482,10 @@ function MinimapAdv:UpdateMinimapPosition()
     self:UpdateQueueStatusPosition()
     -- and the Forever day/night badge the far corner of the button edge
     self:UpdateDielPosition()
+    -- B217: the addon compartment flips with the map's corner
+    if self.PlaceAddonCompartment and _G.AddonCompartmentFrame then
+        self.PlaceAddonCompartment()
+    end
 
     _G.ButtonCollectFrame:ClearAllPoints()
     if isTop then
@@ -1805,19 +1809,26 @@ local function CreateButton(Name, Texture, index)
     return NewButton
 end
 
+-- The addon compartment (the small box with a count of the addons in it) sits
+-- next to the coordinates, inside the map. B217: the offset was always +20 (up),
+-- which is inside the map only when the coords are on its bottom edge (map at
+-- the top). With the map at the bottom the coords are on the top edge, and +20
+-- put the box above the map, over the zone name. It now steps toward the map's
+-- inside either way, and follows the map when it changes corner
+-- (UpdateMinimapPosition).
 local function PlaceAddonCompartment()
-    if not MMFrames.info.Coords then return end
+    if not MMFrames or not MMFrames.info.Coords then return end
 
-    -- FIXLATER to make configurable
     local anchorto = dbPos and dbPos.anchorto or "TOPLEFT"
     local isTop = anchorto:find("TOP")
     local isLeft = anchorto:find("LEFT")
-    -- Set position relative to anchorto
     local CompartmentFramePosition = _G.format("%s%s", isTop and "BOTTOM" or "TOP", isLeft and "LEFT" or "RIGHT")
 
     _G.AddonCompartmentFrame:ClearAllPoints()
-    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition, MMFrames.info.Coords, CompartmentFramePosition, 0, 20)
+    _G.AddonCompartmentFrame:SetPoint(CompartmentFramePosition, MMFrames.info.Coords, CompartmentFramePosition,
+        0, isTop and 20 or -20)
 end
+MinimapAdv.PlaceAddonCompartment = PlaceAddonCompartment
 
 local function CreateFrames()
     -- Set up Frame table
