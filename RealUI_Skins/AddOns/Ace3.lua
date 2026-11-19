@@ -8,10 +8,15 @@ local Aurora = private.Aurora
 local Base, Skin = Aurora.Base, Aurora.Skin
 local Color = Aurora.Color
 
+-- B256: both run again when RealUI_Config loads (RealUI_Skins.lua), since
+-- AceGUI and AceConfig ship only in that load-on-demand addon; each runs once.
+local aceConfigSkinned, aceGUISkinned
+
 -- LibStub("AceConfigDialog-3.0").popup:Show()
 local function SkinAceConfig()
     local AceCD = _G.LibStub("AceConfigDialog-3.0", true)
-    if not AceCD then return end
+    if not AceCD or aceConfigSkinned then return end
+    aceConfigSkinned = true
 
     if AceCD.tooltip then
         Skin.GameTooltipTemplate(AceCD.tooltip)
@@ -35,7 +40,8 @@ local function SkinAceConfig()
 end
 local function SkinAceGUI()
     local AceGUI = _G.LibStub("AceGUI-3.0", true)
-    if not AceGUI then return end
+    if not AceGUI or aceGUISkinned then return end
+    aceGUISkinned = true
 
     local frameColor = Color.frame
     local highlightColor = Color.highlight

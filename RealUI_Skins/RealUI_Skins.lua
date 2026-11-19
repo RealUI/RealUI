@@ -901,6 +901,18 @@ function private.OnLoad()
         --f.f = "f" -- error for testing RealUI_Bugs
     end
 
+    -- B256: AceGUI and AceConfig ship only in RealUI_Config, which loads on
+    -- demand. On a setup with no other Ace3 addon they did not exist yet when
+    -- the RealUI entry above ran, and the skin never retried, so every RealUI
+    -- config window stayed stock. Run it again once they exist (Ace3.lua makes
+    -- each half run once). Goes through private.AddOns.Ace3, so a user who
+    -- turned the Ace3 skin off still gets the no-op.
+    function private.AddOns.RealUI_Config()
+        if not _G.C_AddOns.IsAddOnLoaded("Ace3") then
+            private.AddOns.Ace3()
+        end
+    end
+
     function private.AddOns.RealUI_Bugs()
         local errorFrame = _G.RealUI_ErrorFrame
         Skin.UIPanelDialogTemplate(errorFrame)
