@@ -387,10 +387,24 @@ end
 -- EditMode-managed micro menu via QueueStatusButton:UpdatePosition, which is
 -- what detaches it from the map — a hook in SetUpMinimapFrame re-asserts this
 -- whenever that happens.
+--
+-- B217: optional. The eye is a Blizzard Edit Mode system, and docking it
+-- overrides any Edit Mode move, so a tester on Forever "could not move it, not
+-- even with Bartender". Forever's own default already anchors it to the
+-- minimap edge, so there it defaults to Blizzard ("editmode"); retail keeps
+-- the B29 dock, since its default sits on the micro menu. Read at setup:
+-- switching needs a reload.
+function MinimapAdv:DocksQueueEye()
+    local mode = db.information.queueEye
+    if mode == nil then
+        mode = RealUI.isForever and "editmode" or "minimap"
+    end
+    return mode == "minimap"
+end
 local updatingQueueStatus = false
 function MinimapAdv:UpdateQueueStatusPosition()
     local queueStatusButton = _G.QueueStatusButton
-    if not queueStatusButton or updatingQueueStatus then return end
+    if not queueStatusButton or updatingQueueStatus or not self:DocksQueueEye() then return end
     updatingQueueStatus = true
 
     local mapPoints = GetPositionData()
@@ -2196,6 +2210,10 @@ function MinimapAdv:OnInitialize()
                 coordDelayHide = true,
                 gap = 4,
                 hideRaidFilters = true,
+                -- B217: "minimap" (dock to the inner corner) or "editmode"
+                -- (Blizzard's placement, movable in Edit Mode); nil = the
+                -- flavour default, see MinimapAdv:DocksQueueEye
+                queueEye = nil,
             },
             poi = {
                 enabled = true,

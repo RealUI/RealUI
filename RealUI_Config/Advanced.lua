@@ -2803,6 +2803,24 @@ do -- UI Tweaks
                             end,
                             order = 30,
                         },
+                        queueEye = {
+                            name = "Queue Eye",
+                            desc = "Where the group finder eye sits. Minimap corner: docked to the Minimap's inner corner. Blizzard: the game's own placement, which you can move in Edit Mode. Requires a reload.",
+                            type = "select",
+                            values = {
+                                minimap = "Minimap corner",
+                                editmode = "Blizzard (Edit Mode)",
+                            },
+                            sorting = { "minimap", "editmode" },
+                            get = function(info)
+                                return MinimapAdv:DocksQueueEye() and "minimap" or "editmode"
+                            end,
+                            set = function(info, value)
+                                MinimapAdv.db.profile.information.queueEye = value
+                                RealUI:ReloadUIDialog()
+                            end,
+                            order = 35,
+                        },
                         gap = {
                             name = "Gap",
                             desc = "Amount of space between each information element.",
