@@ -42,6 +42,27 @@ local function FriendlyNameColor(unit)
     return NP.db.profile.enemy.colors.reaction.friendly
 end
 
+-- Mob level in front of the enemy name, in the difficulty colour. RealUI's
+-- helper knows WoW Forever's classic grey level (B237); RealUI is only an
+-- optional dependency, so Blizzard's own rule is the fallback.
+local function DifficultyColor(level)
+    local RealUI = _G.RealUI
+    if RealUI and RealUI.GetCreatureDifficultyColor then
+        return RealUI.GetCreatureDifficultyColor(level)
+    end
+    return _G.GetCreatureDifficultyColor(level)
+end
+local function LevelPrefix(unit)
+    if not NP.db.profile.enemy.texts.level then return "" end
+    local level = _G.UnitLevel(unit)
+    if not private.Accessible(level) then return "" end
+    if level <= 0 then
+        return "|cffff0000??|r " -- bosses and skull-level mobs
+    end
+    local color = DifficultyColor(level)
+    return ("|cff%02x%02x%02x%d|r "):format(color.r * 255, color.g * 255, color.b * 255, level)
+end
+
 local function UpdateName(plate)
     local unit = plate.unit
     local texts = plate.Texts
@@ -52,8 +73,10 @@ local function UpdateName(plate)
         return
     end
 
+    local prefix = plate.design == "enemy" and LevelPrefix(unit) or ""
     local shown = Safe(function()
-        texts.name:SetText(_G.UnitName(unit))
+        -- SetFormattedText takes the name even when it is secret
+        texts.name:SetFormattedText("%s%s", prefix, _G.UnitName(unit))
         return true
     end)
     if not shown then
@@ -197,6 +220,19 @@ end
 Texts.OnSecrecyChanged = Texts.OnCombatChanged
 
 private.RegisterUnitEvent("UNIT_NAME_UPDATE", "OnNameEvent")
+private.RegisterUnitEvent("UNIT_LEVEL", "OnNameEvent")
+
+-- The level colour is relative to the player's level, so a level-up recolours
+-- every plate on screen.
+function Texts.OnEnable()
+    local events = _G.CreateFrame("Frame")
+    events:RegisterEvent("PLAYER_LEVEL_UP")
+    events:SetScript("OnEvent", function()
+        for _, plate in _G.next, private.activeByUnit do
+            UpdateName(plate)
+        end
+    end)
+end
 -- UNIT_HEALTH / UNIT_MAXHEALTH are registered by Health.lua; the router calls every
 -- element that implements the mapped method, so we share the mapping name.
 

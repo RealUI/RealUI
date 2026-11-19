@@ -69,6 +69,9 @@ private.defaults = {
             texts = {
                 healthPercent = true,
                 name = { enabled = true, size = 11, maxWidth = 160 },
+                -- Mob level in front of the name, difficulty coloured. On by
+                -- default on WoW Forever, where levels matter while levelling.
+                level = (_G.RealUI and _G.RealUI.isForever) and true or false,
                 healthValues = false, -- B138: cur - max - pct inside the bar
                 spellName = true,
                 castTarget = true, -- B139: who the cast is aimed at

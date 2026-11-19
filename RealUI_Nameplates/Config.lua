@@ -241,6 +241,10 @@ local function BuildOptions()
                                 type = "toggle", name = "Health values", order = 1.5,
                                 desc = "Current and maximum health plus the percent (\"15.2K - 45.5K - 33%\"), inside the health bar.",
                             },
+                            level         = {
+                                type = "toggle", name = "Mob level", order = 1.7,
+                                desc = "The mob's level in front of its name, coloured by difficulty: grey gives no XP, green is easy, yellow is even, orange and red are higher. \"??\" is a boss or a mob far above you.",
+                            },
                             spellName     = { type = "toggle", name = "Cast spell name", order = 2 },
                             castTarget    = {
                                 type = "toggle", name = "Cast target name", order = 3,
