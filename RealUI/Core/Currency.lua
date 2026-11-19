@@ -130,6 +130,11 @@ function Currency:OnInitialize()
 
     self:RegisterEvent("CURRENCY_DISPLAY_UPDATE", UpdateCurrency)
     self:RegisterEvent("PLAYER_MONEY", UpdateMoney)
+    -- The first write (NormalizedRealmReceived) can come before the client
+    -- knows the gold; take it again once in the world.
+    self:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+        if RealUI.realmInfo.realmNormalized then UpdateMoney() end
+    end)
     self:RegisterEvent("ACCOUNT_MONEY", UpdateMoney)
     if characterInfo.faction == "Neutral" then
         self:RegisterEvent("NEUTRAL_FACTION_SELECT_RESULT")

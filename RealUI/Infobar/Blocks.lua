@@ -134,7 +134,14 @@ local function SetupTextTable()
             if i > #data then
                 row:Hide()
             else
-                for col = 1, #data.header.justify do
+                -- B255: the table frames are shared (Guild, Currency, ...). A
+                -- table with fewer columns left the last one's extra cells on
+                -- the row, so Guild ranks and notes showed in Currency.
+                local numColumns = #data.header.justify
+                for col = numColumns + 1, #row do
+                    row[col]:Hide()
+                end
+                for col = 1, numColumns do
                     local cell = row[col]
                     if not cell then
                         cell = _G.CreateFrame("Button", "$parentCell"..col, row)
@@ -157,6 +164,9 @@ local function SetupTextTable()
                             c.row:GetScript("OnClick")(c.row)
                         end)
                     end
+                    -- set every time: a reused cell kept the other table's
+                    cell:GetFontString():SetJustifyH(data.header.justify[col])
+                    cell:Show()
                     local rowData = data[index]
                     if rowData then
                         rowData.id = i
@@ -416,6 +426,7 @@ local function SetupTextTable()
             else
                 header.hl:Hide()
             end
+            header:Show()
             header.text:SetText(headerData.info[col])
             header.text:SetJustifyH(headerData.justify[col])
 
@@ -432,6 +443,11 @@ local function SetupTextTable()
             header:SetWidth(columnWidth)
             totalWidth = totalWidth + columnWidth
             Infobar:debug("Width", col, columnWidth, totalWidth)
+        end
+
+        -- B255: hide header columns left over from a wider table
+        for col = numColumns + 1, #headerRow do
+            headerRow[col]:Hide()
         end
 
         -- data.width is a minimum. Report the real total, because the tooltip
@@ -2128,6 +2144,17 @@ function Infobar:CreateBlocks()
                 end
             end,
             GetStats = function(Honor)
+                -- WoW Forever has classic PvP ranks, not honor levels: rank
+                -- points toward the next rank live on a major faction, as
+                -- Camelot's PVPRankFrame reads them.
+                -- Two values only: a third is read as rested XP by the bar.
+                if RealUI.isForever then
+                    local info = _G.C_MajorFactions.GetMajorFactionProgressionInfo(2800)
+                    if info then
+                        return info.renownReputationEarned or 0, info.renownLevelThreshold or 0
+                    end
+                    return 0, 0
+                end
                 return _G.UnitHonor("player"), _G.UnitHonorMax("player")
             end,
             GetColor = function(Honor)
@@ -2138,16 +2165,33 @@ function Infobar:CreateBlocks()
             end,
             SetTooltip = function(Honor, tooltip)
                 local minHonor, maxHonor = Honor:GetStats()
-                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(minHonor), RealUI.ReadableNumber(maxHonor), (minHonor/maxHonor)*100)
+                local percent = maxHonor > 0 and (minHonor / maxHonor) * 100 or 0
+                local honorStatus = ("%s/%s (%.1f%%)"):format(RealUI.ReadableNumber(minHonor), RealUI.ReadableNumber(maxHonor), percent)
 
-                local level = _G.UnitHonorLevel("player")
-                local row = tooltip:AddRow(_G.HONOR_LEVEL_LABEL:format(level).._G.HEADER_COLON, honorStatus)
+                local label
+                if RealUI.isForever then
+                    -- "Rank 1 - Scout", the PVP tab's own wording
+                    local info = _G.C_MajorFactions.GetMajorFactionProgressionInfo(2800)
+                    local rank = info and info.renownLevel
+                    if rank and rank > 0 and _G.PVP_RANK_NUMBER_AND_TITLE then
+                        label = _G.PVP_RANK_NUMBER_AND_TITLE:format(rank, _G.GetPVPRankText(rank))
+                    else
+                        label = _G.PVP_RANK_0_NAME or _G.RANK
+                    end
+                else
+                    label = _G.HONOR_LEVEL_LABEL:format(_G.UnitHonorLevel("player"))
+                end
+                local row = tooltip:AddRow(label.._G.HEADER_COLON, honorStatus)
                 row:GetCell(1):SetTextColor(Color.orange:GetRGB())
                 row:GetCell(2):SetTextColor(Color.grayLight:GetRGB())
 
                 tooltip:AddRow(" ")
             end,
             OnClick = function(Honor)
+                if RealUI.isForever then
+                    _G.ToggleCharacter("PVPRankFrame")
+                    return
+                end
                 _G.PlayerSpellsUtil.TogglePlayerSpellsFrame(_G.PlayerSpellsUtil.FrameTabs.ClassTalents)
             end
         }
@@ -2228,7 +2272,8 @@ function Infobar:CreateBlocks()
 
         local function UpdateProgress(block)
             local curValue, maxValue, otherValue = watchStates[dbc.progressState]:GetStats()
-            local value = curValue / maxValue
+            -- A max of 0 (Forever rank points before any are earned) would be NaN
+            local value = maxValue > 0 and curValue / maxValue or 0
             block.dataObj.icon = fa["thermometer-"..round(value * 4)]
             block.dataObj.text = round(value, 3) * 100 .. "%"
 
@@ -2338,9 +2383,13 @@ function Infobar:CreateBlocks()
                     nextState = watchStates[nextState]:GetNext()
                 end
 
-                local hintRow = tooltip:AddRow()
-                hintRow:GetCell(1):SetColSpan(2):SetText(watchStates[dbc.progressState].hint)
-                hintRow:GetCell(1):SetTextColor(0, 1, 0)
+                -- XP has no click hint; its nil printed as "nil"
+                local hint = watchStates[dbc.progressState].hint
+                if hint then
+                    local hintRow = tooltip:AddRow()
+                    hintRow:GetCell(1):SetColSpan(2):SetText(hint)
+                    hintRow:GetCell(1):SetTextColor(0, 1, 0)
+                end
                 local cycleRow = tooltip:AddRow()
                 cycleRow:GetCell(1):SetColSpan(2):SetText(L["Progress_Cycle"])
                 cycleRow:GetCell(1):SetTextColor(Color.green:GetRGB())
@@ -2753,30 +2802,22 @@ function Infobar:CreateBlocks()
             GetNext = function(Money)
                 return GetNextToken(0)
             end,
+            -- The block shows THIS character's gold, so it reads it live. The
+            -- saved copy (Core/Currency.lua) is for the alt list: it could be
+            -- written before login knew the gold, and this block's own
+            -- PLAYER_MONEY can run before Currency's, so it showed "0c" with
+            -- gold in the bags.
             GetText = function(Money)
-                if RealUI.realmInfo.realmNormalized then
-                    local realmData = currencyDB[RealUI.realmInfo.realmNormalized]
-                    if realmData and realmData[RealUI.charInfo.faction] and realmData[RealUI.charInfo.faction][RealUI.charInfo.name] then
-                        return GetMoneyString(realmData[RealUI.charInfo.faction][RealUI.charInfo.name].money)
-                    end
-                end
-                return _G.SEARCH_LOADING_TEXT
+                return GetMoneyString(_G.GetMoney() or 0)
             end,
             GetIcon = function(Money)
-                if RealUI.realmInfo.realmNormalized then
-                    local realmData = currencyDB[RealUI.realmInfo.realmNormalized]
-                    if realmData and realmData[RealUI.charInfo.faction] and realmData[RealUI.charInfo.faction][RealUI.charInfo.name] then
-                        local gold, silver = SplitMoney(realmData[RealUI.charInfo.faction][RealUI.charInfo.name].money)
-                        if gold > 0 then
-                            return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
-                        elseif silver > 0 then
-                            return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
-                        else
-                            return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
-                        end
-                    end
+                local gold, silver = SplitMoney(_G.GetMoney() or 0)
+                if gold > 0 then
+                    return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
+                elseif silver > 0 then
+                    return [[Interface\Icons\INV_Misc_Coin_03]], _G.SILVER_AMOUNT_SYMBOL
                 end
-                return [[Interface\Icons\INV_Misc_Coin_02]], _G.GOLD_AMOUNT_SYMBOL
+                return [[Interface\Icons\INV_Misc_Coin_19]], _G.COPPER_AMOUNT_SYMBOL
             end,
             IsValid = function(Money)
                 return true
