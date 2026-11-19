@@ -1,3 +1,71 @@
+## [4.2.7] - 2026-11-19 ##
+### Summary ###
+A maintenance release built from the WoW Forever launch report and two rounds of tester feedback. On Forever, **the bank's bag tabs show their bags** and take bags on and off, **level colours follow classic's grey level**, the Shaman totem bar no longer shows timers without totems, and Progress Watch shows PvP rank points. **Bags and the bank keep their dragged position** across reloads and relogs.
+
+**RealUI's config windows are skinned again** on setups without another Ace3 addon, and the PvP and offline stripes on the player and target frames light up again.
+
+New options: the mob's level on nameplates, combo points below the nameplate health bar (now the default), main action bars stacked 3-2-1, a Forever swing timer, a debuff-type colour on raid frames, and where the queue eye sits.
+
+Aurora goes from 12.1.5.4 to 12.1.5.5.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_ActionBars
+  * RealUI_Auras
+  * RealUI_Config
+  * RealUI_Inventory
+  * RealUI_Nameplates
+  * RealUI_Skins
+  * RealUI_Tooltips
+  * Aurora
+
+### Added ###
+
+  * add: **nameplates can show the mob's level** in front of its name, coloured by difficulty (Nameplates > Texts > Mob level). On by default on WoW Forever
+  * add: **main action bars can stack 3-2-1**, with bar 1 lowest: HuD config > Other > Action Bars > Reverse Bar Order, and the Action Bar Layout step of the setup wizard
+  * add: **nameplate combo points / class power can sit below the health bar**, and that is now the default; the castbar moves down to make room. `/realui newdefaults` offers it to profiles that chose Inside
+  * add: WoW Forever: a swing timer beside the player cast bar, with a ranged bar for Hunters (HuD config > Cast Bars > Player > Show Swing Timer, off by default)
+  * add: raid and party frames show a small square in the debuff type's colour for any Magic, Curse, Disease or Poison debuff, not only the ones you can dispel
+  * add: Minimap > Information > Queue Eye: the group finder eye docks to the minimap corner or keeps Blizzard's Edit Mode placement, where it can be moved. WoW Forever uses Blizzard's placement by default
+  * add: group loot rolls show a timer bar under the roll frame
+  * add: RealUI's nameplates turn off when Plater, KuiNameplates or Threat Plates is loaded, as they already did for Platynator
+
+### Fixed ###
+
+  * fix: **bags and the bank keep their dragged position** across reloads, relogs and restarts, and `/realui resetinventory` puts both back at their defaults
+  * fix: **WoW Forever: the bank's bag tabs show their bag**, its tooltip, and take a bag dragged on or off them; the first tab shows a backpack, and the tab settings window is no longer see-through
+  * fix: **RealUI's config windows get the Aurora skin** when no other addon loads AceGUI before RealUI's config does
+  * fix: **the PvP stripe on the player and target frames lights up** when flagged; the offline stripe had the same fault
+  * fix: **WoW Forever: level colours on unit frames and tooltips follow classic's grey level**, so a mob that still gives XP is no longer grey
+  * fix: WoW Forever: the Shaman totem bar hides slots with no totem down instead of showing stale timers
+  * fix: WoW Forever: Progress Watch shows PvP rank points ("Rank 1 - Scout") instead of an honor level, and opens the PvP tab; the stray "nil" line in its tooltip is gone
+  * fix: arrows and other stackable gear show their stack count in the bags, not an item level
+  * fix: raid and party frames show AFK again
+  * fix: HuD test mode no longer errors on WoW Forever
+  * fix: the Infobar gold block shows your gold right after login instead of "0c"
+  * fix: Infobar blocks all resize after combat, so a value that grew in combat no longer runs into the next block
+  * fix: the Currency tooltip no longer shows the Guild tooltip's rank and note columns
+  * fix: the minimap button box opens below the zone text and info lines instead of covering them, and leaves map pins (quest "!", mailbox and node icons) on the map
+  * fix: the addon compartment stays inside the minimap when the map sits at the bottom of the screen
+  * fix: WoW Forever: the minimap's day/night badge moves clear of RealUI's minimap buttons
+  * fix: the nameplate quest and rare icons sit next to the name
+  * fix: the reload prompt opens above the config windows instead of behind them
+  * fix: the Friends and professions windows can be dragged again
+  * fix: action bars refresh item cooldowns when bag cooldowns change and after loading screens
+  * fix: turning a RealUI_Auras group off removes its icons at once
+  * fix: Aurora — opening Legacy Challenges on WoW Forever no longer errors (`attempt to index field 'bling'`)
+  * fix: Aurora — the trade window's gold fields no longer cover the first slot, and both names share a line
+  * fix: Aurora — the Friends window is skinned throughout: cards, side tabs, the status dropdown, search box, list headers and the Add New Friend button
+  * fix: Aurora — the quest details page, the spellbook's search suggestions and the Looking For Group buttons are skinned and aligned
+  * fix: Aurora — WoW Forever: the Legacy Challenges page, the professions book, the recipe list headers and the flight map are skinned, and close buttons are back to 24 px
+
+### Changed ###
+
+  * chg: aura elements use oUF 14.3's `CreateAurasElement`
+  * chg: Aurora is bundled from its 12.1.5.5 release
+
+
 ## [4.2.6] - 2026-11-09 ##
 ### Summary ###
 A hotfix for WoW Forever dungeons. Inside a dungeon, Forever keeps unit GUIDs secret, and the range library RealUI bundles (LibRangeCheck-3.0) used the GUID as a table key there, so the HuD target frame's range display raised an error on every update. Upstream fixed it on 2026-11-07, two days after 4.2.5 was packaged; this release carries the fixed library.
@@ -736,7 +804,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.6...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.7...develop
+[4.2.7]: https://github.com/RealUI/RealUI/compare/4.2.6...4.2.7
 [4.2.6]: https://github.com/RealUI/RealUI/compare/4.2.5...4.2.6
 [4.2.5]: https://github.com/RealUI/RealUI/compare/4.2.4...4.2.5
 [4.2.4]: https://github.com/RealUI/RealUI/compare/4.2.3...4.2.4
