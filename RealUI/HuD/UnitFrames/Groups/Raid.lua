@@ -320,6 +320,43 @@ local function RaidStyle(self, unit)
         self.Debuffs = Debuffs
     end
 
+    -- B235: debuff-type square, the Grid2 Curse/Disease/Poison/Magic colours,
+    -- for ANY debuff of those types, not only the ones the player can dispel
+    -- (that is the centre icon above). The engine does both halves: the slot's
+    -- includeDispelTypes candidate filter picks the aura, and PreserveAsset
+    -- tints our white square through oUF's colors.dispel. No dispel type is
+    -- ever read or compared in Lua, so secret auras are fine.
+    if rdb.icons.debuffType ~= false then
+        local size = 6
+        local colorMap = self.colors.dispel
+        local PreserveAsset = _G.Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset
+        local DebuffType = self:CreateAurasElement()
+        DebuffType:SetSize(size, size)
+        DebuffType:SetPoint("TOPLEFT", self, "TOPLEFT", 2, -2)
+        DebuffType:AddSlot("HARMFUL", {
+            candidateFilters = {
+                includeDispelTypes = { Magic = true, Curse = true, Disease = true, Poison = true },
+            },
+            initializeFrame = function(button)
+                button:SetSize(size, size)
+                button:EnableMouse(false)
+                local outline = button:CreateTexture(nil, "BACKGROUND")
+                outline:SetPoint("TOPLEFT", -1, 1)
+                outline:SetPoint("BOTTOMRIGHT", 1, -1)
+                outline:SetColorTexture(0, 0, 0)
+                local square = button:CreateTexture(nil, "OVERLAY")
+                square:SetAllPoints()
+                square:SetColorTexture(1, 1, 1)
+                button:AddDispelTypeTexture(square, {
+                    style = PreserveAsset,
+                    showWhenHarmful = true,
+                    customDispelColorMap = colorMap,
+                })
+            end,
+        })
+        self.RealUIDebuffType = DebuffType
+    end
+
     -- Left icons: my HoTs/shields on the unit (HELPFUL|PLAYER), growing right.
     -- Count is live-configurable (SetAuraGroupMaxFrameCount in RefreshRaid).
     -- Per-spell watch-list refinement pending candidate-filter verification.

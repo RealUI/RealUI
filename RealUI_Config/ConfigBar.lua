@@ -1251,6 +1251,18 @@ do -- UnitFrames
                                 end,
                                 order = 20,
                             },
+                            debuffType = {
+                                name = "Debuff type colour",
+                                desc = "A small square in the top-left corner, coloured by debuff type (Magic, Curse, Disease, Poison), for any debuff of those types, not only the ones you can dispel. Requires a UI reload.",
+                                type = "toggle",
+                                disabled = function() return _G.Grid2 ~= nil end,
+                                get = function() return UnitFrames.db.profile.units.raid.icons.debuffType ~= false end,
+                                set = function(info, value)
+                                    UnitFrames.db.profile.units.raid.icons.debuffType = value
+                                    RealUI:ReloadUIDialog()
+                                end,
+                                order = 21,
+                            },
                             hots = {
                                 name = "My buffs icon",
                                 desc = "Requires a UI reload.",

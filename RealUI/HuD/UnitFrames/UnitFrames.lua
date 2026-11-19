@@ -1203,6 +1203,7 @@ function UnitFrames:OnInitialize()
                     rangeAlpha = 0.4,
                     icons = {
                         centerDebuff = true,
+                        debuffType = true, -- B235: Curse/Disease/Poison/Magic square, any debuff of those types
                         hots = true,
                         hotsCount = 2,
                         hotsFilter = true,
