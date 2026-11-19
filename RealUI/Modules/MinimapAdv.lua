@@ -225,6 +225,22 @@ function MinimapAdv:UpdateInfoPosition()
             end
         end
         MMFrames.info.lastFrame = prevFrame
+
+        -- B218: the button box (shown on hover) hangs past the info list,
+        -- not under the map itself: anchored to the map, it covered the
+        -- location and queue lines with a button sitting on the zone name.
+        -- With no info lines prevFrame is the Minimap, the old anchor.
+        local buttonBox = _G.ButtonCollectFrame
+        if buttonBox then
+            buttonBox:ClearAllPoints()
+            if isTop then
+                buttonBox:SetPoint("TOPLEFT", prevFrame, "BOTTOMLEFT", -1, -5)
+                buttonBox:SetPoint("TOPRIGHT", prevFrame, "BOTTOMRIGHT", 1, -5)
+            else
+                buttonBox:SetPoint("BOTTOMLEFT", prevFrame, "TOPLEFT", -1, 5)
+                buttonBox:SetPoint("BOTTOMRIGHT", prevFrame, "TOPRIGHT", 1, 5)
+            end
+        end
     else
         MMFrames.info.Location:Hide()
         MMFrames.info.Coords:Hide()
