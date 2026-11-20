@@ -2049,9 +2049,16 @@ do -- Tooltips
     local function appSet(info, value)
         Tooltips.db.global[info[#info]] = value
     end
-    local function customPositionDisabled()
+    -- Anchor Point / X / Y edit the cursor values while Anchor to Cursor is
+    -- on, and the screen values while Custom Position is on.
+    local cursorKeys = {point = "cursorPoint", x = "cursorX", y = "cursorY"}
+    local function positionKey(info)
+        local key = info[#info]
+        return Tooltips.db.global.position.atCursor and cursorKeys[key] or key
+    end
+    local function positionDisabled()
         local position = Tooltips.db.global.position
-        return position.atCursor or not position.custom
+        return not (position.atCursor or position.custom)
     end
 
     if Tooltips then
@@ -2107,7 +2114,7 @@ do -- Tooltips
                 args = {
                     atCursor = {
                         name = "Anchor to Cursor",
-                        desc = "Tooltips that use the default anchor follow the mouse cursor.",
+                        desc = "Tooltips that use the default anchor follow the mouse cursor. Anchor Point and the offsets below then set which corner of the tooltip sits at the cursor, and how far from it.",
                         type = "toggle",
                         get = function() return Tooltips.db.global.position.atCursor end,
                         set = function(info, value)
@@ -2129,9 +2136,9 @@ do -- Tooltips
                     },
                     point = {
                         name = "Anchor Point",
-                        desc = "Screen point the tooltip is placed at.",
+                        desc = "With Anchor to Cursor: the corner of the tooltip placed at the cursor. With Custom Position: the screen point the tooltip is placed at.",
                         type = "select",
-                        disabled = customPositionDisabled,
+                        disabled = positionDisabled,
                         values = {
                             TOPLEFT = "TOPLEFT",
                             TOP = "TOP",
@@ -2143,33 +2150,33 @@ do -- Tooltips
                             BOTTOM = "BOTTOM",
                             BOTTOMRIGHT = "BOTTOMRIGHT",
                         },
-                        get = function() return Tooltips.db.global.position.point end,
+                        get = function(info) return Tooltips.db.global.position[positionKey(info)] end,
                         set = function(info, value)
-                            Tooltips.db.global.position.point = value
+                            Tooltips.db.global.position[positionKey(info)] = value
                         end,
                         order = 3,
                     },
                     x = {
                         name = "X Offset",
-                        desc = "Horizontal offset from the anchor point.",
+                        desc = "Horizontal offset from the cursor or the anchor point.",
                         type = "input",
                         width = "half",
-                        disabled = customPositionDisabled,
-                        get = function() return tostring(Tooltips.db.global.position.x) end,
+                        disabled = positionDisabled,
+                        get = function(info) return tostring(Tooltips.db.global.position[positionKey(info)]) end,
                         set = function(info, value)
-                            Tooltips.db.global.position.x = ValidateOffset(value)
+                            Tooltips.db.global.position[positionKey(info)] = ValidateOffset(value)
                         end,
                         order = 4,
                     },
                     y = {
                         name = "Y Offset",
-                        desc = "Vertical offset from the anchor point.",
+                        desc = "Vertical offset from the cursor or the anchor point.",
                         type = "input",
                         width = "half",
-                        disabled = customPositionDisabled,
-                        get = function() return tostring(Tooltips.db.global.position.y) end,
+                        disabled = positionDisabled,
+                        get = function(info) return tostring(Tooltips.db.global.position[positionKey(info)]) end,
                         set = function(info, value)
-                            Tooltips.db.global.position.y = ValidateOffset(value)
+                            Tooltips.db.global.position[positionKey(info)] = ValidateOffset(value)
                         end,
                         order = 5,
                     },

@@ -29,7 +29,11 @@ local defaults = {
             custom = false,
             x = -100,
             y = 130,
-            point = "BOTTOMRIGHT"
+            point = "BOTTOMRIGHT",
+            -- With atCursor: the tooltip corner put at the cursor, and its offset
+            cursorPoint = "BOTTOMLEFT",
+            cursorX = 16,
+            cursorY = 16,
         }
     }
 }
@@ -426,6 +430,39 @@ private.AddHook("OnTooltipCleared", function(tooltip)
     tooltip.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end, true)
 
+--[[ Anchor to Cursor. While a tooltip keeps the owner and anchor type that
+     GameTooltip_SetDefaultAnchor gave it, one driver frame keeps the chosen
+     corner at the cursor plus the offsets. A tooltip drops out once it hides
+     or something else re-owns or re-anchors it. ]]
+local cursorTips = _G.setmetatable({}, {__mode = "k"})   -- tooltip -> owner
+local cursorAnchor = _G.setmetatable({}, {__mode = "k"}) -- tooltip -> anchor type
+local cursorDriver = _G.CreateFrame("Frame")
+cursorDriver:Hide()
+
+local function PlaceAtCursor(tooltip, position)
+    local scale = tooltip:GetEffectiveScale()
+    local x, y = _G.GetCursorPosition()
+    tooltip:ClearAllPoints()
+    tooltip:SetPoint(position.cursorPoint, _G.UIParent, "BOTTOMLEFT",
+        x / scale + position.cursorX, y / scale + position.cursorY)
+end
+
+cursorDriver:SetScript("OnUpdate", function(self)
+    local position = Tooltips.db.global.position
+    for tooltip, owner in next, cursorTips do
+        if not position.atCursor or tooltip:IsForbidden() or not tooltip:IsShown()
+            or tooltip:GetOwner() ~= owner or tooltip:GetAnchorType() ~= cursorAnchor[tooltip] then
+            cursorTips[tooltip] = nil
+            cursorAnchor[tooltip] = nil
+        else
+            PlaceAtCursor(tooltip, position)
+        end
+    end
+    if not next(cursorTips) then
+        self:Hide()
+    end
+end)
+
 function Tooltips:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
     if self.db.global.showIDs then
@@ -470,10 +507,17 @@ function Tooltips:OnInitialize()
 
         local position = Tooltips.db.global.position
         if position.atCursor then
-            tooltip:SetOwner(parent, "ANCHOR_CURSOR")
-        elseif position.custom then
-            tooltip:ClearAllPoints()
-            tooltip:SetPoint(position.point, _G.UIParent, position.point, position.x, position.y)
+            cursorTips[tooltip] = parent
+            cursorAnchor[tooltip] = tooltip:GetAnchorType()
+            PlaceAtCursor(tooltip, position)
+            cursorDriver:Show()
+        else
+            cursorTips[tooltip] = nil
+            cursorAnchor[tooltip] = nil
+            if position.custom then
+                tooltip:ClearAllPoints()
+                tooltip:SetPoint(position.point, _G.UIParent, position.point, position.x, position.y)
+            end
         end
     end)
 end
