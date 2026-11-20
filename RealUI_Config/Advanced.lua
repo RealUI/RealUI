@@ -1674,15 +1674,7 @@ do -- Skins
             --    field is never read by any module code.
             --    Resolution: Disabled with explanatory desc.
             --
-            -- 3. Tooltip position controls (atCursor, x, y, point)
-            --    DB fields: Tooltips.db.global.position.*
-            --    Issue: Position fields are defined in defaults but the
-            --    RealUI_Tooltips module never reads them to position
-            --    tooltips. The controls write to db but nothing uses
-            --    the values.
-            --    Resolution: Disabled with explanatory desc and group note.
-            --
-            -- 4. dvelve (Objectives → Collapse zones → Delves)
+            -- 3. dvelve (Objectives → Collapse zones → Delves)
             --    DB field: ObjectivesAdv.db.profile.hidden.collapse.dvelve
             --    Issue: The db key is "dvelve" but WoW's GetInstanceInfo()
             --    returns "delve" for Delves. The collapse check uses
@@ -2057,6 +2049,10 @@ do -- Tooltips
     local function appSet(info, value)
         Tooltips.db.global[info[#info]] = value
     end
+    local function customPositionDisabled()
+        local position = Tooltips.db.global.position
+        return position.atCursor or not position.custom
+    end
 
     if Tooltips then
         args = {
@@ -2109,29 +2105,33 @@ do -- Tooltips
                 inline = true,
                 order = 10,
                 args = {
-                    deadNote = {
-                        name = "|cffff4444Note:|r These position settings currently have no effect. "
-                            .. "The RealUI_Tooltips module does not yet read these values to reposition tooltips. "
-                            .. "They may be wired up in a future version or removed.",
-                        type = "description",
-                        order = 0,
-                    },
                     atCursor = {
                         name = "Anchor to Cursor",
-                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        desc = "Tooltips that use the default anchor follow the mouse cursor.",
                         type = "toggle",
-                        disabled = function() return true end,
                         get = function() return Tooltips.db.global.position.atCursor end,
                         set = function(info, value)
                             Tooltips.db.global.position.atCursor = value
                         end,
                         order = 1,
                     },
+                    custom = {
+                        name = "Custom Position",
+                        desc = "Place tooltips that use the default anchor at the point and offsets below."
+                            .. "\n\n|cff888888Disabled keeps the default tooltip position.|r",
+                        type = "toggle",
+                        disabled = function() return Tooltips.db.global.position.atCursor end,
+                        get = function() return Tooltips.db.global.position.custom end,
+                        set = function(info, value)
+                            Tooltips.db.global.position.custom = value
+                        end,
+                        order = 2,
+                    },
                     point = {
                         name = "Anchor Point",
-                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        desc = "Screen point the tooltip is placed at.",
                         type = "select",
-                        disabled = function() return true end,
+                        disabled = customPositionDisabled,
                         values = {
                             TOPLEFT = "TOPLEFT",
                             TOP = "TOP",
@@ -2147,31 +2147,31 @@ do -- Tooltips
                         set = function(info, value)
                             Tooltips.db.global.position.point = value
                         end,
-                        order = 2,
+                        order = 3,
                     },
                     x = {
                         name = "X Offset",
-                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        desc = "Horizontal offset from the anchor point.",
                         type = "input",
                         width = "half",
-                        disabled = function() return true end,
+                        disabled = customPositionDisabled,
                         get = function() return tostring(Tooltips.db.global.position.x) end,
                         set = function(info, value)
                             Tooltips.db.global.position.x = ValidateOffset(value)
                         end,
-                        order = 3,
+                        order = 4,
                     },
                     y = {
                         name = "Y Offset",
-                        desc = "|cffff4444Note:|r This setting currently has no effect and may be removed in a future version.",
+                        desc = "Vertical offset from the anchor point.",
                         type = "input",
                         width = "half",
-                        disabled = function() return true end,
+                        disabled = customPositionDisabled,
                         get = function() return tostring(Tooltips.db.global.position.y) end,
                         set = function(info, value)
                             Tooltips.db.global.position.y = ValidateOffset(value)
                         end,
-                        order = 4,
+                        order = 5,
                     },
                 },
             },

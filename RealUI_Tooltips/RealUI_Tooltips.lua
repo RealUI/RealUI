@@ -26,6 +26,7 @@ local defaults = {
         questCache = {},
         position = {
             atCursor = false,
+            custom = false,
             x = -100,
             y = 130,
             point = "BOTTOMRIGHT"
@@ -461,4 +462,18 @@ function Tooltips:OnInitialize()
             end
         end
     end
+
+    -- Position settings: follow the cursor, or sit at a custom screen point.
+    -- With both off, Blizzard / Edit Mode placement is left alone.
+    _G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+        if tooltip:IsForbidden() then return end
+
+        local position = Tooltips.db.global.position
+        if position.atCursor then
+            tooltip:SetOwner(parent, "ANCHOR_CURSOR")
+        elseif position.custom then
+            tooltip:ClearAllPoints()
+            tooltip:SetPoint(position.point, _G.UIParent, position.point, position.x, position.y)
+        end
+    end)
 end
