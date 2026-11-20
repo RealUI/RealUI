@@ -151,7 +151,11 @@ do
         return sqrt((dx * dx) + (dy * dy))
     end
     local function UpdateTrail()
-        local startX, startY = _G.GetScaledCursorPosition()
+        -- The in-game GetScaledCursorPosition global was removed in 12.1.0;
+        -- scale the raw cursor position by UIParent ourselves.
+        local scale = _G.UIParent:GetEffectiveScale()
+        local startX, startY = _G.GetCursorPosition()
+        startX, startY = startX / scale, startY / scale
 
         for i = 1, numLines do
             local info = lines[i]
