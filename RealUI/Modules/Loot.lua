@@ -458,14 +458,174 @@ local function LootOnLeave(self)
     _G.ResetCursor()
 end
 
+-- Master loot (B147) ---------------------------------------------------------
+-- WoW Forever has master loot. Looting a master-loot slot as the looter fires
+-- OPEN_MASTER_LOOT_LIST instead of looting it. Blizzard's own handler builds
+-- its menu from `selected*` fields its LootFrame writes on click; RealUI's
+-- frame never sets them, and writing them onto LootFrame would be a plant
+-- (taint doctrine R1). So RealUI builds its own menu from the master-loot
+-- APIs. All state lives in these locals, none on a Blizzard frame or table.
+-- Retail has no master loot: the event never fires there.
+local MAX_CANDIDATES = _G.MAX_RAID_MEMBERS or 40
+local masterLootSlot            -- slot of the last plain click on a loot slot
+local masterLootMenu            -- the open assign menu (a pooled menu proxy)
+local masterLootOwner           -- the RealUI slot button that menu belongs to
+local masterLootConfirm         -- data table of the open confirmation popup
+local masterLootConfirmSlot     -- the loot slot that popup is for
+
+local function HasMasterLoot()
+    return _G.GiveMasterLoot and _G.GetMasterLootCandidate
+        and _G.MenuUtil and _G.MenuUtil.CreateContextMenu
+        and _G.StaticPopup_ShowCustomGenericConfirmation
+        and true or false
+end
+
+local function IsMasterLootMenuOpen()
+    -- Menu frames are pooled, so the proxy is ours only while it is shown
+    -- for the slot button we opened it on.
+    return masterLootMenu and masterLootMenu:IsShown()
+        and masterLootMenu:GetOwnerRegion() == masterLootOwner
+end
+
+local function CloseMasterLootMenu()
+    if IsMasterLootMenuOpen() then
+        masterLootMenu:Close()
+    end
+    masterLootMenu, masterLootOwner = nil, nil
+end
+
+local function HideMasterLootConfirm()
+    if masterLootConfirm then
+        _G.StaticPopup_Hide("GENERIC_CONFIRMATION", masterLootConfirm)
+    end
+    masterLootConfirm, masterLootConfirmSlot = nil, nil
+end
+
+local function ClassColored(className, text)
+    local color = className and _G.RAID_CLASS_COLORS[className]
+    if color and color.WrapTextInColorCode then
+        return color:WrapTextInColorCode(text)
+    end
+    return text
+end
+
+local function CandidateSort(a, b)
+    if a.class == b.class then
+        return a.name < b.name
+    end
+    return a.class < b.class
+end
+
+local function GetMasterLootCandidates(slot)
+    local candidates = {}
+    for i = 1, MAX_CANDIDATES do
+        local name, class, className = _G.GetMasterLootCandidate(slot, i)
+        if name then
+            candidates[#candidates + 1] = {name = name, class = class or "", className = className}
+        end
+    end
+    _G.sort(candidates, CandidateSort)
+    return candidates
+end
+
+-- Candidate indices shift when the group changes, so the index is looked up
+-- by name at the moment of giving, not taken from when the menu was built.
+local function GiveToCandidate(slot, name)
+    for i = 1, MAX_CANDIDATES do
+        if _G.GetMasterLootCandidate(slot, i) == name then
+            _G.GiveMasterLoot(slot, i)
+            return
+        end
+    end
+end
+
+local function SelectRecipient(slot, candidate)
+    HideMasterLootConfirm()
+
+    local _, itemName, _, _, quality = _G.GetLootSlotInfo(slot)
+    if not itemName then return end
+
+    local lootConsts = _G.Constants and _G.Constants.LootConsts
+    local threshold = lootConsts and lootConsts.MasterLootQualityThreshold or 4
+    if quality and quality >= threshold then
+        -- Blizzard's CONFIRM_LOOT_DISTRIBUTION accept handler only gives from
+        -- its own MasterLooterFrame fields, so confirm through the generic
+        -- dialog with our own callback instead.
+        local color = _G.ITEM_QUALITY_COLORS[quality]
+        local data
+        data = {
+            text = _G.CONFIRM_LOOT_DISTRIBUTION,
+            text_arg1 = color and (color.hex .. itemName .. "|r") or itemName,
+            text_arg2 = ClassColored(candidate.className, candidate.name),
+            callback = function()
+                if masterLootConfirm == data then
+                    masterLootConfirm, masterLootConfirmSlot = nil, nil
+                end
+                GiveToCandidate(slot, candidate.name)
+            end,
+            cancelCallback = function()
+                if masterLootConfirm == data then
+                    masterLootConfirm, masterLootConfirmSlot = nil, nil
+                end
+            end,
+        }
+        masterLootConfirm, masterLootConfirmSlot = data, slot
+        _G.StaticPopup_ShowCustomGenericConfirmation(data)
+    else
+        GiveToCandidate(slot, candidate.name)
+    end
+end
+
+local function NoOp() end
+
+local function OpenMasterLootMenu(slot)
+    local owner = RealUILootFrame.slots[slot]
+    if not (owner and owner:IsShown()) then return end
+
+    local candidates = GetMasterLootCandidates(slot)
+    CloseMasterLootMenu()
+
+    -- A context menu owned by the clicked slot button: it opens at the cursor
+    -- (which is on that slot) and closes when the slot hides.
+    masterLootMenu = _G.MenuUtil.CreateContextMenu(owner, function(_, rootDescription)
+        rootDescription:CreateTitle(_G.MASTER_LOOTER)
+
+        -- party: Assign Loot > name; raid: Assign Loot > class > name
+        local assign = rootDescription:CreateButton(_G.ASSIGN_LOOT)
+        local isRaid = _G.IsInRaid()
+        local classButton, currentClass
+        for _, candidate in _G.ipairs(candidates) do
+            local parent = assign
+            if isRaid then
+                if candidate.class ~= currentClass then
+                    currentClass = candidate.class
+                    classButton = assign:CreateButton(ClassColored(candidate.className, candidate.class), NoOp)
+                end
+                parent = classButton
+            end
+            parent:CreateButton(ClassColored(candidate.className, candidate.name), function()
+                SelectRecipient(slot, candidate)
+            end)
+        end
+
+        if _G.DoMasterLootRoll then
+            rootDescription:CreateButton(_G.REQUEST_ROLL, function()
+                _G.DoMasterLootRoll(slot)
+            end)
+        end
+    end)
+    masterLootOwner = owner
+end
+
 local function LootOnClick(self)
     if _G.IsModifiedClick() then
         _G.HandleModifiedItemClick(_G.GetLootSlotLink(self:GetID()))
     else
         _G.StaticPopup_Hide("CONFIRM_LOOT_DISTRIBUTION")
-        -- The old master-loot `selected*` fields written onto Blizzard's
-        -- LootFrame are gone: nothing reads them in 12.x, and they were
-        -- plants on a Blizzard frame (tracker taint doctrine R1).
+        HideMasterLootConfirm()
+        -- No `selected*` fields on Blizzard's LootFrame (taint doctrine R1):
+        -- the master-loot menu reads this local instead (B147).
+        masterLootSlot = self:GetID()
         _G.LootSlot(self:GetID())
     end
 end
@@ -700,6 +860,9 @@ end
 function Loot:LOOT_SLOT_CLEARED(event, slot)
     --print("LOOT_SLOT_CLEARED: ")
     if(not RealUILootFrame:IsShown()) then return end
+    if masterLootConfirmSlot == slot then
+        HideMasterLootConfirm()
+    end
     RealUILootFrame.slots[slot]:Hide()
     anchorSlots(RealUILootFrame)
 end
@@ -707,6 +870,9 @@ end
 function Loot:LOOT_CLOSED(...)
     --print("Loot:", ...)
     lootPassDone = nil
+    masterLootSlot = nil
+    CloseMasterLootMenu()
+    HideMasterLootConfirm()
     _G.StaticPopup_Hide"LOOT_BIND"
     RealUILootFrame:Hide()
 
@@ -715,30 +881,46 @@ function Loot:LOOT_CLOSED(...)
     end
 end
 
+-- B147: fired by LootSlot() on a master-loot slot when we are the looter.
 function Loot:OPEN_MASTER_LOOT_LIST()
-    --print("OPEN_MASTER_LOOT_LIST: ")--..tostring(GetLootSlotType(slot)))
-    --_G.Lib_ToggleDropDownMenu(1, nil, self.dropdown, RealUILootFrame.slots[_G.LootFrame.selectedSlot], 0, 0)
+    if masterLootSlot and RealUILootFrame:IsShown() then
+        OpenMasterLootMenu(masterLootSlot)
+    end
 end
 
+-- The candidate list changed (someone joined, left or went out of range):
+-- rebuild an open menu so it never offers a stale list.
 function Loot:UPDATE_MASTER_LOOT_LIST()
-    --print("UPDATE_MASTER_LOOT_LIST: ")
-    --_G.Lib_UIDropDownMenu_Refresh(self.dropdown)
+    if IsMasterLootMenuOpen() then
+        OpenMasterLootMenu(masterLootOwner:GetID())
+    end
 end
 
 function Loot:InitializeLoot()
     _G.LootFrame:UnregisterAllEvents()
     _G.tinsert(_G.UISpecialFrames, "RealUI_Loot")
 
-    function Loot:GiveMasterLoot()
-        _G.GiveMasterLoot(_G.MasterLooterFrame.slot, _G.MasterLooterFrame.candidateId)
-        _G.MasterLooterFrame:Hide();
-    end
-
     self:RegisterEvent("LOOT_READY")
     self:RegisterEvent("LOOT_SLOT_CLEARED")
     self:RegisterEvent("LOOT_CLOSED")
-    self:RegisterEvent("OPEN_MASTER_LOOT_LIST")
-    self:RegisterEvent("UPDATE_MASTER_LOOT_LIST")
+
+    if HasMasterLoot() then
+        -- Blizzard opens its own master-loot menu from GroupLootFrame_OnLoad,
+        -- through EventRegistry rather than on LootFrame, so the
+        -- UnregisterAllEvents above leaves it live. Against RealUI's frame it
+        -- anchors to a nil LootFrame.selectedLootFrame and reads a nil
+        -- selectedSlot, and it would race ours for the one open menu. Remove
+        -- those callbacks through the registry's own API (it writes only
+        -- when the owner is present); no Blizzard frame or function is touched.
+        for i = 1, 4 do
+            local glf = _G["GroupLootFrame"..i]
+            if glf then
+                _G.EventRegistry:UnregisterCallback("OPEN_MASTER_LOOT_LIST", glf)
+            end
+        end
+        self:RegisterEvent("OPEN_MASTER_LOOT_LIST")
+        self:RegisterEvent("UPDATE_MASTER_LOOT_LIST")
+    end
 end
 
 function Loot:PLAYER_LOGIN()
