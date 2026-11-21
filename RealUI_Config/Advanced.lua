@@ -2049,16 +2049,8 @@ do -- Tooltips
     local function appSet(info, value)
         Tooltips.db.global[info[#info]] = value
     end
-    -- Anchor Point / X / Y edit the cursor values while Anchor to Cursor is
-    -- on, and the screen values while Custom Position is on.
-    local cursorKeys = {point = "cursorPoint", x = "cursorX", y = "cursorY"}
-    local function positionKey(info)
-        local key = info[#info]
-        return Tooltips.db.global.position.atCursor and cursorKeys[key] or key
-    end
     local function positionDisabled()
-        local position = Tooltips.db.global.position
-        return not (position.atCursor or position.custom)
+        return not Tooltips.db.global.position.atCursor
     end
 
     if Tooltips then
@@ -2114,7 +2106,8 @@ do -- Tooltips
                 args = {
                     atCursor = {
                         name = "Anchor to Cursor",
-                        desc = "Tooltips that use the default anchor follow the mouse cursor. Anchor Point and the offsets below then set which corner of the tooltip sits at the cursor, and how far from it.",
+                        desc = "Tooltips that use the default anchor follow the mouse cursor."
+                            .. "\n\n|cff888888Disabled keeps the default tooltip position, which Edit Mode's HUD Tooltip sets.|r",
                         type = "toggle",
                         get = function() return Tooltips.db.global.position.atCursor end,
                         set = function(info, value)
@@ -2122,63 +2115,44 @@ do -- Tooltips
                         end,
                         order = 1,
                     },
-                    custom = {
-                        name = "Custom Position",
-                        desc = "Place tooltips that use the default anchor at the point and offsets below."
-                            .. "\n\n|cff888888Disabled keeps the default tooltip position.|r",
-                        type = "toggle",
-                        disabled = function() return Tooltips.db.global.position.atCursor end,
-                        get = function() return Tooltips.db.global.position.custom end,
-                        set = function(info, value)
-                            Tooltips.db.global.position.custom = value
-                        end,
-                        order = 2,
-                    },
-                    point = {
-                        name = "Anchor Point",
-                        desc = "With Anchor to Cursor: the corner of the tooltip placed at the cursor. With Custom Position: the screen point the tooltip is placed at.",
+                    side = {
+                        name = "Side",
+                        desc = "Which side of the cursor the tooltip opens on.",
                         type = "select",
                         disabled = positionDisabled,
                         values = {
-                            TOPLEFT = "TOPLEFT",
-                            TOP = "TOP",
-                            TOPRIGHT = "TOPRIGHT",
-                            LEFT = "LEFT",
-                            CENTER = "CENTER",
-                            RIGHT = "RIGHT",
-                            BOTTOMLEFT = "BOTTOMLEFT",
-                            BOTTOM = "BOTTOM",
-                            BOTTOMRIGHT = "BOTTOMRIGHT",
+                            RIGHT = "Right",
+                            LEFT = "Left",
                         },
-                        get = function(info) return Tooltips.db.global.position[positionKey(info)] end,
+                        get = function() return Tooltips.db.global.position.side end,
                         set = function(info, value)
-                            Tooltips.db.global.position[positionKey(info)] = value
+                            Tooltips.db.global.position.side = value
                         end,
-                        order = 3,
+                        order = 2,
                     },
                     x = {
                         name = "X Offset",
-                        desc = "Horizontal offset from the cursor or the anchor point.",
+                        desc = "Horizontal offset from the cursor.",
                         type = "input",
                         width = "half",
                         disabled = positionDisabled,
-                        get = function(info) return tostring(Tooltips.db.global.position[positionKey(info)]) end,
+                        get = function() return tostring(Tooltips.db.global.position.x) end,
                         set = function(info, value)
-                            Tooltips.db.global.position[positionKey(info)] = ValidateOffset(value)
+                            Tooltips.db.global.position.x = ValidateOffset(value)
                         end,
-                        order = 4,
+                        order = 3,
                     },
                     y = {
                         name = "Y Offset",
-                        desc = "Vertical offset from the cursor or the anchor point.",
+                        desc = "Vertical offset from the cursor.",
                         type = "input",
                         width = "half",
                         disabled = positionDisabled,
-                        get = function(info) return tostring(Tooltips.db.global.position[positionKey(info)]) end,
+                        get = function() return tostring(Tooltips.db.global.position.y) end,
                         set = function(info, value)
-                            Tooltips.db.global.position[positionKey(info)] = ValidateOffset(value)
+                            Tooltips.db.global.position.y = ValidateOffset(value)
                         end,
-                        order = 5,
+                        order = 4,
                     },
                 },
             },

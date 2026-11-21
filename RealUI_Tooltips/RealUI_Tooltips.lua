@@ -26,14 +26,9 @@ local defaults = {
         questCache = {},
         position = {
             atCursor = false,
-            custom = false,
-            x = -100,
-            y = 130,
-            point = "BOTTOMRIGHT",
-            -- With atCursor: the tooltip corner put at the cursor, and its offset
-            cursorPoint = "BOTTOMLEFT",
-            cursorX = 16,
-            cursorY = 16,
+            side = "RIGHT", -- ANCHOR_CURSOR_RIGHT or ANCHOR_CURSOR_LEFT
+            x = 0,
+            y = 0,
         }
     }
 }
@@ -430,39 +425,6 @@ private.AddHook("OnTooltipCleared", function(tooltip)
     tooltip.NineSlice:SetBorderColor(frameColor.r, frameColor.g, frameColor.b)
 end, true)
 
---[[ Anchor to Cursor. While a tooltip keeps the owner and anchor type that
-     GameTooltip_SetDefaultAnchor gave it, one driver frame keeps the chosen
-     corner at the cursor plus the offsets. A tooltip drops out once it hides
-     or something else re-owns or re-anchors it. ]]
-local cursorTips = _G.setmetatable({}, {__mode = "k"})   -- tooltip -> owner
-local cursorAnchor = _G.setmetatable({}, {__mode = "k"}) -- tooltip -> anchor type
-local cursorDriver = _G.CreateFrame("Frame")
-cursorDriver:Hide()
-
-local function PlaceAtCursor(tooltip, position)
-    local scale = tooltip:GetEffectiveScale()
-    local x, y = _G.GetCursorPosition()
-    tooltip:ClearAllPoints()
-    tooltip:SetPoint(position.cursorPoint, _G.UIParent, "BOTTOMLEFT",
-        x / scale + position.cursorX, y / scale + position.cursorY)
-end
-
-cursorDriver:SetScript("OnUpdate", function(self)
-    local position = Tooltips.db.global.position
-    for tooltip, owner in next, cursorTips do
-        if not position.atCursor or tooltip:IsForbidden() or not tooltip:IsShown()
-            or tooltip:GetOwner() ~= owner or tooltip:GetAnchorType() ~= cursorAnchor[tooltip] then
-            cursorTips[tooltip] = nil
-            cursorAnchor[tooltip] = nil
-        else
-            PlaceAtCursor(tooltip, position)
-        end
-    end
-    if not next(cursorTips) then
-        self:Hide()
-    end
-end)
-
 function Tooltips:OnInitialize()
     self.db = _G.LibStub("AceDB-3.0"):New("RealUI_TooltipsDB", defaults, true)
     if self.db.global.showIDs then
@@ -500,24 +462,15 @@ function Tooltips:OnInitialize()
         end
     end
 
-    -- Position settings: follow the cursor, or sit at a custom screen point.
-    -- With both off, Blizzard / Edit Mode placement is left alone.
+    -- Anchor to Cursor: hand the tooltip to the engine's own cursor anchor.
+    -- With it off, Blizzard / Edit Mode placement is left alone.
     _G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
         if tooltip:IsForbidden() then return end
 
         local position = Tooltips.db.global.position
         if position.atCursor then
-            cursorTips[tooltip] = parent
-            cursorAnchor[tooltip] = tooltip:GetAnchorType()
-            PlaceAtCursor(tooltip, position)
-            cursorDriver:Show()
-        else
-            cursorTips[tooltip] = nil
-            cursorAnchor[tooltip] = nil
-            if position.custom then
-                tooltip:ClearAllPoints()
-                tooltip:SetPoint(position.point, _G.UIParent, position.point, position.x, position.y)
-            end
+            local anchor = position.side == "LEFT" and "ANCHOR_CURSOR_LEFT" or "ANCHOR_CURSOR_RIGHT"
+            tooltip:SetOwner(parent, anchor, position.x, position.y)
         end
     end)
 end
