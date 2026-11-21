@@ -388,23 +388,26 @@ function Loot:InitializeGroupLoot()
     RealUIGroupLootFrame:SetHeight(24)
     self:GroupLootPosition()
 
-    for i = 1,4 do
-        local glf = _G["GroupLootFrame"..i]
-        glf:UnregisterAllEvents()
-        glf:Hide()
-        glf:SetScript("OnShow", function(frame) frame:Hide() end)
+    -- Keep Blizzard's roll frames from opening by cutting the event route
+    -- into them, not by replacing GroupLootContainer_AddRoll or SetScript on
+    -- GroupLootFrame1-4 (taint doctrine R8): every caller of a replaced
+    -- global, and every show of a SetScript frame, ran RealUI code inside
+    -- Blizzard's execution. START_LOOT_ROLL reaches the container only
+    -- through GameEvent's router (HandleStartLootRoll → AddRoll);
+    -- UnregisterInternalEvent is that router's own off switch, and the key it
+    -- clears is never read again. The roll frames themselves stay Blizzard's.
+    -- If Blizzard still opens one (its PLAYER_ENTERING_WORLD handler re-adds
+    -- rolls carried over a loading screen), its own OnShow registers
+    -- CANCEL_LOOT_ROLL and it removes itself when the roll ends.
+    if _G.GameEvent and _G.GameEvent.UnregisterInternalEvent then
+        _G.GameEvent.UnregisterInternalEvent("START_LOOT_ROLL")
     end
-
-    -- Prevent Blizzard's GroupLootContainer from processing rolls,
-    -- otherwise it accumulates hidden frames that never get cleaned up
     _G.GroupLootContainer:UnregisterAllEvents()
     _G.GroupLootContainer:Hide()
-    _G.GroupLootContainer_AddRoll = function() end
 
     -- After a /reload, re-populate from any still-active rolls that the
-    -- server remembers.  Blizzard's UIParent does this via
-    -- PLAYER_ENTERING_WORLD → GetActiveLootRollIDs → GroupLootContainer_AddRoll,
-    -- but we replaced that function above.
+    -- server remembers (Blizzard's PLAYER_ENTERING_WORLD does the same for
+    -- its own frames via GetActiveLootRollIDs → GroupLootContainer_AddRoll).
     local pendingIDs = _G.GetActiveLootRollIDs and _G.GetActiveLootRollIDs()
     if pendingIDs then
         for i = 1, #pendingIDs do
