@@ -469,7 +469,12 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                             if unitData2 and unitData2.health and unitData2.health.leftVertex then
                                 local HealthBG = frame:CreateAngle("StatusBar", nil, frame.overlay)
                                 HealthBG:SetAngleVertex(unitData2.health.leftVertex, unitData2.health.rightVertex)
-                                HealthBG:SetSize(frame.Health:GetWidth(), frame.Health:GetHeight())
+                                -- The angle SetSize adds the height to the width it
+                                -- is given, and Health:GetWidth() already includes
+                                -- it; take it off or the background is one
+                                -- bar-height wider than the health bar
+                                local healthHeight = frame.Health:GetHeight()
+                                HealthBG:SetSize(frame.Health:GetWidth() - healthHeight, healthHeight)
                                 HealthBG:SetPoint("TOP"..(unitData2.health.point or "RIGHT"), frame)
                                 HealthBG:SetFrameLevel(frame.Health:GetFrameLevel())
                                 HealthBG.bg:SetAlpha(0)
@@ -570,15 +575,18 @@ function UnitFrames:RefreshUnits(event) --luacheck: ignore 561
                     frame.PowerBG:Hide()
                 end
 
+                -- Fill direction goes first: the angled bar's SetReverseFill
+                -- re-anchors the fill and leaves the angled end to the next
+                -- value update, which is the ForceUpdate below (B238)
+                if frame.Power.SetReverseFill then
+                    frame.Power:SetReverseFill(UnitFrames.GetReverseFill(unitKey, pInfo))
+                end
+
                 -- Re-run color logic now (PostUpdateColor repaints the fill
                 -- dark and recolors PowerBG) instead of waiting for the next
                 -- natural power event
                 if frame.Power.ForceUpdate then
                     frame.Power:ForceUpdate()
-                end
-
-                if frame.Power.SetReverseFill then
-                    frame.Power:SetReverseFill(UnitFrames.GetReverseFill(unitKey, pInfo))
                 end
 
                 if frame.Power.text then
