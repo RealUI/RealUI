@@ -1622,7 +1622,7 @@ do -- Skins
             },
             scaleDesc = {
                 name = "Scale settings are applied in the following order of precedence:\n"
-                    .. "1. |cff00ff00Resolution Optimizer|r — When active, automatically sets High Resolution and may override Custom Scale.\n"
+                    .. "1. |cff00ff00Resolution Optimizer|r — When active, automatically sets HiDPI and may override Custom Scale.\n"
                     .. "2. |cff00ff00Pixel Perfect|r — When enabled, calculates the optimal scale automatically and disables Custom Scale.\n"
                     .. "3. |cff00ff00Custom Scale|r — Manual scale value, used when Pixel Perfect is off.\n"
                     .. "4. |cff00ff00UI Mod Scale|r — Scales only the Infobar and HuD Config bar, independent of the above settings.",
@@ -1701,6 +1701,26 @@ do -- Skins
                     .. "\n\n|cffffcc00Note:|r The Resolution Optimizer may manage this setting automatically based on your screen resolution."
                     .. "\n\n|cffffcc00⚠|r This setting may be reset by the Install Wizard during first-time setup or upgrade.",
                 type = "toggle",
+                -- B214: HiDPI doubles whatever scale is set. Over the Desktop
+                -- 1440p canvas (0.64 -> 1.28) or pixel-perfect below 4K the
+                -- canvas drops under 768 UI units and everything is twice as
+                -- large, so turning it on there asks first.
+                confirm = function(info, value)
+                    if not value then return false end
+                    local profile = SkinsDB.profile
+                    local base = profile.customScale or 1
+                    if profile.isPixelScale then
+                        local _, screenH = _G.GetPhysicalScreenSize()
+                        base = 768 / screenH
+                    end
+                    if base * 2 > 1 then
+                        return ("HiDPI doubles the UI scale from %.2f to %.2f, which makes everything about twice as large. "
+                            .. "It is meant for pixel-perfect scale on a 4K display (the 4K presets). "
+                            .. "For the 1440p look on a 4K screen, use the Desktop 1440p preset with HiDPI off.\n\nTurn HiDPI on anyway?")
+                            :format(base, base * 2)
+                    end
+                    return false
+                end,
                 get = function() return SkinsDB.profile.isHighRes end,
                 set = function(info, value)
                     SkinsDB.profile.isHighRes = value
