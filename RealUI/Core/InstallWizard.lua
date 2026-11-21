@@ -83,7 +83,13 @@ end
 
 local function ApplyStartupDisplayOptimization()
     -- 4K only. At 1440p HiDPI doubling shrinks the canvas to 718 units; the
-    -- Desktop High-Res preset picked in the wizard sets the right scale there.
+    -- Desktop 1440p preset picked in the wizard sets the right scale there.
+    -- B214: only until a display preset is chosen. The wizard resumes after
+    -- the reload Display Setup asks for, and forcing HiDPI there doubled the
+    -- preset just applied (Desktop 1440p's 0.64 became 1.28 on a 4K screen).
+    local display = RealUI.db and RealUI.db.global and RealUI.db.global.display
+    if display and display.presetId then return end
+
     local _, screenH = _G.GetPhysicalScreenSize()
     if screenH >= 2160 then
         local skinsOptions = RealUI.GetOptions and RealUI.GetOptions("Skins")
