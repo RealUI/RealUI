@@ -315,8 +315,24 @@ function AngleFrameMixin:SetBackgroundColor(r, g, b, a)
     local color = bars[self].bgColor
     color.r, color.g, color.b, color.a = r, g, b, a
     if (color.r) and (color.g) and (color.b) then
+        -- Undo a SetBackgroundColorFromBoolean tint, which multiplies the paint.
+        self.bg:SetVertexColor(1, 1, 1, 1)
         self.bg:SetColorTexture(r, g, b, a)
     end
+end
+--- Colours the background from a possibly-secret boolean: the engine picks
+--- colorIfTrue or colorIfFalse (ColorMixins), so a tainted caller can show a
+--- flag it may not read. Returns false where the client cannot, so the caller
+--- can fall back to SetBackgroundColor.
+function AngleFrameMixin:SetBackgroundColorFromBoolean(value, colorIfTrue, colorIfFalse)
+    local bg = self.bg
+    if not bg.SetVertexColorFromBoolean then return false end
+    bg:SetColorTexture(1, 1, 1, 1)
+    if not _G.pcall(bg.SetVertexColorFromBoolean, bg, value, colorIfTrue, colorIfFalse) then
+        bg:SetVertexColor(1, 1, 1, 1)
+        return false
+    end
+    return true
 end
 function AngleFrameMixin:GetBackgroundColor()
     return self.bg:GetColorTexture()

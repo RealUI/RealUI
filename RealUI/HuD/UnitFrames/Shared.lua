@@ -415,15 +415,36 @@ local CreateHealthStatus do
 
         local PvPIndicator = self.PvPIndicator
 
-        -- UnitIsPVP, UnitReaction and UnitIsFriend all return secrets for a
-        -- restricted unit; a secret reaction would also poison the color lookup.
-        local color
-        if SafeBool(_G.UnitIsPVP(unit), false) then
-            color = SafeIndex(self.colors.reaction, _G.UnitReaction(unit, "player"))
+        -- The flagged colour comes from the reaction. UnitReaction and
+        -- UnitIsFriend stay readable for a restricted unit, but are screened
+        -- anyway: a secret reaction would poison the color lookup.
+        local function FlaggedColor()
+            local color = SafeIndex(self.colors.reaction, _G.UnitReaction(unit, "player"))
             if not color then
                 local isFriend = SafeBool(_G.UnitIsFriend(unit, "player"), false)
                 color = self.colors.reaction[isFriend and 5 or 2]
             end
+            return color
+        end
+
+        -- UnitIsPVP is secret for a restricted unit (an enemy player in
+        -- combat, in a battleground). B192: hand the secret flag to the engine,
+        -- which picks the flagged or unflagged colour without RealUI reading it.
+        local isPvP = _G.UnitIsPVP(unit)
+        if _G.issecretvalue(isPvP) then
+            local r, g, b, a = FlaggedColor():GetRGBA()
+            local flagged = _G.CreateColor(r, g, b, a or 1)
+            r, g, b, a = _G.Aurora.Color.frame:GetRGBA()
+            local unflagged = _G.CreateColor(r, g, b, a or 1)
+            if PvPIndicator:SetBackgroundColorFromBoolean(isPvP, flagged, unflagged) then
+                return
+            end
+            isPvP = false
+        end
+
+        local color
+        if isPvP then
+            color = FlaggedColor()
         end
 
         if color then
