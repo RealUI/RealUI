@@ -43,8 +43,10 @@ local DISPLAY_PRESETS = {
     },
     {
         id              = "highres",
-        name            = "Desktop High-Res",
-        description     = "27\" monitor, 1440p. Between 1080p and 4K density.",
+        -- B214: was "Desktop High-Res", which read as the HiDPI switch. It is
+        -- the opposite: a fixed canvas that must run with HiDPI off.
+        name            = "Desktop 1440p",
+        description     = "27\" monitor, 1440p, or the 1440p look on a 4K screen. Between 1080p and 4K density. Keep HiDPI off.",
         -- Canvas-based, not pixel-based. The layouts are built on the ~1080-unit
         -- canvas that Desktop Standard and 4K Desk both run; HiDPI doubling at
         -- 1440p (0.53 * 2) shrank it to 718 units and pushed everything out of
@@ -200,6 +202,24 @@ function DisplayPresets.MigrateSeed()
             if dbg.tags then
                 dbg.tags.skinsScaleRepaired = true
             end
+        end
+    end
+
+    -- One-time (B214): HiDPI left on over a preset that runs without it. The
+    -- check above only fires past twice pixel-perfect, so Desktop 1440p's
+    -- fixed 0.64 doubled to 1.28 on a 4K screen slipped through. The usual
+    -- source was the install wizard re-forcing HiDPI on 4K after the reload
+    -- that followed the preset (fixed in InstallWizard.lua). The preset is
+    -- the user's stated choice, so it wins once; turning HiDPI on again
+    -- afterwards is deliberate (the Skins toggle asks first) and is kept.
+    local tags = RealUI.db.global.tags
+    if Skins and Skins.db and tags and not tags.hidpiPresetRepaired then
+        tags.hidpiPresetRepaired = true
+        local skinsProfile = Skins.db.profile
+        local preset = display.presetId and DisplayPresets.GetById(display.presetId)
+        if skinsProfile and preset and not preset.isHighRes and skinsProfile.isHighRes then
+            skinsProfile.isHighRes = false
+            display.isHighRes = false
         end
     end
 
