@@ -26,9 +26,9 @@ local defaults = {
         questCache = {},
         position = {
             atCursor = false,
-            x = -100,
-            y = 130,
-            point = "BOTTOMRIGHT"
+            side = "RIGHT", -- ANCHOR_CURSOR_RIGHT or ANCHOR_CURSOR_LEFT
+            x = 0,
+            y = 0,
         }
     }
 }
@@ -461,4 +461,16 @@ function Tooltips:OnInitialize()
             end
         end
     end
+
+    -- Anchor to Cursor: hand the tooltip to the engine's own cursor anchor.
+    -- With it off, Blizzard / Edit Mode placement is left alone.
+    _G.hooksecurefunc("GameTooltip_SetDefaultAnchor", function(tooltip, parent)
+        if tooltip:IsForbidden() then return end
+
+        local position = Tooltips.db.global.position
+        if position.atCursor then
+            local anchor = position.side == "LEFT" and "ANCHOR_CURSOR_LEFT" or "ANCHOR_CURSOR_RIGHT"
+            tooltip:SetOwner(parent, anchor, position.x, position.y)
+        end
+    end)
 end
