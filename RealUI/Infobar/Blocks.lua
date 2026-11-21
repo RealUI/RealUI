@@ -85,7 +85,10 @@ local function SetupTextTable()
     local MAX_ROWS = 15
     local ROW_HEIGHT = 15
     local TABLE_WIDTH = 320 -- Minimum; the table grows to fit its columns
-    local COLUMN_GAP = 2
+    -- Columns are sized to their content (B203), so the gap is the only space
+    -- between values; at 2 a row read as one run-on string ("Silvermoon City
+    -- Grumpster Hanshi alt") while the short headers looked spread out.
+    local COLUMN_GAP = 8
     local MAX_TEXT_COLUMN = 150 -- Longer text truncates and shows on hover
     local numTables = 0
     local extData = {}
