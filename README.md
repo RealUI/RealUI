@@ -79,7 +79,7 @@ new frame features, fixes the layout on 1440p screens, and adds WoW Forever supp
   and who a cast is aimed at.
 * **Profile exports carry every module's settings**, so an import restores the whole setup rather than
   only keybinds and colours.
-* **1440p layout.** The Desktop High-Res preset uses a fixed 1200-unit canvas instead of doubling the UI
+* **1440p layout.** The Desktop 1440p preset uses a fixed 1200-unit canvas instead of doubling the UI
   scale. The bottom bar row and chat sit on the Infobar at any UI scale, and the Naga bar lines up with
   the bottom row until you move it.
 * **WoW Forever.** RealUI loads on Forever (interface 16001). There, target and focus names show the
