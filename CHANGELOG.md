@@ -1,3 +1,41 @@
+## [4.2.8] - 2026-11-21 ##
+### Summary ###
+A maintenance release from a day of in-game checks against 4.2.7. **Joining a battleground no longer floods `GetHonorRewardInfo` errors** from the scoreboard, and **a player leaving no longer gets the raid frame manager's role filter blocked**: both came from Aurora skins writing onto Blizzard's frames, and both now draw on separate frames. On WoW Forever, **a master looter can assign loot from RealUI's loot window**.
+
+On a 4K screen the install wizard no longer doubles the UI scale after Display Setup, and the High-Res names are clearer: the preset is now **Desktop 1440p** and the switch is **HiDPI (2x scale)**, which asks before doubling a scale that is already large.
+
+Aurora goes from 12.1.5.5 to 12.1.5.6.
+
+### Modified AddOns ###
+
+  * RealUI
+  * RealUI_Config
+  * RealUI_Skins
+  * Aurora
+
+### Added ###
+
+  * add: **WoW Forever: master loot works with RealUI's loot window.** Clicking a slot as master looter opens an Assign Loot menu (names in a party, class groups in a raid) with Request Roll; epic and better items ask before they are given
+
+### Fixed ###
+
+  * fix: **the install wizard no longer doubles the UI scale on a 4K screen** after Display Setup. It switched HiDPI back on after the reload, so the Desktop 1440p preset came out twice as large. A one-time repair turns HiDPI off where the chosen preset runs without it
+  * fix: **the PvP stripe lights up for a flagged enemy player whose PvP state the game hides** from addons (in combat, in battlegrounds)
+  * fix: the Mouse Trail tweak no longer errors on every update (12.1.0 removed the function it used)
+  * fix: the Friends, Guild and Currency tooltips leave more space between columns, so values no longer run together
+  * fix: the health bar background is the right width when Alternative Bar Style is switched on mid-session
+  * fix: Aurora — joining a battleground no longer floods `C_PvP.GetHonorRewardInfo` errors from the scoreboard; the scoreboard and match results are skinned without writing onto Blizzard's frames
+  * fix: Aurora — a player leaving a battleground or raid no longer gets the raid frame manager's role filter blocked; the manager's buttons keep Blizzard's look
+  * fix: Aurora — the spellbook's settings button keeps its gear on retail
+
+### Changed ###
+
+  * chg: the Desktop High-Res display preset is now called **Desktop 1440p**, and the High Resolution switch is **HiDPI (2x scale)**; turning HiDPI on asks first when it would make everything about twice as large
+  * chg: Blizzard's group loot roll frames are kept off through Blizzard's own event switch instead of by replacing Blizzard functions. A roll still running through a loading screen can also show Blizzard's roll frame
+  * chg: Aurora — WoW Forever: the Progress Track window's reward track and Legacy Challenge cards are flat like the rest of the UI
+  * chg: Aurora is bundled from its 12.1.5.6 release
+
+
 ## [4.2.7] - 2026-11-19 ##
 ### Summary ###
 A maintenance release built from the WoW Forever launch report and two rounds of tester feedback. On Forever, **the bank's bag tabs show their bags** and take bags on and off, **level colours follow classic's grey level**, the Shaman totem bar no longer shows timers without totems, and Progress Watch shows PvP rank points. **Bags and the bank keep their dragged position** across reloads and relogs.
@@ -804,7 +842,8 @@ Aurora updates to 12.1.0.7.
 
 
 ## Detailed Changes ##
-[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.7...develop
+[Unreleased]: https://github.com/RealUI/RealUI/compare/4.2.8...develop
+[4.2.8]: https://github.com/RealUI/RealUI/compare/4.2.7...4.2.8
 [4.2.7]: https://github.com/RealUI/RealUI/compare/4.2.6...4.2.7
 [4.2.6]: https://github.com/RealUI/RealUI/compare/4.2.5...4.2.6
 [4.2.5]: https://github.com/RealUI/RealUI/compare/4.2.4...4.2.5
