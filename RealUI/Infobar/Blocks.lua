@@ -1332,7 +1332,17 @@ function Infobar:CreateBlocks()
             if not name[1] then return end
 
             if _G.IsAltKeyDown() then
-                _G.C_PartyInfo.InviteUnit(name[1])
+                if name[3] then
+                    -- B262: a Battle.net friend is invited by game account, the way
+                    -- Blizzard's friends list does (FriendsFrame_InviteOrRequestToJoin:
+                    -- invite or request to join). name[1] is display text with no realm,
+                    -- so InviteUnit could not reach a friend on another realm.
+                    if name[6] and name[4] and name[5] and _G.FriendsFrame_InviteOrRequestToJoin then
+                        _G.FriendsFrame_InviteOrRequestToJoin(name[4], name[5])
+                    end
+                else
+                    _G.C_PartyInfo.InviteUnit(name[1])
+                end
             elseif name[3] then
                 _G.SetItemRef("BNplayer:"..name[2]..":"..name[3], "|HBNplayer:"..name[2].."|h["..name[2].."|h", "LeftButton")
             else
@@ -1423,9 +1433,13 @@ function Infobar:CreateBlocks()
                             name = _G.UNKNOWN
                         end
 
+                        -- Blizzard's own check (faction, realm info): colours the name and,
+                        -- B262, decides whether Alt+Click can invite
+                        local canInvite = client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo)
+
                         -- App-only friends come back as "", which would print an empty "()"
                         if characterName and characterName ~= "" then
-                            if client == _G.BNET_CLIENT_WOW and _G.CanCooperateWithGameAccount(accountInfo) then
+                            if canInvite then
                                 name = nameFormat:format(bnetFriendColor, name, _G.CUSTOM_CLASS_COLORS[ClassLookup[class]].colorStr, characterName)
                             else
                                 if ( _G.ENABLE_COLORBLIND_MODE == "1" ) then
@@ -1464,13 +1478,15 @@ function Infobar:CreateBlocks()
                         if noteText == "" then noteText = nil end
 
 
+                        -- B262: guid and game account ID for Alt+Click invites
                         tinsert(friendsData, {
                             id = i,
                             info = {
                                 name, level, status, noteText
                             },
                             meta = {
-                                i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID}
+                                i, lvl, {characterName, accountInfo.accountName, accountInfo.bnetAccountID,
+                                    gameAccountInfo.playerGuid, gameAccountInfo.gameAccountID, canInvite}
                             }
                         })
                     end
