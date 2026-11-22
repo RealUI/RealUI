@@ -143,3 +143,4 @@ tests\CooldownProtectionScan.lua
 tests\AuraSetupSpikes.lua
 
 ../Aurora/dev/test.lua
+../Aurora/dev/buttonscan.lua
