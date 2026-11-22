@@ -140,5 +140,6 @@ tests\RealUI_Grid2_Modernization.lua
 tests\NameplateAuraSecrecyProbe.lua
 tests\TrackerTaint_ScanTest.lua
 tests\CooldownProtectionScan.lua
+tests\AuraSetupSpikes.lua
 
 ../Aurora/dev/test.lua
